@@ -4,7 +4,7 @@ Hi! I'm really appreciate that you'd like to contribute to this project. Your he
 
 ## Submitting a pull request
 
-1. <a class="github-button" href="https://github.com/LGE-OSS/fosslight_dependency/fork" data-icon="octicon-repo-forked" aria-label="Fork LGE-OSS/fosslight_dependency on GitHub">`Fork`</a> and clone the repository
+1. Fork and clone the repository
 2. Create a new branch: `git checkout -b my-branch-name`
 3. Make your change and make sure it works properly.
 4. Commit your changes to a branch, making sure to sign-off thos changes for the [Developer Certificate of Origin](#Developer-Certificate-of-Origin).
