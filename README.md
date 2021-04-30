@@ -3,7 +3,7 @@
 ![](https://img.shields.io/badge/license-AGPL3.0-red)
 
 <a href="https://fosslight.org"><img src="https://user-images.githubusercontent.com/50347670/115320108-287aeb80-a1bc-11eb-869b-5ef9431ac3d3.png" width="96"></a>  
-FOSSLight system is an integrated system that can efficiently process the open source compliance process.
+FOSSLight is an integrated system that can efficiently process the open source compliance process.
 
 ---
 ## Features
