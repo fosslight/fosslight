@@ -1,0 +1,1660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.PartnerMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	<select id="selectPartnerMasterTotalCount" parameterType="oss.fosslight.domain.PartnerMaster" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(SELECT 
+	   			t1.PARTNER_ID
+	   		FROM 
+	   			PARTNER_MASTER t1
+				LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+				LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+				LEFT JOIN OSS_COMPONENTS t4 ON t1.PARTNER_ID = t4.REFERENCE_ID AND t4.REFERENCE_DIV = '20'
+				LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
+	   		WHERE
+				t1.USE_YN = 'Y'
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+					AND t1.PARTNER_ID = #{partnerId}
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+					AND t4.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+					AND t5.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+					AND t1.STATUS = #{status}
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+						<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+							#{item}
+						</foreach>
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+					AND t1.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{partnerName}, '_', '\\\\_'),'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+					AND t1.SOFTWARE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{softwareName}, '_', '\\\\_'),'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+					AND t1.SOFTWARE_VERSION LIKE CONCAT(REGEXP_REPLACE(#{softwareVersion}, '_', '\\\\_'),'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+					AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+					AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+					AND t3.CD_DTL_NO LIKE CONCAT('%',#{division},'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+					AND t1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+					AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+					<if test='reviewer.equals("N/A")'>
+					AND t1.REVIEWER IS NULL
+					</if>
+					<if test='!reviewer.equals("N/A")'>
+					AND t1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+					</if>
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+					AND t4.FILE_PATH LIKE CONCAT('%',REGEXP_REPLACE(#{binaryName}, '_', '\\\\_'))
+				</if>
+				GROUP BY t1.PARTNER_ID) T1
+	</select>
+	
+	<select id="selectPartnerList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT A.* 
+		  FROM (SELECT t1.PARTNER_ID
+					 , t1.STATUS
+					 , t1.PARTNER_NAME
+					 , t1.SOFTWARE_NAME
+					 , t1.SOFTWARE_VERSION
+					 , t1.DELIVERY_FORM
+					 , t1.PUBLIC_YN
+					 , t1.DESCRIPTION
+					 , t1.COMMENT
+					 , t1.CONFIRMATION_FILE_ID
+					 , t1.OSS_FILE_ID
+					 , t1.REVIEWER
+					 , t1.USE_YN
+					 , t2.USER_NAME AS CREATOR
+					 , t1.CREATED_DATE
+					 , t1.MODIFIER
+					 , t1.MODIFIED_DATE
+					 , t3.CD_DTL_NM AS DIVISION
+					 , t6.ORIG_NM as FILE_NAME
+					 , t7.ORIG_NM as FILE_NAME2
+					 , t3.CD_DTL_NO
+				 	 , t5.LICENSE_NAME
+				 	 , t4.OSS_NAME
+				 	 , t1.CREATOR AS CREATOR_ID
+				 	 , t4.FILE_PATH
+				 <if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+					 , t9.PRJ_ID
+				 </if>
+				 <if test="@oss.fosslight.util.StringUtil@equals('softwareVersion', sortField)">
+					 , (CASE 
+						    WHEN t1.SOFTWARE_VERSION = '' THEN 1
+						    WHEN t1.SOFTWARE_VERSION REGEXP '^[0-9\.]+' THEN 2
+						    WHEN t1.SOFTWARE_VERSION REGEXP '^[a-z]+' THEN 3
+					   	    ELSE 4
+					     END) AS SEQ
+				     , SUBSTRING_INDEX((CASE WHEN t1.SOFTWARE_VERSION REGEXP '^[0-9]+' THEN t1.SOFTWARE_VERSION END), '.',  1)+0 AS MAJOR_VERSION
+				     , IF(t1.SOFTWARE_VERSION REGEXP '[\.]{1}'
+				     	  , SUBSTRING_INDEX(SUBSTRING_INDEX((CASE WHEN t1.SOFTWARE_VERSION REGEXP '^[0-9]+' THEN t1.SOFTWARE_VERSION END), '.', 2), '.', -1)+0
+				     	  , NULL) AS MINOR_VERSION 
+				 	 , IF(t1.SOFTWARE_VERSION REGEXP '[\.]{1}' 
+				 	 	  , SUBSTRING_INDEX(SUBSTRING_INDEX((CASE WHEN t1.SOFTWARE_VERSION REGEXP '^[0-9]+' THEN t1.SOFTWARE_VERSION END), '.', 3), '.', -1)+0 
+				 	 	  , NULL)  AS PATCH_VERSION
+				 	 , LENGTH(t1.SOFTWARE_VERSION) AS VERSION_LEN
+				 	 , ASCII(SUBSTRING(t1.SOFTWARE_VERSION, 1)) AS ASCII
+				 </if>
+				  FROM PARTNER_MASTER t1
+				  LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+				  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+				  LEFT JOIN OSS_COMPONENTS t4 ON t1.PARTNER_ID = t4.REFERENCE_ID AND t4.REFERENCE_DIV = '20'
+				  LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
+				  LEFT JOIN T2_FILE t6 ON t6.FILE_SEQ = t1.CONFIRMATION_FILE_ID
+				  LEFT JOIN T2_FILE t7 ON t7.FILE_SEQ = t1.OSS_FILE_ID
+				  LEFT JOIN T2_USERS t8 ON t1.REVIEWER = t8.USER_ID
+			   <if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+				  LEFT JOIN (SELECT PARTNER_ID, GROUP_CONCAT(PRJ_ID ORDER BY PRJ_ID ASC) AS PRJ_ID FROM PROJECT_PARTNER_MAP GROUP BY PARTNER_ID) t9 ON t1.PARTNER_ID = t9.PARTNER_ID
+			   </if>
+			   ) A		
+		 WHERE A.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+		   AND A.PARTNER_ID = #{partnerId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+		   AND A.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		   AND A.LICENSE_NAME LIKE CONCAT('%',#{licenseName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			AND A.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND A.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		   AND A.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		   AND A.SOFTWARE_NAME LIKE CONCAT('%',#{softwareName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		   AND A.SOFTWARE_VERSION LIKE CONCAT(#{softwareVersion},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		   AND DATE_FORMAT(A.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		  AND DATE_FORMAT(A.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		   AND A.CD_DTL_NO LIKE CONCAT('%',#{division},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		   AND A.CREATOR_ID IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		   AND A.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+		  <if test='reviewer.equals("N/A")'>
+		   AND A.REVIEWER IS NULL
+		  </if>
+		  <if test='!reviewer.equals("N/A")'>
+		   AND A.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+		  </if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+		   AND A.FILE_PATH LIKE CONCAT('%',#{binaryName})
+		</if>
+		 GROUP BY A.PARTNER_ID
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerId', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.PARTNER_ID ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.PARTNER_ID DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.PARTNER_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.PARTNER_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.SOFTWARE_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.SOFTWARE_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareVersion', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+	   			ORDER BY A.SEQ ASC
+		 		    , A.MAJOR_VERSION ASC
+		 		    , BINARY ( CASE WHEN A.SOFTWARE_VERSION REGEXP '^[a-zA-Z]+' THEN SOFTWARE_VERSION END ) ASC
+		 		    , A.ASCII ASC
+				    , A.MINOR_VERSION ASC
+				    , A.PATCH_VERSION ASC
+				    , A.VERSION_LEN ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.SEQ DESC
+		 		    , A.MAJOR_VERSION DESC
+				    , BINARY ( CASE WHEN A.SOFTWARE_VERSION REGEXP '^[a-zA-Z]+' THEN SOFTWARE_VERSION END ) DESC
+				    , A.ASCII DESC
+				    , A.MINOR_VERSION DESC
+				    , A.PATCH_VERSION DESC
+				    , A.VERSION_LEN DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('status', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.STATUS ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.STATUS DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('deliveryForm', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.DELIVERY_FORM ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.DELIVERY_FORM DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('description', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.DESCRIPTION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.DESCRIPTION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('division', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.DIVISION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.DIVISION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('creator', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.CREATOR ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.CREATOR DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('createdDate', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.CREATED_DATE ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.CREATED_DATE DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.USER_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.USER_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('comment', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.COMMENT ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.COMMENT DESC
+			</if>
+		</if>
+		<include refid="limitPage"/>
+	</select>
+
+
+	<update id="updateReviewer" parameterType="oss.fosslight.domain.PartnerMaster">
+		UPDATE PARTNER_MASTER 
+		SET 
+			REVIEWER = #{reviewer}
+		WHERE 
+			PARTNER_ID = #{partnerId}
+	</update>
+	
+	<select id="getPartnerNameList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT
+		DISTINCT T1.PARTNER_NAME
+	FROM
+		PARTNER_MASTER T1
+	WHERE
+		T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			AND T1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+				OR EXISTS (
+					SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+					FROM PARTNER_WATCHER A1
+						INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y'
+					WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A2.USER_ID = #{creator}
+				)
+				OR T1.PUBLIC_YN = 'Y'
+			)
+		</if>
+	</select>
+	<select id="getPartnerSwNmList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT
+		DISTINCT T1.SOFTWARE_NAME
+	FROM
+		PARTNER_MASTER T1
+	WHERE
+		T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			AND T1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+				OR EXISTS (
+					SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+					FROM PARTNER_WATCHER A1
+						INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y'
+					WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A2.USER_ID = #{creator}
+				)
+				OR T1.PUBLIC_YN = 'Y'
+			)
+		</if>
+	</select>
+	<select id="getPartnerSwVerList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT
+		DISTINCT T1.SOFTWARE_VERSION
+	FROM
+		PARTNER_MASTER T1
+	WHERE
+		T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			AND T1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+				OR EXISTS (
+					SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+					FROM PARTNER_WATCHER A1
+						INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y'
+					WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A2.USER_ID = #{creator}
+				)
+				OR T1.PUBLIC_YN = 'Y'
+			)
+		</if>
+	</select>
+
+	<insert id="registPartnerMaster" parameterType="oss.fosslight.domain.PartnerMaster" useGeneratedKeys="true" keyProperty="partnerId">
+		INSERT INTO	 PARTNER_MASTER
+		(
+			PARTNER_ID
+			, STATUS
+			, PARTNER_NAME
+			, SOFTWARE_NAME
+			, SOFTWARE_VERSION
+			, DELIVERY_FORM			
+			, PUBLIC_YN			
+			, DESCRIPTION
+			, CONFIRMATION_FILE_ID
+			, OSS_FILE_ID
+			, DOCUMENTS_FILE_ID
+			, CREATOR
+			, MODIFIER
+		)
+		VALUES
+		(
+			<choose>
+				<when test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">#{partnerId}</when>
+				<otherwise>null</otherwise>
+			</choose>
+			, #{status}
+			, #{partnerName}
+			, #{softwareName}
+			, #{softwareVersion}
+			, #{deliveryForm}
+			, #{publicYn}
+			, #{description}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(confirmationFileId)">
+			, #{confirmationFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(confirmationFileId)">
+			, NULL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
+			, #{ossFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
+			, NULL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
+			, #{documentsFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
+			, NULL
+			</if>
+			, #{loginUserName}
+			, #{loginUserName}
+		) ON DUPLICATE KEY UPDATE
+			STATUS = #{status}
+			, PARTNER_NAME = #{partnerName}
+			, SOFTWARE_NAME = #{softwareName}
+			, SOFTWARE_VERSION = #{softwareVersion}
+			, DELIVERY_FORM = #{deliveryForm}
+			, DESCRIPTION = #{description}
+			<choose>
+				<when test="!@oss.fosslight.util.StringUtil@isEmpty(confirmationFileId)">
+				, CONFIRMATION_FILE_ID = #{confirmationFileId}
+				</when>
+				<otherwise>
+				, CONFIRMATION_FILE_ID = NULL
+				</otherwise>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
+			, OSS_FILE_ID = #{ossFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
+			, OSS_FILE_ID = NULL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
+			, DOCUMENTS_FILE_ID =  #{documentsFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
+			, DOCUMENTS_FILE_ID =  NULL
+			</if>
+			, MODIFIER = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			, CREATOR                    = #{creator}
+			</if>
+	</insert>
+	
+	<select id="selectpartnerLastId" resultType="String">
+	SELECT
+		MAX(PARTNER_ID)
+	FROM
+		PARTNER_MASTER
+	</select>
+	
+	<insert id="registPartnerWatcher" parameterType="oss.fosslight.domain.PartnerMaster">
+	INSERT INTO
+		PARTNER_WATCHER
+		(
+		PARTNER_ID
+		, DIVISION
+		, USER_ID
+		, EMAIL
+		)
+		VALUES
+		(
+		#{partnerId}
+		, #{parDivision}
+		, #{parUserId}
+		, #{parEmail}
+		)
+	</insert>
+	
+	<select id="selectPartnerMaster" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT
+		t1.*
+		,t2.ORIG_NM AS FILE_NAME
+		, t3.ORIG_NM AS FILE_NAME2
+		, t4.USER_NAME AS CREATOR_NAME
+		, t5.USER_NAME AS REVIEWER_NAME
+	FROM
+		PARTNER_MASTER t1
+		LEFT JOIN T2_FILE t2 ON t1.CONFIRMATION_FILE_ID = t2.FILE_SEQ
+		LEFT JOIN T2_FILE t3 ON t1.OSS_FILE_ID = t3.FILE_SEQ
+		LEFT JOIN T2_USERS t4 ON t1.CREATOR = t4.USER_ID
+		LEFT JOIN T2_USERS t5 ON t1.REVIEWER = t5.USER_ID
+	WHERE
+		PARTNER_ID = #{partnerId}
+	</select>
+	
+	<select id="selectPartnerWatcher" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerWatcher">
+	SELECT T1.PARTNER_ID
+		 , T1.DIVISION
+		 , T1.USER_ID
+		 , T2.USER_NAME
+		 , T1.EMAIL
+		 , T2.USE_YN AS USER_USE_YN
+	     , T3.USE_YN AS DEPT_USE_YN
+	  FROM PARTNER_WATCHER T1 
+		   LEFT OUTER JOIN T2_USERS T2 
+		 			    ON T1.USER_ID = T2.USER_ID
+		   LEFT OUTER JOIN T2_CODE_DTL T3 
+	                    ON T1.DIVISION = T3.CD_DTL_NO 
+	                   AND T3.CD_NO = '200'
+	 WHERE T1.PARTNER_ID = #{partnerId}
+	</select>
+	
+	<delete id="deleteWatcher" parameterType="oss.fosslight.domain.PartnerMaster">
+		DELETE 
+			FROM 
+				PARTNER_WATCHER 
+			WHERE 
+				PARTNER_ID = #{partnerId}
+			<if test="divisionList != null">
+			<foreach item="item" index="index" collection="divisionList">
+				AND NOT (DIVISION = #{item.division} AND USER_ID = #{item.userId})
+			</foreach>
+			</if>
+			<if test="emailList != null">
+				<foreach item="item" index="index" collection="emailList">
+					AND NOT (EMAIL = #{item.email})
+				</foreach>
+			</if>
+	</delete>
+	
+	<update id="deleteMaster" parameterType="oss.fosslight.domain.PartnerMaster">
+	UPDATE
+		PARTNER_MASTER 
+	SET 
+		USE_YN = 'N'
+	WHERE 
+		PARTNER_ID = #{partnerId}
+	</update>
+	
+	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
+	UPDATE
+		PARTNER_MASTER
+	SET
+		COMMENT = #{commId}
+	WHERE
+		PARTNER_ID = #{referenceId}
+	</update>
+	
+	<update id="deleteComment" parameterType="oss.fosslight.domain.CommentsHistory">
+	UPDATE
+		PARTNER_MASTER
+	SET
+		COMMENT = ''
+	WHERE
+		PARTNER_ID = #{referenceId}
+	</update>
+	
+	<select id="getOssComponents" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponents">
+	SELECT
+		OSS_ID
+		, OSS_NAME
+		, OSS_VERSION
+		, DOWNLOAD_LOCATION
+		, HOMEPAGE
+	FROM
+		OSS_MASTER
+	WHERE
+		OSS_NAME = #{ossName}
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+		AND (OSS_VERSION = '' OR OSS_VERSION = null)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+		AND OSS_VERSION = #{ossVersion}
+		</if>
+	</select>
+	
+	<select id="getOssLicense" parameterType="String" resultType="oss.fosslight.domain.OssComponentsLicense">
+	SELECT
+		t1.*
+		, t2.LICENSE_NAME AS LICENSE_NAME
+	FROM
+		OSS_LICENSE t1
+		LEFT JOIN LICENSE_MASTER t2 ON t1.LICENSE_ID = t2.LICENSE_ID
+	WHERE
+		OSS_ID = #{ossId}
+	</select>
+	
+	<select id="getPartnerOssAllList" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.ProjectIdentification">
+	/* PartnerMapper.getPartnerOssAllList */
+		SELECT 
+			T1.COMPONENT_ID, T1.REFERENCE_ID, T1.REFERENCE_DIV, T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION
+			, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.FILE_PATH, T1.EXCLUDE_YN
+			, T2.COMPONENT_LICENSE_ID, T2.LICENSE_ID, T2.LICENSE_NAME, T2.LICENSE_TEXT, T2.COPYRIGHT_TEXT, T2.EXCLUDE_YN AS S_EXCLUDE_YN
+		FROM OSS_COMPONENTS T1 INNER JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID
+		WHERE T1.REFERENCE_DIV = '20' AND T1.REFERENCE_ID = #{referenceId}
+		ORDER BY COMPONENT_ID, COMPONENT_LICENSE_ID
+	</select>
+	
+	<delete id="deleteOssComponents" parameterType="String">
+		DELETE 
+		FROM 
+			OSS_COMPONENTS 
+		WHERE 
+			REFERENCE_ID = #{partnerId}
+			AND REFERENCE_DIV = '20'
+	</delete>
+	
+	<select id="selectComponentId" parameterType="String" resultType="oss.fosslight.domain.OssComponents">
+	SELECT
+		COMPONENT_ID
+	FROM
+		OSS_COMPONENTS
+	WHERE
+		REFERENCE_ID = #{partnerId}
+		AND REFERENCE_DIV = '20'
+	</select>
+	
+	<delete id="deleteOssComponentsLicense" parameterType="oss.fosslight.domain.OssComponents">
+		DELETE 
+		FROM 
+			OSS_COMPONENTS_LICENSE
+		WHERE 
+			COMPONENT_ID = #{componentId}
+	</delete>
+	
+	<insert id="insertOssComponents" parameterType="oss.fosslight.domain.OssComponents">
+	INSERT INTO
+		OSS_COMPONENTS
+		(
+		REFERENCE_ID
+		, REFERENCE_DIV
+		, OSS_ID
+		, OSS_NAME
+		, OSS_VERSION
+		, DOWNLOAD_LOCATION
+		, HOMEPAGE
+		, FILE_PATH
+		)
+		VALUES
+		(
+		#{referenceId}
+		, #{referenceDiv}
+		, #{ossId}
+		, #{ossName}
+		, #{ossVersion}
+		, #{downloadLocation}
+		, #{homepage}
+		, #{filePath}
+		)
+	</insert>
+	
+	<select id="selectLastComponentsId" resultType="String">
+	SELECT
+		MAX(COMPONENT_ID)
+	FROM
+		OSS_COMPONENTS
+	</select>
+	
+	<select id="getLicenseId" parameterType="oss.fosslight.domain.OssComponentsLicense" resultType="String">
+	SELECT
+		LICENSE_ID
+	FROM
+		LICENSE_MASTER
+	WHERE
+		LICENSE_NAME = #{licenseName}
+	</select>
+	
+	<insert id="insertOssComponentsLicense" parameterType="oss.fosslight.domain.OssComponentsLicense">
+	INSERT INTO
+		OSS_COMPONENTS_LICENSE
+		(
+		COMPONENT_ID
+		, LICENSE_ID
+		, LICENSE_NAME
+		, LICENSE_TEXT
+		, COPYRIGHT_TEXT
+		)
+		VALUES
+		(
+		#{componentId}
+		, #{licenseId}
+		, #{licenseName}
+		, #{licenseText}
+		, #{copyrightText}
+		)
+	</insert>
+	
+	<select id="selectPartnerListExcel" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT 
+		t1.PARTNER_ID
+		, t1.STATUS
+		, t1.PARTNER_NAME
+		, t1.SOFTWARE_NAME
+		, t1.SOFTWARE_VERSION
+		, t1.DELIVERY_FORM
+		, t1.PUBLIC_YN
+		, t1.DESCRIPTION
+		, t1.COMMENT
+		, t1.REVIEWER
+		, t1.USE_YN
+		, t1.CREATOR
+		, t1.CREATED_DATE
+		, t1.MODIFIER
+		, t1.MODIFIED_DATE
+		, t3.CD_DTL_NM AS DIVISION
+		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as CONFIRMATION_FILE_ID 
+		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as OSS_FILE_ID 
+	FROM 
+		PARTNER_MASTER t1
+		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+	WHERE
+		t1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		AND t1.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		AND t1.SOFTWARE_NAME LIKE CONCAT('%',#{softwareName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		AND t1.SOFTWARE_VERSION LIKE CONCAT('%',#{softwareVersion},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND t2.DIVISION = #{division}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		AND t1.CREATOR LIKE CONCAT('%',#{creator},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+			</if>
+		</if>
+		ORDER BY PARTNER_ID
+	</select>
+	
+	<select id="selectPartnerMasterTotalCountUser" parameterType="oss.fosslight.domain.PartnerMaster" resultType="int">
+	SELECT COUNT(*) FROM (
+	SELECT 
+		t1.PARTNER_ID
+		, t1.STATUS
+		, t1.PARTNER_NAME
+		, t1.SOFTWARE_NAME
+		, t1.SOFTWARE_VERSION
+		, t1.DELIVERY_FORM
+		, t1.PUBLIC_YN
+		, t1.DESCRIPTION
+		, t1.COMMENT
+		, t1.CONFIRMATION_FILE_ID
+		, t1.OSS_FILE_ID
+		, t1.REVIEWER
+		, t1.USE_YN
+		, t1.CREATOR
+		, t1.CREATED_DATE
+		, t1.MODIFIER
+		, t1.MODIFIED_DATE
+		, t3.CD_DTL_NM AS DIVISION
+		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as FILE_NAME
+		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as FILE_NAME2
+	FROM 
+		PARTNER_MASTER t1
+		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+		LEFT JOIN PARTNER_WATCHER t4 ON t1.PARTNER_ID = t4.PARTNER_ID
+		LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
+		LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
+	WHERE
+		t1.USE_YN = 'Y'
+		AND (
+				t1.CREATOR = #{loginUserName}
+				OR t4.USER_ID  = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
+				OR t1.PUBLIC_YN = 'Y'
+			</if>
+				)
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+			AND t1.PARTNER_ID = #{partnerId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND t5.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND t6.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			AND t1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		AND t1.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{partnerName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		AND t1.SOFTWARE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{softwareName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		AND t1.SOFTWARE_VERSION LIKE CONCAT('%',REGEXP_REPLACE(#{softwareVersion}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND t2.DIVISION = #{division}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		AND t1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+			<if test='reviewer.equals("N/A")'>
+			AND t1.REVIEWER IS NULL
+			</if>
+			<if test='!reviewer.equals("N/A")'>
+			AND t1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			AND t5.FILE_PATH LIKE CONCAT('%',REGEXP_REPLACE(#{binaryName}, '_', '\\\\_'))
+		</if>
+		GROUP BY t1.PARTNER_ID
+		) RESULT
+	</select>
+	
+	<select id="selectPartnerListUser" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT 
+		t1.PARTNER_ID
+		, t1.STATUS
+		, t1.PARTNER_NAME
+		, t1.SOFTWARE_NAME
+		, t1.SOFTWARE_VERSION
+		, t1.DELIVERY_FORM
+		, t1.PUBLIC_YN
+		, t1.DESCRIPTION
+		, t1.COMMENT
+		, t1.CONFIRMATION_FILE_ID
+		, t1.OSS_FILE_ID
+		, t1.REVIEWER
+		, t1.USE_YN
+		, t2.USER_NAME AS CREATOR
+		, t1.CREATED_DATE
+		, t1.MODIFIER
+		, t1.MODIFIED_DATE
+		, t3.CD_DTL_NM AS DIVISION
+		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as FILE_NAME
+		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as FILE_NAME2
+	<if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+		, t7.PRJ_ID
+	</if>
+	FROM 
+		PARTNER_MASTER t1
+		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+		LEFT JOIN PARTNER_WATCHER t4 ON t1.PARTNER_ID = t4.PARTNER_ID
+		LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
+		LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
+	<if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+	    LEFT JOIN (SELECT PARTNER_ID, GROUP_CONCAT(PRJ_ID ORDER BY PRJ_ID ASC) AS PRJ_ID FROM PROJECT_PARTNER_MAP GROUP BY PARTNER_ID) t7 ON t1.PARTNER_ID = t7.PARTNER_ID
+	</if>
+	WHERE
+		t1.USE_YN = 'Y'
+		AND (
+				t1.CREATOR = #{loginUserName}
+				OR t4.USER_ID  = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
+				OR t1.PUBLIC_YN = 'Y'
+			</if>
+				)
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+			AND t1.PARTNER_ID = #{partnerId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND t5.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND t6.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			AND t1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		AND t1.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{partnerName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		AND t1.SOFTWARE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{softwareName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		AND t1.SOFTWARE_VERSION LIKE CONCAT('%',REGEXP_REPLACE(#{softwareVersion}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND t2.DIVISION = #{division}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		AND t1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+			<if test='reviewer.equals("N/A")'>
+			AND t1.REVIEWER IS NULL
+			</if>
+			<if test='!reviewer.equals("N/A")'>
+			AND t1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			AND t5.FILE_PATH LIKE CONCAT('%',REGEXP_REPLACE(#{binaryName}, '_', '\\\\_'))
+		</if>
+		GROUP BY t1.PARTNER_ID
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerId', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.PARTNER_ID ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.PARTNER_ID DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.PARTNER_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.PARTNER_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.SOFTWARE_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.SOFTWARE_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareVersion', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.SOFTWARE_VERSION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.SOFTWARE_VERSION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('status', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.STATUS ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.STATUS DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('deliveryForm', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.DELIVERY_FORM ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.DELIVERY_FORM DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('description', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.DESCRIPTION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.DESCRIPTION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('division', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t2.DIVISION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t2.DIVISION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('creator', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.CREATOR ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.CREATOR DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('createdDate', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.CREATED_DATE ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.CREATED_DATE DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.REVIEWER ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.REVIEWER DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('comment', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.COMMENT ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.COMMENT DESC
+			</if>
+		</if>
+		<include refid="limitPage"/>
+	</select>
+	
+	<select id="existPartnerData" parameterType="oss.fosslight.domain.PartnerMaster" resultType="int">
+	SELECT
+		COUNT(*)
+	FROM
+		PARTNER_MASTER
+	WHERE
+		PARTNER_NAME = #{partnerName}
+		AND SOFTWARE_NAME = #{softwareName}
+		AND SOFTWARE_VERSION = #{softwareVersion}
+		AND PARTNER_ID != #{partnerId}
+	</select>
+	
+	<select id="getUserList" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users">
+	SELECT
+		*
+	FROM
+		T2_USERS
+	WHERE
+		USE_YN = 'Y'
+	<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND DIVISION = #{division}
+	</if>
+	ORDER BY USER_NAME
+	</select>
+	
+	<update id="changeStatus" parameterType="oss.fosslight.domain.PartnerMaster">
+		UPDATE PARTNER_MASTER 
+		SET 
+			STATUS = #{status}
+			, MODIFIER = #{loginUserName}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+			, REVIEWER = #{reviewer}
+		</if>
+		WHERE 
+			PARTNER_ID = #{partnerId}
+	</update>
+	
+	<select id="select3rdMapList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper select3rdMapList */
+	SELECT A.PARTNER_ID
+			, B.PARTNER_NAME
+			, B.SOFTWARE_NAME
+			, B.SOFTWARE_VERSION
+			, A.COMPONENT_COUNT
+		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+			, IF(LOCATE(A.PARTNER_ID
+	  				  , (SELECT GROUP_CONCAT(A.PARTNER_ID)
+	       			       FROM PARTNER_MASTER A 
+	       			       LEFT JOIN PARTNER_WATCHER B ON A.PARTNER_ID = B.PARTNER_ID 
+	         		      WHERE A.USE_YN = 'Y' 
+						    AND (A.CREATOR = #{loginUserName} OR B.USER_ID = #{loginUserName}) OR PUBLIC_YN = 'Y')) <![CDATA[>]]> 0, 'Y', 'N') USER_ROLE
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+		    , 'Y' AS USER_ROLE
+		</if>
+	FROM PROJECT_PARTNER_MAP A
+	LEFT JOIN PARTNER_MASTER B
+	ON A.PARTNER_ID = B.PARTNER_ID
+	WHERE A.PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectThirdPartyMapList" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper selectThirdPartyMapList */
+	SELECT * 
+	FROM PROJECT_PARTNER_MAP
+	WHERE PRJ_ID = #{prjId}
+	</select>
+	
+	<update id="updatePartnerMapList" parameterType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper updatePartnerMapList */	
+		UPDATE PROJECT_PARTNER_MAP 
+		SET 
+			COMPONENT_COUNT = #{componentCount}
+		WHERE PRJ_ID = #{prjId} 
+		AND	PARTNER_ID = #{partnerId}
+	</update>
+	
+	<delete id="deletePartnerMapList" parameterType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper deletePartnerMapList */
+		DELETE FROM PROJECT_PARTNER_MAP 
+	 	WHERE 
+	 		PRJ_ID = #{prjId}
+	 		<foreach collection="thirdPartyPartnerIdList" item="item" separator="," open="AND PARTNER_ID IN (" close=")">#{item}</foreach>
+	</delete>
+	
+	<insert id="insertPartnerMapList" parameterType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper insertPartnerMapList */
+		INSERT INTO	 PROJECT_PARTNER_MAP
+		(
+			PRJ_ID,
+			PARTNER_ID ,
+			COMPONENT_COUNT
+		)
+		VALUES
+		(
+			#{prjId} ,
+			#{partnerId} ,
+			#{componentCount}
+		)
+	</insert>
+	
+	<select id="selectPartnerDuplication" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper selectPartnerDuplication */
+	SELECT * 
+	FROM PARTNER_MASTER
+	WHERE PARTNER_NAME = #{partnerName}
+	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+	AND PARTNER_ID <![CDATA[<>]]> #{partnerId}
+	</if>
+	AND SOFTWARE_NAME = #{softwareName}
+	AND SOFTWARE_VERSION = #{softwareVersion}
+	AND USE_YN = 'Y'
+	ORDER BY CREATED_DATE DESC
+	</select>
+	
+	<select id="selectWatchersCheck" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT PARTNER_ID 
+		       ,DIVISION 
+		       ,USER_ID  
+		       ,EMAIL 
+		FROM   PARTNER_WATCHER 
+		WHERE  PARTNER_ID = #{partnerId}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(parDivision)">
+			AND DIVISION = #{parDivision}
+			AND USER_ID = #{parUserId}
+		</if> 
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(parDivision)">
+			AND EMAIL = #{parEmail}
+		</if>
+	</select>
+	
+	<select id="getWatcherListByEmail" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT T2.* FROM PARTNER_WATCHER T1
+		INNER JOIN PARTNER_MASTER T2 ON T1.PARTNER_ID = T2.PARTNER_ID AND T2.USE_YN = 'Y'
+		WHERE T1.EMAIL = #{email}
+	</select>
+	
+	<select id="checkWatcherAuth" parameterType="oss.fosslight.domain.PartnerMaster" resultType="int">
+		SELECT COUNT(1) FROM PARTNER_MASTER T1
+		WHERE T1.PARTNER_ID = #{partnerId} 
+			AND 
+				(
+					T1.CREATOR = #{loginUserName} 
+					OR EXISTS (
+							SELECT 1
+							FROM PARTNER_WATCHER T2
+							WHERE T2.PARTNER_ID = T1.PARTNER_ID AND T2.USER_ID = #{loginUserName})
+				)
+	</select>
+	
+	
+	<select id="existsWatcherByEmail" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
+		SELECT COUNT(1) FROM PARTNER_WATCHER WHERE EMAIL = #{parEmail} AND PARTNER_ID = #{partnerId}
+	</select>
+	
+	<select id="existsWatcherByUser" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
+		SELECT COUNT(1) FROM PARTNER_WATCHER WHERE PARTNER_ID = #{partnerId} AND DIVISION = #{parDivision} AND (USER_ID = 'ALL' OR USER_ID = #{parUserId})
+	</select>
+	
+	<select id="existsWatcher" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
+		SELECT COUNT(1) FROM PARTNER_MASTER WHERE PARTNER_ID = #{partnerId}
+	</select>
+	
+	<insert id="insertWatcher" parameterType="oss.fosslight.domain.PartnerMaster">
+		INSERT INTO PARTNER_WATCHER (PARTNER_ID, DIVISION, USER_ID, EMAIL) VALUES (#{partnerId}, #{parDivision}, #{parUserId}, #{parEmail})
+	</insert>
+	
+	<update id="removeWatcher" parameterType="oss.fosslight.domain.PartnerMaster">
+		DELETE FROM PARTNER_WATCHER 
+		WHERE 
+			PARTNER_ID = #{partnerId} 
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@isNotEmpty(parEmail)"> AND EMAIL = #{parEmail}</when>
+				<otherwise> AND DIVISION = #{parDivision} AND USER_ID = #{parUserId}</otherwise>
+			</choose>
+	</update>
+	
+	<select id="getInvateWatcherList" parameterType="String" resultType="String">
+		SELECT EMAIL FROM PARTNER_WATCHER WHERE IFNULL(EMAIL, '') <![CDATA[<>]]> '' AND PARTNER_ID = #{partnerId}
+	</select>
+	
+	<update id="updatePublicYn" parameterType="oss.fosslight.domain.PartnerMaster">
+		UPDATE PARTNER_MASTER 
+		   SET PUBLIC_YN = #{publicYn}
+		 WHERE PARTNER_ID = #{partnerId}
+	</update>
+	
+	<update id="updateComponentsOssId" parameterType="oss.fosslight.domain.PartnerMaster">
+		UPDATE 
+			OSS_COMPONENTS A1
+  		  LEFT OUTER JOIN OSS_NICKNAME A2 ON A1.OSS_NAME = A2.OSS_NICKNAME
+  		  LEFT OUTER JOIN OSS_MASTER A3 ON (A1.OSS_NAME = A3.OSS_NAME OR A2.OSS_NAME = A3.OSS_NAME) AND IFNULL(A1.OSS_VERSION, '') = IFNULL(A3.OSS_VERSION, '')
+		SET A1.OSS_ID = A3.OSS_ID, A1.OSS_NAME = IFNULL(A3.OSS_NAME, A1.OSS_NAME)
+		WHERE 
+			A1.REFERENCE_ID = #{partnerId}
+		AND A1.REFERENCE_DIV = '20'
+		AND A3.USE_YN = 'Y'
+		AND IFNULL(A1.OSS_NAME, '') <![CDATA[<>]]> ''
+	</update>
+	<select id="copyWatcher" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT T1.DIVISION
+			 , T1.USER_ID AS PAR_USER_ID
+			 , T2.USER_NAME AS PAR_USER_NAME
+			 , T1.EMAIL AS PAR_EMAIL
+			 , T2.USE_YN AS USER_USE_YN
+	 		 , T3.USE_YN AS DEPT_USE_YN
+	   <choose>
+		  <when test="listKind == 'prj'">
+		  FROM PROJECT_WATCHER T1
+		 INNER JOIN T2_USERS T2
+		    ON T1.USER_ID = T2.USER_ID
+		  LEFT JOIN T2_CODE_DTL T3
+			ON T1.DIVISION = T3.CD_DTL_NO 
+		   AND T3.CD_NO = '200'
+		 WHERE T1.PRJ_ID = #{listId}
+		   <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+	  	   AND T1.PRJ_ID IN (SELECT DISTINCT A.PRJ_ID
+	  						   FROM PROJECT_MASTER A
+	 					      WHERE A.USE_YN = 'Y'
+	   							AND (A.CREATOR = #{loginUserName}
+			  				    	 OR EXISTS (SELECT 1 
+												  FROM PROJECT_WATCHER A1 
+												 INNER JOIN T2_USERS A2 
+												    ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+												 WHERE A1.PRJ_ID = A.PRJ_ID 
+												   AND (A1.USER_ID = A2.USER_ID 
+												   		OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION)))
+			  						 OR A.PUBLIC_YN = 'Y')
+			  				)
+			</if>
+		  </when>
+		  <when test="listKind == 'par'">
+		  FROM PARTNER_WATCHER T1
+		 INNER JOIN T2_USERS T2
+		    ON T1.USER_ID = T2.USER_ID
+		  LEFT JOIN T2_CODE_DTL T3
+			ON T1.DIVISION = T3.CD_DTL_NO 
+		   AND T3.CD_NO = '200'
+		 WHERE T1.PARTNER_ID = #{listId}
+		   <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+		   AND T1.PARTNER_ID IN (SELECT DISTINCT A.PARTNER_ID
+		  						   FROM PARTNER_MASTER A
+								  WHERE A.USE_YN = 'Y'
+									AND (A.CREATOR = #{loginUserName}
+				  				   		 OR EXISTS (SELECT 1 
+											 		  FROM PARTNER_WATCHER A1 
+													 INNER JOIN T2_USERS A2 
+													    ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+													 WHERE A1.PARTNER_ID = A.PARTNER_ID 
+													   AND (A1.USER_ID = A2.USER_ID 
+													   		OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION)))
+								  		 OR A.PUBLIC_YN = 'Y')
+								 )
+		   </if>
+		  </when>
+		  <when test="listKind == 'bat'">
+		  FROM BAT_WATCHER T1 
+		 INNER JOIN T2_USERS T2
+		    ON T1.USER_ID = T2.USER_ID
+		  LEFT JOIN T2_CODE_DTL T3
+			ON T1.DIVISION = T3.CD_DTL_NO 
+		   AND T3.CD_NO = '200'
+		 WHERE T1.BAT_ID = #{listId}
+		  </when>
+	   </choose>
+	</select>
+	
+	<select id="getProjectToAddList" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT B.COMPONENT_COUNT
+		     , A.* 
+		  FROM PARTNER_MASTER A 
+		 INNER JOIN PROJECT_PARTNER_MAP B 
+		    ON A.PARTNER_ID = B.PARTNER_ID
+		 WHERE B.PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectDocumentsFile" parameterType="String" resultType="oss.fosslight.domain.T2File">
+		SELECT T1.*
+			 , DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		  FROM T2_FILE T1
+		 WHERE T1.FILE_ID = #{documentsFileId}
+		   AND T1.DEL_YN = 'N'
+	</select>
+	
+	<select id="selectDocumentsFileCnt" parameterType="String" resultType="String">
+		SELECT COUNT(*) AS DOCUMENTS_FILE_CNT
+		  FROM T2_FILE
+		 WHERE FILE_ID = #{documentsFileId}
+		   AND DEL_YN = 'N'
+	</select>
+	
+	<select id="selectPartnerStatusTotalCountUser" parameterType="oss.fosslight.domain.PartnerMaster" resultType="int">
+	SELECT COUNT(*) FROM (
+	SELECT 
+		t1.PARTNER_ID
+		, t1.STATUS
+		, t1.PARTNER_NAME
+		, t1.SOFTWARE_NAME
+		, t1.SOFTWARE_VERSION
+		, t1.DELIVERY_FORM
+		, t1.PUBLIC_YN
+		, t1.DESCRIPTION
+		, t1.COMMENT
+		, t1.CONFIRMATION_FILE_ID
+		, t1.OSS_FILE_ID
+		, t1.REVIEWER
+		, t1.USE_YN
+		, t1.CREATOR
+		, t1.CREATED_DATE
+		, t1.MODIFIER
+		, t1.MODIFIED_DATE
+		, t3.CD_DTL_NM AS DIVISION
+		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as FILE_NAME
+		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as FILE_NAME2
+	FROM 
+		PARTNER_MASTER t1
+		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+		LEFT JOIN PARTNER_WATCHER t4 ON t1.PARTNER_ID = t4.PARTNER_ID
+		LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
+		LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
+	WHERE
+		t1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+			AND t1.PARTNER_ID = #{partnerId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND t5.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND t6.LICENSE_NAME LIKE CONCAT('%',#{licenseName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			AND t1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		AND t1.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		AND t1.SOFTWARE_NAME LIKE CONCAT('%',#{softwareName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		AND t1.SOFTWARE_VERSION LIKE CONCAT('%',#{softwareVersion},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND t2.DIVISION = #{division}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		AND t1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+			<if test='reviewer.equals("N/A")'>
+			AND t1.REVIEWER IS NULL
+			</if>
+			<if test='!reviewer.equals("N/A")'>
+			AND t1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			AND t5.FILE_PATH LIKE CONCAT('%',#{binaryName})
+		</if>
+		GROUP BY t1.PARTNER_ID
+		) RESULT
+	</select>
+	
+	<select id="selectPartnerStatusUser" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT 
+		t1.PARTNER_ID
+		, t1.STATUS
+		, t1.PARTNER_NAME
+		, t1.SOFTWARE_NAME
+		, t1.SOFTWARE_VERSION
+		, t1.DELIVERY_FORM
+		, t1.PUBLIC_YN
+		, t1.DESCRIPTION
+		, t1.COMMENT
+		, t1.CONFIRMATION_FILE_ID
+		, t1.OSS_FILE_ID
+		, t1.REVIEWER
+		, t1.USE_YN
+		, t2.USER_NAME AS CREATOR
+		, t1.CREATED_DATE
+		, t1.MODIFIER
+		, t1.MODIFIED_DATE
+		, t3.CD_DTL_NM AS DIVISION
+		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as FILE_NAME
+		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as FILE_NAME2
+	<if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+		, t7.PRJ_ID
+	</if>
+	FROM 
+		PARTNER_MASTER t1
+		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t2.DIVISION = t3.CD_DTL_NO
+		LEFT JOIN PARTNER_WATCHER t4 ON t1.PARTNER_ID = t4.PARTNER_ID
+		LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
+		LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
+	<if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
+	    LEFT JOIN (SELECT PARTNER_ID, GROUP_CONCAT(PRJ_ID ORDER BY PRJ_ID ASC) AS PRJ_ID FROM PROJECT_PARTNER_MAP GROUP BY PARTNER_ID) t7 ON t1.PARTNER_ID = t7.PARTNER_ID
+	</if>
+	WHERE
+		t1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+			AND t1.PARTNER_ID = #{partnerId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND t5.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND t6.LICENSE_NAME LIKE CONCAT('%',#{licenseName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status) and @oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			AND t1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
+			<foreach collection="arrStatuses" item="item" separator="," open="AND t1.STATUS IN (" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
+		AND t1.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
+		AND t1.SOFTWARE_NAME LIKE CONCAT('%',#{softwareName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareVersion)">
+		AND t1.SOFTWARE_VERSION LIKE CONCAT('%',#{softwareVersion},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate1)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdDate1}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate2)">
+		AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdDate2}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+		AND t2.DIVISION = #{division}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		AND t1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND t1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
+			<if test='reviewer.equals("N/A")'>
+			AND t1.REVIEWER IS NULL
+			</if>
+			<if test='!reviewer.equals("N/A")'>
+			AND t1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			AND t5.FILE_PATH LIKE CONCAT('%',#{binaryName})
+		</if>
+		GROUP BY t1.PARTNER_ID
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerId', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.PARTNER_ID ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.PARTNER_ID DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('partnerName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.PARTNER_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.PARTNER_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareName', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.SOFTWARE_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.SOFTWARE_NAME DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('softwareVersion', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.SOFTWARE_VERSION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.SOFTWARE_VERSION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('status', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.STATUS ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.STATUS DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('deliveryForm', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.DELIVERY_FORM ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.DELIVERY_FORM DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('description', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.DESCRIPTION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.DESCRIPTION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('division', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t2.DIVISION ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t2.DIVISION DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('creator', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.CREATOR ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.CREATOR DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('createdDate', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.CREATED_DATE ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.CREATED_DATE DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.REVIEWER ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.REVIEWER DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('comment', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t1.COMMENT ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t1.COMMENT DESC
+			</if>
+		</if>
+		<include refid="limitPage"/>
+	</select>
+	
+	<select id="selectOssRefPartnerList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	/* PartnerMapper.selectOssRefPartnerList */
+		SELECT T1.PARTNER_ID
+		     , T1.PARTNER_NAME
+			 , T1.SOFTWARE_NAME
+			 , T1.SOFTWARE_VERSION
+			 , T1.MODIFIED_DATE
+		  FROM PARTNER_MASTER T1 
+		 WHERE T1.USE_YN = 'Y' 
+		   AND T1.STATUS = 'CONF' 
+		   AND EXISTS (SELECT 1 
+		                 FROM OSS_COMPONENTS A 
+		                INNER JOIN (SELECT SUB1.OSS_ID
+				 						 , SUB1.OSS_NAME
+										 , SUB1.OSS_VERSION 
+		                              FROM OSS_MASTER SUB1 
+								  	 WHERE  SUB1.OSS_ID = #{ossId}
+                                     UNION ALL 
+                                    SELECT SUB1.OSS_ID 
+                                         , SUB2.OSS_NICKNAME AS OSS_NAME 
+                                         , SUB1.OSS_VERSION
+                                      FROM OSS_MASTER SUB1 
+                                     INNER JOIN OSS_NICKNAME SUB2 ON SUB1.OSS_NAME = SUB2.OSS_NAME 
+                                     WHERE SUB1.OSS_ID = #{ossId}) B ON A.OSS_NAME = B.OSS_NAME AND IFNULL(B.OSS_VERSION, '') = IFNULL(A.OSS_VERSION, '') 
+		                WHERE T1.PARTNER_ID = A.REFERENCE_ID 
+		                  AND A.REFERENCE_DIV IN ( '20' ) 
+		                  AND A.EXCLUDE_YN = 'N') 
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				AND (
+					T1.CREATOR = #{loginUserName} 
+						OR EXISTS (
+						SELECT 1
+						  FROM PARTNER_WATCHER A1 
+						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+						 WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+					)
+				)
+			</if>
+		ORDER BY MODIFIED_DATE DESC LIMIT 100
+	</select>
+</mapper>

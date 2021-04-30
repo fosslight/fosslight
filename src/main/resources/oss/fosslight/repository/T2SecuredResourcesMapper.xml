@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.T2SecuredResourcesMapper">
+	<resultMap type="oss.fosslight.domain.T2SecuredResources" id="T2SecuredResourcesAndT2SecuredResourcesRole" autoMapping="true">
+		<id column="RESOURCE_ID" property="resourceId"/>
+		<collection property="securedResourcesRoles" autoMapping="true" columnPrefix="T2SRR_" ofType="oss.fosslight.domain.T2SecuredResourcesRole" />
+	</resultMap>
+
+	<!-- 리소스와 리소스 모두 조회 -->
+	<select id="getAllSecuredResources" resultType="oss.fosslight.domain.T2SecuredResources">
+		SELECT
+			RESOURCE_ID,
+			RESOURCE_NAME,
+			RESOURCE_PATTERN,
+			DESCRIPTION,
+			RESOURCE_TYPE,
+			SORT_ORDER,
+			CREATE_DATE,
+			MODIFY_DATE
+		FROM T2_SECURED_RESOURCES
+		ORDER BY
+			RESOURCE_ID ASC
+	</select>
+	
+	<!-- 리소스와 리소스-역할 맵핑 데이터를 모두 조회 -->
+	<select id="getAllSecuredResourcesAndSecuredResourcesRoles" resultMap="T2SecuredResourcesAndT2SecuredResourcesRole">
+		SELECT
+			T2SR.RESOURCE_ID AS RESOURCE_ID,
+			T2SR.RESOURCE_NAME AS RESOURCE_NAME,
+			T2SR.RESOURCE_PATTERN AS RESOURCE_PATTERN,
+			T2SR.DESCRIPTION AS DESCRIPTION,
+			T2SR.RESOURCE_TYPE AS RESOURCE_TYPE,
+			T2SR.SORT_ORDER AS SORT_ORDER,
+			T2SR.CREATE_DATE AS CREATE_DATE,
+			T2SR.MODIFY_DATE AS MODIFY_DATE,
+		    T2SRR.RESOURCE_ID AS T2SRR_RESOURCE_ID,
+		    T2SRR.AUTHORITY AS T2SRR_AUTHORITY
+		FROM T2_SECURED_RESOURCES T2SR LEFT JOIN T2_SECURED_RESOURCES_ROLE T2SRR ON T2SR.RESOURCE_ID = T2SRR.RESOURCE_ID
+		ORDER BY
+			T2SR.RESOURCE_ID ASC
+	</select>
+	
+	<!-- 리소스 1건 조회 -->
+	<select id="getSecuredResources" parameterType="oss.fosslight.domain.T2SecuredResources" resultType="oss.fosslight.domain.T2SecuredResources">
+		SELECT
+			RESOURCE_ID,
+			RESOURCE_NAME,
+			RESOURCE_PATTERN,
+			DESCRIPTION,
+			RESOURCE_TYPE,
+			SORT_ORDER,
+			CREATE_DATE,
+			MODIFY_DATE
+		FROM T2_SECURED_RESOURCES
+		WHERE
+			RESOURCE_ID = #{resourceId}
+	</select>
+	
+	<!-- 리소스 1건과 해당 리소스-역할 맵핑 데이터 조회 -->
+	<select id="getSecuredResourcesAndSecuredResourcesRoles" parameterType="oss.fosslight.domain.T2SecuredResources" resultMap="T2SecuredResourcesAndT2SecuredResourcesRole">
+		SELECT
+			T2SR.RESOURCE_ID AS RESOURCE_ID,
+			T2SR.RESOURCE_NAME AS RESOURCE_NAME,
+			T2SR.RESOURCE_PATTERN AS RESOURCE_PATTERN,
+			T2SR.DESCRIPTION AS DESCRIPTION,
+			T2SR.RESOURCE_TYPE AS RESOURCE_TYPE,
+			T2SR.SORT_ORDER AS SORT_ORDER,
+			T2SR.CREATE_DATE AS CREATE_DATE,
+			T2SR.MODIFY_DATE AS MODIFY_DATE,
+		    T2SRR.RESOURCE_ID AS T2SRR_RESOURCE_ID,
+		    T2SRR.AUTHORITY AS T2SRR_AUTHORITY
+		FROM T2_SECURED_RESOURCES T2SR LEFT JOIN T2_SECURED_RESOURCES_ROLE T2SRR ON T2SR.RESOURCE_ID = T2SRR.RESOURCE_ID
+		WHERE
+			T2SR.RESOURCE_ID = #{resourceId}
+	</select>
+	
+	<update id="updateSecuredResources" parameterType="oss.fosslight.domain.T2SecuredResources">
+		UPDATE T2_SECURED_RESOURCES
+		SET
+			RESOURCE_NAME = #{resourceName},
+			RESOURCE_PATTERN = #{resourcePattern},
+			DESCRIPTION = #{description},
+			RESOURCE_TYPE = #{resourceType},
+			SORT_ORDER = #{sortOrder},
+			MODIFY_DATE = #{modifyDate}
+		WHERE
+			RESOURCE_ID = #{resourceId}
+	</update>
+	
+	<insert id="insertSecuredResource" parameterType="oss.fosslight.domain.T2SecuredResources">
+		INSERT INTO T2_SECURED_RESOURCES
+		(
+			RESOURCE_ID,
+			RESOURCE_NAME,
+			RESOURCE_PATTERN,
+			DESCRIPTION,
+			RESOURCE_TYPE,
+			SORT_ORDER,
+			CREATE_DATE,
+			MODIFY_DATE
+		)
+		VALUES
+		(
+			#{resourceId},
+			#{resourceName},
+			#{resourcePattern},
+			#{description},
+			#{resourceType},
+			#{sortOrder},
+			#{createDate},
+			#{modifyDate}
+		)
+	</insert>
+	
+	<delete id="deleteSecuredResourceByResourceId" parameterType="string">
+		DELETE FROM
+			T2_SECURED_RESOURCES
+		WHERE
+			RESOURCE_ID = #{resourceId}
+	</delete>
+</mapper>

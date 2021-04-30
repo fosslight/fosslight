@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="oss.fosslight.repository.MailManagerMapper">
+
+	<insert id="insertEmailHistory" parameterType="oss.fosslight.domain.CoMail" useGeneratedKeys="true" keyProperty="sndSeq">
+		INSERT INTO 
+			EMAIL_SND_HIS(
+				MSG_TYPE			/* 메시지구분 */
+				, EML_TITLE			/* 이메일 제목 */
+				, EML_MESSAGE		/* 이메일 내용 */
+				, EML_FROM			/* 발신자 */
+				, EML_TO			/* 수신자 */
+				, EML_CC			/* 참조자 */
+				, EML_BCC			/* 숨은참조자 */
+				, SND_STATUS		/* 발송상태(전송:S, 완료:C, 전송 시간 초과: G, 전송실패: F) */
+				, USE_FLAG			/* 사용여부 */
+				, CREATION_DATE		/* 등록일 */
+				, CREATION_USER_ID	/* 등록자 */
+				, LAST_UPDATE_DATE	/* 수정일 */
+				, LAST_UPDATE_USER_ID /* 수정자 */
+			)
+			VALUES(
+				#{msgType}			/* 메시지구분 */
+				, #{emlTitle}		/* 이메일 제목 */
+				, #{emlMessage}		/* 이메일 내용 */
+				, #{emlFrom}		/* 발신자 */
+				, #{strToIds}		/* 수신자들 */
+				, #{strToCcIds}		/* 참조자들 */
+				, #{strToBccIds}	/* 숨은참조자들 */
+				, 'S'				/* 발송상태(전송:S, 완료:C, 전송 시간 초과: G, 전송실패: F) */
+				, 'Y'				/* 사용여부 */
+				, now()				/* 등록일 */
+				, #{creationUserId}	/* 등록자 */
+				, now()				/* 수정일 */
+				, #{creationUserId}	/* 수정자 */
+			)
+	</insert>
+
+	<update id="updateSendStatus" parameterType="oss.fosslight.domain.CoMail">
+		UPDATE EMAIL_SND_HIS SET SND_STATUS = #{sndStatus} WHERE SND_SEQ = #{sndSeq}
+	</update>
+	
+	<update id="updateErrorMsg" parameterType="oss.fosslight.domain.CoMail">
+		UPDATE EMAIL_SND_HIS SET SND_STATUS = #{sndStatus}, ERROR_MSG = #{errorMsg} WHERE SND_SEQ = #{sndSeq}
+	</update>
+	
+	<update id="updateSendMailRunTimeout" parameterType="oss.fosslight.domain.CoMail">
+		UPDATE EMAIL_SND_HIS SET SND_STATUS = 'G', USE_FLAG = 'N' 
+		WHERE USE_FLAG = 'Y' AND SND_STATUS = 'S' AND CREATION_DATE <![CDATA[<]]> DATE_ADD(now(), INTERVAL -30 MINUTE)
+	</update>
+	
+	<select id="selectMailAddrFromIds" parameterType="Map" resultType="String">
+		SELECT EMAIL FROM T2_USERS
+		WHERE USE_YN = 'Y' AND USER_ID IN 
+		<foreach collection="idArr" index="index" separator="," open="(" close=")">
+			'${idArr[index]}'
+		</foreach>
+	</select>
+	<select id="selectAdminMailAddr" resultType="String">
+	/* MailManagerMapper.selectAdminMailAddr */
+		SELECT DISTINCT T1.EMAIL FROM T2_USERS T1 
+		INNER JOIN T2_AUTHORITIES T2 ON T1.USER_ID = T2.USER_ID AND T2.AUTHORITY = 'ROLE_ADMIN' 
+		WHERE T1.USE_YN = 'Y' AND IFNULL(T1.EMAIL, '') <![CDATA[<>]]> ''
+	</select>
+	<select id="getProjectInfo" parameterType="String" resultType="oss.fosslight.domain.Project">
+	SELECT * FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
+	</select>
+	<select id="setProjectWatcherMailList" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1
+		INNER JOIN PROJECT_WATCHER T2 ON T1.DIVISION = T2.DIVISION
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId} AND (T2.USER_ID = 'all' OR T1.USER_ID = T2.USER_ID)
+		UNION
+		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN PROJECT_MASTER T2 ON T1.USER_ID = T2.CREATOR
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+	</select>
+	<select id="getPartnerInfo" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT * FROM PARTNER_MASTER WHERE PARTNER_ID = #{partnerId}
+	</select>
+	<select id="setPartnerWatcherMailList" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1
+		INNER JOIN PARTNER_WATCHER T2 ON T1.DIVISION = T2.DIVISION
+		WHERE T1.USE_YN = 'Y' AND T2.PARTNER_ID = #{partnerId} AND (T2.USER_ID = 'all' OR T1.USER_ID = T2.USER_ID)
+		UNION
+		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN PARTNER_MASTER T2 ON T1.USER_ID = T2.CREATOR
+		WHERE T1.USE_YN = 'Y' AND T2.PARTNER_ID = #{partnerId}
+	</select>
+	<select id="binaryWatcherMailList" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1
+		INNER JOIN BAT_WATCHER T2 ON T1.DIVISION = T2.DIVISION
+		WHERE T1.USE_YN = 'Y' AND T2.BAT_ID = #{batId} AND (T2.USER_ID = 'all' OR T1.USER_ID = T2.USER_ID)
+		UNION
+		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN BINARY_MASTER T2 ON T1.USER_ID = T2.CREATOR
+		WHERE T1.USE_YN = 'Y' AND T2.BAT_ID = #{batId}
+	</select>
+	
+	<select id="getOssInfoById" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM OSS_MASTER WHERE OSS_ID = #{ossId}</select>
+	<select id="getLicenseInfoById" parameterType="String" resultType="oss.fosslight.domain.LicenseMaster">SELECT * FROM LICENSE_MASTER WHERE LICENSE_ID = #{licenseId}</select>
+	<select id="getProjectInfoById" parameterType="String" resultType="oss.fosslight.domain.Project">SELECT * FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}</select>
+	<select id="getBinaryInfo" parameterType="String" resultType="oss.fosslight.domain.BinaryMaster">SELECT T1.*, T2.ORIG_NM as BINARY_FILE_NAME FROM BINARY_MASTER T1 INNER JOIN T2_FILE T2 ON T1.BINARY_FILE_ID = T2.FILE_SEQ WHERE T1.BAT_ID = #{batId}</select>
+	<select id="getDistributeReservedUser" parameterType="String" resultType="String">
+		SELECT DISTRIBUTE_RESERVED_USER AS RESERVER
+		FROM PROJECT_MASTER
+		WHERE PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="getTempMail" resultType="CamelMap">
+		SELECT MAIL_SEQ
+			 , MAIL_TYPE
+			 , PARAM_PRJ_ID
+			 , PARAM_BAT_ID
+			 , PARAM_EXPANSION1
+			 , PARAM_EXPANSION2
+			 , PARAM_EXPANSION3
+			 , COMMENT
+			 , PARAM_PRJ_INFO
+			 , CREATOR
+			 , MODIFIER
+			 , TO_IDS
+		  FROM EMAIL_SND_TEMP
+	</select>
+	<delete id="deleteTempMail" parameterType="String">
+		DELETE FROM EMAIL_SND_TEMP WHERE MAIL_SEQ = #{mailSeq}
+	</delete>
+ </mapper>

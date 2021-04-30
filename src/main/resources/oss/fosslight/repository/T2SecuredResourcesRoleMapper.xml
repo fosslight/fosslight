@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.T2SecuredResourcesRoleMapper">
+	
+	<sql id="deleteSecuredResourcesRole">
+		DELETE FROM
+			T2_SECURED_RESOURCES_ROLE
+	</sql>
+
+	<delete id="deleteSecuredResourcesRoleByAuthority" parameterType="string">
+		<include refid="deleteSecuredResourcesRole" />
+		WHERE
+			AUTHORITY = #{authority}
+	</delete>
+	
+	<delete id="deleteSecuredResourcesRoleByResourceId" parameterType="string">
+		<include refid="deleteSecuredResourcesRole" />
+		WHERE
+			RESOURCE_ID = #{resourceId}
+	</delete>
+	
+	<delete id="insertSecuredResourcesRoleTypeList" parameterType="list">
+		INSERT INTO
+			T2_SECURED_RESOURCES_ROLE
+		VALUES
+		<foreach collection="list" item="item" open="(" close=")" separator="),(">
+			#{item.resourceId},
+			#{item.authority}
+		</foreach>
+	</delete>
+</mapper>

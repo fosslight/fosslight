@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.StatisticsMapper">
+	<select id="getChartTitle" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
+			SELECT CD_DTL_NO AS TITLE_NM
+			  FROM T2_CODE_DTL 
+			 WHERE CD_NO = '205' 
+			 ORDER BY CD_ORDER ASC
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
+			SELECT CD_DTL_NO AS TITLE_NM
+			  FROM T2_CODE_DTL 
+			 WHERE CD_NO = '211' 
+			 ORDER BY CD_ORDER ASC
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+			SELECT USR.USER_NAME AS TITLE_NM
+			  FROM T2_USERS USR
+			 INNER JOIN T2_AUTHORITIES AUTH
+			    ON USR.USER_ID = AUTH.USER_ID 
+			   AND AUTH.AUTHORITY='ROLE_ADMIN' 
+			   AND USR.USER_ID NOT IN ('oscAdmin', 'sungwon.yun')
+			   AND USR.USE_YN = 'Y'
+		 </if>
+		 <if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
+		 	SELECT SUBSTRING_INDEX(CD_DTL_NM, '(', 1) AS TITLE_NM
+		 	  FROM T2_CODE_DTL 
+		 	 WHERE CD_NO = '207' 
+		 	 ORDER BY CD_ORDER ASC
+		 </if>
+	</select>
+	<select id="getNoneUser" parameterType="String" resultType="String">
+		SELECT USR.USER_NAME
+		  FROM T2_USERS USR
+		 INNER JOIN T2_AUTHORITIES AUTH
+		    ON USR.USER_ID = AUTH.USER_ID 
+		   AND AUTH.AUTHORITY='ROLE_ADMIN' 
+		   AND (USR.USER_ID IN ('oscAdmin', 'sungwon.yun')
+		   		OR USR.USE_YN = 'N')
+	</select>
+	<select id="getDivisionalProjectChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT RTN.CD_DTL_NM AS DIVISION_NM
+		     , RTN.CD_ORDER AS DIVISION_ORDER
+			<foreach collection="titleArray" item="item" index="index">
+			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			</foreach>
+			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 </if>
+		  FROM (SELECT A.CD_DTL_NM
+		  			 , A.CD_ORDER
+			 	  <foreach collection="titleArray" item="item" index="index">
+			 	  	<choose>
+    					<when test="@oss.fosslight.util.StringUtil@equals('unassigned', item)">
+							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
+						</when>
+    					<otherwise>
+    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    					</otherwise>
+    				</choose>
+	  			  </foreach>
+	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+	  			  	  , IF(
+					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
+					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  </foreach>
+					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
+	  			  </if>
+				  FROM (SELECT CD_DTL_NM
+						     , CD_ORDER
+				  	      FROM T2_CODE_DTL 
+					     WHERE CD_NO = '200'
+					       AND USE_YN = 'Y') A
+			<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
+				  LEFT JOIN (SELECT T2.CD_DTL_NM
+				  				  , CASE 
+										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'REV'
+										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'NA' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
+										ELSE 'PROG' 
+								  	END CATEGORY 
+							   FROM PROJECT_MASTER PM
+							  INNER JOIN T2_USERS T1
+								 ON PM.CREATOR = T1.USER_ID
+							  INNER JOIN (SELECT CD_DTL_NO
+								 			   , CD_DTL_NM
+							  			 	FROM T2_CODE_DTL 
+										   WHERE CD_NO = '200'
+										     AND USE_YN = 'Y') T2
+								 ON T1.DIVISION = T2.CD_DTL_NO
+							  WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate} AND PM.USE_YN ='Y') STAT
+				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
+				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+				 LEFT JOIN (SELECT T2.CD_DTL_NM
+							     , ADMIN.USER_NAME AS CATEGORY
+						      FROM PROJECT_MASTER PM
+						      LEFT JOIN T2_USERS T1
+							    ON PM.CREATOR = T1.USER_ID
+						      LEFT JOIN (SELECT CD_DTL_NO
+							 			   	  , CD_DTL_NM
+						  			 	   FROM T2_CODE_DTL 
+									      WHERE CD_NO = '200'
+									        AND USE_YN = 'Y') T2
+							    ON T1.DIVISION = T2.CD_DTL_NO
+						      LEFT JOIN (SELECT 'unassigned' AS USER_ID, null AS USER_NAME
+						      		      UNION ALL
+						      			 SELECT USR.USER_ID
+						     				  , USR.USER_NAME
+						 				   FROM T2_USERS USR
+						 				  INNER JOIN T2_AUTHORITIES AUTH
+						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
+						        ON PM.REVIEWER = ADMIN.USER_ID
+						     WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate} AND PM.USE_YN ='Y') STAT
+		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
+		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
+				LEFT JOIN (SELECT T2.CD_DTL_NM
+						        , (SELECT SUBSTRING_INDEX(CD_DTL_NM, '(', 1) AS CD_DTL_NM 
+									 FROM T2_CODE_DTL 
+									WHERE CD_NO = '207' AND CD_DTL_NO = PM.DISTRIBUTION_TYPE) AS CATEGORY
+							 FROM PROJECT_MASTER PM
+						    INNER JOIN T2_USERS T1
+							   ON PM.CREATOR = T1.USER_ID
+						    INNER JOIN (SELECT CD_DTL_NO
+											 , CD_DTL_NM
+										  FROM T2_CODE_DTL 
+										 WHERE CD_NO = '200'
+										   AND USE_YN = 'Y') T2
+							   ON T1.DIVISION = T2.CD_DTL_NO
+							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
+		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
+		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			 ) RTN
+		 GROUP BY RTN.CD_DTL_NM
+		 ORDER BY RTN.CD_ORDER ASC
+	</select>
+	
+	<select id="getMostUsedOssChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT OSS.COLUMN_NAME
+		     , COUNT(1) AS COLUMN_CNT
+		  FROM (
+		  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
+		  		SELECT OC.OSS_NAME AS COLUMN_NAME
+				  FROM (SELECT T1.REFERENCE_ID, T1.OSS_NAME
+				  		  FROM OSS_COMPONENTS T1
+				  		 INNER JOIN PROJECT_MASTER T2
+				  		    ON T1.REFERENCE_ID = T2.PRJ_ID
+				  		 WHERE T1.REFERENCE_DIV IN ('13', '14')
+				  		   AND T2.IDENTIFICATION_STATUS = 'CONF'
+		     	   		   AND T1.OSS_NAME NOT IN ('', '-')
+		     	   		   AND T2.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+		     	   		   AND T2.USE_YN = 'Y'
+		     	   		   AND T1.EXCLUDE_YN = 'N') OC
+			     INNER JOIN PROJECT_MASTER PM
+				    ON OC.REFERENCE_ID = PM.PRJ_ID
+				 INNER JOIN T2_USERS T1
+				    ON PM.CREATOR = T1.USER_ID
+				 INNER JOIN (SELECT CD_DTL_NO
+								  , CD_DTL_NM
+							   FROM T2_CODE_DTL 
+							  WHERE CD_NO = '200'
+							    AND USE_YN = 'Y') T2
+					ON T1.DIVISION = T2.CD_DTL_NO
+				 WHERE T2.CD_DTL_NO = #{divisionNo}
+				 GROUP BY OC.REFERENCE_ID, OC.OSS_NAME
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
+	      		SELECT OC.OSS_NAME AS COLUMN_NAME 
+		  		  FROM OSS_COMPONENTS OC
+		  		 INNER JOIN PROJECT_MASTER PM
+		  		    ON OC.REFERENCE_ID = PM.PRJ_ID
+				 WHERE OC.REFERENCE_DIV IN ('13', '14')
+				   AND PM.IDENTIFICATION_STATUS = 'CONF'
+				   AND OC.OSS_NAME NOT IN ('', '-')
+				   AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+				   AND PM.USE_YN = 'Y'
+				   AND OC.EXCLUDE_YN = 'N'
+				 GROUP BY OC.REFERENCE_ID, OC.OSS_NAME 
+				</if>
+				) OSS
+		 GROUP BY OSS.COLUMN_NAME
+		 ORDER BY COLUMN_CNT DESC
+		 LIMIT 0, #{pieSize}
+	</select>
+	
+	<select id="getMostUsedLicenseChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT LICENSE.COLUMN_NAME
+		     , COUNT(1) AS COLUMN_CNT
+		  FROM (
+		  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
+		  		SELECT LICENSE_NAME AS COLUMN_NAME
+				  FROM (SELECT T1.COMPONENT_ID, T1.REFERENCE_ID
+				  		  FROM OSS_COMPONENTS T1
+				  		 INNER JOIN PROJECT_MASTER T2
+				  		    ON T1.REFERENCE_ID = T2.PRJ_ID
+				  		 WHERE T1.REFERENCE_DIV IN ('13', '14')
+				   		   AND T2.IDENTIFICATION_STATUS = 'CONF'
+		     	   		   AND T1.OSS_NAME NOT IN ('', '-')
+		     	   		   AND T1.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+		     	   		   AND T2.USE_YN = 'Y'
+		     	   		   AND T1.EXCLUDE_YN = 'N') OC
+				 INNER JOIN OSS_COMPONENTS_LICENSE CL
+				    ON OC.COMPONENT_ID = CL.COMPONENT_ID
+				   AND UPPER(CL.LICENSE_NAME) NOT IN (''
+				   									, 'LGE PROPRIETARY LICENSE'
+				   									, 'OTHER PROPRIETARY LICENSE')
+			     INNER JOIN PROJECT_MASTER PM
+				    ON OC.REFERENCE_ID = PM.PRJ_ID
+				 INNER JOIN T2_USERS T1
+				    ON PM.CREATOR = T1.USER_ID
+				 INNER JOIN (SELECT CD_DTL_NO
+								  , CD_DTL_NM
+							   FROM T2_CODE_DTL 
+							  WHERE CD_NO = '200'
+							    AND USE_YN = 'Y') T2
+					ON T1.DIVISION = T2.CD_DTL_NO
+				 WHERE T2.CD_DTL_NO = #{divisionNo}
+				 GROUP BY REFERENCE_ID, LICENSE_NAME
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
+				SELECT LICENSE_NAME AS COLUMN_NAME
+				  FROM (SELECT T1.COMPONENT_ID, T1.REFERENCE_ID
+				  		  FROM OSS_COMPONENTS T1
+				  		 INNER JOIN PROJECT_MASTER T2
+				  		    ON T1.REFERENCE_ID = T2.PRJ_ID
+				  		 WHERE T1.REFERENCE_DIV IN ('13', '14')
+				  		   AND T2.IDENTIFICATION_STATUS = 'CONF'
+		     	   		   AND T1.OSS_NAME NOT IN ('', '-')
+		     	   		   AND T2.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+		     	   		   AND T2.USE_YN = 'Y'
+		     	   		   AND T1.EXCLUDE_YN = 'N') OC
+				 INNER JOIN OSS_COMPONENTS_LICENSE CL
+				    ON OC.COMPONENT_ID = CL.COMPONENT_ID
+				   AND UPPER(CL.LICENSE_NAME) NOT IN (''
+				   									, 'LGE PROPRIETARY LICENSE'
+				   									, 'OTHER PROPRIETARY LICENSE')
+				 GROUP BY OC.REFERENCE_ID, CL.LICENSE_NAME
+				</if>
+				) LICENSE
+		 GROUP BY LICENSE.COLUMN_NAME
+		 ORDER BY COLUMN_CNT DESC
+		 LIMIT 0, #{pieSize}
+	</select>
+	
+	<select id="getUpdatedOssChartData"  parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT CONCAT(RTN.DATE, '(', #{updateType}, ')') AS COLUMN_NAME		
+			<foreach collection="titleArray" item="item" index="index">
+			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			</foreach>
+			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+		  FROM (SELECT A.DATE
+			 	  <foreach collection="titleArray" item="item" index="index">
+	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			  </foreach>
+	  			  	 , IF(
+				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
+				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  </foreach>
+				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
+				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+					  	  FROM INFORMATION_SCHEMA.TABLES TAB
+					     	 , (select @num := 0) NUM
+					 	 LIMIT ${diffMonthCnt}) A
+				  LEFT JOIN (SELECT ADMIN.USER_NAME AS CATEGORY
+				  			<choose>
+								<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)"> 
+				  				  , CONCAT(YEAR(OM.CREATED_DATE), LPAD(MONTH(OM.CREATED_DATE), 2, '0')) AS DATE
+				  				</when>
+				  				<otherwise>
+				  				  , CONCAT(YEAR(OM.MODIFIED_DATE), LPAD(MONTH(OM.MODIFIED_DATE), 2, '0')) AS DATE
+				  				</otherwise>
+				  			</choose>
+							   FROM OSS_MASTER OM
+							  INNER JOIN T2_USERS T1
+							     ON OM.MODIFIER = T1.USER_ID
+							  INNER JOIN (SELECT CD_DTL_NO
+							 			   	   , CD_DTL_NM
+									 	   	FROM T2_CODE_DTL 
+									       WHERE CD_NO = '200'
+									         AND USE_YN = 'Y') T2
+							     ON T1.DIVISION = T2.CD_DTL_NO
+							  INNER JOIN (SELECT USR.USER_ID
+							  				   , USR.USER_NAME
+										   	FROM T2_USERS USR
+										   INNER JOIN T2_AUTHORITIES AUTH
+							 				  ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
+							  	 ON OM.CREATOR = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}) STAT
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
+							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate} 
+								AND OM.CREATOR != OM.MODIFIER) STAT
+						</when>
+					</choose>    
+				    ON A.DATE = STAT.DATE
+				 GROUP BY A.DATE, STAT.CATEGORY
+				 ORDER BY A.DATE ASC
+			 ) RTN
+		 GROUP BY RTN.DATE
+	</select>
+	
+	<select id="getUpdatedLicenseChartData"  parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT CONCAT(RTN.DATE, '(', #{updateType}, ')') AS COLUMN_NAME	
+			<foreach collection="titleArray" item="item" index="index">
+			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			</foreach>
+			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+		  FROM (SELECT A.DATE
+			 	  <foreach collection="titleArray" item="item" index="index">
+	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			  </foreach>
+	  			     , IF(
+				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
+				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  </foreach>
+				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
+				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+					  	  FROM INFORMATION_SCHEMA.TABLES TAB
+					     	 , (select @num := 0) NUM
+					 	 LIMIT ${diffMonthCnt}) A
+				  LEFT JOIN (SELECT ADMIN.USER_NAME AS CATEGORY
+				  			<choose>
+								<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
+								  , CONCAT(YEAR(LM.CREATED_DATE), LPAD(MONTH(LM.CREATED_DATE), 2, '0')) AS DATE
+								</when>
+								<otherwise>
+								  , CONCAT(YEAR(LM.MODIFIED_DATE), LPAD(MONTH(LM.MODIFIED_DATE), 2, '0')) AS DATE
+								</otherwise>
+							</choose>
+							   FROM LICENSE_MASTER LM
+							  INNER JOIN T2_USERS T1
+							     ON LM.MODIFIER = T1.USER_ID
+							  INNER JOIN (SELECT CD_DTL_NO
+							 			   	   , CD_DTL_NM
+									 	   	FROM T2_CODE_DTL 
+									       WHERE CD_NO = '200'
+									         AND USE_YN = 'Y') T2
+							     ON T1.DIVISION = T2.CD_DTL_NO
+							  INNER JOIN (SELECT USR.USER_ID
+							  				   , USR.USER_NAME
+										   	FROM T2_USERS USR
+										   INNER JOIN T2_AUTHORITIES AUTH
+							 				  ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
+							  	 ON LM.CREATOR = ADMIN.USER_ID AND LM.USE_YN = 'Y'
+							  WHERE DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}) STAT
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
+							  	 ON LM.MODIFIER = ADMIN.USER_ID AND LM.USE_YN = 'Y'
+							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate} 
+							    AND LM.CREATOR != LM.MODIFIER) STAT
+						</when>
+					</choose>
+				    ON A.DATE = STAT.DATE
+				 GROUP BY A.DATE, STAT.CATEGORY
+				 ORDER BY A.DATE ASC
+			 ) RTN
+		 GROUP BY RTN.DATE
+	</select>
+	
+	<select id="getTrdPartyRelatedChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT RTN.CD_DTL_NM AS DIVISION_NM
+			<foreach collection="titleArray" item="item" index="index">
+			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			</foreach>
+			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 </if>
+		  FROM (SELECT A.CD_DTL_NM
+		  			 , A.CD_ORDER
+			 	  <foreach collection="titleArray" item="item" index="index">
+	  			  <choose>
+    					<when test="@oss.fosslight.util.StringUtil@equals('unassigned', item)">
+							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
+						</when>
+    					<otherwise>
+    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    					</otherwise>
+    				</choose>
+	  			  </foreach>
+	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+	  			  	  , IF(
+					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
+					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  </foreach>
+					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
+	  			  </if>
+				  FROM (SELECT CD_DTL_NM
+						     , CD_ORDER
+				  	      FROM T2_CODE_DTL 
+					     WHERE CD_NO = '200'
+					       AND USE_YN = 'Y') A
+			<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
+				  LEFT JOIN (SELECT T2.CD_DTL_NM
+								  , PM.STATUS AS CATEGORY 
+							   FROM PARTNER_MASTER PM
+							  INNER JOIN T2_USERS T1
+								 ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
+							  INNER JOIN (SELECT CD_DTL_NO
+								 			   , CD_DTL_NM
+							  			 	FROM T2_CODE_DTL 
+										   WHERE CD_NO = '200'
+										     AND USE_YN = 'Y') T2
+								 ON T1.DIVISION = T2.CD_DTL_NO
+							  WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}) STAT
+				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
+				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
+				 LEFT JOIN (SELECT T2.CD_DTL_NM
+								 , ADMIN.USER_NAME AS CATEGORY 
+							  FROM PARTNER_MASTER PM
+							 INNER JOIN T2_USERS T1
+								ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
+							 INNER JOIN (SELECT CD_DTL_NO
+								 			  , CD_DTL_NM
+							  			   FROM T2_CODE_DTL 
+										  WHERE CD_NO = '200'
+										    AND USE_YN = 'Y') T2
+								ON T1.DIVISION = T2.CD_DTL_NO
+						      LEFT JOIN (SELECT 'unassigned' AS USER_ID, null AS USER_NAME
+						      		      UNION ALL
+						     			 SELECT USR.USER_ID
+						     				  , USR.USER_NAME
+						 				   FROM T2_USERS USR
+						 				  INNER JOIN T2_AUTHORITIES AUTH
+						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
+						        ON PM.REVIEWER = ADMIN.USER_ID
+						     WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}) STAT
+		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
+		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			 ) RTN
+		 GROUP BY RTN.CD_DTL_NM
+		 ORDER BY RTN.CD_ORDER ASC
+	</select>
+	
+	<select id="getUserRelatedChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT A.CD_DTL_NM AS DIVISION_NM
+     		 , (SELECT COUNT(1) AS CNT FROM T2_USERS WHERE DIVISION = A.CD_DTL_NO) AS CATEGORY0_CNT
+		     , COUNT(STAT.CNT) AS CATEGORY1_CNT
+		  FROM (SELECT CD_DTL_NO
+  					 , CD_DTL_NM
+				     , CD_ORDER
+		  	      FROM T2_CODE_DTL 
+			     WHERE CD_NO = '200'
+			       AND USE_YN = 'Y') A
+		  LEFT JOIN (SELECT DIVISION.CD_DTL_NM
+						  , USR.USER_ID
+						  , CASE 
+						  		WHEN PM.CREATOR IS NULL THEN NULL 
+						  		ELSE 1 
+						  	 END AS CNT
+					   FROM T2_USERS USR
+					   LEFT JOIN PROJECT_MASTER PM
+						 ON USR.USER_ID = PM.CREATOR AND PM.USE_YN = 'Y'
+					  INNER JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200' AND USE_YN = 'Y') DIVISION
+					     ON USR.DIVISION = DIVISION.CD_DTL_NO
+						AND PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}
+					  GROUP BY USR.USER_ID) STAT
+		    ON A.CD_DTL_NM = STAT.CD_DTL_NM
+		 GROUP BY A.CD_DTL_NM
+		 ORDER BY A.CD_ORDER ASC
+	</select>
+</mapper>

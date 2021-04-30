@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ProcessGuideMapper">
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	
+    <select id="selectProcessGuideTotalCount" parameterType="oss.fosslight.domain.ProcessGuide" resultType="int">
+	    SELECT
+	    	COUNT(1)
+	    FROM
+	    	PROCESS_GUIDE
+	    WHERE 1=1
+    </select>
+    
+	<select id="selectProcessGuideList" parameterType="oss.fosslight.domain.ProcessGuide" resultType="oss.fosslight.domain.ProcessGuide">
+		SELECT ID
+			, PAGE_TARGET
+			, CONTENTS
+			, URL
+			, USE_YN
+		FROM PROCESS_GUIDE
+		WHERE 1=1
+		<include refid="limitPage"/>
+	</select>
+	
+	<insert id="updateProcessGuide" parameterType="oss.fosslight.domain.ProcessGuide">
+		UPDATE PROCESS_GUIDE
+		SET
+			CONTENTS 		= #{contents}
+			, URL			= #{url}
+			, USE_YN		= #{useYn}
+		WHERE ID			= #{id}
+	</insert>
+    
+    <select id="selectProcessGuideCount" parameterType="oss.fosslight.domain.ProcessGuide" resultType="int">
+	    SELECT
+	    	COUNT(1)
+	    FROM
+	    	PROCESS_GUIDE
+		WHERE USE_YN = 'Y'
+			AND ID = #{id}
+    </select>
+    
+    <select id="selectProcessGuide" parameterType="oss.fosslight.domain.ProcessGuide" resultType="oss.fosslight.domain.ProcessGuide">
+	    SELECT
+	    	ID
+			, PAGE_TARGET
+			, CONTENTS
+			, URL
+			, USE_YN
+	    FROM
+	    	PROCESS_GUIDE
+		WHERE ID = #{id}
+    </select>
+</mapper>
+    
+

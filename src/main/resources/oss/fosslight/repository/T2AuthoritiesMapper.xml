@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="oss.fosslight.repository.T2AuthoritiesMapper">
+
+    <!-- 사용자 권한 부여 -->
+    <insert id="insertAuthorities" parameterType="oss.fosslight.domain.T2Authorities">
+    INSERT INTO
+    T2_AUTHORITIES (
+        USER_ID,
+        AUTHORITY
+    ) VALUES (
+        #{userId},
+        #{authority}
+    )
+    </insert>
+    
+    <select id="selectAuthoritiesByUser" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Authorities">
+    SELECT
+        USER_ID,
+        AUTHORITY
+    FROM
+        T2_AUTHORITIES
+    WHERE
+        USER_ID = #{userId}
+    </select>
+    
+    <delete id="deleteAuthoritiesByUserId" parameterType="oss.fosslight.domain.T2Users">
+    DELETE FROM T2_AUTHORITIES
+    WHERE
+        USER_ID = #{userId}
+    </delete>
+</mapper>

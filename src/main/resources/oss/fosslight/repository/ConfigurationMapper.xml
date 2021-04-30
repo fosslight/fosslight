@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ConfigurationMapper">
+
+	<update id="updateDefaultTab" parameterType="oss.fosslight.domain.Configuration">
+		UPDATE T2_USERS 
+		SET 
+			DEFAULT_TAB = #{defaultTab}
+		WHERE USER_ID = #{loginUserName}
+	</update>
+	
+</mapper>

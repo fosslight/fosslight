@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.FileMapper">
+
+
+	<insert id="insertFile" parameterType="oss.fosslight.domain.T2File" useGeneratedKeys="true" keyProperty="fileSeq">
+		INSERT INTO
+			T2_FILE (
+				FILE_ID,
+				<if test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(gubn)">
+				GUBN,
+				</if>
+				ORIG_NM,
+				LOGI_NM,
+				LOGI_THUMB_NM,
+				LOGI_PATH,
+				LOGI_THUMB_PATH,
+				EXT,
+				SIZE,
+				REG_ID,
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(tabNm)">
+				DEL_YN,
+				</if>
+				CONTENT_TYPE
+			) VALUES (
+				#{fileId},
+				<if test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(gubn)">
+				#{gubn},
+				</if>
+				#{origNm},
+				#{logiNm},
+				#{logiThumbNm},
+				#{logiPath},
+				#{logiThumbPath},
+				#{ext},
+				#{size},
+				#{creator},
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(tabNm)">
+				'Y',
+				</if>
+				#{contentType}				
+			)
+	</insert>
+	
+	
+	<select id="getFileInfo" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+	 SELECT FILE_SEQ,
+		    FILE_ID,
+		    ORIG_NM,
+		    LOGI_NM,
+		    LOGI_THUMB_NM,
+		    LOGI_PATH,
+		    LOGI_THUMB_PATH,
+		    EXT,
+		    SIZE,
+		    REG_DT,
+		    REG_ID,
+		    CONTENT_TYPE,
+		    DATE_FORMAT(REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+	   FROM T2_FILE
+	  WHERE FILE_SEQ=#{fileSeq}
+		AND DEL_YN='N'
+	</select>
+	
+	<select id="getFileInfoList" parameterType="java.lang.String" resultType="oss.fosslight.domain.T2File">
+	    SELECT FILE_SEQ,
+		    FILE_ID,
+		    ORIG_NM,
+		    LOGI_NM,
+		    LOGI_THUMB_NM,
+		    LOGI_PATH,
+		    LOGI_THUMB_PATH,
+		    EXT,
+		    SIZE,
+		    REG_DT,
+		    REG_ID,
+		    CONTENT_TYPE
+		FROM T2_FILE
+		WHERE FILE_ID=#{fileId}
+		AND DEL_YN='N'
+	</select>
+	
+	<select id="getFileInfoListKessan" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+	    SELECT FILE_SEQ,
+		    FILE_ID,
+		    ORIG_NM,
+		    LOGI_NM,
+		    LOGI_THUMB_NM,
+		    LOGI_PATH,
+		    LOGI_THUMB_PATH,
+		    EXT,
+		    SIZE,
+		    REG_DT,
+		    REG_ID, 
+		    CONTENT_TYPE
+		FROM T2_FILE
+		WHERE FILE_ID=#{fileId}
+		AND GUBN = #{gubn}
+		AND DEL_YN='N'
+	</select>
+	
+	<select id="getFileKey" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+	    SELECT FILE_ID,
+		FROM T2_FILE
+		WHERE FILE_ID=#{fileId}
+		AND DEL_YN='N'
+	</select>
+	
+	<select id="getFileId" resultType="java.lang.String">
+	    SELECT IFNULL(MAX(FILE_ID), 0)+1 AS FILE_ID
+	    FROM T2_FILE
+	</select>
+	
+	<update id="updateFileDelYn" >
+	    UPDATE
+			T2_FILE
+		SET
+			DEL_YN = 'Y'
+		WHERE
+			FILE_SEQ IN
+	    	<trim prefix="(" suffix=")">
+				<foreach collection="array" item="fileSeq" separator=",">
+				#{fileSeq}
+				</foreach>
+			</trim>
+	</update>
+	
+	<update id="updateFileDelYnById" parameterType="String" >
+	    UPDATE
+			T2_FILE
+		SET
+			DEL_YN = 'Y'
+		WHERE
+			FILE_ID = #{fileId}
+	</update>
+	
+	<update id="updateFileDelYnKessan" parameterType="oss.fosslight.domain.T2File" >
+	    UPDATE
+			T2_FILE
+		SET
+			DEL_YN = 'Y'
+		WHERE
+			FILE_SEQ = #{fileSeq}
+			AND GUBN = #{gubn}
+	</update>
+	
+	<update id="updateFileDelYnByFilePathNm" parameterType="oss.fosslight.domain.T2File">
+	    UPDATE T2_FILE
+		   SET DEL_YN = 'Y'
+		 WHERE LOGI_NM = #{logiNm}
+		   AND LOGI_PATH = #{logiPath}
+	</update>
+	
+	<select id="selectReuseFileInfo" parameterType="String">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		 WHERE T2.PRJ_ID = #{prjId}
+		   AND T1.LOGI_PATH = #{logiPath}
+		   AND T1.DEL_YN = 'N'
+		 LIMIT 0, 1
+	</select>
+	
+	<update id="updateReuseChkFileDelYnByFilePathNm" parameterType="oss.fosslight.domain.T2File">
+	    UPDATE T2_FILE T1
+		  LEFT JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		   SET T1.DEL_YN = 'Y'
+		 WHERE T2.PACKAGING_FILE_ID IS NULL
+		   AND T1.LOGI_NM = #{logiNm}
+		   AND T1.LOGI_PATH = #{logiPath}
+	</update>
+	
+	<update id="updateBatFile" parameterType="oss.fosslight.domain.T2File">
+	    UPDATE T2_FILE T1
+		  LEFT JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		   SET T1.DEL_YN = 'Y'
+		 WHERE T2.PACKAGING_FILE_ID IS NULL
+		   AND (T1.LOGI_NM = #{logiNm} 
+		   			OR T1.ORIG_NM = #{logiNm})
+		   AND T1.LOGI_PATH = #{logiPath}
+	</update>
+	
+	<select id="selectReuseFileByFilePathNm" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		  LEFT JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		 WHERE T2.PACKAGING_FILE_ID IS NULL
+		   AND T1.LOGI_NM = #{logiNm}
+		   AND T1.LOGI_PATH = #{logiPath}
+	</select>
+	
+	<select id="selectFileInfo" parameterType="String" resultType="oss.fosslight.domain.T2File">
+	SELECT
+		T1.*
+		, DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+	FROM
+		T2_FILE T1
+	WHERE
+		T1.FilE_SEQ = #{fileSeq}
+	</select>
+	
+
+	<select id="selectFileInfoById" parameterType="String" resultType="oss.fosslight.domain.T2File">
+	SELECT
+		*
+	FROM
+		T2_FILE
+	WHERE
+		FilE_ID = #{fileId}
+	ORDER BY FILE_SEQ DESC
+	LIMIT 1
+	</select>
+	
+	<update id="copyFileInfo" parameterType="oss.fosslight.domain.T2File">
+		INSERT INTO T2_FILE ( FILE_ID, GUBN, GUBN_CHK, ORIG_NM, LOGI_NM, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, REG_ID, UPD_ID, CONTENT_TYPE ) 
+		SELECT #{fileId}, GUBN, GUBN_CHK, ORIG_NM, LOGI_NM, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, #{loginUserName}, #{loginUserName}, CONTENT_TYPE
+		FROM T2_FILE
+		WHERE FILE_ID = #{orgFileId}
+	</update>
+	
+	<select id="selectFileInfoByName" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+		SELECT
+			*
+		FROM
+			T2_FILE
+		WHERE
+			LOGI_NM = #{logiNm} AND GUBN = #{gubn}
+		ORDER BY FILE_SEQ DESC
+		LIMIT 1
+	</select>
+	
+	
+	<update id="upateOrgFileName" parameterType="oss.fosslight.domain.T2File">
+		UPDATE T2_FILE SET ORIG_NM = #{origNm} WHERE FILE_SEQ = #{fileSeq}
+	</update>
+	
+	<select id="selectPackagingFileInfo" parameterType="java.lang.String" resultType="oss.fosslight.domain.T2File">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PROJECT_MASTER T2
+		    ON T1.FILE_SEQ = T2.PACKAGE_FILE_ID
+		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID2
+		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID3
+		 WHERE T2.PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="getReusePackagingInfo" resultType="oss.fosslight.domain.T2File">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.REF_PACKAGING_FILE_ID 
+		 WHERE T2.DEL_YN = 'N'
+		 GROUP BY T1.ORIG_NM
+	</select>
+	
+	<select id="getPackgingReuseCntToList" resultType="oss.fosslight.domain.T2File">
+		SELECT A.* 
+		  FROM (SELECT LOGI_NM 
+		  			 , LOGI_PATH
+		  			 , SUM(IF(DEL_YN = 'Y', 0, 1)) AS REUSE_CNT 
+				  FROM T2_FILE
+				 WHERE LOGI_NM IN (SELECT LOGI_NM
+									 FROM T2_FILE
+									WHERE FILE_SEQ IN (SELECT REF_PACKAGING_FILE_ID
+											 			 FROM PACKAGING_REUSE_MAP 
+														 WHERE PRJ_ID = #{prjId}
+														   AND HIDDEN_FLAG = 'N'
+														 GROUP BY REF_PACKAGING_FILE_ID))
+				 GROUP BY LOGI_NM) A
+		 WHERE A.REUSE_CNT = 0
+	</select>
+	
+	<select id="getPackgingReuseCnt" resultType="int">
+		SELECT COUNT(*) AS CNT 
+		  FROM T2_FILE 
+		 WHERE LOGI_NM IN (SELECT LOGI_NM 
+		 					 FROM T2_FILE 
+							WHERE FILE_SEQ IN (SELECT PACKAGING_FILE_ID 
+								  				 FROM PACKAGING_REUSE_MAP 
+												WHERE DEL_YN = 'N'))
+		   AND DEL_YN = 'N'
+		   AND LOGI_NM = #{logiNm}
+	</select>
+	
+	<update id="setReusePackagingFileHidden"  parameterType="String">
+		UPDATE T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.REF_PACKAGING_FILE_ID
+		   SET T2.HIDDEN_FLAG = 'Y'
+		 WHERE T1.LOGI_NM = #{logiNm}
+		   AND T1.LOGI_PATH = #{logiPath} 
+		   AND T2.REF_PRJ_ID = #{prjId}
+	</update>
+	
+	<select id="getBinAndroidFileList" parameterType="String" resultType="oss.fosslight.domain.T2File">
+		SELECT * 
+		  FROM T2_FILE 
+		 WHERE FILE_ID IN (SELECT SRC_ANDROID_NOTICE_FILE_ID 
+						     FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
+						    UNION ALL
+						   SELECT SRC_ANDROID_NOTICE_XML_ID 
+						     FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId})
+		    OR FILE_SEQ = #{ossReportId}
+	</select>
+</mapper>

@@ -1,0 +1,107 @@
+<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ include file="/WEB-INF/constants.jsp"%>
+<!-- wrap -->
+<div id="wrapIframe">
+	<!---->
+	<div>
+		<!---->
+		<fieldset class="listSearch">
+			<form id="3rdSearch" name="3rdSearch">
+				<dl class="basicSearch col3">
+					<dt>Basic Search Area</dt>
+					<dd>
+						<label style="width:100px;">ID</label>
+						<input type="text" name="partnerId" value="${searchBean.partnerId}" style="width:150px;"/>
+					</dd>
+					<dd class="centerAign">
+						<label>3rd Party Name</label>
+						<input type="text" name="partnerName" class="autoComParty" value="${searchBean.partnerName}"/>
+					</dd>
+					<dd class="lastAign"></dd>
+					<dd>
+						<label style="width:100px;">3rd Party<br/>Software Name</label>
+						<input type="text" name="softwareName" class="autoComSwNm" value="${searchBean.softwareName}" style="width:150px;"/>
+					</dd>
+					<dd class="centerAign">
+						<label>3rd Party<br/>Software Version</label>
+						<input type="text" name="softwareVersion" value="${searchBean.softwareVersion}"/>
+					</dd>
+					<dd class="lastAign">
+						<label>Division</label>
+						<span class="selectSet">
+							<strong title="Status selected value"></strong>
+							<select name="division">
+								<option value=""></option>
+								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
+							</select>
+						</span>			
+					</dd>
+					<dd style="width:100%;">
+						<label style="width:100px;">Status</label>
+						<span class='checkSet'>
+						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", false)}
+            			</span>
+					</dd>
+					<dd>
+						<label style="width:100px;">License Name</label>
+						<input type="text" name="licenseName" class="autoComLicense" value="${searchBean.licenseName}" style="width:150px;"/>
+					</dd>
+					<dd class="centerAign">
+						<label>OSS Name</label>
+						<input type="text" name="ossName" class="autoComOss" value="${searchBean.ossName}"/>
+					</dd>
+					<dd class="lastAign">
+						<label>Binary Name</label>
+						<input type="text" name="binaryName" class="" value="${searchBean.binaryName}"/>
+					</dd>
+					<dd class="">
+						<label style="width:100px;">Created Date</label>
+						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8"/> ~ 
+						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8"/> 			
+					</dd>
+					<dd class="centerAign">
+						<label>Creator</label>
+						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
+					</dd>
+					<dd class="lastAign">
+						<label>Reviewer</label>
+						<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
+					</dd>
+					<c:if test="${!ct:isAdmin()}">
+					<dd class="" >
+						<label style="width:100px;">View My 3rd Parties Only</label>
+						<input type="checkbox" id="checkbox3" name="publicYn" checked="checked"/>
+					</dd>
+					</c:if>
+				</dl>
+				<input name="act" type="hidden" value="search"/> 
+				<input type="submit" id="search" value="Search" class="btnColor search" />
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+			</form>
+		</fieldset>
+		<!---->
+		<div class="btnLayout">
+			<span class="right">
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
+			</span>
+		</div>
+		<!---->
+		<div class="jqGridSet">
+			<table id="list"><tr><td></td></tr></table>
+			<div id="pager"></div>
+		</div>
+		<!---->
+		<div class="btnLayout">
+			<span class="right">
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
+			</span>
+		</div>
+		<!---->
+
+	</div>
+	<!---->
+
+</div>
+<!-- //wrap -->

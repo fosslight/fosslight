@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.SentMailMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+    <sql id="orderby">
+        ORDER BY ${sidx} ${sord}
+    </sql>
+    
+    <select id="selectSentMailTotalCount" parameterType="oss.fosslight.domain.CoMail" resultType="int">
+    SELECT
+    	COUNT(1)
+    FROM
+    	EMAIL_SND_HIS
+    WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			${filterCondition}
+		</if>
+    </select>
+	<select id="selectSentMailList" parameterType="oss.fosslight.domain.CoMail" resultType="oss.fosslight.domain.CoMail">
+		SELECT SND_SEQ, MSG_TYPE, RCR_NAME, REPLACE(EML_TO, '|', ', ') AS EML_TO, SND_NAME, EML_FROM, REPLACE(EML_CC, '|', ', ') AS EML_CC, EML_BCC, EML_TITLE, EML_MESSAGE, SND_STATUS, USE_FLAG, 
+ DATE_FORMAT(CREATION_DATE, '%Y-%m-%d %H:%i') AS CREATION_DATE, CREATION_USER_ID, LAST_UPDATE_DATE, LAST_UPDATE_USER_ID, FILE_SEQ, IQR_SEQ, IQR_HIS_SEQ, USER_SEQ, ERROR_MSG
+		FROM EMAIL_SND_HIS
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			${filterCondition}
+		</if>
+		<include refid="orderby"/>
+		<include refid="limitPage"/>
+	</select>
+    
+</mapper>

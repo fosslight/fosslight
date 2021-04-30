@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.LicenseMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	
+	<select id="selectLicenseMasterTotalCount" parameterType="oss.fosslight.domain.LicenseMaster" resultType="int">
+   		SELECT 
+   			COUNT(*)
+   		FROM 
+   			LICENSE_MASTER						T1
+		WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND 
+			(
+				
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+						UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName})
+					</when>
+					<otherwise>
+						UPPER(T1.LICENSE_NAME) = UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				 </choose>
+				OR 
+					UPPER(T1.LICENSE_NAME) IN (select  UPPER(LICENSE_NAME)
+															from LICENSE_NICKNAME
+									                        where
+									                        <choose>
+																<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+																	 UPPER(LICENSE_NICKNAME) = UPPER(CONCAT(#{licenseName}))
+																</when>
+																<otherwise>
+																	UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+																</otherwise>
+															</choose>
+															)
+				OR 
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+							UPPER(T1.SHORT_IDENTIFIER) = UPPER(CONCAT(#{licenseName}))
+						</when>
+						<otherwise>
+							UPPER(T1.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+						</otherwise>
+					 </choose>
+				
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+			AND T1.LICENSE_TYPE = #{licenseType}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseText)">
+			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.LICENSE_TEXT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{licenseText},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(webpage)">
+			AND T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cEndDate)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{cEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mStartDate)">
+			AND  DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{mStartDate} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationNeedsCheckYn)">
+			AND T1.OBLIGATION_NEEDS_CHECK_YN = 'Y'
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationDisclosingSrcYn)">
+			AND T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y'
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationNotificationYn)">
+			AND T1.OBLIGATION_NOTIFICATION_YN = 'Y' AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N'
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(obligationType,'NONE')">
+			AND IFNULL(T1.OBLIGATION_NEEDS_CHECK_YN, 'N') = 'N'
+			AND IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N') = 'N'
+			AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N' 
+		</if>
+		/* 2018-07-25 choye 추가 */ 
+		<if test="arrRestriction != null">
+			AND
+			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
+				T1.RESTRICTION LIKE CONCAT('%',#{item},'%')
+			</foreach>
+		</if>
+   	</select>
+   	
+   	<select id="selectLicenseList" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT 
+			T1.LICENSE_ID
+			, T1.LICENSE_NAME
+			, T2.CD_DTL_NM AS LICENSE_TYPE
+            , CONCAT(
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            ) AS OBLIGATION
+            , CONCAT(
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N') 
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'Y',	'N')
+            	, IF(	T1.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
+            ) AS OBLIGATION_CHECKS
+			, T1.SHORT_IDENTIFIER
+			, T1.WEBPAGE
+			, T1.DESCRIPTION
+			, T1.LICENSE_TEXT
+			, T1.ATTRIBUTION
+			, T1.CREATOR
+			, T1.MODIFIER
+			, T1.CREATED_DATE
+			, T1.MODIFIED_DATE
+			, T1.RESTRICTION
+		FROM 
+			LICENSE_MASTER 						T1
+            LEFT OUTER JOIN T2_CODE_DTL 		T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
+		WHERE T1.USE_YN = 'Y'
+		AND T2.CD_NO = '201'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND (
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+						UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName})
+					</when>
+					<otherwise>
+						UPPER(T1.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				 </choose>
+				
+				OR UPPER(T1.LICENSE_NAME) IN (select  UPPER(LICENSE_NAME)
+							from LICENSE_NICKNAME
+	                        where
+	                        <choose>
+								<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+									 UPPER(LICENSE_NICKNAME) = UPPER(CONCAT(#{licenseName}))
+								</when>
+								<otherwise>
+									UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+								</otherwise>
+							</choose>
+						)
+				OR 
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+						UPPER(T1.SHORT_IDENTIFIER) = UPPER(CONCAT(#{licenseName}))
+					</when>
+					<otherwise>
+						UPPER(T1.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+					</otherwise>
+				</choose>
+				
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+			AND T1.LICENSE_TYPE = #{licenseType}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseText)">
+			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.LICENSE_TEXT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{licenseText},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(webpage)">
+			AND T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cEndDate)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{cEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mStartDate)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{mStartDate} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationNeedsCheckYn)">
+			AND T1.OBLIGATION_NEEDS_CHECK_YN = 'Y'
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationDisclosingSrcYn)">
+			AND T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y'
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationNotificationYn)">
+			AND T1.OBLIGATION_NOTIFICATION_YN = 'Y' AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N'
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(obligationType,'NONE')">
+			AND IFNULL(T1.OBLIGATION_NEEDS_CHECK_YN, 'N') = 'N'
+			AND IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N') = 'N'
+			AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N' 
+		</if>
+		<if test="arrRestriction != null">
+			AND
+			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
+				T1.RESTRICTION LIKE CONCAT('%',#{item},'%')
+			</foreach>
+		</if>
+		<if test="sortField eq 'licenseId'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.LICENSE_ID ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.LICENSE_ID DESC
+			</if>
+		</if>
+		<if test="sortField eq 'licenseName'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.LICENSE_NAME ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.LICENSE_NAME DESC
+			</if>
+		</if>
+		<if test="sortField eq 'shortIdentifier'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.SHORT_IDENTIFIER ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.SHORT_IDENTIFIER DESC
+			</if>
+		</if>
+		<if test="sortField eq 'licenseType'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.LICENSE_TYPE ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.LICENSE_TYPE DESC
+			</if>
+		</if>
+		<if test="sortField eq 'webpage'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.WEBPAGE ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.WEBPAGE DESC
+			</if>
+		</if>
+		<if test="sortField eq 'description'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.DESCRIPTION ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.DESCRIPTION DESC
+			</if>
+		</if>
+		<if test="sortField eq 'creator'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.CREATOR ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.CREATOR DESC
+			</if>
+		</if>
+		<if test="sortField eq 'modifier'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.MODIFIER ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.MODIFIER DESC
+			</if>
+		</if>
+		<if test="sortField eq 'createdDate'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.CREATED_DATE ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.CREATED_DATE DESC
+			</if>
+		</if>
+		<if test="sortField eq 'modifiedDate'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.MODIFIED_DATE ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.MODIFIED_DATE DESC
+			</if>
+		</if>
+		<if test="sortField eq 'obligation'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY 
+				OBLIGATION_CHECKS ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY 
+				OBLIGATION_CHECKS DESC
+			</if>
+		</if>
+		
+		<include refid="limitPage"/>
+	</select>
+	
+	<select id="selectLicenseOne" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT 
+			T1.LICENSE_ID
+			, T1.LICENSE_NAME
+			, T1.LICENSE_TYPE
+			, IF(T1.OBLIGATION_DISCLOSING_SRC_YN = '' OR ISNULL(T1.OBLIGATION_DISCLOSING_SRC_YN),'N',T1.OBLIGATION_DISCLOSING_SRC_YN) AS OBLIGATION_DISCLOSING_SRC_YN
+			, IF(T1.OBLIGATION_NOTIFICATION_YN = '' OR ISNULL(T1.OBLIGATION_NOTIFICATION_YN),'N',T1.OBLIGATION_NOTIFICATION_YN) AS OBLIGATION_NOTIFICATION_YN
+			, IF(T1.OBLIGATION_NEEDS_CHECK_YN = '' OR ISNULL(T1.OBLIGATION_NEEDS_CHECK_YN),'N',T1.OBLIGATION_NEEDS_CHECK_YN) AS OBLIGATION_NEEDS_CHECK_YN
+			, T1.SHORT_IDENTIFIER
+			, T1.WEBPAGE
+			, T1.DESCRIPTION
+			, T1.LICENSE_TEXT
+			, T1.ATTRIBUTION
+			, T1.MODIFIER
+			, T1.MODIFIED_DATE
+			, T1.RESTRICTION
+		FROM 
+			LICENSE_MASTER T1
+		WHERE T1.USE_YN = 'Y'
+		AND T1.LICENSE_ID = #{licenseId}
+	</select>
+	
+	<select id="selectLicenseNicknameList" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT
+			LICENSE_NAME
+			, LICENSE_NICKNAME
+		FROM
+			LICENSE_NICKNAME
+		WHERE
+			LICENSE_NAME = #{licenseName}
+	</select>
+	
+	<select id="getLicenseInfoInit" resultType="oss.fosslight.domain.LicenseMaster">
+	/* DB : getLicenseInfoInit */
+	<!-- 
+			SELECT 
+				T1.LICENSE_ID
+				, T1.LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1
+			LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+			WHERE T1.USE_YN = 'Y'
+			GROUP BY LICENSE_ID
+			 -->
+			SELECT 
+				T1.LICENSE_ID
+				, T1.LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS LICENSE_NICKNAME_STR
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1
+			WHERE T1.USE_YN = 'Y'
+	</select>
+	
+	<select id="getLicenseInfoInitNick" resultType="oss.fosslight.domain.LicenseMaster">
+	/* DB : getLicenseInfoInitNick */
+<!-- 	
+			SELECT 
+				T1.LICENSE_ID
+				, T2.LICENSE_NICKNAME AS LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+			WHERE T1.USE_YN = 'Y'
+			GROUP BY LICENSE_ID, LICENSE_NAME
+			 -->
+			SELECT 
+				T1.LICENSE_ID
+				, T2.LICENSE_NICKNAME AS LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+			WHERE T1.USE_YN = 'Y'
+	</select>
+	
+    <select id="getRoleOutLicense" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT T1.LICENSE_NAME, T1.LICENSE_ID FROM LICENSE_MASTER T1
+		WHERE T1.USE_YN = 'Y' AND T1.LICENSE_TYPE = 'NA'
+		UNION ALL
+		SELECT T2.LICENSE_NICKNAME AS LICENSE_NAME, T1.LICENSE_ID FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		WHERE T1.USE_YN = 'Y' AND T1.LICENSE_TYPE = 'NA'
+    </select>
+    
+    <select id="getLicenseChangeForUserList" parameterType="String" resultType="oss.fosslight.domain.Project">
+
+		SELECT T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION, T1.DISTRIBUTION_TYPE, T1.CREATOR, T1.CREATED_DATE, T1.REVIEWER
+		FROM PROJECT_MASTER T1
+		WHERE T1.USE_YN = 'Y' 
+			AND T1.IDENTIFICATION_STATUS = 'CONF'
+			AND EXISTS (
+					SELECT 1 FROM OSS_COMPONENTS T2 
+						INNER JOIN OSS_COMPONENTS_LICENSE T22 ON T2.COMPONENT_ID = T22.COMPONENT_ID AND T22.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND T22.LICENSE_ID = #{licenseId}
+					WHERE 
+		 				T2.REFERENCE_DIV = '50'
+						AND T2.REFERENCE_ID = T1.PRJ_ID
+				)
+		ORDER BY CREATED_DATE DESC
+    </select>
+    
+    <select id="checkExistsUsedOss" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
+		SELECT T1.* 
+		FROM OSS_MASTER T1 
+		WHERE 
+			USE_YN = 'Y' 
+			AND EXISTS(SELECT 1 FROM OSS_LICENSE T2 WHERE T1.OSS_ID = T2.OSS_ID AND T2.LICENSE_ID = #{licenseId})
+		ORDER BY OSS_NAME, OSS_VERSION
+    </select>
+    
+    <select id="checkExistsLicense" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+	/* checkExistsLicense license duplication check */
+		SELECT * 
+		FROM LICENSE_MASTER T1
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		WHERE
+			USE_YN = 'Y'
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseId)">
+			AND LICENSE_ID <![CDATA[<>]]> #{licenseId}
+			</if>
+		    AND (
+				UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName}) 
+				OR UPPER(T1.SHORT_IDENTIFIER) = UPPER(#{licenseName})
+		        OR UPPER(T2.LICENSE_NICKNAME) = UPPER(#{licenseName})
+		        )
+		ORDER BY T1.CREATED_DATE DESC
+		LIMIT 1;
+	</select>
+	
+	<update id="deleteLicenseMaster" parameterType="oss.fosslight.domain.LicenseMaster">
+		UPDATE LICENSE_MASTER SET USE_YN='N' WHERE LICENSE_ID=#{licenseId}
+	</update>
+	
+	<delete id="deleteLicenseNickname" parameterType="oss.fosslight.domain.LicenseMaster">
+		DELETE FROM LICENSE_NICKNAME WHERE LICENSE_NAME=#{licenseName}
+	</delete>
+	
+	 <select id="existNetworkServerLicense" parameterType="String" resultType="String">
+    	SELECT CD_DTL_NO
+    	  FROM T2_CODE_DTL 
+    	 WHERE CD_NO = '122'
+    	   AND CD_DTL_NM IN (SELECT LICENSE_NAME
+    	   					   FROM LICENSE_MASTER 
+    	   					  WHERE LICENSE_ID = #{licenseId})
+    </select>
+    
+    <insert id="insertNetworkServerLicense" parameterType="String">
+    	INSERT INTO T2_CODE_DTL
+	    	(CD_NO
+	    	, CD_DTL_NO
+	    	, CD_DTL_NM
+	    	, CD_SUB_NO
+	    	, CD_DTL_EXP
+	    	, CD_ORDER
+	    	, USE_YN)
+	    	SELECT '122' AS CD_NO
+				 , (SELECT MAX(CD_ORDER)+1 AS CNT FROM T2_CODE_DTL WHERE CD_NO = '122') AS CD_DTL_NO
+				 , LICENSE_NAME AS CD_DTL_NM
+				 , '' AS CD_SUB_NO
+				 , '' AS CD_DTL_EXP
+				 , (SELECT MAX(CD_ORDER)+1 AS CNT FROM T2_CODE_DTL WHERE CD_NO = '122') AS CD_ORDER
+				 , 'Y' AS USE_YN
+			  FROM LICENSE_MASTER
+			 WHERE LICENSE_ID = #{licenseId}
+    </insert>
+    
+    <delete id="deleteNetworkServerLicense" parameterType="String">
+    	DELETE FROM T2_CODE_DTL 
+    	 WHERE CD_NO = '122' 
+    	   AND CD_DTL_NM IN (SELECT LICENSE_NAME
+							   FROM LICENSE_MASTER
+							  WHERE LICENSE_ID = #{licenseId})
+    </delete>
+    
+    <select id="getOssListWithLicenseForTypeCheck" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.OSS_ID FROM OSS_MASTER T1 INNER JOIN OSS_LICENSE T2 ON T1.OSS_ID = T2.OSS_ID
+		WHERE T1.USE_YN = 'Y'
+		AND T2.LICENSE_ID = #{licenseId}
+    </select>
+    
+    <insert id="insertLicenseMaster" parameterType="oss.fosslight.domain.LicenseMaster" useGeneratedKeys="true" keyProperty="licenseId" >
+		INSERT INTO	 LICENSE_MASTER
+		(
+			LICENSE_NAME
+			, LICENSE_TYPE
+			, OBLIGATION_DISCLOSING_SRC_YN
+			, OBLIGATION_NOTIFICATION_YN
+			, OBLIGATION_NEEDS_CHECK_YN			
+			, SHORT_IDENTIFIER			
+			, WEBPAGE
+			, DESCRIPTION
+			, LICENSE_TEXT
+			, ATTRIBUTION
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			, CREATOR
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+			, MODIFIER
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			, RESTRICTION
+			</if>
+		)
+		VALUES
+		(
+			#{licenseName}
+			, #{licenseType}
+			, #{obligationDisclosingSrcYn}
+			, #{obligationNotificationYn}
+			, #{obligationNeedsCheckYn}
+			, #{shortIdentifier}
+			, #{webpage}
+			, #{description}
+			, #{licenseText}
+			, #{attribution}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			, #{creator}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+			, #{modifier}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			, #{restriction}
+			</if>
+		)
+	</insert>
+	
+	<insert id="insertLicenseNickname" parameterType="oss.fosslight.domain.LicenseMaster">
+		INSERT
+		INTO LICENSE_NICKNAME
+		(
+			LICENSE_NAME
+			, LICENSE_NICKNAME
+		)
+		VALUES
+		(
+			#{licenseName}
+			, #{licenseNickname}
+		)
+	</insert>
+	
+	<update id="updateLicenseMaster" parameterType="oss.fosslight.domain.LicenseMaster">
+	UPDATE LICENSE_MASTER SET
+		LICENSE_NAME                      = #{licenseName}                
+		, LICENSE_TYPE                    = #{licenseType}
+		, OBLIGATION_DISCLOSING_SRC_YN    = #{obligationDisclosingSrcYn}
+		, OBLIGATION_NOTIFICATION_YN      = #{obligationNotificationYn}
+		, OBLIGATION_NEEDS_CHECK_YN       = #{obligationNeedsCheckYn}
+		, SHORT_IDENTIFIER			      = #{shortIdentifier}            
+		, WEBPAGE                         = #{webpage}                    
+		, DESCRIPTION                     = #{description}                
+		, LICENSE_TEXT                    = #{licenseText}                
+		, ATTRIBUTION                     = #{attribution}                
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		, CREATOR                         = #{creator}                    
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		, MODIFIER                        = #{modifier}   
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+		, RESTRICTION					  = #{restriction}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+		, RESTRICTION					  = ''
+		</if>  
+	WHERE LICENSE_ID = #{licenseId}
+	</update>
+	
+	<select id="selectLicenseNameList" resultType="oss.fosslight.domain.LicenseMaster">
+	/* selectLicenseNameList Auto complete */
+		SELECT 
+			T1.LICENSE_ID
+			, IFNULL(T1.SHORT_IDENTIFIER, '') AS SHORT_IDENTIFIER
+			, T1.LICENSE_NAME
+			, T2.CD_DTL_NM AS LICENSE_TYPE 
+			, T1.LICENSE_TYPE AS LICENSE_TYPE_VAL
+			, CONCAT(
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            ) AS OBLIGATION
+            , CONCAT(
+            	IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N')
+            	, IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N')
+            	, IFNULL(T1.OBLIGATION_NEEDS_CHECK_YN, 'N')
+            ) AS OBLIGATION_CHECKS
+            ,OBLIGATION_NOTIFICATION_YN
+            ,OBLIGATION_DISCLOSING_SRC_YN
+            ,OBLIGATION_NEEDS_CHECK_YN
+            , IF(IFNULL(T1.RESTRICTION, '') <![CDATA[<>]]> '', '<![CDATA[<span class=\"iconSt review\" title=\"Restriction\"></span>]]>',	'') AS RESTRICTION
+		FROM 
+			LICENSE_MASTER T1
+			INNER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO AND T2.CD_NO = '201'
+		WHERE T1.USE_YN = 'Y'
+	</select>
+	
+	<select id="getLicenseNames" resultType="String">
+		SELECT 
+			T1.LICENSE_NAME
+		FROM LICENSE_MASTER T1
+		WHERE T1.USE_YN = 'Y'
+	</select>
+	<select id="getLicenseShortNames" resultType="String">
+		SELECT 
+			T1.SHORT_IDENTIFIER
+		FROM LICENSE_MASTER T1
+		WHERE T1.USE_YN = 'Y' AND IFNULL(T1.SHORT_IDENTIFIER, '') != ''
+	</select>
+	<select id="getLicenseNickNames" resultType="String">
+		SELECT 
+			T2.LICENSE_NICKNAME
+		FROM LICENSE_MASTER T1
+		INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		WHERE T1.USE_YN = 'Y'
+	</select>
+	
+	<select id="getLicenseInfoWithName" resultType="LicenseMaster">
+		SELECT 
+			T1.LICENSE_ID
+			, T1.LICENSE_NAME
+			, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+			, T1.LICENSE_TYPE
+			, T1.OBLIGATION_DISCLOSING_SRC_YN
+			, T1.OBLIGATION_NOTIFICATION_YN
+			, T1.OBLIGATION_NEEDS_CHECK_YN
+			, T1.SHORT_IDENTIFIER
+			, T1.WEBPAGE
+			, T1.DESCRIPTION
+			, T1.LICENSE_TEXT
+			, T1.ATTRIBUTION 
+			, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
+			, T1.RESTRICTION
+		FROM LICENSE_MASTER T1
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		WHERE T1.USE_YN = 'Y' 
+			AND (T1.LICENSE_NAME = #{licenseName} OR T2.LICENSE_NICKNAME = #{licenseName} OR T1.SHORT_IDENTIFIER = #{licenseName})
+		LIMIT 1
+	</select>
+	
+	<select id="getLicenseInfoWithId" resultType="LicenseMaster">
+		SELECT 
+			T1.LICENSE_ID
+			, T1.LICENSE_NAME
+			, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+			, T1.LICENSE_TYPE
+			, T1.OBLIGATION_DISCLOSING_SRC_YN
+			, T1.OBLIGATION_NOTIFICATION_YN
+			, T1.OBLIGATION_NEEDS_CHECK_YN
+			, T1.SHORT_IDENTIFIER
+			, T1.WEBPAGE
+			, T1.DESCRIPTION
+			, T1.LICENSE_TEXT
+			, T1.ATTRIBUTION 
+			, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
+			, T1.RESTRICTION
+		FROM LICENSE_MASTER T1
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		WHERE T1.USE_YN = 'Y' 
+			T1.LICENSE_ID = #{licenseId}
+	</select>
+</mapper>

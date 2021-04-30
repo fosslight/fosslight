@@ -1,0 +1,55 @@
+<table cellpadding="0" cellspacing="0" border="0">
+#foreach ($mapEntry in $noticeData.entrySet())
+#set ($binaryPathList = $mapEntry.key.split(","))
+<tr id="id$velocityCount"><td class="same-license">
+<div class="label">Notices for file(s):</div>
+<div class="file-list">
+#foreach ($binaryPath in $binaryPathList)
+$binaryPath<br/>
+#end
+</div><!-- file-list -->
+<!-- license-text -->
+<pre class="license-text">
+#foreach ($!{ossInfo} in $!{mapEntry.value})
+$!{ossInfo.ossName}($!{ossInfo.licenseName})
+$!{ossInfo.copyrightText}
+#end
+
+#set ($attributionCnt = 0)
+#foreach ($!{ossInfo} in $!{mapEntry.value})
+#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
+#if($!{licenseInfo.attribution} != "")
+#set ($attributionCnt = $attributionCnt + 1)
+------------------------
+$!{licenseInfo.licenseName} Attribution
+$!{licenseInfo.attribution}
+#end
+#end
+#end
+#foreach ($!{ossInfo} in $!{mapEntry.value})
+#if($!{ossInfo.attribution} != "")
+#set ($attributionCnt = $attributionCnt + 1)
+------------------------
+$!{ossInfo.ossName} Attribution
+$!{ossInfo.attribution}
+#end
+#end
+#if($attributionCnt > 0)
+------------------------
+#end
+#set($duplicateLicense = [])
+#foreach ($!{ossInfo} in $!{mapEntry.value})
+#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
+#if($!{licenseInfo.licenseText} != "" && $!{licenseInfo.obligationType} == "10" && !$duplicateLicense.contains($!{licenseInfo.licenseName}))
+#set($swallow = $duplicateLicense.add($!{licenseInfo.licenseName}))
+
+$!{licenseInfo.licenseName}
+
+$!{licenseInfo.licenseText}
+#end
+#end
+#end
+</pre><!-- license-text --> 
+</td></tr><!-- same-license -->
+#end
+</table>

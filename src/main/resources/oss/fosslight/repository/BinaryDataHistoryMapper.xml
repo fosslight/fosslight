@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.BinaryDataHistoryMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+    <sql id="orderby">
+        ORDER BY ${sidx} ${sord}
+    </sql>
+    
+    <select id="selectBinaryDataHistoryTotalCount" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="int">
+    SELECT
+    	COUNT(1)
+    FROM
+    	BINARY_DATA_HIS
+    WHERE 1=1
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(filename)">
+    		AND FILE_NAME LIKE CONCAT('%', #{filename}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(parentname)">
+    		AND PARENT_NAME LIKE CONCAT('%', #{parentname}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+    		AND OSS_NAME LIKE CONCAT('%', #{ossName}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
+    		AND UPDATE_DATE <![CDATA[>=]]> #{schStartDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schEndDate)">
+    		AND UPDATE_DATE <![CDATA[<=]]> #{schEndDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformname)">
+    		AND PLATFORM_NAME LIKE CONCAT('%', #{platformname}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+    		AND OSS_VERSION = #{ossVersion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+    		AND CHECK_SUM LIKE CONCAT('%', #{checkSum}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+    		AND TLSH_CHECK_SUM LIKE CONCAT('%', #{tlsh}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformversion)">
+    		AND PLATFORM_VERSION = #{platformversion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(license)">
+    		AND LICENSE LIKE CONCAT('%', #{license}, '%')
+    	</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			${filterCondition}
+		</if>
+    </select>
+	<select id="selectBinaryDataHistoryList" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="oss.fosslight.domain.BinaryAnalysisResult">
+		SELECT
+			ACTION_ID
+			, (CASE WHEN ACTION_TYPE = 'MODIFY_DEL' THEN 'DELETE' ELSE ACTION_TYPE END) AS ACTION_TYPE
+			, FILE_NAME AS BINARY_NAME
+			, PATH_NAME AS FILE_PATH
+			, SOURCE_PATH
+			, CHECK_SUM
+			, TLSH_CHECK_SUM AS TLSH
+			, OSS_NAME
+			, OSS_VERSION
+			, LICENSE
+			, PARENT_NAME
+			, PLATFORM_NAME
+			, PLATFORM_VERSION
+			, UPDATE_DATE
+			, CREATED_DATE
+			, COMMENT
+			, IF(ACTION_TYPE='MODIFY' OR ACTION_TYPE='MODIFY_DEL', MODIFIER , '') AS MODIFIER
+		FROM BINARY_DATA_HIS
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filename)">
+    		AND FILE_NAME LIKE CONCAT('%', #{filename}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(parentname)">
+    		AND PARENT_NAME LIKE CONCAT('%', #{parentname}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+    		AND OSS_NAME LIKE CONCAT('%', #{ossName}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
+    		AND UPDATE_DATE <![CDATA[>=]]> #{schStartDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schEndDate)">
+    		AND UPDATE_DATE <![CDATA[<=]]> #{schEndDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformname)">
+    		AND PLATFORM_NAME LIKE CONCAT('%', #{platformname}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+    		AND OSS_VERSION = #{ossVersion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+    		AND CHECK_SUM LIKE CONCAT('%', #{checkSum}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+    		AND TLSH_CHECK_SUM LIKE CONCAT('%', #{tlsh}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformversion)">
+    		AND PLATFORM_VERSION = #{platformversion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(license)">
+    		AND LICENSE LIKE CONCAT('%', #{license}, '%')
+    	</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
+			${filterCondition}
+		</if>
+		<include refid="orderby"/>
+		<include refid="limitPage"/>
+	</select>
+    
+</mapper>

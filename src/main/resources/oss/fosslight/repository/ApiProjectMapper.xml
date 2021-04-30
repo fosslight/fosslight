@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ApiProjectMapper">
+	
+	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
+		/* ProjectMapper.selectProjectTotalCount */
+		SELECT COUNT(*) FROM (
+			SELECT T1.PRJ_NAME
+				 , T1.PRJ_VERSION
+				 , T1.CREATED_DATE
+				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+				 , CASE WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
+						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
+						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+						ELSE 'PROG' 
+					END STATUS
+				 , T1.PRIORITY
+				 , IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
+				 , IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
+				 , IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
+				 , T1.DISTRIBUTION_TYPE
+				 , T3.CD_DTL_NM
+				 , T3.CD_DTL_NO
+			  FROM PROJECT_MASTER T1
+			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
+			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
+	         WHERE T1.USE_YN = 'Y'
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
+				AND (
+					T1.CREATOR = #{userId} 
+						OR EXISTS (
+						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						  FROM PROJECT_WATCHER A1 
+						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
+						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+						)
+						OR PUBLIC_YN = 'Y'
+				)
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
+				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateTo)">
+				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{createDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateFrom)">
+				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{updateDateFrom},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
+				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+				AND (
+						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+					)
+			</if>
+		) A
+		WHERE 1=1
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+				AND A.STATUS = #{status}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+				AND (
+					A.CD_DTL_NM = #{division}
+					OR A.CD_DTL_NO = #{division}
+				)
+			</if>
+	</select>
+	
+	<select id="selectProjectTotal" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper.selectProjectTotal */
+		SELECT A.PRJ_ID
+			 , A.PRJ_NAME
+		     , A.PRJ_VERSION
+		     , DATE_FORMAT(A.MODIFIED_DATE,'%Y-%m-%d') AS UPDATE_DATE
+		     , DATE_FORMAT(A.CREATED_DATE,'%Y-%m-%d') AS CREATE_DATE
+		     , A.IDENTIFICATION_STATUS
+		     , A.VERIFICATION_STATUS
+		     , A.DESTRIBUTION_STATUS AS DISTRIBUTION_STATUS
+		     , A.DISTRIBUTION_TYPE
+		     , A.NETWORK_SERVER_TYPE AS NETWORK_SERVICE
+		     , A.NOTICE_TYPE AS NOTICE
+		     , A.NOTICE_TYPE_ETC AS NOTICE_PLATFORM
+		     , A.PRIORITY
+		     , A.STATUS
+		  FROM (
+			SELECT T1.PRJ_ID
+				 , T1.PRJ_NAME
+				 , T1.PRJ_VERSION
+				 , T1.CREATED_DATE
+				 , T1.MODIFIED_DATE
+				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+				 , CASE WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
+						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
+						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+						ELSE 'PROG' 
+					END STATUS
+				 , T1.PRIORITY
+				 , IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
+				 , IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
+				 , IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
+				 , T1.DISTRIBUTION_TYPE
+				 , T3.CD_DTL_NM
+				 , T3.CD_DTL_NO
+                 , IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
+                 , T4.NOTICE_TYPE
+                 , T4.NOTICE_TYPE_ETC
+                 , T1.PRIORITY
+			  FROM PROJECT_MASTER T1
+			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
+			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
+			  LEFT JOIN OSS_NOTICE T4 ON T1.PRJ_ID = T4.PRJ_ID
+	         WHERE T1.USE_YN = 'Y'
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
+				AND (
+					T1.CREATOR = #{userId} 
+						OR EXISTS (
+						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						  FROM PROJECT_WATCHER A1 
+						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
+						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+						)
+						OR PUBLIC_YN = 'Y'
+				)
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
+				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateTo)">
+				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{createDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateFrom)">
+				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{updateDateFrom},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
+				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+				AND (
+						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+					)
+			</if>
+		) A
+		WHERE 1=1
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+				AND A.STATUS = #{status}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+				AND (
+					A.CD_DTL_NM = #{division}
+					OR A.CD_DTL_NO = #{division}
+				)
+			</if>
+	</select>
+	
+	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
+		/* ProjectMapper.selectProjectCount */
+		SELECT COUNT(*) FROM (
+			 SELECT 
+					  T1.PRJ_ID
+					, T1.PRJ_NAME
+					, T1.PRJ_VERSION
+					, T1.DISTRIBUTION_TYPE
+					, T1.OSS_NOTICE_DUE_DATE
+					, T1.COMMENT
+					, T1.OS_TYPE
+					, T1.OS_TYPE_ETC
+					, CASE 
+							WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+							WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
+							WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
+							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+							ELSE 'PROG' 
+						END STATUS
+					, T1.PRIORITY
+					, IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
+					, IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
+					, IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
+					, T1.IDENTIFICATION_SUB_STATUS_PARTNER 
+					, T1.IDENTIFICATION_SUB_STATUS_SRC
+					, T1.IDENTIFICATION_SUB_STATUS_BAT
+					, T1.IDENTIFICATION_SUB_STATUS_BIN
+					, T1.IDENTIFICATION_SUB_STATUS_ANDROID
+					, IFNULL(T1.SRC_CSV_FILE_ID, '') SRC_CSV_FILE_ID
+					, IFNULL(T1.SRC_ANDROID_CSV_FILE_ID, '') SRC_ANDROID_CSV_FILE_ID 
+					, IFNULL(T1.SRC_ANDROID_NOTICE_FILE_ID, '') SRC_ANDROID_NOTICE_FILE_ID
+					, IFNULL(T1.SRC_ANDROID_NOTICE_XML_ID, '') SRC_ANDROID_NOTICE_XML_ID
+					, IFNULL(T1.PACKAGE_FILE_ID, '') PACKAGE_FILE_ID
+					, IFNULL(T1.NOTICE_FILE_ID, '') NOTICE_FILE_ID
+					, T1.REVIEWER
+					, IFNULL((SELECT DIVISION FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS DIVISION
+					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR
+					, T1.CREATED_DATE
+					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER
+					, T1.MODIFIED_DATE
+			   FROM PROJECT_MASTER T1
+	          WHERE T1.USE_YN = 'Y'
+			    AND (
+						T1.CREATOR = #{userId} 
+							OR EXISTS (
+							SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+							  FROM PROJECT_WATCHER A1 
+							 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
+							 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+							)
+							OR PUBLIC_YN = 'Y'
+					)
+				<foreach item="item" index="index" collection="prjId" open=" AND (" close=")" separator="OR">
+			     T1.PRJ_ID = #{item}
+			    </foreach>
+		   ) A
+	   WHERE 1 = 1
+	   <if test="@oss.fosslight.util.StringUtil@equals('Y', ossReportFlag)">
+	     AND A.IDENTIFICATION_STATUS != 'CONF'
+	   </if>
+	</select>
+	
+	<select id="checkDistributionType" parameterType="hashMap" resultType="int">
+		SELECT COUNT(1) AS CNT
+		  FROM PROJECT_MASTER
+		 WHERE 1 = 1
+		<foreach item="item" index="index" collection="prjId" open=" AND (" close=")" separator="OR">
+	    	PRJ_ID = #{item}
+	    </foreach>
+		<choose>
+	    	<when test="@oss.fosslight.util.StringUtil@equals('android', distributionType)">
+            	AND DISTRIBUTION_TYPE IN (SELECT CD_DTL_NO FROM T2_CODE_DTL WHERE CD_NO = '207' AND CD_DTL_EXP = 'A')
+          	</when>
+          	<when test="@oss.fosslight.util.StringUtil@equals('normal', distributionType)">
+            	AND DISTRIBUTION_TYPE IN (SELECT CD_DTL_NO FROM T2_CODE_DTL WHERE CD_NO = '207' AND CD_DTL_EXP != 'A')
+          	</when>
+	    </choose>
+	</select>
+	
+	<select id="selectVerificationCheck" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT COUNT(PACKAGE_FILE_ID)+COUNT(PACKAGE_FILE_ID2)+COUNT(PACKAGE_FILE_ID3)+1 AS PACKAGE_FILE_SEQ
+		     , USE_YN
+		  FROM PROJECT_MASTER 
+		 WHERE PRJ_ID = #{prjId}
+		   AND IDENTIFICATION_STATUS = 'CONF' 
+		   AND (VERIFICATION_STATUS != 'CONF' OR VERIFICATION_STATUS IS NULL)
+		   AND USE_YN = 'Y'
+	</select>
+	
+	<update id="updatePackageFile" parameterType="hashMap">
+		UPDATE PROJECT_MASTER 
+			SET PRJ_ID = #{prjId}
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('1', packageFileSeq)">
+					, PACKAGE_FILE_ID = #{packageFileId}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('2', packageFileSeq)">
+					, PACKAGE_FILE_ID2 = #{packageFileId}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('3', packageFileSeq)">
+					, PACKAGE_FILE_ID3 = #{packageFileId}	
+				</when>
+			</choose>
+		 WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<select id="findIdentificationMaxNvdInfo" parameterType="String" resultType="String">
+		SELECT NVD.CVSS_SCORE AS CVSS_SCORE
+  		  FROM OSS_COMPONENTS OC
+  		  LEFT OUTER JOIN (SELECT PRODUCT 
+  		  					    , VERSION
+  		  					    , CVSS_SCORE 
+  		  					    , CVE_ID 
+  		  					    , 'Y' AS VULN_YN 
+  		  					 FROM NVD_DATA_SCORE_V3) NVD 
+  		  	ON NVD.PRODUCT = OC.OSS_NAME 
+  		   AND NVD.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) 
+  		 WHERE OC.REFERENCE_ID = #{prjId}
+  		   AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		   AND OC.EXCLUDE_YN = 'N'
+		   AND OC.OSS_NAME IS NOT NULL
+		   AND OC.OSS_NAME != '-'
+  		 ORDER BY NVD.CVSS_SCORE *1 DESC, CVE_ID LIMIT 1
+	</select>
+	
+	<select id="selectModelList" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
+		SELECT CONCAT(MAIN_CD.CD_DTL_NM, ' > ', SUB_CD.CD_DTL_NM) AS CATEGORY
+			 , A.MODEL_NAME
+			 , A.RELEASE_DATE
+		  FROM PROJECT_MODEL A
+		 INNER JOIN T2_CODE_DTL MAIN_CD ON MAIN_CD.CD_NO = '500' AND A.CATEGORY = MAIN_CD.CD_DTL_NO
+		 INNER JOIN T2_CODE_DTL SUB_CD ON SUB_CD.CD_NO = MAIN_CD.CD_SUB_NO AND A.SUBCATEGORY = SUB_CD.CD_DTL_NO
+		 WHERE A.PRJ_ID = #{prjId} AND A.DEL_YN <![CDATA[<>]]> 'Y'
+		 ORDER BY A.CATEGORY, A.MODEL_NAME
+	</select>
+	
+	<select id="getCreateProjectCnt" parameterType="String" resultType="int">
+		SELECT COUNT(1) 
+		  FROM PROJECT_MASTER 
+		 WHERE CREATOR = #{userId}
+		   AND DATE_FORMAT(CREATED_DATE, '%Y%m%d') = DATE_FORMAT(NOW(), '%Y%m%d')
+		   AND USE_YN = 'Y'
+	</select>
+	
+	<select id="checkProject" parameterType="hashMap" resultType="int">
+		SELECT COUNT(1) FROM PROJECT_MASTER WHERE PRJ_NAME = #{prjName} AND PRJ_VERSION = #{prjVersion}
+	</select>
+	
+	<insert id="createProject" parameterType="hashMap" useGeneratedKeys="true" keyProperty="prjId">
+		INSERT INTO	PROJECT_MASTER (
+			PRJ_NAME
+			, PRJ_VERSION
+			, DISTRIBUTION_TYPE	
+			, PRIORITY
+			, NETWORK_SERVER_TYPE
+			, OS_TYPE			
+			, OS_TYPE_ETC
+			, DISTRIBUTE_TARGET
+			, COMMENT
+			, CREATOR
+			, MODIFIER
+		) VALUES (
+			#{prjName}
+			, #{prjVersion}
+			, #{distributionType}
+			, #{priority}
+			, #{networkServerType}
+			, #{osType}
+			, #{osTypeEtc}
+			, #{distributionSite}
+			, ''
+			, #{loginUserName}
+			, #{loginUserName}
+		)
+	</insert>
+	
+	<insert id="makeOssNotice" parameterType="hashMap">
+		INSERT INTO OSS_NOTICE(
+			PRJ_ID
+			, NOTICE_TYPE
+			, NOTICE_TYPE_ETC
+		)VALUES(
+			#{prjId}
+			, #{noticeType}
+			, #{noticeTypeEtc}
+		) ON DUPLICATE KEY UPDATE
+			 NOTICE_TYPE  		=  #{noticeType}
+		   , NOTICE_TYPE_ETC	=  #{noticeTypeEtc}  
+	</insert>
+	
+	<select id="selectBomList" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper selectBomList */
+		SELECT CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY
+		     , CASE 
+		     		WHEN RTN.OSS_NAME = '-' THEN RTN.COMPONENT_ID 
+		     		ELSE CONCAT(RTN.OSS_NAME,RTN.OSS_VERSION,RTN.LICENSE_NAME) 
+		     	 END AS GROUPING_COLUMN
+			 , RTN.COMPONENT_ID
+			 , CASE 
+			 		WHEN RTN.REFERENCE_DIV = '14' THEN RTN.COMPONENT_ID 
+			 		ELSE RTN.REF_COMPONENT_ID 
+			 	 END AS REF_COMPONENT_ID
+			 , RTN.REFERENCE_ID
+			 , RTN.REFERENCE_DIV
+			 , RTN.COMPONENT_IDX
+			 , CASE 
+			 		WHEN RTN.REFERENCE_DIV = '14' THEN RTN.COMPONENT_IDX 
+			 		ELSE (SELECT COMPONENT_IDX FROM OSS_COMPONENTS OC1 WHERE OC1.COMPONENT_ID = RTN.REF_COMPONENT_ID)
+			 	 END AS REF_COMPONENT_IDX	/* 2018-07-17 choye 추가 */
+			 , RTN.REF_DIV
+			 , RTN.OSS_ID 
+			 , RTN.OSS_NAME
+			 , RTN.OSS_VERSION 
+			 , RTN.DOWNLOAD_LOCATION 
+			 , RTN.HOMEPAGE
+			 , RTN.BINARY_NAME
+			 , RTN.BINARY_SIZE 
+			 , RTN.BINARY_NOTICE
+			 , RTN.CUSTOM_BINARY_YN 
+			 , RTN.EXCLUDE_YN 
+			 , RTN.MERGE_PRE_DIV 
+			 , RTN.BAT_STRING_MATCH_PERCENTAGE 
+			 , RTN.BAT_PERCENTAGE
+			 , RTN.BAT_SCORE
+			 , RTN.OBLIGATION_TYPE
+			 , RTN.PRE_OBLIGATION_TYPE
+			 , RTN.ADMIN_CHECK_YN
+			 , CASE 
+					WHEN RTN.REFERENCE_DIV = '11' THEN 1 
+					WHEN RTN.REFERENCE_DIV = '15' THEN 2 
+					WHEN RTN.REFERENCE_DIV = '10' THEN 3 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV IS NULL THEN 11 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '11' THEN 12 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '15' THEN 13 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
+					ELSE 99 
+				 END AS MERGE_ORDER 
+			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, RTN.COPYRIGHT AS COPYRIGHT_TEXT
+			 , IFNULL(RTN.VULN_YN, 'N') AS VULN_YN, IFNULL(RTN.CVSS_SCORE, 0) AS CVSS_SCORE, RTN.CVE_ID, RTN.LICENSE_TYPE_IDX, RTN.CVSS_SCORE_MAX, RTN.LICENSE_TYPE
+		  FROM  (SELECT A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
+					  , A1.DOWNLOAD_LOCATION, A1.HOMEPAGE, A1.FILE_PATH, A1.BINARY_NOTICE, A1.BINARY_NAME, A1.BINARY_SIZE, A1.CUSTOM_BINARY_YN, A1.EXCLUDE_YN, A1.MERGE_PRE_DIV
+					  , A1.BAT_STRING_MATCH_PERCENTAGE, A1.BAT_PERCENTAGE, A1.BAT_SCORE, A1.PRE_OBLIGATION_TYPE, A1.OBLIGATION_TYPE, A1.ADMIN_CHECK_YN, (CASE WHEN PRJ.IDENTIFICATION_STATUS = 'CONF' AND A1.OSS_NAME <![CDATA[<>]]> '-' AND A1.ADMIN_CHECK_YN = 'N' THEN A4.COPYRIGHT ELSE A1.COPYRIGHT END) AS COPYRIGHT
+					  , GROUP_CONCAT(A2.LICENSE_ID ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_ID
+					  , GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
+					  , IFNULL(NVD.CVSS_SCORE, 0) AS CVSS_SCORE, IFNULL(NVD.VULN_YN, 'N') AS VULN_YN, NVD.CVE_ID 
+					  , (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID) AS REF_DIV
+					  , (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
+					  , (SELECT CONCAT(CVSS_SCORE, '@', MAX(CVE_ID))
+				   FROM NVD_DATA_SCORE_V3 
+				  WHERE PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME)
+				    AND CVSS_SCORE = (SELECT MAX(CVSS_SCORE)
+				      					FROM NVD_DATA_SCORE_V3
+				      				   WHERE PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME))) AS CVSS_SCORE_MAX
+				, A3.LICENSE_TYPE 
+			FROM OSS_COMPONENTS A1 
+				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
+				INNER JOIN OSS_COMPONENTS_LICENSE A2 
+					ON A1.COMPONENT_ID = A2.COMPONENT_ID 
+						AND  A2.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+				LEFT OUTER JOIN LICENSE_MASTER A3 ON A2.LICENSE_ID = A3.LICENSE_ID AND A3.USE_YN = 'Y'
+				LEFT OUTER JOIN OSS_MASTER A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y'
+				LEFT OUTER JOIN (SELECT PRODUCT
+									  , VERSION
+									  , CVSS_SCORE
+									  , CVE_ID
+									  , 'Y' AS VULN_YN 
+								   FROM NVD_DATA_SCORE_V3
+								  WHERE PRODUCT != '-') NVD 
+                    ON NVD.PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME)
+                       AND NVD.VERSION = IF(IFNULL(A1.OSS_VERSION, '') = '', '-', A1.OSS_VERSION)
+			 	WHERE A1.REFERENCE_ID = #{prjId}
+				  AND A1.REFERENCE_DIV IN ('13')
+			GROUP BY A1.COMPONENT_ID
+		) RTN
+		GROUP BY GROUPBY
+		ORDER BY LICENSE_TYPE_IDX, OSS_NAME, OSS_VERSION DESC, LICENSE_NAME, MERGE_ORDER
+	</select>
+	
+	<select id="selectBomLicense" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT
+			*
+		FROM
+			OSS_COMPONENTS_LICENSE
+		WHERE COMPONENT_ID = #{componentId}
+		  AND IFNULL(EXCLUDE_YN, 'N') != 'Y'
+	</select>
+</mapper>

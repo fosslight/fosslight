@@ -1,0 +1,592 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.DashboardMapper">
+	<sql id="limitPage">
+        LIMIT #{startIndex}, #{pageListSize}
+    </sql>
+    
+    <select id="selectDashboardJobsList" parameterType="hashMap" resultType="oss.fosslight.domain.Project">
+		SELECT 
+			CONCAT(SUBSTR(RESULT.PRJ_DIVISION, 1, 1), '-', RESULT.PRJ_ID) AS PRJ_DIVISION_ID
+			, RESULT.PRJ_DIVISION
+			, RESULT.PRJ_ID
+			, RESULT.PRJ_NAME
+			, RESULT.PRJ_VERSION
+			, RESULT.STATUS
+			, RESULT.STAGE
+			, RESULT.OSS_NOTICE_DUE_DATE
+			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE RESULT.CREATOR  = USER_ID), RESULT.CREATOR) AS CREATOR
+			, RESULT.CREATED_DATE
+			, RESULT.STAGE
+			, RESULT.MODIFIER
+			, RESULT.MODIFIED_DATE
+			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE RESULT.REVIEWER  = USER_ID), RESULT.REVIEWER) AS REVIEWER_NAME
+			, RESULT.REVIEWER AS REVIEWER
+			, RESULT.PRIORITY
+	 	FROM (
+	 	<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag)">
+			SELECT 
+				'PRJ' AS PRJ_DIVISION
+				, T1.PRJ_ID
+				, T1.PRJ_NAME
+				, T1.PRJ_VERSION
+				, CASE 
+	                	WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+	                 	WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV' THEN 'REV' 
+	                 	WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ' 
+	               		/* 2018-07-19 choye 추가 */ 
+	                 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' 
+	               		/* 2019-10-24 */ 
+	                 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
+	                    /* 2019-10-24 */ 
+	                 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
+	                    /* 2019-10-24 */  
+	                 	ELSE 'PROG' 
+	                END STATUS
+				, CASE
+						WHEN T1.STATUS_REQUEST_YN = 'Y' THEN 'B'
+						WHEN T1.DESTRIBUTION_STATUS != 'NA' AND T1.VERIFICATION_STATUS IN ('CONF', 'NA') THEN 'D'
+						WHEN T1.VERIFICATION_STATUS IS NOT NULL OR (T1.VERIFICATION_STATUS IS NULL AND T1.IDENTIFICATION_STATUS = 'CONF') THEN 'P'
+						ELSE 'I'
+					END STAGE
+				, T1.OSS_NOTICE_DUE_DATE
+				, T1.CREATOR 
+				, T1.CREATED_DATE
+				, T1.MODIFIER
+				, T1.MODIFIED_DATE
+				, T1.REVIEWER
+				, T1.PRIORITY
+			FROM PROJECT_MASTER T1 
+		WHERE 
+			T1.USE_YN = 'Y'
+			AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y' OR T1.STATUS_REQUEST_YN = 'Y')
+	       	 <choose>
+	            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				AND (
+					T1.CREATOR = #{loginUserName}
+					OR EXISTS (
+						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						FROM PROJECT_WATCHER A1
+							INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+					)
+				)
+	            </when>
+	            <otherwise>
+				AND (
+					T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
+				)
+	            </otherwise>
+	        </choose>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag) and @oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
+			UNION ALL	
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
+			SELECT
+				'3RD' AS PRJ_DIVISION
+				, T1.PARTNER_ID AS PRJ_ID
+				, CONCAT ('(', T1.PARTNER_NAME, ')', SOFTWARE_NAME) AS PRJ_NAME
+				, SOFTWARE_VERSION AS PRJ_VERSION
+				, T1.STATUS
+				, '-' AS STAGE
+				, '-' AS OSS_NOTICE_DUE_DATE
+				, T1.CREATOR 
+				, T1.CREATED_DATE
+				, T1.MODIFIER
+				, T1.MODIFIED_DATE
+				, T1.REVIEWER
+				, '' AS PRIORITY
+			FROM PARTNER_MASTER T1
+			WHERE
+				T1.USE_YN = 'Y'
+				AND T1.STATUS <![CDATA[<>]]> 'CONF'
+		       	 <choose>
+		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+					AND (
+						T1.CREATOR = #{loginUserName}
+						OR EXISTS (
+							SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+							FROM PARTNER_WATCHER A1
+								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+						)
+					)
+		            </when>
+		            <otherwise>
+					AND (
+						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
+					)
+		            </otherwise>
+		        </choose>
+		</if>
+		) RESULT
+		WHERE 1 = 1
+
+		ORDER BY MODIFIED_DATE DESC
+    </select>
+    
+    <select id="selectDashboardJobsTotalCount" parameterType="hashMap" resultType="int">
+		SELECT COUNT(1) FROM (
+		<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag)">
+			SELECT 
+				T1.PRJ_ID
+				, T1.CREATOR
+				, T1.REVIEWER
+			FROM PROJECT_MASTER T1 
+			WHERE 
+				T1.USE_YN = 'Y'
+				AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y' OR T1.STATUS_REQUEST_YN = 'Y')
+		       	 <choose>
+		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+					AND (
+						T1.CREATOR = #{loginUserName}
+						OR EXISTS (
+							SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+							FROM PROJECT_WATCHER A1
+								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+							WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+						)
+					)
+		            </when>
+		            <otherwise>
+					AND (
+						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
+					)
+		            </otherwise>
+		        </choose>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag) and @oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
+			UNION ALL
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
+			SELECT
+				T1.PARTNER_ID
+				, T1.CREATOR
+				, T1.REVIEWER
+			FROM PARTNER_MASTER T1
+			WHERE
+				T1.USE_YN = 'Y'
+				AND T1.STATUS <![CDATA[<>]]> 'CONF'
+		       	 <choose>
+		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+					AND (
+						T1.CREATOR = #{loginUserName}
+						OR EXISTS (
+							SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+							FROM PARTNER_WATCHER A1
+								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+						)
+					)
+		            </when>
+		            <otherwise>
+					AND (
+						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
+					)
+		            </otherwise>
+		        </choose>
+		</if>
+		) RESULT
+		WHERE 1 = 1
+    </select>
+    
+    <select id="selectDashboardCommentsTotalCount" parameterType="hashMap" resultType="int">
+    	SELECT
+	        COUNT(G1.COMM_ID)
+		FROM (
+		    SELECT
+		        T1.COMM_ID
+				,T1.REFERENCE_ID
+				,T1.REFERENCE_DIV
+				,T1.STATUS
+				,REPLACE(T1.CONTENTS, '<![CDATA[<br>]]>', '') AS CONTENTS
+				,T1.EXPANSION1
+				,T1.USE_YN
+				,T1.CREATED_DATE
+				,T1.MODIFIER
+				,T1.MODIFIED_DATE
+				,T1.STATUS_CODE
+				,IFNULL(T2.READ_YN, 'N') AS READ_YN
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT CONCAT ('(', ST1.PARTNER_NAME, ')', ST1.SOFTWARE_NAME) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT ST1.PRJ_NAME FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS PRJ_NAME
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.CREATOR = USER_ID), ST1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.CREATOR = USER_ID), ST1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS CREATOR
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.REVIEWER = USER_ID), ST1.REVIEWER) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.REVIEWER = USER_ID), ST1.REVIEWER) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS REVIEWER
+			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN CONCAT('3-', T1.REFERENCE_ID)
+			    	  ELSE CONCAT('P-', T1.REFERENCE_ID)
+			     END AS PRJ_DIVISION_ID
+			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS USER
+		    FROM
+		        COMMENTS_HISTORY T1
+		        LEFT OUTER JOIN COMMENTS_HISTORY_READ T2 ON (
+		        	T1.COMM_ID = T2.COMM_ID
+		        	AND T1.REFERENCE_ID = T2.REFERENCE_ID 
+		        	AND T1.REFERENCE_DIV = T2.REFERENCE_DIV 
+		        	AND T2.CREATOR = #{loginUserName}
+		        )
+		    WHERE
+		        T1.USE_YN = 'Y'
+		        <foreach collection="referenceDivList" item="item" open="AND T1.REFERENCE_DIV IN  (" close=")" separator=", ">
+					#{item}
+				</foreach>
+		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
+		        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
+				AND T1.CONTENTS IS NOT NULL
+				AND T1.CONTENTS <![CDATA[<>]]> ''
+	       	 	<choose>
+		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+		            	AND (
+		            			(
+				            		T1.REFERENCE_ID IN (
+									SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 
+									WHERE
+										A1.USE_YN = 'Y'
+										AND (
+											A1.CREATOR = #{loginUserName}
+											OR EXISTS (
+												SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+												FROM PROJECT_WATCHER A1
+													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+											)
+										)
+				            		)
+			            		) OR (
+				            		T1.REFERENCE_ID IN (
+									SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 
+									WHERE
+										A1.USE_YN = 'Y'
+										AND (
+											A1.CREATOR = #{loginUserName}
+											OR EXISTS (
+												SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+												FROM PARTNER_WATCHER A1
+													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+											)
+										)
+				            		)
+		            			)
+		            		)
+		            </when>
+		            <otherwise>
+		            	AND (
+		            			( T1.REFERENCE_ID IN ( SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            			OR ( T1.REFERENCE_ID IN ( SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            		)
+		            </otherwise>
+	            </choose>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+	                AND T1.CREATOR LIKE CONCAT('%',#{modifier},'%')
+	            </if>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+	            </if>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+	            </if>
+	    	) G1
+    </select>
+	
+	<select id="selectDashboardCommentsList" parameterType="hashMap" resultType="oss.fosslight.domain.CommentsHistory">
+    	/* DashboardMapper.selectDashboardCommentsList */ 
+    	SELECT
+	        G1.COMM_ID
+			,G1.REFERENCE_ID
+			,G1.REFERENCE_DIV
+			,G1.STATUS
+			,G1.CONTENTS
+			,G1.EXPANSION1
+			,G1.USE_YN
+			,G1.CREATED_DATE
+			,G1.MODIFIER
+			,G1.MODIFIED_DATE
+			,G1.STATUS_CODE
+			,G1.READ_YN
+			,G1.PRJ_NAME
+			,G1.CREATOR
+			,G1.USER
+			,G1.REVIEWER
+			,G1.PRJ_DIVISION_ID
+		FROM (
+		    SELECT
+		        T1.COMM_ID
+				,T1.REFERENCE_ID
+				,T1.REFERENCE_DIV
+				,T1.STATUS
+				,REPLACE(T1.CONTENTS, '<![CDATA[<br>]]>', '') AS CONTENTS
+				,T1.EXPANSION1
+				,T1.USE_YN
+				,T1.CREATED_DATE
+				,T1.MODIFIER
+				,T1.MODIFIED_DATE
+				,T1.STATUS_CODE
+				,IFNULL(T2.READ_YN, 'N') AS READ_YN
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT CONCAT ('(', ST1.PARTNER_NAME, ')', ST1.SOFTWARE_NAME) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT ST1.PRJ_NAME FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS PRJ_NAME
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.CREATOR = USER_ID), ST1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.CREATOR = USER_ID), ST1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS CREATOR
+				,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.REVIEWER = USER_ID), ST1.REVIEWER) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE ST1.REVIEWER = USER_ID), ST1.REVIEWER) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS REVIEWER
+			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN CONCAT('3-', T1.REFERENCE_ID)
+			    	  ELSE CONCAT('P-', T1.REFERENCE_ID)
+			     END AS PRJ_DIVISION_ID
+			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
+					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
+			     END AS USER
+		    FROM
+		        COMMENTS_HISTORY T1
+		        LEFT OUTER JOIN COMMENTS_HISTORY_READ T2 ON (
+		        	T1.COMM_ID = T2.COMM_ID
+		        	AND T1.REFERENCE_ID = T2.REFERENCE_ID 
+		        	AND T1.REFERENCE_DIV = T2.REFERENCE_DIV 
+		        	AND T2.CREATOR = #{loginUserName}
+		        )
+		    WHERE
+		        T1.USE_YN = 'Y'
+		        <foreach collection="referenceDivList" item="item" open="AND T1.REFERENCE_DIV IN  (" close=")" separator=", ">
+					#{item}
+				</foreach>
+		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
+		        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
+				AND T1.CONTENTS IS NOT NULL
+				AND T1.CONTENTS <![CDATA[<>]]> ''
+	       	 	<choose>
+		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+		            	AND (
+		            			(
+				            		T1.REFERENCE_ID IN (
+									SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 
+									WHERE
+										A1.USE_YN = 'Y'
+										AND (
+											A1.CREATOR = #{loginUserName}
+											OR EXISTS (
+												SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+												FROM PROJECT_WATCHER A1
+													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+											)
+										)
+				            		)
+			            		) OR (
+				            		T1.REFERENCE_ID IN (
+									SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 
+									WHERE
+										A1.USE_YN = 'Y'
+										AND (
+											A1.CREATOR = #{loginUserName}
+											OR EXISTS (
+												SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+												FROM PARTNER_WATCHER A1
+													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+											)
+										)
+				            		)
+		            			)
+		            		)
+		            </when>
+		            <otherwise>
+		            	AND (
+		            			( T1.REFERENCE_ID IN ( SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            			OR ( T1.REFERENCE_ID IN ( SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            		)
+		            </otherwise>
+	            </choose>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+	                AND T1.CREATOR LIKE CONCAT('%',#{modifier},'%')
+	            </if>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+	            </if>
+	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+	            </if>
+	    	) G1
+	    ORDER BY G1.CREATED_DATE DESC
+    </select>
+    
+    <select id="selectDashboardOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+        SELECT 
+            T1.OSS_ID
+			,T1.OSS_NAME
+			,T1.OSS_VERSION                                                                                                         
+			,T1.HOMEPAGE                       
+			,IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
+            ,T1.MODIFIED_DATE
+            ,(SELECT CONCAT(IF(SUB1.MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(SUB1.DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(SUB1.VERSION_DIFF_FLAG = 'N', '0', '1')) FROM OSS_MASTER_LICENSE_FLAG SUB1 WHERE T1.OSS_ID = SUB1.OSS_ID) AS OSS_TYPE
+        FROM 
+            OSS_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+            AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+            AND T1.MODIFIED_DATE <![CDATA[<=]]> now()
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+                AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+                AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+                AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+            </if>
+        <choose>
+            <when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY T1.MODIFIED_DATE DESC</when>
+            <otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+        </choose>
+    </select>
+   
+    <select id="selectDashboardOssTotalCount" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+        SELECT 
+            COUNT(T1.OSS_ID)
+        FROM 
+            OSS_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+            AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+            AND T1.MODIFIED_DATE <![CDATA[<=]]> now()
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+                AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+                AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+                AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+            </if>
+    </select>
+    
+    <select id="selectDashboardLicenseList" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+        SELECT 
+            T1.LICENSE_ID
+			,T1.LICENSE_NAME
+			,T1.LICENSE_TYPE
+			,(SELECT T2.CD_DTL_NM FROM T2_CODE_DTL T2 WHERE T2.CD_NO='201' AND T2.CD_DTL_NO=T1.LICENSE_TYPE) AS LICENSE_TYPE_FULL /* 2018-07-13 choye 추가 */
+			,T1.SHORT_IDENTIFIER
+			,T1.WEBPAGE
+			,IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
+			,T1.MODIFIED_DATE
+        FROM 
+            LICENSE_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+            AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+            AND T1.MODIFIED_DATE <![CDATA[<=]]> now()
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+                AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+	            AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+	        </if>
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+	            AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+	        </if>
+	    <choose>
+            <when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY T1.MODIFIED_DATE DESC</when>
+            <otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+        </choose>
+    </select>
+   
+    <select id="selectDashboardLicenseTotalCount" parameterType="oss.fosslight.domain.LicenseMaster" resultType="int">
+        SELECT 
+            COUNT(LICENSE_ID)
+        FROM 
+            LICENSE_MASTER
+        WHERE USE_YN = 'Y'
+            AND MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+            AND MODIFIED_DATE <![CDATA[<=]]> now()
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+                AND MODIFIER LIKE CONCAT('%',#{modifier},'%')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+                AND MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
+            </if>
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+                AND MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
+            </if>
+    </select>
+    
+    <insert id="readConfirmAll" parameterType="oss.fosslight.domain.CommentsHistory">
+    	INSERT INTO COMMENTS_HISTORY_READ(
+			COMM_ID
+			, REFERENCE_ID
+			, REFERENCE_DIV
+			, READ_YN
+			, CREATOR
+			, CREATED_DATE
+		)
+		SELECT T1.COMM_ID 
+			,T1.REFERENCE_ID 
+			,T1.REFERENCE_DIV 
+			,'Y'
+			,#{loginUserName}
+			,now()
+		FROM COMMENTS_HISTORY T1
+		WHERE T1.USE_YN = 'Y'
+			AND NOT EXISTS ( SELECT * FROM COMMENTS_HISTORY_READ T2 WHERE T1.comm_id = T2.comm_id 
+                       AND T1.reference_id = T2.reference_id 
+                       AND T1.reference_div = T2.reference_div 
+                       AND T2.creator = #{loginUserName} )
+			AND T1.REFERENCE_DIV IN ('19', '10', '12', '14', '20') 
+			AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
+			AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+			AND T1.CREATED_DATE <![CDATA[<=]]> now() 
+			AND T1.CONTENTS IS NOT NULL AND T1.CONTENTS <![CDATA[<>]]> '' 
+			<choose>
+	            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+	            	AND (
+	            			(
+			            		T1.REFERENCE_ID IN (
+								SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 
+								WHERE
+									A1.USE_YN = 'Y'
+									AND (
+										A1.CREATOR = #{loginUserName}
+										OR EXISTS (
+											SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+											FROM PROJECT_WATCHER A1
+												INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+											WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+										)
+									)
+			            		)
+		            		) OR (
+			            		T1.REFERENCE_ID IN (
+								SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 
+								WHERE
+									A1.USE_YN = 'Y'
+									AND (
+										A1.CREATOR = #{loginUserName}
+										OR EXISTS (
+											SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+											FROM PARTNER_WATCHER A1
+												INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+											WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+										)
+									)
+			            		)
+	            			)
+	            		)
+	            </when>
+	            <otherwise>
+	            	AND (
+	            			( T1.REFERENCE_ID IN ( SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+	            			OR ( T1.REFERENCE_ID IN ( SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+	            		)
+	            </otherwise>
+            </choose>
+    </insert>
+</mapper>

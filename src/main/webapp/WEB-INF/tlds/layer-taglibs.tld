@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<taglib version="2.1" xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"> 
+  
+  <tlib-version>1.0</tlib-version> 
+  <short-name>layer</short-name> 
+  <uri></uri>
+    
+    <function>
+        <description>layer jsp 존재 유무</description>
+        <name>exist</name>
+        <function-class>oss.fosslight.commons.LayerFunc</function-class>
+        <function-signature>boolean exist( javax.servlet.http.HttpServletRequest, java.lang.String )</function-signature>
+    </function>
+</taglib>  

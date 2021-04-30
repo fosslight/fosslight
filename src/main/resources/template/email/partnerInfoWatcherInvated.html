@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html lang="ko">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<style>
+			.marker{background-color: Yellow;}
+		</style>
+		<title>FOSSLight System</title>
+	</head>
+	<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td width="60" style="background:#f9f9f9"></td>
+				<td>
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr> 
+							<td colspan="3" height="25" style="background:#c00c3f">
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight System Notification</h1>
+							</td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+							#if( $contentsTitle )
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
+							#end
+							#if( $contentsSubTitle )
+								<p style="font-size:12px;">$contentsSubTitle</p>
+							#end
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<col style="width:40%">
+        							<col style="width:*">
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+										<th style="padding:5px;background:#f0f0f0;">3rd Party Information</th>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party Name</th>
+										<td style="padding:5px;">($!partner_basic_info.partnerId) $!partner_basic_info.partnerName</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
+										<td style="padding:5px;">$!partner_basic_info.softwareName</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
+										<td style="padding:5px;">$!partner_basic_info.softwareVersion</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Delivery Form</th>
+										<td style="padding:5px;">$!partner_basic_info.deliveryForm</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
+										<td style="padding:5px;">$!partner_basic_info.description</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Commitment</th>
+										<td style="padding:5px;">$!partner_basic_info.confirmationFileId</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Checklist</th>
+										<td style="padding:5px;">$!partner_basic_info.ossFileId</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+										<td style="padding:5px;">$!partner_basic_info.creator</td>
+									</tr>
+									#if( $partner_basic_info.reviewer )
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										<td style="padding:5px;">$!partner_basic_info.reviewer</td>
+									</tr>
+									#end
+								</table>
+								<div style="margin:20px 0;border:1px dashed #666;"></div>
+								<div style="font-size:12px;">* This mail was sent by <a href="http://fosslight.org" target="_blank">fosslight.org</a></div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr>
+					</table>
+				</td>
+				<td width="60" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+		</table>
+		
+	</body>
+</html>

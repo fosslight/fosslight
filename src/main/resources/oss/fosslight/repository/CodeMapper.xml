@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.CodeMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+    <sql id="orderby">
+        ORDER BY ${sidx} ${sord}
+    </sql>
+    
+    <select id="selectCodeTotalCount" parameterType="oss.fosslight.domain.T2Code" resultType="int">
+    SELECT
+    	COUNT(1)
+    FROM
+    	T2_CODE
+    WHERE SYS_CD_YN != 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdNo)">
+			AND CD_NO = #{cdNo}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdNm)">
+			AND CD_NM LIKE CONCAT('%', #{cdNm}, '%')
+		</if>
+    </select>
+	<select id="selectCodeList" parameterType="oss.fosslight.domain.T2Code" resultType="oss.fosslight.domain.T2Code">
+		SELECT 
+		     CD_NO AS gridId
+			,CD_NO
+			,CD_NM
+			,CD_EXP
+		FROM T2_CODE
+		WHERE SYS_CD_YN != 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdNo)">
+			AND CD_NO = #{cdNo}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdNm)">
+			AND CD_NM LIKE CONCAT('%', #{cdNm}, '%')
+		</if>
+		<include refid="orderby"/>
+		<include refid="limitPage"/>
+	</select>
+    
+	<select id="selectCodeDetailList" parameterType="oss.fosslight.domain.T2CodeDtl" resultType="oss.fosslight.domain.T2CodeDtl">
+		SELECT 
+			CD_NO
+			,CD_SUB_NO
+			,CD_DTL_NO
+			,CD_DTL_NO AS gridId
+			,CD_DTL_NM
+			,CD_DTL_EXP
+			,CD_ORDER
+			,USE_YN
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+		ORDER BY CD_ORDER
+	</select>
+	<!-- 
+	<select id="selectCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" resultType="oss.fosslight.domain.T2CodeDtl">
+		SELECT 
+			CD_NO
+			,CD_SUB_NO
+			,CD_DTL_NO
+			,CD_DTL_NO AS gridId
+			,CD_DTL_NM
+			,CD_DTL_EXP
+			,CD_ORDER
+			,USE_YN
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+		  AND CD_DTL_NO = #{cdDtlNo}
+		ORDER BY CD_ORDER
+	</select>
+	 -->
+	
+	<insert id="insertCode" parameterType="oss.fosslight.domain.T2Code">
+		INSERT
+		INTO T2_CODE
+		(
+			CD_NO
+			,CD_NM
+			,CD_EXP
+			,SYS_CD_YN
+		)
+		VALUES
+		(
+			#{cdNo}
+			,#{cdNm}
+			,#{cdExp}
+			, 'N'
+		)
+	</insert>
+  
+	<update id="updateCode" parameterType="oss.fosslight.domain.T2Code" >
+		UPDATE T2_CODE
+		SET
+			CD_NM = #{cdNm},
+			CD_EXP = #{cdExp},
+			SYS_CD_YN = 'N'
+		WHERE CD_NO = #{cdNo}
+	</update>
+	
+	<delete id="deleteCode" parameterType="oss.fosslight.domain.T2Code" >
+		DELETE
+		FROM T2_CODE
+		WHERE CD_NO = #{cdNo}
+	</delete>
+	
+	<delete id="deleteCodeDetailAll" parameterType="oss.fosslight.domain.T2Code" >
+		DELETE
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+	</delete>
+	
+	<insert id="insertCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl">
+		INSERT
+		INTO T2_CODE_DTL
+		(
+			CD_NO
+			,CD_SUB_NO
+			,CD_DTL_NO
+			,CD_DTL_NM
+			,CD_DTL_EXP
+			,CD_ORDER
+			,USE_YN
+		)
+		VALUES
+		(
+			#{cdNo}
+			,#{cdSubNo}
+			,#{cdDtlNo}
+			,#{cdDtlNm}
+			,#{cdDtlExp}
+			,#{cdOrder}
+			,#{useYn}
+		)
+	</insert>
+	
+	<update id="updateCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" >
+		UPDATE T2_CODE_DTL
+		SET
+			CD_DTL_NO = #{cdDtlNo},
+			CD_DTL_NM = #{cdDtlNm},
+			CD_DTL_EXP = #{cdDtlExp},
+			CD_SUB_NO = #{cdSubNo},
+			CD_ORDER = #{cdOrder},
+			USE_YN = #{useYn}
+		WHERE CD_NO = #{cdNo}
+		AND CD_DTL_NO = #{cdDtlNoOrign}
+	</update>
+	
+	<delete id="deleteCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" >
+		DELETE
+		FROM T2_CODE_DTL
+		WHERE CD_NO = #{cdNo}
+		AND CD_DTL_NO = #{cdDtlNo}
+	</delete>
+	
+    <select id="getCodeList" parameterType="oss.fosslight.domain.T2Code" resultType="oss.fosslight.domain.T2Code">
+    SELECT
+    	DISTINCT CD_NO
+    FROM
+    	T2_CODE
+    </select>
+    <select id="getCodeNmList" parameterType="oss.fosslight.domain.T2Code" resultType="oss.fosslight.domain.T2Code">
+    SELECT
+    	DISTINCT CD_NM
+    FROM
+    	T2_CODE
+    </select>
+    
+    <select id="selectExtType" parameterType="String" resultType="String">
+    SELECT
+    	CD_DTL_EXP
+    FROM
+    	T2_CODE_DTL
+    WHERE	
+    	CD_NO = '120'
+    	AND CD_DTL_NO = #{string}
+    </select>
+    <select id="getCategoryList" parameterType="String" resultType="String">
+	    SELECT CONCAT((SELECT CD_DTL_NO 
+	    				 FROM T2_CODE_DTL 
+	    				WHERE CD_NO = #{categoryCd} 
+	    				  AND CD_SUB_NO = T1.CD_NO 
+	    				  AND USE_YN = 'Y')
+				     , T1.CD_DTL_NO) CATEGORY
+	      FROM T2_CODE_DTL T1
+	     WHERE CD_NO IN (SELECT CD_SUB_NO 
+	     				   FROM T2_CODE_DTL 
+	     				  WHERE CD_NO = #{categoryCd})
+		    AND T1.USE_YN = 'Y'
+    </select>
+    
+    <update id="saveConfiguration">
+    /* test 필요함. */
+    	UPDATE T2_CODE_DTL
+    	   SET #{columnNm1} = #{columnValue1}
+    	 WHERE CD_NO = #{cdNo}
+    	  
+    </update>
+</mapper>

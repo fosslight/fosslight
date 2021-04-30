@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.NoticeMapper">
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	
+    <sql id="orderby">
+        ORDER BY ${sidx} ${sord}
+    </sql>
+	
+	<select id="selectNoticeTotalCount" parameterType="oss.fosslight.domain.Notice" resultType="int">
+	    SELECT
+	    	COUNT(1)
+	    FROM
+	    	USER_NOTICE
+	    WHERE 1=1
+    </select>
+    
+	<select id="selectNoticeList" parameterType="oss.fosslight.domain.Notice" resultType="oss.fosslight.domain.Notice">
+		SELECT 
+		    SEQ AS GRID_ID
+		    , SEQ
+			, TITLE
+			, NOTICE
+			, S_DATE
+			, E_DATE
+			, PUBLISH_YN
+			, MODIFIER
+			, MODIFIED_DATE
+			, CREATOR
+			, CREATED_DATE
+		FROM USER_NOTICE
+		WHERE 1=1
+		<include refid="orderby"/>
+		<include refid="limitPage"/>
+	</select>
+    
+    <insert id="insertNotice" parameterType="oss.fosslight.domain.Notice">
+		INSERT
+		INTO USER_NOTICE
+		(
+			TITLE
+			, NOTICE
+			, S_DATE
+			, E_DATE
+			, PUBLISH_YN
+			, MODIFIER
+			, MODIFIED_DATE
+			, CREATOR
+			, CREATED_DATE
+		)
+		VALUES
+		(
+			#{title}
+			,#{notice}
+			,#{sDate}
+			,#{eDate}
+			,#{publishYn}
+			,#{loginUserName}
+			,now()
+			,#{loginUserName}
+			,now()
+		)
+	</insert>
+	
+	<insert id="updateNotice" parameterType="oss.fosslight.domain.Notice">
+		UPDATE USER_NOTICE
+		SET
+			TITLE 			= #{title}
+			, NOTICE		= #{notice}
+			, S_DATE		= #{sDate}
+			, E_DATE		= #{eDate}
+			, PUBLISH_YN	= #{publishYn}
+			, MODIFIER		= #{loginUserName}
+			, MODIFIED_DATE	= now()
+		WHERE SEQ			= #{seq}
+	</insert>
+    
+	<delete id="deleteNotice" parameterType="oss.fosslight.domain.Notice" >
+		DELETE
+		FROM USER_NOTICE
+		WHERE SEQ = #{seq}
+	</delete>
+	
+    <select id="selectPublishedNotice" parameterType="oss.fosslight.domain.Notice" resultType="oss.fosslight.domain.Notice">
+		SELECT 
+		    TITLE
+			, NOTICE
+		FROM USER_NOTICE
+		WHERE 1=1
+		AND PUBLISH_YN = 'Y'
+		AND date_format(now(), '%Y%m%d') BETWEEN date_format(S_DATE, '%Y%m%d') AND date_format(E_DATE, '%Y%m%d')
+		ORDER BY MODIFIED_DATE DESC
+		LIMIT 1
+	</select>
+	
+	<select id="selectPublishedNoticeCount" parameterType="oss.fosslight.domain.Notice" resultType="int">
+	    SELECT
+	    	COUNT(1)
+	    FROM
+	    	USER_NOTICE
+		WHERE 1=1
+		AND PUBLISH_YN = 'Y'
+		AND date_format(now(), '%Y%m%d') BETWEEN date_format(S_DATE, '%Y%m%d') AND date_format(E_DATE, '%Y%m%d') 
+		ORDER BY MODIFIED_DATE DESC
+		LIMIT 1
+    </select>
+</mapper>

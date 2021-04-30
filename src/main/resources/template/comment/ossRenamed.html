@@ -1,0 +1,37 @@
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+							<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!modifierNm "$!ossBeforeNm" renamed to "$!ossAftereNm"</div>
+							
+							<div style="padding:10px;font-size:12px;">$!comment</div>
+							<div style="padding-bottom:5px;font-size:12px;font-weight:bold;">$!ossBeforeNm used in the projects below</div>
+								#if( $projectList )
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th style="padding:5px;background:#f0f0f0;">ID</th>
+											<th style="padding:5px;background:#f0f0f0;">Project Name</th>
+											<th style="padding:5px;background:#f0f0f0;">Project Version</th>
+											<th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
+											<th style="padding:5px;background:#f0f0f0;">Creator</th>
+											<th style="padding:5px;background:#f0f0f0;">Created Date</th>
+											<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										</tr>
+										#foreach( $project in $projectList )
+										<tr>
+											<td style="padding:5px;">$!project.prjId</td>
+											<td style="padding:5px;">$!project.prjName</td>
+											<td style="padding:5px;">$!project.prjVersion</td>
+											<td style="padding:5px;">$!project.distributionType</td>
+											<td style="padding:5px;">$!project.creator</td>
+											<td style="padding:5px;">$!project.createdDate</td>
+											<td style="padding:5px;">$!project.reviewer</td>
+										</tr>
+										#end
+									</table>
+								#end
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+					</table>

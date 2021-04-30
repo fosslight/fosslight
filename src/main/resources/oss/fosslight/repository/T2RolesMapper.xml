@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.T2RolesMapper">
+	<resultMap id="T2RolesAndT2SecuredResourcesRole" type="oss.fosslight.domain.T2Roles" autoMapping="true">
+		<id column="AUTHORITY" property="authority" />
+		<collection ofType="oss.fosslight.domain.T2SecuredResourcesRole" property="securedResourcesRole" autoMapping="true" columnPrefix="T2_SECURED_RESOURCES_ROLE__" />
+	</resultMap>
+
+	<select id="getAllRoles" resultType="oss.fosslight.domain.T2Roles">
+		SELECT
+			AUTHORITY,
+			ROLE_NAME,
+			DESCRIPTION
+		FROM T2_ROLES
+		ORDER BY
+			CREATE_DATE DESC, AUTHORITY ASC
+	</select>
+	
+	<select id="getAllRolesAndSecuredResourcesRole" resultMap="T2RolesAndT2SecuredResourcesRole">
+		SELECT
+			T2_ROLES.AUTHORITY AS AUTHORITY,
+			T2_ROLES.ROLE_NAME AS ROLE_NAME,
+			T2_ROLES.DESCRIPTION AS DESCRIPTION,
+			T2_SECURED_RESOURCES_ROLE.RESOURCE_ID AS T2_SECURED_RESOURCES_ROLE__RESOURCE_ID,
+			T2_SECURED_RESOURCES_ROLE.AUTHORITY AS T2_SECURED_RESOURCES_ROLE__AUTHORITY
+		FROM
+			T2_ROLES T2_ROLES LEFT JOIN T2_SECURED_RESOURCES_ROLE T2_SECURED_RESOURCES_ROLE ON T2_ROLES.AUTHORITY = T2_SECURED_RESOURCES_ROLE.AUTHORITY
+		ORDER BY
+			T2_ROLES.CREATE_DATE DESC, T2_ROLES.AUTHORITY ASC
+	</select>
+	
+	<select id="getRoles" parameterType="oss.fosslight.domain.T2Roles" resultType="oss.fosslight.domain.T2Roles">
+		SELECT
+			AUTHORITY,
+			ROLE_NAME,
+			DESCRIPTION
+		FROM T2_ROLES
+		WHERE
+			AUTHORITY = #{authority}
+	</select>
+	
+	<select id="getRolesAndSecuredResourcesRole" resultMap="T2RolesAndT2SecuredResourcesRole">
+		SELECT
+			T2_ROLES.AUTHORITY AS AUTHORITY,
+			T2_ROLES.ROLE_NAME AS ROLE_NAME,
+			T2_ROLES.DESCRIPTION AS DESCRIPTION,
+			T2_SECURED_RESOURCES_ROLE.RESOURCE_ID AS T2_SECURED_RESOURCES_ROLE__RESOURCE_ID,
+			T2_SECURED_RESOURCES_ROLE.AUTHORITY AS T2_SECURED_RESOURCES_ROLE__AUTHORITY
+		FROM
+			T2_ROLES T2_ROLES LEFT JOIN T2_SECURED_RESOURCES_ROLE T2_SECURED_RESOURCES_ROLE ON T2_ROLES.AUTHORITY = T2_SECURED_RESOURCES_ROLE.AUTHORITY
+		WHERE
+			T2_ROLES.AUTHORITY = #{authority}
+	</select>
+	
+	<update id="updateRoles" parameterType="oss.fosslight.domain.T2Roles">
+		UPDATE
+			T2_ROLES
+		SET
+			ROLE_NAME = #{roleName},
+			DESCRIPTION = #{description}
+		WHERE
+			AUTHORITY = #{authority}
+	</update>
+	
+	<insert id="insertRoles" parameterType="oss.fosslight.domain.T2Roles">
+		INSERT INTO T2_ROLES
+		(
+			AUTHORITY,
+			ROLE_NAME,
+			DESCRIPTION
+		)
+		VALUES
+		(
+			#{authority},
+			#{roleName},
+			#{description}
+		)
+	</insert>
+	
+	<delete id="deleteRolesByAuthority" parameterType="string">
+		DELETE FROM T2_ROLES
+		WHERE
+			AUTHORITY = #{authority}
+	</delete>
+</mapper>

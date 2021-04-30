@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib version="2.1" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd">
+	<tlib-version>1.0</tlib-version>
+	<short-name>ct</short-name>
+  <uri></uri>
+  	<function>
+        <description>ADMIN 권한 체크</description>
+        <name>isAdmin</name>
+        <function-class>oss.fosslight.common.CommonFunction</function-class>
+        <function-signature>boolean isAdmin()</function-signature>
+    </function>
+  	<function>
+        <description>VIEWER 권한 체크</description>
+        <name>isViewer</name>
+        <function-class>oss.fosslight.common.CommonFunction</function-class>
+        <function-signature>boolean isViewer()</function-signature>
+    </function>
+    
+    <function>
+        <description>CoConstDef정의된 변수 값을 취득 ( String )</description>
+        <name>getConstDef</name>
+        <function-class>oss.fosslight.common.CommonFunction</function-class>
+        <function-signature>java.lang.String getCoConstDefVal( java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO
+        Result : Vector [ String CD_DTL_NO, String CD_SUB_NO, String CD_DTL_NM ]
+     -->
+    <function>
+        <description>코드값, 코드명, 서브코드값의 Vector리스트 취득( Vector(String) [CODE_DTL.CD_DTL_NO, CODE_DTL.CD_DTL_NM, CODE_DTL.CD_SUB_NO] )</description>
+        <name>getCodeValues</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getValues( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>사용언어를 지정하여, 코드값, 코드명, 서브코드값의 Vector리스트 취득( String [CODE_DTL.CD_DTL_NO, CODE_DTL.CD_DTL_NM, CODE_DTL.CD_SUB_NO] )</description>
+        <name>getCodeValues2</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getValues( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값, 코드명, 서브코드값의 Json리스트 취득( Vector(String) [CODE_DTL.CD_DTL_NO, CODE_DTL.CD_DTL_NM, CODE_DTL.CD_SUB_NO] )</description>
+        <name>getCodeValuesJson</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getValuesJson( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>사용언어를 지정하여, 코드값, 코드명, 서브코드값의 Json리스트 취득( String [CODE_DTL.CD_DTL_NO, CODE_DTL.CD_DTL_NM, CODE_DTL.CD_SUB_NO] )</description>
+        <name>getCodeValuesJson2</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getValuesJson( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO
+        Result : Vector [ String CD_DTL_NM ]
+     -->
+    <function>
+        <description>코드명 리스트 취득</description>
+        <name>getCodeNames</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getCodeNames( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드명 리스트(Json) 취득</description>
+        <name>getCodeNamesJson</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getCodeNamesJson( java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO
+        Result : Vector [ String CD_DTL_NO ]
+     -->
+    <function>
+        <description>코드값 리스트 취득</description>
+        <name>getCodes</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getCodes( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값 리스트(Json) 취득</description>
+        <name>getCodesJson</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getCodesJson( java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO
+        Result : Vector&String [ String CD_DTL_NO, String CD_SUB_NO, String CD_DTL_NM, String CD_DTL_EXP, String CD_BIT, String CD_ORDER ]
+     -->
+    <function>
+        <description>코드값, 서브코드값, 코드명, 코드상세설명, 코드비트값, 코드순위의 Vector리스트 취득</description>
+        <name>getAllValues</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getAllValues( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값, 서브코드값, 코드명, 코드상세설명, 코드비트값, 코드순위의 Json리스트 취득</description>
+        <name>getAllValuesJson</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getAllValuesJson( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값, 코드명의 Vector리스트 취득(※삭제코드포함)</description>
+        <name>getValuesIgnoreUse</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getValuesIgnoreUse( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값, 코드명의 Json리스트 취득(※삭제코드포함)</description>
+        <name>getValuesIgnoreUseJson</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getValuesIgnoreUseJson( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드명 리스트 취득(※삭제코드포함)</description>
+        <name>getCodeNamesIgnoreUse</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getCodeNamesIgnoreUse( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>코드값 리스트 취득(※삭제코드포함)</description>
+        <name>getCodesIgnoreUse</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.util.Vector getCodesIgnoreUse( java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO, String CD_DTL_NO
+        Result : String CD_DTL_NM
+     -->
+    <function>
+        <description>코드 상세명 취득</description>
+        <name>getCodeString</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getCodeString( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>Comments 컬러</description>
+        <name>getCommentColor</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getCommentColor( java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO, String CD_DTL_NO
+        Result : String CD_DTL_EXP
+     -->
+    <function>
+        <description>코드 상세설명 취득</description>
+        <name>getCodeExpString</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>java.lang.String getCodeExpString( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO, String CD_DTL_NO
+        Result : int CD_ORDER
+     -->
+    <function>
+        <description>코드 비트값 취득</description>
+        <name>getCodeBit</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>int getCodeBit( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO, String CD_DTL_NO
+        Result : int CD_ORDER
+     -->
+    <function>
+        <description>코드 순위 취득</description>
+        <name>getCodePriority</name>
+        <function-class>oss.fosslight.common.CoCodeManager</function-class>
+        <function-signature>int getCodePriority( java.lang.String, java.lang.String )</function-signature>
+    </function>
+    <function>
+    	<description>Mac Address 하이픈(-) 처리</description>
+    	<name>getMacAddressForm</name>
+    	<function-class>oss.fosslight.common.CommonFunction</function-class>
+    	<function-signature>java.lang.String getMacAddressForm( java.lang.String )</function-signature>
+    </function>
+    <function>
+        <description>2진 And 비트 연산</description>
+        <name>bitOperAnd</name>
+        <function-class>oss.fosslight.common.CommonFunction</function-class>
+        <function-signature>boolean bitOperAnd( int, int )</function-signature>
+    </function>
+    <function>
+        <description>2진 비트 연산으로 관리되는 코드명들을 ','구분자의 문자열 형태로 만든다.</description>
+        <name>bitOperAndToCodeStringsByComma</name>
+        <function-class>oss.fosslight.common.components.CoTopComponent</function-class>
+        <function-signature>java.lang.String bitOperAndToCodeStringsByComma( java.lang.String, int )</function-signature>
+    </function>
+    <!-- 
+        Param : String CD_NO, int bit
+        Result : String 코드명(컴마로 구분하여 이어진..)
+     -->
+    <function>
+        <description>2진 비트 연산으로 관리되는 코드명들을 ','구분자의 문자열 형태로 만든다.</description>
+        <name>bitOperAndToCodeStringsByCustom</name>
+        <function-class>oss.fosslight.common.components.CoTopComponent</function-class>
+        <function-signature>java.lang.String bitOperAndToCodeStringsByComma( java.lang.String, int, java.lang.String )</function-signature>
+    </function>
+    <function>
+    	<description>코드값을 받아 select 박스를 만들어준다.</description>
+    	<name>genOption</name>
+    	<function-class>oss.fosslight.common.CoCodeManager</function-class>
+    	<function-signature>java.lang.String genOption(java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>코드값을 받아 check 박스를 만들어준다.</description>
+    	<name>genCheckbox</name>
+    	<function-class>oss.fosslight.common.CoCodeManager</function-class>
+    	<function-signature>java.lang.String genCheckbox(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>코드값을 받아 check 박스를 만들어준다.(공통)</description>
+    	<name>genCommonCheckbox</name>
+    	<function-class>oss.fosslight.common.CoCodeManager</function-class>
+    	<function-signature>java.lang.String genCommonCheckbox(java.lang.String, java.lang.String, java.lang.Boolean)</function-signature>
+    </function>
+    <function>
+    	<description>코드값을 받아 select 박스를 만들어준다.</description>
+    	<name>genOptionSelected</name>
+    	<function-class>oss.fosslight.common.CoCodeManager</function-class>
+    	<function-signature>java.lang.String genOption(java.lang.String, java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>리스트값을 받아 select 박스를 만들어준다.</description>
+    	<name>genOptionUsers</name>
+    	<function-class>oss.fosslight.common.CommonFunction</function-class>
+    	<function-signature>java.lang.String genOptionUsers(java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>yyyy-mm-dd hh24:mi:ss 날짜형식 반환.</description>
+    	<name>formatDate</name>
+    	<function-class>oss.fosslight.common.CommonFunction</function-class>
+    	<function-signature>java.lang.String formatDate(java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>yyyy-mm-dd  날짜형식 반환.</description>
+    	<name>formatDateSimple</name>
+    	<function-class>oss.fosslight.common.CommonFunction</function-class>
+    	<function-signature>java.lang.String formatDateSimple(java.lang.String)</function-signature>
+    </function>
+    <function>
+    	<description>코드값을 받아 radio를 만들어준다.</description>
+    	<name>genRadio</name>
+    	<function-class>oss.fosslight.common.CoCodeManager</function-class>
+    	<function-signature>java.lang.String genRadio(java.lang.String, java.lang.String, java.lang.String)</function-signature>
+    </function>
+     <!-- 
+        Param : String
+        Result : String
+     -->
+    <function>
+        <description>password encoding</description>
+        <name>encodePassword</name>
+        <function-class>oss.fosslight.common.components.CoTopComponent</function-class>
+        <function-signature>java.lang.String encodePassword( java.lang.String )</function-signature>
+    </function>
+</taglib>  

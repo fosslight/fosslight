@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.CommentMapper">
+
+	<insert id="registComment" parameterType="oss.fosslight.domain.CommentsHistory"  useGeneratedKeys="true" keyProperty="commId">
+	INSERT INTO
+		COMMENTS_HISTORY
+		(
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
+			COMM_ID ,
+			</if>
+			REFERENCE_ID
+			, REFERENCE_DIV
+			, STATUS
+			, STATUS_CODE
+			, CONTENTS
+			, CREATOR
+			, MODIFIER
+			, EXPANSION1
+		)
+		VALUES
+		(
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
+			#{commId} ,
+			</if>
+			#{referenceId}
+			, #{referenceDiv}
+			, #{status}
+			, #{statusCode}
+			, #{contents}
+			, #{loginUserName}
+			, #{loginUserName}
+			, #{expansion1}
+		) ON DUPLICATE KEY UPDATE
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
+			COMM_ID  = #{commId},
+			</if>
+			REFERENCE_ID = #{referenceId}
+			, REFERENCE_DIV = #{referenceDiv}
+			, CONTENTS = #{contents}
+			, MODIFIER = #{loginUserName}
+	</insert>
+
+	<select id="getCommentList" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
+	SELECT
+		*
+	FROM
+		COMMENTS_HISTORY
+	WHERE
+		REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND USE_YN = 'Y'
+	ORDER BY CREATED_DATE DESC
+	</select>
+	
+	<select id="getCommentInfo" parameterType="String" resultType="oss.fosslight.domain.CommentsHistory">
+	SELECT /* 2018-07-19 choye 변경 */
+		T1.COMM_ID
+		, T1.REFERENCE_ID
+		, T1.REFERENCE_DIV
+		, T1.STATUS
+		, T1.CONTENTS
+		, T1.EXPANSION1
+		, T1.USE_YN
+		, T1.CREATOR
+		, (SELECT T2.USER_NAME FROM T2_USERS T2 WHERE T1.CREATOR = T2.USER_ID) AS CREATOR_NAME
+		, (SELECT S1.CD_DTL_NM FROM T2_CODE_DTL S1 LEFT OUTER JOIN T2_USERS S2 ON S1.CD_DTL_NO=S2.DIVISION WHERE S1.CD_NO='200' AND S2.USER_ID=T1.CREATOR) AS CREATOR_DIVISION_NAME
+		, T1.CREATED_DATE
+		, T1.MODIFIER
+		, (SELECT T3.USER_NAME FROM T2_USERS T3 WHERE T1.MODIFIER = T3.USER_ID) AS MODIFIER_NAME
+		, (SELECT S1.CD_DTL_NM FROM T2_CODE_DTL S1 LEFT OUTER JOIN T2_USERS S2 ON S1.CD_DTL_NO=S2.DIVISION WHERE S1.CD_NO='200' AND S2.USER_ID=T1.MODIFIER) AS MODIFIER_DIVISION_NAME
+		, T1.MODIFIED_DATE
+		, T1.STATUS_CODE
+	FROM
+		COMMENTS_HISTORY T1
+	WHERE T1.COMM_ID = #{commId}
+	</select>
+	
+	<update id="deleteComment" parameterType="oss.fosslight.domain.CommentsHistory">
+	UPDATE 
+		COMMENTS_HISTORY
+	SET 
+		USE_YN= 'N', MODIFIER = #{loginUserName}
+	WHERE 
+		COMM_ID = #{commId}
+	</update>
+	<update id="deleteCommentUserTemp" parameterType="oss.fosslight.domain.CommentsHistory">
+	UPDATE 
+		COMMENTS_HISTORY
+	SET 
+		USE_YN= 'N'
+	WHERE 
+		USE_YN = 'Y'
+		AND REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND MODIFIER = #{loginUserName}
+	</update>
+	
+	<update id="deleteCommentByReferenceId" parameterType="oss.fosslight.domain.CommentsHistory">
+	UPDATE 
+		COMMENTS_HISTORY
+	SET 
+		USE_YN= 'N', MODIFIER = #{loginUserName}
+	WHERE 
+		REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+	</update>
+	
+	<select id="selectLastComment" resultType="oss.fosslight.domain.CommentsHistory">
+	SELECT
+		*
+	FROM
+		COMMENTS_HISTORY
+	WHERE
+		COMM_ID = (SELECT MAX(COMM_ID) FROM COMMENTS_HISTORY)
+	</select>
+	
+	<select id="getContent" parameterType="String" resultType="String">
+	SELECT
+		CONTENTS
+	FROM
+		COMMENTS_HISTORY
+	WHERE
+		COMM_ID = #{comments}
+		AND USE_YN = 'Y'
+	</select>
+	<select id="getUserComment" parameterType="oss.fosslight.domain.CommentsHistory" resultType="String">
+	SELECT CONTENTS FROM COMMENTS_HISTORY
+	WHERE
+		USE_YN = 'Y'
+		AND REFERENCE_ID = #{referenceId}
+		AND REFERENCE_DIV = #{referenceDiv}
+		AND CREATOR = #{loginUserName}
+	ORDER BY MODIFIED_DATE DESC
+	LIMIT 1
+	</select>
+	
+	<select id="getCommentListHis" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
+	SELECT
+		*
+	FROM
+		COMMENTS_HISTORY
+	WHERE
+		REFERENCE_ID = #{referenceId}
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+				AND REFERENCE_DIV IN ('19', '10', '12', '14')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+				AND REFERENCE_DIV IN ('30')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+				AND REFERENCE_DIV IN ('40')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+				AND REFERENCE_DIV IN ('20')
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV IN ('99')
+			</otherwise>
+		</choose>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
+			AND REFERENCE_DIV = #{schReferenceDiv}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+			AND ${schKeywordSql}
+		</if>
+		AND USE_YN = 'Y'
+	ORDER BY 
+	
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+			CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
+		</if>
+	CREATED_DATE DESC
+	LIMIT 5
+	</select>
+	
+	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
+		UPDATE COMMENTS_HISTORY 
+		SET CONTENTS = #{contents}, MODIFIER = #{loginUserName}
+		WHERE COMM_ID = #{commId}
+			 
+	</update>
+	
+	<update id="updateHistoryReadYn" parameterType="oss.fosslight.domain.CommentsHistory">
+		INSERT INTO COMMENTS_HISTORY_READ 
+		VALUES (
+			#{commId}
+			, #{referenceId}
+			, #{referenceDiv}
+			, 'Y'
+			, #{loginUserName}
+			, now())
+		ON DUPLICATE KEY UPDATE
+			COMM_ID = #{commId}
+			, REFERENCE_ID = #{referenceId}
+			, REFERENCE_DIV = #{referenceDiv}
+			, CREATOR = #{loginUserName}
+	</update>
+	
+	<select id="getMoreCommentListHis" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
+	SELECT
+		G1.*
+	FROM (
+		SELECT
+			@ROWNUM := @ROWNUM+1 AS RNUM, T1.*
+		FROM
+			COMMENTS_HISTORY T1
+			, (SELECT @ROWNUM := 0) R
+		WHERE
+			T1.REFERENCE_ID = #{referenceId}
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+					AND T1.REFERENCE_DIV IN ('19', '10', '12', '14')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+					AND T1.REFERENCE_DIV IN ('30')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+					AND T1.REFERENCE_DIV IN ('40')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+					AND T1.REFERENCE_DIV IN ('20')
+				</when>
+				<otherwise>
+					AND T1.REFERENCE_DIV IN ('99')
+				</otherwise>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
+				AND T1.REFERENCE_DIV = #{schReferenceDiv}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+				AND ${schKeywordSql}
+			</if>
+			AND T1.USE_YN = 'Y'
+		ORDER BY 
+		
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+				CASE WHEN T1.CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
+			</if>
+		T1.CREATED_DATE DESC
+		) AS G1
+	WHERE G1.RNUM > 5
+	ORDER BY RNUM
+	</select>
+	
+	<select id="getCommentListHisCnt" parameterType="oss.fosslight.domain.CommentsHistory" resultType="int">
+	SELECT
+		COUNT(1)
+	FROM
+		COMMENTS_HISTORY
+	WHERE
+		REFERENCE_ID = #{referenceId}
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+				AND REFERENCE_DIV IN ('19', '10', '12', '14')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'license')">
+				AND REFERENCE_DIV IN ('30')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'oss')">
+				AND REFERENCE_DIV IN ('40')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
+				AND REFERENCE_DIV IN ('20')
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV IN ('99')
+			</otherwise>
+		</choose>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schReferenceDiv)">
+			AND REFERENCE_DIV = #{schReferenceDiv}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
+			AND ${schKeywordSql}
+		</if>
+		AND USE_YN = 'Y'
+	</select>
+	
+</mapper>

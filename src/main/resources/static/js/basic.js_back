@@ -1,0 +1,102 @@
+$(document).ready(function (){
+
+	/*$('.btn_acc').click(function(){
+		$('.accpop').show();
+		$('#blind_wrap').show();
+		$('html, body').animate({scrollTop: $("#wrap").offset().top}, 0);
+		$('html').css('overflow','hidden');
+	});//팝업 열기
+
+	$('.pclose').click(function(){
+		$('.pop').hide();
+		$('#blind_wrap').hide();
+		$('html').css('overflow','auto');
+	}); // 팝업 닫기*/
+
+	
+	$(function(){
+		$( '.cal' ).datepicker({
+			dateFormat:"yy.mm.dd"
+		});
+	}); // 달력
+
+	$(function() {
+		var availableTags = [
+		  "ActionScript",
+		  "AppleScript",
+		  "AppleScript1",
+		  "Asp",
+		  "BASIC",
+		  "C",
+		  "C++",
+		  "Clojure",
+		  "COBOL",
+		  "ColdFusion",
+		  "Erlang",
+		  "Fortran",
+		  "Groovy",
+		  "Haskell",
+		  "Java",
+		  "JavaScript",
+		  "Lisp",
+		  "Perl",
+		  "PHP",
+		  "Python",
+		  "Ruby",
+		  "Scala",
+		  "Scheme"
+		];
+		$( ".autoCom" ).autocomplete({
+		  source: availableTags
+		});
+	}); // 자동완성
+
+	
+	var select = $(".selectSet select");
+	select.change(function(){
+		var select_name = $(this).children("option:selected").text();
+		$(this).siblings("strong").text(select_name);
+	});
+	for (i=0; i<$(".selectSet select").length; i++){
+		var select_ = $(".selectSet select").get(i);
+		if($(select_).is(":disabled")) $(select_).siblings('strong').css('opacity','0.5');
+	} // select disabled opacity
+
+
+	/* Create new tab function */
+	$(function newTab() {
+		var $tabs = $('#nav-tabs').tabs();
+		$('.add-tab').click(function (e) {
+			e.preventDefault()
+			var tabName = $(this).text(),
+				tabLink = $(this).attr('href'),
+				tabNumber = -1;
+			$tabs.find('.nav-tab-menu li span').each(function (i) {
+				if ($(this).text() == tabName) {
+					tabNumber = i;
+				}
+			});
+			if (tabNumber >= 0) {
+				$tabs.tabs('option', 'active', tabNumber)
+			} else {
+				$("<li><span><a href=" + tabLink + ">" + tabName + "</a></span><input type='button' value='x' class='ui-icon ui-icon-close' /></li>")
+					.appendTo(".nav-tab-menu");
+				$("#nav-tabs").tabs("refresh");
+				$('#nav-tabs').tabs('option', 'active', -1);
+			}	
+			return false
+		})
+	});
+	/* Delete tab function */
+	$(document).on('click', '.ui-icon-close', function (event) {
+		var parent = $(this).parent(),
+			index = parent.index(),
+			tabs = $(this).closest(".ui-tabs")
+			panel = tabs.children().eq(index + 1)
+			parent.remove()
+			panel.remove()
+			tabs.tabs("refresh").tabs('option', 'active', -1);
+	});
+
+
+});

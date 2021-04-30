@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ApiOssMapper">
+	<select id="getOssInfo" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		SELECT OM.OSS_NAME
+			 , OM.OSS_VERSION
+			 , OM.LICENSE_DIV
+			 , TRIM(REPLACE(REPLACE(GROUP_CONCAT( CONCAT(OL.OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '), ' AND ', ','), ' OR ', '|')) AS LICENSE
+			 , OM.COPYRIGHT
+		  	 , IF(OM.OBLIGATION_TYPE = '10' OR OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS NOTICE
+			 , IF(OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS SOURCE
+		  FROM OSS_MASTER OM
+		 INNER JOIN OSS_LICENSE OL ON OM.OSS_ID = OL.OSS_ID
+		 INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
+		 WHERE OM.OSS_NAME = #{ossName}
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+		   AND OM.OSS_VERSION = #{ossVersion}
+		 </if>
+		 GROUP BY OM.OSS_ID
+	</select>
+	
+	<select id="getOssName" parameterType="String" resultType="String">
+		SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossName}
+	</select>
+	
+	<select id="getOssInfoByDownloadLocation" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT OM.OSS_NAME
+			 , OM.OSS_VERSION
+			 , OM.LICENSE_DIV
+			 , TRIM(REPLACE(REPLACE(GROUP_CONCAT( CONCAT(OL.OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '), ' AND ', ','), ' OR ', '|')) AS LICENSE
+		  FROM OSS_MASTER OM
+		 INNER JOIN OSS_LICENSE OL ON OM.OSS_ID = OL.OSS_ID
+		 INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
+		 WHERE OM.DOWNLOAD_LOCATION = #{downloadLocation}
+		 GROUP BY OM.OSS_ID
+	</select>
+	
+	<select id="getLicenseInfo" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT A.* 
+		  FROM (SELECT LM.LICENSE_NAME
+				     , IFNULL(LM.SHORT_IDENTIFIER, '') AS IDENTIFIER
+					 , IFNULL(GROUP_CONCAT(NICK.LICENSE_NICKNAME), '') AS NICKNAME
+					 , IFNULL(LM.OBLIGATION_NOTIFICATION_YN, 'N') AS NOTICE
+					 , IFNULL(LM.OBLIGATION_DISCLOSING_SRC_YN, 'N') AS SOURCE
+					 , LM.LICENSE_TEXT
+					 , LM.DESCRIPTION AS USER_GUIDE
+					 , (SELECT IFNULL(GROUP_CONCAT(CD_DTL_NM), '') FROM T2_CODE_DTL WHERE CD_NO = '226' AND LM.RESTRICTION LIKE CONCAT('%', CD_DTL_NO, '%')) AS RESTRICTION
+					 , IFNULL(LM.ATTRIBUTION, '') AS ATTRIBUTION
+					 , (SELECT IFNULL(CD_DTL_NM, '') FROM T2_CODE_DTL WHERE CD_NO = '201' AND CD_DTL_NO = LM.LICENSE_TYPE) AS LICENSE_TYPE
+				  FROM LICENSE_MASTER LM
+				  LEFT JOIN LICENSE_NICKNAME NICK ON LM.LICENSE_NAME = NICK.LICENSE_NAME
+				 WHERE (LM.LICENSE_NAME = #{licenseName}
+						OR LM.SHORT_IDENTIFIER = #{licenseName}
+			 			OR NICK.LICENSE_NICKNAME = #{licenseName})) A
+		 WHERE A.LICENSE_NAME IS NOT NULL
+	</select>
+	
+		
+	<select id="selectOssNicknameList" parameterType="String" resultType="String">
+		SELECT OSS_NICKNAME
+		FROM
+			OSS_NICKNAME
+		WHERE
+			OSS_NAME = #{ossName}
+		ORDER BY OSS_NICKNAME
+	</select>
+</mapper>

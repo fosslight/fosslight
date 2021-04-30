@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="oss.fosslight.repository.T2UserMapper">
+    
+    <sql id="limitPage">
+        LIMIT #{startIndex}, #{pageListSize}
+    </sql>
+        
+    <!-- 리스트 총 개수 -->
+    <select id="selectUserTotalCount" parameterType="oss.fosslight.domain.T2Users" resultType="int">
+    SELECT
+            COUNT(*)
+        FROM
+            T2_USERS
+	    WHERE
+	    	1=1
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userId)">
+	             AND USER_ID LIKE CONCAT('%',#{userId},'%')
+	        </if>
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userName)">
+	             AND USER_NAME LIKE CONCAT('%',#{userName},'%')
+	        </if>
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+	             AND DIVISION LIKE CONCAT('%',#{division},'%')
+	        </if>
+    </select>
+    <!-- 리스트 가져오기 -->
+    <select id="getAllUsers" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users">
+		SELECT T1.USER_ID, T1.USER_NAME, T1.EMAIL, T1.ENABLED, T1.CREATED_DATE, T2.AUTHORITY
+		FROM T2_USERS T1
+		INNER JOIN T2_AUTHORITIES T2 ON T1.USER_ID = T2.USER_ID
+        WHERE
+            T1.USE_YN = 'Y' 
+        <if test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(schValue)">
+            <if test="@oss.fosslight.util.StringUtil@equals('userId', schCondition)">
+                AND T1.USER_ID LIKE CONCAT('%',#{schValue},'%')
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@equals('userNm', schCondition)">
+                AND T1.USER_NAME LIKE CONCAT('%',#{schValue},'%')
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@equals('auth', schCondition)">
+                AND T2.AUTHORITY = #{schValue}
+            </if>
+        </if> 
+        <choose>
+            <when test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortField) and !@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortOrder) ">
+                <if test="@oss.fosslight.util.StringUtil@equals('userId', sortField)">
+                ORDER BY USER_ID ${sortOrder}
+                </if>
+                <if test="@oss.fosslight.util.StringUtil@equals('userName', sortField)">
+                ORDER BY USER_NAME ${sortOrder}
+                </if>
+            </when>
+            <otherwise>
+                ORDER BY CREATED_DATE DESC
+            </otherwise>
+        </choose> 
+    </select>
+    <!-- 특정 사용자 가져오기 -->
+    <select id="getUser" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users"> 
+        SELECT
+            A.AUTHORITY,
+            U.USER_ID,
+            U.USER_NAME,
+            U.EMAIL,
+            U.DIVISION,
+            U.ENABLED,
+            U.DEFAULT_TAB,	/* 2018-08-14 choye 추가 */
+            U.USE_YN,
+            U.CREATED_DATE,
+            U.TOKEN,
+            DATE_FORMAT(U.EXPIRE_DATE, '%Y-%m-%d') AS EXPIRE_DATE
+        FROM 
+            T2_USERS U
+            INNER JOIN (SELECT AUTHORITY
+                            , USER_ID
+                        FROM T2_AUTHORITIES
+                        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userId)">
+	                        WHERE USER_ID = #{userId}
+	                        LIMIT 1
+                        </if>
+                        ) A ON U.USER_ID=A.USER_ID
+            INNER JOIN T2_ROLES R ON A.AUTHORITY = R.AUTHORITY
+      <if test="@oss.fosslight.util.StringUtil@isEmpty(userId)">
+        WHERE U.TOKEN = #{token}
+          AND DATEDIFF(U.EXPIRE_DATE, NOW()) >= 0
+      </if>
+    </select>
+    <!-- 특정 권한 사용자 목록 가져오기 -->
+    <select id="getAuthorityUsers" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
+        SELECT
+            A.AUTHORITY AS AUTHORITY,
+            U.USER_ID USER_ID,
+            U.USER_NAME AS USER_NAME,
+            U.EMAIL AS EMAIL,
+            U.DIVISION AS DIVISION,
+            U.ENABLED AS ENABLED,
+            U.CREATED_DATE AS CREATED_DATE
+        FROM 
+            T2_USERS U
+            INNER JOIN (SELECT AUTHORITY
+                            , USER_ID
+                        FROM T2_AUTHORITIES
+                        WHERE AUTHORITY = #{role}
+                        ) A ON U.USER_ID=A.USER_ID
+            INNER JOIN T2_ROLES R ON A.AUTHORITY = R.AUTHORITY
+        WHERE U.USE_YN = 'Y'
+    </select>
+    
+    <select id="getPassword" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users">
+        SELECT PASSWORD FROM T2_USERS WHERE USER_ID = #{userId}
+    </select>
+    <!-- ID중복여부 체크 -->
+    <select id="selectDuplicateId" parameterType="String" resultType="int">
+    SELECT
+        COUNT(USER_ID)
+    FROM
+        T2_USERS
+    WHERE
+        USER_ID = #{userId}
+    </select>
+    <!-- 사용자 등록 -->
+    <insert id="insertUsers" parameterType="oss.fosslight.domain.T2Users">
+    INSERT INTO
+        T2_USERS(
+            USER_ID
+            , USER_NAME
+            , PASSWORD
+            , EMAIL
+            , DIVISION
+            , CREATOR
+            , MODIFIER
+        ) VALUES(
+            #{userId}
+            , #{userName}
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(password)">
+            , #{password}
+            </if>
+            , #{email}
+            , #{division}
+            , #{creator}
+            , #{modifier}
+        )
+    </insert>
+    <!-- 권한등록 -->
+    <insert id="insertAuthority" parameterType="oss.fosslight.domain.T2Users">
+    INSERT INTO
+    	T2_AUTHORITIES(
+    					USER_ID
+    					, AUTHORITY
+    			)VALUES(
+    					#{userId}
+    					, 'ROLE_USER'
+    			)
+    </insert>
+    <!-- 사이트 사용여부 변경-->
+    <update id="changeEnabled" parameterType="oss.fosslight.domain.T2Users">
+    UPDATE 
+        T2_USERS 
+        SET 
+        <if test="@oss.fosslight.util.StringUtil@equals('1', enabled)">
+            ENABLED = 1
+        </if>
+        <if test="@oss.fosslight.util.StringUtil@equals('2', enabled)">
+            ENABLED = 0
+        </if>
+        WHERE USER_ID = #{userId}
+    </update>
+    <!-- 유저 수정 -->
+	<update id="updateUsers" parameterType="oss.fosslight.domain.T2Users">
+        UPDATE 
+        	T2_USERS 
+        SET USER_ID = #{userId}
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userName)">
+            , USER_NAME = #{userName}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+            , DIVISION = #{division}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdDate)">
+            , CREATED_DATE = #{createdDate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(password)">
+            , PASSWORD = #{password}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(email)">
+        	, EMAIL = #{email}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+        	, DIVISION = #{division}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+            , MODIFIER = #{modifier}
+        </if>
+        	, USE_YN = #{useYn}
+        WHERE 
+        	USER_ID = #{userId}
+    </update>
+    <!-- 사용자 삭제 -->
+    <update id="deleteUserTypeDelYNUpdate" parameterType="String">
+    UPDATE
+        T2_USERS
+        SET
+        USE_YN = 'N'
+    WHERE
+        USER_ID = #{userId}
+    </update>
+    
+    <!-- 유저 목록 가져오기 -->
+	<select id="selectUserList" resultType="oss.fosslight.domain.T2Users">
+	SELECT
+		*
+	FROM
+	 T2_USERS WHERE USE_YN = 'Y' ORDER BY DIVISION, USER_NAME
+	</select>
+	
+	<!-- 유저 목록 가져오기 -->
+    <select id="selectParamUserList" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users">
+	    SELECT
+	        T1.USER_ID
+	        , T1.USER_NAME
+	        , T1.EMAIL
+	        , T1.DIVISION
+	        , T1.USE_YN
+	        , T1.TOKEN
+	        , DATE_FORMAT(T1.EXPIRE_DATE, '%Y-%m-%d') AS EXPIRE_DATE
+	        , DATE_FORMAT(T1.CREATED_DATE, '%Y-%m-%d') AS CREATED_DATE
+	        , IF(T2.AUTHORITY='ROLE_ADMIN', 'V', 'N') AS AUTHORITY
+	    FROM
+            T2_USERS T1
+		INNER JOIN T2_AUTHORITIES T2 
+			ON ( T1.USER_ID = T2.USER_ID )
+	    WHERE 1=1
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userId)">
+	             AND T1.USER_ID LIKE CONCAT('%',#{userId},'%')
+	        </if>
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(userName)">
+	             AND T1.USER_NAME LIKE CONCAT('%',#{userName},'%')
+	        </if>
+	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+	             AND T1.DIVISION LIKE CONCAT('%',#{division},'%')
+	        </if>
+
+	    ORDER BY DIVISION, USER_NAME
+    </select>
+	
+	<select id="selectReviwer" resultType="oss.fosslight.domain.T2Users">
+	/* T2UserMapper.selectReviwer */
+		SELECT 
+			T1.USER_ID
+			, T1.USER_NAME
+			, T1.EMAIL
+			, T1.DIVISION
+		FROM T2_USERS T1
+			INNER JOIN T2_AUTHORITIES T2 
+				ON T1.USER_ID = T2.USER_ID AND T2.AUTHORITY = 'ROLE_ADMIN'
+		WHERE 
+			T1.USE_YN = #{adminYn}
+		 <if test="@oss.fosslight.util.StringUtil@equals('Y', ldapFlag)">
+			AND T1.PASSWORD IS NULL
+		 </if>
+		ORDER BY USER_NAME
+	</select>
+	
+	<!-- 유저 권한 가져오기  -->
+	<select id="selectAuthority" parameterType="String" resultType="String">
+	SELECT
+		AUTHORITY
+	FROM
+		T2_AUTHORITIES
+	WHERE
+		USER_ID = #{userId}
+	</select>
+	
+	
+    <!-- 유저 수정 -->
+	<update id="updateAuthorities" parameterType="oss.fosslight.domain.T2Users">
+        UPDATE 
+        	T2_AUTHORITIES 
+        SET 
+            AUTHORITY = #{authority}
+        WHERE 
+        	USER_ID = #{userId}
+    </update>
+    
+    <select id="checkDuplicateId" resultType="String" parameterType="oss.fosslight.domain.T2Users">
+    SELECT
+		IF(COUNT(*) > 0, 'DUPLICATE', 'NO DUPLICATE')
+	FROM
+		T2_USERS
+	WHERE
+		USER_ID = #{userId}
+    </select>
+    
+    <select id="selectAllUsersDivision" resultType="oss.fosslight.domain.T2Users">
+	SELECT
+		A.USER_ID, A.USER_NAME, B.CD_DTL_NM AS DIVISION
+	FROM
+		T2_USERS A
+		LEFT JOIN T2_CODE_DTL B
+		ON A.DIVISION = B.CD_DTL_NO
+		AND B.CD_NO = '200'
+	WHERE A.USE_YN = 'Y' ORDER BY DIVISION, A.USER_NAME
+	</select>
+	
+	<select id="selectCheckEmail" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
+    /*email check*/
+        SELECT
+            A.USER_ID,
+            A.DIVISION,
+			B.CD_DTL_NM AS DIVISION_NAME            
+        FROM 
+            T2_USERS A
+            LEFT JOIN T2_CODE_DTL B
+			ON A.DIVISION = B.CD_DTL_NO
+			AND B.CD_NO = '200'
+        WHERE EMAIL = #{email}
+    </select>
+    
+    <update id="updateProjectWatcherUserInfo" parameterType="oss.fosslight.domain.T2Users">
+    	UPDATE PROJECT_WATCHER SET DIVISION = #{division}, USER_ID = #{userId}, EMAIL = NULL WHERE EMAIL = #{email}
+    </update>
+    <update id="updateBatWatcherUserInfo" parameterType="oss.fosslight.domain.T2Users">
+    	UPDATE BAT_WATCHER SET DIVISION = #{division}, USER_ID = #{userId}, EMAIL = NULL WHERE EMAIL = #{email}
+    </update>
+    <update id="updatePartnerWatcherUserInfo" parameterType="oss.fosslight.domain.T2Users">
+    	UPDATE PARTNER_WATCHER SET DIVISION = #{division}, USER_ID = #{userId}, EMAIL = NULL WHERE EMAIL = #{email}
+    </update>
+    
+    <select id="getUserListByName" parameterType="String" resultType="oss.fosslight.domain.T2Users">SELECT * FROM T2_USERS WHERE USER_NAME = #{name} AND USE_YN = 'Y'</select>
+    
+    <update id="procToken" parameterType="oss.fosslight.domain.T2Users">
+			UPDATE T2_USERS
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('CREATE', tokenType)">
+			   SET TOKEN = #{token}, EXPIRE_DATE = #{expireDate} 
+		    </when>
+			<when test="@oss.fosslight.util.StringUtil@equals('DELETE', tokenType)">
+			   SET TOKEN = null, EXPIRE_DATE = null
+			</when>
+		</choose>
+		     WHERE EMAIL = #{email} AND USER_ID = #{userId}
+	</update>
+	
+	<select id="existUserIdOrEmail" resultType="int">
+		SELECT COUNT(*) FROM T2_USERS WHERE USE_YN = 'Y' AND (USER_ID = #{userId} OR EMAIL = #{userId})
+	</select>
+</mapper>

@@ -1,0 +1,84 @@
+#set($hash = "#")
+$hash$hash$hash Open Source Software Notice $hash$hash$hash
+
+#if($!{editCompanyYn} == "Y")This product from $!{companyNameFull} contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.#end
+#if($!{editCompanyYn} != "Y")This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.#end
+
+#if($!{disclosureObligationSize} != "0")	
+#foreach( $!{closeSource} in $!{disclosureObligationList} ) 
+$!{closeSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{closeSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
+$!{closeSource.copyrightText}
+
+#end
+#if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y")The source code for the above may be obtained free of charge from $!{companyNameFull} at $!{distributionSiteUrl}.#end
+#if($!{editCompanyYn} == "N" && $!{editDistributionSiteUrlYn} == "Y")The source code for the above may be obtained free of charge from $!{distributionSiteUrl}.#end
+#if($!{editDistributionSiteUrlYn} == "N") #end
+#if($!{editDistributionSiteUrlYn} == "Y" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid for a period of three years after our last shipment of this product. This offer is valid to anyone in receipt of this information.#end
+#if($!{editDistributionSiteUrlYn} == "N" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid for a period of three years after our last shipment of this product. This offer is valid to anyone in receipt of this information.#end
+#if($!{editEmailYn} == "N") #end 
+#end
+
+#if($!{noticeObligationSize} != "0")
+Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in to tables below.
+
+#foreach( $!{openSource} in $!{noticeObligationList} ) 
+$!{openSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{openSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
+#if($!{openSource.copyrightText} != "")
+$!{openSource.copyrightText}
+#end
+
+#end
+#end
+		
+#if($!attributionList || $!ossAttributionList)
+#if($!{isSimpleNotice} != "Y") 
+_________________________________________________________________________________________________________________________
+#end
+
+#foreach( $attr in $attributionList )
+$attr.licenseName Attribution
+$attr.attribution
+
+#end
+
+#if($!ossAttributionList)
+#foreach( $value in $ossAttributionList )
+#set ($s = $value.split("__"))
+#set ($ossname = $s[0])
+#set ($attribution = $s[1])
+$ossname Attribution
+$attribution
+
+#end
+#end
+#end
+
+#foreach( $!{license} in $!{licenseList} )
+#if($!{license.licenseName} != "") 
+_________________________________________________________________________________________________________________________
+
+
+$!{license.licenseName}
+
+
+$!{license.licenseText}
+
+
+#end
+#end
+#if($!licenseListUrls)
+#foreach( $!{license} in $!{licenseListUrls} )
+#if($!{license.licenseName} != "") 
+$!{license.licenseName} : $!{license.webpage}
+#end
+#end
+#end
+		
+#if($!{editAppendedYn} == "Y") 
+_________________________________________________________________________________________________________________________
+
+$!{appended} 
+#end #if($!{editAppendedYn} == "N") #end
+
+#set ($s = $noticeTitle.split(".txt"))
+($s.get(0))

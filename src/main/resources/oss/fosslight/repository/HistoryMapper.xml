@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.HistoryMapper">
+	
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	
+	<sql id="history_table">
+		SELECT LICENSE_ID AS H_KEY, LICENSE_NAME AS H_TITLE, '300' AS H_TYPE FROM LICENSE_MASTER
+			UNION ALL SELECT OSS_ID, OSS_NAME, '301' FROM OSS_MASTER
+			UNION ALL SELECT PRJ_ID, PRJ_NAME, '303' FROM PROJECT_MASTER
+	</sql>
+	
+	<insert id="insertHistoryData" parameterType="oss.fosslight.domain.History" useGeneratedKeys="true" keyProperty="idx">
+		INSERT INTO HISTORY (H_KEY, H_TITLE, H_TYPE, H_COMMENT, H_ETC, MODIFIER, MODIFIED_DATE, H_ACTION, H_DATA)
+		VALUES(#{hKey}, #{hTitle}, #{hType}, #{hComment}, #{hEtc}, #{modifier}, #{modifiedDate}, #{hAction}, #{hData})
+	</insert>
+	
+	<select id="selectHistoryDataTotalCount" parameterType="oss.fosslight.domain.History" resultType="int">
+		SELECT 
+			count(1)
+		FROM HISTORY
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hType)">
+		AND H_TYPE = #{hType}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hEtc)">
+		AND H_ETC LIKE CONCAT('%',#{hEtc},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hTitle)">
+		AND H_TITLE LIKE CONCAT('%',#{hTitle},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hAction)">
+		AND H_ACTION = #{hAction}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+			AND MODIFIED_DATE <![CDATA[>=]]> #{startDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+			AND MODIFIED_DATE <![CDATA[<=]]> #{endDate}
+		</if>
+	</select>
+	
+	<select id="selectHistoryData" parameterType="oss.fosslight.domain.History" resultType="oss.fosslight.domain.History">
+		SELECT 
+			IDX
+			, H_KEY
+			, H_TITLE
+			, H_TYPE
+			, (SELECT CD_NM FROM T2_CODE WHERE CD_NO = H_TYPE) AS H_TYPE_NM
+			, H_COMMENT 
+			, H_ETC
+			, MODIFIER
+			, MODIFIED_DATE
+			, H_ACTION
+		FROM HISTORY
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hType)">
+		AND H_TYPE = #{hType}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hEtc)">
+		AND H_ETC LIKE CONCAT('%',#{hEtc},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hTitle)">
+		AND H_TITLE LIKE CONCAT('%',#{hTitle},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(hAction)">
+		AND H_ACTION = #{hAction}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+		AND MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
+			AND MODIFIED_DATE <![CDATA[>=]]> #{startDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
+			AND MODIFIED_DATE <![CDATA[<=]]> #{endDate}
+		</if>
+		<bind name="field" value="@oss.fosslight.util.StringUtil@convertToUnderScore(sortField)"/>
+		ORDER BY ${field} ${sortOrder}
+		<include refid="limitPage"/>
+	</select>
+	
+	<select id="selectOneHistoryData" parameterType="oss.fosslight.domain.History" resultType="oss.fosslight.domain.History">
+		SELECT A.IDX, A.H_KEY, B.H_TITLE, A.H_TYPE, C.CD_NM AS H_TYPE_NM , A.H_COMMENT , A.H_ETC, A.MODIFIER, A.MODIFIED_DATE, A.H_ACTION, A.H_DATA FROM HISTORY A
+		INNER JOIN 
+			(<include refid="history_table"/>) B ON A.H_KEY = B.H_KEY AND A.H_TYPE = B.H_TYPE
+		LEFT JOIN
+			T2_CODE C ON A.H_TYPE = C.CD_NO
+		WHERE IDX = #{idx}
+	</select>
+	
+	<select id="selectOneHistoryBeforeData" parameterType="oss.fosslight.domain.History" resultType="oss.fosslight.domain.History">
+		SELECT IDX, H_KEY, H_TITLE, H_TYPE, H_COMMENT, H_ETC, MODIFIER, MODIFIED_DATE, H_ACTION, H_DATA 
+		FROM HISTORY WHERE H_KEY = #{hKey} AND H_TYPE = #{hType} AND IDX <![CDATA[<]]> #{idx} ORDER BY IDX DESC LIMIT 1
+	</select>
+</mapper>

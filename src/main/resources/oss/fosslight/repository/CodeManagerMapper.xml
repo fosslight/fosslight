@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="oss.fosslight.repository.CodeManagerMapper">
+
+    <sql id="limitPage">
+        LIMIT #{startIndex}, #{pageListSize}
+    </sql>
+    
+    <select id="getCodeInfo" parameterType="oss.fosslight.domain.CodeBean" resultType="oss.fosslight.domain.CodeBean">
+        <![CDATA[
+         SELECT    *
+         FROM     T2_CODE
+         WHERE 1 = 1
+         AND CD_NO = #{cdNo}
+         ]]>
+    </select>
+    
+    <select id="getCodeDtlList" parameterType="oss.fosslight.domain.CodeBean" resultType="oss.fosslight.domain.CodeDtlBean">
+         SELECT 
+             CD_NO
+             ,CD_SUB_NO
+            ,CD_DTL_NO
+            ,CD_DTL_NM
+            ,CD_DTL_EXP
+            ,CD_ORDER
+            ,USE_YN
+         FROM     T2_CODE_DTL
+         WHERE CD_NO = #{cdNo}
+         ORDER BY CD_ORDER
+    </select>
+   			
+    <update id="updateCode" parameterType="oss.fosslight.domain.CodeBean" >
+        <![CDATA[
+            UPDATE T2_CODE
+            SET 
+                CD_NM = #{cdNm},
+                CD_EXP = #{cdExp},
+                SYS_CD_YN = #{sysCdYn}
+            WHERE CD_NO = #{cdNo}
+        ]]>
+    </update>
+     
+    <insert id="insertCode" parameterType="oss.fosslight.domain.CodeBean">
+
+          INSERT
+          INTO T2_CODE
+          (
+            CD_NO
+            ,CD_NM
+            ,CD_EXP
+            ,SYS_CD_YN
+          )
+          VALUES
+          (
+             #{cdNo}
+             ,#{cdNm}
+             ,#{cdExp}
+             ,#{sysCdYn}
+          )
+          <!-- 
+          <selectKey resultClass="String">
+              SELECT LAST_INSERT_ID();
+          </selectKey>
+           -->
+  </insert>
+  
+    <insert id="insertCodeDtl" parameterType="oss.fosslight.domain.CodeDtlBean">
+ 
+          INSERT
+          INTO T2_CODE_DTL
+          (
+            CD_NO
+            ,CD_SUB_NO
+            ,CD_DTL_NO
+            ,CD_DTL_NM
+            ,CD_DTL_EXP
+            ,CD_ORDER
+            ,USE_YN
+          )
+          VALUES
+          (
+             #{cdNo}
+             ,#{cdSubNo}
+             ,#{cdDtlNo}
+             ,#{cdDtlNm}
+             ,#{cdDtlExp}
+             ,#{cdOrder}
+             ,#{useYn}
+          )
+  </insert>
+  
+    <select id="getCodeListAll" resultType="oss.fosslight.domain.CodeDtlBean">
+          SELECT 
+             T1.CD_NO
+            ,T2.CD_SUB_NO
+            ,T1.CD_NM
+            ,T2.CD_DTL_NO            
+            ,T2.CD_DTL_NM            
+            ,T2.CD_DTL_EXP
+            ,T2.CD_ORDER
+            ,T2.USE_YN
+         FROM     T2_CODE T1
+         INNER JOIN T2_CODE_DTL T2 ON T1.CD_NO = T2.CD_NO
+         ORDER BY T1.CD_NO, T2.CD_ORDER
+    </select>
+    
+    <select id="getCodeList" resultType="oss.fosslight.domain.CodeBean">
+          SELECT 
+             T1.CD_NO
+            ,T1.CD_NM
+            ,T1.CD_EXP
+         FROM     T2_CODE T1
+         ORDER BY T1.CD_NO
+    </select>
+  </mapper>

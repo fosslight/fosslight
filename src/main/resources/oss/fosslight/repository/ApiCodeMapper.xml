@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ApiCodeMapper">
+
+	<select id="selectCodeList" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT CD_DTL_NO
+		     , CD_DTL_NM
+		  FROM T2_CODE_DTL
+		 WHERE CD_NO = #{cdNo}
+		   AND USE_YN = 'Y'
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(detailValue)">
+		   AND CD_DTL_NM LIKE CONCAT('%', REGEXP_REPLACE(#{detailValue}, '_', '\\\\_'), '%')
+		 </if>
+	</select>
+</mapper>
