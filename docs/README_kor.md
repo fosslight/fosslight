@@ -43,4 +43,4 @@ FOSSLight은 이슈 수정뿐만 아니라 신규 기능 추가와 같은 기여
 
 ## License
 Copyright (c) 2021 LG Electronics  
-FOSSLight은 Open Source License인 [AGPL-3.0](LICENSE)하에 배포되고 있습니다.
+FOSSLight은 Open Source License인 [AGPL-3.0-only](LICENSE)하에 배포되고 있습니다.
