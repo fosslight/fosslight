@@ -42,4 +42,4 @@ We always welcome your contributions. Please see the [CONTRIBUTING guide](CONTRI
 
 ## License
 Copyright (c) 2021 LG Electronics  
-FOSSLight is released under [AGPL-3.0](LICENSE).
+FOSSLight is released under [AGPL-3.0-only](LICENSE).
