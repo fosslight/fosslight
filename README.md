@@ -37,5 +37,5 @@ Please visit the Demo site and try out the many features of the FOSSLight first-
 We always welcome your contributions. Please see the [CONTRIBUTING guide](CONTRIBUTING.md) for how to contribute.
 
 ## License
-Copyright (c) 2021 FOSSLight  
+Copyright (c) 2021 LG Electronics  
 FOSSLight is released under [AGPL-3.0](LICENSE).
