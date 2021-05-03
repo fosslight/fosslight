@@ -31,7 +31,7 @@ FOSSLight is an integrated system that can efficiently process the open source c
   - Check the information of OSS you wish to examine
 
 ## Documentation
-We provide the guide for the installation and how to use it. Please refer the **[FOSSLight guide](https://fosslight.org/fosslight-guide/)**.
+We provide the guide for the installation and how to use it. Please refer the **[FOSSLight guide](https://fosslight.org/fosslight-guide-en/)**.
 
 ## Demo site
 You can experience FOSSLight through the **[Demo site](https://demo.fosslight.org/)**.  
