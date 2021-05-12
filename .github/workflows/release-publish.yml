@@ -1,0 +1,61 @@
+# 1. Update changelog
+# 2. Build the exe file and upload it in the release assets.
+
+name: Release FOSSLight
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: update changelog with gren
+      env:
+        GREN_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        npm install github-release-notes@0.17.3
+        node_modules/.bin/gren changelog --override
+    - name: Commit files
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git add .
+        git commit -m "Update ChangeLog"
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+  build:
+    needs: update-changelog
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+        
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+        
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build with Gradle
+      run: ./gradlew build
+         
+    - name: Rename package
+      run: mv build/libs/FOSSLight*.war FOSSLight.war
+      
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./FOSSLight.war
+        asset_name: FOSSLight.war
+        asset_content_type: application/octet-stream
