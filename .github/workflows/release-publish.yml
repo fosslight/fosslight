@@ -21,7 +21,7 @@ jobs:
     - name: Commit files
       run: |
         git config --local user.name "github-actions[bot]"
-        git add .
+        git add CHANGELOG.md
         git commit -m "Update ChangeLog"
     - name: Push changes
       uses: ad-m/github-push-action@master
