@@ -1,3 +1,4 @@
+Copyright (C) Sameer1046
 FROM openjdk:8-jre-alpine
 
 MAINTAINER sameer1046
