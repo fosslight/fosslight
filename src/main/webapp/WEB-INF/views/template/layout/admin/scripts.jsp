@@ -1,6 +1,8 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ include file="/WEB-INF/constants.jsp"%>
-
+<script>
+var CTX_PATH = "${ctxPath}";
+</script>
 <%-- 스크립트 추가 --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/common.css?${cssVersion}" />
