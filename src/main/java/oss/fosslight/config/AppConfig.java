@@ -52,7 +52,7 @@ public class AppConfig {
 						} else {
 							setProperty("mail.smtp.auth", "true");
 							setProperty("mail.smtp.starttls.enable", "true");
-							setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
+							setProperty("mail.smtp.ssl.trust", MAIL_SERVICE_HOST);
 						}
 					}
 				};
