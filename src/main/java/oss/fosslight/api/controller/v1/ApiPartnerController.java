@@ -70,6 +70,7 @@ public class ApiPartnerController extends CoTopComponent {
 			paramMap.put("userRole", userInfo.getAuthority());
 			paramMap.put("creator", creator);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("division", division);
 			paramMap.put("status", status);
 			

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -21,6 +21,7 @@ import javax.servlet.ServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.ComBean;
 import oss.fosslight.util.StringUtil;
 

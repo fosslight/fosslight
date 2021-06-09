@@ -752,7 +752,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				
 				// email 발송
 				try {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_INVATED);
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED);
 					mailBean.setParamPrjId(project.getPrjId());
 					mailBean.setParamUserId(project.getLoginUserName());
 					mailBean.setParamEmail(project.getPrjEmail());

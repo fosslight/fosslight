@@ -5,8 +5,6 @@
 
 package oss.fosslight.config;
 
-import oss.fosslight.controller.SessionController;
-
 /** **************************************************************************
  * Web Application의 Config 변수 저장소
  * 

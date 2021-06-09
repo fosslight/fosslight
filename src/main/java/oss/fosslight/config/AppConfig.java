@@ -19,6 +19,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.util.CryptUtil;
 import oss.fosslight.util.StringUtil;
 
@@ -31,6 +32,7 @@ public class AppConfig {
 	public JavaMailSenderImpl mailSender(){
 		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
 		String smtpUseFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_SMTP_USED_FLAG);
+		
 		if(CoConstDef.FLAG_YES.equals(smtpUseFlag)) {
 			try {
 				final String	MAIL_SERVICE_HOST		= CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_HOST);
@@ -38,27 +40,38 @@ public class AppConfig {
 				final String	MAIL_SERVICE_ENCODING	= StringUtil.avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_ENCODING), "UTF-8");
 				final String	MAIL_SERVICE_USERNAME	= CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_USERNAME);
 				final String	MAIL_SERVICE_PASSWORD	= CryptUtil.decryptAES256(CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_PASSWORD), CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
-
-				final Properties MAIL_SERVICE_PROP = new Properties(){
+				final boolean checkFlag = CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES);
+				
+				final Properties MAIL_SERVICE_PROP = new Properties() {
 					private static final long serialVersionUID = 1L;
 					{
-						setProperty("mail.smtp.auth", "true");
-						setProperty("mail.smtp.starttls.enable", "true");
-						setProperty("mail.smtp.ssl.trust", MAIL_SERVICE_HOST);
+						if(checkFlag) {
+							setProperty("mail.smtp.host", MAIL_SERVICE_HOST);
+							setProperty("mail.smtp.user", MAIL_SERVICE_USERNAME);
+							setProperty("mail.smtp.port", String.valueOf(MAIL_SERVICE_PORT));
+						} else {
+							setProperty("mail.smtp.auth", "true");
+							setProperty("mail.smtp.starttls.enable", "true");
+							setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
+						}
 					}
 				};
 				
 				mailSenderImpl.setHost(MAIL_SERVICE_HOST);
 				mailSenderImpl.setPort(MAIL_SERVICE_PORT);
-				mailSenderImpl.setUsername(MAIL_SERVICE_USERNAME);
-				mailSenderImpl.setPassword(MAIL_SERVICE_PASSWORD);
 				mailSenderImpl.setDefaultEncoding(MAIL_SERVICE_ENCODING);
-				mailSenderImpl.setJavaMailProperties(MAIL_SERVICE_PROP);		
+				mailSenderImpl.setJavaMailProperties(MAIL_SERVICE_PROP);
+				
+				if(!checkFlag) {
+					mailSenderImpl.setUsername(MAIL_SERVICE_USERNAME);
+					mailSenderImpl.setPassword(MAIL_SERVICE_PASSWORD);
+				}
 				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		
 		return mailSenderImpl;
 	}
 	

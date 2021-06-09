@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation.custom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.domain.Project;
+import oss.fosslight.validation.T2CoValidator;
 
 
 public class DistributionValidator extends T2CoValidator {

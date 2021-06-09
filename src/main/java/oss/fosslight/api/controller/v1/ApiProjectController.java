@@ -10,8 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +41,6 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.CoMail;
@@ -60,12 +62,21 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Api(tags = {"3. Project"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
 public class ApiProjectController extends CoTopComponent {
+	
+	@Resource private Environment env;
+	private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
 	
 	private final ResponseService responseService;
 	
@@ -112,6 +123,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("userRole", userInfo.getAuthority());
 			paramMap.put("creator", creator);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("division", division);
 			paramMap.put("status", status);
 			
@@ -334,6 +346,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
 			paramMap.put("distributionType", "normal");
@@ -341,10 +354,7 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
 			if(searchFlag) {
-				String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-						? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-						: "template";
-				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, templatePath);
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				fileInfo = fileService.selectFileInfo(downloadId);
 			}
 			
@@ -376,6 +386,7 @@ public class ApiProjectController extends CoTopComponent {
 			prjIdList.add(beforePrjId);
 			prjIdList.add(afterPrjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("distributionType", "normal");
 			
@@ -423,6 +434,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -552,6 +564,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -804,6 +817,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "android");
@@ -1020,6 +1034,7 @@ public class ApiProjectController extends CoTopComponent {
 		List<String> prjIdList = new ArrayList<String>();
 		prjIdList.add(prjId);
 		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("userRole", loginUserRole());
 		paramMap.put("prjId", prjIdList);
 		
 		boolean searchFlag = apiProjectService.existProjectCnt(paramMap);

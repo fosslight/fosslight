@@ -47,7 +47,6 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 
-
 /**
  * The Class CoMailManager.
  */
@@ -130,8 +129,14 @@ public class CoMailManager extends CoTopComponent {
     		Map<String, Object> convertDataMap = new HashMap<>();
     		convertDataMap.put("mailType", bean.getMsgType());
     		convertDataMap.put("isModify", false);//데이터 변경여부
+    		String msgType = bean.getMsgType();
     		
-			String title = (isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType());
+    		// recalculated에 해당하는 경우 동일한 title로 사용하기 위함.
+    		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(msgType)) {
+    			msgType = CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED;
+    		}
+    		
+			String title = (isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, msgType);
 			
 			// title
 			title = makeMailSubject(title, bean);
@@ -184,12 +189,19 @@ public class CoMailManager extends CoTopComponent {
     		}
     		
     		// 92번 메일 ( vulnerability recalculated )의 경우 as-is to-be 가 존재하기 때문에 예외처리한다.
-    		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType())) {
+    		// 94번 메일 NVD Data > CVSS Score가 9.0이상인 대상중 현재 배치로인해 NVD Data가 삭제된 경우 mail 발송
+    		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType())
+    				|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
     			if(bean.getParamOssInfoMap() == null || bean.getParamOssInfoMap().isEmpty()) {
     				return false;
     			}
+    			
+    			String recalculatedMsgType = CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()) 
+    					? CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED 
+    					: CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED;
+    			
     			// 변경된 oss id 과 해당 프로젝트에서 사용중인 oss 목록을 비교하기 위해서 210 번 쿼리를 사용한다.
-    			List<OssMaster> _contents = (List<OssMaster>) setContentsInfo(bean, CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED);
+    			List<OssMaster> _contents = (List<OssMaster>) setContentsInfo(bean, recalculatedMsgType);
     			List<OssMaster> _reMakeContents = new ArrayList<>();
     			for(OssMaster _bean : _contents) {
 					String key = _bean.getOssName().toUpperCase()+"_"+_bean.getOssVersion();
@@ -419,7 +431,9 @@ public class CoMailManager extends CoTopComponent {
 						|| CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_INVATED.equals(bean.getMsgType())
 						|| CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED.equals(bean.getMsgType())
-						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())) {
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED.equals(bean.getMsgType())
+						) {
 					if(!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()))) {
 						String subTitle = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()));
 
@@ -485,6 +499,28 @@ public class CoMailManager extends CoTopComponent {
 							subTitle = StringUtil.replace(subTitle, "${3rd Party ID}", _s);
 							if(subTitle.indexOf("${3rd Party ID}") > -1) {
 								subTitle = StringUtil.replace(subTitle, "${3rd Party ID}", _s);
+							}
+						}
+						
+						if(subTitle.indexOf("${SelfCheck Project Name}") > -1) {
+							String _s = "";
+							if(!isEmpty(bean.getParamPrjId())) {
+								project = mailManagerMapper.getSelfCheckProjectInfoById(bean.getParamPrjId());
+							}
+							
+							if(project != null) {
+								if(subTitle.indexOf("${SelfCheck Project Name}") > -1) {
+									_s += "(" + bean.getParamPrjId() +")";  // SelfCheck project ID
+									_s += project.getPrjName();				// SelfCheck Project Name
+									if(!isEmpty(project.getPrjVersion())) { // SelfCheck Project Version
+										_s += " (" + project.getPrjVersion() +")";
+									}
+								}
+							}
+
+							subTitle = StringUtil.replace(subTitle, "${SelfCheck Project Name}", _s);
+							if(subTitle.indexOf("${SelfCheck Project Name}") > -1) {
+								subTitle = StringUtil.replace(subTitle, "${SelfCheck Project Name}", _s);
 							}
 						}
 						
@@ -629,6 +665,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED:
+    		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_ADDED_COMMENT:
@@ -790,6 +827,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
@@ -840,6 +878,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
@@ -854,7 +893,8 @@ public class CoMailManager extends CoTopComponent {
         				if(!isTest && 
         						(
         								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType()) 
-        								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))) {
+        								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
+        								|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
         					ccList.addAll(Arrays.asList(MAIL_LIST_SECURITY));
         				}
     				}
@@ -1050,6 +1090,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_INVATED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_INVATED:
     		case CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_INVATED:
+    		case CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED:
     			bean.setToIds(new String[]{bean.getParamEmail()});
 				bean.setCcIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			break;
@@ -1226,6 +1267,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TOKEN_CREATE_TYPE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TOKEN_DELETE_TYPE.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED.equals(bean.getMsgType())
 					) {
 				String _convUser = avoidNull(makeUserNameFormat(!isEmpty(bean.getParamUserId()) ? bean.getParamUserId() : bean.getLoginUserName()));
 
@@ -1756,7 +1798,7 @@ public class CoMailManager extends CoTopComponent {
 				String[] afterArry =  _newAfterList.toArray(new String[_newAfterList.size()]);
 				
 				before.setLicenseNicknames(beforeArry);
-				after.setLicenseNicknames(afterArry);				
+				after.setLicenseNicknames(afterArry);
 			}
 			
 			after.setLicenseType(appendChangeStyle(before.getLicenseType(), after.getLicenseType()));
@@ -2091,16 +2133,18 @@ public class CoMailManager extends CoTopComponent {
 	private String appendChangeStyleLinkFormatArray(String[] before, String[] after, int seq) {
 		int length = before.length > after.length ? before.length : after.length;
 		String result = "";
+		String beforeVal = (before.length > seq ? before[seq] : "");
+		String afterVal = (after.length > seq ? after[seq] : "");
 		
-		if(length == seq){
+		if(length == seq) {
 			return result;
-		}else{
-			if(seq > 0){
+		} else {
+			if(seq > 0) {
 				result = "<br>";
 			}
 		}
 		
-		result += "<a href='"+after+"' target='_blank'>" + appendChangeStyle((before.length > seq ? before[seq] : ""), (after.length > seq ? after[seq] : "")) + "</a>" + appendChangeStyleLinkFormatArray(before, after, ++seq);
+		result += "<a href='"+afterVal+"' target='_blank'>" + appendChangeStyle(beforeVal, afterVal) + "</a>" + appendChangeStyleLinkFormatArray(before, after, ++seq);
 		
 		return result;
 	}
@@ -2297,57 +2341,58 @@ public class CoMailManager extends CoTopComponent {
 		List<String> param = new ArrayList<>();
 		// 순서대로
 		switch (component) {
-		case CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO:
-			param.add(bean.getParamOssId());
-			return makeOssBasicInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_LICENSEBASICINFO:
-			param.add(bean.getParamLicenseId());
-			return makeLicenseBasicInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BASICINFO:
-			param.add(bean.getParamPrjId());
-			return makeProjectBasicInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO:
-		case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO:
-			ProjectIdentification ossListParam = new ProjectIdentification();
-			ossListParam.setReferenceId(bean.getParamPrjId());
-			ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			ossListParam.setMerge(CoConstDef.FLAG_NO);
-			Map<String, Object> mailComponentDataMap = projectService.getIdentificationGridList(ossListParam);
-			
-			if(CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO.equals(component)) {
-				Project project = new Project();
-				project.setPrjId(bean.getParamPrjId());
-				mailComponentDataMap.put("projectBean", projectService.getProjectDetail(project));
-			}
-			return makeIdentificationOssListInfo(mailComponentDataMap, component);
-		case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO:
-			param.add(bean.getParamPrjId());
-			return makeDistributionInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_PROJECT_MODELINFO:
-			param.add(bean.getParamPrjId());
-			return makeModelInfo(getMailComponentData(param, component), bean.getMsgType());
-		case CoConstDef.CD_MAIL_COMPONENT_PARTNER_BASICINFO:
-			param.add(bean.getParamPartnerId());
-			return makePartnerBasicInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
-			param.add(bean.getParamPartnerId());
-			return makePartnerOssListInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
-			param.add(bean.getParamBatId());
-			return makeBatResultInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ:
-			param.add(bean.getParamPrjId());
-			return makeVulnerabilityInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
-		case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
-			return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
-		case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
-			param.add(bean.getParamPrjId());
-			return makeVulnerabilityInfo(getMailComponentData(param, component));
-		case CoConstDef.CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL:
-			return CoCodeManager.getCodeExpString(CoConstDef.CD_COLLAB_INFO, CoConstDef.CD_PACKAGING_REQUESTED_URL);
-		default:
-			break;
+			case CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO:
+				param.add(bean.getParamOssId());
+				return makeOssBasicInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_LICENSEBASICINFO:
+				param.add(bean.getParamLicenseId());
+				return makeLicenseBasicInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BASICINFO:
+			case CoConstDef.CD_MAIL_COMPONENT_SELFCHECK_PROJECT_BASICINFO:
+				param.add(bean.getParamPrjId());
+				return makeProjectBasicInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO:
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO:
+				ProjectIdentification ossListParam = new ProjectIdentification();
+				ossListParam.setReferenceId(bean.getParamPrjId());
+				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				ossListParam.setMerge(CoConstDef.FLAG_NO);
+				Map<String, Object> mailComponentDataMap = projectService.getIdentificationGridList(ossListParam);
+				
+				if(CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISCROSEOSSINFO.equals(component)) {
+					Project project = new Project();
+					project.setPrjId(bean.getParamPrjId());
+					mailComponentDataMap.put("projectBean", projectService.getProjectDetail(project));
+				}
+				return makeIdentificationOssListInfo(mailComponentDataMap, component);
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO:
+				param.add(bean.getParamPrjId());
+				return makeDistributionInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_PROJECT_MODELINFO:
+				param.add(bean.getParamPrjId());
+				return makeModelInfo(getMailComponentData(param, component), bean.getMsgType());
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_BASICINFO:
+				param.add(bean.getParamPartnerId());
+				return makePartnerBasicInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
+				param.add(bean.getParamPartnerId());
+				return makePartnerOssListInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
+				param.add(bean.getParamBatId());
+				return makeBatResultInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ:
+				param.add(bean.getParamPrjId());
+				return makeVulnerabilityInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS:
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL:
+				return makeVulnerabilityInfo(getMailComponentDataWithArray(bean.getParamOssKey(), component));
+			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
+				param.add(bean.getParamPrjId());
+				return makeVulnerabilityInfo(getMailComponentData(param, component));
+			case CoConstDef.CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL:
+				return CoCodeManager.getCodeExpString(CoConstDef.CD_COLLAB_INFO, CoConstDef.CD_PACKAGING_REQUESTED_URL);
+			default:
+				break;
 		}
 		return null;
 	}
@@ -3148,3 +3193,5 @@ public class CoMailManager extends CoTopComponent {
 		}
 	}
 }
+
+

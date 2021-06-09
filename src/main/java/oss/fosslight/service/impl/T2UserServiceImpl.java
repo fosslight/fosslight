@@ -528,7 +528,7 @@ public class T2UserServiceImpl implements T2UserService {
 			return false;
 		}
 		String encPassword = userInfo.getPassword();
-		return new BCryptPasswordEncoder().matches(rawPassword, encPassword);
+		return rawPassword.equals(encPassword) || new BCryptPasswordEncoder().matches(rawPassword, encPassword);
 	}
 
 	@Override

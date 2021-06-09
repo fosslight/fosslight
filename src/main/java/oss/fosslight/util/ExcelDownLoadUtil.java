@@ -44,7 +44,6 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -58,8 +57,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.BinaryAnalysisResult;
 import oss.fosslight.domain.BinaryMaster;
@@ -73,7 +70,6 @@ import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.Statistics;
-import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.OssMapper;
@@ -91,6 +87,8 @@ import oss.fosslight.service.StatisticsService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.service.VulnerabilityService;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -119,114 +117,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
 
-	@SuppressWarnings("unchecked")
-	private static String getBatOssListExcel(
-			Map<String, Object> batOssMap) throws IOException {
-		Workbook wb = null;
-		Sheet sheet = null;
-		InputStream inFile=null;
-		
-		try {
-			inFile= new ClassPathResource(downloadpath+"/BatOssList.xlsx").getInputStream();
-			try {wb = WorkbookFactory.create(inFile);} catch (IOException e) {e.printStackTrace();}
-			sheet = wb.getSheetAt(0);
-			wb.setSheetName(0, "BAT");
-			List<String[]> rows = new ArrayList<>();
-			
-			if(batOssMap != null && batOssMap.containsKey("mainData")) {
-				List<ProjectIdentification> ossList = (List<ProjectIdentification>) batOssMap.get("mainData");
-				// binary	path	checksum : sha256	tlsh	ossname	license	parentname
-				int index = 1;
-				
-				for(ProjectIdentification bean : ossList) {
-					List<String> params = new ArrayList<>();
-					params.add(Integer.toString(index)); //ID
-					params.add(bean.getBinaryName()); // binary name
-					params.add(bean.getFilePath()); // path
-					params.add(bean.getOssName()); // OSS Name
-					params.add(bean.getOssVersion()); // OSS Version
-					params.add(bean.getLicenseName()); // license name
-					params.add(bean.getBinarySize()); // size
-					params.add(bean.getBatStringMatchPercentage()); // percentage
-					
-					rows.add(params.toArray(new String[params.size()]));
-					
-					index++;
-				}
-				
-				//시트 만들기
-				makeSheet(sheet, rows);
-			}
-			
-			sheet = wb.getSheetAt(1);
-			wb.setSheetName(1, "BIN");
-			rows = new ArrayList<>();
-			
-			if(batOssMap != null && batOssMap.containsKey("mainData")) {
-				
-				List<ProjectIdentification> ossList = (List<ProjectIdentification>) batOssMap.get("mainData");
-				// binary	path	checksum : sha256	tlsh	ossname	license	parentname
-				int index = 1;
-				
-				for(ProjectIdentification bean : ossList) {
-					String licenseTextUrl = "";
-					
-					for(String licenseName : bean.getLicenseName().split(",")) {
-						String licenseUrl = CommonFunction.getLicenseUrlByName(licenseName.trim());
-						
-						if(isEmpty(licenseUrl)) {
-							boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-							
-							licenseUrl = CommonFunction.makeLicenseInternalUrl(CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase()), distributionFlag);
-						}
-						
-						if(!isEmpty(licenseUrl)) {
-							if(!isEmpty(licenseTextUrl)) {
-								licenseTextUrl += ", ";
-							}
-							
-							licenseTextUrl += licenseUrl;
-						}
-					}
-					
-					List<String> params = new ArrayList<>();
-					
-					params.add(Integer.toString(index)); //ID
-					params.add(bean.getBinaryName()); // binary name
-					params.add(bean.getOssName()); // OSS Name
-					params.add(bean.getOssVersion()); // OSS Version
-					params.add(bean.getLicenseName()); // license name
-					params.add(bean.getDownloadLocation()); // Download Location
-					params.add(bean.getHomepage()); // homepage
-					params.add(bean.getCopyrightText()); // copyright
-					params.add(licenseTextUrl); // license Text => license webpage
-					params.add(bean.getExcludeYn()); // excludeYn
-					params.add(bean.getComments()); // comment
-					
-					rows.add(params.toArray(new String[params.size()]));
-					
-					index++;
-				}
-				
-				//시트 만들기
-				makeSheet2(sheet, rows);
-			}
-		
-		} catch (FileNotFoundException e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if(inFile != null) {
-				inFile.close();
-			}
-		}
-		
-		return makeExcelFileId(wb,"BinOssList");
-	}	
-
 	private static String getReportExcelPost (String prjId, String type) throws IOException, InvalidFormatException {
 		Workbook wb = null;
 		Sheet sheet1 = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 
 		// download file name
 		String downloadFileName = "OSS-Report"; // Default
@@ -242,7 +136,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
 			}
 			
-			inFile= new ClassPathResource(downloadpath+"/ProjectReport.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/ProjectReport.xlsx"));
+			
 			wb = WorkbookFactory.create(inFile);
 			
 			{
@@ -287,7 +182,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			
 			//BIN(ANDROID)
-			if(isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, wb.getSheetAt(5), projectService.getIdentificationGridList(ossListParam), projectInfo);
@@ -629,6 +524,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						params.add(licenseTextUrl);
 					}
 					
+					if(CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
+						params.add(""); // check list > Modified or not
+					}
+					
 					if(!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
 						if( CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 							params.add("Exclude");
@@ -946,10 +845,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getLicenseExcel(List<LicenseMaster> licenseList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath+"/LicenseList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/LicenseList.xlsx"));
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {e.printStackTrace();}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "LicenseList");
@@ -1017,10 +916,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getOssExcel(List<OssMaster> oss) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath+"/OssList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/OssList.xlsx"));
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {e.printStackTrace();}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "ossList");
@@ -1091,10 +990,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getProjectExcel(List<Project> projectList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath+"/ProjectList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/ProjectList.xlsx"));
 			
 			try {
 				wb = new XSSFWorkbook(inFile);
@@ -1251,10 +1150,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getPartnerExcelId(List<PartnerMaster> ossList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 
 		try {
-			inFile= new ClassPathResource(downloadpath+"/3rdList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/3rdList.xlsx"));
 			wb = new XSSFWorkbook(inFile);
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "3rdList");
@@ -1302,10 +1201,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getModelStatusExcelId(List<Project> project, Project fileData) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 
 		try {
-			inFile= new ClassPathResource(downloadpath+"/ComplianceStatus.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
+			
 			wb = new XSSFWorkbook(inFile);
 				
 			if(fileData != null){
@@ -1376,11 +1276,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getPartnerModelExcelId(List<PartnerMaster> ossList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 
 		
 		try {
-			inFile= new ClassPathResource(downloadpath+"/ComplianceStatus.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
 			wb = new XSSFWorkbook(inFile);
 			sheet = wb.getSheetAt(2);
 			if(ossList != null && !ossList.isEmpty()) {
@@ -1426,67 +1326,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @param batList
 	 * @return
 	 * @throws Exception
-	 * @용도 bat 엑셀
-	 */
-	private static String getBatExcel(List<Map<String, Object>> batList) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		InputStream inFile=null;
-		
-		try {
-			inFile= new ClassPathResource(downloadpath+"/BatList.xlsx").getInputStream();
-			wb = new XSSFWorkbook(inFile);
-			sheet = wb.getSheetAt(0);
-			wb.setSheetName(0, "BatList");
-			List<String[]> rows = new ArrayList<>();
-			
-			for(int i = 0; i < batList.size(); i++){
-				Map<String, Object> param = batList.get(i);
-				
-				String[] rowParam = {
-					Integer.toString((int) param.get("batId"))
-					, (String) param.get("fileName")
-					, CoCodeManager.getCodeString(CoConstDef.CD_BAT_STATUS, (String) param.get("batStatus"))
-					, (String) param.get("softwareName")
-					, (String) param.get("softwareVersion")
-					, (String) param.get("partnerName")
-					, (String) param.get("creator")
-					, CommonFunction.formatDate(((Timestamp) param.get("createdDate")).toString())
-				};
-				
-				rows.add(rowParam);
-			}
-			
-			//시트 만들기
-			makeSheet(sheet, rows);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if(inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-		return makeExcelFileId(wb,"BatList");
-	}
-	
-	/**
-	 * 
-	 * @param batList
-	 * @return
-	 * @throws Exception
 	 * @용도 user 엑셀
 	 */
 	private static String getUserExcelId(List<T2Users> userList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile = new ClassPathResource(downloadpath+"/UserList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/UserList.xlsx"));
 			wb = new XSSFWorkbook(inFile);
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "UserList");
@@ -1528,11 +1376,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getModelExcel(List<Project> modelList, String distributionType) throws Exception {
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		List<String[]> rows = null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + (CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? "/SKS_ModelList.xlsx" : "/ModelList.xlsx")).getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+ (CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? "/SKS_ModelList.xlsx" : "/ModelList.xlsx") ));
 			wb = WorkbookFactory.create(inFile);
 			String mainModelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
 			
@@ -1819,17 +1667,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				donwloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				break;
-			case "batOssList" :
-				Type 							batOssType	 	= new TypeToken<BinaryMaster>(){}.getType();
-				BinaryMaster	batOssInfo 		= (BinaryMaster) fromJson(dataStr, batOssType);
-				ProjectIdentification _batOssparam = new ProjectIdentification();
-				_batOssparam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_BAT);
-				_batOssparam.setReferenceId(batOssInfo.getBatId());
-				
-				Map<String, Object> batOssInfoMap 	= projectService.getIdentificationGridList(_batOssparam);
-				donwloadId = getBatOssListExcel(batOssInfoMap);
-				
-				break;
 			case "license" :	//License List
 				Type 				licenseType = new TypeToken<LicenseMaster>(){}.getType();
 				LicenseMaster 		license 	= (LicenseMaster) fromJson(dataStr, licenseType);
@@ -2017,67 +1854,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return donwloadId;
 	}
 	
-	
-
-	/**
-	 * Binary DB excel download
-	 * @param bianrySearchBean
-	 * @return
-	 * @throws IOException 
-	 * @throws InvalidFormatException 
-	 */
-	private static String getBinaryDBExcel(List<Map<String, Object>> list) throws InvalidFormatException, IOException {
-		Workbook wb = null;
-		Sheet sheet1 = null;
-		InputStream inFile=null;
-		// download file name
-		String downloadFileName = "FOSSLight-BinaryDB"; // Default
-
-		try {
-			inFile= new ClassPathResource(downloadpath + "/BinaryDB.xlsx").getInputStream();
-			wb = WorkbookFactory.create(inFile);
-			sheet1 = wb.getSheetAt(0);
-			
-			List<String[]> rowDatas = new ArrayList<>();
-			
-			for(Map<String, Object> binaryMap : list) {
-				String ossname = binaryMap.containsKey("ossname") ? (String) binaryMap.get("ossname") : "";
-				String ossversion = binaryMap.containsKey("ossversion") ? (String) binaryMap.get("ossversion") : "";
-				String license = binaryMap.containsKey("license") ? (String) binaryMap.get("license") : "";
-				String downloadlocation = binaryMap.containsKey("downloadlocation") ? (String) binaryMap.get("downloadlocation") : "";
-				String parentname = binaryMap.containsKey("parentname") ? (String) binaryMap.get("parentname") : "";
-				String checksum = binaryMap.containsKey("checksum") ? (String) binaryMap.get("checksum") : "";
-				String tlshchecksum = binaryMap.containsKey("tlshchecksum") ? (String) binaryMap.get("tlshchecksum") : "";
-				String updatedate = binaryMap.containsKey("updatedate") ? (String) binaryMap.get("updatedate") : "";
-				
-				String[] rowParam = {
-						(String) binaryMap.get("filename")
-						, (String) binaryMap.get("pathname")
-						, avoidNull(ossname)
-						, avoidNull(ossversion)
-						, avoidNull(license)
-						, avoidNull(downloadlocation)
-						, avoidNull(parentname)
-						, avoidNull(checksum)
-						, avoidNull(checksum)
-						, avoidNull(updatedate)
-					};
-				
-				rowDatas.add(rowParam);
-			}
-			
-			makeSheet(sheet1, rowDatas);
-		} finally {
-			if(inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e) {}
-			}
-		}
-
-		return makeExcelFileId(wb,downloadFileName);
-	}
-	
 	/**
 	 * Binary DB excel download
 	 * @param bianrySearchBean
@@ -2088,12 +1864,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getBinaryDBLogExcel(List<BinaryAnalysisResult> list) throws InvalidFormatException, IOException {
 		Workbook wb = null;
 		Sheet sheet1 = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		// download file name
 		String downloadFileName = "FOSSLight-BinaryDBLog"; // Default
 
 		try {
-			inFile= new ClassPathResource(downloadpath + "/BinaryDBLog.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/BinaryDBLog.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			sheet1 = wb.getSheetAt(0);
 			
@@ -2152,13 +1928,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + "/SPDXRdf_2.2.2.xls").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
 			
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
@@ -2621,56 +2397,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	}
 
 	/**
-	 * selfcheck list 상세의 vulnerability 정보를 csv 형식으로 export처리한다.
-	 * @param dataStr
-	 * @param object
-	 * @return
-	 * @throws IOException 
-	 */
-	private static String getSelftReportVulnPost(String prjId, String type) throws IOException {
-		List<String[]> vulnRows = new ArrayList<>();
-		String[] headerArr = new String[]{"Product", "Version", "CVE ID", "Score", "Summary"};
-		//header 정보 추가
-		vulnRows.add(headerArr);
-		
-		String downloadFileName = "SelfCheck-vuln"; // Default
-		
-		Project projectInfo = new Project();
-		
-		{
-			projectInfo.setPrjId(prjId);
-			projectInfo = selfCheckService.getProjectDetail(projectInfo);
-		}
-		
-		downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjName());
-		
-		if(!isEmpty(projectInfo.getPrjVersion())) {
-			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjVersion());
-		}
-		
-		List<Vulnerability> vulnList = selfCheckService.getAllVulnListWithProject(projectInfo.getPrjId());
-		
-		if(vulnList != null && !vulnList.isEmpty()) {
-			for(Vulnerability vulnBean : vulnList) {
-				List<String> params = new ArrayList<>();
-				// PRODUCT
-				params.add(avoidNull(vulnBean.getProduct()));
-				// VERSION
-				params.add(avoidNull(vulnBean.getVersion()));
-				// CVE ID
-				params.add(avoidNull(vulnBean.getCveId()));
-				params.add(avoidNull(vulnBean.getCvssScore()));
-				// SUMMARY
-				params.add(avoidNull(vulnBean.getVulnSummary()));
-				
-				vulnRows.add(params.toArray(new String[params.size()]));
-			}
-		}
-		
-		return makeCsvFileId(downloadFileName, vulnRows);
-	}
-
-	/**
 	 * 3rd party export<br>
 	 * 기존 업로드한 check list data 파일을 재사용한다.
 	 * @param prjId
@@ -2679,13 +2405,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @throws IOException
 	 */
 	private static String getPartnerChecklistReportExcelPost(String prjId) throws InvalidFormatException, IOException {
+		FileInputStream inFile=null;
 		Workbook wb = null;
-		Sheet sheet1 = null;
-		InputStream inFile=null;
-		InputStream inFile2=null;
-
+		
 		// download file name
-		String downloadFileName = "OSS-Report"; // Default
+		String downloadFileName = "OSS-List"; // Default
 
 		try {
 			//cover
@@ -2697,49 +2421,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			ossListParam.setReferenceId(prjId);
 			ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
 			Map<String, Object> resultMap = projectService.getIdentificationGridList(ossListParam);
-			List<ProjectIdentification> list = (List<ProjectIdentification>) resultMap.get("mainData");
 			
-			if(!isEmpty(projectInfo.getOssFileId())) {
-				T2File chkFile = fileService.selectFileInfo(projectInfo.getOssFileId());
-				inFile2= new FileInputStream(new File(chkFile.getLogiPath() + "/" + chkFile.getLogiNm()));
-				wb = WorkbookFactory.create(inFile2);
-				
-				if(wb.getSheetIndex("OSS List") > -1) {
-					sheet1 = wb.getSheetAt(wb.getSheetIndex("OSS List"));
-					
-					try {
-						if("NO".equalsIgnoreCase(sheet1.getRow(0).getCell(0).getStringCellValue())) {
-							// delete row (업로드 data 삭제)
-							for(int i = 2 ; i < sheet1.getLastRowNum() ; i++){
-								Row removingRow = sheet1.getRow(i);
-								
-								if(removingRow != null){
-									removingRow.getCell(6).removeHyperlink();
-									
-									if(i > 2 || list.size() == 0){
-										sheet1.removeRow(removingRow);
-									}
-								}
-							}
-						} else {
-							sheet1 = null;
-						}
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						sheet1 = null;
-					}
-				}
-			}
+			inFile= new FileInputStream(new File(downloadpath+"/OssCheckList.xlsx"));
+			wb = WorkbookFactory.create(inFile);
+			int sheetIdx = wb.getSheetIndex("OSS List");
+			Sheet sheet1 = wb.getSheetAt(sheetIdx); // OSS List sheet
 			
-			if(sheet1 == null) {
-				inFile= new ClassPathResource(downloadpath + "/PartnerOssReport.xlsx").getInputStream();
-				wb = WorkbookFactory.create(inFile);
-				sheet1 = wb.getSheetAt(0);
-			}
-			
-			//OSS-Report-[ID]-[3rd party]-[Software Name(Software Version)]
-			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPartnerName()) + "-" + projectInfo.getSoftwareName();
-			
+			//OSS-List-[3rd ID]-[3rd Party Name]-[3rd Party Software Name]-[3rd Party Software Version]-[Date].xlsx
+			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + projectInfo.getPartnerName() + "-" + projectInfo.getSoftwareName();
 			if(!isEmpty(projectInfo.getSoftwareVersion())) {
 				downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getSoftwareVersion());
 			}
@@ -2752,12 +2441,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				try {
 					inFile.close();
 				} catch (Exception e) {}
-			}
-			if(inFile2 != null) {
-				try {
-					inFile2.close();
-				} catch (Exception e2) {
-				}
 			}
 		}
 
@@ -2783,10 +2466,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String makeVerificationExcel (List<ProjectIdentification> verificationList)  throws Exception {
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile = null;
 
 		try {
-			inFile= new ClassPathResource(downloadpath + "/VerificationList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/VerificationList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "DisclosureOSSList");
@@ -2847,10 +2530,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getSelfCheckListExcelPost(String search, String type) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + "/selfCheckList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/selfCheckList.xlsx"));
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {e.printStackTrace();}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "selfCheckList");
@@ -2890,12 +2573,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	private static String getSelftReportExcelPost (String prjId) throws IOException, InvalidFormatException {
 		Workbook wb = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 
 		// download file name
 		String downloadFileName = "SelfCheck-Report"; // Default
 		try {
-			inFile = new ClassPathResource(downloadpath + "/SelfCheck-Report.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/SelfCheck-Report.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			//cover
 			Project projectInfo = new Project();
@@ -2990,10 +2673,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getVulnerabilityExcel(List<Vulnerability> vulnerabilityList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + "/VulnerabilityReport.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {e.printStackTrace();}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "vulnerabilityList");
@@ -3100,11 +2783,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		Workbook wb = null;
 		Sheet sheet = null;
-		InputStream inFile=null;
-
+		FileInputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + "/chartDataList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/chartDataList.xlsx"));
 			wb = new XSSFWorkbook(inFile);
 			String[] sheetIdxList = new String[] {"divisionalProjectChart", "mostUsedOssChart", "mostUsedLicenseChart", "updatedOssChart", "updatedLicenseChart", "trdPartyRelatedChart", "userRelatedChart"};
 			if(chartDataMap != null && !chartDataMap.isEmpty()) {
@@ -3231,7 +2913,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		InputStream inFile=null;
 		
 		try {
-			inFile= new ClassPathResource(downloadpath + "/AutoAnalysisList.xlsx").getInputStream();
+			inFile= new FileInputStream(new File(downloadpath+"/AutoAnalysisList.xlsx"));
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {e.printStackTrace();}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "Auto Analysis Input");

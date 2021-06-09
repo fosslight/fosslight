@@ -66,7 +66,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
-//import com.trendmicro.tlsh.Tlsh;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -89,6 +88,8 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoOssValidator;
 
 @Component
 @Slf4j
@@ -3397,6 +3398,7 @@ public class CommonFunction extends CoTopComponent {
 			userData.setGroupId(userData.getGridId()); // groupId는 user가 입력한 row의 grid Id임.
 			
 			if(CoConstDef.FLAG_YES.equals(userData.getCompleteYn()) && !isEmpty(userData.getReferenceOssId())) {
+				
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
 				if(!isEmpty(successOssInfo.getDownloadLocationGroup())) {
@@ -3437,31 +3439,12 @@ public class CommonFunction extends CoTopComponent {
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()))
 						.size();
 				
-				String copyright = bean.getOssCopyright().replaceAll("\\*\\*\\*[\\s]{0,1}", "\n");
-				String comment  = "";
-				
-				if(!isEmpty(bean.getAskalonoLicense())) {
-					   comment += " - Askalono License 분석 결과 : " + bean.getAskalonoLicense() + "\n";
-				}
-				
-				if(!isEmpty(bean.getScancodeLicense())) {
-					   comment += " - Scancode License 분석 결과 : " + bean.getScancodeLicense() + "\n";
-				}
-				
-				if(!isEmpty(bean.getNeedReviewLicenseAskalono())) {
-					   comment += " - Askalono Need Review License 분석 결과 : " + bean.getNeedReviewLicenseAskalono() + "\n";
-				}
-				
-				if(!isEmpty(bean.getNeedReviewLicenseScanode())) {
-					   comment += " - Scancode Need Review License 분석 결과 : " + bean.getNeedReviewLicenseScanode();
-				}
-				
-				if(!isEmpty(comment)) {
-					comment = "[OSS 자동분석 결과]\n" + comment;
-				}
+				String copyright = bean.getOssCopyright();
+				String comment  = bean.getComment();
 				
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
+				
 				String duplicateNickname = bean.getOssNickname();
 				
 				if(ossNameCnt == 0 && ossVersionCnt > 0) { // ossVersion 대상
@@ -3479,7 +3462,7 @@ public class CommonFunction extends CoTopComponent {
 						, userData.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
 				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
 						, askalonoLicense, null, bean.getDownloadLocation()
-						, userData.getHomepage(), null, comment, bean.getResult(), "Askalono 분석 결과"); // askalono 정보
+						, userData.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
 				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
 						, scancodeLicense, copyright, bean.getDownloadLocation()
 						, userData.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
@@ -3588,7 +3571,7 @@ public class CommonFunction extends CoTopComponent {
 						log.error(newestException.getMessage());
 					}
 				}
-			}			
+			}
 		}
 		
 		getAnalysisValidation(map, changeAnalysisResultList);
@@ -3953,5 +3936,12 @@ public class CommonFunction extends CoTopComponent {
 			jdbcUrl += (jdbcUrl.contains("?") ? "&" : "?") + "autoReconnect=true";
 		}
 		return jdbcUrl;
+	}
+	
+	public static String getOssDownloadLocation(String ossName, String ossVersion) {
+		if(!isEmpty(ossName) && CoCodeManager.OSS_INFO_UPPER.containsKey( (ossName + "_" + avoidNull(ossVersion)).toUpperCase() )) {
+			return avoidNull( CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(ossVersion)).toUpperCase() ).getDownloadLocation() );
+		}
+		return "";
 	}
 }

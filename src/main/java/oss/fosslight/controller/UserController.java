@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.USER;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -39,6 +38,7 @@ import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.validation.T2CoValidationResult;
 
 @Controller
 @Slf4j

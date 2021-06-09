@@ -50,6 +50,8 @@ public interface MailManagerMapper {
 	
 	public Project getProjectInfoById(String prjId);
 	
+	public Project getSelfCheckProjectInfoById(String prjId);
+	
 	public BinaryMaster getBinaryInfo(String batId);
 	
 	public String getDistributeReservedUser(String prjId);

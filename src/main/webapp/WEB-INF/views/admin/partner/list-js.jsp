@@ -266,7 +266,7 @@
 
 					if(totalRow == 0){
 						var startDate = $("#createdDate1").val()||0;
-						var endate = $("#createdDate2").val()||0;
+						var endDate = $("#createdDate2").val()||0;
 						var diffNum = +startDate - +endDate;
 						
 						if(diffNum > 0 && endDate > 0){

@@ -983,7 +983,7 @@ var commonAjax = {
 };
 
 function fnBasicAjaxData(data, url) {
-	return $.ajax({	type: 'GET',url:url,data:data,headers: {'Content-Type': 'application/json'}});
+	return $.ajax({	type: 'GET',url:CTX_PATH+url,data:data,headers: {'Content-Type': 'application/json'}});
 }
 
 var autoComplete = {
@@ -1915,7 +1915,7 @@ function showHelpLink(id, target){
 	if(_showItem && _showItem.length > 0) {
 		$.ajax({
 			type: 'GET',
-			url: "/system/processGuide/getProcessGuide",
+			url: CTX_PATH+"/system/processGuide/getProcessGuide",
 			data: {"id":id},
 			async:false,
 			success : function(data){

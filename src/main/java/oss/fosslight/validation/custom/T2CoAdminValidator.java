@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation.custom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.validation.T2BasicValidator;
 
 public class T2CoAdminValidator extends T2BasicValidator {
 	private CodeService codeService = (CodeService) getWebappContext().getBean(CodeService.class);
