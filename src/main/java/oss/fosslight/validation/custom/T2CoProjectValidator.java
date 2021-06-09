@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation.custom;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -16,6 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
@@ -25,6 +28,7 @@ import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidator;
 
 @Slf4j
 public class T2CoProjectValidator extends T2CoValidator {
@@ -1848,14 +1852,28 @@ public class T2CoProjectValidator extends T2CoValidator {
 	private boolean checkOROperation(List<ProjectIdentification> licenseList, OssMaster ossInfo) {
 		if(ossInfo != null) {
 			String licenseGroup = CommonFunction.makeLicenseExpression(ossInfo.getOssLicenses());
-			String[] licenseGroupSplit = licenseGroup.split("OR");
+//			String[] licenseGroupSplit = licenseGroup.split("OR");
+			
+			List<String> andCombLicenseList = new ArrayList<>();
+			for(OssLicense bean : ossInfo.getOssLicenses()) {
+				if(andCombLicenseList.isEmpty() || "OR".equals(bean.getOssLicenseComb())) {
+					andCombLicenseList.add(bean.getLicenseName());
+					
+					continue;
+				}
+				
+				int seq = andCombLicenseList.size()-1;
+				String licenseName = andCombLicenseList.get(seq);
+				licenseName += " AND " + bean.getLicenseName();
+				andCombLicenseList.set(seq, licenseName);
+			}
+			
 			Map<String, Object> result = new HashMap<String, Object>();
 			boolean returnFlag = false;
 			
 			for(ProjectIdentification iden : licenseList) {
 				if(!licenseGroup.contains(iden.getLicenseName())) {
 					returnFlag = true;
-					
 					break;
 				}
 			}
@@ -1864,17 +1882,16 @@ public class T2CoProjectValidator extends T2CoValidator {
 				return false;
 			}
 			
-			for(String licenseName : licenseGroupSplit) {
+			for(String licenseName : andCombLicenseList) {
 				for(ProjectIdentification iden : licenseList) {
 					if(!licenseName.trim().contains(iden.getLicenseName().trim()) && CoConstDef.FLAG_NO.equals(iden.getExcludeYn())) {
 						result.put(licenseName, false);
-						
 						break;
 					}
 				}
 			}
 			
-			return licenseGroupSplit.length == result.size() ? true : false; // group의 size와 존재하지 않은 값 check size가 동일하면 true
+			return andCombLicenseList.size() == result.size() ? true : false; // group의 size와 존재하지 않은 값 check size가 동일하면 true
 		}
 
 		return false;

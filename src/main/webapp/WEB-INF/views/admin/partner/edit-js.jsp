@@ -571,7 +571,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			var postData = $("#partnerForm").serializeObject();
 			
 			if(obj.validMsg && obj.validMsg.length != 0){
-				alertify.confirm(obj.validMsg, function () {
+				alertify.alert(obj.validMsg, function () {
 					$.ajax({
 						url : '/partner/saveAjax',
 						type : 'POST',

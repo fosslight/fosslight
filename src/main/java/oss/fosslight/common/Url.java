@@ -183,8 +183,8 @@ public final class Url {
 		public static final String ANALYSIS_RESULT_DETAIL_ID = PATH + "/getAnalysisResultDetail/{groupId}";
 		public static final String ANALYSIS_RESULT_DETAIL_JSP = TILES_ROOT + PATH + "/ossAnalysisResultDetailpopup";
 		
-		public static final String CHECK_LICENSE_TEXT_VALIDATION = PATH + "/checkLicenseTextValid";
-		public static final String START_CHECK_LICENSE_TEXT = PATH + "/startCheckLicenseText";
+		public static final String CHECK_LICENSE_TEXT_VALIDATION = "/checkLicenseText/valid";
+		public static final String START_CHECK_LICENSE_TEXT = "/checkLicenseText/start";
 		
 		public static final String UPDATE_ANALYSIS_COMPLETE = PATH + "/updateAnalysisComplete";
 	}

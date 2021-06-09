@@ -62,11 +62,13 @@
 									WHERE A1.REFERENCE_DIV IN ('10','11','12','14','15') AND A1.EXCLUDE_YN = 'N'
 						    		GROUP BY REFERENCE_ID) T2 ON T1.PRJ_ID = T2.REFERENCE_ID
 	    		 WHERE T1.USE_YN = 'Y'
+	    		 <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
 			       AND (T1.CREATOR = #{userId} 
 							OR EXISTS (SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
 										 FROM PRE_PROJECT_WATCHER A1 
 										INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
 										WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))))
+				 </if>
 				   AND T1.PRJ_ID = #{prjId}
 			   ) A
 		 WHERE 1=1

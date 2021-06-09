@@ -665,7 +665,7 @@
 		WHERE T1.USE_YN = 'Y'
 	</select>
 	
-	<select id="getLicenseInfoWithName" resultType="LicenseMaster">
+	<select id="getLicenseInfoWithName" resultType="oss.fosslight.domain.LicenseMaster">
 		SELECT 
 			T1.LICENSE_ID
 			, T1.LICENSE_NAME
@@ -688,7 +688,7 @@
 		LIMIT 1
 	</select>
 	
-	<select id="getLicenseInfoWithId" resultType="LicenseMaster">
+	<select id="getLicenseInfoWithId" resultType="oss.fosslight.domain.LicenseMaster">
 		SELECT 
 			T1.LICENSE_ID
 			, T1.LICENSE_NAME

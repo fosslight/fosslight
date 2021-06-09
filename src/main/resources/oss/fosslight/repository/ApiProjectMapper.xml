@@ -208,6 +208,7 @@
 					, T1.MODIFIED_DATE
 			   FROM PROJECT_MASTER T1
 	          WHERE T1.USE_YN = 'Y'
+	          <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
 			    AND (
 						T1.CREATOR = #{userId} 
 							OR EXISTS (
@@ -218,6 +219,7 @@
 							)
 							OR PUBLIC_YN = 'Y'
 					)
+			  </if>
 				<foreach item="item" index="index" collection="prjId" open=" AND (" close=")" separator="OR">
 			     T1.PRJ_ID = #{item}
 			    </foreach>

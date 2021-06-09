@@ -2241,6 +2241,7 @@ public class ExcelUtil extends CoTopComponent {
 		int downloadLocationCol = -1;
 		int homepageCol = -1;
 		int copyrightTextCol = -1;
+		int commentCol = -1;
 		
 		Map<String, Object> result = new HashMap<>();
 		List<OssAnalysis> analysisResultList = new ArrayList<OssAnalysis>();
@@ -2250,7 +2251,8 @@ public class ExcelUtil extends CoTopComponent {
 		String[] titleRow = csvDataList.get(0); // titleRow 추출
 		
 		for (String col : titleRow) {
-			col = col.toUpperCase();
+			col = col.toUpperCase().replaceAll("\\,", "");
+			
 			// 각 컬럼별 colindex 찾기
 			// 기존 report와 해더 칼럼명 호환 처리가 필요한 경우 여기에 추가
 			switch (col) {
@@ -2310,7 +2312,7 @@ public class ExcelUtil extends CoTopComponent {
 					concludedLicenseCol = colIdx;
 					
 					break;
-				case "LICENSE(ASKALONO)":
+				case "MAIN LICENSE":
 					if(askalonoLicenseCol > -1) {
 						dupColList.add(col);
 					}
@@ -2365,6 +2367,12 @@ public class ExcelUtil extends CoTopComponent {
 					
 					copyrightTextCol = colIdx;
 					
+					break;
+				case "COMMENT":
+					if(commentCol > -1) {
+						dupColList.add(col);
+					}
+					commentCol = colIdx;
 					break;
 				default:
 					break;
@@ -2445,6 +2453,7 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(row[downloadLocationCol]).trim().replaceAll("\t", ""));
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
+					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\\,", "").replaceAll("\t", ""));
 					
 					analysisResultList.add(bean);
 				}

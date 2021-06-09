@@ -79,9 +79,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_DECOMP = CommonFunction.emptyCheckProperty("verify.decompress.path", "/verify/decompression");
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
-	private static String EXPORT_TEMPLATE_PATH = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-													? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-													: "template";
+	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
 		// 1. Verification정보
@@ -470,7 +469,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.debug("VERIFY TARGET FILE : " + filePath);
 			
 			if(packagingFileIdx == 1 && isChangedPackageFile) {
-				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
+//				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 			}
 			
 			String exceptionWordsPatten = "proprietary\\|commercial";
@@ -502,7 +501,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.info("VERIFY START : " + prjId);
 			
 			if(isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
-				ShellCommander.shellCommandWaitFor(commandStr);
+//				ShellCommander.shellCommandWaitFor(commandStr);
 			}
 			
 			log.info("VERIFY END : " + prjId);
@@ -550,13 +549,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
+			List<String> readmePathList = new ArrayList<String>();
 			if(result != null) {
 				boolean isFirst = true;
 				
 				for(String s : result) {
-					if(!isEmpty(s)) {
+					if(!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
+						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
+
 						boolean isFile = s.endsWith("*");
-						
+						prjId = "1563";
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
 						
@@ -585,6 +587,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						if(isFile){
 							String _dir = s;
 							
+							if(s.toUpperCase().indexOf("README") > -1) {
+								readmePathList.add(s);
+							}
+							
 							if(s.indexOf("/") > -1) {
 								_dir = s.substring(0, s.lastIndexOf("/"));
 							}
@@ -599,7 +605,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						deCompResultMap.put(s, 0);
-						
 					}
 				}
 			}
@@ -852,8 +857,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			// depth가 낮은 readme 파일을 구하기 위해 sort
 			if(packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
-				List<String> sortList = new ArrayList<>(deCompResultMap.keySet());
-				Collections.sort(sortList, new Comparator<String>() {
+//				List<String> sortList = new ArrayList<>(deCompResultMap.keySet());
+				Collections.sort(readmePathList, new Comparator<String>() {
 
 					@Override
 					public int compare(String arg1, String arg2) {
@@ -867,22 +872,26 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					};
 				});
 				
-				String lastReadmeFilePath = "";
-				for(String r : sortList) {
+//				String lastReadmeFilePath = "";
+				for(String r : readmePathList) {
 					String _upperPath = avoidNull(r).toUpperCase();
 					
 					if(_upperPath.endsWith("/")) {
 						continue;
 					}
 					
-					String _currentReadmeFilePath = _upperPath.indexOf("/") < 0 ? _upperPath : _upperPath.substring(0,_upperPath.lastIndexOf("/"));
+//					String _currentReadmeFilePath = _upperPath.indexOf("/") < 0 ? _upperPath : _upperPath.substring(0,_upperPath.lastIndexOf("/"));
+//					
+//					if(!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
+//						if(!isEmpty(readmePath)) {
+//							break;
+//						}
+//						
+//						lastReadmeFilePath = _currentReadmeFilePath;
+//					}
 					
-					if(!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
-						if(!isEmpty(readmePath)) {
-							break;
-						}
-						
-						lastReadmeFilePath = _currentReadmeFilePath;
+					if(_upperPath.indexOf("/") > -1) {
+						_upperPath = _upperPath.substring(_upperPath.lastIndexOf("/"), _upperPath.length());
 					}
 					
 					if(_upperPath.indexOf("README") > -1){
@@ -921,7 +930,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
 				if(isChangedPackageFile){
-					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
+//					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
 				log.info("VERIFY Copy Readme file END -----------------");
@@ -1036,7 +1045,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		} finally {
 			try {
 				if(isChangedPackageFile){
-					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
+//					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 				}
 				
 				log.info("VERIFY delete decomp file END -----------------");

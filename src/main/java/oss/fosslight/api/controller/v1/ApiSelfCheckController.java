@@ -35,8 +35,6 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
@@ -47,6 +45,8 @@ import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Api(tags = {"5. SelfCheck"})
 @RequiredArgsConstructor

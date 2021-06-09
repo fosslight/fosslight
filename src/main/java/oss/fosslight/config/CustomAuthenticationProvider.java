@@ -6,6 +6,7 @@
 package oss.fosslight.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.T2Authorities;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.T2UserService;
@@ -41,8 +43,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String user_pw = (String)authentication.getCredentials();
         boolean loginSuccess = false;
         String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+        List<String> customAccounts = Arrays.asList(CommonFunction.emptyCheckProperty("custom.accounts", "").split(","));
         
-        if(CoConstDef.FLAG_YES.equals(ldapFlag)) {
+        if(CoConstDef.FLAG_YES.equals(ldapFlag) && !customAccounts.contains(user_id)) {
         	loginSuccess = checkByADUser(user_id, user_pw);
         } else {
         	loginSuccess = checkSystemUser(user_id, user_pw);
@@ -81,11 +84,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				return isAuthenticated;
 			}
 			
+			String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
 			Hashtable<String, String> properties = new Hashtable<String, String>();
 			properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
 			properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
 			properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-			properties.put(Context.SECURITY_PRINCIPAL, user_id);
+			properties.put(Context.SECURITY_PRINCIPAL, user_id+ldapDomain);
 			properties.put(Context.SECURITY_CREDENTIALS, user_pw);
 
 			DirContext con = null;

@@ -1063,7 +1063,7 @@ var fn_grid_com = {
 		},
 		checkLicenseTextValidation : function(_prjId, _type){
 			$.ajax({
-				url : '/oss/checkLicenseTextValid',
+				url : '/checkLicenseText/valid',
 				cache : false,
 				async: false,
 				data : JSON.stringify({ "prjId" : _prjId , "regType" : _type}),
@@ -1096,7 +1096,7 @@ var fn_grid_com = {
 		},
 		checkLicenseText : function(_prjId){
 			$.ajax({
-				url : '/oss/startCheckLicenseText',
+				url : '/checkLicenseText/start',
 				cache : false,
 				async: false,
 				data : JSON.stringify({ "prjId" : _prjId }),

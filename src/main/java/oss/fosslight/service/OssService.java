@@ -98,10 +98,6 @@ public interface OssService extends HistoryConfig{
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
 	
-	Map<String, Object> checkLicenseTextValid(OssMaster bean);
-	
-	Map<String, Object> startCheckLicenseText(String prjId, String ossReportId);
-	
 	Map<String, Object> updateAnalysisComplete(OssAnalysis bean) throws Exception;
 	
 	OssAnalysis getAutoAnalysisSuccessOssInfo(String referenceOssId);

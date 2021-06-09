@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation;
 
 import java.io.IOException;
 import java.util.Arrays;

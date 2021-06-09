@@ -6,7 +6,6 @@
 package oss.fosslight.service.impl;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
@@ -35,7 +34,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoValidationConfig;
+import oss.fosslight.common.ShellCommander;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
@@ -57,8 +56,8 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.util.DateUtil;
-import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationConfig;
 
 @Service
 @Slf4j
@@ -2088,115 +2087,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return ossNewistData;
-	}
-
-	@Override
-	public Map<String, Object> checkLicenseTextValid(OssMaster bean) {
-		String prjId = bean.getPrjId();
-		String type = bean.getRegType();
-		
-		Map<String, Object> result = new HashMap<String, Object>();
-		boolean isProd = "REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
-		String checkFilePath = MessageFormat.format(CommonFunction.emptyCheckProperty("check.license.text.path", "/osc_license_check/{0}_license_check{1}"), (isProd ? "live" : "dev"), "/output");
-		File outputDir = new File(checkFilePath);
-		
-		if(outputDir.exists()) {
-			for(File f : outputDir.listFiles()) {
-				if(!f.getName().startsWith(prjId)) {
-					continue;
-				}
-				
-				// {projectId}_analyze.lock
-				if(f.getName().startsWith(prjId) && f.getName().endsWith("lock")) {
-					result.put("isValid", false);
-					result.put("returnMsg", "It is still being analyzed.");
-					
-					break;
-				}
-				
-				// {projectId}_result_{timestamp - yyyy-mm-dd_hh:MM:ss} 확장자는 check하지 않음.
-				if(!isEmpty(type) && "load".equals(type)) {
-					if(f.getName().startsWith(prjId+"_result")) {
-						String downloadUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_CHECK_LICENSETEXT_SERVER_INFO, CoConstDef.CD_DOWNLOAD_URL)+f.getName();
-						
-						if(!isProd) {
-							downloadUrl += "&dev=ok";
-						}
-						
-						result.put("isValid", true);
-						result.put("returnMsg", "complete");
-						result.put("downloadUrl", downloadUrl);
-						
-						break;
-					}
-				}
-			}
-		}
-		
-		
-		if(!result.containsKey("isValid")) {
-			result.put("isValid", true);
-			result.put("returnMsg", "Success");
-		}
-		
-		return result;
-	}
-	
-	@Override
-	public Map<String, Object> startCheckLicenseText(String prjId, String ossReportId) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		
-		try {
-			boolean isProd = "REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
-			List<T2File> binAndroidFileList = fileMapper.getBinAndroidFileList(prjId, ossReportId);
-			
-			for(T2File binFile : binAndroidFileList) {
-				String origFilePath = binFile.getLogiPath();
-				
-				if(binFile.getLogiPath().endsWith("/")) {
-					origFilePath += binFile.getLogiNm();
-				} else {
-					origFilePath += "/" + binFile.getLogiNm();
-				}
-				
-				String copyFilePath = MessageFormat.format(CommonFunction.emptyCheckProperty("check.license.text.path", "/osc_license_check/{0}_license_check{1}"), (isProd ? "osc" : "dev"), "/output");
-				String copyFileName = "";
-				
-				if(binFile.getOrigNm().endsWith("xml")
-						|| binFile.getOrigNm().endsWith("zip")
-						|| binFile.getOrigNm().endsWith("tar.gz")) {
-					continue; // 이슈로 인해 위의 file들이 들어올 수 있음.
-				}
-				
-				if(binFile.getOrigNm().endsWith("html")) {
-					copyFileName = prjId+"_NOTICE.html"; // Notice
-				}else if(binFile.getOrigNm().endsWith("xlsx")) {
-					copyFileName = prjId+"_OSS-Report.xlsx"; // OSS Report
-				}
-				
-				FileUtil.copyFile(origFilePath, copyFilePath, copyFileName);// OSS Report
-				File copiedFile = new File(copyFilePath + "/" + copyFileName);
-				copiedFile.setReadable(true, false); // 읽기 권한 부여
-				copiedFile.setWritable(true, false); // 쓰기 권한 부여
-				copiedFile.setExecutable(true, false); // 실행 권한 부여
-				
-				log.info(origFilePath + " => " + copyFilePath + "/" + copyFileName + " copy File info");
-			}
-			
-			String EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName()); // reviewer와 loginUser의 email
-			
-			resultMap.put("isValid", true);
-			resultMap.put("returnMsg", "Success");
-			resultMap.put("isProd", isProd);
-			resultMap.put("email", EMAIL_VAL);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			
-			resultMap.put("isValid", false);
-			resultMap.put("returnMsg", "error message");
-		}
-		
-		return resultMap;
 	}
 	
 	@Override

@@ -45,8 +45,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -71,6 +69,8 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.OssComponentUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Controller
 @Slf4j
@@ -2610,80 +2610,6 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> map = projectService.getIdentificationProject(project);
 
 		return makeJsonResponseHeader(map);
-	}
-	
-	/**
-	 * Save bat.
-	 *
-	 * @param map the map
-	 * @param req the req
-	 * @param res the res
-	 * @param model the model
-	 * @return the response entity
-	 */
-	@SuppressWarnings("unchecked")
-	@PostMapping(value = PROJECT.SAVE_BAT)
-	public @ResponseBody ResponseEntity<Object> saveBat(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
-		// default validation
-		boolean isValid = true;
-		// last response map
-		Map<String, String> resMap = new HashMap<>();
-		// default 00:java error check code, 10:success code
-		String resCd = "00";
-
-		boolean prjYn = "prj".equals(String.valueOf(map.get("workType")));
-		String prjId = (String) map.get("referenceId");
-		String identificationSubStatusBat = (String) map.get("identificationSubStatusBat");
-		String mainGrid = (String) map.get("mainData");
-		String subGrid = (String) map.get("subData");
-
-		// 메인그리드
-		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponents = new ArrayList<>();
-		ossComponents = (List<ProjectIdentification>) fromJson(mainGrid, collectionType);
-
-		// 서브그리드
-		Type collectionType2 = new TypeToken<List<List<ProjectIdentification>>>() {}.getType();
-		List<List<ProjectIdentification>> ossComponentsLicense = new ArrayList<List<ProjectIdentification>>();
-		ossComponentsLicense = (List<List<ProjectIdentification>>) fromJson(subGrid, collectionType2);
-		ossComponentsLicense = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(), prjYn?CoConstDef.CD_DTL_COMPONENT_ID_BAT:CoConstDef.CD_DTL_COMPONENT_PARTNER_BAT, prjId), ossComponents,
-				ossComponentsLicense);
-
-		if (CoConstDef.FLAG_NO.equals(identificationSubStatusBat) && prjYn) {
-			Project project = new Project();
-			project.setIdentificationSubStatusBat(identificationSubStatusBat);
-			project.setPrjId(prjId);
-			projectService.updateSubStatus(project);
-		} else {
-			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
-			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
-			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-
-			projectService.registComponentsBat(prjId, identificationSubStatusBat, ossComponents, ossComponentsLicense, prjYn);
-
-			try {
-				Project project = new Project();
-				project.setPrjId(prjId);
-				History h = new History();
-				h = projectService.work(project);
-				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-				project = (Project) h.gethData();
-				h.sethEtc(project.etcStr());
-				historyService.storeData(h);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-
-		}
-		
-		// success code set 10
-		resCd = "10";
-		resMap.put("isValid", String.valueOf(isValid));
-		resMap.put("resCd", resCd);
-		
-		return makeJsonResponseHeader(resMap);
 	}
 	
 	/**

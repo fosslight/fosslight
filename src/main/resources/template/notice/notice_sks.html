@@ -1,5 +1,5 @@
 <!DOCTYPE>
-<html>
+<html lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
@@ -22,6 +22,7 @@
 			.left {float:left;}
 			.right {float:right;}
 			.notice_sks_body .bdTop {margin-top:30px;padding-top:30px;border-top:1px solid #888;}
+			caption {display:none;}
 			/*.bdTop b {font-style: italic;}*/
 		</style>
 	</head>
@@ -39,7 +40,8 @@
 			#end
 			#if($!{disclosureObligationSize} != "0")
 			<div style="padding:10px;max-width:800px;">
-				<table class="gridtable" width="100%">
+				<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
+					<caption>Open source lists under Copyleft license.</caption>
 					<tr>
 						<th width=182>Open Source</th>
 						<th width=159>License</th>
@@ -80,7 +82,8 @@
 				#if($!{disclosureObligationSize} != "0")<P>Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in the tables below.</P>#end
 		
 			<div style="padding:10px;max-width:800px;">
-				<table width="100%" class="gridtable">
+				<table width="100%" class="gridtable" aria-label="Open source lists under Pemissive License.">
+					<caption>Open source lists under Pemissive License.</caption>
 					<tr>
 						<th width=182>Open Source</th>
 						<th width=159>License</th>
