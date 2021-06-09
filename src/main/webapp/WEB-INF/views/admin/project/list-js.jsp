@@ -442,7 +442,7 @@
 		displayComment : function(cellvalue, options, rowObject){
 			var display = "";
 			
-			if(cellvalue !="") {
+			if(!isEmpty(cellvalue)) {
 				var tmpStr = new RegExp();
 				tmpStr = /[<][^>]*[>]/gi;
 				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
