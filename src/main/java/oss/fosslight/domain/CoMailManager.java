@@ -1316,7 +1316,7 @@ public class CoMailManager extends CoTopComponent {
 								)
 						)
 				{
-					String linkUrl = "http://fosslight.org";
+					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
 					linkUrl += "/oss/edit/" + bean.getParamOssId();
 					_s = "<a href='"+linkUrl+"' target='_blank'>" + _s + "</a>";
 				}
@@ -3047,7 +3047,9 @@ public class CoMailManager extends CoTopComponent {
 			}
 		}
 		
-	    props.put("resource.loader", "class");
+		context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
+	    
+		props.put("resource.loader", "class");
 	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 	    props.put("input.encoding", "UTF-8");
 	    

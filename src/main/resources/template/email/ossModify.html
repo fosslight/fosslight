@@ -165,7 +165,8 @@
 									</table>
 								#end
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								<div style="font-size:12px;">* This mail was sent by <a href="http://fosslight.org">fosslight.org</a></div>
+								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
+								<div style="font-size:12px;">* This mail was sent by <a href="$domain">$shortDomain</a></div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>
