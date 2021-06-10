@@ -248,7 +248,8 @@ Guide for Packaging : <a href="$packaging_requested_url_info">$packaging_request
 									<div style="padding:10px;font-size:12px;">$!comment</div>
 								#end
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								<div style="font-size:12px;">* This mail was sent by <a href="http://fosslight.org" target="_blank">fosslight.org</a></div>
+								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
+								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

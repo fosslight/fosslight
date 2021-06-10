@@ -1994,7 +1994,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				// Document Namespace
 				Cell cellDocumentNamespace = getCell(row, cellIdx); cellIdx++;
 				String spdxidentifier = "SPDXRef-" + strPrjName.replaceAll(" ", "") + "-" + createdTime;
-				cellDocumentNamespace.setCellValue("http://fosslight.org/" + spdxidentifier);
+				String domain = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org/");
+				cellDocumentNamespace.setCellValue(domain + spdxidentifier);
 				
 				// Document Contents
 				cellIdx++;
