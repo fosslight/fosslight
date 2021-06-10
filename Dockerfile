@@ -8,7 +8,7 @@ WORKDIR /home/gradle/src
 
 RUN gradle build --no-daemon
 
-#Cretae the containerized app
+#Create the containerized app
 FROM openjdk:8-jre-alpine
 
 MAINTAINER sameer1046
