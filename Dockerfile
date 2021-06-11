@@ -1,4 +1,5 @@
 #Copyright (C) Sameer1046
+#SPDX-License-Identifier: AGPL-3.0-only
 #Build the image from source
 FROM gradle:4.7.0-jdk8-alpine AS build
 
