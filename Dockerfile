@@ -11,7 +11,7 @@ RUN gradle build --no-daemon
 #Create the containerized app
 FROM openjdk:8-jre-alpine
 
-MAINTAINER sameer1046
+LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
 
