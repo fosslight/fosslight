@@ -1,0 +1,29 @@
+#Copyright (C) Sameer1046
+
+#SPDX-License-Identifier: AGPL-3.0-only
+
+version: "3.5"
+services:
+    db:
+     image: mysql:5.7
+     ports:
+         - 3306:3306
+     env_file:
+         - docker.env 
+     volumes:
+         - db_data:/var/lib/mysql
+         - .docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    web:
+       build: .
+       depends_on:
+         - db
+       ports:
+         - 8188:8180
+       command: sh -c " java -jar FOSSLight.war --root.dir=/data/fosslight 
+         --server.port=8180   
+         --spring.datasource.url=db:3306/fosslight
+         --spring.datasource.username=root
+         --spring.datasource.password=secret"
+
+volumes:
+    db_data:
