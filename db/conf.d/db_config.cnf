@@ -1,0 +1,16 @@
+[client]
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4
+
+[mysqld]
+character-set-client-handshake = FALSE
+character-set-server           = utf8mb4
+collation-server               = utf8mb4_unicode_ci
+#bind-address = 127.0.0.1 
+bind-address = 0.0.0.0 
+key_buffer_size = 512M
+innodb_buffer_pool_size = 512M
+init_connect="SET collation_connection=utf8_general_ci"
+
