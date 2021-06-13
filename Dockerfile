@@ -9,12 +9,16 @@ WORKDIR /home/gradle/src
 
 RUN gradle build --no-daemon
 
+
 #Create the containerized app
 FROM openjdk:8-jre-alpine
 
 LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
+
+COPY ./wait-for /app/wait-for
+RUN chmod +x /app/wait-for
 
 WORKDIR /app
 
