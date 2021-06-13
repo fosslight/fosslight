@@ -30,5 +30,6 @@ services:
                --server.port=8180
                --spring.datasource.url=db:3306/fosslight
                --spring.datasource.username=fosslight
-               --spring.datasource.password=fosslight"
+               --spring.datasource.password=fosslight
+               --logging.path=/data/fosslight/logs"
 

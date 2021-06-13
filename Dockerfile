@@ -17,7 +17,7 @@ LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
 
-COPY ./wait-for /app/wait-for
+COPY ./db/wait-for /app/wait-for
 RUN chmod +x /app/wait-for
 
 WORKDIR /app
