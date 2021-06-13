@@ -24,6 +24,8 @@ services:
          - db
        ports:
          - 8180:8180
+       volumes:
+          - ./web-data:/data/fosslight
        command:
          sh -c " java -jar FOSSLight.war --root.dir=/data/fosslight 
          --server.port=8180   
