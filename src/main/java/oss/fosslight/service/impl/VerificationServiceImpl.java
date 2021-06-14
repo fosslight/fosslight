@@ -469,7 +469,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.debug("VERIFY TARGET FILE : " + filePath);
 			
 			if(packagingFileIdx == 1 && isChangedPackageFile) {
-//				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
+				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 			}
 			
 			String exceptionWordsPatten = "proprietary\\|commercial";
@@ -501,7 +501,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.info("VERIFY START : " + prjId);
 			
 			if(isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
-//				ShellCommander.shellCommandWaitFor(commandStr);
+				ShellCommander.shellCommandWaitFor(commandStr);
 			}
 			
 			log.info("VERIFY END : " + prjId);
@@ -558,7 +558,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
 
 						boolean isFile = s.endsWith("*");
-						prjId = "1563";
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
 						
@@ -930,7 +929,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
 				if(isChangedPackageFile){
-//					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
+					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
 				log.info("VERIFY Copy Readme file END -----------------");
@@ -1045,7 +1044,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		} finally {
 			try {
 				if(isChangedPackageFile){
-//					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
+					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 				}
 				
 				log.info("VERIFY delete decomp file END -----------------");
