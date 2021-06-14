@@ -24,9 +24,12 @@ services:
          - db
        ports:
          - 8180:8180
-       command:
-         sh -c " java -jar FOSSLight.war --root.dir=/data/fosslight 
-         --server.port=8180   
-         --spring.datasource.url=db:3306/fosslight
-         --spring.datasource.username=fosslight
-         --spring.datasource.password=fosslight"
+       volumes:
+         - ./web-data:/data/fosslight
+       command: sh -c "./wait-for db:3306 -t 120 && java -jar FOSSLight.war --root.dir=/data/fosslight 
+               --server.port=8180
+               --spring.datasource.url=db:3306/fosslight
+               --spring.datasource.username=fosslight
+               --spring.datasource.password=fosslight
+               --logging.path=/data/fosslight/logs"
+
