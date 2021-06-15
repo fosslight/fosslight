@@ -30,7 +30,6 @@ import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2CodeDtl;
-import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.service.CommentService;
