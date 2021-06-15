@@ -133,7 +133,7 @@ public class T2UserServiceImpl implements T2UserService {
 			
 			List<Project> prjList = null;
 			List<PartnerMaster> partnerList = null;
-			List<Map<String, Object>> batList = null;
+//			List<Map<String, Object>> batList = null;
 			
 			if(CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES)) {
 				// project watcher 초대여부
@@ -168,17 +168,17 @@ public class T2UserServiceImpl implements T2UserService {
 				}
 			}
 			
-			if(batList != null) {
-				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
-				for(Map<String, Object> bean : batList) {
-					String batId = (String) bean.get("baId");
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED);
-					mailBean.setParamBatId(batId);
-					mailBean.setParamUserId(t2Users.getUserId());
-					
-					CoMailManager.getInstance().sendMail(mailBean);
-				}
-			}
+//			if(batList != null) {
+//				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
+//				for(Map<String, Object> bean : batList) {
+//					String batId = (String) bean.get("baId");
+//					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED);
+//					mailBean.setParamBatId(batId);
+//					mailBean.setParamUserId(t2Users.getUserId());
+//					
+//					CoMailManager.getInstance().sendMail(mailBean);
+//				}
+//			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

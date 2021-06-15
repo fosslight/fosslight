@@ -26,7 +26,7 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
-import oss.fosslight.service.vulnerability.NvdDataService;
+import oss.fosslight.service.NvdDataService;
 import oss.fosslight.util.FileUtil;
 
 @Slf4j
@@ -69,8 +69,8 @@ public class SchedulerWorkerTask {
 	}
 	
 	// 새벽 12시 스케줄 - CPE Dictionary, CVE Update Data Sync 
-	@Scheduled(cron="0 0 1 * * ?")
-	//@Scheduled(fixedDelay=1000)
+	@Scheduled(cron="0 10 3 * * ?")
+//	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
 		String resCd = "";
 		try {

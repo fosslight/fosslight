@@ -100,5 +100,4 @@ dependencies {
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    compile files('libs/FOSSLight-vulnerability-0.0.1.jar')
 }

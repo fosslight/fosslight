@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.NvdDataMapper">
+
+	<select id="getCodeExp" resultType="String">
+		SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE USE_YN = 'Y' AND CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo} 
+	</select>
+	<select id="getCodeString" resultType="String">
+		SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE USE_YN = 'Y' AND CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo}
+	</select>
+
+	<!-- 사용중인 메타 데이터 조회 -->
+    <select id="selectUseMetaData" parameterType="HashMap" resultType="HashMap">
+    	SELECT 
+    		FILE_NM		AS fileNm
+    		, FILE_TYPE	AS fileType
+    		, MODI_DATE	AS modiDate
+    		, SIZE		AS size
+    		, USE_YN	AS useYn
+    		, JOB_STATUS AS jobStatus
+    	FROM NVD_META
+		WHERE FILE_TYPE = #{fileType} 
+			AND FILE_NM = #{fileNm}
+			AND USE_YN = 'Y' 
+			AND MODI_DATE IS NOT NULL
+		ORDER BY FILE_NM
+    </select>
+    
+    <!-- 메타 데이터 신규 등록 -->
+    <insert id="insertNewMetaData" parameterType="HashMap">
+    	INSERT INTO NVD_META
+			(FILE_NM, FILE_TYPE, MODI_DATE, SIZE, ZIP_SIZE, GZ_SIZE, SHA256, USE_YN) VALUES
+			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y')
+    </insert>
+    
+    <!-- 메타 데이터 사용유무 변경 -->
+    <update id="updateUseYN" parameterType="HashMap">
+    	UPDATE NVD_META SET USE_YN = #{useYn} WHERE FILE_TYPE = #{fileType} AND FILE_NM = #{fileNm}
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
+    		AND MODI_DATE = #{modiDate}
+    	</if>
+    	<if test="@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
+    		AND MODI_DATE IS NULL
+    	</if>
+    </update>
+    
+    <!-- 메타 데이터 Wait Job 데이터 조회 -->
+    <select id="selectWaitJobData" parameterType="HashMap" resultType="HashMap">
+    	SELECT 
+			FILE_NM		AS fileNm
+			, FILE_TYPE	AS fileType
+			, MODI_DATE	AS modiDate
+			, SIZE		AS size
+			, USE_YN	AS useYn
+			, JOB_STATUS AS jobStatus
+		FROM NVD_META
+		WHERE FILE_TYPE = #{fileType} 
+			AND USE_YN = 'Y' 
+		    AND JOB_STATUS = 'W'
+		ORDER BY FILE_NM
+    </select>
+    
+    <!-- 메타 데이터 Delete Job 데이터 조회 -->
+    <select id="selectDeleteJobData" parameterType="HashMap" resultType="HashMap">
+    	SELECT 
+			FILE_NM		AS fileNm
+			, FILE_TYPE	AS fileType
+			, MODI_DATE	AS modiDate
+			, SIZE		AS size
+			, USE_YN	AS useYn
+			, JOB_STATUS AS jobStatus
+		FROM NVD_META
+		WHERE FILE_TYPE = #{fileType} 
+			AND USE_YN = 'N' 
+		    AND JOB_STATUS = 'D'
+		ORDER BY FILE_NM
+    </select>
+    
+    <!-- 메타 데이터 Job 상태 변경 -->
+    <update id="updateJobStatus" parameterType="HashMap">
+    	UPDATE NVD_META SET JOB_STATUS = #{jobStatus} WHERE FILE_TYPE = #{fileType} AND FILE_NM = #{fileNm}
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
+    		AND MODI_DATE = #{modiDate}
+    	</if>
+    	<if test="@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
+    		AND MODI_DATE IS NULL
+    	</if>
+    </update>
+    
+    <!-- CVE 데이터 삭제 -->
+    <delete id="deleteCveData" parameterType="HashMap">
+    	DELETE FROM NVD_CVE WHERE CVE_ID = #{cveId}
+    </delete>
+    
+    <!-- SW 취약점 리스트 데이터 삭제 -->
+    <delete id="deleteVulnSwData" parameterType="HashMap">
+    	DELETE FROM NVD_VULN_SW WHERE CVE_ID = #{cveId}
+    </delete>
+    
+    <!-- CPE 데이터 조회 -->
+    <select id="selectOneCpeDicData" parameterType="HashMap" resultType="HashMap">
+    	SELECT CPE_NM AS cpeNm, TITLE AS title, PART AS part, VENDOR AS vendor, PRODUCT AS product, VERSION AS version, REG_DATE AS regDate FROM NVD_CPE_DICTIONARY WHERE CPE_NM = #{cpeNm}
+    </select>
+    
+    <!-- CPE 데이터 등록 -->
+    <insert id="insertCpeDicData" parameterType="HashMap">
+    	INSERT INTO NVD_CPE_DICTIONARY(CPE_NM,TITLE,PART,VENDOR,PRODUCT,VERSION)VALUES(#{cpeNm}, #{title}, #{part}, #{vendor}, #{product}, #{version})
+    </insert>
+    
+    <!-- CPE Dictionary 데이터 삭제 -->
+    <delete id="deleteCpeDicData">
+    	DELETE FROM NVD_CPE_DICTIONARY
+    </delete>
+    
+    <!-- SW 취약점 개수 조회 -->
+    <select id="selectVulnSwCnt" parameterType="HashMap" resultType="int">
+    	SELECT COUNT(*) FROM NVD_VULN_SW 
+    	WHERE CPE_NM = (SELECT CPE_NM FROM NVD_CPE_DICTIONARY WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion} ORDER BY CPE_NM LIMIT 1)
+    </select>
+    
+    <!-- CVE 정보 조회 -->
+    <select id="selectOneCveInfo" parameterType="HashMap" resultType="HashMap">
+    	SELECT CVE_ID AS cveId, PUBL_DATE AS publDate, MODI_DATE AS modiDate FROM NVD_CVE WHERE CVE_ID = #{cveId}
+    </select>
+    
+    <!-- SW 취약점 정보 조회
+    	 기능: OSS Name, OSS Version으로 발견된 취약점 데이터를 모두 조회하여 취약점 점수가 높은 최신 취약점 정보를 조회한다. 
+     -->
+    <select id="selectOneVulnSwInfo" parameterType="HashMap" resultType="HashMap">
+    	SELECT 
+    		A.CVE_ID		AS cveId
+    		, A.CPE_NM		AS cpeNm
+    		, B.CVSS_SCORE 	AS cvssScore
+    	FROM NVD_VULN_SW A
+		INNER JOIN NVD_CVE B ON A.CVE_ID = B.CVE_ID
+    		WHERE 
+    			A.CPE_NM = (SELECT CPE_NM FROM NVD_CPE_DICTIONARY WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion} ORDER BY CPE_NM LIMIT 1) 
+    	ORDER BY CONVERT(B.CVSS_SCORE, DECIMAL) DESC, A.CVE_ID DESC LIMIT 1
+    </select>
+    
+    <!-- CVE 정보 등록 -->
+    <insert id="insertCveInfo" parameterType="HashMap">
+    	INSERT INTO NVD_CVE(CVE_ID, PUBL_DATE, MODI_DATE, CVSS_SCORE, CVSS_ACC_VECTOR, CVSS_ACC_COMPLE, CVSS_AUTH, CVSS_CONF_IMPACT, CVSS_INT_IMPACT, CVSS_AVA_IMPACT, CVSS_SOURCE, CVSS_GEN_ON_DATE, VULN_SUMMARY)VALUES
+    	(#{cveId}, #{publDate}, #{modiDate}, #{cvssScore}, #{cvssAV}, #{cvssAC}, #{cvssAu}, #{cvssC}, #{cvssI}, #{cvssA}, #{cvssSource}, #{cvssGenDate}, #{summary})
+    </insert>
+    
+    <!-- SW 취약점 정보 등록 -->
+    <insert id="insertVulnSwInfo" parameterType="HashMap">
+		INSERT INTO NVD_VULN_SW(CVE_ID, CPE_NM)VALUES(#{cveId}, #{cpeNm})    	
+    </insert>
+    
+    <!-- OSS 배치 타겟 초기화 -->
+    <select id="updateOssBatTarget">
+    	UPDATE OSS_MASTER SET VULN_YN = NULL, VULN_DATE = NULL, CVE_ID = NULL WHERE VULN_YN = 'N'
+    </select>
+    
+    <!-- OSS 배치 타겟 조회 -->
+    <select id="selectOssBatTarget" resultType="HashMap">
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, T1.CVSS_SCORE AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM (
+				SELECT B1.CVE_ID, B1.VENDOR, B1.PRODUCT, B1.VERSION, B1.MODI_DATE, B2.CVSS_SCORE 
+				FROM NVD_DATA B1 
+					INNER JOIN (
+						SELECT A1.VENDOR, A1.PRODUCT, A1.VERSION, MAX(A1.CVSS_SCORE) AS CVSS_SCORE 
+						FROM NVD_DATA A1 
+						GROUP BY A1.VENDOR, A1.PRODUCT, A1.VERSION
+					) B2 
+						ON B1.VENDOR = B2.VENDOR 
+							AND B1.PRODUCT = B2.PRODUCT 
+							AND B1.VERSION = B2.VERSION 
+							AND B1.CVSS_SCORE = B2.CVSS_SCORE
+			) T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_YN IS NULL
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_YN IS NULL ) M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME AND T1.VERSION = T2.OSS_VERSION
+    </select>
+    
+    <select id="selectOssBatTargetWithOutVersion" resultType="HashMap">
+		
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, MAX(T1.CVSS_SCORE) AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM (
+				SELECT B1.CVE_ID, B1.VENDOR, B1.PRODUCT, B1.VERSION, B1.MODI_DATE, B2.CVSS_SCORE 
+				FROM NVD_DATA B1 
+					INNER JOIN (
+						SELECT A1.VENDOR, A1.PRODUCT, A1.VERSION, MAX(A1.CVSS_SCORE) AS CVSS_SCORE 
+						FROM NVD_DATA A1 
+						GROUP BY A1.VENDOR, A1.PRODUCT, A1.VERSION
+					) B2 
+						ON B1.VENDOR = B2.VENDOR 
+							AND B1.PRODUCT = B2.PRODUCT 
+							AND B1.VERSION = B2.VERSION 
+							AND B1.CVSS_SCORE = B2.CVSS_SCORE
+			) T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_YN IS NULL AND IFNULL(M1.OSS_VERSION, '') = ''
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_YN IS NULL AND IFNULL(M21.OSS_VERSION, '') = '') M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME 
+			GROUP BY ossId
+    </select>
+    
+    <!-- OSS 취약점 정보 설정 -->
+    <update id="updateOssVulnInfo" parameterType="HashMap">
+    	UPDATE OSS_MASTER SET CVSS_SCORE = #{cvssScore}, VULN_YN = 'Y', VULN_DATE = NOW(), CVE_ID = #{cveId} WHERE OSS_ID = #{ossId}
+    </update>
+    
+    <!-- OSS 취약점 유무 설정 -->
+    <update id="updateOssVulnYn" parameterType="HashMap">
+    	UPDATE OSS_MASTER SET VULN_YN = #{vulnYn}, VULN_DATE = NOW() WHERE OSS_ID = #{ossId}
+    </update>
+    
+    <!-- 메타 데이터 Job Run Timeout -->
+    <update id="updateJobRunTimeout" parameterType="HashMap">
+    	UPDATE NVD_META SET JOB_STATUS = 'G', USE_YN = 'N' WHERE FILE_TYPE = #{fileType} AND USE_YN = 'Y' AND JOB_STATUS = 'W' AND REG_DATE <![CDATA[<]]> DATE_ADD(now(), INTERVAL -30 MINUTE)
+    </update>
+    
+    <!-- Local에 저장된 입력 데이터 조회 - 첫 NVD 데이터 입력 시 사용 -->
+	<select id="selectLocalJobData" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			FILE_NM		AS fileNm
+			, FILE_TYPE	AS fileType
+			, MODI_DATE	AS modiDate
+			, SIZE		AS size
+			, USE_YN	AS useYn
+			, JOB_STATUS AS jobStatus
+		FROM NVD_META
+		WHERE FILE_TYPE = #{fileType} 
+			AND USE_YN = 'Y' 
+		    AND JOB_STATUS = 'L'
+		ORDER BY FILE_NM
+	</select>
+	
+	<delete id="deleteNvdDataTemp">TRUNCATE TABLE NVD_DATA_TEMP</delete>
+	<delete id="deleteNvdData">TRUNCATE TABLE NVD_DATA</delete>
+	<insert id="insertNvdDataTemp">
+		INSERT INTO NVD_DATA_TEMP
+		SELECT C.CVE_ID, D.VENDOR, D.PRODUCT, D.VERSION, D.TITLE, C.CVSS_SCORE, C.VULN_SUMMARY, IFNULL(C.MODI_DATE, C.PUBL_DATE)
+		FROM NVD_CVE C 
+			INNER JOIN (
+					SELECT T2.CVE_ID, T1.VENDOR, T1.PRODUCT, T1.VERSION, T1.TITLE
+					FROM NVD_CPE_DICTIONARY T1 
+						INNER JOIN NVD_VULN_SW T2 ON T1.CPE_NM = T2.CPE_NM
+					GROUP BY T2.CVE_ID, T1.VENDOR, T1.PRODUCT, T1.VERSION  ) D ON C.CVE_ID = D.CVE_ID
+	</insert>
+	<insert id="copyNvdDataFromTemp">
+	INSERT INTO NVD_DATA SELECT * FROM NVD_DATA_TEMP
+	</insert>
+	<delete id="deleteNvdDataScore">TRUNCATE TABLE NVD_DATA_SCORE</delete>
+	<insert id="insertNvdDataScore">INSERT INTO NVD_DATA_SCORE SELECT CVE_ID, PRODUCT, VERSION, MAX(CVSS_SCORE) FROM NVD_DATA GROUP BY PRODUCT, VERSION</insert>
+	
+	<!-- V3.0 대응 -->
+    <select id="selectOneCveInfoV3" parameterType="HashMap" resultType="HashMap">
+    	SELECT CVE_ID AS cveId, PUBL_DATE AS publDate, MODI_DATE AS modiDate, CVSS_SCORE AS cvssScore FROM NVD_CVE_V3 WHERE CVE_ID = #{cveId}
+    </select>
+    
+    <!-- CVE 정보 등록 -->
+    <insert id="insertCveInfoV3" parameterType="HashMap">
+    	INSERT INTO NVD_CVE_V3(CVE_ID, PUBL_DATE, MODI_DATE, CVSS_SCORE, VULN_SUMMARY, BASE_METRIC)VALUES
+    	(#{cveId}, #{publDate}, #{modiDate}, #{cvssScore}, #{summary}, #{baseMetric})
+    </insert>
+    
+    <delete id="deleteCveDataV3" parameterType="HashMap">
+    	DELETE FROM NVD_CVE_V3 WHERE CVE_ID = #{cveId}
+    </delete>
+    <delete id="deleteNvdDataV3" parameterType="HashMap">
+    	DELETE FROM NVD_DATA_V3 WHERE CVE_ID = #{cveId}
+    </delete>
+    
+    <!-- NVD 정보 등록 -->
+    <insert id="insertNvdDataV3" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_V3(CVE_ID, PRODUCT, VERSION)VALUES
+    	(#{cveId}, #{product}, #{version})
+    	ON DUPLICATE KEY UPDATE
+    	CVE_ID = #{cveId}, PRODUCT = #{product}, VERSION = #{version} 
+    </insert>
+    <insert id="insertBulkNvdDataV3">
+    	INSERT INTO NVD_DATA_V3 (CVE_ID, PRODUCT, VERSION) VALUES
+    	<foreach collection="list" item="item" index="index" separator=",">
+    		(#{item.cveId}, #{item.product}, #{item.version})
+    	</foreach>
+    	ON DUPLICATE KEY UPDATE
+    	CVE_ID = values(cve_id), PRODUCT = values(product), VERSION = values(version) 
+    </insert>
+    
+	<delete id="deleteNvdDataTempV3">TRUNCATE TABLE NVD_DATA_TEMP_V3</delete>
+	<insert id="insertNvdDataTempV3">
+		INSERT INTO NVD_DATA_TEMP_V3
+		SELECT RTN.PRODUCT, RTN.VERSION, RTN.CVE_ID, TEMP.CVSS_SCORE, RTN.VULN_SUMMARY, RTN.MODI_DATE 
+		FROM (
+		SELECT T32.PRODUCT, T32.VERSION, T31.CVE_ID, T31.CVSS_SCORE, T31.VULN_SUMMARY, T31.MODI_DATE 
+		FROM NVD_CVE_V3 T31
+		INNER JOIN NVD_DATA_V3 T32 ON T31.CVE_ID = T32.CVE_ID
+		) RTN 
+		INNER JOIN (
+			SELECT A1.PRODUCT, A1.VERSION, MAX(A1.CVE_ID) AS CVE_ID, A1.CVSS_SCORE
+			FROM (
+					SELECT T12.PRODUCT, T12.VERSION, T11.CVE_ID, T11.CVSS_SCORE
+					FROM NVD_CVE_V3 T11 
+						INNER JOIN NVD_DATA_V3 T12 ON T11.CVE_ID = T12.CVE_ID) A1 
+					INNER JOIN (
+						SELECT T21.PRODUCT, T21.VERSION, MAX(T22.CVSS_SCORE) AS CVSS_SCORE
+						FROM NVD_DATA_V3 T21
+							INNER JOIN NVD_CVE_V3 T22 ON T21.CVE_ID = T22.CVE_ID
+						GROUP BY T21.PRODUCT, VERSION
+					) A2 ON A1.PRODUCT = A2.PRODUCT AND A1.VERSION = A2.VERSION AND A1.CVSS_SCORE = A2.CVSS_SCORE
+					GROUP BY PRODUCT, VERSION
+				) TEMP ON RTN.PRODUCT = TEMP.PRODUCT AND RTN.VERSION = TEMP.VERSION AND RTN.CVE_ID = TEMP.CVE_ID
+	</insert>
+	<delete id="deleteNvdDataScoreV3">DELETE FROM NVD_DATA_SCORE_V3</delete>
+	<insert id="insertNvdDataScoreV3">INSERT INTO NVD_DATA_SCORE_V3 SELECT * FROM NVD_DATA_TEMP_V3</insert>
+	
+	
+    <!-- OSS 배치 타겟 조회 -->
+    <select id="selectOssBatTargetV3" resultType="HashMap">
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, T1.CVSS_SCORE AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM NVD_DATA_SCORE_V3 T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_YN IS NULL
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_YN IS NULL ) M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME AND T1.VERSION = T2.OSS_VERSION
+    </select>
+    
+    <select id="selectOssBatTargetWithOutVersionV3" resultType="HashMap">
+		
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, MAX(T1.CVSS_SCORE) AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM NVD_DATA_SCORE_V3 T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_YN IS NULL AND IFNULL(M1.OSS_VERSION, '') = ''
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_YN IS NULL AND IFNULL(M21.OSS_VERSION, '') = '') M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME 
+			GROUP BY ossId
+    </select>
+    
+
+    <!-- OSS 배치 타겟 조회 -->
+    <select id="selectOssBatTargetV3test" resultType="HashMap">
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, T1.CVSS_SCORE AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM NVD_DATA_SCORE_V3 T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_DATE IS NOT NULL AND M1.VULN_DATE <![CDATA[<]]> '2019-01-01'
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_DATE IS NOT NULL AND M21.VULN_DATE <![CDATA[<]]> '2019-01-01' ) M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME AND T1.VERSION = T2.OSS_VERSION
+    </select>
+    
+    <select id="selectOssBatTargetWithOutVersionV3test" resultType="HashMap">
+		
+		SELECT T2.OSS_ID AS ossId, T1.CVE_ID AS cveId, MAX(T1.CVSS_SCORE) AS cvssScore, T1.MODI_DATE AS modiDate
+		FROM NVD_DATA_SCORE_V3 T1
+			INNER JOIN (
+				SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+				FROM OSS_MASTER M1 
+				WHERE M1.USE_YN = 'Y' AND M1.VULN_DATE IS NOT NULL AND M1.VULN_DATE <![CDATA[<]]> '2019-01-01' AND IFNULL(M1.OSS_VERSION, '') = '' 
+				UNION
+				SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
+				FROM (
+					SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+					FROM OSS_MASTER M21 
+						INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+					WHERE M21.USE_YN = 'Y' AND M21.VULN_DATE IS NOT NULL AND M21.VULN_DATE <![CDATA[<]]> '2019-01-01' AND IFNULL(M21.OSS_VERSION, '') = '') M2
+			) T2 ON T1.PRODUCT = T2.OSS_NAME 
+			GROUP BY ossId
+    </select>	
+    
+    <select id="selectNickNameMgrtNvdDataScoreV3" resultType="int">
+    	SELECT COUNT(*) AS CNT
+		  FROM (SELECT NICK.OSS_NAME, NVD1.VERSION, NVD1.CVE_ID, NVD1.CVSS_SCORE, NVD1.VULN_SUMMARY, now() AS MODI_DATE
+				  FROM OSS_NICKNAME NICK
+				 INNER JOIN NVD_DATA_SCORE_V3 NVD1 ON NICK.OSS_NICKNAME = NVD1.PRODUCT
+				  LEFT JOIN NVD_DATA_SCORE_V3 NVD2 ON NICK.OSS_NAME = NVD2.PRODUCT AND NVD1.VERSION = NVD2.VERSION
+				 WHERE NVD2.PRODUCT IS NULL AND NVD1.VERSION != '-'
+				 GROUP BY NVD1.PRODUCT, NVD1.VERSION) RTN
+    </select>
+    <insert id="insertNickNameMgrtNvdDataScoreV3">
+    	INSERT INTO NVD_DATA_SCORE_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE)
+	    	SELECT RTN.OSS_NAME, RTN.VERSION, RTN.CVE_ID, RTN.CVSS_SCORE, RTN.VULN_SUMMARY, RTN.MODI_DATE
+			  FROM (SELECT NICK.OSS_NAME, NVD1.VERSION, NVD1.CVE_ID, NVD1.CVSS_SCORE, NVD1.VULN_SUMMARY, now() AS MODI_DATE
+					  FROM OSS_NICKNAME NICK
+					 INNER JOIN NVD_DATA_SCORE_V3 NVD1 ON NICK.OSS_NICKNAME = NVD1.PRODUCT
+					  LEFT JOIN NVD_DATA_SCORE_V3 NVD2 ON NICK.OSS_NAME = NVD2.PRODUCT AND NVD1.VERSION = NVD2.VERSION
+					 WHERE NVD2.PRODUCT IS NULL AND NVD1.VERSION != '-'
+					 GROUP BY NVD1.PRODUCT, NVD1.VERSION) RTN
+			 ORDER BY RTN.CVSS_SCORE ASC
+		ON DUPLICATE KEY UPDATE
+			CVE_ID = RTN.CVE_ID
+		  , CVSS_SCORE = RTN.CVSS_SCORE
+		  , VULN_SUMMARY = RTN.VULN_SUMMARY
+		  , MODI_DATE = now()
+    </insert>
+    <select id="selectMaxCvssScoreNvdDataScoreV3" resultType="int">
+	    SELECT COUNT(*) AS CNT
+		  FROM (SELECT PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE 
+				  FROM NVD_DATA_SCORE_V3 
+				 WHERE CONCAT(PRODUCT,'@',CVSS_SCORE) IN (SELECT CONCAT(PRODUCT,'@',MAX(CVSS_SCORE)) AS NVD_KEY FROM NVD_DATA_SCORE_V3 GROUP BY PRODUCT)
+				 GROUP BY PRODUCT) NVD
+		  LEFT JOIN (SELECT PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE
+			  		   FROM NVD_DATA_SCORE_V3 
+			  		  WHERE VERSION ='-') NVD2
+			ON NVD.PRODUCT = NVD2.PRODUCT
+		 WHERE (NVD.CVSS_SCORE != NVD2.CVSS_SCORE OR NVD2.PRODUCT IS NULL)
+    </select>
+	<insert id="insertMaxCvssScoreNvdDataScoreV3">
+		INSERT INTO NVD_DATA_SCORE_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE)
+			SELECT NVD.PRODUCT, '-' AS VERSION, NVD.CVE_ID, NVD.CVSS_SCORE, NVD.VULN_SUMMARY, now() AS MODI_DATE
+			  FROM (SELECT PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE 
+					  FROM NVD_DATA_SCORE_V3 
+					 WHERE CONCAT(PRODUCT,'@',CVSS_SCORE) IN (SELECT CONCAT(PRODUCT,'@',MAX(CVSS_SCORE)) AS NVD_KEY FROM NVD_DATA_SCORE_V3 GROUP BY PRODUCT)
+					 GROUP BY PRODUCT) NVD
+			  LEFT JOIN (SELECT PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE
+			  			   FROM NVD_DATA_SCORE_V3 
+			  			  WHERE VERSION ='-') NVD2
+			    ON NVD.PRODUCT = NVD2.PRODUCT
+			 WHERE (NVD.CVSS_SCORE != NVD2.CVSS_SCORE OR NVD2.PRODUCT IS NULL)
+		ON DUPLICATE KEY UPDATE
+			CVE_ID = NVD.CVE_ID
+		  , CVSS_SCORE = NVD.CVSS_SCORE
+		  , VULN_SUMMARY = NVD.VULN_SUMMARY
+		  , MODI_DATE = now()
+	</insert>
+	<update id="ossNameToNickNameMgrtCvssScore">
+		UPDATE OSS_NICKNAME NICK
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD1 ON NICK.OSS_NAME = NVD1.PRODUCT
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD2 ON NICK.OSS_NICKNAME = NVD2.PRODUCT
+		   SET NVD1.CVSS_SCORE = NVD2.CVSS_SCORE
+		     , NVD1.CVE_ID = NVD2.CVE_ID
+		     , NVD1.MODI_DATE = now()
+		 WHERE NVD1.VERSION = NVD2.VERSION
+		   AND NVD2.CVSS_SCORE <![CDATA[>]]> NVD1.CVSS_SCORE
+	</update>
+	<update id="nickNameToOssNameMgrtCvssScore">
+		UPDATE OSS_NICKNAME NICK
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD1 ON NICK.OSS_NAME = NVD1.PRODUCT
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD2 ON NICK.OSS_NICKNAME = NVD2.PRODUCT
+		   SET NVD2.CVSS_SCORE = NVD1.CVSS_SCORE
+		     , NVD2.CVE_ID = NVD1.CVE_ID
+		     , NVD2.MODI_DATE = now()
+		 WHERE NVD1.VERSION = NVD2.VERSION
+		   AND NVD1.CVSS_SCORE <![CDATA[>]]> NVD2.CVSS_SCORE
+	</update>
+	<select id="ossNameNickNameCvssScoreDiffCnt" resultType="int">
+		SELECT COUNT(*) AS CNT 
+		  FROM OSS_NICKNAME NICK
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD1 ON NICK.OSS_NAME = NVD1.PRODUCT
+		 INNER JOIN NVD_DATA_SCORE_V3 NVD2 ON NICK.OSS_NICKNAME = NVD2.PRODUCT
+		 WHERE NVD1.VERSION = NVD2.VERSION
+		   AND NVD1.CVSS_SCORE != NVD2.CVSS_SCORE
+	</select>
+	
+	<update id="truncateCpeMatch">TRUNCATE TABLE NVD_CPE_MATCH_NAMES</update>
+	<update id="truncateCpeMatchNames">TRUNCATE TABLE NVD_CPE_MATCH</update>
+	<insert id="insertBulkCpeMatchData">
+		INSERT
+		INTO NVD_CPE_MATCH (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.cpeSeq},#{item.cpe23Uri},#{item.versionStartIncluding},#{item.versionEndIncluding},#{item.versionStartExcluding},#{item.versionEndExcluding})
+		</foreach>
+	</insert>
+	
+	<insert id="insertBulkCpeMatchNameData">
+		INSERT
+		INTO NVD_CPE_MATCH_NAMES (SEQ, IDX, CPE23URI)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.cpeSeq}, #{item.idx}, #{item.cpe23Uri})
+		</foreach>
+	</insert>
+	
+	<insert id="insertCpeMatchData">
+		INSERT
+		INTO NVD_CPE_MATCH (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
+		VALUES (#{cpeSeq},#{cpe23Uri},#{versionStartIncluding},#{versionEndIncluding},#{versionStartExcluding},#{versionEndExcluding})
+	</insert>
+	<insert id="insertCpeMatchNameData">
+		INSERT
+		INTO NVD_CPE_MATCH_NAMES (SEQ, IDX, CPE23URI)
+		VALUES (#{cpeSeq}, #{idx}, #{cpe23Uri})
+	</insert>
+	
+	<select id="selectNvdMatchList" parameterType="hashmap" resultType="String">
+		SELECT 
+			T2.CPE23URI 
+		FROM NVD_CPE_MATCH T1 
+				INNER JOIN NVD_CPE_MATCH_NAMES T2 
+					ON T1.SEQ = T2.SEQ 
+		WHERE 
+			T1.CPE23URI = #{cpe23Uri}
+			<choose>
+				<when test="versionStartIncluding != null">AND T1.VER_START_INC = #{versionStartIncluding}</when>
+				<otherwise>AND T1.VER_START_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndIncluding != null">AND T1.VER_END_INC = #{versionEndIncluding}</when>
+				<otherwise>AND T1.VER_END_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionStartExcluding != null">AND T1.VER_START_EXC = #{versionStartExcluding}</when>
+				<otherwise>AND T1.VER_START_EXC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndExcluding != null">AND T1.VER_END_EXC = #{versionEndExcluding}</when>
+				<otherwise>AND T1.VER_END_EXC IS NULL</otherwise>
+			</choose>
+		ORDER BY T2.IDX
+	</select>
+	
+	<update id="nvdBulkDataCleanCVE">TRUNCATE TABLE NVD_CVE_V3</update>
+	<update id="nvdBulkDataCleanData">TRUNCATE TABLE NVD_DATA_V3</update>
+	
+	<select id="getProducVerCnt" resultType="int">
+		SELECT COUNT(*) FROM (
+			SELECT PRODUCT, VERSION FROM NVD_DATA_V3 GROUP BY PRODUCT, VERSION
+		) AS RESULT
+	</select>
+	
+	<select id="getProducVerList" resultType="hashmap">
+		SELECT PRODUCT, VERSION FROM NVD_DATA_V3 
+		GROUP BY PRODUCT, VERSION 
+		ORDER BY PRODUCT, VERSION LIMIT #{pageIdx}, #{pageCnt}
+	</select>
+	
+	<select id="getMaxScoreProductVer" resultType="hashmap">
+		SELECT T2.PRODUCT, T2.VERSION, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE 
+		FROM NVD_CVE_V3 T1, NVD_DATA_V3 T2 
+		WHERE 
+			T1.CVE_ID = T2.CVE_ID 
+			AND T2.PRODUCT = #{ossName} 
+			AND T2.VERSION = #{ossVersion}
+			AND T1.CVSS_SCORE = (	
+											SELECT MAX(CVSS_SCORE) AS CVSS_SCORE  FROM NVD_CVE_V3 WHERE CVE_ID IN (
+												SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion}
+											)
+										)
+		ORDER BY CVE_ID DESC LIMIT 1
+	</select>
+	
+	<insert id="insertNvdDataListTempV3" >
+		INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE )
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(#{item.PRODUCT}, #{item.VERSION}, #{item.CVE_ID}, #{item.CVSS_SCORE}, #{item.VULN_SUMMARY}, #{item.MODI_DATE})
+		</foreach>
+	</insert>
+</mapper>

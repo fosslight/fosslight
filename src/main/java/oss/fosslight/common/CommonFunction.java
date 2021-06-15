@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -195,42 +196,6 @@ public class CommonFunction extends CoTopComponent {
     	return arrayToString(list.toArray(arr), null);
     }
     
-    public static String[] strToArray(String str) {
-        return strToArray(str, ",", true);
-    }
-    
-    public static String[] strToArray(String str, String deci) {
-        return strToArray(str, deci, true);
-    }
-    
-    public static String[] strToArray(String str, String deci, boolean ignoreEmpty) {
-        List<String> retList = new ArrayList<String>();
-        
-        if(!isEmpty(str)) {
-            str = str.trim();
-            
-            if(isEmpty(deci)) {
-                for(int i=0; i<str.length(); i++) {
-                    String s = new Character(str.charAt(i)).toString();
-                    if(ignoreEmpty && isEmpty(s)) {
-                        continue;
-                    }
-                    retList.add(s);
-                }
-            } else {
-                for(String s : str.split(deci)) {
-                    if(ignoreEmpty && isEmpty(s)) {
-                        continue;
-                    }
-                    retList.add(s);
-                }
-            }
-        }
-        
-        
-        return retList.toArray(new String[retList.size()]);
-    }
-    
     public static String getCurrentDateTime() {
         DateFormat df = new SimpleDateFormat("yyyyMMdd");
         return df.format(new Date());
@@ -243,8 +208,7 @@ public class CommonFunction extends CoTopComponent {
     
     public static String getCurrentDateTime(String format, String timeZone) {
         DateFormat df = new SimpleDateFormat(format);
-        // 시:분 입력으로 Asia /Seoul 설정
-        TimeZone tx=TimeZone.getTimeZone( timeZone ); // "Asia/Seoul"
+        TimeZone tx=TimeZone.getTimeZone( timeZone );
         df.setTimeZone(tx);
         return df.format(new Date());
     }
@@ -3943,5 +3907,48 @@ public class CommonFunction extends CoTopComponent {
 			return avoidNull( CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(ossVersion)).toUpperCase() ).getDownloadLocation() );
 		}
 		return "";
+	}
+	
+	public static String httpCodePrint(int code){
+		String res = code + "";
+		switch(code){
+			case HttpURLConnection.HTTP_ACCEPTED: 		  res = "HTTP_ACCEPTED"; break;
+			case HttpURLConnection.HTTP_BAD_GATEWAY: 	  res = "HTTP_BAD_GATEWAY"; break;
+			case HttpURLConnection.HTTP_BAD_METHOD: 	  res = "HTTP_BAD_METHOD"; break;
+			case HttpURLConnection.HTTP_BAD_REQUEST: 	  res = "HTTP_BAD_REQUEST"; break;
+			case HttpURLConnection.HTTP_CLIENT_TIMEOUT:   res = "HTTP_CLIENT_TIMEOUT"; break;
+			case HttpURLConnection.HTTP_CONFLICT: 		  res = "HTTP_CONFLICT"; break;
+			case HttpURLConnection.HTTP_CREATED: 		  res = "HTTP_CREATED"; break;
+			case HttpURLConnection.HTTP_ENTITY_TOO_LARGE: res = "HTTP_ENTITY_TOO_LARGE"; break;
+			case HttpURLConnection.HTTP_FORBIDDEN: 		  res = "HTTP_FORBIDDEN"; break;
+			case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:  res = "HTTP_GATEWAY_TIMEOUT"; break;
+			case HttpURLConnection.HTTP_GONE: 			  res = "HTTP_GONE"; break;
+			case HttpURLConnection.HTTP_INTERNAL_ERROR:   res = "HTTP_INTERNAL_ERROR"; break;
+			case HttpURLConnection.HTTP_LENGTH_REQUIRED:  res = "HTTP_LENGTH_REQUIRED"; break;
+			case HttpURLConnection.HTTP_MOVED_PERM: 	  res = "HTTP_MOVED_PERM"; break;
+			case HttpURLConnection.HTTP_MOVED_TEMP: 	  res = "HTTP_MOVED_TEMP"; break;
+			case HttpURLConnection.HTTP_MULT_CHOICE: 	  res = "HTTP_MULT_CHOICE"; break;
+			case HttpURLConnection.HTTP_NO_CONTENT: 	  res = "HTTP_NO_CONTENT"; break;
+			case HttpURLConnection.HTTP_NOT_ACCEPTABLE:   res = "HTTP_NOT_ACCEPTABLE"; break;
+			case HttpURLConnection.HTTP_NOT_AUTHORITATIVE:res = "HTTP_NOT_AUTHORITATIVE"; break;
+			case HttpURLConnection.HTTP_NOT_FOUND: 		  res = "HTTP_NOT_FOUND"; break;
+			case HttpURLConnection.HTTP_NOT_IMPLEMENTED:  res = "HTTP_NOT_IMPLEMENTED"; break;
+			case HttpURLConnection.HTTP_NOT_MODIFIED: 	  res = "HTTP_NOT_MODIFIED"; break;
+			case HttpURLConnection.HTTP_OK: 			  res = "HTTP_OK"; break;
+			case HttpURLConnection.HTTP_PARTIAL: 		  res = "HTTP_PARTIAL"; break;
+			case HttpURLConnection.HTTP_PAYMENT_REQUIRED: res = "HTTP_PAYMENT_REQUIRED"; break;
+			case HttpURLConnection.HTTP_PRECON_FAILED: 	  res = "HTTP_PRECON_FAILED"; break;
+			case HttpURLConnection.HTTP_PROXY_AUTH: 	  res = "HTTP_PROXY_AUTH"; break;
+			case HttpURLConnection.HTTP_REQ_TOO_LONG: 	  res = "HTTP_REQ_TOO_LONG"; break;
+			case HttpURLConnection.HTTP_RESET: 			  res = "HTTP_RESET"; break;
+			case HttpURLConnection.HTTP_SEE_OTHER: 		  res = "HTTP_SEE_OTHER"; break;
+			case HttpURLConnection.HTTP_UNAUTHORIZED: 	  res = "HTTP_UNAUTHORIZED"; break;
+			case HttpURLConnection.HTTP_UNAVAILABLE: 	  res = "HTTP_UNAVAILABLE"; break;
+			case HttpURLConnection.HTTP_UNSUPPORTED_TYPE: res = "HTTP_UNSUPPORTED_TYPE"; break;
+			case HttpURLConnection.HTTP_USE_PROXY: 		  res = "HTTP_USE_PROXY"; break;
+			case HttpURLConnection.HTTP_VERSION: 		  res = "HTTP_VERSION"; break;
+			default: break;	
+		}
+		return res;
 	}
 }
