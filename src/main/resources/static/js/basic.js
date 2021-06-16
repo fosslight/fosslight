@@ -1587,9 +1587,7 @@ function openNVD2(_ossName, _ossVersion){
 	}
 }
 
-function openCommentHistory(commDiv, commPrjId) {
-	var _url = "/comment/popup/"+commDiv+"/"+commPrjId;
-	
+function openCommentHistory(_url) {	
 	if(_popupComment == null || _popupComment.closed){
 		_popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
