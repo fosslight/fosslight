@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -42,6 +43,8 @@ import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.entity.CommonResult;
+import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -96,6 +99,8 @@ public class ProjectController extends CoTopComponent {
 	@Autowired VerificationService verificationService;
 	
 	@Autowired CodeMapper codeMapper;
+	
+	@Autowired ResponseService responseService;
 	
 	/** The env. */
 	@Resource
@@ -3863,5 +3868,61 @@ public class ProjectController extends CoTopComponent {
 		}
 
 		return makeJsonResponseHeader(fileId);
+	}
+	
+	// 20210616_BOM COMPARE FUNC ADD
+	@GetMapping(value=PROJECT.BOM_COMPARE, produces = "text/html; charset=utf-8")
+	public String bomCompare(@PathVariable String beforePrjId, 
+			@PathVariable String afterPrjId, 
+			HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		model.addAttribute("beforePrjId", beforePrjId);
+		model.addAttribute("afterPrjId", afterPrjId);
+		
+		return PROJECT.PAGE_JSP;
+	}
+	
+	// 20210616_BOM COMPARE FUNC ADD
+	@GetMapping(value=PROJECT.BOM_COMPARE_LIST_AJAX)
+	public @ResponseBody CommonResult bomCompareList(
+			@RequestParam("beforePrjId") String beforePrjId
+			, @RequestParam("afterPrjId") String afterPrjId) throws Exception{
+		
+		T2Users userInfo = userService.getLoginUserInfo(); 
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		try {
+			
+			Map<String, Object> paramMap = new HashMap<>();
+		
+			List<String> prjIdList = new ArrayList<String>();
+			prjIdList.add(beforePrjId);
+			prjIdList.add(afterPrjId);
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
+			paramMap.put("prjId", prjIdList);
+			paramMap.put("distributionType", "normal");
+			
+			boolean searchFlag = projectService.existProjectCnt(paramMap);
+			
+			if(searchFlag) {
+				List<Map<String, Object>> beforeBomList = projectService.getBomList(beforePrjId);
+				List<Map<String, Object>> afterBomList = projectService.getBomList(afterPrjId);
+				
+				if(beforeBomList == null 
+						|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
+					throw new Exception();
+				}
+				
+				resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList));
+				
+				return responseService.getSingleResult(resultMap);
+			} else {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
 	}
 }

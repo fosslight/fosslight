@@ -313,4 +313,12 @@ public interface ProjectMapper {
 	Project getOssAnalysisData(Project project);
 	
 	String getReviewerEmail(@Param("prjId") String prjId, @Param("loginUser") String loginUser);
+	
+	// 20210616_BOM COMPARE FUNC ADD >>>
+	int selectProjectCount(Map<String, Object> paramMap);
+
+	List<Map<String, Object>> selectBomCompareList(Map<String, Object> paramMap);
+	
+	List<Map<String, Object>> selectBomCompareLicense(String componentId);
+	// 20210616_BOM COMPARE FUNC ADD <<<
 }
