@@ -1847,6 +1847,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				donwloadId = getUserExcelId(userList);
 				
 				break;
+			case "bomcompare" :
+				ObjectMapper objMapper = new ObjectMapper();
+				List<Map<String, Object>> list = objMapper.readValue(dataStr, new TypeReference<List<Map<String, Object>>>(){});
+				donwloadId = getBomCompareExcelId(list);
+				
+				break;
 			default:
 				break;
 		}
@@ -2620,7 +2626,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				List<String[]> vulnRows = new ArrayList<>();
 				
 				if(vulnList != null && !vulnList.isEmpty()) {
-					String _host = CommonFunction.getDomain(((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest());
+					String _host = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
 					for(Vulnerability vulnBean : vulnList) {
 						List<String> params = new ArrayList<>();
 						String url = _host+"/vulnerability/vulnpopup?ossName=";
@@ -2948,5 +2954,85 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		return makeAnalysisListExcelFileId(wb, "AutoAnalysisList", "xlsx", prjId);
+	}
+	
+	/**
+	 * 
+	 * @param bomCompareList
+	 * @return
+	 * @throws Exception
+	 * @용도 bomcompare 엑셀
+	 */
+	private static String getBomCompareExcelId(List<Map<String, Object>> bomCompareList) throws Exception{
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+		
+		String beforePrjId = bomCompareList.get(0).get("beforePrjId").toString();
+		String afterPrjId = bomCompareList.get(0).get("afterPrjId").toString();
+		
+		try {
+			inFile= new FileInputStream(new File(downloadpath+"/BOM_Compare.xlsx"));
+			wb = new XSSFWorkbook(inFile);
+			sheet = wb.getSheetAt(0);
+			wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
+			
+			List<String[]> rows = new ArrayList<>();
+			
+			for(int i = 0; i < bomCompareList.size(); i++){
+				String[] rowParam = {
+					bomCompareList.get(i).get("status").toString()
+					, bomCompareList.get(i).get("beforeossname").toString()
+					, bomCompareList.get(i).get("beforelicense").toString()
+					, bomCompareList.get(i).get("afterossname").toString()
+					, bomCompareList.get(i).get("afterlicense").toString()
+				};
+				
+				rows.add(rowParam);
+			}
+			
+			//시트 만들기
+			makeSheet(sheet, rows, 1);
+		} catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if(inFile != null) {
+				try {
+					inFile.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+		return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
+	}
+	
+	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
+		String fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
+		String logiFileName = fileName + "." + exp;
+		String excelFilePath = writepath + "/download/";
+		
+		FileOutputStream outFile = null;
+		
+		try {
+			if(!Files.exists(Paths.get(excelFilePath))) {
+				Files.createDirectories(Paths.get(excelFilePath));
+			}
+			outFile = new FileOutputStream(excelFilePath + logiFileName);
+			wb.write(outFile);
+			
+			// db 등록
+			return fileService.registFileDownload(excelFilePath, fileName + "."+exp, logiFileName);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if(outFile != null) {
+				try {
+					outFile.close();
+				} catch (Exception e2) {}
+			}
+		}
+		
+		return null;
 	}
 }

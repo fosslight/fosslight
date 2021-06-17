@@ -166,5 +166,14 @@ public interface ProjectService extends HistoryConfig{
 	String makeSupplementFileId(String contents, Project project);
 	
 	String makeZipFileId(Map<String, Object>paramMap, Project project);
+	
+	// 20210616_BOM COMPARE FUNC ADD
+	public boolean existProjectCnt(Map<String, Object> paramMap) throws Exception;
+
+	public List<Map<String, Object>> getBomList(String prjId) throws Exception;
+
+	public Object getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList) throws Exception;
+	
+	public List<Map<String, Object>> setBomCompareMergeGridData(List<Map<String, Object>> list);
 }
 
