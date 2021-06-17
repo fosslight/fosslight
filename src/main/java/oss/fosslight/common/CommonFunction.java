@@ -3951,4 +3951,12 @@ public class CommonFunction extends CoTopComponent {
 		}
 		return res;
 	}
+	
+	public static Object convertStringToMap (String StringMap, String key) {
+		Gson gson = CommonFunction.getGsonBuiler();
+		Type type = new TypeToken<Map<String, Object>>(){}.getType();
+		Map<String, Object> resultMap = (Map<String, Object>) gson.fromJson(StringMap , type);
+		
+		return resultMap.containsKey(key) ? resultMap.get(key) : resultMap;
+	}
 }

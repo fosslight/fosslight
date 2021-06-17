@@ -358,6 +358,10 @@ public class CoTopComponent {
 		return false;
 	}
 	
+	public static String getSessionString(String key) {
+		return (String) getSessionObject(key, false);
+	}
+	
 	public static Object getSessionObject(String key) {
 		return getSessionObject(key, false);
 	}

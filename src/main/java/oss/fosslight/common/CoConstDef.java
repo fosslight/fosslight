@@ -393,6 +393,8 @@ public class CoConstDef {
 	public static final String DISTRIBUTE_CHECK_DELETE = "/pservice/descriptionDeletedCheck";
 	public static final String DISTRIBUTE_LICENSE_URL_UPDATE = "/pservice/uploadLicense";
 	public static final String DISTRIBUTE_LICENSE_URL_DELETE = "/pservice/deleteLicense";
+	public static final String DISTRIBUTE_AUTH_CALLED_URL = "/pservice/getLoginToken";
+	public static final String DISTRIBUTE_AUTH_URL = "/admin/login/loginWithToken";
 //	public static final String DISTRIBUTE_LICENSE_URL = "/license/";
 //	public static final String DISTRIBUTE_MIGRATION_TEST = "/pservice/migTest";
 	
