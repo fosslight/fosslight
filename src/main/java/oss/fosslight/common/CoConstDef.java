@@ -95,7 +95,7 @@ public class CoConstDef {
 	public static final String CD_SYSTEM_SETTING				= "909";
 	public static final String CD_LDAP_USED_FLAG				= "910";
 	public static final String CD_SMTP_USED_FLAG				= "911";
-	public static final String CD_MENU_AUTH_FLAG				= "912";
+//	public static final String CD_MENU_AUTH_FLAG				= "912";
 	
 	// Login Setting
 	public static final String CD_LOGIN_SETTING					= "910";
@@ -131,9 +131,6 @@ public class CoConstDef {
 	public static final String CD_PROJECT_DETAIL				= "918";
 	public static final String CD_AUTO_ANALYSIS_FLAG			= "100";
 	public static final String CD_NOTICE_FLAG					= "101";
-	
-	// Extenal Link Detail Setting
-	public static final String CD_EXTERNAL_LINK_DETAIL			= "925";
 	
 	// Notice Info
 	public static final String CD_NOTICE_INFO					= "927";
