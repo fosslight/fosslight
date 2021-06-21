@@ -16,6 +16,8 @@ public interface NvdDataMapper {
 	List<HashMap<String, Object>> selectUseMetaData(HashMap<String, Object> params);
 
 	int insertNewMetaData(HashMap<String, Object> params);
+	
+	int insertErrorMetaData(HashMap<String, Object> params);
 
 	int updateUseYN(HashMap<String, Object> params);
 

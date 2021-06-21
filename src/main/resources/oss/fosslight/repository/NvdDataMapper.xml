@@ -34,6 +34,12 @@
 			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y')
     </insert>
     
+    <insert id="insertErrorMetaData" parameterType="HashMap">
+    	INSERT INTO NVD_META
+			(FILE_NM, FILE_TYPE, MODI_DATE, SIZE, ZIP_SIZE, GZ_SIZE, SHA256, USE_YN, JOB_STATUS) VALUES
+			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y', 'E')
+    </insert>
+    
     <!-- 메타 데이터 사용유무 변경 -->
     <update id="updateUseYN" parameterType="HashMap">
     	UPDATE NVD_META SET USE_YN = #{useYn} WHERE FILE_TYPE = #{fileType} AND FILE_NM = #{fileNm}

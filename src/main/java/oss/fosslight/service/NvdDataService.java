@@ -408,6 +408,11 @@ public class NvdDataService {
 				nvdDataMapper.updateJobStatus(param);
 				return true;
 			}
+		} else {
+			HashMap<String, Object> param = new HashMap<String, Object>();
+			param.put("fileType", FILE_TYPE);
+			param.put("fileNm", FILE_NM);
+			nvdDataMapper.insertErrorMetaData(param);
 		}
 		
 		return false;

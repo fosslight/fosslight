@@ -1572,8 +1572,7 @@ function openNVD(cveId) {
 	}
 }
 
-function openNVD2(_ossName, _ossVersion){
-	var _url = "/vulnerability/vulnpopup?ossName="+_ossName+"&ossVersion="+_ossVersion+"&vulnType=";
+function openNVD2(_ossName, _url){
 	if(_popupVuln == null || _popupVuln.closed) {
 		_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
