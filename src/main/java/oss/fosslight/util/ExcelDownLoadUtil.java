@@ -16,7 +16,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -44,8 +43,6 @@ import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1848,9 +1845,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "bomcompare" :
-				ObjectMapper objMapper = new ObjectMapper();
-				List<Map<String, Object>> list = objMapper.readValue(dataStr, new TypeReference<List<Map<String, Object>>>(){});
-				donwloadId = getBomCompareExcelId(list);
+				donwloadId = getBomCompareExcelId(dataStr);
 				
 				break;
 			default:
@@ -2963,48 +2958,69 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @throws Exception
 	 * @용도 bomcompare 엑셀
 	 */
-	private static String getBomCompareExcelId(List<Map<String, Object>> bomCompareList) throws Exception{
+	@SuppressWarnings("unchecked")
+	private static String getBomCompareExcelId(String dataStr) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
 		FileInputStream inFile=null;
 		
-		String beforePrjId = bomCompareList.get(0).get("beforePrjId").toString();
-		String afterPrjId = bomCompareList.get(0).get("afterPrjId").toString();
+		ObjectMapper objMapper = new ObjectMapper();
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/BOM_Compare.xlsx"));
-			wb = new XSSFWorkbook(inFile);
-			sheet = wb.getSheetAt(0);
-			wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
+			Map<String, String> map = objMapper.readValue(dataStr, Map.class);
 			
-			List<String[]> rows = new ArrayList<>();
+			String beforePrjId = map.get("beforePrjId").toString();
+			String afterPrjId = map.get("afterPrjId").toString();
 			
-			for(int i = 0; i < bomCompareList.size(); i++){
-				String[] rowParam = {
-					bomCompareList.get(i).get("status").toString()
-					, bomCompareList.get(i).get("beforeossname").toString()
-					, bomCompareList.get(i).get("beforelicense").toString()
-					, bomCompareList.get(i).get("afterossname").toString()
-					, bomCompareList.get(i).get("afterlicense").toString()
-				};
-				
-				rows.add(rowParam);
+			List<ProjectIdentification> beforeBomList = projectService.getBomList(beforePrjId);
+			List<ProjectIdentification> afterBomList = projectService.getBomList(afterPrjId);
+			
+			if(beforeBomList == null 
+					|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
+				throw new Exception();
 			}
 			
-			//시트 만들기
-			makeSheet(sheet, rows, 1);
-		} catch (FileNotFoundException e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if(inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
+			String flag = "excel";
+			Object compareBomObject = projectService.getBomCompare(beforeBomList, afterBomList);
+			Map<String, Object> resultMap = objMapper.convertValue(compareBomObject, Map.class);
+			List<Map<String, String>> bomCompareListExcel = projectService.getBomCompareList(flag, resultMap);
+			
+			try {
+				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
+				wb = new XSSFWorkbook(inFile);
+				sheet = wb.getSheetAt(0); 
+				wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
+			  
+				List<String[]> rows = new ArrayList<String[]>();
+			  
+				for(int i = 0; i < bomCompareListExcel.size(); i++){ 
+					String[] rowParam = {
+							bomCompareListExcel.get(i).get("status"),
+							bomCompareListExcel.get(i).get("beforeossname"),
+							bomCompareListExcel.get(i).get("beforelicense"),
+							bomCompareListExcel.get(i).get("afterossname"),
+							bomCompareListExcel.get(i).get("afterlicense")
+					};
+					rows.add(rowParam);
+				}
+				
+				//시트 만들기 
+				makeSheet(sheet, rows, 1); 
+			} catch (FileNotFoundException e) {
+				log.error(e.getMessage(), e); 
+			} finally { 
+				if(inFile != null) { 
+					try {inFile.close();} 
+					catch (Exception e2) {} 
 				}
 			}
+			
+			return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
+		} catch (IOException e){
+			e.printStackTrace();
 		}
 		
-		return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
+		return null;
 	}
 	
 	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
