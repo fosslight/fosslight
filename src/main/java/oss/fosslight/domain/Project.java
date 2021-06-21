@@ -45,7 +45,7 @@ public class Project extends ComBean implements Serializable {
 				+ ", status=" + status + ", refPartnerId=" + refPartnerId + ", readmeContent=" + readmeContent
 				+ ", readmeYn=" + readmeYn + ", verifyFileContent=" + verifyFileContent + ", exceptFileContent="
 				+ exceptFileContent + ", schStartDate=" + schStartDate + ", schEndDate=" + schEndDate
-				+ ", prjModelJson=" + prjModelJson + ", division=" + division + ", vulnYn=" + vulnYn + "]";
+				+ ", prjModelJson=" + prjModelJson + ", division=" + division + ", vulnYn=" + vulnYn + ", ossReportFlag=" + ossReportFlag +"]";
 	}
 
 	/** The Constant serialVersionUID. */
@@ -317,6 +317,8 @@ public class Project extends ComBean implements Serializable {
 	// 사용자 comment가 이중등록되는 경우 "Y"으로 설정
 	private String ignoreUserCommentReg;
 	
+	/* The ossReportFlag */
+	private String ossReportFlag;
 	
 
 	public String getIgnoreUserCommentReg() {
@@ -3938,5 +3940,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setChangedNoticeYn(String changedNoticeYn) {
 		this.changedNoticeYn = changedNoticeYn;
+	}
+
+	public String getOssReportFlag() {
+		return ossReportFlag;
+	}
+
+	public void setOssReportFlag(String ossReportFlag) {
+		this.ossReportFlag = ossReportFlag;
 	}
 }

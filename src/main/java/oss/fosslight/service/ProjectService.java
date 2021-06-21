@@ -168,12 +168,12 @@ public interface ProjectService extends HistoryConfig{
 	String makeZipFileId(Map<String, Object>paramMap, Project project);
 	
 	// 20210616_BOM COMPARE FUNC ADD
-	public boolean existProjectCnt(Map<String, Object> paramMap) throws Exception;
+	public boolean existProjectCnt(Project project) throws Exception;
 
-	public List<Map<String, Object>> getBomList(String prjId) throws Exception;
+	public List<ProjectIdentification> getBomList(String prjId) throws Exception;
 
-	public Object getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList) throws Exception;
-	
-	public List<Map<String, Object>> setBomCompareMergeGridData(List<Map<String, Object>> list);
+	public Object getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList) throws Exception;
+
+	public List<Map<String, String>> getBomCompareList(String flag, Map<String, Object> compareMap) throws Exception;
 }
 

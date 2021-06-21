@@ -38,12 +38,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -3882,8 +3882,9 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	// 20210616_BOM COMPARE FUNC ADD
+	@SuppressWarnings("unchecked")
 	@GetMapping(value=PROJECT.BOM_COMPARE_LIST_AJAX)
-	public @ResponseBody CommonResult bomCompareList(
+	public @ResponseBody ResponseEntity<Object> bomCompareList(
 			@RequestParam("beforePrjId") String beforePrjId
 			, @RequestParam("afterPrjId") String afterPrjId) throws Exception{
 		
@@ -3891,38 +3892,41 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {
-			
-			Map<String, Object> paramMap = new HashMap<>();
-		
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(beforePrjId);
 			prjIdList.add(afterPrjId);
-			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
-			paramMap.put("prjId", prjIdList);
-			paramMap.put("distributionType", "normal");
 			
-			boolean searchFlag = projectService.existProjectCnt(paramMap);
+			Project project = new Project();
+			project.setWatcherListInfo(prjIdList);
+			project.setPrjUserId(userInfo.getUserId());
+			project.setUserRole(loginUserRole());
+			project.setDistributionType("normal");
+			
+			boolean searchFlag = projectService.existProjectCnt(project);
 			
 			if(searchFlag) {
-				List<Map<String, Object>> beforeBomList = projectService.getBomList(beforePrjId);
-				List<Map<String, Object>> afterBomList = projectService.getBomList(afterPrjId);
+				List<ProjectIdentification> beforeBomList = projectService.getBomList(beforePrjId);
+				List<ProjectIdentification> afterBomList = projectService.getBomList(afterPrjId);
 				
 				if(beforeBomList == null 
 						|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
 					throw new Exception();
 				}
 				
-				resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList));
+				String flag = "list";
+				ObjectMapper objMapper = new ObjectMapper();
+				Object compareBomObject = projectService.getBomCompare(beforeBomList, afterBomList);
+				Map<String, Object> compareMap = objMapper.convertValue(compareBomObject, Map.class);
+				List<Map<String, String>> bomCompareList = projectService.getBomCompareList(flag, compareMap);
 				
-				return responseService.getSingleResult(resultMap);
+				resultMap.put("contents", bomCompareList);
+				
+				return makeJsonResponseHeader(true, "0", resultMap);
 			} else {
-				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+				return makeJsonResponseHeader(false, "1");
 			}
 		} catch (Exception e) {
-			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
-					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+			return makeJsonResponseHeader(false, "1");
 		}
 	}
 }

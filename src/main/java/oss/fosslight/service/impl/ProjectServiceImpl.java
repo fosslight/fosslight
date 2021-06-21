@@ -4021,20 +4021,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	// 20210616_BOM COMPARE FUNC ADD
-	@SuppressWarnings("unchecked")
 	@Override
-	public boolean existProjectCnt(Map<String, Object> paramMap) throws Exception {
-		String ossReportFlag = (String) paramMap.get("ossReportFlag");
-		List<String> prjIdList = (List<String>) paramMap.get("prjId");
+	public boolean existProjectCnt(Project project) throws Exception {
+		String ossReportFlag = project.getOssReportFlag();
+		List<String> prjIdList = (List<String>) project.getWatcherListInfo();
 		
 		if(prjIdList != null) {
 			if(isEmpty(ossReportFlag)) {
 				ossReportFlag = CoConstDef.FLAG_NO;
 				
-				paramMap.put("ossReportFlag", ossReportFlag);
+				project.setOssReportFlag(ossReportFlag);
 			}
 			
-			int records = projectMapper.selectProjectCount(paramMap);
+			int records = projectMapper.selectProjectCount(project);
 			
 			return records == prjIdList.size() ? true : false;
 		}
@@ -4043,79 +4042,88 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public List<Map<String, Object>> getBomList(String prjId) throws Exception {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
-		paramMap.put("prjId", prjId);
-		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
+	public List<ProjectIdentification> getBomList(String prjId) throws Exception {
+		Project project = new Project();
+		
+		// get bom list
+		ProjectIdentification bomParam = new ProjectIdentification();
+		bomParam.setReferenceId(prjId);
+		bomParam.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+		bomParam.setMerge(CoConstDef.FLAG_NO);
+		bomParam.setNoticeFlag(CoConstDef.FLAG_NO); // notice 대상만 추출한다. (obligation type이 10, 11)
+		bomParam.setSaveBomFlag(CoConstDef.FLAG_YES);
+		bomParam.setBomWithAndroidFlag(project.getAndroidFlag()); // android Project
 		
 		if(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
-			paramMap.put("roleOutLicenseIdList", CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST);
+			bomParam.setRoleOutLicenseIdList(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST); // android Project
 		}
 		
-		paramMap.put("merge", CoConstDef.FLAG_NO);
+		List<ProjectIdentification> bomList = projectMapper.selectBomList(bomParam);
+		List<ProjectIdentification> chkedBomList = new ArrayList<ProjectIdentification>();
 		
-		List<Map<String, Object>> list = projectMapper.selectBomCompareList(paramMap);
-		
-		for(Map<String, Object> li : list) {
-			String licenseId = CommonFunction.removeDuplicateStringToken(avoidNull((String) li.get("licenseId")).toString(), ",");
-			String licenseName = CommonFunction.removeDuplicateStringToken((String) li.get("licenseName"), ",");
-			String componentId = (String) li.get("componentId").toString();
-			List<Map<String, Object>> listLicense = projectMapper.selectBomCompareLicense(componentId);
-			
-			li.replace("licenseId", licenseId);
-			li.replace("licenseName", licenseName);
-			li.put("ROLE_OUT_LICENSE", CoCodeManager.CD_ROLE_OUT_LICENSE);
-			li.put("OSS_COMPONENTS_LICENSE_LIST", listLicense);
+		if (bomList.size() > 0) {
+			for(ProjectIdentification li : bomList) {
+				String licenseId = CommonFunction.removeDuplicateStringToken(avoidNull(li.getLicenseId()), ",");
+				String licenseName = CommonFunction.removeDuplicateStringToken(li.getLicenseName(), ",");
+				List<OssComponentsLicense> listLicense = projectMapper.selectBomLicense(li);
+				
+				li.setLicenseId(licenseId);
+				li.setLicenseName(licenseName);
+				li.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+				li.setOssComponentsLicenseList(listLicense);
+				
+				chkedBomList.add(li);
+			}
 		}
 		
-		return setBomCompareMergeGridData(list);
+		return setMergeGridData(chkedBomList);
 	}
 
 	@Override
-	public Object getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList)
+	public Object getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList)
 			throws Exception {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String, Object> addList = new HashMap<String, Object>();
 		Map<String, Object> deleteList = new HashMap<String, Object>();
 		Map<String, Object> changeList = new HashMap<String, Object>();
 		
-		for(Map<String, Object> before : beforeBomList) {
-			String ossName = (String) before.get("ossName");
-			List<Map<String, Object>> afterList = afterBomList.stream().filter(after -> ((String)after.get("ossName")).equals(ossName)).collect(Collectors.toList());
+		for(ProjectIdentification before : beforeBomList) {
+			String ossName = before.getOssName();
+			List<ProjectIdentification> afterList = afterBomList.stream().filter(after -> (after.getOssName()).equals(ossName)).collect(Collectors.toList());
 			
 			if(afterList.size() == 0) {
 				Map<String, Object> deleteMap = new HashMap<String, Object>();
 				
-				deleteMap.put("name", (String) before.get("ossName"));
-				deleteMap.put("version", avoidNull((String) before.get("ossVersion"), ""));
-				deleteMap.put("license", Arrays.asList(((String) before.get("licenseName")).split(",")));
+				deleteMap.put("name", before.getOssName());
+				deleteMap.put("version", avoidNull(before.getOssVersion(), ""));
+				deleteMap.put("license", Arrays.asList((before.getLicenseName()).split(",")));
 				deleteList.put(getCompareKey(before), deleteMap);
 			} else {
-				if(!((String)afterList.get(0).get("ossVersion")).equals((String) before.get("ossVersion"))
-						 || !((String)afterList.get(0).get("licenseName")).equals((String) before.get("licenseName"))) {
+				if(!(afterList.get(0).getOssVersion()).equals(before.getOssVersion())
+						 || !(afterList.get(0).getLicenseName()).equals(before.getLicenseName())) {
 					Map<String, Object> changeMap = new HashMap<String, Object>();
 					
-					changeMap.put("name", (String) before.get("ossName"));
-					changeMap.put("prev_version", avoidNull((String) before.get("ossVersion"), ""));
-					changeMap.put("prev_license", Arrays.asList(((String) before.get("licenseName")).split(",")));
-					changeMap.put("now_version", avoidNull((String) afterList.get(0).get("ossVersion"), ""));
-					changeMap.put("now_license", Arrays.asList(((String) afterList.get(0).get("licenseName")).split(",")));
+					changeMap.put("name", (String) before.getOssName());
+					changeMap.put("prev_version", avoidNull(before.getOssVersion(), ""));
+					changeMap.put("prev_license", Arrays.asList((before.getLicenseName()).split(",")));
+					changeMap.put("now_version", avoidNull(afterList.get(0).getOssVersion(), ""));
+					changeMap.put("now_license", Arrays.asList((afterList.get(0).getLicenseName()).split(",")));
 					
 					changeList.put(getCompareKey(before), changeMap);
 				}
 			}
 		}
 		
-		for(Map<String, Object> after : afterBomList) {
-			String ossName = (String) after.get("ossName");
-			int addTargetCnt = beforeBomList.stream().filter(before -> ((String)before.get("ossName")).equals(ossName)).collect(Collectors.toList()).size();
+		for(ProjectIdentification after : afterBomList) {
+			String ossName = after.getOssName();
+			int addTargetCnt = beforeBomList.stream().filter(before -> (before.getOssName()).equals(ossName)).collect(Collectors.toList()).size();
 			
 			if(addTargetCnt == 0) {
 				Map<String, Object> addMap = new HashMap<String, Object>();
 				
-				addMap.put("name", (String) after.get("ossName"));
-				addMap.put("version", avoidNull((String) after.get("ossVersion"), ""));
-				addMap.put("license", Arrays.asList(((String) after.get("licenseName")).split(",")));
+				addMap.put("name", after.getOssName());
+				addMap.put("version", avoidNull(after.getOssVersion(), ""));
+				addMap.put("license", Arrays.asList((after.getLicenseName()).split(",")));
 				
 				addList.put(getCompareKey(after), addMap);
 			}
@@ -4128,122 +4136,180 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return resultMap;
 	}
-
-	@Override
-	public List<Map<String, Object>> setBomCompareMergeGridData(List<Map<String, Object>> list) {
-		List<Map<String, Object>> tempData = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> resultGridData = new ArrayList<Map<String, Object>>();
-		String groupColumn = "";
-		boolean ossNameEmptyFlag = false;
-		
-		for(Map<String, Object> li : list) {
-			if(isEmpty(groupColumn)) {
-				groupColumn = (String) li.get("ossName") + "-" + avoidNull((String) li.get("ossVersion"));
-			}
-			
-			if("-".equals(groupColumn)) {
-				if("NA".equals((String) li.get("licenseType"))) {
-					ossNameEmptyFlag = true;
-				}
-			}
-			
-			String ossVersion = avoidNull((String) li.get("ossVersion"));
-			String licenseType = avoidNull((String) li.get("licenseType"));
-			
-			if(groupColumn.equals((String) li.get("ossName") + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
-					&& !("-".equals((String) li.get("ossName")) 
-					&& !"NA".equals(licenseType))
-					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
-				tempData.add(li);
-			} else { // 다른 grouping
-				setBomCompareMergeData(tempData, resultGridData);
-				groupColumn = (String) li.get("ossName") + "-" + ossVersion;
-				tempData.clear();
-				tempData.add(li);
-			}
-		}
-		
-		setBomCompareMergeData(tempData, resultGridData); // bom data의 loop가 끝났지만 tempData에 값이 있다면 해당 값도 merge를 함.
-		
-		return resultGridData;
+	
+	private String getCompareKey(ProjectIdentification param) {
+		return param.getOssName() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void setBomCompareMergeData(List<Map<String, Object>> tempData, List<Map<String, Object>> resultGridData){
-		if(tempData.size() > 0) {
-			Collections.sort(tempData, new Comparator<Map<String, Object>>() {
-				@Override
-				public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-					if(((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
-						return 1;
-					}else {
-						return -1;
+	public List<Map<String, String>> getBomCompareList(String flag, Map<String, Object> compareMap) throws Exception{
+		List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
+		
+		List<Map<String, Object>> addList = (List<Map<String, Object>>) compareMap.get("add");
+		
+		if (addList.size() > 0) {
+			for (int i=0; i<addList.size(); i++) {
+				Map<String, String> returnMap = new HashMap<String, String>();
+
+				returnMap.put("status", "add");
+				List<String> licenseArr = (List<String>) addList.get(i).get("license");
+				String license = "";
+				for (int j=0; j<licenseArr.size(); j++) {
+					license += licenseArr.get(j).toString();
+					if (j<licenseArr.size()-1) {
+						license += ", ";
 					}
 				}
-			});
-			
-			Map<String, Object> rtnBean = null;
-			for(Map<String, Object> temp : tempData) {
-				if(rtnBean == null) {
-					rtnBean = temp;
-					
-					continue;
+				returnMap.put("beforeossname", "");
+				returnMap.put("beforelicense", "");
+				
+				String afterossname = "";
+				afterossname += addList.get(i).get("name").toString();
+				
+				if (addList.get(i).get("version").toString().equals("") || addList.get(i).get("version") == null) {
+				}else {
+					afterossname += " (" + addList.get(i).get("version").toString() + ")";
 				}
-				
-				String tempLicenseName = ((String) temp.get("licenseName"));
-				String rtnLicenseName = ((String) rtnBean.get("licenseName"));
-				String key = (String) temp.get("ossName") + "-" + (String) temp.get("licenseType");
-				
-				if("--NA".equals(key)) {
-					if(!rtnLicenseName.contains(tempLicenseName)) {
-						resultGridData.add(rtnBean);
-						rtnBean = temp;
-						
-						continue;
+				if (flag.equals("list")) {
+					returnMap.put("afterossname", changeStyle("add", afterossname));
+					returnMap.put("afterlicense", changeStyle("add", license));
+				}else {
+					returnMap.put("afterossname", afterossname);
+					returnMap.put("afterlicense", license);
+				}
+				returnList.add(returnMap);
+			}
+		}
+		
+		List<Map<String, Object>> deleteList = (List<Map<String, Object>>) compareMap.get("delete");
+		
+		if (deleteList.size() > 0) {
+			for (int i=0; i<deleteList.size(); i++) {
+				Map<String, String> returnMap = new HashMap<String, String>();
+
+				returnMap.put("status", "delete");
+				List<String> licenseArr = (List<String>) deleteList.get(i).get("license");
+				String license = "";
+				for (int j=0; j<licenseArr.size(); j++) {
+					license += licenseArr.get(j).toString();
+					if (j<licenseArr.size()-1) {
+						license += ", ";
 					}
 				}
 				
-				// 동일한 oss name과 version일 경우 license 정보를 중복제거하여 merge 함.
-				for(String tempStr : tempLicenseName.split(",")) {
-					boolean equalFlag = false;
-					
-					for(String rtnStr : rtnLicenseName.split(",")) {
-						if(rtnStr.equals(tempStr)) {
-							equalFlag = true;
-							
-							break;
+				String beforeossname = "";
+				
+				beforeossname += deleteList.get(i).get("name").toString();
+				
+				if (deleteList.get(i).get("version").toString().equals("") || deleteList.get(i).get("version") == null) {
+				}else {
+					beforeossname += " (" + deleteList.get(i).get("version").toString() + ")";
+				}
+				if (flag.equals("list")) {
+					returnMap.put("beforeossname", changeStyle("delete", beforeossname));
+					returnMap.put("beforelicense", changeStyle("delete", license));
+				}else {
+					returnMap.put("beforeossname", beforeossname);
+					returnMap.put("beforelicense", license);
+				}
+				
+				returnMap.put("afterossname", "");
+				returnMap.put("afterlicense", "");
+				
+				returnList.add(returnMap);
+			}
+		}
+		
+		List<Map<String, Object>> changeList = (List<Map<String, Object>>) compareMap.get("change");
+		
+		if (changeList.size() > 0) {
+			for (int i=0; i<changeList.size(); i++) {
+				Map<String, String> returnMap = new HashMap<String, String>();
+
+				returnMap.put("status", "change");
+				
+				List<String> prev_licenseArr = (List<String>) changeList.get(i).get("prev_license");
+				List<String> now_licenseArr = (List<String>) changeList.get(i).get("now_license");
+				
+				String prev_license = "";
+				String now_license = "";
+				
+				for (int j=0; j<prev_licenseArr.size(); j++) {
+					prev_license += prev_licenseArr.get(j).toString();
+					if (j<prev_licenseArr.size()-1) {
+						prev_license += ", ";
+					}
+				}
+				
+				for (int a=0; a<now_licenseArr.size(); a++) {
+					int chk = 0;
+					for (int b=0; b<prev_licenseArr.size(); b++) {
+						if (now_licenseArr.get(a).toString().equals(prev_licenseArr.get(b).toString())) {
+							chk++;
 						}
 					}
 					
-					if(!equalFlag) {
-						rtnBean.replace("LICENSE_NAME", rtnLicenseName + "," + tempStr);
+					if (chk > 0) {
+						now_license += now_licenseArr.get(a).toString();
+					}else {
+						if (flag.equals("list")) {
+							now_license += changeStyle("change", now_licenseArr.get(a).toString());
+						}else {
+							now_license += now_licenseArr.get(a).toString();
+						}
 					}
-				}
-				
-				List<Map<String, Object>> rtnComponentLicenseList = new ArrayList<Map<String, Object>>();
-				List<Map<String, Object>> tempOssComponentsLicenseList = (List<Map<String, Object>>) temp.get("ossComponentsLicenseList");
-				List<Map<String, Object>> rtnOssComponentsLicenseList = (List<Map<String, Object>>) rtnBean.get("ossComponentsLicenseList");
-				
-				for(Map<String, Object> list : tempOssComponentsLicenseList) {
-					int equalsItemList = (int) rtnOssComponentsLicenseList
-														.stream()
-														.filter(e -> ((String) list.get("licenseName")).equals((String) e.get("licenseName"))) // 동일한 licenseName을 filter
-														.collect(Collectors.toList()) // return을 list로변환
-														.size(); // 해당 list의 size
 					
-					if(equalsItemList == 0) {
-						rtnComponentLicenseList.add(list);
+					if (a<now_licenseArr.size()-1) {
+						now_license += ", ";
 					}
 				}
 				
-				rtnOssComponentsLicenseList.addAll(rtnComponentLicenseList);
+				returnMap.put("beforelicense", prev_license);
+				returnMap.put("afterlicense", now_license);
+				
+				String beforeossname = "";
+				String afterossname = "";
+				
+				beforeossname += changeList.get(i).get("name").toString();
+				afterossname += changeList.get(i).get("name").toString();
+				
+				if (changeList.get(i).get("prev_version").toString().equals("") || changeList.get(i).get("prev_version") == null) {
+				}else {
+					beforeossname += " (" + changeList.get(i).get("prev_version").toString() + ")";
+				}
+				
+				if (changeList.get(i).get("now_version").toString().equals("") || changeList.get(i).get("now_version") == null) {
+				}else {
+					if (beforeossname.contains(changeList.get(i).get("now_version").toString())) {
+						afterossname += " (" + changeList.get(i).get("now_version").toString() + ")";
+					}else{
+						if (flag.equals("list")) {
+							afterossname += " (" + changeStyle("change", changeList.get(i).get("now_version").toString()) + ")";
+						}else {
+							afterossname += " (" + changeList.get(i).get("now_version").toString() + ")";
+						}
+					}
+				}
+				
+				returnMap.put("beforeossname", beforeossname);
+				returnMap.put("afterossname", afterossname);
+				
+				returnList.add(returnMap);
 			}
-			
-			resultGridData.add(rtnBean);
 		}
+		
+		return returnList;
 	}
-	
-	private String getCompareKey(Map<String, Object> paramMap) {
-		return (String) paramMap.get("ossName") + "|" + avoidNull((String) paramMap.get("ossVersion"), "") + "|" + (String) paramMap.get("licenseName");
+
+	private static String changeStyle(String flag, String license) {
+		String returnVal = "";
+		
+		if (flag.equals("delete")){
+			returnVal = "<span style=\"background-color:red;text-decoration:line-through;\">" + license + "</span>";
+		}else if (flag.equals("change") || flag.equals("add")){
+			returnVal = "<span style=\"background-color:yellow\">" + license + "</span>";
+		}
+
+		return returnVal;
 	}
 }
