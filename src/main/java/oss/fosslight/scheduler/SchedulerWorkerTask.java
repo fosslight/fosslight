@@ -69,7 +69,7 @@ public class SchedulerWorkerTask {
 	}
 	
 	// 새벽 12시 스케줄 - CPE Dictionary, CVE Update Data Sync 
-	@Scheduled(cron="0 10 3 * * ?")
+	@Scheduled(cron="0 0 1 * * ?")
 //	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
 		String resCd = "";
