@@ -175,6 +175,15 @@ public class CoCodeManager extends CoTopComponent {
 				}
 			}
 			
+			Map<String, OssMaster> _idMasterMap = new HashMap<>();
+			for(OssMaster bean : _ossMap.values()) {
+				if(!_idMasterMap.containsKey(bean.getOssId())) {
+					_idMasterMap.put(bean.getOssId(), bean);
+				}
+			}
+			
+			OSS_INFO_BY_ID = _idMasterMap;
+			
 			if(listNick != null) {
 
 				for(OssMaster bean : listNick) {
@@ -208,22 +217,13 @@ public class CoCodeManager extends CoTopComponent {
 					bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
 					bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
 
-					_ossMap.put(key, bean);
+					_ossMap.put(key.toUpperCase(), bean);
 				}
 			
 			}
 			
 			if(!_ossMap.isEmpty()) {
 				OSS_INFO_UPPER = _ossMap;
-				
-				Map<String, OssMaster> _idMasterMap = new HashMap<>();
-				for(OssMaster bean : _ossMap.values()) {
-					if(!_idMasterMap.containsKey(bean.getOssId())) {
-						_idMasterMap.put(bean.getOssId(), bean);
-					}
-				}
-				
-				OSS_INFO_BY_ID = _idMasterMap;
 			}
 			
 			if(!_ossNamesMap.isEmpty()) {

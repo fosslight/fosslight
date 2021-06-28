@@ -41,7 +41,7 @@
 	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
-		               +"<dl><dt><span class=\"downSet btnReport\">OSS Report</span>OSS Report</dt></dl><br>"
+		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",
@@ -385,7 +385,7 @@
 			var display = "";
 			
 			if(rowObject.identificationStatus == "Confirm"){
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"OSS Report\">";
+				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"FOSSLight Report\">";
 			} else {
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this)\" disabled>";
 			}

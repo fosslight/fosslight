@@ -394,11 +394,13 @@ public class T2UserServiceImpl implements T2UserService {
 	@Override
 	public boolean checkAdAccounts(String userId, String userPw) {
 		boolean isAuthenticated = false;
+		
+		String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
 		Hashtable<String, String> properties = new Hashtable<String, String>();
 		properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
 		properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
 		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-		properties.put(Context.SECURITY_PRINCIPAL, userId);
+		properties.put(Context.SECURITY_PRINCIPAL, userId+ldapDomain);
 		properties.put(Context.SECURITY_CREDENTIALS, userPw);
 
 		DirContext con = null;

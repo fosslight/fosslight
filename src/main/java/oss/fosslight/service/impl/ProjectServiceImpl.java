@@ -3802,7 +3802,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String makeZipFileId(Map<String, Object> paramMap, Project project) {
 		String fileId = "";
-		String filePath = CommonFunction.emptyCheckProperty("supplement.notice.path", "/supplement_notice") + "/" + project.getPrjId();
+		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
 		File dir = new File(filePath);
 		
 		if(dir.exists()) {  // 전체 삭제 예쩡( html file은 제외함)
@@ -3885,7 +3885,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String makeSupplementFileId(String contents, Project project) {
 		String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), "needtoadd-notice",  DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN), "html");
-		String filePath = CommonFunction.emptyCheckProperty("supplement.notice.path", "/supplement_notice") + "/" + project.getPrjId();
+		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
 		String fileId = "";
 		
 		File fileDir = new File(filePath);
