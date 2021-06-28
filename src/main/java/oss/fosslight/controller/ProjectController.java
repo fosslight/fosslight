@@ -141,6 +141,7 @@ public class ProjectController extends CoTopComponent {
 				
 				if(ossBean != null) {
 					searchBean.setOssName(ossBean.getOssName());
+					searchBean.setOssVersion(ossBean.getOssVersion());
 				}
 			}
 		} else {

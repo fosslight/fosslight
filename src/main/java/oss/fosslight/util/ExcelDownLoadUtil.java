@@ -120,7 +120,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileInputStream inFile=null;
 
 		// download file name
-		String downloadFileName = "OSS-Report"; // Default
+		String downloadFileName = "FOSSLight-Report"; // Default
 
 		try {
 			//cover

@@ -313,7 +313,7 @@
 	                   +"<dl><dt><span class=\"iconSt delay\">Delay</span>Delay</dt></dl><br>"
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
-		               +"<dl><dt><span class=\"downSet btnReport\">OSS Report</span>OSS Report</dt></dl><br>"
+		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",

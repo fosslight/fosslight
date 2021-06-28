@@ -125,7 +125,9 @@
         T2_USERS(
             USER_ID
             , USER_NAME
+            <if test="!@oss.fosslight.util.StringUtil@isEmpty(password)">
             , PASSWORD
+            </if>
             , EMAIL
             , DIVISION
             , CREATOR

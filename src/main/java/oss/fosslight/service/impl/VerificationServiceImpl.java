@@ -896,7 +896,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					if(_upperPath.indexOf("README") > -1){
 						String _readmePath = r.replaceAll("\\n", "");
 						
-						if(isEmpty(readmePath) || _readmePath.length() < readmePath.length()) {
+						int afterDepthCnt = StringUtils.countMatches(_readmePath, "/");
+						int beforeDepthCnt = StringUtils.countMatches(readmePath, "/");
+						if(isEmpty(readmePath) || beforeDepthCnt > afterDepthCnt) {
 							readmePath = _readmePath;
 						}
 					}

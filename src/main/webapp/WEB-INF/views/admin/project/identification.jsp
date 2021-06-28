@@ -401,7 +401,7 @@
 										</div>
 										<div class="uploadGroup">
 											<div class="uploadSet">
-												<label>OSS Report :</label>
+												<label>FOSSLight Report :</label>
 												<span class="fileex_back" <c:if test="${isCommited}">style="display:none;"</c:if>>
 													<div id="binCsvFile">upload</div>
 												</span>
@@ -585,7 +585,7 @@
 										<span class="sampleDownSet"></span>
 										<div class="uploadGroup">
 											<div class="uploadSet">
-												<label>OSS Report :</label>
+												<label>FOSSLight Report :</label>
 												<span class="fileex_back">
 													<div id="androidCsvFile">upload</div>
 												</span>
