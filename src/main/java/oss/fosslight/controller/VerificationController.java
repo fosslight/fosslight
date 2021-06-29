@@ -231,6 +231,13 @@ public class VerificationController extends CoTopComponent {
 		//결과값 resultList에 담기
 		resultList.add(list);
 		
+		// 20210625_fileUpload 시 projectMaster table save_START
+		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
+		String registFileId = list.get(0).getRegistSeq();
+		
+		verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
+		// 20210625_fileUpload 시 projectMaster table save_END
+		
 		return toJson(resultList);
 	}
 	
@@ -264,8 +271,8 @@ public class VerificationController extends CoTopComponent {
 			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
 			String prjId = (String) map.get("prjId");
 			
-			String packagingComment = fileService.setClearFiles(map);
-			map.put("packagingComment", packagingComment);
+			//String packagingComment = fileService.setClearFiles(map);
+			//map.put("packagingComment", packagingComment);
 			
 			boolean isChangedPackageFile = verificationService.getChangedPackageFile(prjId, fileSeqs);
 			int seq = 1;

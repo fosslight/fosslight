@@ -2049,4 +2049,62 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			resultGridData.add(rtnBean);
 		}
 	}
+
+	@Override
+	public void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception {
+		Project prjParam = new Project(); 
+		prjParam.setPrjId(prjId);
+		  
+		Project project = projectMapper.selectProjectMaster(prjParam);
+		
+		if (fileSeq.equals("1")) {
+			prjParam.setPackageFileId(registFileId);
+			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+		}else if (fileSeq.equals("2")) {
+			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+			prjParam.setPackageFileId2(registFileId);
+			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+		}else {
+			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+			prjParam.setPackageFileId3(registFileId);
+		}
+				
+		List<String> fileSeqs = new ArrayList<String>(); 
+		if (prjParam.getPackageFileId() != null) {
+			fileSeqs.add(prjParam.getPackageFileId()); 
+		}  
+		if (prjParam.getPackageFileId2() != null) {
+			fileSeqs.add(prjParam.getPackageFileId2()); 
+		} 
+		if (prjParam.getPackageFileId3() != null) {
+			fileSeqs.add(prjParam.getPackageFileId3()); 
+		}
+					
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		map.put("prjId", prjId);
+		map.put("fileSeqs", fileSeqs);
+		
+		String packagingComment = "";
+		
+		try {
+			packagingComment = fileService.setClearFiles(map);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		// project_master packageFileId update
+		verificationMapper.updatePackageFile(prjParam);
+		
+		// commentHistory regist
+		if (!packagingComment.equals("")) {
+			CommentsHistory commHisBean = new CommentsHistory();
+			commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+			commHisBean.setReferenceId(prjId); 
+			commHisBean.setContents(packagingComment);
+			
+			commentService.registComment(commHisBean);
+		}
+	}
 }
