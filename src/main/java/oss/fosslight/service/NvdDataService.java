@@ -16,6 +16,8 @@ import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
@@ -37,6 +39,7 @@ import oss.fosslight.util.StringUtil;
 @Service
 @Slf4j
 public class NvdDataService {
+	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	
 	private final String NVD_DATA_FILE_NAME_CPEMATCH = "nvdcpematch-1.0";
 	private final String NVD_DATA_FILE_NAME_NVDCVE = "nvdcve-1.1-modified";

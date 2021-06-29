@@ -45,6 +45,25 @@
 		</rollingPolicy>
 	</appender>
 	
+	<appender name="SCHEDULER_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender" includeLocation="true">
+		<file>${LOG_PATH}/schedule.log</file>
+		<append>true</append>
+		<encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level [%F, %M\(\):%L] - %msg%n</pattern>
+			<!-- <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%p] [%F, %M\(\):%L] %m %n</pattern> -->
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_PATH}/backup/schedule.%d{yyyyMMdd}.log</fileNamePattern>
+			<!-- keep 60 days' worth of history -->
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<logger name="SCHEDULER_LOG" level="info" additivity="false">
+		<appender-ref ref="SCHEDULER_LOG_APPENDER"/>
+	</logger>
+	
 	<root level="info">
 		<appender-ref ref="CONSOLE"/>
 		<appender-ref ref="FILE"/>
