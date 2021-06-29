@@ -14,23 +14,28 @@ import java.nio.file.Paths;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
+import oss.fosslight.service.NvdDataService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
-import oss.fosslight.service.NvdDataService;
 import oss.fosslight.util.FileUtil;
 
 @Slf4j
-public class SchedulerWorkerTask {
+public class SchedulerWorkerTask extends CoTopComponent {
+	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
+	
 	@Autowired Environment env;
 	@Autowired MailService mailService;
 	@Autowired OssService ossService;
