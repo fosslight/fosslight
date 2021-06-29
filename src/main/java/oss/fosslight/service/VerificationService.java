@@ -75,4 +75,6 @@ public interface VerificationService {
 	boolean setReusePackagingFile(Map<String, Object> map);
 	
 	List<OssComponents> setMergeGridData(List<OssComponents> gridData);
+
+	void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception;
 }

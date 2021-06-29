@@ -697,12 +697,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			paramT2File.setFileSeq(fileSeq);
 			uploadFileInfos.add(fileMapper.getFileInfo(paramT2File));
 		}
-		
+						
 		String publicUrl = appEnv.getProperty("upload.path", "/upload");
 		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 		List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
-		
-		if(result != null){
+
+		if(result.size() > 0){
 			for(T2File res : result){
 				String rtnFilePath = res.getLogiPath();
 				String rtnFileName = res.getLogiNm();
@@ -712,13 +712,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 					// select한 filePath가 upload Dir 일 경우 해당 파일만 삭제함.
 					file = new File(rtnFilePath + "/" + rtnFileName);
 					
-					for(String fileSeq : fileSeqs){
+					for (String fileSeq : fileSeqs) {
 						if(file.exists() && !rtnFileSeq.equals(fileSeq)){
 							int reuseCnt = fileMapper.getPackgingReuseCnt(rtnFileName);
-							
+								
 							if(reuseCnt == 0){
 								T2File delFile = new T2File();
-								delFile.setFileSeq(fileSeq);
+								delFile.setFileSeq(rtnFileSeq);
 								delFile.setGubn("A");
 								int returnSuccess = fileMapper.updateFileDelYnKessan(delFile);
 								
@@ -754,14 +754,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				T2File fileInfo = new T2File();
 				
 				if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
-					fileInfo.setFileSeq(fileId);
-					fileInfo = fileMapper.getFileInfo(fileInfo);
+					//fileInfo.setFileSeq(fileId);
+					fileInfo = fileMapper.selectFileInfo(fileId);
 					deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
 				}
 				
 				if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
-					fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
-					fileInfo = fileMapper.getFileInfo(fileInfo);
+					//fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
+					fileInfo = fileMapper.selectFileInfo(newPackagingFileIdList.get(idx));
 					oss.fosslight.domain.File resultFile = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
 					
 					if(CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
@@ -775,11 +775,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
-		}
+		}		
 		
 		verificationMapper.updatePackagingReuseMap(prjParam);
 		
-		return deleteComment+uploadComment;
+		return deleteComment + uploadComment;
 	}
 
 	@Override
