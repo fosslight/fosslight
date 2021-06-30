@@ -290,6 +290,8 @@ public final class Url {
 		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePrjId}/{afterPrjId}";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
 		public static final String BOM_COMPARE_LIST_AJAX = PATH + "/bomCompare/listAjax";
+		
+		public static final String PROJECT_STATUS = PATH + "/getProjectStatus";
 	}
 	
 	public static final class VERIFICATION {
@@ -629,8 +631,8 @@ public final class Url {
 	public static final class IMAGE_VIEW {
 		public static final String PATH = "/imageView";
 		
-		public static final String IMAGE = PATH + "/{imageName}";
-		public static final String GUI_REPORT_ID_NM = PATH + "/guiReport/{batId}/{imageName}";
+		public static final String IMAGE = PATH + "/{imageName:.+}";
+		public static final String GUI_REPORT_ID_NM = PATH + "/guiReport/{batId}/{imageName:.+}";
 	}
 	
 	public static final class IMAGE_UPLOAD {
