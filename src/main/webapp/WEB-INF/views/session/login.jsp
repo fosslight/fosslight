@@ -287,7 +287,7 @@
 								<dl>
 									<dt><label for="accountInput">ID</label></dt>
 									<dd class="required">
-										<input type="text" name="un" />
+										<input type="text" name="un" placeholder="foss.kim" />
 									</dd>
 									<dt><label for="passwordInput">Password</label></dt>
 									<dd class="required">
@@ -319,7 +319,7 @@
 								<dl>
 									<dt><label>ID</label></dt>
 									<dd class="required">
-										<input type="text" name="userId" onKeypress="CheckChar()"/><div class="retxt userId"></div>
+										<input type="text" name="userId" placeholder="foss.kim" onKeypress="CheckChar()"/><div class="retxt userId"></div>
 									</dd>
 									<dt><label>Password</label></dt>
 									<dd class="required">

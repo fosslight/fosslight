@@ -632,6 +632,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String modelFlag;
 	
+	private String changeStatusFlag;
+
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -3901,7 +3903,15 @@ public class Project extends ComBean implements Serializable {
 	public void setModelFlag(String modelFlag) {
 		this.modelFlag = modelFlag;
 	}
+	
+	public String getChangeStatusFlag() {
+		return changeStatusFlag;
+	}
 
+	public void setChangeStatusFlag(String changeStatusFlag) {
+		this.changeStatusFlag = changeStatusFlag;
+	}
+	
 	public String getSrcAndroidNoticeXmlId() {
 		return srcAndroidNoticeXmlId;
 	}
