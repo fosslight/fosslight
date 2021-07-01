@@ -201,7 +201,6 @@
 					cache : false,
 					contentType : 'application/json',
 					success: function(data){
-						console.log(data.resCd);
 						if(data.resCd == "10"){
 							alertify.success('<spring:message code="msg.common.success" />');
 							location.reload();
