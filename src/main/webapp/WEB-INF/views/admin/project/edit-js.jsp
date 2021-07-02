@@ -1491,7 +1491,7 @@
 					var userUseYn = watcher.userUseYn || "Y";
 					
 					if(watcher!=""){
-						if(watcher.prjEmail != ""){ 
+						if(watcher.prjEmail){ 
 							fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
 						} else {
 							var str = "";
