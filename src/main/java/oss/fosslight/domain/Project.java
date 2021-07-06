@@ -705,6 +705,8 @@ public class Project extends ComBean implements Serializable {
 	private String reProcessDistributionFlag = "N";
 	
 	private String changedNoticeYn = "N";
+	
+	private String modelListAppendFlag = "N";
 
 	/**
 	 * Gets the prj id.
@@ -3958,5 +3960,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setOssReportFlag(String ossReportFlag) {
 		this.ossReportFlag = ossReportFlag;
+	}
+	
+	public String getModelListAppendFlag() {
+		return modelListAppendFlag;
+	}
+
+	public void setModelListAppendFlag(String modelListAppendFlag) {
+		this.modelListAppendFlag = modelListAppendFlag;
 	}
 }

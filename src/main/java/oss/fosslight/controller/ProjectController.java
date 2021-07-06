@@ -3821,7 +3821,7 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) throws Exception {
 		// 엑셀 분석
 		Map<String, List<Project>> modelList = ExcelUtil.getModelList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
-				request.getParameter("distributionTarget"), request.getParameter("prjId"));
+				request.getParameter("distributionTarget"), request.getParameter("prjId"), request.getParameter("modelListAppendFlag"));
 		
 		return makeJsonResponseHeader(modelList);
 	}

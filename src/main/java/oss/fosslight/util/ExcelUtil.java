@@ -1544,13 +1544,17 @@ public class ExcelUtil extends CoTopComponent {
 		return "false".equals(value) ? "" : StringUtil.isNumeric(value) ? StringUtil.trim(value) : StringUtil.trim(value).replaceAll("(^\\p{Z}+|\\p{Z}+$)", "");
 	}
 
-	public static Map<String, List<Project>> getModelList(MultipartHttpServletRequest req, String localPath, String distributionType, String prjId) {
+	public static Map<String, List<Project>> getModelList(MultipartHttpServletRequest req, String localPath, String distributionType, String prjId, String modelListAppendFlag) {
 		Map<String, List<Project>> result = new HashMap<>();
 		List<Project> resultModel = new ArrayList<Project>();
 		List<Project> resultModelDelete = new ArrayList<Project>();
 		Iterator<String> fileNames = req.getFileNames();
 		List<Project> modelList = projectMapper.selectModelList(prjId);
 		List<Project> modelDeleteList = projectMapper.selectDeleteModelList(prjId);
+		
+		if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) { // append Flag : Y시 등록되어 있는 model List를 default로 setting함.
+			resultModel = modelList;
+		}
 		
 		// osdd에 존재하는 model만 체크한다.
 		Map<String, Project> osddModelInfo = new HashMap<>();
@@ -1607,7 +1611,7 @@ public class ExcelUtil extends CoTopComponent {
 				
 				try {
 					wb = WorkbookFactory.create(file);
-					int rowindex=0;
+					int rowindex=resultModel.size();
 					int colindex=0;		
 					Sheet sheet = wb.getSheetAt(0);
 					Row row = null;
