@@ -438,7 +438,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 		List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 		boolean isChangedPackageFile = (boolean)map.get("isChangedPackageFile");
-		//String packagingComment = (String)map.get("packagingComment");
+		String packagingComment = (String)map.get("packagingComment");
 		
 		List<String> checkExceptionWordsList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_EXCEPTION_WORDS);
 		List<String> checkExceptionIgnoreWorksList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_IGNORE_WORDS);
@@ -1031,13 +1031,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				
-				/*
-				 * CommentsHistory commHisBean = new CommentsHistory();
-				 * commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				 * commHisBean.setReferenceId(prjId); commHisBean.setContents(packagingComment);
-				 * 
-				 * commentService.registComment(commHisBean);
-				 */
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+				commHisBean.setReferenceId(prjId); commHisBean.setContents(packagingComment);
+				  
+				commentService.registComment(commHisBean);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2094,7 +2092,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+		prjParam.setStatusVerifyYn("N");
 		// project_master packageFileId update
 		verificationMapper.updatePackageFile(prjParam);
 		

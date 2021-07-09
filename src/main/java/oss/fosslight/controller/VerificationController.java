@@ -271,8 +271,8 @@ public class VerificationController extends CoTopComponent {
 			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
 			String prjId = (String) map.get("prjId");
 			
-			//String packagingComment = fileService.setClearFiles(map);
-			//map.put("packagingComment", packagingComment);
+			String packagingComment = fileService.setClearFiles(map);
+			map.put("packagingComment", packagingComment);
 			
 			boolean isChangedPackageFile = verificationService.getChangedPackageFile(prjId, fileSeqs);
 			int seq = 1;

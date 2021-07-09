@@ -56,7 +56,6 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.BinaryAnalysisResult;
-import oss.fosslight.domain.BinaryMaster;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssComponents;
@@ -105,6 +104,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static VulnerabilityService 		vulnerabilityService 	= (VulnerabilityService)	getWebappContext().getBean(VulnerabilityService.class);
 	private static ComplianceService 			complianceService = (ComplianceService) getWebappContext().getBean(ComplianceService.class);
 	private static StatisticsService 			statisticsService = (StatisticsService) getWebappContext().getBean(StatisticsService.class);
+	private static ProjectService 				prjService	= (ProjectService)	getWebappContext().getBean(ProjectService.class);
 	
 	// Mapper
 	private static ProjectMapper				projectMapper	= (ProjectMapper)		getWebappContext().getBean(ProjectMapper.class);
@@ -1844,10 +1844,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				donwloadId = getUserExcelId(userList);
 				
 				break;
-			case "bomcompare" :
-				donwloadId = getBomCompareExcelId(dataStr);
-				
-				break;
 			default:
 				break;
 		}
@@ -2949,106 +2945,5 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		return makeAnalysisListExcelFileId(wb, "AutoAnalysisList", "xlsx", prjId);
-	}
-	
-	/**
-	 * 
-	 * @param bomCompareList
-	 * @return
-	 * @throws Exception
-	 * @용도 bomcompare 엑셀
-	 */
-	@SuppressWarnings("unchecked")
-	private static String getBomCompareExcelId(String dataStr) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		FileInputStream inFile=null;
-		
-		ObjectMapper objMapper = new ObjectMapper();
-		
-		try {
-			Map<String, String> map = objMapper.readValue(dataStr, Map.class);
-			
-			String beforePrjId = map.get("beforePrjId").toString();
-			String afterPrjId = map.get("afterPrjId").toString();
-			
-			List<ProjectIdentification> beforeBomList = projectService.getBomList(beforePrjId);
-			List<ProjectIdentification> afterBomList = projectService.getBomList(afterPrjId);
-			
-			if(beforeBomList == null 
-					|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
-				throw new Exception();
-			}
-			
-			String flag = "excel";
-			Object compareBomObject = projectService.getBomCompare(beforeBomList, afterBomList);
-			Map<String, Object> resultMap = objMapper.convertValue(compareBomObject, Map.class);
-			List<Map<String, String>> bomCompareListExcel = projectService.getBomCompareList(flag, resultMap);
-			
-			try {
-				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
-				wb = new XSSFWorkbook(inFile);
-				sheet = wb.getSheetAt(0); 
-				wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
-			  
-				List<String[]> rows = new ArrayList<String[]>();
-			  
-				for(int i = 0; i < bomCompareListExcel.size(); i++){ 
-					String[] rowParam = {
-							bomCompareListExcel.get(i).get("status"),
-							bomCompareListExcel.get(i).get("beforeossname"),
-							bomCompareListExcel.get(i).get("beforelicense"),
-							bomCompareListExcel.get(i).get("afterossname"),
-							bomCompareListExcel.get(i).get("afterlicense")
-					};
-					rows.add(rowParam);
-				}
-				
-				//시트 만들기 
-				makeSheet(sheet, rows, 1); 
-			} catch (FileNotFoundException e) {
-				log.error(e.getMessage(), e); 
-			} finally { 
-				if(inFile != null) { 
-					try {inFile.close();} 
-					catch (Exception e2) {} 
-				}
-			}
-			
-			return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
-		} catch (IOException e){
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
-		String fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
-		String logiFileName = fileName + "." + exp;
-		String excelFilePath = writepath + "/download/";
-		
-		FileOutputStream outFile = null;
-		
-		try {
-			if(!Files.exists(Paths.get(excelFilePath))) {
-				Files.createDirectories(Paths.get(excelFilePath));
-			}
-			outFile = new FileOutputStream(excelFilePath + logiFileName);
-			wb.write(outFile);
-			
-			// db 등록
-			return fileService.registFileDownload(excelFilePath, fileName + "."+exp, logiFileName);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if(outFile != null) {
-				try {
-					outFile.close();
-				} catch (Exception e2) {}
-			}
-		}
-		
-		return null;
 	}
 }
