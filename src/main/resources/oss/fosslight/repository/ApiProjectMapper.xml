@@ -8,7 +8,8 @@
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* ProjectMapper.selectProjectTotalCount */
 		SELECT COUNT(*) FROM (
-			SELECT T1.PRJ_NAME
+			SELECT T1.PRJ_ID
+				 , T1.PRJ_NAME
 				 , T1.PRJ_VERSION
 				 , T1.CREATED_DATE
 				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
@@ -31,18 +32,6 @@
 			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
 			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
 	         WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-				AND (
-					T1.CREATOR = #{userId} 
-						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
-						  FROM PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
-						)
-						OR PUBLIC_YN = 'Y'
-				)
-			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 			</if>
@@ -72,10 +61,15 @@
 					OR A.CD_DTL_NO = #{division}
 				)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+				<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+			     	A.PRJ_ID = #{item}
+			    </foreach>
+			</if>
 	</select>
 	
-	<select id="selectProjectTotal" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
-		/* ProjectMapper.selectProjectTotal */
+	<select id="selectProject" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper.selectProject */
 		SELECT A.PRJ_ID
 			 , A.PRJ_NAME
 		     , A.PRJ_VERSION
@@ -115,24 +109,11 @@
                  , IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
                  , T4.NOTICE_TYPE
                  , T4.NOTICE_TYPE_ETC
-                 , T1.PRIORITY
 			  FROM PROJECT_MASTER T1
 			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
 			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
 			  LEFT JOIN OSS_NOTICE T4 ON T1.PRJ_ID = T4.PRJ_ID
 	         WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-				AND (
-					T1.CREATOR = #{userId} 
-						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
-						  FROM PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
-						)
-						OR PUBLIC_YN = 'Y'
-				)
-			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 			</if>
@@ -162,6 +143,13 @@
 					OR A.CD_DTL_NO = #{division}
 				)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+				<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+			     	A.PRJ_ID = #{item}
+			    </foreach>
+			</if>
+		ORDER BY A.PRJ_ID DESC
+		LIMIT 0, 1000;
 	</select>
 	
 	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
@@ -293,14 +281,20 @@
   		 ORDER BY NVD.CVSS_SCORE *1 DESC, CVE_ID LIMIT 1
 	</select>
 	
-	<select id="selectModelList" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
-		SELECT CONCAT(MAIN_CD.CD_DTL_NM, ' > ', SUB_CD.CD_DTL_NM) AS CATEGORY
+	<select id="selectModelList" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		SELECT A.PRJ_ID
+			 , CONCAT(MAIN_CD.CD_DTL_NM, ' > ', SUB_CD.CD_DTL_NM) AS CATEGORY
 			 , A.MODEL_NAME
 			 , A.RELEASE_DATE
 		  FROM PROJECT_MODEL A
 		 INNER JOIN T2_CODE_DTL MAIN_CD ON MAIN_CD.CD_NO = '500' AND A.CATEGORY = MAIN_CD.CD_DTL_NO
 		 INNER JOIN T2_CODE_DTL SUB_CD ON SUB_CD.CD_NO = MAIN_CD.CD_SUB_NO AND A.SUBCATEGORY = SUB_CD.CD_DTL_NO
-		 WHERE A.PRJ_ID = #{prjId} AND A.DEL_YN <![CDATA[<>]]> 'Y'
+		 WHERE A.DEL_YN <![CDATA[<>]]> 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+			<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+		       A.PRJ_ID = #{item}
+		    </foreach>
+		 </if>
 		 ORDER BY A.CATEGORY, A.MODEL_NAME
 	</select>
 	

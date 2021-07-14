@@ -19,13 +19,13 @@ public interface ApiProjectMapper {
 	
 	int updatePackageFile(Map<String, Object> paramMap);
 	
-	List<Map<String, Object>> selectProjectTotal(Map<String, Object> paramMap);
+	List<Map<String, Object>> selectProject(Map<String, Object> paramMap);
 
 	int selectProjectTotalCount(Map<String, Object> paramMap);
 	
 	String findIdentificationMaxNvdInfo(String prjId);
 	
-	List<Map<String, Object>> selectModelList(String prjId);
+	List<Map<String, Object>> selectModelList(Map<String, Object> paramMap);
 	
 	int getCreateProjectCnt(@Param("userId") String userId);
 	
