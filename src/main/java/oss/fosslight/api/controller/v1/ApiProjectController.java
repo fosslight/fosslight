@@ -105,6 +105,7 @@ public class ApiProjectController extends CoTopComponent {
 	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_SEARCH})
     public CommonResult selectProjectList(
     		@RequestHeader String _token,
+    		@ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
     		@ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
     		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete)", required = false, allowableValues = "PROG,REQ,REV,COMP") @RequestParam(required = false) String status,
@@ -120,12 +121,13 @@ public class ApiProjectController extends CoTopComponent {
 			CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
 			CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 			
-			paramMap.put("userRole", userInfo.getAuthority());
-			paramMap.put("creator", creator);
-			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
-			paramMap.put("division", division);
-			paramMap.put("status", status);
+//			paramMap.put("userRole", userInfo.getAuthority());
+			paramMap.put("creator", 	creator);
+			paramMap.put("userId", 		userInfo.getUserId());
+			paramMap.put("userRole", 	loginUserRole());
+			paramMap.put("division", 	division);
+			paramMap.put("status", 		status);
+			paramMap.put("prjIdList", 	prjIdList);
 			
 			try {
 				resultMap = apiProjectService.selectProjectList(paramMap);
@@ -140,6 +142,37 @@ public class ApiProjectController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
+	
+	@ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {Url.API.FOSSLIGHT_API_MODEL_SEARCH})
+    public CommonResult selectModelList(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList){
+		
+		// 사용자 인증
+		userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		try {
+			try {
+				Map<String, Object> paramMap = new HashMap<String, Object>();
+				paramMap.put("prjIdList", prjIdList);
+				
+				resultMap = apiProjectService.selectModelList(paramMap);
+			} catch (Exception e) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+			}
+			
+			return responseService.getSingleResult(resultMap);
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		}
+	}
 	
 	@ApiOperation(value = "Create Project", notes = "project 생성")
     @ApiImplicitParams({

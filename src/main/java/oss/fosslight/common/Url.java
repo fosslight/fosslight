@@ -668,7 +668,10 @@ public final class Url {
 			
 			/** API Project List 조회 */
 			public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/prj_search";
-		
+			
+			/** API Project Model List 조회 */
+			public static final String FOSSLIGHT_API_MODEL_SEARCH			= "/model_search";
+			
 			/** API Project BOM Tab Export */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export"; 
 			

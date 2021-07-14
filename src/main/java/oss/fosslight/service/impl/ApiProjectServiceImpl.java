@@ -54,7 +54,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
 		
 		if(projectCnt > 0) {
-			list = apiProjectMapper.selectProjectTotal(paramMap);
+			list = apiProjectMapper.selectProject(paramMap);
 			
 			for(Map<String, Object> map : list) {
 				String prjId = (String) map.get("prjId").toString();
@@ -74,7 +74,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
 				map.put("DISTRIBUTION_STATUS", distributionStatus);					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
-				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
 			}
 		}
 		
@@ -550,6 +550,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		resultMap.put("change", changeList.values());
 		
 		return resultMap;
+	}
+	
+	@Override
+	public Map<String, Object> selectModelList(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(paramMap);	
+		
+		result.put("records", modelList.size());
+		result.put("contents", modelList);
+		
+		return result;
 	}
 	
 	private String getCompareKey(Map<String, Object> paramMap) {
