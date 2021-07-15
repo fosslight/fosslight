@@ -400,7 +400,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the oss component data info
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> getOssComponentDataInfo(ProjectIdentification identification, String code) {
+	public Map<String, Object> getOssComponentDataInfo(ProjectIdentification identification, String code) {
 
 		if (isEmpty(identification.getReferenceDiv())) {
 			identification.setReferenceDiv(code);
@@ -3870,4 +3870,72 @@ public class ProjectController extends CoTopComponent {
 
 		return makeJsonResponseHeader(fileId);
 	}
+	
+	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectController > ProjectController) >>>
+	@GetMapping(value=PROJECT.BOM_COMPARE, produces = "text/html; charset=utf-8")
+	public String bomCompare(@PathVariable String beforePrjId, 
+			@PathVariable String afterPrjId, 
+			HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		
+		if (beforePrjId.equals("0000")) {
+			model.addAttribute("beforePrjId", "");
+		}else {
+			model.addAttribute("beforePrjId", beforePrjId);
+		}
+		
+		if (afterPrjId.equals("0000")) {
+			model.addAttribute("afterPrjId", "");
+		}else {
+			model.addAttribute("afterPrjId", afterPrjId);
+		}
+		
+		return PROJECT.PAGE_JSP;
+	}
+			
+	@SuppressWarnings("unchecked")
+	@GetMapping(value=PROJECT.BOM_COMPARE_LIST_AJAX)
+	public @ResponseBody ResponseEntity<Object> bomCompareList(
+			@RequestParam("beforePrjId") String beforePrjId, @RequestParam("afterPrjId") String afterPrjId) throws Exception{
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		try {
+			ProjectIdentification beforeIdentification = new ProjectIdentification();
+			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			beforeIdentification.setReferenceId(beforePrjId);
+			beforeIdentification.setMerge("N");
+			
+			ProjectIdentification AfterIdentification = new ProjectIdentification();
+			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			AfterIdentification.setReferenceId(afterPrjId);
+			AfterIdentification.setMerge("N");
+			
+			Map<String, Object> beforeBom = new HashMap<String, Object>();
+			Map<String, Object> afterBom = new HashMap<String, Object>();
+			
+			try {
+				beforeBom = getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			try {
+				afterBom = getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
+				throw new Exception();
+			}
+		
+			String flag = "list";
+			List<Map<String, String>> bomCompareList = projectService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
+			resultMap.put("contents", bomCompareList);
+				
+			return makeJsonResponseHeader(true, "0" , resultMap);
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, "1");
+		}
+	}
+	// 20210701_BOM COMPARE FUNC MOVE (ProjectController > LgeProjectController) <<<
 }

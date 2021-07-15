@@ -55,6 +55,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
+import oss.fosslight.controller.ProjectController;
 import oss.fosslight.domain.BinaryAnalysisResult;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
@@ -110,6 +111,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static ProjectMapper				projectMapper	= (ProjectMapper)		getWebappContext().getBean(ProjectMapper.class);
 	private static OssMapper					ossMapper		= (OssMapper)			getWebappContext().getBean(OssMapper.class);
 	private static SelfCheckMapper				selfCheckMapper = (SelfCheckMapper)  	getWebappContext().getBean(SelfCheckMapper.class);
+	
+	// Controller
+	private static ProjectController projectController	= (ProjectController)	getWebappContext().getBean(ProjectController.class);
 	
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
@@ -1844,6 +1848,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				donwloadId = getUserExcelId(userList);
 				
 				break;
+			case "bomcompare" :
+				donwloadId = getBomCompareExcelId(dataStr);
+				
+				break;
 			default:
 				break;
 		}
@@ -2945,5 +2953,125 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		return makeAnalysisListExcelFileId(wb, "AutoAnalysisList", "xlsx", prjId);
+	}
+	
+	/**
+	 * 
+	 * @param bomCompareList
+	 * @return
+	 * @throws Exception
+	 * @용도 bomcompare 엑셀
+	 */
+	@SuppressWarnings("unchecked")
+	private static String getBomCompareExcelId(String dataStr) throws Exception{
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+		
+		ObjectMapper objMapper = new ObjectMapper();
+		
+		try {
+			Map<String, String> map = objMapper.readValue(dataStr, Map.class);
+			
+			String beforePrjId = map.get("beforePrjId").toString();
+			String afterPrjId = map.get("afterPrjId").toString();			
+			
+			ProjectIdentification beforeIdentification = new ProjectIdentification();
+			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			beforeIdentification.setReferenceId(beforePrjId);
+			beforeIdentification.setMerge("N");
+			
+			ProjectIdentification AfterIdentification = new ProjectIdentification();
+			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			AfterIdentification.setReferenceId(afterPrjId);
+			AfterIdentification.setMerge("N");
+			
+			Map<String, Object> beforeBom = new HashMap<String, Object>();
+			Map<String, Object> afterBom = new HashMap<String, Object>();
+			
+			try {
+				beforeBom = projectController.getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			try {
+				afterBom = projectController.getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
+				throw new Exception(); 
+			}
+			
+			String flag = "excel";
+			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
+			
+			try {
+				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
+				wb = new XSSFWorkbook(inFile);
+				sheet = wb.getSheetAt(0); 
+				wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
+			  
+				List<String[]> rows = new ArrayList<String[]>();
+			  
+				for(int i = 0; i < bomCompareListExcel.size(); i++){ 
+					String[] rowParam = {
+							bomCompareListExcel.get(i).get("status"),
+							bomCompareListExcel.get(i).get("beforeossname"),
+							bomCompareListExcel.get(i).get("beforelicense"),
+							bomCompareListExcel.get(i).get("afterossname"),
+							bomCompareListExcel.get(i).get("afterlicense")
+					};
+					rows.add(rowParam);
+				}
+				
+				//시트 만들기 
+				makeSheet(sheet, rows, 1); 
+			} catch (FileNotFoundException e) {
+				log.error(e.getMessage(), e); 
+			} finally { 
+				if(inFile != null) { 
+					try {inFile.close();} 
+					catch (Exception e2) {} 
+				}
+			}
+			
+			return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	private static String makeBomCompareExcelFileId(String beforePrjId, String afterPrjId, Workbook wb, String target, String exp) throws IOException {
+		String fileName = CommonFunction.replaceSlashToUnderline(target) + "_" + beforePrjId + "_" + afterPrjId + "_" + CommonFunction.getCurrentDateTime();
+		String logiFileName = fileName + "." + exp;
+		String excelFilePath = writepath + "/download/";
+		
+		FileOutputStream outFile = null;
+		
+		try {
+			if(!Files.exists(Paths.get(excelFilePath))) {
+				Files.createDirectories(Paths.get(excelFilePath));
+			}
+			outFile = new FileOutputStream(excelFilePath + logiFileName);
+			wb.write(outFile);
+			
+			// db 등록
+			return fileService.registFileDownload(excelFilePath, fileName + "."+exp, logiFileName);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if(outFile != null) {
+				try {
+					outFile.close();
+				} catch (Exception e2) {}
+			}
+		}
+		
+		return null;
 	}
 }
