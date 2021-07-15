@@ -52,6 +52,12 @@
 						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
 					)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
+				AND EXISTS (SELECT 1 
+		                             FROM PROJECT_MODEL M 
+		                           WHERE T1.PRJ_ID = M.PRJ_ID 
+		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			</if>
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
@@ -135,6 +141,12 @@
 						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
 						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
 					)
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
+				AND EXISTS (SELECT 1 
+		                             FROM PROJECT_MODEL M 
+		                           WHERE T1.PRJ_ID = M.PRJ_ID 
+		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
 			</if>
 		) A
 		WHERE 1=1

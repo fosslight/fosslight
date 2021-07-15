@@ -107,6 +107,7 @@ public class ApiProjectController extends CoTopComponent {
     		@RequestHeader String _token,
     		@ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
     		@ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
+    		@ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
     		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete)", required = false, allowableValues = "PROG,REQ,REV,COMP") @RequestParam(required = false) String status,
     		@ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
@@ -126,6 +127,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("userId", 		userInfo.getUserId());
 			paramMap.put("userRole", 	loginUserRole());
 			paramMap.put("division", 	division);
+			paramMap.put("modelName", 	modelName);
 			paramMap.put("status", 		status);
 			paramMap.put("prjIdList", 	prjIdList);
 			
@@ -150,7 +152,7 @@ public class ApiProjectController extends CoTopComponent {
 	@GetMapping(value = {Url.API.FOSSLIGHT_API_MODEL_SEARCH})
     public CommonResult selectModelList(
     		@RequestHeader String _token,
-    		@ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList){
+    		@ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList){
 		
 		// 사용자 인증
 		userService.checkApiUserAuth(_token);
