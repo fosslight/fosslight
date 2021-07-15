@@ -555,11 +555,21 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Override
 	public Map<String, Object> selectModelList(Map<String, Object> paramMap){
 		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> list = apiProjectMapper.selectProject(paramMap);
+		List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
 		
-		List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(paramMap);	
+		for(Map<String, Object> map : list) {
+			Map<String, Object> modelMap = new HashMap<String, Object>();
+			String prjId = (String) map.get("prjId").toString();
+			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
+			
+			modelMap.put("prjId", prjId);
+			modelMap.put("modelList", modelList);
+			contents.add(modelMap);
+		}
 		
-		result.put("records", modelList.size());
-		result.put("contents", modelList);
+		result.put("records", list.size());
+		result.put("contents", contents);
 		
 		return result;
 	}
