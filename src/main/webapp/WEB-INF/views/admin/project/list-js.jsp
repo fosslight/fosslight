@@ -11,6 +11,7 @@
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
+	var checkboxParam = []; /* BOM Compare ADD */
 	
 	$(document).ready(function () {
 		'use strict';
@@ -612,6 +613,63 @@
 			return paramData;
 		}, getUserName : function(cellvalue, options, rowObject){
 			return userIdList[cellvalue] || pastEmpList[cellvalue] || "";
+		}, bomCompare : function(){ /* BOM Compare ADD */
+			// 체크박스 선택 체크
+			var chk = checkboxParam.length
+		
+			if(chk < 3){
+				var beforePrjId = "";
+				var afterPrjId = "";
+
+				switch (chk) {
+					case 0:
+						beforePrjId = "0000";
+						afterPrjId = "0000";
+						break;
+					case 1:
+						beforePrjId = checkboxParam[0];
+						afterPrjId = "0000";
+						break;
+					case 2:
+						beforePrjId = checkboxParam[0];
+						afterPrjId = checkboxParam[1];
+
+						if (parseInt(beforePrjId) > parseInt(afterPrjId)){
+							beforePrjId = checkboxParam[1];
+							afterPrjId = checkboxParam[0];
+						}
+						break;
+				}
+				
+				var tabNm = "BOM_Compare";
+				var tabLk = '#<c:url value="/project/bomCompare/'+beforePrjId+'/'+afterPrjId+'"/>';
+		
+				createTabInFrame(tabNm, tabLk);
+			}else {
+				alertify.alert('Choose two projects.');
+				return false;
+			}
+		}, checkboxChange : function(rowid){ /* BOM Compare ADD */
+			$("input:checkbox[id='jqg_list_"+rowid+"']").each(function(){
+				var rowidChk = rowid;
+				
+				if (checkboxParam.length < 1){
+					checkboxParam.push(rowidChk);
+				}else{
+					var spliceChk = 0;
+					for (var i=0; i<checkboxParam.length; i++){
+						if (checkboxParam[i] === rowidChk){
+							checkboxParam.splice(i, 1);
+							i--;
+							spliceChk++;
+						}
+					}
+
+					if (spliceChk == 0){
+						checkboxParam.push(rowidChk);
+					}
+				}
+			});
 		}
 	}
 	

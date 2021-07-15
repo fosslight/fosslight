@@ -148,7 +148,9 @@
 				</div>
 			</div>
 			<!-- //Popup -->
-			
+			<span class="left">
+				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
+			</span>
 			
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
@@ -162,6 +164,10 @@
 		</div>
 		<!---->
 		<div class="btnLayout">
+			<span class="left">
+				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
+			</span>
+		
 			<input type="button" value="Reject" class="btnReject btnColor left" />
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
