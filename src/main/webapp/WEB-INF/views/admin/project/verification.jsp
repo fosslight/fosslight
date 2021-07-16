@@ -19,7 +19,7 @@
 				</li>
 				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
 			</ul>
-			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="/images/user-guide.png" /></a>
+			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="<c:url value="/images/user-guide.png"/>" /></a>
 		</div>
 		<!---->
 		<div class="projdecTab">
@@ -72,6 +72,7 @@
 			<div class="projectContents">
 				<div class="btnLayout" style="padding:5px 0 !important">
 					<span><b>Upload OSS Package</b></span>
+					<span style="padding-left:30px;"><input type="checkbox" id="autoVerify" name="autoVerify" checked="checked"/><span style="padding-left:3px;"><b>Verify when file is uploaded</b></span></span>
 				</div>
 				<!-- 161116 upload 추가 -->
 				<div class="multiSet">
@@ -129,7 +130,7 @@
 																			<c:when test="${empty project.verificationStatus or project.verificationStatus eq '' or project.verificationStatus eq 'PROG' or (ct:isAdmin() and project.verificationStatus eq 'REV')}">
 																				<li>
 																					<span>
-																						<strong><a class="urlLink" href="/download/${file.fileSeq}/${file.logiNm}">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
+																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
 																						<input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,'${file.fileSeq}', '${i}' )">
 																					</span>
 																				</li>
@@ -137,7 +138,7 @@
 																			<c:otherwise>
 																				<li>
 																					<span>
-																						<strong><a class="urlLink" href="/download/${file.fileSeq}/${file.logiNm}">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
+																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
 																					</span>
 																				</li>
 																			</c:otherwise>
@@ -189,7 +190,7 @@
 											</div>
 											<div class="uploadSet">
 												<span class="fileex_back" style="">
-													<div id="verificationFile"><div class="ajax-upload-dragdrop" style="vertical-align: top; width: 400px;"><div class="ajax-file-upload" style="position: relative; overflow: hidden; cursor: default;">Upload<form method="POST" action="/project/verification/registFile?prjId=120" enctype="multipart/form-data" style="margin: 0px; padding: 0px;"><input type="file" id="ajax-upload-id-1479276429067" name="myfile" accept="*" style="position: absolute; cursor: pointer; top: 0px; width: 100%; height: 100%; left: 0px; z-index: 100; opacity: 0;"></form></div><span><b>Drag &amp; Drop Files</b></span></div><div></div></div><div class="ajax-file-upload-container"></div><div class="ajax-file-upload-container"></div>
+													<div id="verificationFile"><div class="ajax-upload-dragdrop" style="vertical-align: top; width: 400px;"><div class="ajax-file-upload" style="position: relative; overflow: hidden; cursor: default;">Upload<form method="POST" action="<c:url value="/project/verification/registFile?prjId=120"/>" enctype="multipart/form-data" style="margin: 0px; padding: 0px;"><input type="file" id="ajax-upload-id-1479276429067" name="myfile" accept="*" style="position: absolute; cursor: pointer; top: 0px; width: 100%; height: 100%; left: 0px; z-index: 100; opacity: 0;"></form></div><span><b>Drag &amp; Drop Files</b></span></div><div></div></div><div class="ajax-file-upload-container"></div><div class="ajax-file-upload-container"></div>
 												</span>
 											</div>
 										</div>
