@@ -2090,7 +2090,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		try {
 			packagingComment = fileService.setClearFiles(map);
 		}catch(Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		prjParam.setStatusVerifyYn("N");
 		// project_master packageFileId update

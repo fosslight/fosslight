@@ -80,10 +80,13 @@ public class UserController extends CoTopComponent {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		
+		Map<String, String> dataMap = vResult.getDataMap();
 		Map<String, String> validResultMap = vResult.getValidDataMap();
+
 		vo.setCreatedDateCurrentTime();
 		vo.setCreator(vo.getUserId());
 		vo.setModifier(vo.getUserId());
+		vo.setEmail((String) dataMap.get("EMAIL"));
 		
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
 		

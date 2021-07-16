@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -392,8 +395,11 @@ public class T2UserServiceImpl implements T2UserService {
 	}
 
 	@Override
-	public boolean checkAdAccounts(String userId, String userPw) {
+	public boolean checkAdAccounts(Map<String, String> userInfo, String idKey, String pwKey) {
 		boolean isAuthenticated = false;
+		
+		String userId = (String) userInfo.get(idKey);
+		String userPw = (String) userInfo.get(pwKey);
 		
 		String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
 		Hashtable<String, String> properties = new Hashtable<String, String>();
@@ -402,12 +408,26 @@ public class T2UserServiceImpl implements T2UserService {
 		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
 		properties.put(Context.SECURITY_PRINCIPAL, userId+ldapDomain);
 		properties.put(Context.SECURITY_CREDENTIALS, userPw);
-
+		
+		String[] attrIDs = { "cn", "mail" };
+		String filter = "(cn=" + userId + ")";
+		
 		DirContext con = null;
+		SearchControls constraints = new SearchControls();
+		NamingEnumeration<SearchResult> m_ne = null;
 		
 		try {
 			con = new InitialDirContext(properties);
 			isAuthenticated = true;
+			
+			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			
+			if(attrIDs != null) {
+				constraints.setReturningAttributes(attrIDs);
+			}
+			
+			String searchKey = StringUtil.avoidNull(CommonFunction.getProperty("ldap.search.key"), "");
+			m_ne = con.search(searchKey, filter, constraints);
 		} catch (NamingException e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -416,6 +436,23 @@ public class T2UserServiceImpl implements T2UserService {
 					con.close();
 				} catch (NamingException e) {}
 			}
+		}
+		
+		try {
+			SearchResult sr = null;
+
+			while (m_ne.hasMoreElements()) {
+				sr = (SearchResult) m_ne.next();
+				if(sr != null) {
+					String email = (String) sr.getAttributes().get("mail").get();
+					
+					if(!StringUtil.isEmpty(email)) {
+						userInfo.put("EMAIL", email);
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
 		
 		return isAuthenticated;

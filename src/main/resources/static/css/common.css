@@ -171,12 +171,6 @@ body#login_before {background:#fff;}
 #login .box dl dd .selectSet {width:100%;margin-top:8px;border:none;border-bottom:1px solid #ddd;}
 #login .box dl dd .selectSet:focus {border-bottom-color:#333;}
 #login .box dl dd .selectSet strong {padding-left:0;}
-#login .box dl dd.email:after {clear:both;display:block;height:0;content:'';visibility:hidden}
-#login .box dl dd.email input {float:left;width:calc((100% - 25px )/2);}
-#login .box dl dd.email input.direct {float:none;width:100%;margin-top:10px;}
-#login .box dl dd.email .selectSet {float:left;margin-top:0;width:calc((100% - 25px )/2);height:28px;}
-#login .box dl dd.email .selectSet select {height:28px;}
-#login .box dl dd.email em {float:left;display:inline-block;width:25px;text-align:center;line-height:2.3;}
 #login .box .btnlogin {width:100%;color:#fff;height:53px;border:none;background:#ac1e35;}
 #login .joinGo {display:block;padding:20px 0;text-align:left;}
 #login .joinGo label {font-weight:bold;}

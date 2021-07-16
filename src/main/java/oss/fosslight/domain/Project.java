@@ -707,6 +707,8 @@ public class Project extends ComBean implements Serializable {
 	private String changedNoticeYn = "N";
 	
 	private String modelListAppendFlag = "N";
+	
+	private String modelSeq;
 
 	/**
 	 * Gets the prj id.
@@ -3968,5 +3970,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setModelListAppendFlag(String modelListAppendFlag) {
 		this.modelListAppendFlag = modelListAppendFlag;
+	}
+	
+	public String getModelSeq() {
+		return modelSeq;
+	}
+
+	public void setModelSeq(String modelSeq) {
+		this.modelSeq = modelSeq;
 	}
 }

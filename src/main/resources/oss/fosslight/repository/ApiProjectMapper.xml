@@ -165,7 +165,7 @@
 			    </foreach>
 			</if>
 		ORDER BY A.PRJ_ID DESC
-		LIMIT 0, 1000;
+		LIMIT 0, 1000
 	</select>
 	
 	<select id="selectProjectCount" parameterType="hashMap" resultType="int">

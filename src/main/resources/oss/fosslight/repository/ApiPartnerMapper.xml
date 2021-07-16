@@ -37,13 +37,6 @@
 				LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
 			WHERE
 				t1.USE_YN = 'Y'
-				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-						AND (
-							t1.CREATOR = #{userId}
-							OR t4.USER_ID  = #{userId}
-							OR t1.PUBLIC_YN = 'Y'
-						)
-				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 				AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 				</if>
@@ -91,7 +84,12 @@
      	  FROM (SELECT t1.PARTNER_ID
 					 , t1.PARTNER_NAME
 					 , t1.SOFTWARE_NAME
-					 , t1.STATUS
+					 , CASE
+					 		WHEN t1.STATUS = 'PROG' THEN 'Progress'
+							WHEN t1.STATUS = 'REQ' THEN 'Request'
+							WHEN t1.STATUS = 'REV' THEN 'Review'
+							WHEN t1.STATUS = 'CONF' THEN 'Confirm' 
+						END AS STATUS
 					 , t1.MODIFIED_DATE								
 					 , t1.CREATED_DATE
 					 , t1.CREATOR
@@ -105,13 +103,6 @@
 				  LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
 				  LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
 				 WHERE t1.USE_YN = 'Y'
-				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-				   AND (
-						t1.CREATOR = #{userId}
-						OR t4.USER_ID  = #{userId}
-						OR t1.PUBLIC_YN = 'Y'
-				   	   )
-				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 					AND DATE_FORMAT(t1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 				</if>
@@ -144,5 +135,12 @@
 		         OR RESULT.CREATOR LIKE CONCAT('%', #{creator}, '%')
 		      ) 
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerIdList)">
+			<foreach item="item" index="index" collection="partnerIdList" open=" AND (" close=")" separator="OR">
+		     	RESULT.PARTNER_ID = #{item}
+		    </foreach>
+		</if>
+		ORDER BY RESULT.PARTNER_ID DESC
+		LIMIT 0, 1000
 	</select>
 </mapper>
