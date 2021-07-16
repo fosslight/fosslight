@@ -12,5 +12,5 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface ApiPartnerService {
-	List<Map<String, Object>> getPartnerMasterList(Map<String, Object> paramMap);
+	Map<String, Object> getPartnerMasterList(Map<String, Object> paramMap);
 }

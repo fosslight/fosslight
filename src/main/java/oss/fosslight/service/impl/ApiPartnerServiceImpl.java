@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,8 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 	@Autowired ApiPartnerMapper apiPartnerMapper;
 	
 	@Override
-	public List<Map<String, Object>> getPartnerMasterList(Map<String, Object> paramMap){
+	public Map<String, Object> getPartnerMasterList(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		
 		int partnerCnt = apiPartnerMapper.selectPartnerMasterCount(paramMap);
@@ -29,6 +31,9 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 			list = apiPartnerMapper.selectPartnerMaster(paramMap);
 		}
 		
-		return list;
+		result.put("content", list);
+		result.put("record", partnerCnt);
+		
+		return result;
 	}
 }
