@@ -753,7 +753,8 @@
 				viewrecords: true,
 				sortorder: 'desc',
 				height: 'auto' ,
-				multiselect : (('${sessUserInfo.authority}'=="ROLE_ADMIN") ? true: false),
+				multiselect : true,
+				//multiselect : (('${sessUserInfo.authority}'=="ROLE_ADMIN") ? true: false),
 				loadonce:false,
 				loadComplete:function(data) {
 					totalRow = data.records;
@@ -847,6 +848,19 @@
 						}
 					
 					$('input[id*="_releaseDate"]').attr('class', 'cal');
+
+					$("input:checkbox[id='cb_list']").click(function(){
+						var checkboxBoolean = $(this).is(":checked");
+						if (checkboxBoolean == true){
+							$("input:checkbox[name^=jqg_list_]").each(function(){
+								if (this.checked){
+									checkboxParam.push(this.name.split('_').reverse()[0]);
+								}
+							});
+						}else{
+							checkboxParam = [];
+						}
+					});
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					var role = '${sessUserInfo.authority}';
@@ -856,6 +870,8 @@
 						$("#list").jqGrid('editRow',rowid);
 						lastsel=rowid;
 					}
+
+					fn.checkboxChange(rowid);
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);

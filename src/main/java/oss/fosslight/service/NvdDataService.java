@@ -36,7 +36,7 @@ import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 
-@Service
+@Service("NvdDataService")
 @Slf4j
 public class NvdDataService {
 	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
