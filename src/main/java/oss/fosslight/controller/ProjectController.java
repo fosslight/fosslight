@@ -222,13 +222,16 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@GetMapping(value = PROJECT.USER_ID_LIST)
 	public @ResponseBody String getUserIdList(HttpServletRequest req, HttpServletResponse res, Model model) {
-		String adminYn = req.getParameter("adminYn");
+		String reviewerFlag = req.getParameter("reviewerFlag");
+		String userIdList = "";
 		
-		if(isEmpty(adminYn)){ // default 'Y'
-			adminYn = CoConstDef.FLAG_YES;
+		if(CoConstDef.FLAG_YES.equals(reviewerFlag)) {
+			userIdList = projectService.getReviewerList(CoConstDef.FLAG_YES);
+		} else {
+			userIdList = projectService.getAdminUserList();
 		}
 		
-		return projectService.getReviewerList(adminYn);
+		return userIdList;
 	}
 	
 	/**

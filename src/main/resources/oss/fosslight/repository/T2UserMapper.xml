@@ -264,6 +264,17 @@
 		ORDER BY USER_NAME
 	</select>
 	
+	<select id="selectAdminUser" resultType="oss.fosslight.domain.T2Users">
+		SELECT T1.USER_ID
+			 , T1.USER_NAME
+			 , T1.EMAIL
+			 , T1.DIVISION
+		  FROM T2_USERS T1
+		 INNER JOIN T2_AUTHORITIES T2 
+			ON T1.USER_ID = T2.USER_ID AND T2.AUTHORITY = 'ROLE_ADMIN'
+		 ORDER BY USER_NAME
+	</select>
+	
 	<!-- 유저 권한 가져오기  -->
 	<select id="selectAuthority" parameterType="String" resultType="String">
 	SELECT
