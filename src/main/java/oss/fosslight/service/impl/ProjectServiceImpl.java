@@ -103,6 +103,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public String getAdminUserList() {
+		List<T2Users> userList = userMapper.selectAdminUser();
+		StringBuilder sb = new StringBuilder();
+		sb.append( " : " +  ";");
+		
+		for (T2Users user : userList) {
+			user.getUserId();
+			sb.append(user.getUserId() + ":" + user.getUserName() + ";");
+		}
+		
+		return sb.toString();
+	}
+	
+	
+	@Override
 	public Map<String, Object> getProjectList(Project project) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<Project> list = null;

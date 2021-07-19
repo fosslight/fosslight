@@ -88,6 +88,8 @@ public interface ProjectService extends HistoryConfig{
 	Map<String, Object> getIdentificationProjectSearch(ProjectIdentification projectIdentification);
 
 	String getReviewerList(String adminYn);
+	
+	String getAdminUserList();
 
 	Map<String, Object> getIdentificationThird(OssComponents ossComponents);
 	
