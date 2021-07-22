@@ -441,7 +441,7 @@
 	/* ProjectMapper.getLicenses */
 		SELECT T1.LICENSE_ID, T1.OSS_LICENSE_COMB, T1.OSS_COPYRIGHT, CASE WHEN IFNULL(SHORT_IDENTIFIER, '') = '' THEN T2.LICENSE_NAME ELSE T2.SHORT_IDENTIFIER END AS LICENSE_NAME
 		, T2.LICENSE_TEXT, T2.LICENSE_TYPE
-		FROM OSS_LICENSE T1
+		FROM OSS_LICENSE_DECLARED T1
 		INNER JOIN LICENSE_MASTER T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE T1.OSS_ID = #{ossId}
 		ORDER BY OSS_LICENSE_IDX
@@ -824,7 +824,7 @@
 		SELECT
 			OSS_LICENSE_COMB
 		FROM
-			OSS_LICENSE
+			OSS_LICENSE_DECLARED
 		WHERE
 			OSS_ID = #{ossId}
 			AND LICENSE_ID = #{licenseId}
@@ -1328,7 +1328,7 @@
 	<select id="identificationSubGrid" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.ProjectIdentification">
 		SELECT RESULT.* ,
 		(SELECT X.OSS_LICENSE_COMB
-				       FROM OSS_LICENSE X
+				       FROM OSS_LICENSE_DECLARED X
 				      WHERE X.OSS_ID = (SELECT M.OSS_ID
 				                          FROM PRE_OSS_COMPONENTS M
 				                         WHERE 

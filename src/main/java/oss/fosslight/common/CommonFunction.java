@@ -428,6 +428,14 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static String makeLicenseExpression(List<OssLicense> list, boolean htmlLinkType, boolean spdxConvert) {
+		return makeLicenseExpression(list, htmlLinkType, spdxConvert, false);
+	}
+	
+	public static String makeLicenseExpressionMsgType(List<OssLicense> list, boolean msgType) {
+		return makeLicenseExpression(list, false, false, msgType);
+	}
+	
+	public static String makeLicenseExpression(List<OssLicense> list, boolean htmlLinkType, boolean spdxConvert, boolean msgType) {
 		String rtnVal = "";
 		
 		List<List<String>> licenseNameList = new ArrayList<>();
@@ -459,7 +467,11 @@ public class CommonFunction extends CoTopComponent {
 				String andStr = "";
 				for(String s : combList) {
 					if(!isEmpty(andStr)) {
-						andStr += " AND ";
+						if(msgType) { 
+							andStr += ", ";
+						} else {
+							andStr += " AND ";
+						}
 					}
 					
 					LicenseMaster licenseMaster = null;
@@ -484,7 +496,7 @@ public class CommonFunction extends CoTopComponent {
 					}
 				}
 				
-				rtnVal += licenseNameList.size() > 1 ? ( combList.size() == 1 ? andStr : ("(" + andStr + ")") ) : andStr;
+				rtnVal += licenseNameList.size() > 1 ? ( combList.size() != 1 && !msgType ? ("(" + andStr + ")") :  andStr ) : andStr;
 			}
 		}
 		

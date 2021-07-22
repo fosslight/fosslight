@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CoCodeManager;
@@ -180,6 +181,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() +"_"+ avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				OssMaster ossBean = ossInfoByName.get(checkKey);
+
 				List<ProjectIdentification> licenseList = null;
 				
 				if(ossComponentLicenseListMap != null
@@ -201,6 +204,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				// oss 등록 여부 체크
 				if(!isEmpty(bean.getOssName()) && !diffMap.containsKey("OSS_NAME." + bean.getComponentId())) {
+					String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+					
 					if(!ossInfoByName.containsKey(checkKey)) {
 						if(checkNonVersionOss(ossInfoByName, bean.getOssName())) {
 							// oss는 등록되어 있지만, 해당 version은 없는 경우
@@ -208,8 +213,18 @@ public class T2CoProjectValidator extends T2CoValidator {
 						} else {
 							diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
 						}
-					} else if(!hasOssLicense2(ossInfoByName.get(checkKey), licenseList)) { // license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은 경우)
-						diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+					}
+					// license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은 경우 & Detected License도 미 포함인 경우)
+					else if(!hasOssLicense2(ossBean, licenseList)) {
+						diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+					}
+					// Declared License가 미포함인 경우
+					else if(!hasOssLicense2(ossBean, licenseList, false)) {
+						diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+					}
+					//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+					else if(hasOssLicenseTypeProject(ossBean, licenseList)) {
+						diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 					}
 				}
 				
@@ -249,18 +264,19 @@ public class T2CoProjectValidator extends T2CoValidator {
 					
 					if(!hasSelected) {
 						errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NOLICENSE");
-					} else if(licenseList != null // bom merge licese 정보를 이용해서 dual license 중복 여부를 확인한다. // oss list에 등록되어 있고, dual license를 가지는 oss에 대해서만 체크
+					}
+					else if(licenseList != null // bom merge licese 정보를 이용해서 dual license 중복 여부를 확인한다. // oss list에 등록되어 있고, dual license를 가지는 oss에 대해서만 체크
 							&& !CoConstDef.FLAG_YES.equals(bean.getExcludeYn())
 							&& ossInfoByName.containsKey(checkKey) 
-							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossInfoByName.get(checkKey).getLicenseDiv()) 
-							&& CoConstDef.FLAG_YES.equals(ossInfoByName.get(checkKey).getDualLicenseFlag()) ) {
-						if(checkOROperation(licenseList, ossInfoByName.get(checkKey))) {
+							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv()) 
+							&& CoConstDef.FLAG_YES.equals(ossBean.getDualLicenseFlag()) ) {
+						if(checkOROperation(licenseList, ossBean)) {
 							errMap.put("LICENSE_NAME."  + bean.getComponentId(), "LICENSE_NAME.INCLUDE_DUAL_OPERATE");
 						}
 					}
 				}
 			}
-		}	
+		}
 	}
 
 	private boolean checkNonPermissiveLicense(List<ProjectIdentification> licenseList) {
@@ -326,7 +342,6 @@ public class T2CoProjectValidator extends T2CoValidator {
 							diffMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 						}
 					}
-					
 					// FILE PATH
 					{
 						basicKey = "FILE_PATH";
@@ -346,6 +361,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				OssMaster ossBean = ossInfoByName.get(checkKey);
 				basicKey = "OSS_NAME";
 				gridKey = StringUtil.convertToCamelCase(basicKey);
 				String errCd = checkBasicError(basicKey, gridKey, bean.getOssName(), CommonFunction.isIgnoreLicense(bean.getLicenseName()));
@@ -374,26 +390,50 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId()) // license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은 경우)
+					}
+					// license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은
+					// 경우)
+					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
-							if (!hasOssLicense(ossInfoByName.get(checkKey), bean.getOssComponentsLicenseList())) {
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense(ossBean, bean.getOssComponentsLicenseList())) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								}
+							}
+							// Declared License를 사용하지 않는 case
+							else if(!hasOssLicense(ossBean, bean.getOssComponentsLicenseList(), false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(ossBean, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
-							if (!hasOssLicense2(ossInfoByName.get(checkKey),
-									ossComponentLicenseListMap.get(bean.getComponentId()))) {
+							List<ProjectIdentification> licenseList = ossComponentLicenseListMap.get(bean.getComponentId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(ossBean, licenseList)) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								}
+							} 
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense2(ossBean, licenseList, false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(ossBean, licenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						}
 					}
@@ -409,28 +449,50 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
+					}
+					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("OSS_VERSION." + bean.getComponentId())
 							&& ossInfoByName.containsKey(checkKey)
 							) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
-							if (!hasOssLicense(ossInfoByName.get(checkKey), bean.getOssComponentsLicenseList())) {
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense(ossBean, bean.getOssComponentsLicenseList())) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								}
+							} 
+							// Declared License를 사용하지 않는 case
+							else if(!hasOssLicense(ossBean, bean.getOssComponentsLicenseList(), false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(ossBean, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
-							if (!hasOssLicense2(ossInfoByName.get(checkKey),
-									ossComponentLicenseListMap.get(bean.getComponentId()))) {
+							List<ProjectIdentification> licenseList = ossComponentLicenseListMap.get(bean.getComponentId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(ossBean, licenseList)) {								
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								}
+							} 
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense2(ossBean, licenseList, false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(ossBean, licenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						}
 					}
@@ -480,24 +542,23 @@ public class T2CoProjectValidator extends T2CoValidator {
 					// oss list에 등록되어 있고, dual license를 가지는 oss에 대해서만 체크
 					else if (PROC_TYPE_IDENTIFICATION_BOM_MERGE.equals(PROC_TYPE) && !isEmpty(bean.getRefComponentId())
 							&& !CoConstDef.FLAG_YES.equals(bean.getExcludeYn()) && ossInfoByName.containsKey(checkKey)
-							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossInfoByName.get(checkKey).getLicenseDiv())
-							&& CoConstDef.FLAG_YES.equals(ossInfoByName.get(checkKey).getDualLicenseFlag())) {
+							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())
+							&& CoConstDef.FLAG_YES.equals(ossBean.getDualLicenseFlag())) {
 						// 참조 대상 source 에서 현재 설정된 정보를 취득한다.
 						ProjectIdentification param = new ProjectIdentification();
 						param.setComponentId(bean.getRefComponentId());
 						Map<String, Object> checkLicenseInfo = projectService.identificationSubGrid(param);
 						
 						if (checkLicenseInfo != null && checkLicenseInfo.containsKey("rows")
-								&& checkOROperation((List<ProjectIdentification>) checkLicenseInfo.get("rows"), ossInfoByName.get(checkKey))) {
+								&& checkOROperation((List<ProjectIdentification>) checkLicenseInfo.get("rows"), ossBean)) {
 							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_DUAL_OPERATE");
 						}
 					} else if (PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)
 							&& !CoConstDef.FLAG_YES.equals(bean.getExcludeYn()) && ossInfoByName.containsKey(checkKey)
-							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossInfoByName.get(checkKey).getLicenseDiv())
-							&& CoConstDef.FLAG_YES.equals(ossInfoByName.get(checkKey).getDualLicenseFlag())) {
+							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())
+							&& CoConstDef.FLAG_YES.equals(ossBean.getDualLicenseFlag())) {
 						List<ProjectIdentification> licenseList = findLicense(bean.getGridId());
-						
-						if (licenseList != null && !licenseList.isEmpty() && checkOROperation(licenseList, ossInfoByName.get(checkKey))) {
+						if (licenseList != null && !licenseList.isEmpty() && checkOROperation(licenseList, ossBean)) {
 							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_DUAL_OPERATE");
 						}
 					}
@@ -722,30 +783,55 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId()) // license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은 경우)
+					}
+					// license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은
+					// 경우)
+					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()
 								&& !isEmpty(bean.getLicenseName())) {
+							// Declared & Detected License를 전부 사용하지 않는 case
 							if (!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList())) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 									diffMapLicense = true;
 								}
+							} 
+							// Declared License를 사용하지 않는 case
+							else if(!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList(), false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMapLicense = true;
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(checkOSSMaster, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
-							if (!hasOssLicense2(checkOSSMaster,
-									ossComponentLicenseListMap.get(bean.getComponentId()))) {
-
+							List<ProjectIdentification> licenseList = ossComponentLicenseListMap.get(bean.getComponentId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(checkOSSMaster, licenseList)) {						
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 									diffMapLicense = true;
 								}
+							}
+							// Declared License를 사용하지 않는 case
+							else if(!hasOssLicense2(checkOSSMaster, licenseList, false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMapLicense = true;
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(checkOSSMaster, licenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						}
 					}
@@ -761,30 +847,54 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
+					}
+					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("OSS_VERSION." + bean.getComponentId())
 							&& ossInfoByName.containsKey(checkKey)
 							) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
+							// Declared & Detected License를 전부 사용하지 않는 case
 							if (!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList())) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 									diffMapLicense = true;
 								}
 							}
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense(checkOSSMaster, bean.getOssComponentsLicenseList(), false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMapLicense = true;
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(checkOSSMaster, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getComponentId())) {
-							if (!hasOssLicense2(checkOSSMaster,
-									ossComponentLicenseListMap.get(bean.getComponentId()))) {
+							List<ProjectIdentification> licenseList = ossComponentLicenseListMap.get(bean.getComponentId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(checkOSSMaster, licenseList)) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									errMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								} else {
-									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.NONINCLUDED");
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 									diffMapLicense = true;
 								}
+							}
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense2(checkOSSMaster, licenseList, false)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+								diffMapLicense = true;
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(checkOSSMaster, licenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						}
 					}
@@ -843,7 +953,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						Map<String, Object> checkLicenseInfo = projectService.identificationSubGrid(param);
 						
 						if (checkLicenseInfo != null && checkLicenseInfo.containsKey("rows")
-								&& checkOROperation((List<ProjectIdentification>) checkLicenseInfo.get("rows"), ossInfoByName.get(checkKey))) {
+								&& checkOROperation((List<ProjectIdentification>) checkLicenseInfo.get("rows"), checkOSSMaster)) {
 							errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_DUAL_OPERATE");
 							
 							if(diffMapLicense) { // 일반사용자의 경우 error message 우선순위가 높은 대상들이 diff message로 출력하기 때문에 중복등록 방지를 해야함.
@@ -923,12 +1033,17 @@ public class T2CoProjectValidator extends T2CoValidator {
 	}
 	
 	private boolean hasOssLicense(OssMaster ossMaster, List<OssComponentsLicense> list) {
+		return hasOssLicense(ossMaster, list, true);
+	}
+	
+	private boolean hasOssLicense(OssMaster ossMaster, List<OssComponentsLicense> list, boolean detectedLicenseCheck) {
 		if (ossMaster == null) {
 			return true;
 		}
 		
 		// license nick name을 포함한 라이선스 명 list를 구성
-		List<String> checkLicenseNameList = new ArrayList<>();
+		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
+		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
 		
 		for (OssLicense license : ossMaster.getOssLicenses()) {
 			if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
@@ -954,24 +1069,58 @@ public class T2CoProjectValidator extends T2CoValidator {
 			}
 		}
 		
-		for (OssComponentsLicense license : list) {
-			// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
-			if (!CoConstDef.FLAG_YES.equals(license.getExcludeYn())
-					&& !checkLicenseNameList.contains(avoidNull(license.getLicenseName()).trim().toUpperCase())) {
-				return false;
+		if(detectedLicenseCheck) {
+			if(detectedLicenseList != null) {
+				for(String licenseName : detectedLicenseList) {
+					if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+						LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+						checkLicenseNameList.add(_temp.getLicenseName().toUpperCase());
+						if (!isEmpty(_temp.getShortIdentifier())) {
+							checkLicenseNameList.add(_temp.getShortIdentifier().toUpperCase());
+						}
+						if(!isEmpty(_temp.getLicenseNameTemp())) {
+							checkLicenseNameList.add(_temp.getLicenseNameTemp().toUpperCase());
+						}
+						// nick name이 등록되어 있다면 닉네임도 포함시킨다.
+						if (_temp.getLicenseNicknameList() != null) {
+							for (String s : _temp.getLicenseNicknameList()) {
+								if (!isEmpty(s)) {
+									checkLicenseNameList.add(s.toUpperCase());
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 		
+		for (OssComponentsLicense license : list) {
+			// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
+			String licenseName = avoidNull(license.getLicenseName()).trim().toUpperCase();
+			
+			if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName)) {
+				continue;
+			}
+			
+			if (!CoConstDef.FLAG_YES.equals(license.getExcludeYn())
+				&& !checkLicenseNameList.contains(licenseName)) {
+				return false;
+			}
+		}
 		return true;
 	}
 	
 	private boolean hasOssLicense(OssMaster ossMaster, String LicenseName, String exclude) {
+		return hasOssLicense(ossMaster, LicenseName, exclude, true);
+	}
+	
+	private boolean hasOssLicense(OssMaster ossMaster, String LicenseName, String exclude, boolean detectedLicenseCheck) {
 		if (ossMaster == null) {
 			return true;
 		}
-		
 		// license nick name을 포함한 라이선스 명 list를 구성
 		List<String> checkLicenseNameList = new ArrayList<>();
+		List<String> detectedLicenseList = ossMaster.getDetectedLicenses();
 		String[] LicenseNames = LicenseName.split("AND|OR|\\,");
 		
 		for (OssLicense license : ossMaster.getOssLicenses()) {
@@ -997,9 +1146,37 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 			}
 		}
+		if(detectedLicenseCheck) {
+			if(detectedLicenseList != null) {
+				for(String licenseName : detectedLicenseList) {
+					if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+						LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+						checkLicenseNameList.add(_temp.getLicenseName().toUpperCase());
+						if (!isEmpty(_temp.getShortIdentifier())) {
+							checkLicenseNameList.add(_temp.getShortIdentifier().toUpperCase());
+						}
+						if(!isEmpty(_temp.getLicenseNameTemp())) {
+							checkLicenseNameList.add(_temp.getLicenseNameTemp().toUpperCase());
+						}
+						// nick name이 등록되어 있다면 닉네임도 포함시킨다.
+						if (_temp.getLicenseNicknameList() != null) {
+							for (String s : _temp.getLicenseNicknameList()) {
+								if (!isEmpty(s)) {
+									checkLicenseNameList.add(s.toUpperCase());
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		
 		// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
 		for(String LicenseNm : LicenseNames){
+			if(!detectedLicenseCheck && detectedLicenseList.contains(LicenseNm)) {
+				continue;
+			}
+			
 			if (!CoConstDef.FLAG_YES.equals(exclude)
 					&& !checkLicenseNameList.contains(avoidNull(LicenseNm).trim().toUpperCase())) {
 				return false;
@@ -1009,16 +1186,21 @@ public class T2CoProjectValidator extends T2CoValidator {
 		return true;
 	}
 	
-	private boolean hasOssLicense2(OssMaster ossMaster, List<ProjectIdentification> list) {
+	private boolean hasOssLicense2(OssMaster ossMaster, List<ProjectIdentification> list){
+		return hasOssLicense2(ossMaster, list, true);
+	}
+	
+	private boolean hasOssLicense2(OssMaster ossMaster, List<ProjectIdentification> list, boolean detectedLicenseCheck) {
 		// license nick name을 포함한 라이선스 명 list를 구성
-		List<String> checkLicenseNameList = new ArrayList<>();
+		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
+		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
 		
 		if (ossMaster != null) {
 			for (OssLicense license : ossMaster.getOssLicenses()) {
 				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
 					LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					checkLicenseNameList.add(_temp.getLicenseName().toUpperCase());
-				
+					
 					if (!isEmpty(_temp.getShortIdentifier())) {
 						checkLicenseNameList.add(_temp.getShortIdentifier().toUpperCase());
 					}
@@ -1037,13 +1219,44 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 			}
+			
+			if(detectedLicenseCheck) {
+				if(detectedLicenseList != null) {
+					for(String licenseName : detectedLicenseList) {
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+							LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+							checkLicenseNameList.add(_temp.getLicenseName().toUpperCase());
+							if (!isEmpty(_temp.getShortIdentifier())) {
+								checkLicenseNameList.add(_temp.getShortIdentifier().toUpperCase());
+							}
+							if(!isEmpty(_temp.getLicenseNameTemp())) {
+								checkLicenseNameList.add(_temp.getLicenseNameTemp().toUpperCase());
+							}
+							// nick name이 등록되어 있다면 닉네임도 포함시킨다.
+							if (_temp.getLicenseNicknameList() != null) {
+								for (String s : _temp.getLicenseNicknameList()) {
+									if (!isEmpty(s)) {
+										checkLicenseNameList.add(s.toUpperCase());
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		if (list != null) {
 			for (ProjectIdentification license : list) {
 				// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
+				String licenseName = avoidNull(license.getLicenseName()).trim().toUpperCase();
+				
+				if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName)) {
+					continue;
+				}
+				
 				if (!CoConstDef.FLAG_YES.equals(license.getExcludeYn())
-						&& !checkLicenseNameList.contains(avoidNull(license.getLicenseName()).trim().toUpperCase())) {
+					&& !checkLicenseNameList.contains(licenseName)) {
 					return false;
 				}
 			}
@@ -1190,6 +1403,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	
 	@SuppressWarnings("unused")
 	private void validateProjectGrid(Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap) {
+
 		Map<String, OssMaster> ossInfo = null;
 		
 		// dataMap을 사용하지 않고, request정보를 직접 참조
@@ -1198,6 +1412,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			String gridKey = "";
 			String errKey = "";
 			List<ProjectIdentification> licenseList = null;
+
 			// 설정된 oss 정보를 DB에서 취득한다.
 			OssMaster ossParam = new OssMaster();
 			ossParam.setOssNames(getOssNames());
@@ -1214,6 +1429,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 			for (ProjectIdentification bean : ossComponetList) {
 				boolean hasError = false;
 				boolean hasMultiError = false; // multi license용
+				
+				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+				checkKey = checkKey.toUpperCase();
+				OssMaster ossmaster = ossInfo.get(checkKey);
 				
 				// exclude=Y 상태인 경우 체크하지 않음
 				if (!ignoreExcludeDataFlag && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
@@ -1271,7 +1490,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 						
 						if (!isEmpty(errCd)) {
 							errMap.put(basicKey + "." + bean.getGridId(), errCd);
-						} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getRefDiv()) // OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를 공개해야하는 경우, 필수 체크
+						}
+						// OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를
+						// 공개해야하는 경우, 필수 체크
+						else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getRefDiv())
 								&& isEmpty(bean.getFilePath())) {
 							errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".REQUIRED");
 						}
@@ -1327,8 +1549,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 					basicKey = "OSS_NAME";
 					gridKey = StringUtil.convertToCamelCase(basicKey);
 					// 기본체크
-					String errCd = checkBasicError(basicKey, gridKey, bean.getOssName(), CommonFunction.isIgnoreLicense(bean.getLicenseName()));
-					
+					String errCd = checkBasicError(basicKey, gridKey, bean.getOssName(),
+							CommonFunction.isIgnoreLicense(bean.getLicenseName()));
+							
 					if (!isEmpty(errCd)) {
 						errMap.put(basicKey + "." + bean.getGridId(), errCd);
 					} else {
@@ -1390,7 +1613,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 
 				if (licenseList == null || licenseList.isEmpty() || licenseList.size() < 2) {
 					hasError = false; // 초기화
-					
+
 					// subGrid가 없을 경우, 싱글라이선스로 간주
 					{
 						basicKey = "LICENSE_NAME";
@@ -1434,9 +1657,6 @@ public class T2CoProjectValidator extends T2CoValidator {
 					// exclude를 포함하여 체크해야할 validator
 					if (!hasMultiError) {
 						basicKey = "LICENSE_NAME";
-						String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
-						checkKey = checkKey.toUpperCase();
-						OssMaster ossmaster = ossInfo.get(checkKey);
 						
 						// 모두 exlucde가 체크되어 선택된 라이선스가 없을 경우
 						if (unExcludeLicenseList.isEmpty()) {
@@ -1460,10 +1680,16 @@ public class T2CoProjectValidator extends T2CoValidator {
 					
 					if (!isEmpty(errCd)) {
 						errMap.put(basicKey + "." + bean.getGridId(), errCd);
-					} else if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) && isEmpty(bean.getFilePath())) { // OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를 공개해야하는 경우, 필수 체크
+					}
+					// OSS가 DB에 존재하고, 선택된 라이선스(멀티인 경우 복수)의 oblication이 소스코드를
+					// 공개해야하는 경우, 필수 체크
+					else if (PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) && isEmpty(bean.getFilePath())) {
 						// 17.02.21 yuns bin(android)의 경우 무조건 필수체크로 변경
 						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".REQUIRED");
-					} else if (diffMap != null && PROC_TYPE_IDENTIFICATION_SOURCE.equals(PROC_TYPE) // 170524 add yun SRC의 path 정보에 복수개의 path를 선언하는 경우, 에러는 아니지만 다른 색상으로 표시
+					}
+					// 170524 add yun SRC의 path 정보에 복수개의 path를 선언하는 경우, 에러는 아니지만
+					// 다른 색상으로 표시
+					else if (diffMap != null && PROC_TYPE_IDENTIFICATION_SOURCE.equals(PROC_TYPE)
 							&& (avoidNull(bean.getFilePath()).indexOf("\r\n") > -1
 									|| avoidNull(bean.getFilePath()).indexOf("\n") > -1)) {
 						diffMap.put(basicKey + "." + bean.getGridId(), basicKey + ".FORMAT");
@@ -1501,7 +1727,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 						
 						if (!isEmpty(errCd)) {
 							diffMap.put(errKey, errCd);
-						} else if (("ok".equalsIgnoreCase(bean.getBinaryNotice())
+						}
+						else if (("ok".equalsIgnoreCase(bean.getBinaryNotice())
 								|| "ok(NA)".equalsIgnoreCase(bean.getBinaryNotice()))
 								&& !checkUsedPermissive(bean, licenseList)) {
 							diffMap.put(errKey, basicKey + ".NOTICE_FIND");
@@ -1515,9 +1742,6 @@ public class T2CoProjectValidator extends T2CoValidator {
 
 				// Admin용 validation
 				// admin review시 confirm을 위한 추가 validation
-				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
-				checkKey = checkKey.toUpperCase();
-				
 				if (!isEmpty(bean.getLicenseName())) {
 					if (bean.getOssComponentsLicenseList() != null) {
 						for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
@@ -1526,8 +1750,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							}
 							
 							String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-							
-							if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
+							if (!CoCodeManager.LICENSE_INFO_UPPER
+									.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
 								if (CommonFunction.isAdmin()) {
 									errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
 								} else {
@@ -1547,7 +1771,6 @@ public class T2CoProjectValidator extends T2CoValidator {
 							}
 							
 							String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-							
 							if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
 								if (CommonFunction.isAdmin()) {
 									errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
@@ -1583,47 +1806,90 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getGridId()) // license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은 경우)
+					}
+					// license 등록 여부 (등록되어 있는 오픈소스이나 사용자가 입력한 라이선스는 포함하고 있지 않은
+					// 경우)
+					else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getGridId())) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
 							String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 							
-							if (!hasOssLicense(ossInfo.get(checkKey), bean.getOssComponentsLicenseList())) {
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
 								if (CommonFunction.isAdmin()) {
-									errMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if(!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
 									}
 								}
+							}
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
+								if(!errMap.containsKey(LICENSE_KEY)) {
+									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+								}
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
-							if (!hasOssLicense2(ossInfo.get(checkKey),
-									ossComponentLicenseListMap.get(bean.getGridId()))) {
+							List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(bean.getGridId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(ossmaster, useLicenseList)) {
 								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 								
 								if (CommonFunction.isAdmin()) {
-									errMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if(!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
 									}
 								}
 							}
-						}else if (ossComponentLicenseListMap == null){
-							if(PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)){
-								if (!hasOssLicense(ossInfo.get(checkKey), bean.getLicenseName(), bean.getExcludeYn())) {
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {
+								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
+								
+								if(!errMap.containsKey(LICENSE_KEY)) {
+									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+								}
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
+						} else if (ossComponentLicenseListMap == null) {
+							if(PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) {
+								// Declared & Detected License를 전부 사용하지 않는 case
+								if (!hasOssLicense(ossmaster, bean.getLicenseName(), bean.getExcludeYn())) {
 									String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 									
 									if (CommonFunction.isAdmin()) {
-										errMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+										errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 									} else {
 										if(!errMap.containsKey(LICENSE_KEY)) {
-											diffMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+											diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
 										}
 									}
+								} 
+								// Declared License를 사용하지 않는 case
+								else if (!hasOssLicense(ossmaster, bean.getLicenseName(), bean.getExcludeYn(), false)) {
+									String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
+									
+									if(!errMap.containsKey(LICENSE_KEY)) {
+										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+									}
+								}
+								//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+								else if(hasOssLicenseTypeSingle(ossmaster, bean.getLicenseName())) {
+									diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 								}
 							}
 						}
@@ -1640,34 +1906,66 @@ public class T2CoProjectValidator extends T2CoValidator {
 								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
 							}
 						}
-					} else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
+					}
+					else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
 							&& !errMap.containsKey("OSS_VERSION." + bean.getGridId())
-							&& ossInfo.containsKey(checkKey)) {
+							&& ossInfo.containsKey(checkKey)
+							) {
+						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
-							if (!hasOssLicense(ossInfo.get(checkKey), bean.getOssComponentsLicenseList())) {
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList())) {
 								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 								
 								if (CommonFunction.isAdmin()) {
-									errMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if(!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
 									}
 								}
 							}
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense(ossmaster, bean.getOssComponentsLicenseList(), false)) {
+								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
+								
+								if(!errMap.containsKey(LICENSE_KEY)) {
+									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+								}
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeComponents(ossmaster, bean.getOssComponentsLicenseList())) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
+							}
 						} else if (ossComponentLicenseListMap != null
 								&& ossComponentLicenseListMap.containsKey(bean.getGridId())) {
-							if (!hasOssLicense2(ossInfo.get(checkKey), ossComponentLicenseListMap.get(bean.getGridId()))) {
+							List<ProjectIdentification> useLicenseList = ossComponentLicenseListMap.get(bean.getGridId());
+							
+							// Declared & Detected License를 전부 사용하지 않는 case
+							if (!hasOssLicense2(ossmaster, useLicenseList)) {
 								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 								
 								if (CommonFunction.isAdmin()) {
-									errMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+									errMap.put(LICENSE_KEY, "Declared : " + licenseText);
 								} else {
 									if(!errMap.containsKey(LICENSE_KEY)) {
-										diffMap.put(LICENSE_KEY, "LICENSE_NAME.NONINCLUDED");
+										diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
 									}
 								}
+							} 
+							// Declared License를 사용하지 않는 case
+							else if (!hasOssLicense2(ossmaster, useLicenseList, false)) {
+								String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
+								
+								if(!errMap.containsKey(LICENSE_KEY)) {
+									diffMap.put(LICENSE_KEY, "Declared : " + licenseText);
+								}
+							}
+							//Declared License 중 Permissive가 아닌 type(Copyleft, weak copyleft, Proprietary, Proprietary Free)의 License가 누락된 경우
+							else if(hasOssLicenseTypeProject(ossmaster, useLicenseList)) {
+								diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Declared : " + licenseText);
 							}
 						}
 					}
@@ -1894,6 +2192,98 @@ public class T2CoProjectValidator extends T2CoValidator {
 			return andCombLicenseList.size() == result.size() ? true : false; // group의 size와 존재하지 않은 값 check size가 동일하면 true
 		}
 
+		return false;
+	}
+	
+	private boolean hasOssLicenseTypeComponents(OssMaster ossInfo, List<OssComponentsLicense> licenseList) {
+		List<String> licenseNameList = licenseList.stream().map(ocl -> ocl.getLicenseName()).collect(Collectors.toCollection(ArrayList::new));
+		
+		return hasOssLicenseType(ossInfo, licenseNameList);
+	}
+	
+	private boolean hasOssLicenseTypeProject(OssMaster ossInfo, List<ProjectIdentification> licenseList) {
+		List<String> licenseNameList = licenseList.stream().map(pi -> pi.getLicenseName()).collect(Collectors.toCollection(ArrayList::new));
+		
+		return hasOssLicenseType(ossInfo, licenseNameList);
+	}
+	
+	private boolean hasOssLicenseTypeSingle(OssMaster ossInfo, String licenseName) {
+		List<String> licenseNameList = new ArrayList<String>();
+		licenseNameList.add(licenseName);
+		
+		return hasOssLicenseType(ossInfo, licenseNameList);
+	}
+	
+	private boolean hasOssLicenseType(OssMaster ossInfo, List<String> licenseNameList) {
+		if(ossInfo != null) {
+			// License가 permissive로만 구성되어 있는지 check 함.
+			List<OssLicense> permissiveCheck = ossInfo.getOssLicenses()
+														.stream()
+														.filter(ol -> !CoConstDef.CD_LICENSE_TYPE_PMS.equals(ol.getLicenseType()))
+														.collect(Collectors.toList());
+			
+			// 전체가 permissive로 이루어져 있으므로 message를 출력하지 않음.
+			if(permissiveCheck.size() == 0) { 
+				return false;
+			}
+			
+			
+			List<OssLicense> ossLicenses = ossInfo.getOssLicenses().stream().filter(ol -> "OR".equals(ol.getOssLicenseComb())).collect(Collectors.toList());
+			
+			// Single License이거나 AND로만 구성된 Multi License -> Group을 나눌 필요가 없음.
+			if(ossLicenses.size() == 0) {				
+				// permissive가 아닌 licenseType이면서 사용자가 입력한 License Name중에 없는 License가 존재할 경우 message를 출력함.
+				ossLicenses = ossInfo.getOssLicenses()
+											.stream()
+											.filter(ol -> !CoConstDef.CD_LICENSE_TYPE_PMS.equals(ol.getLicenseType()) 
+															&& !licenseNameList.contains(ol.getLicenseName()))
+											.collect(Collectors.toList());
+			
+				if(ossLicenses.size() > 0) {
+					return true;
+				}
+			} 
+			// Multi License(AND, OR 전부 포함한 case) -> Group을 나누어 각각 check를 함.
+			else {
+				List<List<OssLicense>> groupList = new ArrayList<>();
+				List<OssLicense> olList = new ArrayList<>();
+				
+				// OR Group별로 분리
+				for(OssLicense bean : ossInfo.getOssLicenses()) {
+					if(olList.isEmpty() || "OR".equals(bean.getOssLicenseComb())) {
+						olList = new ArrayList<>();
+						olList.add(bean);
+						
+						groupList.add(olList);
+						
+						continue;
+					}
+					
+					int seq = groupList.size()-1;
+					olList = groupList.get(seq);
+					olList.add(bean);
+					
+					groupList.set(seq, olList);
+				}
+				boolean errorFlag = true;
+				for(List<OssLicense> list : groupList) {
+					list = list.stream()
+							   .filter(ol -> !CoConstDef.CD_LICENSE_TYPE_PMS.equals(ol.getLicenseType()) 
+									   			&& !licenseNameList.contains(ol.getLicenseName()))
+							   .collect(Collectors.toList());
+					
+					if(list.size() == 0) {
+						errorFlag = false;
+						break;
+					}
+				}
+				
+				if(errorFlag) {
+					return true;
+				}
+			}
+		}
+		
 		return false;
 	}
 	

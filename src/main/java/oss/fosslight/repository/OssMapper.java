@@ -41,6 +41,8 @@ public interface OssMapper {
 	
 	List<OssMaster> selectOssDownloadLocationList(OssMaster ossMaster);
 	
+	List<OssMaster> selectOssDetectedLicenseList(OssMaster ossMaster);
+	
 	int selectOssPopupTotalCount(OssMaster ossMaster);			
 	
 	List<OssMaster> selectOssPopupList(OssMaster ossMaster);
@@ -57,7 +59,9 @@ public interface OssMapper {
 	
 	int mergeOssNickname(OssMaster ossMaster);					
 	
-	int insertOssLicense(OssMaster ossMaster);					
+	int insertOssLicenseDeclared(OssMaster ossMaster);
+	
+	int insertOssLicenseDetected(OssMaster ossMaster);
 	
 	int updateOssForProject(OssMaster ossMaster);				
 	
