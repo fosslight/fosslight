@@ -38,8 +38,8 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         
         paramMap.put("loginUserName", loginUserName());
         paramMap.put("loginUserRole", loginUserRole());
-        paramMap.put("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-        paramMap.put("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+        paramMap.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
+        paramMap.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
         
         int records = dashboardMapper.selectDashboardJobsTotalCount(paramMap);
         

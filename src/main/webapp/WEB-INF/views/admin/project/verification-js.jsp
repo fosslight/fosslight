@@ -35,7 +35,7 @@
 		
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory("prj", "${project.prjId}");
+			openCommentHistory('<c:url value="/comment/popup/prj/${project.prjId}"/>');
 		});
 		
 		// 버튼 컨트롤
@@ -123,6 +123,13 @@
 		$("#docType > [value^='noticeDownload']").trigger("change");
 		
 		com_fn.tabInit();
+
+		// 20210617_autoVerify Change Alert ADD
+		$("input:checkbox[name='autoVerify']").change(function(){
+			if($("input:checkbox[name='autoVerify']").is(":checked") == true){
+				alertify.alert('Verify when file is uploaded');
+			}
+		});
 	});
 	
 	var datas = {
@@ -196,7 +203,7 @@
 			});
 			
 			$('#registFile_1').uploadFile({
-				url : '/project/verification/registFile?prjId='+datas.verify.data.prjId,
+				url : '<c:url value="/project/verification/registFile?prjId='+datas.verify.data.prjId+'&fileSeq=1"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -205,8 +212,9 @@
 
 					result.forEach(function(item){
 						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-
-						$('.uploadList_1 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'1\')"></span></li>');
+						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+						
+						$('.uploadList_1 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'1\')"></span></li>');
 						$('input[name=fileSeq_1]').val(item[0].registSeq);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
@@ -217,12 +225,17 @@
 					$("#uploadAdd_1").show();
 					$("#uploadRemove_1").hide();
 
+					// verified 초기화
+					verified = false;
+					
 					evt.uploadStatus = true;
+
+					fn.autoVerify();
 				},
 			});
 			
 			$('#registFile_2').uploadFile({
-				url : '/project/verification/registFile?prjId='+datas.verify.data.prjId,
+				url : '<c:url value="/project/verification/registFile?prjId='+datas.verify.data.prjId+'&fileSeq=2"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -231,8 +244,9 @@
 					
 					result.forEach(function(item){
 						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-
-						$('.uploadList_2 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
+						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+						
+						$('.uploadList_2 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
 						$('input[name=fileSeq_2]').val(item[0].registSeq);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
@@ -243,12 +257,17 @@
 					$("#uploadAdd_2").show();
 					$("#uploadRemove_2").hide();
 
+					// verified 초기화
+					verified = false;
+					
 					evt.uploadStatus = true;
+
+					fn.autoVerify();
 				},
 			});
 			
 			$('#registFile_3').uploadFile({
-				url : '/project/verification/registFile?prjId='+datas.verify.data.prjId,
+				url : '<c:url value="/project/verification/registFile?prjId='+datas.verify.data.prjId+'&fileSeq=3"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -257,8 +276,9 @@
 
 					result.forEach(function(item){
 						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-
-						$('.uploadList_3 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
+						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+						
+						$('.uploadList_3 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
 						$('input[name=fileSeq_3]').val(item[0].registSeq);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
@@ -268,7 +288,12 @@
 					$('.verifyFile_3').hide();
 					$("#uploadRemove_3").hide();
 
+					// verified 초기화
+					verified = false;
+					
 					evt.uploadStatus = true;
+
+					fn.autoVerify();
 				},
 			});
 			
@@ -290,7 +315,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"verification", "parameter":JSON.stringify(data)}),
 					dataType : 'json',
 					cache : false,
@@ -327,7 +352,7 @@
 			</c:forEach>
 			
 			$('#verificationFile').uploadFile({
-				url : '/project/verification/uploadVerification' ,
+				url : '<c:url value="/project/verification/uploadVerification"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -378,164 +403,7 @@
 			
 			//Verify 프로세스
 			$("[name='verify']").on('click', function(){
-				var fileSeqs = [];
-				
-				if($('input[name=fileSeq_1]').val() != ''){
-					fileSeqs.push($('input[name=fileSeq_1]').val());
-				}
-				
-				if($('input[name=fileSeq_2]').val() != ''){
-					fileSeqs.push($('input[name=fileSeq_2]').val());
-				}
-				
-				if($('input[name=fileSeq_3]').val() != ''){
-					fileSeqs.push($('input[name=fileSeq_3]').val());
-				}
-				
-				gridCleanErrMsg("list"); // 기존 error message 삭제
-
-				if(!evt.uploadStatus && fileSeqs.join("").length <= 0){
-					alertify.error('should be upload to file.', 0);
-					return false;
-				}
-				
-				var target = $('#list');
-				var arr = [];
-				arr = target.jqGrid('getDataIDs');
-				
-				for(var i in arr){
-					// remove error message
-					target.jqGrid('saveRow',arr[i]);
-				}
-				
-				var filePaths = [];
-				var componentIds = [];
-				var emptyIds = [];
-								
-				// empty check
-				for(var i in arr){
-					var _path = target.jqGrid('getCell',arr[i],'filePath');
-					var _componentId = target.jqGrid('getCell',arr[i],'componentId');
-					
-					if(!$.trim(_path)){
-						emptyIds.push(arr[i]);
-					}
-					
-					filePaths.push(_path);
-					componentIds.push(_componentId);
-				}
-
-				// edit mode 원복
-				for(var i in arr){
-					target.jqGrid('editRow',arr[i], true);
-				}
-				
-				if(emptyIds.length > 0) {
-					// show error message
-					for(var idx in emptyIds){
-						var errRow = $("#"+emptyIds[idx]+" > td[aria-describedby='list_filePath']");
-
-						if(errRow) {
-							errRow.append('<div class=\"list_filePath_'+emptyIds[idx]+' retxt"\">Required</div>');
-						}
-					}
-					
-					alertify.error('<spring:message code="msg.common.valid" />', 0);
-					
-					return false;
-				}
-				
-				var obj = {
-					fileSeqs:fileSeqs,		     // packaging file이 1~3건일때 전부 담는 array를 보내고
-					prjId:'${project.prjId}',
-					gridFilePaths:filePaths,
-					gridComponentIds:componentIds,
-					statusVerifyYn:'Y'
-				};
-				
-				$.ajax({
-					url : '/project/verification/verify',
-					type : 'POST',					
-					dataType : 'json',
-					contentType : 'application/json',
-					cache : false,
-					data : JSON.stringify(obj) ,
-				 	timeout: 2*60*60*1000 , // max
-					success : function(json){
-						json = JSON.parse(json);
-						loading.hide();
-						
-						if(json.resCd=='10'){
-							var isReq = true;
-							var validArray = json.verifyValid;
-							var validMsg = json.verifyValidMsg;
-							var fileCountsMap = json.fileCounts;
-							var readmeFileName = json.verifyReadme;
-							var proprietary = json.verifyProprietary;
-							var verifyCheckList = json.verifyCheckList;
-							
-							validArray.forEach(function(id){
-								var errRow = $("#"+id+" > td[aria-describedby='list_filePath']");
-
-								if(errRow) {
-									errRow.append('<div class=\"list_filePath_'+id+' retxt"\">'+validMsg+'</div>');
-								}
-								
-								$("#list").jqGrid("setCell", id, "verifyFileCount", " ");
-
-								isReq = false;
-							});
-							
-							$.each(fileCountsMap, function(key,value){
-								$("#list").jqGrid("setCell", key, "verifyFileCount", value);
-							});
-							
-							if(isReq){//verify 가 정상이라면 Request Review 노출
-								alertify.alert('<spring:message code="msg.common.success" />', function() {
-									if(!curIdenStatus || 'PROG' == curIdenStatus) {
-										$(".review").show();
-									}
-									
-									createTabInFrame('${project.prjId}'+'_Packaging', '#/project/verification/'+'${project.prjId}');
-								});
-								
-								verified = true;
-							} else {
-								alertify.alert(json.resMsg);
-								verified = false;
-							}
-							
-							if(readmeFileName.length > 0) {
-								$("#readmeFile").val(readmeFileName);
-								$("#btnReadme").addClass("green");
-							} else {
-								$("#btnReadme").removeClass("green");
-							}
-							
-							if(proprietary.length > 0){
-								$("#btnProprietary").addClass("green");
-							} else {
-								$("#btnProprietary").removeClass("green");
-							}
-							
-							if(verifyCheckList.length > 0){
-								$("#btnVerifyFileContent").addClass("green");
-							} else {
-								$("#btnVerifyFileContent").removeClass("green");
-							}
-							
-							$("#deleteFlag").val("N");
-							$("#verifyBtnSet").show();
-						} else {
-							alertify.alert(json.resMsg);
-						}
-						
-					},
-					error : function(data){
-						loading.hide();
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					}
-				});
+				fn.verify();
 			});
 			
 			
@@ -593,7 +461,7 @@
 				}
 				
 				$.ajax({
-					url : '/project/verification/savePath',
+					url : '<c:url value="/project/verification/savePath"/>',
 					type : 'POST',					
 					dataType : 'json',
 					contentType : 'application/json',
@@ -607,7 +475,7 @@
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						} else {
 							alertify.alert('<spring:message code="msg.common.success" />', function(){
-								createTabInFrame('${project.prjId}'+'_Packaging', '#/project/verification/'+'${project.prjId}');	
+								createTabInFrame('${project.prjId}_Packaging', '#<c:url value="/project/verification/${project.prjId}"/>');	
 							});
 						}
 					},
@@ -714,7 +582,7 @@
 				
 				
 				$('#noticeForm').ajaxForm({
-					url :"/project/verification/noticeAjax?confirm=conf",
+					url :'<c:url value="/project/verification/noticeAjax?confirm=conf"/>',
 		            type : 'POST',
 		            dataType:"text",
 		            cache : false,
@@ -724,14 +592,14 @@
 		            	if(result.isValid == 'false') {
 			            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
 		            	} else {
-							reloadTabInframe('/project/list');
+							reloadTabInframe('<c:url value="/project/list"/>');
 			            	loading.hide();
 			            	
 			            	var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
 						    fn.defaultNotice(checkedFlag);
 
 							alertify.alert('<spring:message code="msg.common.success" />', function() {
-								deleteTabInFrame('#/project/verification/'+'${project.prjId}');
+								deleteTabInFrame('#<c:url value="/project/verification/${project.prjId}"/>');
 								activeTabInFrameList("PROJECT");
 							});
 		            	}
@@ -876,7 +744,7 @@
 				};
 				
 				$.ajax({
-					url : '/project/verification/wgetUrl',
+					url : '<c:url value="/project/verification/wgetUrl"/>',
 					type : 'POST',					
 					dataType : 'json',
 					contentType : 'application/json',
@@ -888,7 +756,9 @@
 
 						if(resultCode == 0){
 							result.forEach(function(item){
-								$('.uploadList_1 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'1\')"></span></li>');
+								var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+								
+								$('.uploadList_1 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'1\')"></span></li>');
 								$('input[name=fileSeq_1]').val(item[0].registSeq);
 								$('.ajax-file-upload-statusbar').fadeOut('slow');
 								$('.ajax-file-upload-statusbar').remove();
@@ -915,7 +785,7 @@
 				};
 				
 				$.ajax({
-					url : '/project/verification/wgetUrl',
+					url : '<c:url value="/project/verification/wgetUrl"/>',
 					type : 'POST',					
 					dataType : 'json',
 					contentType : 'application/json',
@@ -927,7 +797,9 @@
 						
 						if(resultCode == 0) {
 							result.forEach(function(item){
-								$('.uploadList_2 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
+								var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+								
+								$('.uploadList_2 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
 								$('input[name=fileSeq_2]').val(item[0].registSeq);
 								$('.ajax-file-upload-statusbar').fadeOut('slow');
 								$('.ajax-file-upload-statusbar').remove();
@@ -955,7 +827,7 @@
 				};
 				
 				$.ajax({
-					url : '/project/verification/wgetUrl',
+					url : '<c:url value="/project/verification/wgetUrl"/>',
 					type : 'POST',					
 					dataType : 'json',
 					contentType : 'application/json',
@@ -967,7 +839,9 @@
 						
 						if(resultCode == 0) {
 							result.forEach(function(item){
-								$('.uploadList_3 ul').append('<li><span><strong><a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
+								var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
+								
+								$('.uploadList_3 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
 								$('input[name=fileSeq_3]').val(item[0].registSeq);
 								$('.ajax-file-upload-statusbar').fadeOut('slow');
 								$('.ajax-file-upload-statusbar').remove();
@@ -1095,7 +969,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/4');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
 				}
 			});
 			$("#packagingTab").click(function(){
@@ -1105,7 +979,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+					createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 				}
 			});
 			$("#distributionTab").click(function(){
@@ -1115,7 +989,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+					createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 				}
 			});
 			$("#editTab").click(function(){
@@ -1125,7 +999,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Project', '#/project/edit/'+prjId);
+					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 				}
 			});
 			
@@ -1286,7 +1160,7 @@
 					tempHandler = ""; // temp clear
 				} else {
 					alertify.alert('<spring:message code="msg.common.success" />', function(){
-						createTabInFrame('${project.prjId}'+'_Packaging', '#/project/verification/1/'+'${project.prjId}');
+						createTabInFrame('${project.prjId}_Packaging', '#<c:url value="/project/verification/1/${project.prjId}"/>');
 					});
 				}
 			}
@@ -1403,7 +1277,7 @@
 			curIdenStatus = status;
 			$(".commentBtn.open").trigger( "click" );
 			$.ajax({
-				url : '/project/updateProjectStatus',
+				url : '<c:url value="${suffixUrl}/project/updateProjectStatus"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -1413,10 +1287,10 @@
 					resetEditor(CKEDITOR.instances.editor);
 					
 					fn.btnCtl(userRole, status);
-					reloadTabInframe('/project/list');
+					reloadTabInframe('<c:url value="/project/list"/>');
 					
 					alertify.alert('<spring:message code="msg.common.success" />', function(){
-						createTabInFrame('${project.prjId}'+'_Packaging', '#/project/verification/'+'${project.prjId}');
+						createTabInFrame('${project.prjId}_Packaging', '#<c:url value="/project/verification/${project.prjId}"/>');
 					});
 				},
 				error: function(data){
@@ -1483,7 +1357,7 @@
 			$('#noticeHtml').val(CKEDITOR.instances.editor3.getData());
 			
 			$('#noticeForm').ajaxForm({
-				url : '/project/verification/saveNoticeAjax',
+				url : '<c:url value="/project/verification/saveNoticeAjax"/>',
 	            type : 'POST',
 	            dataType: 'json',
 	            cache : false,
@@ -1510,7 +1384,7 @@
 			var customError;
 			
 			if(flag == 'save') {
-				customUrl      = "/project/verification/saveAjax";
+				customUrl      = '<c:url value="${suffixUrl}/project/verification/saveAjax"/>';
 				customDataType = "json";
 				customSucess   = fn.onRegistSuccess;
 				customError	   = function(data){
@@ -1542,7 +1416,7 @@
 					$("#editEmail").attr("disabled", false);
 				}
 			} else if(flag == 'preview') {
-				customUrl      = "/project/verification/noticeAjax";
+				customUrl      = '<c:url value="/project/verification/noticeAjax"/>';
 				customDataType = "text";
 				customSucess   = fn.openPreviewPop;
 				customError    = function(data){
@@ -1566,7 +1440,7 @@
 				$("#editOssDistributionSite").attr("disabled", false);
 				$("#editEmail").attr("disabled", false);
 			} else if(flag == 'previewOnly') {
-				customUrl      = "/project/verification/noticeAjax";
+				customUrl      = '<c:url value="/project/verification/noticeAjax"/>';
 				customDataType = "text";
 				customSucess   = fn.openPreviewPop;
 				customError    = function(data){
@@ -1591,7 +1465,7 @@
 				$("#editEmail").attr("disabled", false);
 				$("#previewOnly").val("Y");
 			} else if(flag == 'editor') {
-				customUrl      = "/project/verification/noticeAjax";
+				customUrl      = '<c:url value="/project/verification/noticeAjax"/>';
 				customDataType = "text";
 				customSucess   = fn.openNoticeEditPop;
 				customError    = function(data){
@@ -1791,7 +1665,7 @@
 			$("#isSimpleNotice").val("N");
 			
 			$('#noticeForm').ajaxForm({
-				url :"/project/verification/makeNoticePreview",
+				url :'<c:url value="/project/verification/makeNoticePreview"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -1825,7 +1699,7 @@
 			$("#isSimpleNotice").val("N");
 			
 			$('#noticeForm').ajaxForm({
-				url :"/project/verification/makeNoticeText",
+				url :'<c:url value="/project/verification/makeNoticeText"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -1860,7 +1734,7 @@
 			$("#isSimpleNotice").val("Y");
 			
 			$('#noticeForm').ajaxForm({
-				url :"/project/verification/makeNoticeSimple",
+				url :'<c:url value="/project/verification/makeNoticeSimple"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -1895,7 +1769,7 @@
 			$("#isSimpleNotice").val("Y");
 			
 			$('#noticeForm').ajaxForm({
-				url :"/project/verification/makeNoticeTextSimple",
+				url :'<c:url value="/project/verification/makeNoticeTextSimple"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -1917,7 +1791,7 @@
 		downloadSpdxSpreadSheetExcel : function(){
 			$.ajax({
 				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
+				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
 				data: JSON.stringify({"type":"spdx", "parameter":'${project.prjId}'}),
 				dataType : 'json',
 				cache : false,
@@ -1938,7 +1812,7 @@
 		downloadSpdxRdf : function() {
 			$.ajax({
 				type: "POST",
-				url: '/spdxdownload/getSPDXPost',
+				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
 				data: JSON.stringify({"type":"spdxRdf", "parameter":'${project.prjId}'}),
 				dataType : 'json',
 				cache : false,
@@ -1959,7 +1833,7 @@
 		downloadSpdxTag : function() {
 			$.ajax({
 				type: "POST",				   
-				url: '/spdxdownload/getSPDXPost',
+				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
 				data: JSON.stringify({"type":"spdxTag", "parameter":'${project.prjId}'}),
 				dataType : 'json',
 				cache : false,
@@ -2160,13 +2034,13 @@
 			
 			if($("#projectList_"+targetGrid).length > 0) {
 				$("#packaging_"+targetGrid).hide();
-				$("#projectList_"+targetGrid).jqGrid('setGridParam', {postData:postData, page : 1, url : '/project/verification/reuseProjectSearch'}).trigger('reloadGrid');
+				$("#projectList_"+targetGrid).jqGrid('setGridParam', {postData:postData, page : 1, url : '<c:url value="/project/verification/reuseProjectSearch"/>'}).trigger('reloadGrid');
 			}
 		},
 		projectPackagingSearch : function(prjId, seq){
 			var postData = {prjId:prjId};
 			if($("#projectList_"+seq).length > 0) {
-				$("#packagingList_"+seq).jqGrid('setGridParam', {postData:postData, url : '/project/verification/reuseProjectPackagingSearch'}).trigger('reloadGrid');
+				$("#packagingList_"+seq).jqGrid('setGridParam', {postData:postData, url : '<c:url value="/project/verification/reuseProjectPackagingSearch"/>'}).trigger('reloadGrid');
 			}
 		},
 		displayComment : function(cellvalue, options, rowObject){
@@ -2190,7 +2064,7 @@
 			
 			$.ajax({
 				type: "POST",
-				url : '/project/verification/reusePackagingFile',
+				url : '<c:url value="/project/verification/reusePackagingFile"/>',
 				data : JSON.stringify(data),
 				dataType : 'json',
 				cache : false,
@@ -2199,8 +2073,9 @@
 					var item = data.file[0];
 					
 					var appendHtml = '<span style="margin-left:20px;">'+item.createdDate+'</span>';
-
-					$('.uploadList_'+targetSeq+' ul').append('<li><span><strong><a href="/download/'+item.registSeq+'/'+item.fileName+'">'+item.originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item.registSeq+'\', \''+targetSeq+'\')"></span></li>');
+					var _url = '<c:url value="/download/'+item.registSeq+'/'+item.fileName+'"/>';
+					
+					$('.uploadList_'+targetSeq+' ul').append('<li><span><strong><a href="'+_url+'">'+item.originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item.registSeq+'\', \''+targetSeq+'\')"></span></li>');
 					$('input[name=fileSeq_'+targetSeq+']').val(item.registSeq);
 					$('.ajax-file-upload-statusbar').fadeOut('slow');
 					$('.ajax-file-upload-statusbar').remove();
@@ -2243,7 +2118,175 @@
 												}).length;
 			
 			return filterData != allData.length && !$("#approve").prop("checked");
-		} 
+		}
+		// 20210617_autoVerify FN ADD
+		, autoVerify : function(){
+			var verifyBoolean = $("input:checkbox[name='autoVerify']").is(":checked");
+
+			if (verifyBoolean == true){
+				fn.verify();
+			}
+		}
+		, verify : function(){
+			var fileSeqs = [];
+			
+			if($('input[name=fileSeq_1]').val() != ''){
+				fileSeqs.push($('input[name=fileSeq_1]').val());
+			}
+			
+			if($('input[name=fileSeq_2]').val() != ''){
+				fileSeqs.push($('input[name=fileSeq_2]').val());
+			}
+			
+			if($('input[name=fileSeq_3]').val() != ''){
+				fileSeqs.push($('input[name=fileSeq_3]').val());
+			}
+			
+			gridCleanErrMsg("list"); // 기존 error message 삭제
+
+			if(!evt.uploadStatus && fileSeqs.join("").length <= 0){
+				alertify.error('should be upload to file.', 0);
+				return false;
+			}
+			
+			var target = $('#list');
+			var arr = [];
+			arr = target.jqGrid('getDataIDs');
+			
+			for(var i in arr){
+				// remove error message
+				target.jqGrid('saveRow',arr[i]);
+			}
+			
+			var filePaths = [];
+			var componentIds = [];
+			var emptyIds = [];
+							
+			// empty check
+			for(var i in arr){
+				var _path = target.jqGrid('getCell',arr[i],'filePath');
+				var _componentId = target.jqGrid('getCell',arr[i],'componentId');
+				
+				if(!$.trim(_path)){
+					emptyIds.push(arr[i]);
+				}
+				
+				filePaths.push(_path);
+				componentIds.push(_componentId);
+			}
+
+			// edit mode 원복
+			for(var i in arr){
+				target.jqGrid('editRow',arr[i], true);
+			}
+			
+			if(emptyIds.length > 0) {
+				// show error message
+				for(var idx in emptyIds){
+					var errRow = $("#"+emptyIds[idx]+" > td[aria-describedby='list_filePath']");
+
+					if(errRow) {
+						errRow.append('<div class=\"list_filePath_'+emptyIds[idx]+' retxt"\">Required</div>');
+					}
+				}
+				
+				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				
+				return false;
+			}
+			
+			var obj = {
+				fileSeqs:fileSeqs,		     // packaging file이 1~3건일때 전부 담는 array를 보내고
+				prjId:'${project.prjId}',
+				gridFilePaths:filePaths,
+				gridComponentIds:componentIds,
+				statusVerifyYn:'Y'
+			};
+			
+			$.ajax({
+				url : '<c:url value="/project/verification/verify"/>',
+				type : 'POST',					
+				dataType : 'json',
+				contentType : 'application/json',
+				cache : false,
+				data : JSON.stringify(obj) ,
+			 	timeout: 2*60*60*1000 , // max
+				success : function(json){
+					json = JSON.parse(json);
+					loading.hide();
+					
+					if(json.resCd=='10'){
+						var isReq = true;
+						var validArray = json.verifyValid;
+						var validMsg = json.verifyValidMsg;
+						var fileCountsMap = json.fileCounts;
+						var readmeFileName = json.verifyReadme;
+						var proprietary = json.verifyProprietary;
+						var verifyCheckList = json.verifyCheckList;
+						
+						validArray.forEach(function(id){
+							var errRow = $("#"+id+" > td[aria-describedby='list_filePath']");
+
+							if(errRow) {
+								errRow.append('<div class=\"list_filePath_'+id+' retxt"\">'+validMsg+'</div>');
+							}
+							
+							$("#list").jqGrid("setCell", id, "verifyFileCount", " ");
+
+							isReq = false;
+						});
+						
+						$.each(fileCountsMap, function(key,value){
+							$("#list").jqGrid("setCell", key, "verifyFileCount", value);
+						});
+						
+						if(isReq){//verify 가 정상이라면 Request Review 노출
+							alertify.alert('<spring:message code="msg.common.success" />', function() {
+								if(!curIdenStatus || 'PROG' == curIdenStatus) {
+									$(".review").show();
+								}
+								
+								createTabInFrame('${project.prjId}_Packaging', '#<c:url value="/project/verification/${project.prjId}"/>');
+							});
+							
+							verified = true;
+						} else {
+							alertify.alert(json.resMsg);
+							verified = false;
+						}
+						
+						if(readmeFileName.length > 0) {
+							$("#readmeFile").val(readmeFileName);
+							$("#btnReadme").addClass("green");
+						} else {
+							$("#btnReadme").removeClass("green");
+						}
+						
+						if(proprietary.length > 0){
+							$("#btnProprietary").addClass("green");
+						} else {
+							$("#btnProprietary").removeClass("green");
+						}
+						
+						if(verifyCheckList.length > 0){
+							$("#btnVerifyFileContent").addClass("green");
+						} else {
+							$("#btnVerifyFileContent").removeClass("green");
+						}
+						
+						$("#deleteFlag").val("N");
+						$("#verifyBtnSet").show();
+					} else {
+						alertify.alert(json.resMsg);
+					}
+					
+				},
+				error : function(data){
+					loading.hide();
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		}
 	}
 	
 	var com_fn = {

@@ -30,6 +30,7 @@
 							#if( $contentsSubTitle )
 								<p style="font-size:12px;">$contentsSubTitle</p>
 							#end
+							#if( $project_basic_info )
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
         							<col style="width:*">
@@ -80,9 +81,40 @@
 									</tr>
 									#end
 								</table>
-								
+							#end
+							#if( $selfcheck_basic_info )
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<col style="width:40%">
+        							<col style="width:*">
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Name</th>
+										<td style="padding:5px;">($!selfcheck_basic_info.prjId) $!selfcheck_basic_info.prjName</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Version</th>
+										<td style="padding:5px;">$!selfcheck_basic_info.prjVersion</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Operating system</th>
+										<td style="padding:5px;">$!selfcheck_basic_info.osType</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type</th>
+										<td style="padding:5px;">$!selfcheck_basic_info.distributionType</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+										<td style="padding:5px;">$!selfcheck_basic_info.creator</td>
+									</tr>
+								</table>
+							#end
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								<div style="font-size:12px;">* This mail was sent by <a href="http://fosslight.org" target="_blank">fosslight.org</a></div>
+								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
+								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

@@ -77,17 +77,15 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 	}
 	
 	public void sendProcessor(History h, CoMail rcvInfo){
-		History mailInfo = historyMapper.selectOneHistoryData(h);// 받아온 History의 idx로 데이터를 조회한다.
-		// TODO mailInfo가 null로 넘어올경우(501) 처리 필요
-		
-		Map<String, Object> mailData = new HashMap<String, Object>();
-		
-		// 수정의 경우 비교데이터
-		if("UPDATE".equals(mailInfo.gethAction())){
-			mailData = getAsToBeHistoryData(mailInfo);
-		} else {
-			mailData = toMailData(mailInfo);
-		}
+//		History mailInfo = historyMapper.selectOneHistoryData(h);// 받아온 History의 idx로 데이터를 조회한다.
+//		Map<String, Object> mailData = new HashMap<String, Object>();
+//		
+//		// 수정의 경우 비교데이터
+//		if("UPDATE".equals(mailInfo.gethAction())){
+//			mailData = getAsToBeHistoryData(mailInfo);
+//		} else {
+//			mailData = toMailData(mailInfo);
+//		}
 		
 		CoMail coMail = new CoMail();		// 메일 데이터
 		

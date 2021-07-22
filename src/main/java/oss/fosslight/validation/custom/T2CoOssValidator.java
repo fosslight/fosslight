@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation.custom;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -15,10 +15,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.OssService;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidator;
 
 public class T2CoOssValidator extends T2CoValidator {	
 	private OssService 		ossService		= (OssService) getWebappContext().getBean(OssService.class);

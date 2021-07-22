@@ -45,7 +45,7 @@ public class Project extends ComBean implements Serializable {
 				+ ", status=" + status + ", refPartnerId=" + refPartnerId + ", readmeContent=" + readmeContent
 				+ ", readmeYn=" + readmeYn + ", verifyFileContent=" + verifyFileContent + ", exceptFileContent="
 				+ exceptFileContent + ", schStartDate=" + schStartDate + ", schEndDate=" + schEndDate
-				+ ", prjModelJson=" + prjModelJson + ", division=" + division + ", vulnYn=" + vulnYn + "]";
+				+ ", prjModelJson=" + prjModelJson + ", division=" + division + ", vulnYn=" + vulnYn + ", ossReportFlag=" + ossReportFlag +"]";
 	}
 
 	/** The Constant serialVersionUID. */
@@ -317,6 +317,8 @@ public class Project extends ComBean implements Serializable {
 	// 사용자 comment가 이중등록되는 경우 "Y"으로 설정
 	private String ignoreUserCommentReg;
 	
+	/* The ossReportFlag */
+	private String ossReportFlag;
 	
 
 	public String getIgnoreUserCommentReg() {
@@ -630,6 +632,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String modelFlag;
 	
+	private String changeStatusFlag;
+
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -701,6 +705,10 @@ public class Project extends ComBean implements Serializable {
 	private String reProcessDistributionFlag = "N";
 	
 	private String changedNoticeYn = "N";
+	
+	private String modelListAppendFlag = "N";
+	
+	private String modelSeq;
 
 	/**
 	 * Gets the prj id.
@@ -3899,7 +3907,15 @@ public class Project extends ComBean implements Serializable {
 	public void setModelFlag(String modelFlag) {
 		this.modelFlag = modelFlag;
 	}
+	
+	public String getChangeStatusFlag() {
+		return changeStatusFlag;
+	}
 
+	public void setChangeStatusFlag(String changeStatusFlag) {
+		this.changeStatusFlag = changeStatusFlag;
+	}
+	
 	public String getSrcAndroidNoticeXmlId() {
 		return srcAndroidNoticeXmlId;
 	}
@@ -3938,5 +3954,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setChangedNoticeYn(String changedNoticeYn) {
 		this.changedNoticeYn = changedNoticeYn;
+	}
+
+	public String getOssReportFlag() {
+		return ossReportFlag;
+	}
+
+	public void setOssReportFlag(String ossReportFlag) {
+		this.ossReportFlag = ossReportFlag;
+	}
+	
+	public String getModelListAppendFlag() {
+		return modelListAppendFlag;
+	}
+
+	public void setModelListAppendFlag(String modelListAppendFlag) {
+		this.modelListAppendFlag = modelListAppendFlag;
+	}
+	
+	public String getModelSeq() {
+		return modelSeq;
+	}
+
+	public void setModelSeq(String modelSeq) {
+		this.modelSeq = modelSeq;
 	}
 }

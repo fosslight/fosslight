@@ -983,7 +983,7 @@ var commonAjax = {
 };
 
 function fnBasicAjaxData(data, url) {
-	return $.ajax({	type: 'GET',url:url,data:data,headers: {'Content-Type': 'application/json'}});
+	return $.ajax({	type: 'GET',url:CTX_PATH+url,data:data,headers: {'Content-Type': 'application/json'}});
 }
 
 var autoComplete = {
@@ -1572,8 +1572,7 @@ function openNVD(cveId) {
 	}
 }
 
-function openNVD2(_ossName, _ossVersion){
-	var _url = "/vulnerability/vulnpopup?ossName="+_ossName+"&ossVersion="+_ossVersion+"&vulnType=";
+function openNVD2(_ossName, _url){
 	if(_popupVuln == null || _popupVuln.closed) {
 		_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
@@ -1587,9 +1586,7 @@ function openNVD2(_ossName, _ossVersion){
 	}
 }
 
-function openCommentHistory(commDiv, commPrjId) {
-	var _url = "/comment/popup/"+commDiv+"/"+commPrjId;
-	
+function openCommentHistory(_url) {	
 	if(_popupComment == null || _popupComment.closed){
 		_popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
@@ -1915,7 +1912,7 @@ function showHelpLink(id, target){
 	if(_showItem && _showItem.length > 0) {
 		$.ajax({
 			type: 'GET',
-			url: "/system/processGuide/getProcessGuide",
+			url: CTX_PATH+"/system/processGuide/getProcessGuide",
 			data: {"id":id},
 			async:false,
 			success : function(data){
@@ -2135,6 +2132,31 @@ $(document).ready(function (){
 	      }
 	  };
 });
+
+/**
+ * 문자열이 빈 문자열인지 체크하여 결과값을 리턴한다.
+ * @param str       : 체크할 문자열
+ */
+function isEmpty(str){
+     
+    if(typeof str == "undefined" || str == null || str == "")
+        return true;
+    else
+        return false ;
+}
+ 
+/**
+ * 문자열이 빈 문자열인지 체크하여 기본 문자열로 리턴한다.
+ * @param str           : 체크할 문자열
+ * @param defaultStr    : 문자열이 비어있을경우 리턴할 기본 문자열
+ */
+function nvl(str, defaultStr){
+     
+    if(typeof str == "undefined" || str == null || str == "")
+        str = defaultStr ;
+     
+    return str ;
+}
 
 //2018-07-31 choye 추가
 var searchStringOptions = {searchoptions:{sopt:['cn','eq','ne','bw','bn','ew','en','nc']}};

@@ -14,7 +14,6 @@
 				$("[name='defaultTab']:eq(0)").attr("checked", true); // 첫번째 항목을 선택하도록 변경
 			} else {
 				$.each(defaultTab.split(","), function(idx, val){
-					//console.log(idx, val);
 					$("#defaultTab"+val).attr('checked', true);
 				});
 			}

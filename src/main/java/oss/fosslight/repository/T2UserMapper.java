@@ -46,6 +46,8 @@ public interface T2UserMapper {
 	
 	public List<T2Users> selectReviwer(@Param("adminYn") String adminYn, @Param("ldapFlag") String ldapFlag);
 	
+	public List<T2Users> selectAdminUser();
+	
 	public List<T2Users> selectAllUsersDivision();
 	
 	public List<T2Users> selectCheckEmail(String email);

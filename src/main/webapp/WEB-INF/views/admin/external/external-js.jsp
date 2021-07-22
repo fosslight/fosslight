@@ -4,7 +4,7 @@
 
 $(document).ready(function(){
 	
-	var linkV = ${ct:getAllValuesJson(ct:getConstDef("CD_EXTERNAL_LINK_DETAIL"))};
+	var linkV = ${ct:getAllValuesJson(ct:getConstDef("CD_EXTERNAL_LINK"))};
 	var tbody = $('.linkCase').find('tbody');
 	
 	$.each(linkV, function(index, value) {

@@ -11,6 +11,7 @@
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
+	var checkboxParam = []; /* BOM Compare ADD */
 	
 	$(document).ready(function () {
 		'use strict';
@@ -41,7 +42,7 @@
 	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
-		               +"<dl><dt><span class=\"downSet btnReport\">OSS Report</span>OSS Report</dt></dl><br>"
+		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",
@@ -385,7 +386,7 @@
 			var display = "";
 			
 			if(rowObject.identificationStatus == "Confirm"){
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"OSS Report\">";
+				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"FOSSLight Report\">";
 			} else {
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this)\" disabled>";
 			}
@@ -442,7 +443,7 @@
 		displayComment : function(cellvalue, options, rowObject){
 			var display = "";
 			
-			if(cellvalue !="") {
+			if(!isEmpty(cellvalue)) {
 				var tmpStr = new RegExp();
 				tmpStr = /[<][^>]*[>]/gi;
 				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
@@ -612,6 +613,63 @@
 			return paramData;
 		}, getUserName : function(cellvalue, options, rowObject){
 			return userIdList[cellvalue] || pastEmpList[cellvalue] || "";
+		}, bomCompare : function(){ /* BOM Compare ADD */
+			// 체크박스 선택 체크
+			var chk = checkboxParam.length
+		
+			if(chk < 3){
+				var beforePrjId = "";
+				var afterPrjId = "";
+
+				switch (chk) {
+					case 0:
+						beforePrjId = "0000";
+						afterPrjId = "0000";
+						break;
+					case 1:
+						beforePrjId = checkboxParam[0];
+						afterPrjId = "0000";
+						break;
+					case 2:
+						beforePrjId = checkboxParam[0];
+						afterPrjId = checkboxParam[1];
+
+						if (parseInt(beforePrjId) > parseInt(afterPrjId)){
+							beforePrjId = checkboxParam[1];
+							afterPrjId = checkboxParam[0];
+						}
+						break;
+				}
+				
+				var tabNm = "BOM_Compare";
+				var tabLk = '#<c:url value="/project/bomCompare/'+beforePrjId+'/'+afterPrjId+'"/>';
+		
+				createTabInFrame(tabNm, tabLk);
+			}else {
+				alertify.alert('Choose two projects.');
+				return false;
+			}
+		}, checkboxChange : function(rowid){ /* BOM Compare ADD */
+			$("input:checkbox[id='jqg_list_"+rowid+"']").each(function(){
+				var rowidChk = rowid;
+				
+				if (checkboxParam.length < 1){
+					checkboxParam.push(rowidChk);
+				}else{
+					var spliceChk = 0;
+					for (var i=0; i<checkboxParam.length; i++){
+						if (checkboxParam[i] === rowidChk){
+							checkboxParam.splice(i, 1);
+							i--;
+							spliceChk++;
+						}
+					}
+
+					if (spliceChk == 0){
+						checkboxParam.push(rowidChk);
+					}
+				}
+			});
 		}
 	}
 	
@@ -695,7 +753,8 @@
 				viewrecords: true,
 				sortorder: 'desc',
 				height: 'auto' ,
-				multiselect : (('${sessUserInfo.authority}'=="ROLE_ADMIN") ? true: false),
+				multiselect : true,
+				//multiselect : (('${sessUserInfo.authority}'=="ROLE_ADMIN") ? true: false),
 				loadonce:false,
 				loadComplete:function(data) {
 					totalRow = data.records;
@@ -789,6 +848,19 @@
 						}
 					
 					$('input[id*="_releaseDate"]').attr('class', 'cal');
+
+					$("input:checkbox[id='cb_list']").click(function(){
+						var checkboxBoolean = $(this).is(":checked");
+						if (checkboxBoolean == true){
+							$("input:checkbox[name^=jqg_list_]").each(function(){
+								if (this.checked){
+									checkboxParam.push(this.name.split('_').reverse()[0]);
+								}
+							});
+						}else{
+							checkboxParam = [];
+						}
+					});
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					var role = '${sessUserInfo.authority}';
@@ -798,6 +870,8 @@
 						$("#list").jqGrid('editRow',rowid);
 						lastsel=rowid;
 					}
+
+					fn.checkboxChange(rowid);
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);

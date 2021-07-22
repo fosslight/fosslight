@@ -39,4 +39,6 @@ public interface ApiProjectService {
 	public Map<String, Object> getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList);
 	
 	public boolean checkDistributionType(Map<String, Object> paramMap);
+	
+	public Map<String, Object> selectModelList(Map<String, Object> paramMap);
 }

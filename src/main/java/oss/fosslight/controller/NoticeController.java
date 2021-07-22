@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.NOTICE;
 import oss.fosslight.domain.Notice;
 import oss.fosslight.service.NoticeService;
+import oss.fosslight.validation.T2CoValidationResult;
 
 @Controller
 public class NoticeController extends CoTopComponent {

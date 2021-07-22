@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation.custom;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.validation.T2BasicValidator;
 
 public class T2CoAdminValidator extends T2BasicValidator {
 	private CodeService codeService = (CodeService) getWebappContext().getBean(CodeService.class);
@@ -78,9 +81,9 @@ public class T2CoAdminValidator extends T2BasicValidator {
         	 
         	if(CoConstDef.FLAG_YES.equals(ldapFlag)) { // configuration에서 LDAP을 선택시만 check함.
 	        	if(!isEmpty(map.get(targetKey2))) {
-	        		if(!userService.checkAdAccounts(map.get(targetKey), map.get(targetKey2))) {
+	        		if(!userService.checkAdAccounts(map, targetKey, targetKey2)) {
 	        			if(map.containsKey("EMAIL") && !errMap.containsKey("EMAIL")) {
-	        				if(!userService.checkAdAccounts(map.get("EMAIL"), map.get(targetKey2))) {
+	        				if(!userService.checkAdAccounts(map, "EMAIL", targetKey2)) {
 	        					errMap.put(targetKey2, targetKey2+".AUTH");
 	        				}
 	        			} else {

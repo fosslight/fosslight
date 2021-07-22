@@ -10,8 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,8 +41,6 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.CoMail;
@@ -60,12 +62,21 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Api(tags = {"3. Project"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
 public class ApiProjectController extends CoTopComponent {
+	
+	@Resource private Environment env;
+	private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
 	
 	private final ResponseService responseService;
 	
@@ -94,7 +105,9 @@ public class ApiProjectController extends CoTopComponent {
 	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_SEARCH})
     public CommonResult selectProjectList(
     		@RequestHeader String _token,
+    		@ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
     		@ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
+    		@ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
     		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete)", required = false, allowableValues = "PROG,REQ,REV,COMP") @RequestParam(required = false) String status,
     		@ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
@@ -109,11 +122,14 @@ public class ApiProjectController extends CoTopComponent {
 			CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
 			CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 			
-			paramMap.put("userRole", userInfo.getAuthority());
-			paramMap.put("creator", creator);
-			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("division", division);
-			paramMap.put("status", status);
+//			paramMap.put("userRole", userInfo.getAuthority());
+			paramMap.put("creator", 	creator);
+			paramMap.put("userId", 		userInfo.getUserId());
+			paramMap.put("userRole", 	loginUserRole());
+			paramMap.put("division", 	division);
+			paramMap.put("modelName", 	modelName);
+			paramMap.put("status", 		status);
+			paramMap.put("prjIdList", 	prjIdList);
 			
 			try {
 				resultMap = apiProjectService.selectProjectList(paramMap);
@@ -128,6 +144,37 @@ public class ApiProjectController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
+	
+	@ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {Url.API.FOSSLIGHT_API_MODEL_SEARCH})
+    public CommonResult selectModelList(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList){
+		
+		// 사용자 인증
+		userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		try {
+			try {
+				Map<String, Object> paramMap = new HashMap<String, Object>();
+				paramMap.put("prjIdList", prjIdList);
+				
+				resultMap = apiProjectService.selectModelList(paramMap);
+			} catch (Exception e) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+			}
+			
+			return responseService.getSingleResult(resultMap);
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		}
+	}
 	
 	@ApiOperation(value = "Create Project", notes = "project 생성")
     @ApiImplicitParams({
@@ -334,6 +381,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
 			paramMap.put("distributionType", "normal");
@@ -341,10 +389,7 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
 			if(searchFlag) {
-				String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-						? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-						: "template";
-				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, templatePath);
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				fileInfo = fileService.selectFileInfo(downloadId);
 			}
 			
@@ -376,6 +421,7 @@ public class ApiProjectController extends CoTopComponent {
 			prjIdList.add(beforePrjId);
 			prjIdList.add(afterPrjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("distributionType", "normal");
 			
@@ -423,6 +469,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -552,6 +599,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -804,6 +852,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "android");
@@ -1020,6 +1069,7 @@ public class ApiProjectController extends CoTopComponent {
 		List<String> prjIdList = new ArrayList<String>();
 		prjIdList.add(prjId);
 		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("userRole", loginUserRole());
 		paramMap.put("prjId", prjIdList);
 		
 		boolean searchFlag = apiProjectService.existProjectCnt(paramMap);

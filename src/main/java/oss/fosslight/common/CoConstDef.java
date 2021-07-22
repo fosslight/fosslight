@@ -95,12 +95,12 @@ public class CoConstDef {
 	public static final String CD_SYSTEM_SETTING				= "909";
 	public static final String CD_LDAP_USED_FLAG				= "910";
 	public static final String CD_SMTP_USED_FLAG				= "911";
-	public static final String CD_MENU_AUTH_FLAG				= "912";
+//	public static final String CD_MENU_AUTH_FLAG				= "912";
 	
 	// Login Setting
 	public static final String CD_LOGIN_SETTING					= "910";
 	public static final String CD_LDAP_SERVER_URL 				= "100";
-//	public static final String CD_LDAP_DOMAIN					= "200";
+	public static final String CD_LDAP_DOMAIN					= "200";
 //	public static final String CD_LDAP_INITIAL_CONTEXT_FACTORY 	= "300";
 //	public static final String CD_LDAP_ERROR_49 				= "400";
 
@@ -124,16 +124,13 @@ public class CoConstDef {
 	public static final String CD_MENU_EXTERNAL_LINK			= "011";
 	
 	// Dashboard Detail Setting
-//	public static final String CD_DASHBOARD_DETAIL				= "914";
+	public static final String CD_DASHBOARD_DETAIL				= "914";
 	public static final String CD_DASHBOARD_NOTICE				= "100";
 	
 	// Project List Detail Setting
 	public static final String CD_PROJECT_DETAIL				= "918";
 	public static final String CD_AUTO_ANALYSIS_FLAG			= "100";
 	public static final String CD_NOTICE_FLAG					= "101";
-	
-	// Extenal Link Detail Setting
-	public static final String CD_EXTERNAL_LINK_DETAIL			= "925";
 	
 	// Notice Info
 	public static final String CD_NOTICE_INFO					= "927";
@@ -393,6 +390,8 @@ public class CoConstDef {
 	public static final String DISTRIBUTE_CHECK_DELETE = "/pservice/descriptionDeletedCheck";
 	public static final String DISTRIBUTE_LICENSE_URL_UPDATE = "/pservice/uploadLicense";
 	public static final String DISTRIBUTE_LICENSE_URL_DELETE = "/pservice/deleteLicense";
+	public static final String DISTRIBUTE_AUTH_CALLED_URL = "/pservice/getLoginToken";
+	public static final String DISTRIBUTE_AUTH_URL = "/admin/login/loginWithToken";
 //	public static final String DISTRIBUTE_LICENSE_URL = "/license/";
 //	public static final String DISTRIBUTE_MIGRATION_TEST = "/pservice/migTest";
 	
@@ -547,6 +546,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_BAT_ERROR = "81";
 	public static final String CD_MAIL_TYPE_BAT_WATCHER_INVATED = "82";
 	public static final String CD_MAIL_TYPE_BAT_WATCHER_REGISTED = "83";
+	/** Self Check Watcher registed */
+	public static final String CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED = "84";
 	/** project oss 에서 새로운 취약점이 발견된 경우*/
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT = "90";
 	/** project oss 에서 사용하지는 않지만 OSS master에 등록되어 있는 오픈소스에서 로운 취약점이 발견된 경우*/
@@ -555,6 +556,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED = "92";
 	/** vulnerability score가 9.0 이상에서 9.0 미만으로 변경된 경우 - admin */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL = "93";
+	/** vulnerability score가 9.0 이상에서 삭제되어 recalculated 대상이 된 경우 */
+	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED = "94";
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
 	
 	/** Mail Type엥 따른 공통 Components 구성 */
@@ -574,6 +577,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED = "210";
 	public static final String CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL = "211";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL = "212";
+	public static final String CD_MAIL_COMPONENT_SELFCHECK_PROJECT_BASICINFO = "213";
+	public static final String CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED = "214";
 	
 	/** MAIL 모듈 별 KEY NAME */
 	public static final String CD_MAIL_COMPONENT_NAME = "104";

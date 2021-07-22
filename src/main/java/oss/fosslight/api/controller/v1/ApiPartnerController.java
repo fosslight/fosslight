@@ -52,6 +52,7 @@ public class ApiPartnerController extends CoTopComponent {
 	@GetMapping(value = {API.FOSSLIGHT_API_PARTNER_SEARCH})
     public CommonResult getVulnerabilityData(
     		@RequestHeader String _token,
+    		@ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
     		@ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
     		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
@@ -67,18 +68,16 @@ public class ApiPartnerController extends CoTopComponent {
 			CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
 			CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 			
-			paramMap.put("userRole", userInfo.getAuthority());
-			paramMap.put("creator", creator);
-			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("division", division);
-			paramMap.put("status", status);
+//			paramMap.put("userRole", userInfo.getAuthority());
+			paramMap.put("creator", 		creator);
+			paramMap.put("userId", 			userInfo.getUserId());
+			paramMap.put("userRole", 		loginUserRole());
+			paramMap.put("division", 		division);
+			paramMap.put("status", 			status);
+			paramMap.put("partnerIdList", 	partnerIdList);
 			
 			try {
-				List<Map<String, Object>> content = apiPartnerService.getPartnerMasterList(paramMap);
-				
-				if(content.size() > 0) {
-					resultMap.put("content", content);
-				}
+				resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 				
 				return responseService.getSingleResult(resultMap);
 			} catch (Exception e) {

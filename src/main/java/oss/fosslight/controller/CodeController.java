@@ -26,11 +26,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.CODE;
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.service.CodeService;
+import oss.fosslight.validation.T2CoValidationResult;
 
 @Controller
 public class CodeController extends CoTopComponent {

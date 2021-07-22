@@ -11,12 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,9 +36,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoOssValidator;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.OSS;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -64,11 +60,19 @@ import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoOssValidator;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Controller
 @Slf4j
 public class OssController extends CoTopComponent{
-	@Resource private Environment env;
+	private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
+	
 	@Autowired OssService ossService;
 	@Autowired HistoryService historyService;
 	@Autowired CommentService commentService;
@@ -1243,10 +1247,7 @@ public class OssController extends CoTopComponent{
 		Map<String, Object> result = null;
 		
 		try {
-			String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-					? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-					: "template";
-			donwloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), templatePath);
+			donwloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if(!isEmpty(donwloadId)) {
 				result = ossService.startAnalysis(ossBean.getPrjId(), donwloadId);
@@ -1350,40 +1351,6 @@ public class OssController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(result);
-	}
-	
-	@PostMapping(value=OSS.CHECK_LICENSE_TEXT_VALIDATION)
-	public @ResponseBody ResponseEntity<Object> checkLicenseTextValid(
-			@RequestBody OssMaster ossBean
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
-		return makeJsonResponseHeader(ossService.checkLicenseTextValid(ossBean));
-	} 
-	
-	@PostMapping(value=OSS.START_CHECK_LICENSE_TEXT)
-	public @ResponseBody ResponseEntity<Object> startCheckLicenseText(
-			@RequestBody OssMaster ossBean
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
-		try {
-			String prjId = ossBean.getPrjId();
-			
-			if(!isEmpty(prjId)) {
-				String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-						? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-						: "template";
-				String donwloadId = ExcelDownLoadUtil.getExcelDownloadId("binAndroid", prjId, templatePath);
-				Map<String, Object> result = ossService.startCheckLicenseText(prjId, donwloadId);
-				
-				return makeJsonResponseHeader(result);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		return makeJsonResponseHeader(false, "Failure");
 	}
 	
 	@PostMapping(value=OSS.UPDATE_ANALYSIS_COMPLETE)

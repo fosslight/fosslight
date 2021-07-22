@@ -22,7 +22,7 @@
 	var gridTooltip = {
 		typeCodes : [],
 	    tooltipCont : "<div class=\"tooltipData\">"
-		               +"<dl><dt><span class=\"downSet btnReport\">OSS Report</span>OSS Report</dt></dl><br>"
+		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",
@@ -80,7 +80,7 @@
 
 			if(rowObject.ossCount) {
 				if(parseInt(rowObject.ossCount) > 0) {
-					display = "<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"OSS Report\">";
+					display = "<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"FOSSLight Report\">";
 				}
 			}
 			

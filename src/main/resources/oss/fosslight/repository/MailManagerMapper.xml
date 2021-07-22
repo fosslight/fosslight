@@ -102,6 +102,7 @@
 	<select id="getOssInfoById" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM OSS_MASTER WHERE OSS_ID = #{ossId}</select>
 	<select id="getLicenseInfoById" parameterType="String" resultType="oss.fosslight.domain.LicenseMaster">SELECT * FROM LICENSE_MASTER WHERE LICENSE_ID = #{licenseId}</select>
 	<select id="getProjectInfoById" parameterType="String" resultType="oss.fosslight.domain.Project">SELECT * FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}</select>
+	<select id="getSelfCheckProjectInfoById" parameterType="String" resultType="oss.fosslight.domain.Project">SELECT * FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}</select>
 	<select id="getBinaryInfo" parameterType="String" resultType="oss.fosslight.domain.BinaryMaster">SELECT T1.*, T2.ORIG_NM as BINARY_FILE_NAME FROM BINARY_MASTER T1 INNER JOIN T2_FILE T2 ON T1.BINARY_FILE_ID = T2.FILE_SEQ WHERE T1.BAT_ID = #{batId}</select>
 	<select id="getDistributeReservedUser" parameterType="String" resultType="String">
 		SELECT DISTRIBUTE_RESERVED_USER AS RESERVER
@@ -109,7 +110,7 @@
 		WHERE PRJ_ID = #{prjId}
 	</select>
 	
-	<select id="getTempMail" resultType="CamelMap">
+	<select id="getTempMail" resultType="oss.fosslight.domain.CamelMap">
 		SELECT MAIL_SEQ
 			 , MAIL_TYPE
 			 , PARAM_PRJ_ID

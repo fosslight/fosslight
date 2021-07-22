@@ -8,17 +8,20 @@
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* ProjectMapper.selectProjectTotalCount */
 		SELECT COUNT(*) FROM (
-			SELECT T1.PRJ_NAME
+			SELECT T1.PRJ_ID
+				 , T1.PRJ_NAME
 				 , T1.PRJ_VERSION
 				 , T1.CREATED_DATE
 				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-				 , CASE WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+				 , CASE 
+						WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+						WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
-						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
-						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
-						ELSE 'PROG' 
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+						ELSE 'PROG'
 					END STATUS
 				 , T1.PRIORITY
 				 , IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
@@ -31,18 +34,6 @@
 			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
 			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
 	         WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-				AND (
-					T1.CREATOR = #{userId} 
-						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
-						  FROM PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
-						)
-						OR PUBLIC_YN = 'Y'
-				)
-			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 			</if>
@@ -61,6 +52,12 @@
 						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
 					)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
+				AND EXISTS (SELECT 1 
+		                             FROM PROJECT_MODEL M 
+		                           WHERE T1.PRJ_ID = M.PRJ_ID 
+		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			</if>
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
@@ -72,10 +69,15 @@
 					OR A.CD_DTL_NO = #{division}
 				)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+				<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+			     	A.PRJ_ID = #{item}
+			    </foreach>
+			</if>
 	</select>
 	
-	<select id="selectProjectTotal" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
-		/* ProjectMapper.selectProjectTotal */
+	<select id="selectProject" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper.selectProject */
 		SELECT A.PRJ_ID
 			 , A.PRJ_NAME
 		     , A.PRJ_VERSION
@@ -97,13 +99,15 @@
 				 , T1.CREATED_DATE
 				 , T1.MODIFIED_DATE
 				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-				 , CASE WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+				 , CASE 
+						WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+						WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
-						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
-						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
-						ELSE 'PROG' 
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+						ELSE 'PROG'
 					END STATUS
 				 , T1.PRIORITY
 				 , IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
@@ -115,24 +119,11 @@
                  , IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
                  , T4.NOTICE_TYPE
                  , T4.NOTICE_TYPE_ETC
-                 , T1.PRIORITY
 			  FROM PROJECT_MASTER T1
 			  LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
 			  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T2.DIVISION = T3.CD_DTL_NO
 			  LEFT JOIN OSS_NOTICE T4 ON T1.PRJ_ID = T4.PRJ_ID
 	         WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
-				AND (
-					T1.CREATOR = #{userId} 
-						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
-						  FROM PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
-						)
-						OR PUBLIC_YN = 'Y'
-				)
-			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
 			</if>
@@ -151,6 +142,12 @@
 						OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
 					)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
+				AND EXISTS (SELECT 1 
+		                             FROM PROJECT_MODEL M 
+		                           WHERE T1.PRJ_ID = M.PRJ_ID 
+		                               AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+			</if>
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
@@ -162,6 +159,13 @@
 					OR A.CD_DTL_NO = #{division}
 				)
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+				<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+			     	A.PRJ_ID = #{item}
+			    </foreach>
+			</if>
+		ORDER BY A.PRJ_ID DESC
+		LIMIT 0, 1000
 	</select>
 	
 	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
@@ -208,6 +212,7 @@
 					, T1.MODIFIED_DATE
 			   FROM PROJECT_MASTER T1
 	          WHERE T1.USE_YN = 'Y'
+	          <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
 			    AND (
 						T1.CREATOR = #{userId} 
 							OR EXISTS (
@@ -218,6 +223,7 @@
 							)
 							OR PUBLIC_YN = 'Y'
 					)
+			  </if>
 				<foreach item="item" index="index" collection="prjId" open=" AND (" close=")" separator="OR">
 			     T1.PRJ_ID = #{item}
 			    </foreach>

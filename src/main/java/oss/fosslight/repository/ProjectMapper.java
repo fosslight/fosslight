@@ -313,4 +313,7 @@ public interface ProjectMapper {
 	Project getOssAnalysisData(Project project);
 	
 	String getReviewerEmail(@Param("prjId") String prjId, @Param("loginUser") String loginUser);
+	
+	// 20210616_BOM COMPARE FUNC ADD
+	int selectProjectCount(Project project);
 }

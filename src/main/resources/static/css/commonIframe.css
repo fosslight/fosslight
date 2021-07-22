@@ -131,6 +131,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .w55 {width:56px !important;padding:0 0 0 !important;}
 .w60 {width:60px !important;}
 .w100 {width:100px ;}
+.w120 {width:120px !important;}
 .w150 {width:150px !important;}
 .w155 {width:155px !important;} /* 161104 jh_son 추가 */
 .w220 {width:220px !important;} /* 171017 yuns 추가 */
@@ -690,6 +691,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .pop .pbtn {clear:left;padding-bottom:30px;text-align:center;display:inline-block;width:100%;}
 .pop .pbtn.tcenter {text-align:center;}
 .pop h1 {height:45px;font-size:14px;font-weight:600;line-height:57px !important;text-align:center;color:#000000;text-align:left;border-bottom:1px solid #c5c5c5;} /* 20161025 by mj-cho */
+.pop h1.orange {height:45px;font-size:14px;font-weight:600;line-height:57px !important;text-align:center;color:#ff5a00;text-align:left;border-bottom:1px solid #c5c5c5;}
 /* ===== Pop up ===== */
 /* loading */
 /* 2016-10-05 이훈경  로딩바 수정 */
@@ -704,6 +706,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .ossSelectPop .listSearch2 input[type="text"].autoCom {width:420px;height:26px;}
 /**/
 .rejectPop {width:400px;margin:-158px 0 0 -200px;}
+.changeStatusPop {width:400px;margin:-158px 0 0 -260px;}
 /**/
 .savePop {width:500px;margin:-100px 0 0 -250px;}
 .savePop .popdata {padding-top:30px;}

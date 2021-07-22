@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only 
  */
 
-package oss.fosslight.common;
+package oss.fosslight.validation;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.util.StringUtil;
 
 public class T2CoValidationResult {

@@ -19,7 +19,7 @@ public interface ApiProjectMapper {
 	
 	int updatePackageFile(Map<String, Object> paramMap);
 	
-	List<Map<String, Object>> selectProjectTotal(Map<String, Object> paramMap);
+	List<Map<String, Object>> selectProject(Map<String, Object> paramMap);
 
 	int selectProjectTotalCount(Map<String, Object> paramMap);
 	

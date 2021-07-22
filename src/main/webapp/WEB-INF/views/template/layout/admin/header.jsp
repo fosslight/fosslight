@@ -48,12 +48,12 @@
 							</ol>
 						</li>
 					</c:if>
-					<c:if test="${externalLinkFlag and not empty ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_LINK_DETAIL'))}">
+					<c:if test="${externalLinkFlag and not empty ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_LINK'))}">
 						<li class="gnbOpen">
 							<a href="#/external/external" class="add-tab">External Link</a>
 							<ol>
-								<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_LINK_DETAIL'))}" varStatus="status">
-									<li><a href="${fn:split(ct:getCodeExpString(ct:getConstDef('CD_EXTERNAL_LINK_DETAIL'),code[0]),'|')[1]}" target="_blank">${code[1]}</a></li>
+								<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_LINK'))}" varStatus="status">
+									<li><a href="${fn:split(ct:getCodeExpString(ct:getConstDef('CD_EXTERNAL_LINK'),code[0]),'|')[1]}" target="_blank">${code[1]}</a></li>
 								</c:forEach>
 							</ol>
 						</li>

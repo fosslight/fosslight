@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,9 +38,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationConfig;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.PARTNER;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -60,6 +58,9 @@ import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.validation.T2CoValidationConfig;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 
 @Controller
@@ -80,6 +81,21 @@ public class PartnerController extends CoTopComponent{
 	
 	/** The env. */
 	@Resource private Environment env;
+	
+	/** The resource public upload excel path prefix. */
+	private String RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX;
+	
+	/** The resource public excel template path prefix. */
+	private String RESOURCE_PUBLIC_EXCEL_TEMPLATE_PATH_PREFIX;
+	
+	/**
+	 * Sets the resource path prefix.
+	 */
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("upload.path", "/upload");
+		RESOURCE_PUBLIC_EXCEL_TEMPLATE_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
 	
 	@GetMapping(value=PARTNER.LIST, produces = "text/html; charset=utf-8")
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model){
@@ -831,7 +847,7 @@ public class PartnerController extends CoTopComponent{
 		try {
 			if(CoConstDef.FLAG_YES.equals(excel)){
 				if(list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt())) {
-					sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+					sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
 				}
 			}	
 		} catch(Exception e) {
@@ -1003,11 +1019,8 @@ public class PartnerController extends CoTopComponent{
 			HttpServletResponse res, Model model) throws Exception{
 		String fileName = req.getParameter("fileName");
 		String logiPath = req.getParameter("logiPath");
-		String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-				? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-				: "template";
 				
-		return excelToResponseEntity(templatePath + logiPath, fileName);
+		return excelToResponseEntity(RESOURCE_PUBLIC_EXCEL_TEMPLATE_PATH_PREFIX + logiPath, fileName);
 	}
 	
 }

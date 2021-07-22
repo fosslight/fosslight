@@ -33,20 +33,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -71,6 +72,8 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.OssComponentUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Controller
 @Slf4j
@@ -96,6 +99,8 @@ public class ProjectController extends CoTopComponent {
 	@Autowired VerificationService verificationService;
 	
 	@Autowired CodeMapper codeMapper;
+	
+	@Autowired ResponseService responseService;
 	
 	/** The env. */
 	@Resource
@@ -136,6 +141,7 @@ public class ProjectController extends CoTopComponent {
 				
 				if(ossBean != null) {
 					searchBean.setOssName(ossBean.getOssName());
+					searchBean.setOssVersion(ossBean.getOssVersion());
 				}
 			}
 		} else {
@@ -216,13 +222,16 @@ public class ProjectController extends CoTopComponent {
 	 */
 	@GetMapping(value = PROJECT.USER_ID_LIST)
 	public @ResponseBody String getUserIdList(HttpServletRequest req, HttpServletResponse res, Model model) {
-		String adminYn = req.getParameter("adminYn");
+		String reviewerFlag = req.getParameter("reviewerFlag");
+		String userIdList = "";
 		
-		if(isEmpty(adminYn)){ // default 'Y'
-			adminYn = CoConstDef.FLAG_YES;
+		if(CoConstDef.FLAG_YES.equals(reviewerFlag)) {
+			userIdList = projectService.getReviewerList(CoConstDef.FLAG_YES);
+		} else {
+			userIdList = projectService.getAdminUserList();
 		}
 		
-		return projectService.getReviewerList(adminYn);
+		return userIdList;
 	}
 	
 	/**
@@ -394,7 +403,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the oss component data info
 	 */
 	@SuppressWarnings("unchecked")
-	private Map<String, Object> getOssComponentDataInfo(ProjectIdentification identification, String code) {
+	public Map<String, Object> getOssComponentDataInfo(ProjectIdentification identification, String code) {
 
 		if (isEmpty(identification.getReferenceDiv())) {
 			identification.setReferenceDiv(code);
@@ -2613,80 +2622,6 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	/**
-	 * Save bat.
-	 *
-	 * @param map the map
-	 * @param req the req
-	 * @param res the res
-	 * @param model the model
-	 * @return the response entity
-	 */
-	@SuppressWarnings("unchecked")
-	@PostMapping(value = PROJECT.SAVE_BAT)
-	public @ResponseBody ResponseEntity<Object> saveBat(@RequestBody HashMap<String, Object> map,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
-		// default validation
-		boolean isValid = true;
-		// last response map
-		Map<String, String> resMap = new HashMap<>();
-		// default 00:java error check code, 10:success code
-		String resCd = "00";
-
-		boolean prjYn = "prj".equals(String.valueOf(map.get("workType")));
-		String prjId = (String) map.get("referenceId");
-		String identificationSubStatusBat = (String) map.get("identificationSubStatusBat");
-		String mainGrid = (String) map.get("mainData");
-		String subGrid = (String) map.get("subData");
-
-		// 메인그리드
-		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponents = new ArrayList<>();
-		ossComponents = (List<ProjectIdentification>) fromJson(mainGrid, collectionType);
-
-		// 서브그리드
-		Type collectionType2 = new TypeToken<List<List<ProjectIdentification>>>() {}.getType();
-		List<List<ProjectIdentification>> ossComponentsLicense = new ArrayList<List<ProjectIdentification>>();
-		ossComponentsLicense = (List<List<ProjectIdentification>>) fromJson(subGrid, collectionType2);
-		ossComponentsLicense = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(), prjYn?CoConstDef.CD_DTL_COMPONENT_ID_BAT:CoConstDef.CD_DTL_COMPONENT_PARTNER_BAT, prjId), ossComponents,
-				ossComponentsLicense);
-
-		if (CoConstDef.FLAG_NO.equals(identificationSubStatusBat) && prjYn) {
-			Project project = new Project();
-			project.setIdentificationSubStatusBat(identificationSubStatusBat);
-			project.setPrjId(prjId);
-			projectService.updateSubStatus(project);
-		} else {
-			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
-			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
-			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
-
-			projectService.registComponentsBat(prjId, identificationSubStatusBat, ossComponents, ossComponentsLicense, prjYn);
-
-			try {
-				Project project = new Project();
-				project.setPrjId(prjId);
-				History h = new History();
-				h = projectService.work(project);
-				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-				project = (Project) h.gethData();
-				h.sethEtc(project.etcStr());
-				historyService.storeData(h);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-
-		}
-		
-		// success code set 10
-		resCd = "10";
-		resMap.put("isValid", String.valueOf(isValid));
-		resMap.put("resCd", resCd);
-		
-		return makeJsonResponseHeader(resMap);
-	}
-	
-	/**
 	 * List ajax.
 	 *
 	 * @param ossComponents the oss components
@@ -3889,7 +3824,7 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) throws Exception {
 		// 엑셀 분석
 		Map<String, List<Project>> modelList = ExcelUtil.getModelList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
-				request.getParameter("distributionTarget"), request.getParameter("prjId"));
+				request.getParameter("distributionTarget"), request.getParameter("prjId"), request.getParameter("modelListAppendFlag"), request.getParameter("modelSeq"));
 		
 		return makeJsonResponseHeader(modelList);
 	}
@@ -3938,4 +3873,72 @@ public class ProjectController extends CoTopComponent {
 
 		return makeJsonResponseHeader(fileId);
 	}
+	
+	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectController > ProjectController) >>>
+	@GetMapping(value=PROJECT.BOM_COMPARE, produces = "text/html; charset=utf-8")
+	public String bomCompare(@PathVariable String beforePrjId, 
+			@PathVariable String afterPrjId, 
+			HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		
+		if (beforePrjId.equals("0000")) {
+			model.addAttribute("beforePrjId", "");
+		}else {
+			model.addAttribute("beforePrjId", beforePrjId);
+		}
+		
+		if (afterPrjId.equals("0000")) {
+			model.addAttribute("afterPrjId", "");
+		}else {
+			model.addAttribute("afterPrjId", afterPrjId);
+		}
+		
+		return PROJECT.PAGE_JSP;
+	}
+			
+	@SuppressWarnings("unchecked")
+	@GetMapping(value=PROJECT.BOM_COMPARE_LIST_AJAX)
+	public @ResponseBody ResponseEntity<Object> bomCompareList(
+			@RequestParam("beforePrjId") String beforePrjId, @RequestParam("afterPrjId") String afterPrjId) throws Exception{
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		try {
+			ProjectIdentification beforeIdentification = new ProjectIdentification();
+			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			beforeIdentification.setReferenceId(beforePrjId);
+			beforeIdentification.setMerge("N");
+			
+			ProjectIdentification AfterIdentification = new ProjectIdentification();
+			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			AfterIdentification.setReferenceId(afterPrjId);
+			AfterIdentification.setMerge("N");
+			
+			Map<String, Object> beforeBom = new HashMap<String, Object>();
+			Map<String, Object> afterBom = new HashMap<String, Object>();
+			
+			try {
+				beforeBom = getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			try {
+				afterBom = getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
+				throw new Exception();
+			}
+		
+			String flag = "list";
+			List<Map<String, String>> bomCompareList = projectService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
+			resultMap.put("contents", bomCompareList);
+				
+			return makeJsonResponseHeader(true, "0" , resultMap);
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, "1");
+		}
+	}
+	// 20210701_BOM COMPARE FUNC MOVE (ProjectController > LgeProjectController) <<<
 }

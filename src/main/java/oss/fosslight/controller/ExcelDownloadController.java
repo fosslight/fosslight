@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +31,6 @@ import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.EXCELDOWNLOAD;
 import oss.fosslight.domain.OssMaster;
@@ -43,21 +43,24 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 @Slf4j
 public class ExcelDownloadController extends CoTopComponent {
 	@Resource private Environment env;
+	private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
+	
 	@Autowired FileService fileService;
 
 	@PostMapping(value = EXCELDOWNLOAD.EXCEL_POST)
 	public @ResponseBody ResponseEntity<Object> getExcelPost(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String donwloadId = null;
-		String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-						? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-						: "template";
 		
 		try {
 			if(map.containsKey("extParam")) {
-				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), templatePath, (String)map.get("extParam"));				
+				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, (String)map.get("extParam"));				
 			} else {
-				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), templatePath);
+				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			}
 			
 			if(isEmpty(donwloadId)){
@@ -75,13 +78,9 @@ public class ExcelDownloadController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> getExcelPostOss(@ModelAttribute OssMaster ossMaster,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String donwloadId = null;
-		
-		String templatePath = CommonFunction.propertyFlagCheck("checkflag", CoConstDef.FLAG_YES)
-				? CommonFunction.emptyCheckProperty("export.template.path", "/template")
-				: "template";
 				
 		try {
-			donwloadId = ExcelDownLoadUtil.getExcelDownloadIdOss("OSS", ossMaster , templatePath);
+			donwloadId = ExcelDownLoadUtil.getExcelDownloadIdOss("OSS", ossMaster , RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if(isEmpty(donwloadId)){
 				return makeJsonResponseHeader(false, "overflow");
@@ -118,7 +117,7 @@ public class ExcelDownloadController extends CoTopComponent {
 		String donwloadId = null;
 		
 		try {
-			donwloadId = ExcelDownLoadUtil.getChartExcel(params, CommonFunction.emptyCheckProperty("export.template.path", "/template"));
+			donwloadId = ExcelDownLoadUtil.getChartExcel(params, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if(isEmpty(donwloadId)){
 				return makeJsonResponseHeader(false, "overflow");

@@ -42,11 +42,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.google.gson.Gson;
 
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoAdminValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.ComBean;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoAdminValidator;
 
 @Component
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
@@ -356,6 +356,10 @@ public class CoTopComponent {
 		}
 		
 		return false;
+	}
+	
+	public static String getSessionString(String key) {
+		return (String) getSessionObject(key, false);
 	}
 	
 	public static Object getSessionObject(String key) {

@@ -1,10 +1,14 @@
+<!--
+Copyright (c) 2021 LG Electronics
+SPDX-License-Identifier: AGPL-3.0-only
+ -->
 <p align='right'>
   <a href="https://github.com/fosslight/fosslight_system/blob/main/README.md">[Eng]</a>
 </p>
 
 # FOSSLight
 
-![](https://img.shields.io/badge/license-AGPL3.0-red)
+[![GitHub license](https://img.shields.io/github/license/fosslight/fosslight.svg)](https://github.com/fosslight/fosslight/blob/main/LICENSE) [![GitHub release](https://img.shields.io/github/release/fosslight/fosslight.svg)](https://GitHub.com/fosslight/fosslight/releases/) [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/demo.fosslight.org.svg)](http://demo.fosslight.org/) [![Guide](http://img.shields.io/badge/-doc-blue?style=flat-square&logo=github&link=https://fosslight.org/fosslight-guide-en/)](https://fosslight.org/fosslight-guide-en/)
 
 <a href="https://fosslight.org"><img src="https://user-images.githubusercontent.com/50347670/115320108-287aeb80-a1bc-11eb-869b-5ef9431ac3d3.png" width="96"></a>  
 

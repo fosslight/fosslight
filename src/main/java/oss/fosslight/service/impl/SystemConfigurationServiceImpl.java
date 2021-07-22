@@ -230,7 +230,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 				T2CodeDtl externalItem = new T2CodeDtl();
 				Map<String, Object> value = (Map<String, Object>) externalDetailMap.get((String) key);
 				
-				externalItem.setCdNo(CoConstDef.CD_EXTERNAL_LINK_DETAIL);
+				externalItem.setCdNo(CoConstDef.CD_EXTERNAL_LINK);
 				externalItem.setCdDtlNo((String) key);
 				externalItem.setCdDtlNm((String) value.get("urlKey"));
 				externalItem.setCdSubNo("");
@@ -241,7 +241,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 				externalList.add(externalItem);
 			}
 			
-			codeService.setCodeDetails(externalList, CoConstDef.CD_EXTERNAL_LINK_DETAIL);
+			codeService.setCodeDetails(externalList, CoConstDef.CD_EXTERNAL_LINK);
 		}
 		
 		CoCodeManager.getInstance().refreshCodes();

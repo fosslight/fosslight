@@ -183,8 +183,8 @@ public final class Url {
 		public static final String ANALYSIS_RESULT_DETAIL_ID = PATH + "/getAnalysisResultDetail/{groupId}";
 		public static final String ANALYSIS_RESULT_DETAIL_JSP = TILES_ROOT + PATH + "/ossAnalysisResultDetailpopup";
 		
-		public static final String CHECK_LICENSE_TEXT_VALIDATION = PATH + "/checkLicenseTextValid";
-		public static final String START_CHECK_LICENSE_TEXT = PATH + "/startCheckLicenseText";
+		public static final String CHECK_LICENSE_TEXT_VALIDATION = "/checkLicenseText/valid";
+		public static final String START_CHECK_LICENSE_TEXT = "/checkLicenseText/start";
 		
 		public static final String UPDATE_ANALYSIS_COMPLETE = PATH + "/updateAnalysisComplete";
 	}
@@ -286,6 +286,12 @@ public final class Url {
 		public static final String MODEL_FILE = PATH + "/modelFile";
 		
 		public static final String SUPPLEMEMT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
+		
+		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePrjId}/{afterPrjId}";
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
+		public static final String BOM_COMPARE_LIST_AJAX = PATH + "/bomCompare/listAjax";
+		
+		public static final String PROJECT_STATUS = PATH + "/getProjectStatus";
 	}
 	
 	public static final class VERIFICATION {
@@ -625,8 +631,8 @@ public final class Url {
 	public static final class IMAGE_VIEW {
 		public static final String PATH = "/imageView";
 		
-		public static final String IMAGE = PATH + "/{imageName}";
-		public static final String GUI_REPORT_ID_NM = PATH + "/guiReport/{batId}/{imageName}";
+		public static final String IMAGE = PATH + "/{imageName:.+}";
+		public static final String GUI_REPORT_ID_NM = PATH + "/guiReport/{batId}/{imageName:.+}";
 	}
 	
 	public static final class IMAGE_UPLOAD {
@@ -662,7 +668,10 @@ public final class Url {
 			
 			/** API Project List 조회 */
 			public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/prj_search";
-		
+			
+			/** API Project Model List 조회 */
+			public static final String FOSSLIGHT_API_MODEL_SEARCH			= "/model_search";
+			
 			/** API Project BOM Tab Export */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export"; 
 			

@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchControls;
+import javax.naming.directory.SearchResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -133,7 +136,7 @@ public class T2UserServiceImpl implements T2UserService {
 			
 			List<Project> prjList = null;
 			List<PartnerMaster> partnerList = null;
-			List<Map<String, Object>> batList = null;
+//			List<Map<String, Object>> batList = null;
 			
 			if(CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES)) {
 				// project watcher 초대여부
@@ -168,17 +171,17 @@ public class T2UserServiceImpl implements T2UserService {
 				}
 			}
 			
-			if(batList != null) {
-				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
-				for(Map<String, Object> bean : batList) {
-					String batId = (String) bean.get("baId");
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED);
-					mailBean.setParamBatId(batId);
-					mailBean.setParamUserId(t2Users.getUserId());
-					
-					CoMailManager.getInstance().sendMail(mailBean);
-				}
-			}
+//			if(batList != null) {
+//				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
+//				for(Map<String, Object> bean : batList) {
+//					String batId = (String) bean.get("baId");
+//					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED);
+//					mailBean.setParamBatId(batId);
+//					mailBean.setParamUserId(t2Users.getUserId());
+//					
+//					CoMailManager.getInstance().sendMail(mailBean);
+//				}
+//			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -392,20 +395,39 @@ public class T2UserServiceImpl implements T2UserService {
 	}
 
 	@Override
-	public boolean checkAdAccounts(String userId, String userPw) {
+	public boolean checkAdAccounts(Map<String, String> userInfo, String idKey, String pwKey) {
 		boolean isAuthenticated = false;
+		
+		String userId = (String) userInfo.get(idKey);
+		String userPw = (String) userInfo.get(pwKey);
+		
+		String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
 		Hashtable<String, String> properties = new Hashtable<String, String>();
 		properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
 		properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
 		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-		properties.put(Context.SECURITY_PRINCIPAL, userId);
+		properties.put(Context.SECURITY_PRINCIPAL, userId+ldapDomain);
 		properties.put(Context.SECURITY_CREDENTIALS, userPw);
-
+		
+		String[] attrIDs = { "cn", "mail" };
+		String filter = "(cn=" + userId + ")";
+		
 		DirContext con = null;
+		SearchControls constraints = new SearchControls();
+		NamingEnumeration<SearchResult> m_ne = null;
 		
 		try {
 			con = new InitialDirContext(properties);
 			isAuthenticated = true;
+			
+			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+			
+			if(attrIDs != null) {
+				constraints.setReturningAttributes(attrIDs);
+			}
+			
+			String searchKey = StringUtil.avoidNull(CommonFunction.getProperty("ldap.search.key"), "");
+			m_ne = con.search(searchKey, filter, constraints);
 		} catch (NamingException e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -414,6 +436,23 @@ public class T2UserServiceImpl implements T2UserService {
 					con.close();
 				} catch (NamingException e) {}
 			}
+		}
+		
+		try {
+			SearchResult sr = null;
+
+			while (m_ne.hasMoreElements()) {
+				sr = (SearchResult) m_ne.next();
+				if(sr != null) {
+					String email = (String) sr.getAttributes().get("mail").get();
+					
+					if(!StringUtil.isEmpty(email)) {
+						userInfo.put("EMAIL", email);
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
 		
 		return isAuthenticated;
@@ -528,7 +567,7 @@ public class T2UserServiceImpl implements T2UserService {
 			return false;
 		}
 		String encPassword = userInfo.getPassword();
-		return new BCryptPasswordEncoder().matches(rawPassword, encPassword);
+		return rawPassword.equals(encPassword) || new BCryptPasswordEncoder().matches(rawPassword, encPassword);
 	}
 
 	@Override

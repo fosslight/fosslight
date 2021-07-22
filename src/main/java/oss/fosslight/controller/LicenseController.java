@@ -25,10 +25,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
-import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.T2CoLicenseValidator;
-import oss.fosslight.common.T2CoValidationResult;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.LICENSE;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -40,6 +38,8 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoLicenseValidator;
 
 @Controller
 @Slf4j

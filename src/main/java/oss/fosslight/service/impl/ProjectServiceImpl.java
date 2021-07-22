@@ -13,9 +13,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +33,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationConfig;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.History;
@@ -59,6 +58,9 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationConfig;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Service
 @Slf4j
@@ -99,6 +101,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return sb.toString();
 	}
+	
+	@Override
+	public String getAdminUserList() {
+		List<T2Users> userList = userMapper.selectAdminUser();
+		StringBuilder sb = new StringBuilder();
+		sb.append( " : " +  ";");
+		
+		for (T2Users user : userList) {
+			user.getUserId();
+			sb.append(user.getUserId() + ":" + user.getUserName() + ";");
+		}
+		
+		return sb.toString();
+	}
+	
 	
 	@Override
 	public Map<String, Object> getProjectList(Project project) {
@@ -2048,125 +2065,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
-	private Map<String, String[]> loadBinaryText(String fileId, boolean pathFlag) {
-		Map<String, String[]> loadData = new HashMap<>();
-		T2File binaryTextFile = fileService.selectFileInfoById(fileId);
-		
-		if(binaryTextFile != null && binaryTextFile.getExt().equals("txt")) {
-			log.info("loadBinaryText : " + binaryTextFile.getLogiNm());
-			
-			String _contents = avoidNull(CommonFunction.getStringFromFile(binaryTextFile.getLogiPath() + "/" + binaryTextFile.getLogiNm()));
-			
-			if(!isEmpty(_contents)) {
-				boolean isHeader = true;
-				int idx_checkSum = -1;
-				int idx_tlsh = -1;
-				int idx_binaryName = -1;
-				
-				for(String line : _contents.split(System.lineSeparator())) {
-					if(isHeader) {
-						String[] hdata = line.split("\t", -1);
-						
-						// header 정보가 없을 경우 처리 중단
-						if(hdata == null || isEmpty(line)) {
-							log.warn("Header row is empty :" + binaryTextFile.getLogiNm());
-							
-							break;
-						}
-						
-						int idx = 0;
-						
-						for(String s : hdata) {
-							if(idx_binaryName < 0 && (s.trim().equalsIgnoreCase("Binary Name") || s.trim().equalsIgnoreCase("Binary"))) {
-								idx_binaryName = idx;
-							} else if(idx_checkSum < 0 && (s.trim().equalsIgnoreCase("checksum") || s.trim().equalsIgnoreCase("sha1sum"))) {
-								idx_checkSum = idx;
-							} else if(idx_tlsh < 0 && (s.trim().equalsIgnoreCase("tlsh"))) {
-								idx_tlsh = idx;
-							}
-							
-							idx ++;
-						}
-						
-						isHeader = false;
-						
-						continue;
-					}
-					
-					String binaryName, checkSum, tlsh;
-					String[] data = line.split("\t", -1);
-					
-					if(idx_binaryName > -1 && idx_checkSum > -1 && idx_tlsh > -1) {
-						if(data == null) {
-							log.warn("unexpected format Bin binary text : " + line);
-							
-							continue;
-						} else if(data.length < idx_binaryName + 1) {
-							log.warn("unexpected format Bin binary text (idx_binaryName index): " + line); 
-							
-							continue;
-						} else if(data.length < idx_checkSum + 1) {
-							log.warn("unexpected format Bin binary text (idx_checkSum index): " + line); 
-							
-							continue;
-						} else if(data.length < idx_tlsh + 1) {
-							log.warn("unexpected format Bin binary text (idx_tlsh index): " + line); 
-							
-							continue;
-						}
-						
-						binaryName = data[idx_binaryName].trim();
-						checkSum = data[idx_checkSum].trim();
-						tlsh = data[idx_tlsh].trim();
-						
-						// tils가 추출되지 않은 경우 공백
-						if(isEmpty(binaryName) || isEmpty(checkSum)) {
-							log.warn("unexpected format Bin binary text : " + line);
-							
-							continue;
-						}
-					} else {
-						// binary name을 key로 sha256sum과 tlsh 를 격납한다.
-						if(data == null || data.length !=3 || isEmpty(data[0]) || isEmpty(data[1])) {
-							log.warn("unexpected format Bin binary text : " + line);
-							
-							continue;
-						}
-						
-						binaryName = data[0].trim();
-						
-						if(binaryName.endsWith("/") || binaryName.endsWith("\\")) {
-							log.warn("unexpected format Bin binary text (is not file) : " + line);
-							
-							continue;
-						}
-						
-						checkSum = data[1].trim();
-						tlsh = data[2].trim();
-					}
-
-					if(!pathFlag){
-						if(binaryName.indexOf("/") > -1) {
-							binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
-						}
-						
-						if(binaryName.indexOf("\\") > -1) {
-							binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
-						}
-					}
-					
-					if(isEmpty(binaryName)) {
-						continue;
-					}
-					
-					loadData.put(binaryName, new String[]{checkSum, avoidNull(tlsh, "0")});
-				}					
-			}
-		}
-		
-		return loadData;
-	}
-	
 	@Transactional
 	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList, Map<String, List<Map<String, Object>>> binaryRegInfoMap) {
 		for(OssComponents bean : componentList) {
@@ -3921,7 +3819,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String makeZipFileId(Map<String, Object> paramMap, Project project) {
 		String fileId = "";
-		String filePath = CommonFunction.emptyCheckProperty("supplement.notice.path", "/supplement_notice") + "/" + project.getPrjId();
+		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
 		File dir = new File(filePath);
 		
 		if(dir.exists()) {  // 전체 삭제 예쩡( html file은 제외함)
@@ -4004,7 +3902,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String makeSupplementFileId(String contents, Project project) {
 		String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), "needtoadd-notice",  DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN), "html");
-		String filePath = CommonFunction.emptyCheckProperty("supplement.notice.path", "/supplement_notice") + "/" + project.getPrjId();
+		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
 		String fileId = "";
 		
 		File fileDir = new File(filePath);
@@ -4138,4 +4036,323 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return resultData;
 	}
+	
+	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) >>>
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag)
+			throws Exception {
+		Map<String, Object> addList = new HashMap<String, Object>();
+		Map<String, Object> deleteList = new HashMap<String, Object>();
+		
+		List<Map<String, String>> returnList = new ArrayList<Map<String, String>>();
+		
+		// bom compare 대상 추출 하기 전에 완전일치하는 대상은 제외하고 처리함 ?
+		// bflist loop -> aflist와 ossname & oss version이 완전 일치하는 대상은 제거함.
+		// aflist loop -> bflist와 ossname & oss version이 완전 일치하는 대상은 제거함.
+		// 이후 delete / change / add 대상 추출함.
+		
+		List<ProjectIdentification> filteredBeforeBomList = beforeBomList
+				.stream()
+				.filter(bfList-> 
+						afterBomList
+								.stream()
+								.filter(afList -> 
+										(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim().replaceAll(" ", "")))
+										.equals(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim().replaceAll(" ", "")))
+										).collect(Collectors.toList()).size() == 0
+						).collect(Collectors.toList());
+		
+		List<ProjectIdentification> filteredAfterBomList = afterBomList
+				.stream()
+				.filter(afList-> 
+						beforeBomList
+								.stream()
+								.filter(bfList -> 
+										(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim().replaceAll(" ", "")))
+										.equals(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim().replaceAll(" ", "")))
+										).collect(Collectors.toList()).size() == 0
+						).collect(Collectors.toList());
+		
+		// status > add
+		int addchk = 0;
+		for(ProjectIdentification after : filteredAfterBomList) {
+			String ossName = after.getOssName();
+			int addTargetCnt = filteredBeforeBomList.stream().filter(before -> (before.getOssName()).equals(ossName)).collect(Collectors.toList()).size();
+			
+			if(addTargetCnt == 0) {
+				Map<String, String> addMap = new HashMap<String, String>();
+				
+				String afterossname = after.getOssName();
+				String version = avoidNull(after.getOssVersion(), "");
+				
+				if (!version.equals("")) {
+					afterossname += " (" + version + ")";
+				}
+				
+				String afterlicense = after.getLicenseName();
+				
+				if (flag.equals("list")) {
+					afterossname = changeStyle("add", afterossname);
+					afterlicense = changeStyle("add", getLicenseNameSort(afterlicense.trim().replaceAll(" ", "")));
+				}
+				
+				addMap.put("status", "add");
+				addMap.put("beforeossname", "");
+				addMap.put("beforelicense", "");
+				addMap.put("afterossname", afterossname);
+				addMap.put("afterlicense", afterlicense);
+				addList.put(getCompareKey(after), addMap);
+				
+				addchk++;
+			}	
+		}
+		
+		if (addchk > 0) {
+			for (String key : addList.keySet()) {
+				returnList.add((Map<String, String>) addList.get(key));
+			}
+		}
+				
+		// status > delete
+		int deletechk = 0;
+		for(ProjectIdentification before : filteredBeforeBomList) {
+			String ossName = before.getOssName();
+			List<ProjectIdentification> afterList = filteredAfterBomList.stream().filter(after -> (after.getOssName()).equals(ossName)).collect(Collectors.toList());
+			
+			if(afterList.size() == 0) {
+				Map<String, String> deleteMap = new HashMap<String, String>();
+				
+				String beforeossname = before.getOssName();
+				String version = avoidNull(before.getOssVersion(), "");
+				
+				if (!version.equals("")) {
+					beforeossname += " (" + version + ")";
+				}
+				
+				String beforelicense = before.getLicenseName();
+				
+				if (flag.equals("list")) {
+					beforeossname = changeStyle("delete", beforeossname);
+					beforelicense = changeStyle("delete", getLicenseNameSort(beforelicense.trim().replaceAll(" ", "")));
+				}
+				
+				deleteMap.put("status", "delete");
+				deleteMap.put("beforeossname", beforeossname);
+				deleteMap.put("beforelicense", beforelicense);
+				deleteMap.put("afterossname", "");
+				deleteMap.put("afterlicense", "");
+				deleteList.put(getCompareKey(before), deleteMap);
+				
+				deletechk++;
+			}
+		}
+		
+		if (deletechk > 0) {
+			for (String key : deleteList.keySet()) {
+				returnList.add((Map<String, String>) deleteList.get(key));
+			}
+		}
+		
+		// status > change
+		int changechk = 0;
+		if (filteredBeforeBomList.size() > 0 && filteredAfterBomList.size() > 0) {
+			List<ProjectIdentification> beforeBomResult = new ArrayList<ProjectIdentification>();
+			
+			int chk = 0;
+			
+			for (ProjectIdentification beforeBomCheckVO : filteredBeforeBomList) {
+				ProjectIdentification addBeforeBomVO = new ProjectIdentification();
+				addBeforeBomVO.setOssName(beforeBomCheckVO.getOssName());
+				if (avoidNull(beforeBomCheckVO.getOssVersion(), "").equals("")) {
+					addBeforeBomVO.setOssVersion(beforeBomCheckVO.getOssName());
+				}else {
+					addBeforeBomVO.setOssVersion(beforeBomCheckVO.getOssName() + "("+ beforeBomCheckVO.getOssVersion() + ")");
+				}
+				addBeforeBomVO.setLicenseName(getLicenseNameSort(avoidNull(beforeBomCheckVO.getLicenseName(), "N/A").replaceAll(" ", "")));
+									
+				if (beforeBomResult.size() > 0) {
+					for (int j=0; j<beforeBomResult.size(); j++) {
+						ProjectIdentification piVO = beforeBomResult.get(j);
+						if (addBeforeBomVO.getOssName().equals(piVO.getOssName())) {
+							ProjectIdentification changePIVO = new ProjectIdentification();
+							changePIVO.setOssName(piVO.getOssName());
+							changePIVO.setOssVersion(ossCheck("ossName", piVO.getOssVersion(), piVO.getLicenseName(), addBeforeBomVO.getOssVersion(), addBeforeBomVO.getLicenseName()));
+							changePIVO.setLicenseName(ossCheck("licenseName", piVO.getOssVersion(), piVO.getLicenseName(), addBeforeBomVO.getOssVersion(), addBeforeBomVO.getLicenseName()));
+							beforeBomResult.add(changePIVO);
+							beforeBomResult.remove(j);
+							chk++;
+						}
+					}
+				}
+				
+				if (chk == 0) {
+					beforeBomResult.add(addBeforeBomVO);
+				}
+				chk = 0;
+			}
+			
+			List<ProjectIdentification> afterBomResult = new ArrayList<ProjectIdentification>();
+			
+			for (ProjectIdentification afterBomCheckVO : filteredAfterBomList) {
+				ProjectIdentification addAfterBomVO = new ProjectIdentification();
+				addAfterBomVO.setOssName(afterBomCheckVO.getOssName());
+				if (avoidNull(afterBomCheckVO.getOssVersion(), "").equals("")) {
+					addAfterBomVO.setOssVersion(afterBomCheckVO.getOssName());
+				}else {
+					addAfterBomVO.setOssVersion(afterBomCheckVO.getOssName() + "(" + avoidNull(afterBomCheckVO.getOssVersion(), "N/A") + ")");
+				}
+				addAfterBomVO.setLicenseName(getLicenseNameSort(avoidNull(afterBomCheckVO.getLicenseName().trim(), "N/A").replaceAll(" ", "")));
+				
+				if (afterBomResult.size() > 0) {
+					for (int j=0; j<afterBomResult.size(); j++) {
+						ProjectIdentification piVO = afterBomResult.get(j);
+						if (addAfterBomVO.getOssName().equals(piVO.getOssName())) {
+							ProjectIdentification changePIVO = new ProjectIdentification();
+							changePIVO.setOssName(addAfterBomVO.getOssName());
+							changePIVO.setOssVersion(ossCheck("ossName", piVO.getOssVersion(), piVO.getLicenseName(), addAfterBomVO.getOssVersion(), addAfterBomVO.getLicenseName()));
+							changePIVO.setLicenseName(ossCheck("licenseName", piVO.getOssVersion(), piVO.getLicenseName(), addAfterBomVO.getOssVersion(), addAfterBomVO.getLicenseName()));
+							afterBomResult.add(changePIVO);
+							afterBomResult.remove(j);
+							chk++;
+						}
+					}
+				}
+				
+				if (chk == 0) {
+					afterBomResult.add(addAfterBomVO);
+				}
+				chk = 0;
+			}
+			
+			for (ProjectIdentification beforeResult : beforeBomResult) {
+				for (ProjectIdentification afterResult : afterBomResult) {
+					if (beforeResult.getOssName().equals(afterResult.getOssName())) {
+						if (!beforeResult.getOssVersion().equals(afterResult.getOssVersion()) || !beforeResult.getLicenseName().equals(afterResult.getLicenseName())) {
+							Map<String, String> map = new HashMap<String, String>();
+							map.put("status", "change");
+							if (flag.equals("list")) {
+								map.put("beforeossname", changeStyle("change", beforeResult.getOssVersion()));
+								map.put("beforelicense", changeStyle("change", beforeResult.getLicenseName()));
+								map.put("afterossname", changeStyle("change", afterResult.getOssVersion()));
+								map.put("afterlicense", changeStyle("change", afterResult.getLicenseName()));
+							}else {
+								map.put("beforeossname", beforeResult.getOssVersion());
+								map.put("beforelicense", beforeResult.getLicenseName());
+								map.put("afterossname", afterResult.getOssVersion());
+								map.put("afterlicense", afterResult.getLicenseName());
+							}
+							
+							returnList.add(map);
+							
+							changechk++;
+						}
+					}
+				}
+			}
+		}
+		
+		if (addchk == 0 && deletechk == 0 && changechk == 0) {
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("status", "Same");
+			returnList.add(map);
+		}
+		
+		return returnList;
+	}
+	
+	private String getCompareKey(ProjectIdentification param) {
+		return param.getOssName().toLowerCase() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName();
+	}
+	
+	private static String changeStyle(String flag, String text) {
+		String returnVal = "";
+		
+		if (flag.equals("delete")){
+			returnVal = "<span style=\"background-color:#FFCCCC;\">" + text + "</span>";
+		}else if (flag.equals("change") || flag.equals("add")){
+			returnVal = "<span style=\"background-color:yellow\">" + text + "</span>";
+		}
+
+		return returnVal;
+	}
+	
+	private String getLicenseNameSort(String licenseName) {
+		String sortedValue = "";
+		
+		String splitLicenseNm[] = licenseName.split(",");
+		Arrays.sort(splitLicenseNm);
+		
+		for (int i=0; i< splitLicenseNm.length; i++) {
+			sortedValue += splitLicenseNm[i];
+			if (i<splitLicenseNm.length-1) {
+				sortedValue += ", ";
+			}
+		}
+		
+		return sortedValue;
+	}
+	
+	private String ossCheck(String flag, String ossNameVersion, String ossLicenseName, String ossNameVersion2, String ossLicenseName2) {
+		String splitOssNameVersion[] = ossNameVersion.split("/");
+		
+		int count = splitOssNameVersion.length;
+		
+		if (flag.equals("ossName")) {
+			int cnt = 0;
+			
+			for (int i=0; i<count; i++) {
+				if (splitOssNameVersion[i].replaceAll(" ", "").equals(ossNameVersion2)) {
+					cnt++;
+				}
+			}
+			
+			if (cnt > 0) {
+				return ossNameVersion;
+			}else {
+				return ossNameVersion + " / " + ossNameVersion2;
+			}
+		}else {
+			String licenseNmArr1[] = ossLicenseName.split("/");
+			
+			int chk = 0;
+			for (int i=0; i<count; i++) {
+				if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+					List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
+					List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
+					
+					Set<String> set = new LinkedHashSet<>(licenseNmChk1);
+					set.addAll(licenseNmChk2);
+					
+					List<String> mergeList = new ArrayList<>(set);
+					
+					if (mergeList.size() > 0) {
+						String str = "";
+						for (int j=0; j<mergeList.size(); j++) {
+							str += mergeList.get(j);
+							if (j < mergeList.size()-1) {
+								str += ", ";
+							}
+						}
+						licenseNmArr1[i] = str;
+						chk++;
+					}
+				}
+			}
+			
+			if (chk > 0) {
+				String strMerge = "";
+				for (int i=0; i<licenseNmArr1.length; i++) {
+					strMerge += licenseNmArr1[i];
+					if (i<licenseNmArr1.length-1) {
+						strMerge += " / ";
+					}
+				}
+				return strMerge;
+			}else {
+				return ossLicenseName + " / " + ossLicenseName2;
+			}
+		}
+	}
+	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) <<<
 }

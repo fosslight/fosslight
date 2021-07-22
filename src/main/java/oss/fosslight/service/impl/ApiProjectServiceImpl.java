@@ -54,7 +54,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
 		
 		if(projectCnt > 0) {
-			list = apiProjectMapper.selectProjectTotal(paramMap);
+			list = apiProjectMapper.selectProject(paramMap);
 			
 			for(Map<String, Object> map : list) {
 				String prjId = (String) map.get("prjId").toString();
@@ -72,9 +72,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
 				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
 				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
-				map.put("DISTRIBUTION_STATUS", distributionStatus);					
+				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));					
 				map.put("VULNERABILITY_SCORE", nvdMaxScore);
-				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
 			}
 		}
 		
@@ -550,6 +550,28 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		resultMap.put("change", changeList.values());
 		
 		return resultMap;
+	}
+	
+	@Override
+	public Map<String, Object> selectModelList(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> list = apiProjectMapper.selectProject(paramMap);
+		List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
+		
+		for(Map<String, Object> map : list) {
+			Map<String, Object> modelMap = new HashMap<String, Object>();
+			String prjId = (String) map.get("prjId").toString();
+			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
+			
+			modelMap.put("prjId", prjId);
+			modelMap.put("modelList", modelList);
+			contents.add(modelMap);
+		}
+		
+		result.put("records", list.size());
+		result.put("contents", contents);
+		
+		return result;
 	}
 	
 	private String getCompareKey(Map<String, Object> paramMap) {

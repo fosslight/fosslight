@@ -37,8 +37,6 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.T2CoProjectValidator;
-import oss.fosslight.common.T2CoValidationResult;
 import oss.fosslight.common.Url.VERIFICATION;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -60,6 +58,8 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Controller
 @Slf4j
@@ -114,7 +114,8 @@ public class VerificationController extends CoTopComponent {
 					for(String license : bean.getLicenseName().split(",", -1)) {
 						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
 						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
-								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())) {
+								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())
+								&& CoConstDef.FLAG_YES.equals(licenseBean.getObligationDisclosingSrcYn())) {
 							userGuideLicenseList.add(licenseBean);
 							duplLicenseCheckList.add(licenseBean.getLicenseId());
 						}
@@ -229,6 +230,13 @@ public class VerificationController extends CoTopComponent {
 		
 		//결과값 resultList에 담기
 		resultList.add(list);
+		
+		// 20210625_fileUpload 시 projectMaster table save_START
+		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
+		String registFileId = list.get(0).getRegistSeq();
+		
+		verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
+		// 20210625_fileUpload 시 projectMaster table save_END
 		
 		return toJson(resultList);
 	}
