@@ -36,6 +36,11 @@
 				"2" : new Array(),
 				"3" : new Array()
 		};
+		var detectedLicenseValid = {
+				"1" : true,
+				"2" : true,
+				"3" : true
+		};
 		
 		var Ctrl_fn = {
 			init: function(){
@@ -71,6 +76,8 @@
 
 				$(".detailNickName"+seq+" > *").remove(); // nickName clear
 				$(".detailDownloadLocation"+seq+" > *").remove(); //downloadLocation clear
+				$(".detailDetectedLicense"+seq+" > *").remove(); //detectedLicense clear
+				
 				$("#lt"+seq+" td").html('');
 				$("#ob"+seq+" td").html('');
 				
@@ -97,7 +104,21 @@
 						});
 				    }
 				});
-
+				
+				selectData.detectedLicense.split(",").forEach(function(licenseName){
+					if(licenseName != ''){
+						var cloneData = common_data.detectLicenseClone.split("autoComOssLicense1").join("autoComOssLicense"+seq); // autoComplete 기능으로 인해 cloneData를 별도로 가공함.
+						$(cloneData).appendTo('.detailDetectedLicense'+seq);
+						$(".detailDetectedLicense"+seq+" input[type=text]:last").val(licenseName);
+						
+						grid_fn.setCustomAutoComplete('single', '', seq);
+						
+						$('.smallDelete').on('click', function(){
+							$(this).parent().parent().remove();
+						});
+					}
+				});
+				
 				var licenseData = selectData.licenseName.split(/\s(?=AND|OR)/g);
 				var licenseDiv = licenseData.length > 1 ? "M" : "S";
 				$("[name='licenseDiv"+seq+"']").eq(licenseDiv.toUpperCase() == "M" ? 1 : 0).trigger("click");
@@ -657,6 +678,19 @@
 					});
 				});
 
+				//Detect License Input 추가
+				$('input[id^=detectedLicenseAdd]').on('click', function(){
+					var seq = $(this).attr("id").replace(/[^\d]+/g, "");
+					var cloneData = common_data.detectLicenseClone.split("autoComOssLicense1").join("autoComOssLicense"+seq); // autoComplete 기능으로 인해 cloneData를 별도로 가공함.
+					$(cloneData).appendTo('.detailDetectedLicense'+seq);
+					
+					grid_fn.setCustomAutoComplete('single', '', seq);
+					
+					$('.smallDelete').on('click', function(){
+						$(this).parent().parent().remove();
+					});
+				});
+				
 				$("input[id^=downloadLocationAdd]").on('click', function(){
 					var seq = $(this).attr("id").replace(/[^\d]+/g, "");
 					$(common_data.downloadLocationClone).appendTo(".detailDownloadLocation"+seq);
@@ -746,9 +780,10 @@
 							}
 						}
 					
-						if(!jsValidResult) {
+						if(!jsValidResult|| !detectedLicenseValid[seq]) {
 							alertify.error('<spring:message code="msg.common.valid" />', 0);
-
+							$("span.retxt").show();
+							
 							return false;
 						}
 					
@@ -776,6 +811,7 @@
 			groupId : "${groupId}",
 			nickNameClone : "",
 			downloadLocationClone : "",
+			detectLicenseClone : "",
 			nickNameCloneIdx : 1,
 			list1 : ${'{rows:[]}'},
 			list2 : ${'{rows:[]}'},
@@ -784,7 +820,8 @@
 				// multi대비한 clone 정보 set
 				common_data.nickNameClone = $('.multiTxtSet').clone().html();
 				common_data.downloadLocationClone = $('.multiDownloadLocationSet').clone().html();
-
+				common_data.detectLicenseClone = $('.multiDetectedLicenseSet').clone().html();
+				
 				//자동완성 데이터 리스트 가져오기
 				commonAjax.getLicenseTags().success(function(data, status, headers, config){
 					if(data != null){
@@ -1047,21 +1084,25 @@
 					}
 				}
 			}, 
-			setCustomAutoComplete : function(div, _target, seq){				
+			setCustomAutoComplete : function(div, _target, seq){
 				var selected = false;
 				
 				if(div == 'single'){
 					$( '.autoComOssLicense'+seq ).autocomplete({
 						source: licenseTags,
 						select: function( event, ui ) {
-							$("#licenseName"+seq).parent().find("span.retxt:first").hide();
+							var target = $(this).attr("id");
 
-							var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
-							$('#licenseName'+seq).val(licenseName);
-							
-							grid_fn.showLicenseText(licenseName, _target, seq);
-							
-							return false;
+							if(target == "licenseName"+seq){
+								$("#licenseName"+seq).parent().find("span.retxt:first").hide();
+	
+								var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
+								$('#licenseName'+seq).val(licenseName);
+								
+								grid_fn.showLicenseText(licenseName, _target, seq);
+								
+								return false;
+							}
 						},
 						minLength: 0,
 						open: function() {
@@ -1072,22 +1113,43 @@
 						close: function () {
 							$(this).attr('state', 'closed');
 							var _item = grid_fn.checkLicenseSelected($(this).val());
-
-							if(_item == null) {
-								$("#licenseName"+seq).parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
+							var targetId = $(this).attr("id");
+							
+							if(targetId == "licenseName"+seq){
+								if(_item == null) {
+									$("#licenseName"+seq).parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
+								} else {
+									$("#licenseName"+seq).parent().find("span.retxt:first").hide();
+	
+									var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+									$('#licenseName'+seq).val(licenseName);
+									$('#licenseType').val(_item.licenseType);
+									$('input[name=obligationType]').val(_item.obligationCode);
+									$('#lt'+seq+' td').html(_item.licenseType);
+									$('#ob'+seq+' td').html('');
+									
+									$(_item.obligation).appendTo('#ob'+seq+' td');
+									
+									selected = true;
+								}
 							} else {
-								$("#licenseName"+seq).parent().find("span.retxt:first").hide();
-
-								var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
-								$('#licenseName'+seq).val(licenseName);
-								$('#licenseType').val(_item.licenseType);
-								$('input[name=obligationType]').val(_item.obligationCode);
-								$('#lt'+seq+' td').html(_item.licenseType);
-								$('#ob'+seq+' td').html('');
+								// detected License
+								$(this).parent().next("span.retxt:first").empty();
+								detectedLicenseValid[seq] = true; // reset
 								
-								$(_item.obligation).appendTo('#ob'+seq+' td');
-								
-								selected = true;
+								if(_item != null){
+									var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+									$(this).val(licenseName);
+									
+									selected = true;
+								} else {
+									var value = $(this).val();
+									
+									if(value != ""){
+										$(this).parent().next("span.retxt:first").html('<spring:message code="msg.oss.unknown.license" />').show();
+										detectedLicenseValid[seq] = false;
+									}
+								}
 							}
 						}
 				    })
@@ -1616,7 +1678,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr">License</th>
+										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense1">
 												<span class="radioSet"><input type="radio" name="licenseDiv1" id="single" value="S"/><label for="single">Single License</label></span>
@@ -1632,6 +1694,18 @@
 												</div>
 											</div>
 											<div id="disp_licenseText1" style="display: none;"></div>
+										</td>
+									</tr>
+									<tr>
+										<th class="dCase">Detected License</th>
+										<td class="dCase">
+											<div class="multiItemSet multiDetectedLicenseSet detailDetectedLicense1">
+												<div class="required">
+													<span><input type="text" name="detectedLicenses" class="autoComOssLicense1 w250"/><input type="button" value="Delete" class="smallDelete"/></span>
+													<span class="retxt"></span>
+												</div>
+											</div>
+											<input id="detectedLicenseAdd1" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
 									</tr>
 									<tr>
@@ -1651,7 +1725,7 @@
 									<tr>
 										<th class="dCase">Download<br>Location</th>
 										<td class="dCase">
-											<div class="multiDownloadLocationSet detailDownloadLocation1" style="width:290px !important">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation1">
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations1" class="w250"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
@@ -1749,7 +1823,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr">License</th>
+										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense2">
 												<span class="radioSet"><input type="radio" name="licenseDiv2" id="single" value="S"/><label for="single">Single License</label></span>
@@ -1765,6 +1839,18 @@
 												</div>
 											</div>
 											<div id="disp_licenseText2" style="display: none;"></div>
+										</td>
+									</tr>
+									<tr>
+										<th class="dCase">Detected License</th>
+										<td class="dCase">
+											<div class="multiItemSet multiDetectedLicenseSet detailDetectedLicense2">
+												<div class="required">
+													<span><input type="text" name="detectedLicenses" class="autoComOssLicense2 w250"/><input type="button" value="Delete" class="smallDelete"/></span>
+													<span class="retxt"></span>
+												</div>
+											</div>
+											<input id="detectedLicenseAdd2" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
 									</tr>
 									<tr>
@@ -1784,7 +1870,7 @@
 									<tr>
 										<th class="dCase">Download<br>Location</th>
 										<td class="dCase">
-											<div class="multiDownloadLocationSet detailDownloadLocation2">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation2">
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations2" class="w250"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
@@ -1882,7 +1968,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr">License</th>
+										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense3">
 												<span class="radioSet"><input type="radio" name="licenseDiv3" id="single" value="S"/><label for="single">Single License</label></span>
@@ -1898,6 +1984,18 @@
 												</div>
 											</div>
 											<div id="disp_licenseText3" style="display: none;"></div>
+										</td>
+									</tr>
+									<tr>
+										<th class="dCase">Detected License</th>
+										<td class="dCase">
+											<div class="multiItemSet multiDetectedLicenseSet detailDetectedLicense3">
+												<div class="required">
+													<span><input type="text" name="detectedLicenses" class="autoComOssLicense3 w250"/><input type="button" value="Delete" class="smallDelete"/></span>
+													<span class="retxt"></span>
+												</div>
+											</div>
+											<input id="detectedLicenseAdd3" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
 									</tr>
 									<tr>
@@ -1917,7 +2015,7 @@
 									<tr>
 										<th class="dCase">Download<br>Location</th>
 										<td class="dCase">
-											<div class="multiDownloadLocationSet detailDownloadLocation3">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation3">
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations3" /><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>

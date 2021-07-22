@@ -162,6 +162,7 @@
 		init : function(){
 			data.clone = $('.multiTxtSet').clone().html();
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
+			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 
 			//데이터 초기화(컨트롤러에서 가져온 데이터)
 			if(data.detail){
@@ -185,6 +186,16 @@
 						$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
 						$("[name='downloadLocations'] > a:last").html(cur).attr("href", cur);
 					}
+				});
+
+				$.each(data.detail.detectedLicenses, function(idx, cur){
+					if(idx == 0){
+						$('.multiDetectedLicenseSet span:first').remove();
+					}
+					if(cur != ''){
+						$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
+						$("[name='detectedLicenses']:last").html(cur).attr("href", cur);
+					}	
 				});
 				
 				$('#homepage a').text(data.detail.homepage);
