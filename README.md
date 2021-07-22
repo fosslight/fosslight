@@ -2,7 +2,7 @@
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/README_kor.md">[Kor]</a>
 </p>
 
-# FOSSLight
+# FOSSLight test
 
 ![](https://img.shields.io/badge/license-AGPL3.0-red)
 
