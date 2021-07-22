@@ -1,5 +1,4 @@
-# OSS Name: peter-evans-docker-compose-actions-workflow
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: AGPL-3.0-only
 
 name: Pull requests fosslight
 
@@ -14,14 +13,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build the stack
         run: docker-compose up --build -d
-      - name: Sleep for 30 seconds
+      - name: Sleep for 60 seconds
         uses: jakejarvis/wait-action@master
         with:
           time: '60s'
       - name: Check running containers
         run: docker ps
-      - name: Test
-        run: docker run --network container:webapp-frontend appropriate/curl -s --retry 10 --retry-connrefused http://localhost:8180/
+      - name: Ping test
+        uses: actions/is-my-site-up@v1.1
+        with: 
+          site: 'http://localhost:8180'
       - name: Stop containers
         if: always()
         run: docker-compose down
