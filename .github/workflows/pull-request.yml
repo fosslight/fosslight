@@ -1,4 +1,5 @@
-# Running tests with tox for releasing new version
+# OSS Name: peter-evans-docker-compose-actions-workflow
+# SPDX-License-Identifier: MIT
 
 name: Pull requests fosslight
 
@@ -12,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the stack
-        run: docker-compose up -d
+        run: docker-compose up --build -d
       - name: Test
         run: docker run --network container:webapp-frontend appropriate/curl -s --retry 10 --retry-connrefused http://localhost:8180/
