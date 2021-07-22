@@ -1,6 +1,5 @@
-#Copyright (C) Sameer1046
-
-#SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (c) Sameer1046
+# SPDX-License-Identifier: AGPL-3.0-only
 
 version: "3.5"
 services:
@@ -20,6 +19,7 @@ services:
         - '3306'
     web:
        build: .
+       container_name: fosslight_web
        depends_on:
          - db
        ports:

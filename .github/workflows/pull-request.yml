@@ -1,0 +1,27 @@
+# OSS Name : peter-evans-docker-compose-actions-workflow
+# SPDX-License-Identifier: MIT
+
+name: Pull requests fosslight
+
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build the stack
+        run: docker-compose up --build -d
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
+      - name: Check running containers
+        run: docker-compose ps
+      - name: Check the site
+        run: docker run --network container:fosslight_web appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
