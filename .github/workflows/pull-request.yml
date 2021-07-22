@@ -6,16 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
-jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: azure/docker-login@v1
-      with:
-        login-server: mycontainer.azurecr.io
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - run: |
-        docker build . -t mycontainer.azurecr.io/myapp:${{ github.sha }}
+      - uses: actions/checkout@v2
+      - name: Build the stack
+        run: docker-compose up -d
+      - name: Test
+        run: docker run --network container:webapp-frontend appropriate/curl -s --retry 10 --retry-connrefused http://localhost:8180/
