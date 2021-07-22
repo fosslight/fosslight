@@ -19,10 +19,10 @@ jobs:
           time: '60s'
       - name: Check running containers
         run: docker ps
-      - name: Ping test
-        uses: actions/is-my-site-up@v1.1
-        with: 
-          site: 'http://localhost:8180'
+      - name: Check the site
+        uses: atymic/sitemap-ping-action@master
+        with:
+          sitemap-url: "http://localhost:8180"
       - name: Stop containers
         if: always()
         run: docker-compose down
