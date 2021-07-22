@@ -49,6 +49,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String scancodeLicense;
 	private String needReviewLicenseAskalono;
 	private String needReviewLicenseScanode;
+	private String detectedLicense;
 	private String downloadLocation;
 	private String downloadLocationGroup;
 	private String homepage;

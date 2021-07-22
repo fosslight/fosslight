@@ -51,7 +51,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
+							<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 							<td class="dCase">
 								<div class="required">
 									<span class="radioSet"><input type="radio" name="licenses" id="single" value="S"/><label for="single">Single License</label></span>
@@ -72,6 +72,18 @@
 							</td>
 						</tr>
 						<tr>
+							<th class="dCase">Detected License</th>
+							<td class="dCase">
+								<div class="multiItemSet multiDetectedLicenseSet">
+									<div class="required">
+										<span><input type="text" name="detectedLicenses" class="autoComOssLicense w725"/><input type="button" value="Delete" class="smallDelete"/></span>
+										<span class="retxt"></span>
+									</div>
+								</div>
+								<input id="detectedLicenseAdd" type="button" value="+ Add" class="btnCLight gray"/>
+							</td>
+						</tr>
+						<tr>
 							<th class="dCase">Copyright</th>
 							<td class="dCase">
 								<textarea name="copyright" class="w100P h150">${copyright}</textarea>
@@ -88,7 +100,7 @@
 						<tr>
 							<th class="dCase">Download Location</th>
 							<td class="dCase">
-								<div class="multiDownloadLocationSet">
+								<div class="multiItemSet multiDownloadLocationSet">
 									<div class="required">
 										<span><input type="text" name="downloadLocations" class="w725"/><input type="button" value="Delete" class="smallDelete"/></span>
 										<span class="urltxt"></span>

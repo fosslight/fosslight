@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -1701,6 +1703,58 @@ public class CoMailManager extends CoTopComponent {
 			after.setAttribution(appendChangeStyleMultiLine(before.getAttribution(), after.getAttribution(), true));
 			isModified = checkEquals(before.getAttribution(), after.getAttribution(), isModified);
 			
+			if(before.getDetectedLicenses().size() > 0 || after.getDetectedLicenses().size() > 0) {
+				List<String> _beforeList = before.getDetectedLicenses().size() > 0 ? Arrays.asList(before.getDetectedLicenses().get(0).split(", ")) : new ArrayList<>();
+				List<String> _afterList = after.getDetectedLicenses().size() > 0 ? Arrays.asList(after.getDetectedLicenses().get(0).split(", ")) : new ArrayList<>();
+
+				Collections.sort(_beforeList);
+				Collections.sort(_afterList);
+				
+				List<String> addList = new ArrayList<>();
+				List<String> delList = new ArrayList<>();
+				
+				// 삭제 여부 체크
+				for(String s : _beforeList) {
+					if(!isEmpty(s) && !_afterList.contains(s)) {
+						delList.add(s);
+						isModified = true;
+					}
+				}
+				// 추가 여부 체크
+				for(String s : _afterList) {
+					if(!isEmpty(s) && !_beforeList.contains(s)) {
+						addList.add(s);
+						isModified = true;
+					}
+				}
+				
+				// 하나의 통합 list로 만들어서 순서 정렬
+				List<String> tmpList = Stream.concat(_beforeList.stream(), _afterList.stream()).collect(Collectors.toList());
+				
+				List<String> mergeList = new ArrayList<>(new HashSet<String>(tmpList));
+				Collections.sort(mergeList);
+
+				List<String> _finalBeforeList = new ArrayList<>();
+				List<String> _finalAfterList = new ArrayList<>();
+				
+				for(String s : mergeList) {
+					if(delList.contains(s)) {						
+						_finalBeforeList.add(appendChangeStyleMultiLine(s, ""));
+					} else if(addList.contains(s)) {
+						_finalAfterList.add(appendChangeStyleMultiLine("", s));
+					} else {
+						_finalBeforeList.add(s);
+						_finalAfterList.add(s);
+					}
+				}
+				
+				before.clearDetectLicense();
+				after.clearDetectLicense();
+				
+				before.addDetectedLicense(String.join(", ", _finalBeforeList));
+				after.addDetectedLicense(String.join(", ", _finalAfterList));
+			}
+			
 			//데이터 변경 없을시
 			if(!isModified){
 				convertDataMap.replace("isModify", true);
@@ -2857,6 +2911,9 @@ public class CoMailManager extends CoTopComponent {
 				if(!isEmpty(bean.getOssId()) && CoCodeManager.OSS_INFO_BY_ID.containsKey(bean.getOssId())) {
 					bean.setMultiLicenseFlag(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getLicenseDiv());
 				}
+				
+				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
+				bean.addDetectedLicense(detectedLicenses);
 			}
 			if(dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();
@@ -2869,11 +2926,13 @@ public class CoMailManager extends CoTopComponent {
 				license.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull((String) dataMap.get("LICENSE_TYPE"))));
 				bean.addOssLicense(license);
 			}
+			
 			isFirst = false;
 		}
 		if(bean != null && bean.getOssLicenses() != null && !bean.getOssLicenses().isEmpty()) {
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
 		}
+		
 		return bean;
 	}
 
