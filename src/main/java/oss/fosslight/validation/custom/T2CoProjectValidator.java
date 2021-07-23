@@ -1045,6 +1045,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
 		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
 		
+		if(detectedLicenseList == null) {
+			detectedLicenseList = new ArrayList<>();
+		}
+		
 		for (OssLicense license : ossMaster.getOssLicenses()) {
 			if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
 				LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
@@ -1123,6 +1127,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 		List<String> detectedLicenseList = ossMaster.getDetectedLicenses();
 		String[] LicenseNames = LicenseName.split("AND|OR|\\,");
 		
+		if(detectedLicenseList == null) {
+			detectedLicenseList = new ArrayList<>();
+		}
+		
 		for (OssLicense license : ossMaster.getOssLicenses()) {
 			if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
 				LicenseMaster _temp = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
@@ -1194,6 +1202,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 		// license nick name을 포함한 라이선스 명 list를 구성
 		List<String> checkLicenseNameList = new ArrayList<>(); // declared License
 		List<String> detectedLicenseList = ossMaster.getDetectedLicenses(); // detected License
+		
+		if(detectedLicenseList == null) {
+			detectedLicenseList = new ArrayList<>();
+		}
 		
 		if (ossMaster != null) {
 			for (OssLicense license : ossMaster.getOssLicenses()) {
