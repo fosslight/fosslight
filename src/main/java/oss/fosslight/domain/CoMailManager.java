@@ -1703,9 +1703,12 @@ public class CoMailManager extends CoTopComponent {
 			after.setAttribution(appendChangeStyleMultiLine(before.getAttribution(), after.getAttribution(), true));
 			isModified = checkEquals(before.getAttribution(), after.getAttribution(), isModified);
 			
-			if(before.getDetectedLicenses().size() > 0 || after.getDetectedLicenses().size() > 0) {
-				List<String> _beforeList = before.getDetectedLicenses().size() > 0 ? Arrays.asList(before.getDetectedLicenses().get(0).split(", ")) : new ArrayList<>();
-				List<String> _afterList = after.getDetectedLicenses().size() > 0 ? Arrays.asList(after.getDetectedLicenses().get(0).split(", ")) : new ArrayList<>();
+			String beforeDetectedLicense = before.getDetectedLicense();
+			String afterDetectedLicense = after.getDetectedLicense();
+			
+			if(!isEmpty(beforeDetectedLicense) || !isEmpty(afterDetectedLicense)) {
+				List<String> _beforeList = Arrays.asList(beforeDetectedLicense.split(","));
+				List<String> _afterList = Arrays.asList(afterDetectedLicense.split(","));
 
 				Collections.sort(_beforeList);
 				Collections.sort(_afterList);
@@ -1728,6 +1731,10 @@ public class CoMailManager extends CoTopComponent {
 					}
 				}
 				
+				if(_beforeList.size() != _afterList.size()) {
+					isModified = true;
+				}
+				
 				// 하나의 통합 list로 만들어서 순서 정렬
 				List<String> tmpList = Stream.concat(_beforeList.stream(), _afterList.stream()).collect(Collectors.toList());
 				
@@ -1738,13 +1745,15 @@ public class CoMailManager extends CoTopComponent {
 				List<String> _finalAfterList = new ArrayList<>();
 				
 				for(String s : mergeList) {
-					if(delList.contains(s)) {						
-						_finalBeforeList.add(appendChangeStyleMultiLine(s, ""));
-					} else if(addList.contains(s)) {
-						_finalAfterList.add(appendChangeStyleMultiLine("", s));
-					} else {
-						_finalBeforeList.add(s);
-						_finalAfterList.add(s);
+					if(!isEmpty(s)) {
+						if(delList.contains(s)) {						
+							_finalBeforeList.add(appendChangeStyleMultiLine(s, ""));
+						} else if(addList.contains(s)) {
+							_finalAfterList.add(appendChangeStyleMultiLine("", s));
+						} else {
+							_finalBeforeList.add(s);
+							_finalAfterList.add(s);
+						}
 					}
 				}
 				
@@ -2913,7 +2922,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 				
 				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
-				bean.addDetectedLicense(detectedLicenses);
+				bean.setDetectedLicense(detectedLicenses);
 			}
 			if(dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();
