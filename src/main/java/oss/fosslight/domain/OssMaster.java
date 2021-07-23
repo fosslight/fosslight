@@ -1802,7 +1802,13 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 	
 	public List<String> getDetectedLicenses() {
-		return detectedLicenses;
+		return detectedLicenses == null 
+						? new ArrayList<>() 
+						: detectedLicenses;
+	}
+	
+	public String getDetectedLicense() {
+		return detectedLicenses == null ? "" : String.join(",", detectedLicenses);
 	}
 
 	public void setDetectedLicenses(List<String> detectedLicenses) {
