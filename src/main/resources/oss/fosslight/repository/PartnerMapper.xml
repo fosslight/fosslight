@@ -1657,4 +1657,13 @@
 			</if>
 		ORDER BY MODIFIED_DATE DESC LIMIT 100
 	</select>
+	
+	 <select id="getReviewerEmail" parameterType="string" resultType="string">
+	 	SELECT GROUP_CONCAT(DISTINCT USER.EMAIL) AS EMAIL
+		  FROM PARTNER_MASTER PARTNER
+		 INNER JOIN T2_USERS USER
+		    ON PARTNER.REVIEWER = USER.USER_ID
+		 WHERE CONCAT('3rd_', PARTNER.PARTNER_ID) = #{partnerId}
+				 OR USER.USER_ID = #{loginUser}
+	 </select>
 </mapper>

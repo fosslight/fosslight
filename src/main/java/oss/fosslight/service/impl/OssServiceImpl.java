@@ -49,6 +49,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.OssMapper;
+import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CommentService;
@@ -70,6 +71,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired T2UserMapper userMapper;
 	@Autowired FileMapper fileMapper;
 	@Autowired ProjectMapper projectMapper;
+	@Autowired PartnerMapper partnerMapper;
 	
 	@Override
 	public Map<String,Object> getOssMasterList(OssMaster ossMaster) {
@@ -1900,11 +1902,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		try {
 			switch(key) {
-				case "BOM":
-					int analysisListCnt = ossMapper.ossAnalysisListCnt(ossBean);
+				case "VIEW":
+					String prjId = ossBean.getPrjId();
+					if(CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossBean.getReferenceDiv())) {
+						prjId = "3rd_" + prjId;
+					}
+					
+					int analysisListCnt = ossMapper.ossAnalysisListCnt(prjId, ossBean.getStartAnalysisFlag());
 					
 					if(analysisListCnt > 0) {
-						ossMapper.deleteOssAnalysisList(ossBean);
+						ossMapper.deleteOssAnalysisList(prjId);
 					}
 					
 					if(ossBean.getComponentIdList().size() > 0) {
@@ -1943,9 +1950,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public Map<String, Object> getOssAnalysisList(OssMaster ossMaster) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		List<OssAnalysis> list = null;
+		String prjId = ossMaster.getPrjId();
+		
+		if(CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossMaster.getReferenceDiv())) {
+			ossMaster.setPrjId("3rd_" + prjId);
+		}
 		
 		if(CoConstDef.FLAG_YES.equals(ossMaster.getStartAnalysisFlag())) {
-			int records = ossMapper.ossAnalysisListCnt(ossMaster);
+			int records = ossMapper.ossAnalysisListCnt(ossMaster.getPrjId(), ossMaster.getStartAnalysisFlag());
 			ossMaster.setTotListSize(records);
 			
 			list = ossMapper.selectOssAnalysisList(ossMaster);
@@ -1991,7 +2003,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
-			String EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName()); // reviewer와 loginUser의 email
+			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
+			if(prjId.toUpperCase().indexOf("3RD") > -1){
+				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName());
+			} else {
+				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName());
+			}
+			
 			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
