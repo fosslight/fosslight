@@ -41,6 +41,7 @@ We provide the guide for the installation and how to use it. Please refer the **
 ## Demo site
 You can experience FOSSLight through the **[Demo site](https://demo.fosslight.org/)**.  
 Please visit the Demo site and try out the many features of the FOSSLight first-hand!
+ID and Password for Demo site are described in **[FOSSLight guide](https://fosslight.org/fosslight-guide-en/)**.
 
 ## Contributing
 We always welcome your contributions. Please see the [CONTRIBUTING guide](CONTRIBUTING.md) for how to contribute.
