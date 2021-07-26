@@ -8,6 +8,7 @@ package oss.fosslight.repository;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.OssComponents;
@@ -131,4 +132,6 @@ public interface PartnerMapper {
 	public List<PartnerMaster> selectPartnerStatusUser(PartnerMaster partnerMaster);
 	
 	List<PartnerMaster> selectOssRefPartnerList(OssMaster ossMaster);
+	
+	String getReviewerEmail(@Param("partnerId") String partnerId, @Param("loginUser") String loginUser);
 }

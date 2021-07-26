@@ -32,6 +32,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
@@ -40,6 +41,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2CoValidationResult;
 
 @Service
 @Slf4j
@@ -595,5 +597,91 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		return result;
 	}
+	
+	@Override
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster){
+		ProjectIdentification prjBean = new ProjectIdentification();
+		
+		prjBean.setReferenceId(partnerMaster.getPartnerId());
+		prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		Map<String, Object> partnerList = projectService.getIdentificationGridList(prjBean, true);
+		
+		PartnerMaster partnerInfo = new PartnerMaster();
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		
+		if(prjBean.getPartnerId() == null){
+			partnerInfo.setPartnerId(prjBean.getReferenceId());
+		}else{
+			partnerInfo.setPartnerId(prjBean.getPartnerId());
+		}
+		
+		partnerInfo = getPartnerMasterOne(partnerInfo);
 
+		if (partnerInfo != null) {
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+
+			// main grid
+			pv.setAppendix("mainList", (List<ProjectIdentification>) partnerList.get("mainData"));
+			// sub grid
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) partnerList.get("subData"));
+			
+			if ((CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerInfo.getStatus())
+					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(partnerInfo.getStatus()))
+					&& CommonFunction.isAdmin()) {
+				pv.setCheckForAdmin(true);
+			}
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+			
+			if(!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
+				partnerList.replace("mainData", CommonFunction.identificationSortByValidInfo(
+						(List<ProjectIdentification>) partnerList.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+				if(!vr.isValid()) {
+					partnerList.put("validData", vr.getValidMessageMap());
+				}
+				if(!vr.isDiff()) {
+					partnerList.put("diffData", vr.getDiffMessageMap());
+				}
+				if(vr.hasInfo()) {
+					partnerList.put("infoData", vr.getInfoMessageMap());
+				}
+			}
+		}
+		
+		return partnerList;
+	}
+	
+	public Map<String, Object> getFilterdList(Map<String, Object> paramMap){
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		List<ProjectIdentification> mainData = (List<ProjectIdentification>) paramMap.get("mainData");
+		Map<String, String> errorMap = (Map<String, String>) paramMap.get("validData");
+		List<String> duplicateList = new ArrayList<>();
+		List<String> componentIdList = new ArrayList<>();
+		
+		if(errorMap != null) {
+			for(ProjectIdentification prjBean : mainData) {
+				String checkKey = prjBean.getOssName() + "_" + prjBean.getOssVersion();
+				// 중복된 oss Info는 제외함.
+				if(duplicateList.contains(checkKey)) {
+					continue;
+				}
+				
+				String componentId = prjBean.getComponentId();
+				String ossNameErrorMsg = errorMap.containsKey("ossName."+componentId) ? errorMap.get("ossName."+componentId) : "";
+				String ossVersionErrorMsg = errorMap.containsKey("ossVersion."+componentId) ? errorMap.get("ossVersion."+componentId) : "";
+				
+				if(ossNameErrorMsg.indexOf("Unconfirmed") > -1 
+						|| ossVersionErrorMsg.indexOf("Unconfirmed") > -1) {
+					duplicateList.add(checkKey);
+					componentIdList.add(componentId);
+				}
+			}
+		}
+		
+		resultMap.put("componentIdList", componentIdList);
+		resultMap.put("isValid", true);
+		
+		return resultMap;
+	}
 }

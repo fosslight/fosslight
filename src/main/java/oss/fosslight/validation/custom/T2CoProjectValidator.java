@@ -2208,19 +2208,26 @@ public class T2CoProjectValidator extends T2CoValidator {
 	}
 	
 	private boolean hasOssLicenseTypeComponents(OssMaster ossInfo, List<OssComponentsLicense> licenseList) {
-		List<String> licenseNameList = licenseList.stream().map(ocl -> ocl.getLicenseName()).collect(Collectors.toCollection(ArrayList::new));
+		List<String> licenseNameList = licenseList.stream()
+				.map(ocl -> avoidNull(CoCodeManager.LICENSE_INFO.get(ocl.getLicenseName()).getShortIdentifier()
+									, ocl.getLicenseName()))
+				.collect(Collectors.toCollection(ArrayList::new));
 		
 		return hasOssLicenseType(ossInfo, licenseNameList);
 	}
 	
 	private boolean hasOssLicenseTypeProject(OssMaster ossInfo, List<ProjectIdentification> licenseList) {
-		List<String> licenseNameList = licenseList.stream().map(pi -> pi.getLicenseName()).collect(Collectors.toCollection(ArrayList::new));
-		
+		List<String> licenseNameList = licenseList.stream()
+				.map(pi -> avoidNull(CoCodeManager.LICENSE_INFO.get(pi.getLicenseName()).getShortIdentifier()
+									, pi.getLicenseName()))
+				.collect(Collectors.toCollection(ArrayList::new));
+
 		return hasOssLicenseType(ossInfo, licenseNameList);
 	}
 	
 	private boolean hasOssLicenseTypeSingle(OssMaster ossInfo, String licenseName) {
 		List<String> licenseNameList = new ArrayList<String>();
+		licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
 		licenseNameList.add(licenseName);
 		
 		return hasOssLicenseType(ossInfo, licenseNameList);

@@ -1720,7 +1720,7 @@
 		       )
 	</select>
 	
-	<select id="ossAnalysisListCnt" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+	<select id="ossAnalysisListCnt" parameterType="String" resultType="int">
 		SELECT COUNT(*) AS CNT 
 		  FROM OSS_ANALYSIS_MAP
 		 WHERE REFERENCE_ID = #{prjId}
@@ -1729,7 +1729,7 @@
 		</if>
 	</select>
 	
-	<delete id="deleteOssAnalysisList" parameterType="oss.fosslight.domain.OssMaster">
+	<delete id="deleteOssAnalysisList" parameterType="String">
 		DELETE FROM OSS_ANALYSIS_MAP WHERE REFERENCE_ID = #{prjId}
 	</delete>
 	
@@ -1746,7 +1746,12 @@
 			  , COMPLETE_YN
 		)
 		SELECT OC.COMPONENT_ID
-		  	 , #{prjId} AS REFERENCE_ID
+		<choose>
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    			, CONCAT('3rd_', #{prjId}) AS REFERENCE_ID
+    		</when>
+    		<otherwise>, #{prjId} AS REFERENCE_ID</otherwise>
+    	</choose>
 		  	 , OC.OSS_NAME
 		  	 , OC.OSS_VERSION
 		  	 , GROUP_CONCAT(DISTINCT OCL.LICENSE_NAME SEPARATOR ' AND ') AS LICENSE_NAME
@@ -1758,7 +1763,7 @@
 	  	  LEFT JOIN OSS_COMPONENTS_LICENSE OCL
 	        ON OC.COMPONENT_ID = OCL.COMPONENT_ID
 	 	  WHERE OC.REFERENCE_ID = #{prjId}
-		    AND OC.REFERENCE_DIV = '13'
+		    AND OC.REFERENCE_DIV = #{referenceDiv}
 		    AND OC.DOWNLOAD_LOCATION IS NOT NULL
 		    AND OC.DOWNLOAD_LOCATION != ''
 		    <foreach item="id" index="index" collection="componentIdList" open=" AND OC.COMPONENT_ID IN (" separator="," close=")">
