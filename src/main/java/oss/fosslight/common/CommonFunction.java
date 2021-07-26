@@ -503,6 +503,33 @@ public class CommonFunction extends CoTopComponent {
 		return rtnVal;
 	}
 	
+	public static String makeLicenseFromFiles(OssMaster _ossBean) {
+		List<String> resultList = new ArrayList<>(); // declared License
+		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
+		
+		if (_ossBean != null) {
+			for (OssLicense license : _ossBean.getOssLicenses()) {
+				String licenseName = license.getLicenseName();
+				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+				
+				if(!resultList.contains(licenseName)) {
+					resultList.add(licenseName);
+				}
+			}
+
+			if(detectedLicenseList != null) {
+				for(String licenseName : detectedLicenseList) {
+					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+					
+					if(!resultList.contains(licenseName)) {
+						resultList.add(licenseName);
+					}
+				}
+			}
+		}
+		return String.join(",", resultList);
+	}
+	
 	public static List<ProjectIdentification> makeLicenseExcludeYn(List<ProjectIdentification> list){
 		// OR 조건으로 각 list로 구분한다.
 		List<List<ProjectIdentification>> andCombLicenseList = new ArrayList<>();
