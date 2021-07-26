@@ -179,9 +179,9 @@ public interface OssMapper {
 	
 	int checkOssNameUrl2Cnt(ProjectIdentification bean);
 	
-	int ossAnalysisListCnt(OssMaster bean);
+	int ossAnalysisListCnt(@Param("prjId") String prjId, @Param("startAnalysisFlag") String startAnalysisFlag);
 	
-	void deleteOssAnalysisList(OssMaster bean);
+	void deleteOssAnalysisList(@Param("prjId") String prjId);
 	
 	int insertOssAnalysisList(OssMaster bean);
 	

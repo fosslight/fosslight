@@ -515,10 +515,11 @@ var bom_fn = {
 			var data = {
 					'componentIdList' : componentIdList
 				  , 'prjId' : '${project.prjId}'
+				  , 'referenceDiv' : '13'
 			};
 			
 			$.ajax({
-				url : '/oss/saveOssAnalysisList/bom',
+				url : '/oss/saveOssAnalysisList/view',
 				dataType : 'json',
 				type : 'POST',
 				cache : false,
