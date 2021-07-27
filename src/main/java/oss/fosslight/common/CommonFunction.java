@@ -3483,6 +3483,7 @@ public class CommonFunction extends CoTopComponent {
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						newestOssInfo.setGridId(""+gridSeq++);
 						newestOssInfo.setOssVersion(userData.getOssVersion());
+						newestOssInfo.setComment(comment);
 						
 						if(userData.getOssName().toUpperCase().equals(totalAnalysis.getOssName().toUpperCase())) {
 							String newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, newestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
@@ -3525,6 +3526,7 @@ public class CommonFunction extends CoTopComponent {
 					if(totalNewestOssInfo != null) {
 						totalNewestOssInfo.setGridId(""+gridSeq++);
 						totalNewestOssInfo.setOssVersion(userData.getOssVersion());
+						totalNewestOssInfo.setComment(comment);
 						
 						String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
 						
