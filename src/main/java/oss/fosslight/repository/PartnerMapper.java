@@ -133,5 +133,9 @@ public interface PartnerMapper {
 	
 	List<PartnerMaster> selectOssRefPartnerList(OssMaster ossMaster);
 	
-	String getReviewerEmail(@Param("partnerId") String partnerId, @Param("loginUser") String loginUser);
+	int getOssAnalysisDataCnt(@Param("partnerId") String partnerId);
+	
+	PartnerMaster getOssAnalysisData(@Param("partnerId") String partnerId);
+	
+	String getReviewerEmail(@Param("partnerId") String partnerId, @Param("loginUser") String loginUser);	
 }
