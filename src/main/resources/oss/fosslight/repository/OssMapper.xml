@@ -1852,6 +1852,7 @@
 			 , A.HOMEPAGE
 			 , #{result} AS RESULT
 			 , CONCAT(A.OSS_NAME, ' (', IF(A.OSS_VERSION IS NULL OR A.OSS_VERSION = '', 'N/A', A.OSS_VERSION), ') 최신 등록 정보') AS TITLE
+			 , A.SUMMARY_DESCRIPTION
 		  FROM OSS_MASTER A
 		 WHERE A.OSS_NAME = #{ossName}
 		   AND A.USE_YN = 'Y'
