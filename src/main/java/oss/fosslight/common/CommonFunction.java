@@ -428,6 +428,14 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static String makeLicenseExpression(List<OssLicense> list, boolean htmlLinkType, boolean spdxConvert) {
+		return makeLicenseExpression(list, htmlLinkType, spdxConvert, false);
+	}
+	
+	public static String makeLicenseExpressionMsgType(List<OssLicense> list, boolean msgType) {
+		return makeLicenseExpression(list, false, false, msgType);
+	}
+	
+	public static String makeLicenseExpression(List<OssLicense> list, boolean htmlLinkType, boolean spdxConvert, boolean msgType) {
 		String rtnVal = "";
 		
 		List<List<String>> licenseNameList = new ArrayList<>();
@@ -459,7 +467,11 @@ public class CommonFunction extends CoTopComponent {
 				String andStr = "";
 				for(String s : combList) {
 					if(!isEmpty(andStr)) {
-						andStr += " AND ";
+						if(msgType) { 
+							andStr += ", ";
+						} else {
+							andStr += " AND ";
+						}
 					}
 					
 					LicenseMaster licenseMaster = null;
@@ -484,11 +496,38 @@ public class CommonFunction extends CoTopComponent {
 					}
 				}
 				
-				rtnVal += licenseNameList.size() > 1 ? ( combList.size() == 1 ? andStr : ("(" + andStr + ")") ) : andStr;
+				rtnVal += licenseNameList.size() > 1 ? ( combList.size() != 1 && !msgType ? ("(" + andStr + ")") :  andStr ) : andStr;
 			}
 		}
 		
 		return rtnVal;
+	}
+	
+	public static String makeLicenseFromFiles(OssMaster _ossBean) {
+		List<String> resultList = new ArrayList<>(); // declared License
+		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
+		
+		if (_ossBean != null) {
+			for (OssLicense license : _ossBean.getOssLicenses()) {
+				String licenseName = license.getLicenseName();
+				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+				
+				if(!resultList.contains(licenseName)) {
+					resultList.add(licenseName);
+				}
+			}
+
+			if(detectedLicenseList != null) {
+				for(String licenseName : detectedLicenseList) {
+					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+					
+					if(!resultList.contains(licenseName)) {
+						resultList.add(licenseName);
+					}
+				}
+			}
+		}
+		return String.join(",", resultList);
 	}
 	
 	public static List<ProjectIdentification> makeLicenseExcludeYn(List<ProjectIdentification> list){

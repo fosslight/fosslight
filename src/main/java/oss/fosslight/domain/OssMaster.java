@@ -7,6 +7,7 @@ package oss.fosslight.domain;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -60,6 +61,8 @@ public class OssMaster extends ComBean implements Serializable{
 
 	/** The download location. */
 	private String[] downloadLocations;
+
+	private List<String> detectedLicenses;
 
 	/** The download location link format. */
 	private String downloadLocationLinkFormat;
@@ -263,6 +266,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String completeYn;
 	private String addNicknameYn = "N";
 	
+	private String referenceDiv;
+
 	/**
 	 * Instantiates a new oss master.
 	 */
@@ -289,6 +294,21 @@ public class OssMaster extends ComBean implements Serializable{
 		this.publishedDate = publishedDate;
 	}
 
+	/**
+	 * Instantiates a new oss master.
+	 *
+	 * @param ossId the oss id
+	 * @param licenseId the license id
+	 * @param ossLicenseIdx the oss license idx
+	 */
+	
+	public OssMaster(String ossId, String licenseId, String ossLicenseIdx) {
+		super();
+		this.ossId = ossId;
+		this.licenseId = licenseId;
+		this.ossLicenseIdx = ossLicenseIdx;
+	}
+	
 	/**
 	 * Instantiates a new oss master.
 	 *
@@ -1768,4 +1788,48 @@ public class OssMaster extends ComBean implements Serializable{
 	public void setAddNicknameYn(String addNicknameYn) {
 		this.addNicknameYn = addNicknameYn;
 	}	
+	
+	public void clearDetectLicense() {
+		this.detectedLicenses = new ArrayList<>();
+	}
+	
+	public void setDetectedLicense(String detectedLicense) {
+		List<String> list = Arrays.asList(detectedLicense.split(","));
+		
+		for(String s : list) {
+			if(!isEmpty(s)) {
+				this.addDetectedLicense(s.trim());
+			}
+		}
+	}
+	
+	public List<String> getDetectedLicenses() {
+		return detectedLicenses == null 
+						? new ArrayList<>() 
+						: detectedLicenses;
+	}
+	
+	public String getDetectedLicense() {
+		return detectedLicenses == null ? "" : String.join(",", detectedLicenses);
+	}
+
+	public void setDetectedLicenses(List<String> detectedLicenses) {
+		this.detectedLicenses = detectedLicenses;
+	}
+	
+	public void addDetectedLicense(String s) {
+		if(this.detectedLicenses == null) {
+			this.detectedLicenses = new ArrayList<>();
+		}
+		
+		this.detectedLicenses.add(s);
+	}
+	
+	public String getReferenceDiv() {
+		return referenceDiv;
+	}
+
+	public void setReferenceDiv(String referenceDiv) {
+		this.referenceDiv = referenceDiv;
+	}
 }

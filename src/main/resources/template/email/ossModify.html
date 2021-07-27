@@ -66,9 +66,14 @@
 									#end
 									</tr>
 									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Name / Type</th>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name / Type</th>
 										<td style="padding:5px;">$!before.licenseName ($!before.licenseType)</td>
 										<td style="padding:5px;">$!after.licenseName ($!after.licenseType)</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
+										<td style="padding:5px;">#foreach( $beforeDetectedLicense in $!before.detectedLicenses )$!beforeDetectedLicense #end</td>
+										<td style="padding:5px;">#foreach( $afterDetectedLicense in $!after.detectedLicenses )$!afterDetectedLicense #end</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>

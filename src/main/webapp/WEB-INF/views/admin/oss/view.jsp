@@ -37,7 +37,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase txStr">License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
+						<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 						<td class="dCase">
 							<div class="required">
 								<div id="licenses" class="viewOssTd" ></div>
@@ -49,6 +49,16 @@
 							</div>
 							<input type="hidden" id="licenseName" />
 							<div id="disp_licenseText" style="display: none;"></div>
+						</td>
+					</tr>
+					<tr>
+						<th class="dCase">Detected License</th>
+						<td class="dCase">
+							<div class="multiItemSet multiDetectedLicenseSet">
+								<div class="required">
+									<div name="detectedLicenses" class="viewOssTd" ></div>
+								</div>
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -68,7 +78,7 @@
 					<tr>
 						<th class="dCase">Download Location</th>
 						<td class="dCase">
-							<div class="multiDownloadLocationSet">
+							<div class="multiItemSet multiDownloadLocationSet">
 								<div class="required">
 									<div name="downloadLocations" class="viewOssTd" ><a href="" class="urlLink" target="_blank"></a></div>
 								</div>

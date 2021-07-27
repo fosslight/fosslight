@@ -49,6 +49,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.OssMapper;
+import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CommentService;
@@ -70,6 +71,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired T2UserMapper userMapper;
 	@Autowired FileMapper fileMapper;
 	@Autowired ProjectMapper projectMapper;
+	@Autowired PartnerMapper partnerMapper;
 	
 	@Override
 	public Map<String,Object> getOssMasterList(OssMaster ossMaster) {
@@ -228,7 +230,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMaster = ossMapper.selectOssOne(ossMaster);
 		List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
 		List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(ossMaster);
-		List<OssLicense> ossLicenses = ossMapper.selectOssLicenseList(ossMaster);
+		List<OssLicense> ossLicenses = ossMapper.selectOssLicenseList(ossMaster); // declared License
+		List<OssMaster> ossDetectedLicense = ossMapper.selectOssDetectedLicenseList(ossMaster); // detected License
 		
 		String totLicenseTxt = CommonFunction.makeLicenseExpression(ossLicenses);
 		ossMaster.setTotLicenseTxt(totLicenseTxt);
@@ -241,22 +244,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		String[] ossNicknames = new String(sb).split("[,]");
 		
-		sb = new StringBuilder();
-		String[] ossDownloadLocations = null;
+		sb = new StringBuilder(); // 초기화
 		
-		if(ossDownloadLocation.size() > 0) {
-			for(OssMaster location : ossDownloadLocation) {
-				sb.append(location.getDownloadLocation()).append(",");
-			}
-			
-			ossDownloadLocations = new String(sb).split("[,]");
-		} else {
-			ossDownloadLocations = new String(ossMaster.getDownloadLocation()).split("[,]");
+		for(OssMaster location : ossDownloadLocation) {
+			sb.append(location.getDownloadLocation()).append(",");
 		}
+		
+		String[] ossDownloadLocations = new String(sb).split("[,]");
+		
+		sb = new StringBuilder(); // 초기화
+		
+		for(OssMaster licenseInfo : ossDetectedLicense) {
+			sb.append(licenseInfo.getLicenseName()).append(",");
+		}
+		
+		String[] detectedLicenses = new String(sb).split("[,]");
 		
 		ossMaster.setOssNicknames(ossNicknames);
 		ossMaster.setDownloadLocations(ossDownloadLocations);
 		ossMaster.setOssLicenses(ossLicenses);
+		ossMaster.setDetectedLicenses(Arrays.asList(detectedLicenses));
 		
 		return ossMaster;
 	}
@@ -314,6 +321,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					bean.setOssNicknames(nickNames.toArray(new String[nickNames.size()]));
+				}
+				
+				List<OssMaster> detectedLicenseList = ossMapper.selectOssDetectedLicenseList(bean);
+				if(detectedLicenseList.size() > 0) {
+					String detectedLicense = "";
+					for(OssMaster ossBean : detectedLicenseList) {
+						if(!isEmpty(detectedLicense)) {
+							detectedLicense += ", ";
+						}
+						
+						detectedLicense += ossBean.getLicenseName();
+					}
+					
+					bean.addDetectedLicense(detectedLicense);
 				}
 				
 				if(isMailFormat) {
@@ -820,30 +841,30 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		checkOssLicenseAndObligation(ossMaster);
 		
 		ossMapper.insertOssMaster(ossMaster);
-		ossMapper.deleteOssLicense(ossMaster);
+		ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
 		
 		// v-Diff 체크를 위해 license list를 생성
 		if("M".equals(ossMaster.getLicenseDiv())) {
 			List<OssLicense> list = ossMaster.getOssLicenses();
-			int ossLicenseIdx = 0;
+			int ossLicenseDeclaredIdx = 0;
 			
 			for(OssLicense license : list) {
-				ossLicenseIdx++;
+				ossLicenseDeclaredIdx++;
 				
 				OssMaster om = new OssMaster(
-					  Integer.toString(ossLicenseIdx)
+					  Integer.toString(ossLicenseDeclaredIdx)
 					, ossMaster.getOssId()
 					, license.getLicenseName()
-					, ossLicenseIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
+					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
 					, license.getOssLicenseText()
 					, license.getOssCopyright()
 					, ossMaster.getLicenseDiv()
 				);
 				
-				ossMapper.insertOssLicense(om);
+				ossMapper.insertOssLicenseDeclared(om);
 			}
 		} else {
-			ossMapper.insertOssLicense(ossMaster);
+			ossMapper.insertOssLicenseDeclared(ossMaster);
 			// single license의 경우 oss list에서 new 한 경우 osslicense list가 null 이거나, license id가 없는 경우 체워준다.
 			if(ossMaster.getOssLicenses() == null || ossMaster.getOssLicenses().isEmpty()) {
 				List<OssLicense> _ossLicenseList = new ArrayList<>();
@@ -855,6 +876,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMaster.setOssLicenses(_ossLicenseList);
 			}
 		}		
+		
+		// Detected License Insert
+		List<String> detectedLicenses = ossMaster.getDetectedLicenses();
+		
+		if(detectedLicenses != null) {
+			int ossLicenseDetectedIdx = 0;
+			
+			for(String detectedLicense : detectedLicenses) {			
+				if(!isEmpty(detectedLicense)) {
+					LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
+					
+					OssMaster om = new OssMaster(
+						  ossMaster.getOssId() // ossId
+						, detectedLicenseInfo.getLicenseId() // licenseId
+						, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
+					);
+					
+					ossMapper.insertOssLicenseDetected(om);
+				}
+			}
+		}
 		
 		if(ossMaster.getOssLicenses() != null) {
 			for(OssLicense license : ossMaster.getOssLicenses()) {
@@ -1860,11 +1902,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		try {
 			switch(key) {
-				case "BOM":
-					int analysisListCnt = ossMapper.ossAnalysisListCnt(ossBean);
+				case "VIEW":
+					String prjId = ossBean.getPrjId();
+					if(CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossBean.getReferenceDiv())) {
+						prjId = "3rd_" + prjId;
+					}
+					
+					int analysisListCnt = ossMapper.ossAnalysisListCnt(prjId, ossBean.getStartAnalysisFlag());
 					
 					if(analysisListCnt > 0) {
-						ossMapper.deleteOssAnalysisList(ossBean);
+						ossMapper.deleteOssAnalysisList(prjId);
 					}
 					
 					if(ossBean.getComponentIdList().size() > 0) {
@@ -1903,9 +1950,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public Map<String, Object> getOssAnalysisList(OssMaster ossMaster) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		List<OssAnalysis> list = null;
+		String prjId = ossMaster.getPrjId();
+		
+		if(CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossMaster.getReferenceDiv())) {
+			ossMaster.setPrjId("3rd_" + prjId);
+		}
 		
 		if(CoConstDef.FLAG_YES.equals(ossMaster.getStartAnalysisFlag())) {
-			int records = ossMapper.ossAnalysisListCnt(ossMaster);
+			int records = ossMapper.ossAnalysisListCnt(ossMaster.getPrjId(), ossMaster.getStartAnalysisFlag());
 			ossMaster.setTotListSize(records);
 			
 			list = ossMapper.selectOssAnalysisList(ossMaster);
@@ -1951,7 +2003,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
-			String EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName()); // reviewer와 loginUser의 email
+			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
+			if(prjId.toUpperCase().indexOf("3RD") > -1){
+				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName());
+			} else {
+				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName());
+			}
+			
 			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );

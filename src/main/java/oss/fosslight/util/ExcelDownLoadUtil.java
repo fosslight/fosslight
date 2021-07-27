@@ -2152,7 +2152,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
-					licenseInfoFromFiles.setCellValue(srtLicenseName); // License Concluded 란과 동일한 값으로 표시
+					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean)); // Declared & Detected License Info (중복제거)
 					
 					// License Comments
 					cellIdx++;
@@ -2187,15 +2187,21 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			// Extracted License Info
 			{
-				// license identifier가 설정되어 있지 않은 license 정보만 출력한다.
-				List<OssComponentsLicense> noticeList = (List<OssComponentsLicense>) packageInfo.get("licenseList");
+				// BOM에 사용된 OSS Info중 License identifier가 설정되어 있지 않은 license 정보만 출력한다.
+				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
 				
-				for(OssComponentsLicense liBean : noticeList) {
-					LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_BY_ID.get(liBean.getLicenseId());
+				for(OssComponents ocBean : noticeList) {
+					String ossName = ocBean.getOssName().replace("&#39;", "\'");
+					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
 					
-					if(liMaster != null && isEmpty(liMaster.getShortIdentifier()) && !nonIdetifierNoticeList.containsKey(liBean.getLicenseId())) {
-						nonIdetifierNoticeList.put(liBean.getLicenseId(), liMaster);
+					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean).split(","));
+					
+					for(String licenseNm : licenseList) {
+						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);
+						if(lmBean != null && isEmpty(lmBean.getShortIdentifier()) && !nonIdetifierNoticeList.containsKey(lmBean.getLicenseId())) {
+							nonIdetifierNoticeList.put(lmBean.getLicenseId(), lmBean);
+						}
 					}
 				}
 				

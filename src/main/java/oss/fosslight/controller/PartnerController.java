@@ -142,6 +142,7 @@ public class PartnerController extends CoTopComponent{
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
 		return PARTNER.EDIT_JSP;
 	}
@@ -176,6 +177,7 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
 		return PARTNER.EDIT_JSP;
 	}
@@ -1023,4 +1025,22 @@ public class PartnerController extends CoTopComponent{
 		return excelToResponseEntity(RESOURCE_PUBLIC_EXCEL_TEMPLATE_PATH_PREFIX + logiPath, fileName);
 	}
 	
+	
+	@PostMapping(value = PARTNER.FILTERED_LIST)
+	public @ResponseBody ResponseEntity<Object> getfilteredList(
+			PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		
+		Map<String, Object> resultMap = partnerService.getPartnerValidationList(partnerMaster);
+		
+		try{
+			resultMap = partnerService.getFilterdList(resultMap);
+			
+			return makeJsonResponseHeader(resultMap);
+		}catch(Exception e){
+			return makeJsonResponseHeader(false, "filterList Error");
+		}
+	}
 }

@@ -591,7 +591,7 @@
 		t1.*
 		, t2.LICENSE_NAME AS LICENSE_NAME
 	FROM
-		OSS_LICENSE t1
+		OSS_LICENSE_DECLARED t1
 		LEFT JOIN LICENSE_MASTER t2 ON t1.LICENSE_ID = t2.LICENSE_ID
 	WHERE
 		OSS_ID = #{ossId}
@@ -1657,4 +1657,32 @@
 			</if>
 		ORDER BY MODIFIED_DATE DESC LIMIT 100
 	</select>
+	
+	 <select id="getReviewerEmail" parameterType="string" resultType="string">
+	 	SELECT GROUP_CONCAT(DISTINCT USER.EMAIL) AS EMAIL
+		  FROM PARTNER_MASTER PARTNER
+		 INNER JOIN T2_USERS USER
+		    ON PARTNER.REVIEWER = USER.USER_ID
+		 WHERE CONCAT('3rd_', PARTNER.PARTNER_ID) = #{partnerId}
+				 OR USER.USER_ID = #{loginUser}
+	 </select>
+	 
+	  <select id="getOssAnalysisDataCnt" parameterType="String" resultType="int">
+	 	SELECT COUNT(*) AS CNT 
+	 	  FROM OSS_ANALYSIS_STATUS
+	 	 WHERE PRJ_ID = #{partnerId}
+	 </select>
+	 
+	 <select id="getOssAnalysisData" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
+	 	SELECT PRJ_ID
+		     , STATUS AS OSS_ANALYSIS_STATUS
+		     , CREATED_DATE
+		     , CREATOR
+		     , ANALYSIS_START_DATE
+		     , ANALYSIS_END_DATE
+		     , MODIFIED_DATE
+		     , MODIFIER
+		  FROM OSS_ANALYSIS_STATUS
+		 WHERE PRJ_ID = #{partnerId}
+	 </select>
 </mapper>
