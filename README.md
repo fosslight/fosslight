@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 # FOSSLight
 
-[![GitHub license](https://img.shields.io/github/license/fosslight/fosslight.svg)](https://github.com/fosslight/fosslight/blob/main/LICENSE) [![GitHub release](https://img.shields.io/github/release/fosslight/fosslight.svg)](https://GitHub.com/fosslight/fosslight/releases/) [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/demo.fosslight.org.svg)](http://demo.fosslight.org/) [![Guide](http://img.shields.io/badge/-doc-blue?style=flat-square&logo=github&link=https://fosslight.org/fosslight-guide-en/)](https://fosslight.org/fosslight-guide-en/)
+[![GitHub license](https://img.shields.io/github/license/fosslight/fosslight.svg)](https://github.com/fosslight/fosslight/blob/main/LICENSE) [![GitHub release](https://img.shields.io/github/release/fosslight/fosslight.svg)](https://GitHub.com/fosslight/fosslight/releases/) [![Website shields.io](https://img.shields.io/website-up-down-green-red/http/demo.fosslight.org.svg)](http://demo.fosslight.org/) [![Guide](http://img.shields.io/badge/-doc-blue?style=flat-square&logo=github&link=https://fosslight.org/fosslight-guide-en/)](https://fosslight.org/fosslight-guide-en/) [![Spring boot](https://img.shields.io/badge/Spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white)](https://fosslight.org/fosslight-guide-en/features/1_developer.html)
 
 
 <a href="https://fosslight.org"><img src="https://user-images.githubusercontent.com/50347670/115320108-287aeb80-a1bc-11eb-869b-5ef9431ac3d3.png" width="96"></a>  
@@ -40,11 +40,12 @@ We provide the guide for the installation and how to use it. Please refer the **
 
 ## Demo site
 You can experience FOSSLight through the **[Demo site](https://demo.fosslight.org/)**.  
-Please visit the Demo site and try out the many features of the FOSSLight first-hand!  
+Please visit the Demo site and try out the many features of the FOSSLight first-hand!    
 ID and Password for Demo site are described in **[FOSSLight guide](https://fosslight.org/fosslight-guide-en/)**.
 
 ## Contributing
 We always welcome your contributions. Please see the [CONTRIBUTING guide](CONTRIBUTING.md) for how to contribute.
+
 
 ## License
 Copyright (c) 2021 LG Electronics  
