@@ -74,6 +74,15 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		if(watcher != null){
 			result.setPartnerWatcher(watcher);	
 		}
+		String partnerId = "3rd_" + result.getPartnerId();
+		int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);
+		
+		if(resultCnt > 0) {
+			PartnerMaster analysisStatus = partnerMapper.getOssAnalysisData(partnerId);
+			
+			result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
+			result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+		}
 		
 		return result;
 	}

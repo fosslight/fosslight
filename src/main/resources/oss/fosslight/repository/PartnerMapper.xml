@@ -1666,4 +1666,23 @@
 		 WHERE CONCAT('3rd_', PARTNER.PARTNER_ID) = #{partnerId}
 				 OR USER.USER_ID = #{loginUser}
 	 </select>
+	 
+	  <select id="getOssAnalysisDataCnt" parameterType="String" resultType="int">
+	 	SELECT COUNT(*) AS CNT 
+	 	  FROM OSS_ANALYSIS_STATUS
+	 	 WHERE PRJ_ID = #{partnerId}
+	 </select>
+	 
+	 <select id="getOssAnalysisData" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
+	 	SELECT PRJ_ID
+		     , STATUS AS OSS_ANALYSIS_STATUS
+		     , CREATED_DATE
+		     , CREATOR
+		     , ANALYSIS_START_DATE
+		     , ANALYSIS_END_DATE
+		     , MODIFIED_DATE
+		     , MODIFIER
+		  FROM OSS_ANALYSIS_STATUS
+		 WHERE PRJ_ID = #{partnerId}
+	 </select>
 </mapper>
