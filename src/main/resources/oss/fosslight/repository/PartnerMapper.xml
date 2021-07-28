@@ -28,6 +28,9 @@
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 					AND t4.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+					AND t4.OSS_VERSION LIKE CONCAT('%',#{ossVersion},'%')
+				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 					AND t5.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
 				</if>
@@ -102,6 +105,7 @@
 					 , t3.CD_DTL_NO
 				 	 , t5.LICENSE_NAME
 				 	 , t4.OSS_NAME
+				 	 , t4.OSS_VERSION
 				 	 , t1.CREATOR AS CREATOR_ID
 				 	 , t4.FILE_PATH
 				 <if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
@@ -142,6 +146,9 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		   AND A.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			AND A.OSS_VERSION LIKE CONCAT('%',#{ossVersion},'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 		   AND A.LICENSE_NAME LIKE CONCAT('%',#{licenseName},'%')
@@ -803,6 +810,9 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			AND t5.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			AND t5.OSS_VERSION LIKE CONCAT('%',#{ossVersion},'%')
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 			AND t6.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
 		</if>
@@ -902,6 +912,9 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			AND t5.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+			AND t5.OSS_VERSION LIKE CONCAT('%',#{ossVersion},'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 			AND t6.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
