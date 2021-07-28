@@ -179,6 +179,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String analysisStartDate;
 
+	private String ossVersion;
+	
 	/**
 	 * Gets the partner id.
 	 *
@@ -1095,5 +1097,13 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setAnalysisStartDate(String analysisStartDate) {
 		this.analysisStartDate = analysisStartDate;
+	}
+
+	public String getOssVersion() {
+		return ossVersion;
+	}
+
+	public void setOssVersion(String ossVersion) {
+		this.ossVersion = ossVersion;
 	}
 }
