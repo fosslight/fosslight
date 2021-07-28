@@ -119,6 +119,7 @@ public class PartnerController extends CoTopComponent{
 				
 				if(ossBean != null) {
 					searchBean.setOssName(ossBean.getOssName());
+					searchBean.setOssVersion(ossBean.getOssVersion());
 				}
 			}
 		} else {
@@ -208,6 +209,7 @@ public class PartnerController extends CoTopComponent{
 		
 		if("search".equals(req.getParameter("act"))){
 			// 검색 조건 저장
+			// save search condition
 			putSessionObject(SESSION_KEY_SEARCH, partnerMaster);
 		}else if(getSessionObject(SESSION_KEY_SEARCH) != null){
 			partnerMaster = (PartnerMaster) getSessionObject(SESSION_KEY_SEARCH);
@@ -355,16 +357,17 @@ public class PartnerController extends CoTopComponent{
 
 	        
 			retMap.put("isValid", "false");
-			retMap.put("resCd", "99");//중복
+			retMap.put("resCd", "99"); // overlap flag
 			retMap.put("dupData", dupMap);
 			return makeJsonResponseHeader(retMap);
 		}
 				
 		String mainGrid = partnerMaster.getOssComponentsStr();
-		//메인그리드
+		
 		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
 		// ossVersion N/A => "" 치환 / 3rd Party > e2fsprogs를 Row에 추가 시 Save 불가
+		// ossVersion N/A => "" replace / 3rd Party > cannot save when adding e2fsprogs to row
 		ossComponents = CommonFunction.replaceOssVersionNA((List<ProjectIdentification>) fromJson(mainGrid, collectionType));
 		
 		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
@@ -373,7 +376,7 @@ public class PartnerController extends CoTopComponent{
 				CommonFunction.makeSessionKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()), ossComponents, ossComponentsLicense,
 				CommonFunction.makeSessionReportKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()));
 		
-		T2CoProjectValidator pv = new T2CoProjectValidator(); // validation을 t2coProject를 탐.
+		T2CoProjectValidator pv = new T2CoProjectValidator(); // validation proceeded with t2coProject
 		pv.setIgnore("OSS_NAME");
 		pv.setIgnore("OSS_VERSION");
 		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
@@ -416,7 +419,7 @@ public class PartnerController extends CoTopComponent{
 		if("10".equals(resCd) && !isEmpty(partnerMaster.getPartnerId())) {
 			String prjId = partnerMaster.getPartnerId();
 			
-			// invate mail 발송
+			// send invate mail
 			if(isNew) {
 				List<String> partnerInvateWatcherList = partnerService.getInvateWatcherList(prjId);
 				
@@ -437,6 +440,7 @@ public class PartnerController extends CoTopComponent{
 			}
 			
 			// 분석 결과어 업로시 nickname 변경된 사항
+			// In the case of nickname is changed when uploading to analysis result
 			try {
 				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
 						CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId())) != null) {
@@ -843,7 +847,7 @@ public class PartnerController extends CoTopComponent{
 			}
 		}
 		
-		//sheet이름 
+		// sheet name
 		List<Object> sheetNameList = null;
 		
 		try {
@@ -877,11 +881,11 @@ public class PartnerController extends CoTopComponent{
 	@PostMapping(value = PARTNER.DOCUMENT_FILE)
 	public String documentsFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
 			HttpServletResponse res, Model model) throws Exception {
-		// 파일등록
+		// file registration
 		List<UploadFile> list = new ArrayList<UploadFile>();
 		String fileId = req.getParameter("registFileId");
 		
-		// 파일 등록
+		// file registration
 		try {
 			if (req.getContentType() != null
 					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
@@ -897,6 +901,7 @@ public class PartnerController extends CoTopComponent{
 		}
 
 		// 결과값 resultList에 담기
+		// Put the result value in resultList
 		return toJson(list);
 	}
 	
