@@ -1796,6 +1796,8 @@ public class OssMaster extends ComBean implements Serializable{
 	public void setDetectedLicense(String detectedLicense) {
 		List<String> list = Arrays.asList(detectedLicense.split(","));
 		
+		this.detectedLicenses = null; // clear
+		
 		for(String s : list) {
 			if(!isEmpty(s)) {
 				this.addDetectedLicense(s.trim());
