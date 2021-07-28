@@ -181,12 +181,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				// nick name 에 걸려있는 nvd score를 다시 쿼리로 변경 (성능 이슈로 oss name과 nick name의 score를 각각 가져와서 여기서 비교한다.
-				double _sccore = Double.parseDouble(bean.getCvssScore());
-				double _sccore2 = Double.parseDouble(bean.getCvssScore2());
-			
-				if(Double.compare(_sccore2, _sccore) > 0) {
-					bean.setCvssScore(bean.getCvssScore2());
+				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
+				if(isEmpty(bean.getCveId()) 
+						&& isEmpty(bean.getOssVersion()) 
+						&& !isEmpty(bean.getCvssScoreMax())
+						&& !("-".equals(bean.getOssName()))){ 
+					String[] cvssScoreMax = bean.getCvssScoreMax().split("\\@");
+					bean.setCvssScore(cvssScoreMax[0]);
+					bean.setCveId(cvssScoreMax[1]);
 				}
 			}
 				
