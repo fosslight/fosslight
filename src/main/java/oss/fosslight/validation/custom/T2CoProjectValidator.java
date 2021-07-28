@@ -2286,6 +2286,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 				boolean errorFlag = true;
 				for(List<OssLicense> list : groupList) {
+					List<OssLicense> checkList = list.stream().filter(c -> licenseNameList.contains(c.getLicenseName())).collect(Collectors.toList());
+					// 현재 그룹 내에 사용된 license name이 존재하는지 check함.
+					if(checkList.size() == 0) {
+						continue; // 그룹내에 사용한 license name이 없을 경우 continue
+					}
+					
 					list = list.stream()
 							   .filter(ol -> !CoConstDef.CD_LICENSE_TYPE_PMS.equals(ol.getLicenseType()) 
 									   			&& !licenseNameList.contains(ol.getLicenseName()))
