@@ -26,7 +26,7 @@
 							repeatitems: false,
 							id: 'ossId',
 						},
-						colNames: ['ID','OSS Name (version)','OSS Version', 'License'],
+						colNames: ['ID','OSS Name (version)','OSS Version', 'Declared License'],
 						colModel: [
 							{name: 'ossId', index: 'ossId', key:true, hidden:true},
 							{name: 'ossNameVerStr', index: 'ossNameVerStr', align: 'left'},
