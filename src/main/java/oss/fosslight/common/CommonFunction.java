@@ -510,7 +510,7 @@ public class CommonFunction extends CoTopComponent {
 		if (_ossBean != null) {
 			for (OssLicense license : _ossBean.getOssLicenses()) {
 				String licenseName = license.getLicenseName();
-				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 				
 				if(!resultList.contains(licenseName)) {
 					resultList.add(licenseName);
@@ -519,7 +519,7 @@ public class CommonFunction extends CoTopComponent {
 
 			if(detectedLicenseList != null) {
 				for(String licenseName : detectedLicenseList) {
-					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
+					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 					
 					if(!resultList.contains(licenseName)) {
 						resultList.add(licenseName);
@@ -527,6 +527,7 @@ public class CommonFunction extends CoTopComponent {
 				}
 			}
 		}
+		
 		return String.join(",", resultList);
 	}
 	
