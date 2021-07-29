@@ -38,8 +38,8 @@ function showLicenseText(target) {
 						<td class="dCase">${ossInfo.ossVersion}<c:if test="${ossInfo.ossType eq 'V'}"> / <span class="iconSet vdif">v-Diff</span></c:if></td>
 					</tr>
 					<tr>
-						<th class="dCase txStr">License</th>
-						<td class="dCase" id="td_licenseName">
+						<th class="dCase txStr">Declared License</th>
+						<td class="dCase" id="td_declaredLicenseName">
 							<c:choose>
 								<c:when test="${ossInfo.licenseDiv eq ct:getConstDef('LICENSE_DIV_MULTI')}">
 								${ossInfo.licenseName}
@@ -49,6 +49,12 @@ function showLicenseText(target) {
 							<c:forEach var="license" items="${ossInfo.ossLicenses}">
 								<div id="license_${license.licenseId}" class="classLicenseText" style="display: none;">${license.ossLicenseText}</div>
 							</c:forEach>
+						</td>
+					</tr>
+					<tr>
+						<th class="dCase">Detected License</th>
+						<td class="dCase" id="td_detectedLicenseName">
+							${ossInfo.detectedLicense}
 						</td>
 					</tr>
 					<tr>

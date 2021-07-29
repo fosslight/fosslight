@@ -42,18 +42,6 @@
 						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", false)}
             			</span>
 					</dd>
-					<dd>
-						<label style="width:100px;">License Name</label>
-						<input type="text" name="licenseName" class="autoComLicense" value="${searchBean.licenseName}" style="width:150px;"/>
-					</dd>
-					<dd class="centerAign">
-						<label>OSS Name</label>
-						<input type="text" name="ossName" class="autoComOss" value="${searchBean.ossName}"/>
-					</dd>
-					<dd class="lastAign">
-						<label>Binary Name</label>
-						<input type="text" name="binaryName" class="" value="${searchBean.binaryName}"/>
-					</dd>
 					<dd class="">
 						<label style="width:100px;">Created Date</label>
 						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8"/> ~ 
@@ -73,6 +61,29 @@
 						<input type="checkbox" id="checkbox3" name="publicYn" checked="checked"/>
 					</dd>
 					</c:if>
+				</dl>
+				<input type="button" value="Admin Expand apply" class="btnHiddenExpand" />
+				<dl class="hiddenSearch" style="display:none;">
+					<dd>
+						<label style="width:100px;">OSS Name</label>
+						<input type="text" name="ossName" class="autoComOss" value="${searchBean.ossName}" style="width:150px;"/>
+					</dd>
+					<dd class="centerAign">
+						<label>OSS Version</label>
+						<input type="text" name="ossVersion" class="autoComOss" value="${searchBean.ossVersion}"/>
+					</dd>
+					<dd class="lastAign">
+						<label style="width:100px;">License Name</label>
+						<input type="text" name="licenseName" class="autoComLicense" value="${searchBean.licenseName}" style="width:150px;"/>
+					</dd>
+					<dd>
+						<label style="width:100px;">Binary Name</label>
+						<input type="text" name="binaryName" class="" value="${searchBean.binaryName}" style="width:150px;"/>
+					</dd>
+					<dd class="centerAign">
+						<label>Comment</label>
+						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.comment}</textarea>					
+					</dd>
 				</dl>
 				<input name="act" type="hidden" value="search"/> 
 				<input type="submit" id="search" value="Search" class="btnColor search" />

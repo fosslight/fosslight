@@ -71,7 +71,7 @@
 					$('#ossList').jqGrid({
 							datatype: 'local',
 							data : resultData.ossList,
-							colNames: ['ID','Result', 'OSS Name','OSS Version', 'Nick Name', 'License', 'Copyright', 'Download Location', 'Home Page', 'Summary Description', 'Comment', 'regType'],
+							colNames: ['ID','Result', 'OSS Name','OSS Version', 'Nick Name', 'Declared License', 'Copyright', 'Download Location', 'Home Page', 'Summary Description', 'Comment', 'regType'],
 							colModel: [
 								{name: 'gridId', index: 'gridId', hidden:true, key:true},
 								{name: 'procStatus', index: 'procStatus', width: 40, align: 'left',editable: false},

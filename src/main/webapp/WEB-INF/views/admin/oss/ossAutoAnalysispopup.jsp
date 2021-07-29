@@ -73,8 +73,8 @@
 						total:function(obj){return obj.total;},
 						records:function(obj){return obj.records;}
 					},
-					colNames: ['', 'Title', 'Result', 'gridId', 'OSS Name', 'OSS Version', 'OSS NickName', 'License Name', 'Copyright', 'Download Location'
-						 , 'Homepage', 'Description', 'Comment', '', ''],
+					colNames: ['', 'Title', 'Result', 'gridId', 'OSS Name', 'OSS Version', 'OSS NickName', 'Declared License Name', 'Copyright', 'Download Location'
+						 , 'Homepage', 'Description', 'Comment', '', '', ''],
 					colModel: [
 						{name:'checkbox', align: 'center', width:13
 							, formatter: function radio(cellvalue, options, rowObject) {
@@ -110,7 +110,14 @@
 						{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left', editable: true},
 						{name: 'ossNickname', index: 'ossNickname', width: 120, align: 'left', editable: true},
 						{name: 'licenseName', index: 'licenseName', width: 95, align: 'left', editable: true},
-						{name: 'ossCopyright', index: 'ossCopyright', width: 100, align: 'left', editable: true, edittype:"textarea", editoptions:{rows:"3",cols:"15"}},
+						{name: 'ossCopyright', index: 'ossCopyright', width: 100, align: 'left', editable: true, edittype:"textarea", editoptions:{rows:"3",cols:"15"}, 
+							formatter: function radio(cellvalue, options, rowObject) {
+								return (rowObject.ossCopyright||"")
+															.split("\\n").join("\n")
+															.split("<").join("&lt;")
+															.split(">").join("&gt;");
+							}
+						},
 						{name: 'downloadLocation', index: 'downloadLocation', width: 120, align: 'left', editable: true, 
 							editoptions: {
 								dataInit: function (e) {
@@ -140,7 +147,15 @@
 							}
 						},
 						{name: 'summaryDescription', index: 'summaryDescription', width: 50, height: 50, align: 'left'},
-						{name: 'comment', index: 'comment', width: 100, editable: true, edittype:"textarea", editoptions:{rows:"3",cols:"15"}},
+						{name: 'comment', index: 'comment', width: 100, editable: true, edittype:"textarea", editoptions:{rows:"3",cols:"15"}, 
+							formatter: function radio(cellvalue, options, rowObject) {
+								return (rowObject.comment||"")
+														.split("\\n").join("\n")
+														.split("<").join("&lt;")
+														.split(">").join("&gt;");
+							}
+						},
+						{name: 'detectedLicense', index: 'detectedLicense', width: 0, hidden:true},
 						{name: 'completeYn', index: 'completeYn', width: 0, hidden:true},
 						{name: 'groupId', index: 'groupId', width:1, hidden:true
 							, cellattr: function(rowId, val, rawObject, cm, rdata) {

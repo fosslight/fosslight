@@ -53,4 +53,8 @@ public interface PartnerService extends HistoryConfig{
 	public void updatePublicYn(PartnerMaster partnerMaster);
 	
 	public boolean existsWatcher(PartnerMaster project);
+	
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster);
+	
+	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
 }

@@ -13,7 +13,7 @@
 	var licenseTags=[];
 	var commentTemp = '';
 	var gLicenseData = new Array();
-	
+	var detectedLicenseValid = true;
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
@@ -29,6 +29,7 @@
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
+			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 			//데이터 초기화(컨트롤러에서 가져온 데이터)
 			if(data.detail){
 				data.syncData(data.detail, false);
@@ -128,6 +129,21 @@
 						});
 						
 						break;
+					case 'detectedLicenses':
+						v.forEach(function(detectLicense, index, obj){
+							if(index == 0){
+								$('.multiDetectedLicenseSet span:first').remove();
+							}
+							if(detectLicense!=''){
+								$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
+								$('.multiDetectedLicenseSet input[type=text]:last').val(detectLicense);
+								$('.smallDelete').on('click', function(){
+									$(this).parent().remove();
+								});
+							}					
+						});
+						
+						break;
 					case 'licenseDiv':
 						if(v=='S'){
 							syncData.ossLicenses.forEach(function(item){
@@ -198,6 +214,17 @@
 				});
 				
 			});
+
+			//Detect License Input 추가
+			$('#detectedLicenseAdd').on('click', function(){
+				$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
+
+				setCustomAutoComplete("single");
+				
+				$('.smallDelete').on('click', function(){
+					$(this).parent().parent().remove();
+				});
+			});
 			
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
@@ -266,10 +293,11 @@
 							jsValidResult = false;
 						}
 					}
-				
-					if(!jsValidResult) {
+					
+					if(!jsValidResult || !detectedLicenseValid) {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
-
+						$("span.retxt").show();
+						
 						return false;
 					}
 				
@@ -455,12 +483,16 @@
 			$( '.autoComOssLicense' ).autocomplete({
 				source: licenseTags,
 				select: function( event, ui ) {
-					$("#licenseName").parent().find("span.retxt:first").hide();
-					var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
-					$('#licenseName').val(licenseName);
-					showLicenseText(licenseName);
+					var target = $(this).attr("id");
 					
-					return false;
+					if(target == "licenseName"){
+						$("#licenseName").parent().find("span.retxt:first").hide();
+						var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
+						$('#licenseName').val(licenseName);
+						showLicenseText(licenseName);
+						
+						return false;
+					}
 				},
 				minLength: 0,
 				open: function() {
@@ -468,23 +500,44 @@
 					selected = false;
 					
 				},
-				close: function () { 
+				close: function () {
 					$(this).attr('state', 'closed');
 					var _item = checkLicenseSelected($(this).val());
-					if(_item == null) {
-						$("#licenseName").parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
+					var target = $(this).attr("id");
+					
+					if(target == "licenseName"){
+						if(_item == null) {
+							$("#licenseName").parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
+						} else {
+							$("#licenseName").parent().find("span.retxt:first").hide();
+	
+							var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+							$('#licenseName').val(licenseName);
+							$('input[name=licenseName]').val(_item.licenseName);
+							$('#licenseType').val(_item.licenseType);
+							$('input[name=obligationType]').val(_item.obligationCode);
+							$('#lt td').html(_item.licenseType);
+							$('#ob td').html('');
+							$(_item.obligation).appendTo('#ob td');
+							selected = true;
+						}
 					} else {
-						$("#licenseName").parent().find("span.retxt:first").hide();
-
-						var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
-						$('#licenseName').val(licenseName);
-						$('input[name=licenseName]').val(_item.licenseName);
-						$('#licenseType').val(_item.licenseType);
-						$('input[name=obligationType]').val(_item.obligationCode);
-						$('#lt td').html(_item.licenseType);
-						$('#ob td').html('');
-						$(_item.obligation).appendTo('#ob td');
-						selected = true;
+						// detected License
+						$(this).parent().next("span.retxt:first").empty();
+						detectedLicenseValid = true; // reset
+						
+						if(_item != null){
+							var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+							$(this).val(licenseName);
+							selected = true;
+						} else {
+							var value = $(this).val();
+							
+							if(value != ""){
+								$(this).parent().next("span.retxt:first").html('<spring:message code="msg.oss.unknown.license" />').show();
+								detectedLicenseValid = false;
+							}
+						}
 					}
 				}
 		    })
@@ -2064,6 +2117,5 @@ var fn = {
 			$(target).parent().next("span.retxt").hide();
 		}
 	}
-	
 }
 </script>

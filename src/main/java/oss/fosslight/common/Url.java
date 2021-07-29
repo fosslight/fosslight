@@ -395,6 +395,8 @@ public final class Url {
 		public static final String COMMENT_LIST = PATH + "/getCommentList";
 		
 		public static final String SAMPLEDOWNLOAD = PATH + "/sampleDownload";
+		
+		public static final String FILTERED_LIST = PATH + "/getFilteredList";
 	}
 	
 	public static final class USER {

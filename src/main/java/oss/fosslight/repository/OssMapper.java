@@ -41,6 +41,8 @@ public interface OssMapper {
 	
 	List<OssMaster> selectOssDownloadLocationList(OssMaster ossMaster);
 	
+	List<OssMaster> selectOssDetectedLicenseList(OssMaster ossMaster);
+	
 	int selectOssPopupTotalCount(OssMaster ossMaster);			
 	
 	List<OssMaster> selectOssPopupList(OssMaster ossMaster);
@@ -57,7 +59,9 @@ public interface OssMapper {
 	
 	int mergeOssNickname(OssMaster ossMaster);					
 	
-	int insertOssLicense(OssMaster ossMaster);					
+	int insertOssLicenseDeclared(OssMaster ossMaster);
+	
+	int insertOssLicenseDetected(OssMaster ossMaster);
 	
 	int updateOssForProject(OssMaster ossMaster);				
 	
@@ -175,9 +179,9 @@ public interface OssMapper {
 	
 	int checkOssNameUrl2Cnt(ProjectIdentification bean);
 	
-	int ossAnalysisListCnt(OssMaster bean);
+	int ossAnalysisListCnt(@Param("prjId") String prjId, @Param("startAnalysisFlag") String startAnalysisFlag);
 	
-	void deleteOssAnalysisList(OssMaster bean);
+	void deleteOssAnalysisList(@Param("prjId") String prjId);
 	
 	int insertOssAnalysisList(OssMaster bean);
 	
