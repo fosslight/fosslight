@@ -7,7 +7,7 @@
 	var lastsel;
 	var userList;
 	var userIdList;
-	var pastEmpList;
+	var adminUserList;
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
@@ -19,7 +19,7 @@
 		evt.init();
 		
 		fn.getUserIdList("Y", "REVIEWER"); // 근무자
-		fn.getUserIdList("N", "PASTEMP"); // 퇴사자
+		fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
 
 		// TODO - 추후 기능이 정리되면 주석제거할 예정
 		//if('${sessUserInfo.authority}'=="ROLE_ADMIN"){
@@ -67,16 +67,12 @@
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
 			
-			$('.btnReject').on('click',function(e){
-				fn.rejectPopOpen();
-			});
-			
-			$('#popReject').click(function(){
-				fn.exeReject();
-			});				
-			
 			$('#popCancel').click(function(){
-				$('#rejectPop').hide();
+				$('#changeStatusPop').hide();
+			});
+
+			$('#popChangeStatus').on('click', function(){
+				fn.changeStatusProc();
 			});
 			
 			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
@@ -86,15 +82,15 @@
 				calValidation(this, e);
 			});
 		}
-	}
+	};
 	
 	
 	var fn = {
-		getUserIdList : function(adminYn, type){
+		getUserIdList : function(reviewerFlag, type){
 			return $.ajax({
 				type: 'GET',
 				url: "/project/getUserIdList",
-				data: {adminYn : adminYn},
+				data: {reviewerFlag : reviewerFlag},
 				success : function(data){
 					if(data != null){
 						temp = data.split(";").reduce(function(obj, cur){
@@ -111,7 +107,7 @@
 						if(type == "REVIEWER"){
 							userIdList = temp;
 						} else {
-							pastEmpList = temp;
+							adminUserList = temp;
 							gridTooltip.init();
 						}
 					}
@@ -303,7 +299,7 @@
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else {
-								display = cellvalue;
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Progress</a></div>";
 							}
 							
 							break;
@@ -311,9 +307,20 @@
 							display = "N/A";
 							
 							break;
+						case "Error":
+							display = "Error";
+
+							break;
+						case "Drop":
+							display = "Drop";
+
+							break;
 						default:
-							display = cellvalue;
-						
+							if(rowObject.distributeTarget == "N/A"){
+								display = "N/A";
+							} else{
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">"+cellvalue+"</a></div>";
+							}
 							break;
 					}
 				}
@@ -363,15 +370,19 @@
 							}
 							
 							break;
-						case "Reserve":
+						case "Error":
 							display = cellvalue;
-							
+
+							break;
+						case "N/A":
+							display = cellvalue;
+
 							break;
 						default:
-							if(rowObject.distributeTarget == "NA"){
+							if(rowObject.distributeTarget == "N/A"){
 								display = "N/A";
-							} else {
-								display = cellvalue;
+							} else{
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+")\">"+cellvalue+"</a></div>";
 							}
 						
 							break;
@@ -443,7 +454,7 @@
 		displayComment : function(cellvalue, options, rowObject){
 			var display = "";
 			
-			if(!isEmpty(cellvalue)) {
+			if(cellvalue !="") {
 				var tmpStr = new RegExp();
 				tmpStr = /[<][^>]*[>]/gi;
 				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
@@ -488,42 +499,6 @@
 				},
 				error: function(data){
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			})
-		},
-		// Reject pop open
-		rejectPopOpen : function(){
-			var selrows = $("#list").jqGrid('getGridParam','selarrrow');
-			
-			if(selrows.length > 0){
-				// 초기화
-				$("input:radio[name='radioName']:radio[value='0']").attr("checked",true);
-				$('#rejectPop').show();
-			} else {
-				alert("대상 프로젝트를 선택하여 주십시오.");
-				return false;
-			}
-		},
-		exeReject : function(selrows){
-			var selrows = $("#list").jqGrid('getGridParam','selarrrow');
-			// 라디오 identification = 0, verification = 1
-			var rValue = $("input:radio[name='radioName']:checked").val();
-			var data = {"prjIds" : selrows, "identificationStatus" : rValue};
-			
-			$.ajax({
-				url : '/project/updateReject',
-				type : 'POST',
-				data : JSON.stringify(data),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function(data){
-					$('#rejectPop').hide();
-					$('#search').click();
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					$('#rejectPop').hide();
 				}
 			})
 		},
@@ -612,7 +587,307 @@
 			
 			return paramData;
 		}, getUserName : function(cellvalue, options, rowObject){
-			return userIdList[cellvalue] || pastEmpList[cellvalue] || "";
+			return adminUserList[cellvalue] || "";
+		}, 
+		checkProjectCnt : function(){
+			var isValid = true;
+			var checkProjectArr = $("#list").getGridParam("selarrrow");
+			
+			switch(checkProjectArr.length){
+				case 1:
+					break;
+				case 0:
+					isValid = false;
+					alertify.alert("Select the Project.");
+					break;
+				default: // 2개 이상
+					isValid = false;
+					alertify.alert("Choose only one project.");
+					break;
+			}
+
+			return isValid;
+		},
+		checkProjectStatus : function(){
+			if(fn.checkProjectCnt()) {
+				var prjId = $("#list").getGridParam("selrow");
+				var rtnParameter = {};
+				
+				$.ajax({
+					url : '<c:url value="/project/getProjectStatus"/>',
+					type : 'POST',
+					data : JSON.stringify({"prjId" : prjId}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(data){
+						var distributionStatus = data.distributionStatus;
+						
+						if((distributionStatus||"").toUpperCase() == "PROC"){
+							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size");
+							return false;
+						}
+						
+						fn.showChangeStatus(data);
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
+		},
+		copy : function(){
+			if(fn.checkProjectCnt()){
+				var prjId = $("#list").getGridParam("selrow");
+				
+				createTabInFrame(prjId+'copy_Project', '#/project/copy/'+prjId);
+			}
+		},
+		showChangeStatus : function(paramObj){
+			var projectStatus = (paramObj.projectStatus||"").toUpperCase();
+			var identificationStatus = (paramObj.identificationStatus||"").toUpperCase();
+			var verificationStatus = (paramObj.verificationStatus||"").toUpperCase();
+			var distributionStatus = (paramObj.distributionStatus||"").toUpperCase();
+			var completeFlag = paramObj.completeFlag == "Y";
+			var dropFlag = paramObj.dropFlag == "Y";
+			var commId = paramObj.commId;
+			var viewOnlyFlag = paramObj.viewOnlyFlag;
+
+			$("#identificationStatus").val(identificationStatus);
+			$("#distributionStatus").val(distributionStatus);
+			$("#completeFlag").val(paramObj.completeFlag);
+			$("#dropFlag").val(paramObj.dropFlag);
+			$("#commId").val(commId);
+
+			$("#CSIdentification > input[type=radio]").attr("disabled", false);
+			$("#CSDrop > input[type=radio]").attr("disabled", false);
+			$("#CSDelete > input[type=radio]").attr("disabled", false);
+			$("#CSComplete > input[type=radio]").attr("disabled", false);
+			
+			if (projectStatus == "PROG"){
+				if (identificationStatus == "" || identificationStatus == "PROG"){
+					$("#CSIdentification > input[type=radio]").attr("disabled", true);
+				}
+			}
+			
+			if(projectStatus == "REV"){
+				$("#CSIdentification > input[type=radio]").attr("disabled", true);
+				$("#CSDrop > input[type=radio]").attr("disabled", true);
+				$("#CSDelete > input[type=radio]").attr("disabled", true);
+			}
+
+			if(dropFlag){
+				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
+			}
+			
+			if(projectStatus != "REQ" && completeFlag){
+				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
+				$("#CSDelete > input[type=radio]").attr("disabled", true); // status : REV or complete 시 disabled
+			}
+
+			if('${sessUserInfo.authority}'=="ROLE_ADMIN"
+				&& identificationStatus == "CONF"
+				&& (!verificationStatus
+						|| verificationStatus == ""
+						|| verificationStatus == "PROG"
+						|| verificationStatus == "CONF"
+						|| verificationStatus == "NA")
+				&& !completeFlag){
+				$("#CSComplete > input[type=radio]").attr("disabled", false);
+			} else {
+				$("#CSComplete > input[type=radio]").attr("disabled", true);
+			}
+						
+			$("#changeStatusPop").show();
+		},
+		changeStatusProc : function(){
+			$("#reason").next(".retxt").hide(); // required reset
+			
+			var prjId = $("#list").getGridParam("selrow");
+			var rowData = $("#list").getRowData(prjId);
+			var changeSeq = $("input:radio[name='radioName']:checked").val();
+			var reason = $("#reason").val();
+			var identificationStatus = $("#identificationStatus").val();
+			var distributionStatus = $("#distributionStatus").val();
+			var completeFlag = $("#completeFlag").val();
+			var dropFlag = $("#dropFlag").val();
+			
+			if(reason.split(" ").join("") == ""){
+				alertify.alert("Please leave a comment.");
+				$("#reason").next(".retxt").show();
+				
+				return false;
+			}
+
+			switch(changeSeq){
+				case "1": // restart identification
+					var param = {
+						"prjId" : prjId
+					  , "userComment" : reason
+					  , "identificationStatus" : "PROG"
+					};
+					if ('${sessUserInfo.authority}'=="ROLE_ADMIN"){
+						if(identificationStatus == "CONF"){
+							if(distributionStatus == "DONE"){
+								param["delOsdd"] = "Y"; // -> delete with OSDD
+								
+								if(completeFlag != "Y"){ // -> delete with OSDD & identification reject 후 end 
+									param["changeStatusFlag"] = "Y";
+								}
+							}
+
+							if(completeFlag == "Y"){
+								param["completeYn"] = "N"; // -> reopen 동작
+							}
+						}
+
+						if (dropFlag == "Y"){
+							param["completeYn"] = "N"; // -> reopen 동작
+						}
+						
+						fn.updateProjectStatus(param);
+					}else{
+						if(completeFlag == "Y"){
+							param["commId"] = $("#commId").val();
+							fn.reqToOpenUser(param);
+						}else {
+							if (dropFlag == "Y"){
+								param["completeYn"] = "N"; // -> reopen 동작
+							}
+							
+							fn.updateProjectStatus(param);
+						}
+					}
+					
+					break;
+				case "2": // drop -> distribution Done 일경우 delete with OSDD를 실행 후 drop 처리함.
+					if(distributionStatus == "DONE"){
+						var param = {
+							"prjId" : prjId
+							, "identificationStatus" : "PROG"
+							, "userComment" : reason
+						};
+							
+						param["delOsdd"] = "Y"; // -> delete with OSDD
+
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
+
+						alertify.confirm(dropMessage, function (e) {
+							if (e) {
+								fn.updateProjectStatus(param, fn.exeProjectDrop);
+							} else {
+								return false;
+							}
+						});
+					}else if (distributionStatus == "RSV"){
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
+
+						alertify.confirm(dropMessage, function (e) {
+							if (e) {
+								fn.cancelDistributeReserve();
+							} else {
+								return false;
+							}
+						});
+					}else{
+						var param = {
+							"prjId" : prjId
+							, "userComment" : reason
+						};
+						
+						fn.exeProjectDrop(param);
+					}
+
+					break;
+				case "3": // delete
+					var param = {
+						"prjId" : prjId
+					  , "userComment" : reason
+					  , "identificationStatus" : "PROG"
+					};
+
+					if(identificationStatus == "CONF"){ // identification > confirm 일 경우 reject 후 delete
+						if(distributionStatus == "DONE"){
+							param["delOsdd"] = "Y"; // -> delete with OSDD
+							
+							if(completeFlag != "Y"){
+								param["changeStatusFlag"] = "Y"; // -> delete with OSDD & identification reject 후 end 
+							}
+						} 
+
+						if(completeFlag == "Y"){
+							param["completeYn"] = "N"; // -> reopen 동작
+						}
+						
+						fn.updateProjectStatus(param, fn.projectDelete);
+					} else { // identification > !confirm 일 경우 즉시 delete
+						fn.projectDelete({"prjId" : prjId, "userComment" : reason});
+					}
+					
+					break;
+				case "4": // complete
+					fn.updateProjectStatus({"prjId" : prjId, "completeYn" : "Y", "userComment" : reason});
+					
+					break;
+				default:
+					break;
+			}
+		},
+		projectDelete : function(data){
+			var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
+			
+			$.ajax({
+				url : _url,
+				type : 'POST',
+				data : '',
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					reloadTabInframe('/project/list');
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		updateProjectStatus : function(data, callbackFunc){
+			$.ajax({
+				url : '/project/updateProjectStatus',
+				type : 'POST',
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(){
+					if(typeof callbackFunc == "function"){
+						callbackFunc(data);
+					} else {
+						reloadTabInframe('<c:url value="/project/list"/>');
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		exeProjectDrop : function (data){
+			data["dropYn"] = "Y";
+			
+			$.ajax({
+				url : '<c:url value="${suffixUrl}/project/updateProjectStatus"/>',
+				type : 'POST',
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					reloadTabInframe('<c:url value="/project/list"/>');
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
 		}, bomCompare : function(){ /* BOM Compare ADD */
 			// 체크박스 선택 체크
 			var chk = checkboxParam.length
@@ -670,8 +945,34 @@
 					}
 				}
 			});
+		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
+			var commentsMode = data.commId != "" ? "update" : "insert";
+			var param = {"referenceId" : data.prjId, "contents" : data.userComment, "referenceDiv" : "10", "commId" : data.commId, "commentsMode" : commentsMode};
+			
+			fn.commentsSave(param);
+		}, commentsSave : function(data){
+			$.ajax({
+				url : '<c:url value="${suffixUrl}/project/commentsSave"/>',
+				type : 'POST',
+				dataType : 'json',
+				cache : false,
+				data : data,
+				success : function(json){
+					if(json.isValid == 'false'){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						alertify.alert('<spring:message code="msg.common.success" />', function(){
+							reloadTabInframe('<c:url value="/project/list"/>');
+							activeTabInFrameList("PROJECT");
+						});
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
 		}
-	}
+	};
 	
 	// jqGrid
 	var list = {
@@ -754,7 +1055,6 @@
 				sortorder: 'desc',
 				height: 'auto' ,
 				multiselect : true,
-				//multiselect : (('${sessUserInfo.authority}'=="ROLE_ADMIN") ? true: false),
 				loadonce:false,
 				loadComplete:function(data) {
 					totalRow = data.records;
@@ -782,7 +1082,7 @@
 						rowid = arr[idx];
 						selectEl = $("#list #"+arr[idx]);
 						status = data.rows[idx].identificationStatus;
-
+						
 	 					if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}") {
 	 						selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
 						} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}" 
@@ -896,7 +1196,7 @@
 						createTabInFrame(rowData['prjId']+'_Project','#/project/edit/'+rowData['prjId']);
 					}
 				},
-				postData : refreshParam
+				postData: refreshParam
 			});
 		}
 	};

@@ -131,11 +131,21 @@
 			<input type="button" value="Reject" class="btnReject btnColor left" style="display: none;"/>
 			
 			<!-- Popup -->
-			<div id="rejectPop" class="pop rejectPop">
-				<h1>RequestUpdate</h1>
+			<div id="changeStatusPop" class="pop changeStatusPop">
+				<h1 class="orange">Change Status</h1>
 				<div class="popdata">
-					<div class="radioSet"><input type="radio" id="r1" name="radioName" value="0"><label for="r1">Identification</label></div>
-					<div class="radioSet mt10"><input type="radio" id="r2" name="radioName" value="1"><label for="r2">Verification</label></div>
+					<input type="hidden" id="identificationStatus" />
+					<input type="hidden" id="verificationStatus" />
+					<input type="hidden" id="distributionStatus" />
+					<input type="hidden" id="completeFlag" />
+					<input type="hidden" id="dropFlag" />
+					<input type="hidden" id="commId"/>
+					<div class="radioSet" id="CSIdentification"><input type="radio" id="r1" name="radioName" value="1"><label for="r1">Restart Identification</label></div>
+					<div class="radioSet mt10" id="CSDrop"><input type="radio" id="r2" name="radioName" value="2"><label for="r2">Drop</label></div>
+					<div class="radioSet mt10" id="CSDelete"><input type="radio" id="r3" name="radioName" value="3"><label for="r3">Delete</label></div>
+					<c:if test="${ct:isAdmin()}">
+						<div class="radioSet mt10" id="CSComplete"><input type="radio" id="r4" name="radioName" value="4"><label for="r4">Complete</label></div>
+					</c:if>
 					<div class="taSet required mt20">
 						<label for="t1">Caused by</label>
 						<textarea id="reason" rows="8"></textarea>
@@ -144,11 +154,14 @@
 				</div>
 				<div class="pbtn">
 					<input id="popCancel" type="button" value="Cancel" class="btnCancel btnColor" />
-					<input id="popReject" type="button" value="Reject" class="btnColor red" />
+					<input id="popChangeStatus" type="button" value="OK" class="btnColor red" />
 				</div>
 			</div>
 			<!-- //Popup -->
+			
 			<span class="left">
+				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
+				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>
 				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
 			</span>
 			
@@ -165,6 +178,8 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="left">
+				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
+				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>
 				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
 			</span>
 		
