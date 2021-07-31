@@ -5,6 +5,7 @@ version: "3.5"
 services:
     db:
       image: mariadb:10
+      container_name: fosslight_db
       ports:
         - 3306:3306
       volumes:
