@@ -320,7 +320,11 @@ public class FileUtil {
             // opens input stream from the HTTP connection
             InputStream inputStream = httpConn.getInputStream();
             String saveFilePath = saveDir + File.separator + fileName;
-             
+
+            if(!Files.exists(Paths.get(saveDir))) {
+                Files.createDirectories(Paths.get(saveDir));
+            }
+
             // opens an output stream to save into file
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);
  
@@ -416,7 +420,7 @@ public class FileUtil {
 			Path movePath = Paths.get(destPath);
 			
 			if(!Files.exists(movePath)) {
-				Files.createDirectory(movePath);
+				Files.createDirectories(movePath);
 			}
 			
 			if(Files.exists(zipPath)) {
