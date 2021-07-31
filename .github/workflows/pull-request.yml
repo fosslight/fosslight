@@ -5,7 +5,8 @@ name: Pull requests fosslight
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+      - "*"
 jobs:
   build:
     runs-on: ubuntu-latest
