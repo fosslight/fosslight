@@ -65,11 +65,18 @@ public class CoMailManager extends CoTopComponent {
 	private static FileService fileService;
 	private static OssMapper ossMapper;
 	
-	private final static String DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
+	private static String DEFAULT_BCC;
+	private static String[] BAT_FAILED_BCC;
+	private static String[] MAIL_LIST_SECURITY;
+
+	/** The conn str. */
+	private static String connStr;
 	
-	private final static String[] BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// BAT Detail setting에 추가할 예정
-	
-	private static String[] MAIL_LIST_SECURITY = avoidNull(CommonFunction.getProperty("smtp.default.security")).split(","); // Vulnerability Detail setting에 추가할 예정
+	/** The conn user. */
+	private static String connUser;
+		
+	/** The conn pw. */
+	private static String connPw;
 	
 	/**
 	 * Instantiates a new co mail manager.
@@ -90,18 +97,15 @@ public class CoMailManager extends CoTopComponent {
         	projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
         	fileService = (FileService) getWebappContext().getBean(FileService.class);
         	ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
-    	}
+            DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
+            BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// (To be added) BAT Detail setting
+            MAIL_LIST_SECURITY = avoidNull(CommonFunction.getProperty("smtp.default.security")).split(","); // (To be added) Vulnerability Detail setting
+            connStr = CommonFunction.makeJdbcUrl( CommonFunction.getProperty("spring.datasource.url"));
+            connUser = CommonFunction.getProperty("spring.datasource.username");
+            connPw = CommonFunction.getProperty("spring.datasource.password");
+		}
         return instance;
     }
-
-	/** The conn str. */
-	private static String connStr = CommonFunction.makeJdbcUrl( CommonFunction.getProperty("spring.datasource.url"));
-	
-	/** The conn user. */
-	private static String connUser = CommonFunction.getProperty("spring.datasource.username");
-	
-	/** The conn pw. */
-	private static String connPw = CommonFunction.getProperty("spring.datasource.password");
 	
     /**
      * Send mail.
