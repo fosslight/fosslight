@@ -204,7 +204,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				// oss 등록 여부 체크
 				if(!isEmpty(bean.getOssName()) && !diffMap.containsKey("OSS_NAME." + bean.getComponentId())) {
-					String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+					String licenseText = "";
+					
+					if(ossBean != null) {
+						licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+					}
 					
 					if(!ossInfoByName.containsKey(checkKey)) {
 						if(checkNonVersionOss(ossInfoByName, bean.getOssName())) {
@@ -395,7 +399,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					// 경우)
 					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(ossBean != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
@@ -454,7 +462,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 							&& !errMap.containsKey("OSS_VERSION." + bean.getComponentId())
 							&& ossInfoByName.containsKey(checkKey)
 							) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(ossBean != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(ossBean.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
@@ -788,7 +800,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					// 경우)
 					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(checkOSSMaster != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()
@@ -852,7 +868,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 							&& !errMap.containsKey("OSS_VERSION." + bean.getComponentId())
 							&& ossInfoByName.containsKey(checkKey)
 							) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(checkOSSMaster != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(checkOSSMaster.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
@@ -1823,7 +1843,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					// 경우)
 					else if (!errMap.containsKey("OSS_NAME." + bean.getGridId())
 							&& !errMap.containsKey("LICENSE_NAME." + bean.getGridId())) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(ossmaster != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
@@ -1923,7 +1947,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 							&& !errMap.containsKey("OSS_VERSION." + bean.getGridId())
 							&& ossInfo.containsKey(checkKey)
 							) {
-						String licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						String licenseText = "";
+						
+						if(ossmaster != null) {
+							licenseText = CommonFunction.makeLicenseExpressionMsgType(ossmaster.getOssLicenses(), true); // msgType return
+						}
 						
 						if (bean.getOssComponentsLicenseList() != null
 								&& !bean.getOssComponentsLicenseList().isEmpty()) {
