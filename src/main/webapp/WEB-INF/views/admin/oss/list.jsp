@@ -35,6 +35,11 @@
 						<label>WebSite</label>
 						<input name="homepage" type="text" value="${searchBean.homepage}"/>
 					</dd>
+					<dd>
+						<label>Deactivate</label>
+						<input type="checkbox" id="deactivateFlag" value="${searchBean.deactivateFlag}" style="margin:0 5px;"/>
+						<input type="hidden" name="deactivateFlag" value=""/>
+					</dd>
 				</dl>
 				<c:if test="${ct:isAdmin()}">
 				<input type="button" value="Admin Expand apply" class="btnExpand" />

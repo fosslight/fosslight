@@ -153,6 +153,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 					) {
 				convertDataMap.put("contentsTitle", StringUtil.replace(makeMailSubject((isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()), bean, true), "[FOSSLight]", ""));
 			} else {
@@ -645,6 +646,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     			// Creator를 To, 나머지 전체 Admin사용자를 cc로 발송
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -1318,7 +1320,8 @@ public class CoMailManager extends CoTopComponent {
 								|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
-								
+								|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
+
 								)
 						)
 				{
@@ -2927,6 +2930,7 @@ public class CoMailManager extends CoTopComponent {
 				
 				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
 				bean.setDetectedLicense(detectedLicenses);
+				bean.setDeactivateFlag(avoidNull((String) dataMap.get("DEACTIVATE_FLAG"), CoConstDef.FLAG_NO));
 			}
 			if(dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();
