@@ -61,6 +61,10 @@
 			$("#licenseNameAllSearchFlag").on("click", function(e){
 				$("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
+
+			$("#deactivateFlag").on("click", function(){
+				$("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
+			});
 		}
 	};
 	
@@ -232,6 +236,7 @@
 				},
 				loadComplete: function(result) {
 					totalRow = result.records;
+					var rows = result.rows;
 					var grid = this;
 
 					if(totalRow == 0){
@@ -340,6 +345,29 @@
 						});
 						
 						data.existTooltip = true;						
+					}
+
+					var datas = result.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
+					
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = result.rows[rowIdx++];
+							var dataObject = datas.filter(function(a){
+								return a.ossId==rowid}
+							)[0];
+							
+							if(dataObject.deactivateFlag == "Y" && className.indexOf('excludeRow') === -1) {
+								className= className + ' excludeRow';
+							}
+							
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
 					}
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {

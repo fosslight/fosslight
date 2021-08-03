@@ -168,6 +168,12 @@
 						}
 						
 						break;
+					case 'deactivateFlag':
+						if(v.toUpperCase() == "Y"){
+							$("#deactivateFlag").attr("checked", true).val(v);
+						}
+						
+						break;
 				}
 			});
 			
@@ -300,7 +306,14 @@
 						
 						return false;
 					}
-				
+
+					var editorVal = CKEDITOR.instances.editor.getData();
+					var deactivateFlag = $("#deactivateFlag").val();
+					if(editorVal == "" && deactivateFlag == "Y") {
+						alertify.alert("Please enter reason for deactivate");
+						return false;
+					}
+					
 					alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 						if (e) {
 							// 세이브 전 그리드 처리
@@ -472,6 +485,13 @@
 			
 			$("[name='ossName']").on("blur", function(e){
 				fn.urlDuplicationAll();
+			});
+
+			$("#deactivateFlag").on("click", function(){
+				var isChecked = $("#deactivateFlag").prop("checked");
+				var rtnVal = isChecked ? "Y" : "N";
+				
+				$(this).val(rtnVal);
 			});
 		}			
 	};
@@ -966,7 +986,7 @@
 		// comment history
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory("oss", "${ossId}");
+			openCommentHistory("/comment/popup/oss/${ossId}");
 		});
 		
 	});
@@ -1294,6 +1314,7 @@
 			if(index!=0){
 				markTxt += ' <span> '+ossLicenseComb+' </span> ';
 			}
+			
 			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","#/license/edit/'+row.licenseId+'")>'+licenseName+'</a>';
 		});
 		
@@ -1575,8 +1596,11 @@
 				$('.smallDelete').on('click', function(){
 					$(this).parent().remove();
 				});
+			} else if(json.validMsg == "deactivate"){
+				alertify.error('<spring:message code="msg.oss.deactivated"/>', 0);
 			} else {
-				alertify.error('<spring:message code="msg.common.valid"/>', 0);
+				//alertify.error('<spring:message code="msg.common.valid"/>', 0);
+				alertify.error('<spring:message code="msg.oss.duplicated"/>', 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
 			}

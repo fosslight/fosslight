@@ -267,6 +267,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String addNicknameYn = "N";
 	
 	private String referenceDiv;
+	
+	private String deactivateFlag;
 
 	/**
 	 * Instantiates a new oss master.
@@ -1833,5 +1835,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setReferenceDiv(String referenceDiv) {
 		this.referenceDiv = referenceDiv;
+	}
+	
+	public String getDeactivateFlag() {
+		return deactivateFlag;
+	}
+
+	public void setDeactivateFlag(String deactivateFlag) {
+		this.deactivateFlag = deactivateFlag;
 	}
 }
