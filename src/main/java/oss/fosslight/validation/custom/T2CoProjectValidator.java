@@ -2253,10 +2253,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 		return hasOssLicenseType(ossInfo, licenseNameList);
 	}
 	
-	private boolean hasOssLicenseTypeSingle(OssMaster ossInfo, String licenseName) {
-		List<String> licenseNameList = new ArrayList<String>();
-		licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), licenseName);
-		licenseNameList.add(licenseName);
+	private boolean hasOssLicenseTypeSingle(OssMaster ossInfo, String licenseName) {List<String> licenseNameList = new ArrayList<String>();
+		String[] licenseNameSplit = licenseName.split(",");
+		for (int i=0; i < licenseNameSplit.length; i++) {
+			licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseNameSplit[i]).getShortIdentifier(), licenseNameSplit[i]);
+			licenseNameList.add(licenseName);
+		}
 		
 		return hasOssLicenseType(ossInfo, licenseNameList);
 	}
