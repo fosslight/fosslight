@@ -458,6 +458,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_OSS_MODIFIED_COMMENT = "130";
 	/** Mail Type [FOSSLight] OSS bas been deactivated */
 	public static final String CD_MAIL_TYPE_OSS_DEACTIVATED = "813";
+	public static final String CD_MAIL_TYPE_OSS_ACTIVATED = "814";
 	
 	/** Mail Type [FOSSLight] Open source license has been registered */
 	public static final String CD_MAIL_TYPE_LICENSE_REGIST = "20";
