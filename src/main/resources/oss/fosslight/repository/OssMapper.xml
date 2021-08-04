@@ -1619,7 +1619,15 @@
 		)
 	</insert>
 	<select id="selectOssDownloadLocationList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-	SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} ORDER BY SORT_ORDER 
+		SELECT DISTINCT A.DOWNLOAD_LOCATION 
+	  	  FROM (SELECT DOWNLOAD_LOCATION 
+	  			  FROM OSS_MASTER 
+				 WHERE OSS_ID = #{ossId}
+				 UNION ALL
+			   (SELECT DOWNLOAD_LOCATION 
+			 	  FROM OSS_DOWNLOADLOCATION 
+				 WHERE OSS_ID = #{ossId}
+			    ORDER BY SORT_ORDER ASC)) A
 	</select>
 	
 	<select id="selectOssDetectedLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
