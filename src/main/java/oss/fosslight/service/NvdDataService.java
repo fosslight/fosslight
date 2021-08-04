@@ -29,7 +29,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.NvdDataMapper;
 import oss.fosslight.util.DateUtil;
@@ -37,7 +36,6 @@ import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 
 @Service("NvdDataService")
-@Slf4j
 public class NvdDataService {
 	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	

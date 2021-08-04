@@ -21,7 +21,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -32,7 +31,6 @@ import oss.fosslight.service.OssService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
 
-@Slf4j
 public class SchedulerWorkerTask extends CoTopComponent {
 	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	
