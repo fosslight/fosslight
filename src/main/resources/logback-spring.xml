@@ -99,16 +99,6 @@
         </rollingPolicy>
     </appender>
 	 
-	<appender name="Sentry" class="io.sentry.logback.SentryAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>error</level>
-        </filter>
-        Optionally add an encoder
-        <encoder>
-           <pattern>${LOG_PATTERN}</pattern>
-        </encoder>
-    </appender>
-	
 	<logger name="SCHEDULER_LOG" level="info" additivity="false">
 		<appender-ref ref="SCHEDULER_LOG_APPENDER"/>
 	</logger>
@@ -129,11 +119,5 @@
 		<appender-ref ref="CONSOLE"/>
 		<appender-ref ref="FILE"/>
 		<appender-ref ref="Error"/>
-		<springProfile name="stage">
-			<appender-ref ref="Sentry"/>
-		</springProfile>
-		<springProfile name="prod">
-			<appender-ref ref="Sentry"/>
-		</springProfile>
 	</root>
 </configuration>
