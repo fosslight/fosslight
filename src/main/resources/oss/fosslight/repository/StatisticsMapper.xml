@@ -30,6 +30,7 @@
 		 	SELECT SUBSTRING_INDEX(CD_DTL_NM, '(', 1) AS TITLE_NM
 		 	  FROM T2_CODE_DTL 
 		 	 WHERE CD_NO = '207' 
+		 	 AND USE_YN = 'Y'
 		 	 ORDER BY CD_ORDER ASC
 		 </if>
 	</select>
@@ -79,6 +80,7 @@
 				  LEFT JOIN (SELECT T2.CD_DTL_NM
 				  				  , CASE 
 										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'REV'
 										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
 										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
@@ -137,7 +139,25 @@
 										 WHERE CD_NO = '200'
 										   AND USE_YN = 'Y') T2
 							   ON T1.DIVISION = T2.CD_DTL_NO
-							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
+							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
+							) STAT
+		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
+		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('NET', categoryType)">
+				LEFT JOIN (SELECT T2.CD_DTL_NM
+						        , CASE WHEN NETWORK_SERVER_TYPE = 'Y' THEN 'Network Service' ELSE 'Others' END CATEGORY
+							 FROM PROJECT_MASTER PM
+						    INNER JOIN T2_USERS T1
+							   ON PM.CREATOR = T1.USER_ID
+						    INNER JOIN (SELECT CD_DTL_NO
+											 , CD_DTL_NM
+										  FROM T2_CODE_DTL 
+										 WHERE CD_NO = '200'
+										   AND USE_YN = 'Y') T2
+							   ON T1.DIVISION = T2.CD_DTL_NO
+							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
+							) STAT
 		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
