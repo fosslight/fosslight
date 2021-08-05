@@ -24,7 +24,7 @@
 							<th class="dCase txStr">OSS Name</th>
 							<td class="dCase">
 								<div class="required">
-									<input name="ossName" type="text" class="autoComOss w100P" value="${ossName}"/>
+									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/><input type="checkbox" id="deactivateFlag" name="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate
 									<span class="retxt"></span>
 								</div>
 							</td>

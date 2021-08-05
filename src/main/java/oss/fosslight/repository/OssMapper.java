@@ -200,4 +200,6 @@ public interface OssMapper {
 	int getAnalysisListPage(@Param("rows") int rows, @Param("prjId") String prjId);
 	
 	OssAnalysis getAutoAnalysisSuccessOssInfo(@Param("referenceOssId") String referenceOssId);
+	
+	void setDeactivateFlag(OssMaster ossMaster);
 }

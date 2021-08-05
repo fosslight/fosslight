@@ -1006,6 +1006,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		// download location이 여러건일 경우를 대비해 table을 별도로 관리함.
 		registOssDownloadLocation(ossMaster);
 		
+		// Deactivate Flag Setting
+		ossMapper.setDeactivateFlag(ossMaster);
+		
 		return ossMaster.getOssId();
 	}
 

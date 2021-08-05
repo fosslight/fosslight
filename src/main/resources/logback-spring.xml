@@ -60,8 +60,59 @@
 		</rollingPolicy>
 	</appender>
 	
+	<appender name="BAT_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/bat.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern> -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level [%F, %M\(\):%L] - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/backup/bat.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 60 days' worth of history -->
+			<maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+	
+	<appender name="OSS_HISTORY_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/oss_history.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern> -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level [%F, %M\(\):%L] - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/backup/oss_history.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 60 days' worth of history -->
+			<maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+	
+	<appender name="OSS_AUTO_ANALYSIS_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/oss_auto_analysis.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss} %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern> -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-4relative [%thread] %-5level [%F, %M\(\):%L] - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/backup/oss_auto_analysis.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 60 days' worth of history -->
+			<maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+	 
 	<logger name="SCHEDULER_LOG" level="info" additivity="false">
 		<appender-ref ref="SCHEDULER_LOG_APPENDER"/>
+	</logger>
+	
+	<logger name="BAT_LOG" level="info" additivity="false">
+		<appender-ref ref="BAT_LOG_APPENDER"/>
+	</logger>
+	
+	<logger name="OSS_HISTORY_LOG" level="info" additivity="false">
+		<appender-ref ref="OSS_HISTORY_LOG_APPENDER"/>
+	</logger>
+	
+	<logger name="OSS_AUTO_ANALYSIS_LOG" level="info" additivity="false">
+		<appender-ref ref="OSS_AUTO_ANALYSIS_LOG_APPENDER"/>
 	</logger>
 	
 	<root level="info">

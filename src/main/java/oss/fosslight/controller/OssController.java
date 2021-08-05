@@ -368,6 +368,8 @@ public class OssController extends CoTopComponent{
 		boolean isNew = StringUtil.isEmpty(ossId);
 		boolean isNewVersion = false; // 새로운 version을 등록
 		boolean isChangedName = false;
+		boolean isDeactivateFlag = false;
+		boolean isActivateFlag = false;
 		OssMaster beforeBean = null;
 		OssMaster afterBean = null;
 		
@@ -407,6 +409,19 @@ public class OssController extends CoTopComponent{
 				if(!beforeBean.getOssName().equalsIgnoreCase(afterBean.getOssName())) {
 					isChangedName = true;
 				}
+				
+				String beforeDeactivateFlag = avoidNull(beforeBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
+				String afterDeactivateFlag = avoidNull(afterBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
+				
+				if(CoConstDef.FLAG_NO.equals(beforeDeactivateFlag) 
+						&& CoConstDef.FLAG_YES.equals(afterDeactivateFlag)) {
+					isDeactivateFlag = true;
+				}
+				
+				if(CoConstDef.FLAG_YES.equals(beforeDeactivateFlag) 
+						&& CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
+					isActivateFlag = true;
+				}
 			} else{ // OSS 등록
 				// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
@@ -424,11 +439,31 @@ public class OssController extends CoTopComponent{
 			
 			// history 저장 성공 후 메일 발송
 			try {
-				CoMail mailBean = new CoMail(isNew ? ( isNewVersion ? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION : CoConstDef.CD_MAIL_TYPE_OSS_REGIST) : isChangedName ? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME : CoConstDef.CD_MAIL_TYPE_OSS_UPDATE);
+				String mailType = "";
+				
+				if(isNew) {
+					mailType = isNewVersion 
+								? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION 
+								: CoConstDef.CD_MAIL_TYPE_OSS_REGIST;	
+				} else {
+					mailType = isChangedName 
+								? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME 
+								: CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+					
+					if(isDeactivateFlag) { 
+						mailType = CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED;
+					}
+					
+					if(isActivateFlag) { 
+						mailType = CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED;
+					}
+				}
+				
+				CoMail mailBean = new CoMail(mailType);
 				mailBean.setParamOssId(ossId);
 				mailBean.setComment(ossMaster.getComment());
 				
-				if(!isNew) {
+				if(!isNew && !isDeactivateFlag) {
 					mailBean.setCompareDataBefore(beforeBean);
 					mailBean.setCompareDataAfter(afterBean);
 				}
@@ -552,18 +587,29 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(isEmpty(ossMaster.getOssId())) {
-			// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
-			String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
+			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
 			
-			// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
-			// null을 반환하지는 않는다.
-			if(_mergeNicknames.length > 0) {
-				return makeJsonResponseHeader(false, null, _mergeNicknames);
+			if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+				return makeJsonResponseHeader(false, "deactivate");
+			} else {
+				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
+				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
+				
+				// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
+				// null을 반환하지는 않는다.
+				if(_mergeNicknames.length > 0) {
+					return makeJsonResponseHeader(false, null, _mergeNicknames);
+				}
 			}
 		} else {
 			// 수정이면서 oss name이 변경되었고, 변경하려고 하는 oss에 nick name이 등록되어 있는 경우, 사용자 confirm 필요
 			// 변경전 정보를 취득
 			OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
+			
+			if(CoConstDef.FLAG_YES.equals(ossMaster.getDeactivateFlag()) 
+					&& CoConstDef.FLAG_YES.equals(orgBean.getDeactivateFlag())) {
+				return makeJsonResponseHeader(false, "deactivate");
+			}
 			
 			// oss name 변경 여부 확인
 			if(orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {

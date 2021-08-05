@@ -31,6 +31,7 @@
 	var distributeNameChangeFlag = false;
 	var swModelChangeFlag = false;
 	var modelOnlyChangeFlag = false;
+	var releaseDateArr = [];
 	
 	$(document).ready(function () {
 		if(distributionStatus == "PROC"){
@@ -99,6 +100,7 @@
 				
 				ids.forEach(function(id){
 					jQuery('#_modelList').jqGrid('saveRow',id,false);
+					releaseDateArr.push(jQuery('#_modelList').jqGrid('getCell',ids[element],'releaseDate'));
 				});
 				
 				saveSubmit();
@@ -630,6 +632,17 @@
 				}
 				
 				alertify.myAlert(btnHtm);
+			},
+			// release date check function add
+			releaseDateCheck : function() {
+				var releaseDateCheckMessage = "Models for which a release date has not been entered are not be disclosed to external customers.";
+				
+				alertify.confirm(releaseDateCheckMessage).set('onok', function(closeEvent){
+						availableCheck('save');
+					}
+				);
+
+				$(".ajs-button").css("font-size", "12").css("cursor", "pointer");
 			}
 
 	}
@@ -1060,7 +1073,18 @@
 			
 			gridValidMsgNew(json, "_modelList");
 		} else if(json.isValid == 'true') {
-			availableCheck('save');
+			var chk = 0;
+			releaseDateArr.forEach(function(item){
+				if (item == ""){
+					chk++;
+				}
+			});
+
+			if (chk > 0){
+				fn.releaseDateCheck();
+			} else{
+				availableCheck('save');
+			}
 		}
 	};
 	

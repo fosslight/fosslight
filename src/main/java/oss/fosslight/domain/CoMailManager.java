@@ -65,11 +65,18 @@ public class CoMailManager extends CoTopComponent {
 	private static FileService fileService;
 	private static OssMapper ossMapper;
 	
-	private final static String DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
+	private static String DEFAULT_BCC;
+	private static String[] BAT_FAILED_BCC;
+	private static String[] MAIL_LIST_SECURITY;
+
+	/** The conn str. */
+	private static String connStr;
 	
-	private final static String[] BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// BAT Detail setting에 추가할 예정
-	
-	private static String[] MAIL_LIST_SECURITY = avoidNull(CommonFunction.getProperty("smtp.default.security")).split(","); // Vulnerability Detail setting에 추가할 예정
+	/** The conn user. */
+	private static String connUser;
+
+	/** The conn pw. */
+	private static String connPw;
 	
 	/**
 	 * Instantiates a new co mail manager.
@@ -90,18 +97,15 @@ public class CoMailManager extends CoTopComponent {
         	projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
         	fileService = (FileService) getWebappContext().getBean(FileService.class);
         	ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
-    	}
+            DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
+            BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// (To be added) BAT Detail setting
+            MAIL_LIST_SECURITY = avoidNull(CommonFunction.getProperty("smtp.default.security")).split(","); // (To be added) Vulnerability Detail setting
+            connStr = CommonFunction.makeJdbcUrl( CommonFunction.getProperty("spring.datasource.url"));
+            connUser = CommonFunction.getProperty("spring.datasource.username");
+            connPw = CommonFunction.getProperty("spring.datasource.password");
+		}
         return instance;
     }
-
-	/** The conn str. */
-	private static String connStr = CommonFunction.makeJdbcUrl( CommonFunction.getProperty("spring.datasource.url"));
-	
-	/** The conn user. */
-	private static String connUser = CommonFunction.getProperty("spring.datasource.username");
-	
-	/** The conn pw. */
-	private static String connPw = CommonFunction.getProperty("spring.datasource.password");
 	
     /**
      * Send mail.
@@ -149,6 +153,8 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
 					) {
 				convertDataMap.put("contentsTitle", StringUtil.replace(makeMailSubject((isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()), bean, true), "[FOSSLight]", ""));
 			} else {
@@ -641,6 +647,8 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE:
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
+    		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
     			// Creator를 To, 나머지 전체 Admin사용자를 cc로 발송
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -1314,7 +1322,9 @@ public class CoMailManager extends CoTopComponent {
 								|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
-								
+								|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
+								|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
+
 								)
 						)
 				{
@@ -2923,6 +2933,7 @@ public class CoMailManager extends CoTopComponent {
 				
 				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
 				bean.setDetectedLicense(detectedLicenses);
+				bean.setDeactivateFlag(avoidNull((String) dataMap.get("DEACTIVATE_FLAG"), CoConstDef.FLAG_NO));
 			}
 			if(dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();

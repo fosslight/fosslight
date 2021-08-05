@@ -19,6 +19,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.PropertySource;
@@ -53,6 +55,11 @@ import oss.fosslight.validation.custom.T2CoAdminValidator;
 public class CoTopComponent {
 	
 	protected static WebApplicationContext applicationContext;
+	
+	/* Separation by log type_20210802 */
+	protected static final Logger scheduler_log = LoggerFactory.getLogger("SCHEDULER_LOG");
+	protected static final Logger oss_history_log = LoggerFactory.getLogger("OSS_HISTORY_LOG");
+	protected static final Logger oss_auto_analysis_log = LoggerFactory.getLogger("OSS_AUTO_ANALYSIS_LOG");
 	
 	@SuppressWarnings("static-access")
 	@Autowired

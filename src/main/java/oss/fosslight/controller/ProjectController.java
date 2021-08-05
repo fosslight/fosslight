@@ -3940,5 +3940,22 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, "1");
 		}
 	}
-	// 20210701_BOM COMPARE FUNC MOVE (ProjectController > LgeProjectController) <<<
+
+	@PostMapping(value=PROJECT.PROJECT_STATUS)
+	public @ResponseBody ResponseEntity<Object> getProjectStatus(@RequestBody Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		Map<String, String> map = new HashMap<String, String>();
+		Project prjBean = projectService.getProjectDetail(project);
+		
+		map.put("projectStatus", prjBean.getStatus());
+		map.put("identificationStatus", prjBean.getIdentificationStatus());
+		map.put("verificationStatus", prjBean.getVerificationStatus());
+		map.put("distributionStatus", prjBean.getDestributionStatus());
+		map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
+		map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
+		map.put("commId", avoidNull(prjBean.getCommId(), ""));
+		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
+		
+		return makeJsonResponseHeader(map);
+	}
 }
