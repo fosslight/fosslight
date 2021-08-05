@@ -11,7 +11,6 @@
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
-	var checkboxParam = []; /* BOM Compare ADD */
 	
 	$(document).ready(function () {
 		'use strict';
@@ -890,9 +889,11 @@
 			});
 		}, bomCompare : function(){ /* BOM Compare ADD */
 			// 체크박스 선택 체크
-			var chk = checkboxParam.length
+			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 		
 			if(chk < 3){
+				var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
+				
 				var beforePrjId = "";
 				var afterPrjId = "";
 
@@ -902,17 +903,15 @@
 						afterPrjId = "0000";
 						break;
 					case 1:
-						beforePrjId = checkboxParam[0];
+						beforePrjId = bomCompareArr[0];
 						afterPrjId = "0000";
 						break;
 					case 2:
-						beforePrjId = checkboxParam[0];
-						afterPrjId = checkboxParam[1];
-
-						if (parseInt(beforePrjId) > parseInt(afterPrjId)){
-							beforePrjId = checkboxParam[1];
-							afterPrjId = checkboxParam[0];
-						}
+						bomCompareArr.sort();
+						
+						beforePrjId = bomCompareArr[0];
+						afterPrjId = bomCompareArr[1];
+						
 						break;
 				}
 				
@@ -924,27 +923,6 @@
 				alertify.alert('Choose two projects.');
 				return false;
 			}
-		}, checkboxChange : function(rowid){ /* BOM Compare ADD */
-			$("input:checkbox[id='jqg_list_"+rowid+"']").each(function(){
-				var rowidChk = rowid;
-				
-				if (checkboxParam.length < 1){
-					checkboxParam.push(rowidChk);
-				}else{
-					var spliceChk = 0;
-					for (var i=0; i<checkboxParam.length; i++){
-						if (checkboxParam[i] === rowidChk){
-							checkboxParam.splice(i, 1);
-							i--;
-							spliceChk++;
-						}
-					}
-
-					if (spliceChk == 0){
-						checkboxParam.push(rowidChk);
-					}
-				}
-			});
 		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
 			var commentsMode = data.commId != "" ? "update" : "insert";
 			var param = {"referenceId" : data.prjId, "contents" : data.userComment, "referenceDiv" : "10", "commId" : data.commId, "commentsMode" : commentsMode};
@@ -1170,8 +1148,6 @@
 						$("#list").jqGrid('editRow',rowid);
 						lastsel=rowid;
 					}
-
-					fn.checkboxChange(rowid);
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);
