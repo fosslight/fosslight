@@ -2022,7 +2022,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isProd = "REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
 		
 		try {			
-			log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
+			oss_auto_analysis_log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
@@ -2040,7 +2040,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			builder.redirectErrorStream(true);
 		
 			process = builder.start();
-			log.info("ANALYSIS Process PRJ ID : " + prjId + " command : " + analysisCommand);
+			oss_auto_analysis_log.info("ANALYSIS Process PRJ ID : " + prjId + " command : " + analysisCommand);
 			
 			is = process.getInputStream();
 			isr = new InputStreamReader(is);
@@ -2052,7 +2052,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			while (!Thread.currentThread().isInterrupted()) {
 				if(count > idleTime) {
-					log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
+					oss_auto_analysis_log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
 					resultMap.put("isValid", false);
 					resultMap.put("returnMsg", "OSS auto analysis has not been completed yet.");
 					
@@ -2060,10 +2060,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				String result = br.readLine();
-				log.info("OSS AUTO ANALYSIS READLINE : " + result);
+				oss_auto_analysis_log.info("OSS AUTO ANALYSIS READLINE : " + result);
 				
 				if(result.toLowerCase().indexOf("start download oss") > -1) {
-					log.info("ANALYSIS START SUCCESS PRJ ID : " + prjId);
+					oss_auto_analysis_log.info("ANALYSIS START SUCCESS PRJ ID : " + prjId);
 					Project prjInfo = new Project();
 					prjInfo.setPrjId(prjId);
 					
@@ -2088,14 +2088,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			// 스크립트 종료
 		} catch(NullPointerException npe) {
-			log.error("ANALYSIS ERR PRJ ID : " + prjId);
-			log.error(npe.getMessage(), npe);
+			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
+			oss_auto_analysis_log.error(npe.getMessage(), npe);
 			
 			resultMap.replace("isValid", false);
 			resultMap.replace("returnMsg", "script Error");
 		} catch (Exception e) {
-			log.error("ANALYSIS ERR PRJ ID : " + prjId);
-			log.error(e.getMessage(), e);
+			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
+			oss_auto_analysis_log.error(e.getMessage(), e);
 			
 			resultMap.replace("isValid", false);
 			resultMap.replace("returnMsg", "OSS auto analysis has not been completed yet.");
@@ -2132,11 +2132,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			try {
 				if(process != null) {
-					log.info("Do OSS ANALYSIS Process Destry");
+					oss_auto_analysis_log.info("Do OSS ANALYSIS Process Destry");
 					process.destroy();
 				}
 			} catch (Exception e2) {
-				log.error(e2.getMessage(), e2);
+				oss_auto_analysis_log.error(e2.getMessage(), e2);
 			}
 		}
 		
