@@ -6,7 +6,7 @@
 	/*jslint browser: true, nomen: true */
 	var lastsel;
 	var userIdList;
-	var pastEmpList;
+	var adminUserList;
 	var totalRow = 0;
 	var refreshParam = {};
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
@@ -16,8 +16,8 @@
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
 		evt.init();
 		ajax.getUserIdList("Y", "REVIEWER"); // 근무자
-		ajax.getUserIdList("N", "PASTEMP"); // 퇴사자
-
+		ajax.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
+		
 		if('${sessUserInfo.authority}' == "ROLE_VIEWER"){
 			$(".btnAdd").hide();
 		}
@@ -138,17 +138,17 @@
 				}
 			})
 		}, getUserName : function(cellvalue, options, rowObject){
-			return userIdList[cellvalue] || pastEmpList[cellvalue] || "";
+			return adminUserList[cellvalue] || "";
 		}
 	}
 	
 	//http
 	var ajax = {
-		getUserIdList : function(adminYn, type){
+		getUserIdList : function(reviewerFlag, type){
 			return $.ajax({
 				type: 'GET',
 				url: "/project/getUserIdList",
-				data: {adminYn : adminYn},
+				data: {reviewerFlag : reviewerFlag},
 				success : function(data){
 					temp = data.split(";").reduce(function(obj, cur){
 					    var keys = Object.keys(obj);
@@ -164,10 +164,9 @@
 					if(type == "REVIEWER") {
 						userIdList = temp;
 					} else {
-						pastEmpList = temp;
+						adminUserList = temp;
 						partnerList.load();
 					}
-					
 				}
 			});
 		}
