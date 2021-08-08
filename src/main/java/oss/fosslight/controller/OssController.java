@@ -1289,14 +1289,14 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		String donwloadId = null;
+		String downloadId = null;
 		Map<String, Object> result = null;
 		
 		try {
-			donwloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+			downloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(!isEmpty(donwloadId)) {
-				result = ossService.startAnalysis(ossBean.getPrjId(), donwloadId);
+			if(!isEmpty(downloadId)) {
+				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId);
 				return makeJsonResponseHeader(result);
 			}
 			
