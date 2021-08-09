@@ -299,7 +299,7 @@ public class CoTopComponent {
 	public static ResponseEntity<FileSystemResource> excelToResponseEntity(String excelPath ,String downFileName) throws IOException{
 		
 		String fullLogiPath = excelPath;
-		String encordedFilename = URLEncoder.encode(downFileName,"UTF-8").replace("+", "%20");
+		String encodedFilename = URLEncoder.encode(downFileName,"UTF-8").replace("+", "%20");
 		String contentType = CommonFunction.getMsApplicationContentType(downFileName);
 		
 		ResponseEntity<FileSystemResource> responseEntity = null;
@@ -313,7 +313,7 @@ public class CoTopComponent {
 	    	responseHeaders.add(HttpHeaders.CONTENT_TYPE, contentType);
 	    }
 	    
-	    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encordedFilename + ";filename*= UTF-8''" + encordedFilename);
+	    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encodedFilename + ";filename*= UTF-8''" + encodedFilename);
 	    responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Long.toString(fileSystemResource.contentLength()));
 	    
 	    responseEntity = new ResponseEntity<FileSystemResource>(fileSystemResource, responseHeaders, HttpStatus.OK);
@@ -324,7 +324,7 @@ public class CoTopComponent {
 	public static ResponseEntity<FileSystemResource> noticeToResponseEntity(String filePath ,String downFileName) throws IOException{
 	
 		String fullLogiPath = filePath;
-		String encordedFilename = URLEncoder.encode(downFileName,"UTF-8").replace("+", "%20");
+		String encodedFilename = URLEncoder.encode(downFileName,"UTF-8").replace("+", "%20");
 	    
 		ResponseEntity<FileSystemResource> responseEntity = null;
 		java.io.File file = new java.io.File(fullLogiPath);
@@ -332,7 +332,7 @@ public class CoTopComponent {
 	    
 	    HttpHeaders responseHeaders = new HttpHeaders();
     	responseHeaders.add(HttpHeaders.CONTENT_TYPE, "application/octet-stream");
-	    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encordedFilename + ";filename*= UTF-8''" + encordedFilename);
+	    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encodedFilename + ";filename*= UTF-8''" + encodedFilename);
 	    responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Long.toString(fileSystemResource.contentLength()));
 	    
 	    responseEntity = new ResponseEntity<FileSystemResource>(fileSystemResource, responseHeaders, HttpStatus.OK);
