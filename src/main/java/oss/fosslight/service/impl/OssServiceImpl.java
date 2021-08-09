@@ -877,8 +877,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}		
 		
-		// Detected License Insert
-		List<String> detectedLicenses = ossMaster.getDetectedLicenses();
+		// Detected License Insert / 20210806_Distinct Add
+		List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
 		
 		if(detectedLicenses != null) {
 			int ossLicenseDetectedIdx = 0;
