@@ -54,16 +54,16 @@ public class ExcelDownloadController extends CoTopComponent {
 	@PostMapping(value = EXCELDOWNLOAD.EXCEL_POST)
 	public @ResponseBody ResponseEntity<Object> getExcelPost(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
-		String donwloadId = null;
+		String downloadId = null;
 		
 		try {
 			if(map.containsKey("extParam")) {
-				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, (String)map.get("extParam"));				
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, (String)map.get("extParam"));				
 			} else {
-				donwloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			}
 			
-			if(isEmpty(donwloadId)){
+			if(isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {
@@ -71,18 +71,18 @@ public class ExcelDownloadController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 
-		return makeJsonResponseHeader(donwloadId);
+		return makeJsonResponseHeader(downloadId);
 	}
 	
 	@PostMapping(value = EXCELDOWNLOAD.EXCEL_POST_OSS)
 	public @ResponseBody ResponseEntity<Object> getExcelPostOss(@ModelAttribute OssMaster ossMaster,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
-		String donwloadId = null;
+		String downloadId = null;
 				
 		try {
-			donwloadId = ExcelDownLoadUtil.getExcelDownloadIdOss("OSS", ossMaster , RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+			downloadId = ExcelDownLoadUtil.getExcelDownloadIdOss("OSS", ossMaster , RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(isEmpty(donwloadId)){
+			if(isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {
@@ -90,7 +90,7 @@ public class ExcelDownloadController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 
-		return makeJsonResponseHeader(donwloadId);
+		return makeJsonResponseHeader(downloadId);
 	}
 	
 	
@@ -114,12 +114,12 @@ public class ExcelDownloadController extends CoTopComponent {
 		String chartParams = req.getParameter("params");
 		Type collectionType = new TypeToken<List<Statistics>>() {}.getType();
 		List<Statistics> params = (List<Statistics>) fromJson(chartParams, collectionType);
-		String donwloadId = null;
+		String downloadId = null;
 		
 		try {
-			donwloadId = ExcelDownLoadUtil.getChartExcel(params, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+			downloadId = ExcelDownLoadUtil.getChartExcel(params, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(isEmpty(donwloadId)){
+			if(isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {
@@ -127,6 +127,6 @@ public class ExcelDownloadController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 
-		return makeJsonResponseHeader(donwloadId);
+		return makeJsonResponseHeader(downloadId);
 	}
 }
