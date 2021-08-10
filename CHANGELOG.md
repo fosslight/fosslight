@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.0 (30/07/2021)
+## Changes
+## 🚀 Features
+
+- Add Declared/Detected License to OSS @soimkim (#14)
+
+## 🐛 Hotfixes
+
+- Fix a bug - Vulnerability score of Self-Check List @soimkim (#14)
+
+## 🔧 Maintenance
+
+- Change 3rd Party List - Searching UI @soimkim (#14)
+- Add a spring boot badge to README @soimkim (#12)
+- Add Description of ID and Password for Demo site @fu7mu4 (#10)
+
+---
+
 ## v1.1.0 (22/07/2021)
 ## Changes
 ## 🚀 Features
