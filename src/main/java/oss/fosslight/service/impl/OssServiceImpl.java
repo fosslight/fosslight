@@ -844,44 +844,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
 		
 		// v-Diff 체크를 위해 license list를 생성
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<OssLicense> list = ossMaster.getOssLicenses();
-			int ossLicenseDeclaredIdx = 0;
+		List<OssLicense> list = ossMaster.getOssLicenses();
+		int ossLicenseDeclaredIdx = 0;
+		
+		for(OssLicense license : list) {
+			ossLicenseDeclaredIdx++;
 			
-			for(OssLicense license : list) {
-				ossLicenseDeclaredIdx++;
-				
-				OssMaster om = new OssMaster(
-					  Integer.toString(ossLicenseDeclaredIdx)
-					, ossMaster.getOssId()
-					, license.getLicenseName()
-					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
-					, license.getOssLicenseText()
-					, license.getOssCopyright()
-					, ossMaster.getLicenseDiv()
-				);
-				
-				ossMapper.insertOssLicenseDeclared(om);
-			}
-		} else {
-			List<OssLicense> list = ossMaster.getOssLicenses();
+			OssMaster om = new OssMaster(
+				  Integer.toString(ossLicenseDeclaredIdx)
+				, ossMaster.getOssId()
+				, license.getLicenseName()
+				, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
+				, license.getOssLicenseText()
+				, license.getOssCopyright()
+				, ossMaster.getLicenseDiv()
+			);
 			
-			for(OssLicense license : list) {
-				ossMaster.setLicenseName(license.getLicenseName());
-			}
-			
-			ossMapper.insertOssLicenseDeclared(ossMaster);
-			
-			// single license의 경우 oss list에서 new 한 경우 osslicense list가 null 이거나, license id가 없는 경우 체워준다.
-			if(ossMaster.getOssLicenses() == null || ossMaster.getOssLicenses().isEmpty()) {
-				List<OssLicense> _ossLicenseList = new ArrayList<>();
-				
-				OssLicense _license = new OssLicense();
-				_license.setLicenseName(ossMaster.getLicenseName());
-				_ossLicenseList.add(_license);
-				
-				ossMaster.setOssLicenses(_ossLicenseList);
-			}
+			ossMapper.insertOssLicenseDeclared(om);
 		}		
 		
 		// Detected License Insert / 20210806_Distinct Add
@@ -1472,108 +1451,81 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	public void checkOssLicenseAndObligation(OssMaster ossMaster) {
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<List<OssLicense>> orLicenseList = new ArrayList<>();
-			String currentType = null;
-			String currentObligation = null;
-			boolean isFirst = true;
-			List<OssLicense> andLicenseList = new ArrayList<>();
+		List<List<OssLicense>> orLicenseList = new ArrayList<>();
+		String currentType = null;
+		String currentObligation = null;
+		boolean isFirst = true;
+		List<OssLicense> andLicenseList = new ArrayList<>();
+		
+		for(OssLicense license : ossMaster.getOssLicenses()) {
+			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
+			license.setLicenseType(master.getLicenseType());
 			
-			for(OssLicense license : ossMaster.getOssLicenses()) {
-				LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-				license.setLicenseType(master.getLicenseType());
-				
-				// obligation 설정
-				if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-				}
-				
-				if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
-					if(!andLicenseList.isEmpty()) {
-						orLicenseList.add(andLicenseList);
-						andLicenseList = new ArrayList<>();
-						andLicenseList.add(license);
-					}
-					
+			// obligation 설정
+			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+			}
+			
+			if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
+				if(!andLicenseList.isEmpty()) {
+					orLicenseList.add(andLicenseList);
 					andLicenseList = new ArrayList<>();
 					andLicenseList.add(license);
-				} else {
-					andLicenseList.add(license);
 				}
 				
-				isFirst = false;
-			}
-
-			if(!andLicenseList.isEmpty()) {
-				orLicenseList.add(andLicenseList);
+				andLicenseList = new ArrayList<>();
+				andLicenseList.add(license);
+			} else {
+				andLicenseList.add(license);
 			}
 			
-			//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
-			for(List<OssLicense> andlicenseGroup : orLicenseList) {
-				OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
-				
-				if(permissiveLicense != null) {
-					switch (permissiveLicense.getLicenseType()) {
-						case CoConstDef.CD_LICENSE_TYPE_PMS:
-							currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+			isFirst = false;
+		}
+
+		if(!andLicenseList.isEmpty()) {
+			orLicenseList.add(andLicenseList);
+		}
+		
+		//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
+		for(List<OssLicense> andlicenseGroup : orLicenseList) {
+			OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
+			
+			if(permissiveLicense != null) {
+				switch (permissiveLicense.getLicenseType()) {
+					case CoConstDef.CD_LICENSE_TYPE_PMS:
+						currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+						
+						currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_WCP:
+						if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
 							
 							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_CP:
+						if(isEmpty(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_CP;
 							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_WCP:
-							if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
-							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_CP:
-							if(isEmpty(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_CP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
-							
-							break;
-						default:
-							break;
-					}
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					default:
+						break;
 				}
 			}
-			
-			ossMaster.setLicenseType(currentType);
-			ossMaster.setObligationType(currentObligation);
-		} else {
-			List<OssLicense> list = ossMaster.getOssLicenses();
-			
-			for(OssLicense license : list) {
-				ossMaster.setLicenseName(license.getLicenseName());
-			}
-			
-			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(ossMaster.getLicenseName().toUpperCase());
-			
-			if(master == null) {
-				log.error("############# Can not found license info : " + ossMaster.getLicenseName());
-			}
-			
-			ossMaster.setLicenseType(master.getLicenseType());
-			String obligationType = "";
-			
-			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
-			}
-			
-			ossMaster.setObligationType(obligationType);
 		}
+		
+		ossMaster.setLicenseType(currentType);
+		ossMaster.setObligationType(currentObligation);
 	}
 
 	@Override
