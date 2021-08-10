@@ -864,7 +864,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMapper.insertOssLicenseDeclared(om);
 			}
 		} else {
+			List<OssLicense> list = ossMaster.getOssLicenses();
+			
+			for(OssLicense license : list) {
+				ossMaster.setLicenseName(license.getLicenseName());
+			}
+			
 			ossMapper.insertOssLicenseDeclared(ossMaster);
+			
 			// single license의 경우 oss list에서 new 한 경우 osslicense list가 null 이거나, license id가 없는 경우 체워준다.
 			if(ossMaster.getOssLicenses() == null || ossMaster.getOssLicenses().isEmpty()) {
 				List<OssLicense> _ossLicenseList = new ArrayList<>();
@@ -1542,6 +1549,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMaster.setLicenseType(currentType);
 			ossMaster.setObligationType(currentObligation);
 		} else {
+			List<OssLicense> list = ossMaster.getOssLicenses();
+			
+			for(OssLicense license : list) {
+				ossMaster.setLicenseName(license.getLicenseName());
+			}
+			
 			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(ossMaster.getLicenseName().toUpperCase());
 			
 			if(master == null) {
