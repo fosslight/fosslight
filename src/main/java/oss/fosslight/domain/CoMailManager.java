@@ -2933,7 +2933,6 @@ public class CoMailManager extends CoTopComponent {
 				
 				String detectedLicenses = dataMap.containsKey("DETECTED_LICENSE") ? (String) dataMap.get("DETECTED_LICENSE") : "";
 				bean.setDetectedLicense(detectedLicenses);
-				bean.setDeactivateFlag(avoidNull((String) dataMap.get("DEACTIVATE_FLAG"), CoConstDef.FLAG_NO));
 			}
 			if(dataMap.containsKey("LICENSE_ID")) {
 				license = new OssLicense();
