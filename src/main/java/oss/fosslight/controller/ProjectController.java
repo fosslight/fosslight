@@ -3955,7 +3955,6 @@ public class ProjectController extends CoTopComponent {
 		map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));
 		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
-		map.put("statusRequestYn", prjBean.getStatusRequestYn());
 		
 		return makeJsonResponseHeader(map);
 	}
