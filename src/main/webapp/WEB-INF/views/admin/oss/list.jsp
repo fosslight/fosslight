@@ -32,7 +32,7 @@
 						<textarea name="summaryDescription">${searchBean.summaryDescription}</textarea>
 					</dd>
 					<dd>
-						<label>WebSite</label>
+						<label>Website</label>
 						<input name="homepage" type="text" value="${searchBean.homepage}"/>
 					</dd>
 					<dd>
