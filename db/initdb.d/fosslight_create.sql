@@ -2493,7 +2493,7 @@ SHOW VARIABLES WHERE Variable_name = 'max_allowed_packet';
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
 
-CREATE USER IF NOT EXISTS 'fosslight'@'%' IDENTIFIED BY 'fosslight';
+CREATE USER IF NOT EXISTS 'fosslight2'@'%' IDENTIFIED BY 'fosslight';
 CREATE USER IF NOT EXISTS 'fosslight'@'localhost' IDENTIFIED BY 'fosslight';
 GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'%';
 GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'localhost';
