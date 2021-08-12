@@ -335,11 +335,11 @@
 			<c:if test="${not empty project.prjId}">
 				<span class="left">
 					<c:if test="${project.completeYn ne 'Y' and project.viewOnlyFlag eq 'N'}"><input id="delete" type="button" value="Delete" class="btnColor" /></c:if>
+					<c:if test="${project.viewOnlyFlag eq 'N'}"><input id="drop" type="button" value="Drop" class="btnColor wauto" style="display: none;"/></c:if>
 				</span>
 			</c:if>
 			<span class="right">
 				<c:if test="${project.viewOnlyFlag eq 'N'}">
-					<input id="drop" type="button" value="Drop" class="btnColor wauto" style="display: none;"/>
 					<input id="complete" type="button" value="Complete" class="btnColor wauto" style="display: none;"/>
 				</c:if>
 				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();" style="display: none;"/>
