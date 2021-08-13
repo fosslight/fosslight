@@ -21,8 +21,14 @@ jobs:
           time: '30s'
       - name: Check running containers
         run: docker-compose ps
+      - name: Save docker-compose logs
+        run: docker-compose logs --no-color web > docker-compose-web.log && docker-compose logs --no-color db > docker-compose-db.log
       - name: Check the site
         run: docker run --network container:fosslight_web appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
       - name: Stop containers
         if: always()
         run: docker-compose down
+      - name: Show db container log
+        run: cat docker-compose-db.log
+      - name: Show web container log
+        run: cat docker-compose-web.log
