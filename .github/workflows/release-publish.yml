@@ -10,8 +10,13 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ref: [main, develop]
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ matrix.ref }}
     - name: update changelog with gren
       env:
         GREN_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,12 +27,12 @@ jobs:
       run: |
         git config --local user.name "github-actions[bot]"
         git add CHANGELOG.md
-        git commit -m "Update ChangeLog"
+        git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: main
+        branch: ${{ matrix.ref }}
   build:
     needs: update-changelog
     runs-on: ubuntu-18.04
