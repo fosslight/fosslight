@@ -844,41 +844,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
 		
 		// v-Diff 체크를 위해 license list를 생성
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<OssLicense> list = ossMaster.getOssLicenses();
-			int ossLicenseDeclaredIdx = 0;
+		List<OssLicense> list = ossMaster.getOssLicenses();
+		int ossLicenseDeclaredIdx = 0;
+		
+		for(OssLicense license : list) {
+			ossLicenseDeclaredIdx++;
 			
-			for(OssLicense license : list) {
-				ossLicenseDeclaredIdx++;
-				
-				OssMaster om = new OssMaster(
-					  Integer.toString(ossLicenseDeclaredIdx)
-					, ossMaster.getOssId()
-					, license.getLicenseName()
-					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
-					, license.getOssLicenseText()
-					, license.getOssCopyright()
-					, ossMaster.getLicenseDiv()
-				);
-				
-				ossMapper.insertOssLicenseDeclared(om);
-			}
-		} else {
-			ossMapper.insertOssLicenseDeclared(ossMaster);
-			// single license의 경우 oss list에서 new 한 경우 osslicense list가 null 이거나, license id가 없는 경우 체워준다.
-			if(ossMaster.getOssLicenses() == null || ossMaster.getOssLicenses().isEmpty()) {
-				List<OssLicense> _ossLicenseList = new ArrayList<>();
-				
-				OssLicense _license = new OssLicense();
-				_license.setLicenseName(ossMaster.getLicenseName());
-				_ossLicenseList.add(_license);
-				
-				ossMaster.setOssLicenses(_ossLicenseList);
-			}
+			OssMaster om = new OssMaster(
+				  Integer.toString(ossLicenseDeclaredIdx)
+				, ossMaster.getOssId()
+				, license.getLicenseName()
+				, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
+				, license.getOssLicenseText()
+				, license.getOssCopyright()
+				, ossMaster.getLicenseDiv()
+			);
+			
+			ossMapper.insertOssLicenseDeclared(om);
 		}		
 		
-		// Detected License Insert
-		List<String> detectedLicenses = ossMaster.getDetectedLicenses();
+		// Detected License Insert / 20210806_Distinct Add
+		List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
 		
 		if(detectedLicenses != null) {
 			int ossLicenseDetectedIdx = 0;
@@ -1465,102 +1451,81 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	public void checkOssLicenseAndObligation(OssMaster ossMaster) {
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<List<OssLicense>> orLicenseList = new ArrayList<>();
-			String currentType = null;
-			String currentObligation = null;
-			boolean isFirst = true;
-			List<OssLicense> andLicenseList = new ArrayList<>();
+		List<List<OssLicense>> orLicenseList = new ArrayList<>();
+		String currentType = null;
+		String currentObligation = null;
+		boolean isFirst = true;
+		List<OssLicense> andLicenseList = new ArrayList<>();
+		
+		for(OssLicense license : ossMaster.getOssLicenses()) {
+			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
+			license.setLicenseType(master.getLicenseType());
 			
-			for(OssLicense license : ossMaster.getOssLicenses()) {
-				LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-				license.setLicenseType(master.getLicenseType());
-				
-				// obligation 설정
-				if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-				}
-				
-				if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
-					if(!andLicenseList.isEmpty()) {
-						orLicenseList.add(andLicenseList);
-						andLicenseList = new ArrayList<>();
-						andLicenseList.add(license);
-					}
-					
+			// obligation 설정
+			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+			}
+			
+			if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
+				if(!andLicenseList.isEmpty()) {
+					orLicenseList.add(andLicenseList);
 					andLicenseList = new ArrayList<>();
 					andLicenseList.add(license);
-				} else {
-					andLicenseList.add(license);
 				}
 				
-				isFirst = false;
-			}
-
-			if(!andLicenseList.isEmpty()) {
-				orLicenseList.add(andLicenseList);
+				andLicenseList = new ArrayList<>();
+				andLicenseList.add(license);
+			} else {
+				andLicenseList.add(license);
 			}
 			
-			//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
-			for(List<OssLicense> andlicenseGroup : orLicenseList) {
-				OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
-				
-				if(permissiveLicense != null) {
-					switch (permissiveLicense.getLicenseType()) {
-						case CoConstDef.CD_LICENSE_TYPE_PMS:
-							currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+			isFirst = false;
+		}
+
+		if(!andLicenseList.isEmpty()) {
+			orLicenseList.add(andLicenseList);
+		}
+		
+		//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
+		for(List<OssLicense> andlicenseGroup : orLicenseList) {
+			OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
+			
+			if(permissiveLicense != null) {
+				switch (permissiveLicense.getLicenseType()) {
+					case CoConstDef.CD_LICENSE_TYPE_PMS:
+						currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+						
+						currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_WCP:
+						if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
 							
 							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_CP:
+						if(isEmpty(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_CP;
 							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_WCP:
-							if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
-							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_CP:
-							if(isEmpty(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_CP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
-							
-							break;
-						default:
-							break;
-					}
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					default:
+						break;
 				}
 			}
-			
-			ossMaster.setLicenseType(currentType);
-			ossMaster.setObligationType(currentObligation);
-		} else {
-			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(ossMaster.getLicenseName().toUpperCase());
-			
-			if(master == null) {
-				log.error("############# Can not found license info : " + ossMaster.getLicenseName());
-			}
-			
-			ossMaster.setLicenseType(master.getLicenseType());
-			String obligationType = "";
-			
-			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
-			}
-			
-			ossMaster.setObligationType(obligationType);
 		}
+		
+		ossMaster.setLicenseType(currentType);
+		ossMaster.setObligationType(currentObligation);
 	}
 
 	@Override
@@ -2022,7 +1987,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isProd = "REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
 		
 		try {			
-			log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
+			oss_auto_analysis_log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
@@ -2040,7 +2005,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			builder.redirectErrorStream(true);
 		
 			process = builder.start();
-			log.info("ANALYSIS Process PRJ ID : " + prjId + " command : " + analysisCommand);
+			oss_auto_analysis_log.info("ANALYSIS Process PRJ ID : " + prjId + " command : " + analysisCommand);
 			
 			is = process.getInputStream();
 			isr = new InputStreamReader(is);
@@ -2052,7 +2017,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			while (!Thread.currentThread().isInterrupted()) {
 				if(count > idleTime) {
-					log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
+					oss_auto_analysis_log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
 					resultMap.put("isValid", false);
 					resultMap.put("returnMsg", "OSS auto analysis has not been completed yet.");
 					
@@ -2060,10 +2025,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				String result = br.readLine();
-				log.info("OSS AUTO ANALYSIS READLINE : " + result);
+				oss_auto_analysis_log.info("OSS AUTO ANALYSIS READLINE : " + result);
 				
 				if(result.toLowerCase().indexOf("start download oss") > -1) {
-					log.info("ANALYSIS START SUCCESS PRJ ID : " + prjId);
+					oss_auto_analysis_log.info("ANALYSIS START SUCCESS PRJ ID : " + prjId);
 					Project prjInfo = new Project();
 					prjInfo.setPrjId(prjId);
 					
@@ -2088,14 +2053,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			// 스크립트 종료
 		} catch(NullPointerException npe) {
-			log.error("ANALYSIS ERR PRJ ID : " + prjId);
-			log.error(npe.getMessage(), npe);
+			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
+			oss_auto_analysis_log.error(npe.getMessage(), npe);
 			
 			resultMap.replace("isValid", false);
 			resultMap.replace("returnMsg", "script Error");
 		} catch (Exception e) {
-			log.error("ANALYSIS ERR PRJ ID : " + prjId);
-			log.error(e.getMessage(), e);
+			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
+			oss_auto_analysis_log.error(e.getMessage(), e);
 			
 			resultMap.replace("isValid", false);
 			resultMap.replace("returnMsg", "OSS auto analysis has not been completed yet.");
@@ -2132,11 +2097,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			try {
 				if(process != null) {
-					log.info("Do OSS ANALYSIS Process Destry");
+					oss_auto_analysis_log.info("Do OSS ANALYSIS Process Destry");
 					process.destroy();
 				}
 			} catch (Exception e2) {
-				log.error(e2.getMessage(), e2);
+				oss_auto_analysis_log.error(e2.getMessage(), e2);
 			}
 		}
 		

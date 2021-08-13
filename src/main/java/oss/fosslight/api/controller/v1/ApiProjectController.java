@@ -109,7 +109,7 @@ public class ApiProjectController extends CoTopComponent {
     		@ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
     		@ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-    		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete)", required = false, allowableValues = "PROG,REQ,REV,COMP") @RequestParam(required = false) String status,
+    		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
     		@ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
     		@ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator){
 		
