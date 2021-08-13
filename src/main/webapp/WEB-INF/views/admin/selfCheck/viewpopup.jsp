@@ -98,7 +98,7 @@
 									repeatitems: false,
 									id: 'licenseId',
 								},
-								colNames: ['ID','License Name','Identifier','License Type','Obligation','Restriction','Web site','Nick Name','License Text'],
+								colNames: ['ID','License Name','Identifier','License Type','Obligation','Restriction','Website','Nick Name','License Text'],
 								colModel: [
 									{name: 'licenseId', index: 'licenseId', key:true, hidden:true},
 									{name: 'licenseName', index: 'licenseName', width: 200, align: 'left'},
