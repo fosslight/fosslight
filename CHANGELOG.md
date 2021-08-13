@@ -1,5 +1,38 @@
 # Changelog
 
+## v1.2.1 (13/08/2021)
+## Changes
+- Add to show docker-compose log in github-actions @riyenas0925 (#50)
+
+## 🚀 Features
+
+- Bug fix - validation check @FOSSLight-dev (#27)
+
+## 🐛 Hotfixes
+
+- Update the function related to detected license and changing status @soimkim (#56)
+- Add DROP status to project search @riyenas0925 (#45)
+- Bug fix - validation check @FOSSLight-dev (#27)
+- Remove warning message @riyenas0925 (#25)
+- Fix a bug related to load properties @soimkim (#22)
+- Fix a bug to create directories @soimkim (#17)
+
+## 🔧 Maintenance
+
+- Update the function related to detected license and changing status @soimkim (#56)
+- Move the Drop button to the right of the Delete button in "Project > Basic Information" @suhwan-cheon (#55)
+- FIx typo 'website' in UI @epicarts (#48)
+- Fix Timezone to Asia/Seoul @epicarts (#46)
+- Typo in Class @kimtaehyun98 (#41)
+- Fix gradew file permission @epicarts (#38)
+- Fix typo in CoTopComponent.java in fosslight @ubermen5che (#34)
+- Fix Typo @greeenly (#32)
+- Update .gitignore to ignore personal data folders @namkyu1999 (#31)
+- Change db settings for running with Docker @soimkim (#24)
+- Run PR action for all branches @soimkim (#23)
+
+---
+
 ## v1.2.0 (30/07/2021)
 ## Changes
 ## 🚀 Features
