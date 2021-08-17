@@ -1511,8 +1511,24 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						break;
 					case CoConstDef.CD_LICENSE_TYPE_CP:
-						if(isEmpty(currentType)) {
+						if(!CoConstDef.CD_LICENSE_TYPE_WCP.equals(currentType)) {
 							currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+							
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_PF:
+						if(!CoConstDef.CD_LICENSE_TYPE_CP.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_PF;
+							
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_NA:
+						if(isEmpty(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 							
 							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
 						}

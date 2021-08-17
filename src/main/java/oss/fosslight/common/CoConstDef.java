@@ -629,7 +629,8 @@ public class CoConstDef {
 	public static final String CD_LICENSE_TYPE_CP 								= "CP";
 	public static final String CD_LICENSE_TYPE_WCP 								= "WCP";
 	public static final String CD_LICENSE_TYPE_PMS								= "PMS";
-	public static final String CD_LICENSE_TYPE_PF								= "PF";
+	public static final String CD_LICENSE_TYPE_PF								= "PF"; // Proprietary Free
+	public static final String CD_LICENSE_TYPE_NA								= "NA"; // Proprietary
 	
 	/** 라이센스 Restriction 코드 **/
 	public static final String CD_LICENSE_RESTRICTION							= "226";
