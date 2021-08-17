@@ -693,10 +693,24 @@ public class CommonFunction extends CoTopComponent {
 		for(OssLicense bean : andList) {
 			// 가장 Strong한 라이선스부터 case
 			switch (bean.getLicenseType()) {
-				case CoConstDef.CD_LICENSE_TYPE_CP:
-					currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 					rtnVal = bean;
 					breakFlag = true;
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(!CoConstDef.CD_LICENSE_TYPE_NA.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_PF;
+						rtnVal = bean;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP:
+					if(!CoConstDef.CD_LICENSE_TYPE_PF.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+						rtnVal = bean;
+					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
