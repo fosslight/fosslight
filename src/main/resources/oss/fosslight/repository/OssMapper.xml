@@ -592,6 +592,9 @@
         <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(deactivateFlag,'Y')">
 			AND T1.DEACTIVATE_FLAG = #{deactivateFlag}
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+			AND T1.LICENSE_TYPE = #{licenseType}
+		</if>
 		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
 		GROUP BY T1.OSS_NAME
 		</if>
