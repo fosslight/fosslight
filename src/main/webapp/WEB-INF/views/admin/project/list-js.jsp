@@ -708,11 +708,17 @@
 			var distributionStatus = $("#distributionStatus").val();
 			var completeFlag = $("#completeFlag").val();
 			var dropFlag = $("#dropFlag").val();
-			
-			if(reason.split(" ").join("") == ""){
+			var commentFlag = true;
+
+			if('${sessUserInfo.authority}'=="ROLE_ADMIN") {
+				if(changeSeq == 1 || changeSeq == 4) {
+					commentFlag = false;
+				}
+			}
+
+			if(commentFlag && reason.split(" ").join("") == "") {
 				alertify.alert("Please leave a comment.");
 				$("#reason").next(".retxt").show();
-				
 				return false;
 			}
 
