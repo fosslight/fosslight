@@ -97,6 +97,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .multiItemSet span .smallDelete {position:absolute;right:7px;top:7px;}
 .multiItemSet + input {float:left;width:90px;}
 .multiItemSet .retxt {clear:left;} /* 2016-11-05 by mj-cho*/
+.multiDetectedLicenseSet a {color:#0070c0;}
 /**/
 .taSet {padding-right:12px;}
 .taSet label {display:block;}
