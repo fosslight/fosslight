@@ -153,6 +153,7 @@
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
+        detectedLicenseIdByName : ${empty detectedLicenseIdByName ? 'null': detectedLicenseIdByName},
 		list : ${empty list ? '{rows:[]}' : list},
 		components : ${empty components ? '[]' : components },
 		vulnInfoList : ${empty vulnInfoList ? '[]' : vulnInfoList },
@@ -176,12 +177,12 @@
 
 				$('#ossVersion').html(ossVersion);
 				$('#downloadLocation a').text(data.detail.downloadLocation);
-				
+
 				$.each(data.detail.downloadLocations, function(idx, cur){
 					if(idx == 0){
 						$('.multiDownloadLocationSet span:first').remove();
 					}
-					
+
 					if(cur != ''){
 						$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
 						$("[name='downloadLocations'] > a:last").html(cur).attr("href", cur);
@@ -194,8 +195,9 @@
 					}
 					if(cur != ''){
 						$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
-						$("[name='detectedLicenses']:last").html(cur).attr("href", cur);
-					}	
+						var tagForTab = '<a href="#none" onclick=createTabInFrame("'+data.detectedLicenseIdByName[cur]+'_License","#/license/edit/'+data.detectedLicenseIdByName[cur]+'")>'+cur+'</a>'
+						$("[name='detectedLicenses']:last").html(tagForTab);
+					}
 				});
 				
 				$('#homepage a').text(data.detail.homepage);
