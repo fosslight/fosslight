@@ -20,4 +20,5 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             whoami
-            touch soim
+            bash /service/deploy/fosslight/test_soim.sh
+
