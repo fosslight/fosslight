@@ -3422,15 +3422,7 @@ public class CommonFunction extends CoTopComponent {
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
 				if(!isEmpty(successOssInfo.getDownloadLocationGroup())) {
-					String downloadLocation = successOssInfo.getDownloadLocation();
-					
-					for(String url : successOssInfo.getDownloadLocationGroup().split(",")) {
-						if(!url.equals(downloadLocation)) {
-							downloadLocation += "," + url;
-						}
-					}
-					
-					successOssInfo.setDownloadLocation(downloadLocation);
+					successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
 				}
 				
 				successOssInfo.setTitle("사용자 등록 정보");

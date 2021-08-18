@@ -1061,9 +1061,15 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(!isEmpty(ossMaster.getDownloadLocation())){
+			List<String> duplicateDownloadLocation = new ArrayList<>();
 			String result = "";
+			boolean isFirst = true;
 			
 			for(String url : ossMaster.getDownloadLocation().split(",")) {
+				if(duplicateDownloadLocation.contains(url)) {
+					continue;
+				}
+				
 				if(!isEmpty(result)) {
 					result += ",";
 				}
@@ -1073,10 +1079,16 @@ public class OssController extends CoTopComponent{
 				}else {
 					result += url;
 				}
+				
+				if(isFirst) {
+					ossMaster.setDownloadLocation(result);
+					isFirst = false;
+				}
+				
+				duplicateDownloadLocation.add(url);
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-			ossMaster.setDownloadLocation(result);
 		}
 		
 		if(!isEmpty(ossMaster.getHomepage())) {
