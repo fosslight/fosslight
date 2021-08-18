@@ -2132,7 +2132,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(!isEmpty(ossNewistData.getDownloadLocationGroup())) {
 				String url = "";
 				
-				String[] downloadLocationList = (ossNewistData.getDownloadLocation()+","+ossNewistData.getDownloadLocationGroup()).split(",");
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
 				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
 				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
 														.stream()
