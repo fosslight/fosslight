@@ -519,6 +519,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_CANCELED = "62";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_INVATED = "63";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
+	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
 
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
