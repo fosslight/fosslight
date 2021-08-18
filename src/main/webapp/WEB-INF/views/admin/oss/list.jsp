@@ -43,7 +43,7 @@
 				</dl>
 				<c:if test="${ct:isAdmin()}">
 				<input type="button" value="Admin Expand apply" class="btnExpand" />
-				<dl class="adminSearch" style="display:none;">
+				<dl class="adminSearch" style="display:none; height: 70px;">
 					<dt style="width:20px;"></dt>
 					<dd>
 						<label>Creator</label>
@@ -74,6 +74,17 @@
 						<label>Modified Date</label>
 						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8"/> ~ 
 						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8"/> 
+					</dd>
+					<dt style="width:20px;"></dt>
+					<dd style="padding-top: 6px;">
+						<label>License Type</label>
+						<span class="selectSet" style="width: 257px;">
+							<strong for="licenseType" title="selected value"></strong>
+							<select id="licenseType" name="licenseType">
+								<option></option>
+								${ct:genOption(ct:getConstDef("CD_LICENSE_TYPE"))}
+							</select>
+						</span>
 					</dd>
 				</dl>
 				</c:if>
