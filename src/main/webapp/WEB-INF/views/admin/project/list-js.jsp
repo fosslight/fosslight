@@ -669,21 +669,6 @@
 				}
 			}
 			
-			if(projectStatus == "REV"){
-				$("#CSIdentification > input[type=radio]").attr("disabled", true);
-				$("#CSDrop > input[type=radio]").attr("disabled", true);
-				$("#CSDelete > input[type=radio]").attr("disabled", true);
-			}
-
-			if(dropFlag){
-				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
-			}
-			
-			if(projectStatus != "REQ" && completeFlag){
-				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
-				$("#CSDelete > input[type=radio]").attr("disabled", true); // status : REV or complete 시 disabled
-			}
-
 			if('${sessUserInfo.authority}'=="ROLE_ADMIN"
 				&& identificationStatus == "CONF"
 				&& (!verificationStatus
@@ -695,8 +680,21 @@
 				$("#CSComplete > input[type=radio]").attr("disabled", false);
 			} else {
 				$("#CSComplete > input[type=radio]").attr("disabled", true);
+				$("#CSDelete > input[type=radio]").attr("disabled", true);
 			}
-						
+
+			if(!dropFlag && !completeFlag){
+				$("#CSDrop > input[type=radio]").attr("disabled", false);
+			}else{
+				$("#CSDrop > input[type=radio]").attr("disabled", true);
+			}
+			
+			if(projectStatus == "REV"){
+				$("#CSIdentification > input[type=radio]").attr("disabled", true);
+				$("#CSDrop > input[type=radio]").attr("disabled", true);
+				$("#CSDelete > input[type=radio]").attr("disabled", true);
+			}
+			
 			$("#changeStatusPop").show();
 		},
 		changeStatusProc : function(){
@@ -1126,19 +1124,6 @@
 						}
 					
 					$('input[id*="_releaseDate"]').attr('class', 'cal');
-
-					$("input:checkbox[id='cb_list']").click(function(){
-						var checkboxBoolean = $(this).is(":checked");
-						if (checkboxBoolean == true){
-							$("input:checkbox[name^=jqg_list_]").each(function(){
-								if (this.checked){
-									checkboxParam.push(this.name.split('_').reverse()[0]);
-								}
-							});
-						}else{
-							checkboxParam = [];
-						}
-					});
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					var role = '${sessUserInfo.authority}';

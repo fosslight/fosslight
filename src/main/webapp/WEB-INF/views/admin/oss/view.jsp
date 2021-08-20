@@ -40,8 +40,6 @@
 						<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 						<td class="dCase">
 							<div class="required">
-								<div id="licenses" class="viewOssTd" ></div>
-								<div id="licenseSingle" class="viewOssTd" ></div>
 								<div class="licenseMulti">
 									<div class="mark"></div>
 									<div class="mt5"><table id="_licenseChoice"><tr><td></td></tr></table></div>

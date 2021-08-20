@@ -693,10 +693,24 @@ public class CommonFunction extends CoTopComponent {
 		for(OssLicense bean : andList) {
 			// 가장 Strong한 라이선스부터 case
 			switch (bean.getLicenseType()) {
-				case CoConstDef.CD_LICENSE_TYPE_CP:
-					currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 					rtnVal = bean;
 					breakFlag = true;
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(!CoConstDef.CD_LICENSE_TYPE_NA.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_PF;
+						rtnVal = bean;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP:
+					if(!CoConstDef.CD_LICENSE_TYPE_PF.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+						rtnVal = bean;
+					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
@@ -3408,15 +3422,7 @@ public class CommonFunction extends CoTopComponent {
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
 				if(!isEmpty(successOssInfo.getDownloadLocationGroup())) {
-					String downloadLocation = successOssInfo.getDownloadLocation();
-					
-					for(String url : successOssInfo.getDownloadLocationGroup().split(",")) {
-						if(!url.equals(downloadLocation)) {
-							downloadLocation += "," + url;
-						}
-					}
-					
-					successOssInfo.setDownloadLocation(downloadLocation);
+					successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
 				}
 				
 				successOssInfo.setTitle("사용자 등록 정보");

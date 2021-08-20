@@ -13,6 +13,8 @@
 				<input type="hidden" name="ossType" value="${ossType}"/>
 				<input type="hidden" name="validationType"/>
 				<input type="hidden" name="downloadLocation"/>
+				<input type="hidden" name="licenseId" value=""/>
+				<input type="hidden" name="deactivateFlag" value="N"/>
 				<!-- Main Table [S] -->
 				<table class="dCase">
 					<colgroup>
@@ -24,7 +26,7 @@
 							<th class="dCase txStr">OSS Name</th>
 							<td class="dCase">
 								<div class="required">
-									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/><input type="checkbox" id="deactivateFlag" name="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate
+									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/><c:if test="${!empty ossId}"><input type="checkbox" id="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate</c:if>
 									<span class="retxt"></span>
 								</div>
 							</td>
@@ -54,14 +56,7 @@
 							<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 							<td class="dCase">
 								<div class="required">
-									<span class="radioSet"><input type="radio" name="licenses" id="single" value="S"/><label for="single">Single License</label></span>
-									<span class="radioSet"><input type="radio" name="licenses" id="multi" value="M"/><label for="multi">Multi/Dual License</label></span>
 									<input type="hidden" name="licenseDiv"/>
-									<div class="licenseSingle">
-										<input id="licenseName" type="text" class="autoComOssLicense w100P" value="${licenseName}"/>
-										<input type="hidden" name="licenseName" value="${licenseName}"/>
-										<span class="retxt"></span>
-									</div>
 									<div class="licenseMulti">
 										<div class="mark"></div>
 										<div class="mt5"><table id="_licenseChoice"><tr><td></td></tr></table></div>

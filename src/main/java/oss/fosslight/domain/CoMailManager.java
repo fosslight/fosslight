@@ -673,6 +673,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED:
@@ -806,6 +807,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
     						) {
         				if(!isEmpty(prjInfo.getReviewer())) {
@@ -863,6 +865,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
     						) {

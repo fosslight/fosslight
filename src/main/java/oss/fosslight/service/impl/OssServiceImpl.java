@@ -1511,8 +1511,24 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						break;
 					case CoConstDef.CD_LICENSE_TYPE_CP:
-						if(isEmpty(currentType)) {
+						if(!CoConstDef.CD_LICENSE_TYPE_WCP.equals(currentType)) {
 							currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+							
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_PF:
+						if(!CoConstDef.CD_LICENSE_TYPE_CP.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_PF;
+							
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_NA:
+						if(isEmpty(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 							
 							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
 						}
@@ -2116,7 +2132,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(!isEmpty(ossNewistData.getDownloadLocationGroup())) {
 				String url = "";
 				
-				String[] downloadLocationList = (ossNewistData.getDownloadLocation()+","+ossNewistData.getDownloadLocationGroup()).split(",");
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
 				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
 				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
 														.stream()

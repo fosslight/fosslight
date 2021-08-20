@@ -241,17 +241,27 @@ public class OssController extends CoTopComponent{
 		
 		return OSS.EDIT_JSP;
 	}
-	
+
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String ossId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		OssMaster ossMaster = new OssMaster(ossId);
 		Map<String, Object> map = ossService.getOssLicenseList(ossMaster);
 		ossMaster = ossService.getOssMasterOne(ossMaster);
-		
+
 		if(ossMaster.getOssVersion() == null) {
 			ossMaster.setOssVersion("");
 		}
-		
+		//getDetectedLicenses()는 detectedLicenses가 null이면 비어있는 ArrayList객체를 생성해서 반환함.
+		if(!ossMaster.getDetectedLicenses().get(0).isEmpty()) {
+			List<String> detectedLicenseNames = ossMaster.getDetectedLicenses();
+			Map<String, String> detectedLicenseIdByName = new HashMap<>();
+			for (String name : detectedLicenseNames) {
+				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
+			}
+			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
+		} else
+			model.addAttribute("detectedLicenseIdByName", null);
+
 		model.addAttribute("list", toJson(map));
 		model.addAttribute("detail", toJson(ossMaster));
 		model.addAttribute("ossId", ossMaster.getOssId());
@@ -1061,9 +1071,15 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(!isEmpty(ossMaster.getDownloadLocation())){
+			List<String> duplicateDownloadLocation = new ArrayList<>();
 			String result = "";
+			boolean isFirst = true;
 			
 			for(String url : ossMaster.getDownloadLocation().split(",")) {
+				if(duplicateDownloadLocation.contains(url)) {
+					continue;
+				}
+				
 				if(!isEmpty(result)) {
 					result += ",";
 				}
@@ -1073,10 +1089,16 @@ public class OssController extends CoTopComponent{
 				}else {
 					result += url;
 				}
+				
+				if(isFirst) {
+					ossMaster.setDownloadLocation(result);
+					isFirst = false;
+				}
+				
+				duplicateDownloadLocation.add(url);
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-			ossMaster.setDownloadLocation(result);
 		}
 		
 		if(!isEmpty(ossMaster.getHomepage())) {

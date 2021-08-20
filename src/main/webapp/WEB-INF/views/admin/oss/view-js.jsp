@@ -153,6 +153,7 @@
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
+        detectedLicenseIdByName : ${empty detectedLicenseIdByName ? 'null': detectedLicenseIdByName},
 		list : ${empty list ? '{rows:[]}' : list},
 		components : ${empty components ? '[]' : components },
 		vulnInfoList : ${empty vulnInfoList ? '[]' : vulnInfoList },
@@ -176,12 +177,12 @@
 
 				$('#ossVersion').html(ossVersion);
 				$('#downloadLocation a').text(data.detail.downloadLocation);
-				
+
 				$.each(data.detail.downloadLocations, function(idx, cur){
 					if(idx == 0){
 						$('.multiDownloadLocationSet span:first').remove();
 					}
-					
+
 					if(cur != ''){
 						$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
 						$("[name='downloadLocations'] > a:last").html(cur).attr("href", cur);
@@ -194,8 +195,9 @@
 					}
 					if(cur != ''){
 						$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
-						$("[name='detectedLicenses']:last").html(cur).attr("href", cur);
-					}	
+						var tagForTab = '<a href="#none" onclick=createTabInFrame("'+data.detectedLicenseIdByName[cur]+'_License","#/license/edit/'+data.detectedLicenseIdByName[cur]+'")>'+cur+'</a>'
+						$("[name='detectedLicenses']:last").html(tagForTab);
+					}
 				});
 				
 				$('#homepage a').text(data.detail.homepage);
@@ -204,41 +206,13 @@
 				$('#summaryDescription').text(data.detail.summaryDescription);
 				$('#attribution').text(data.detail.attribution);
 				
-				var licenseDiv = data.detail.licenseDiv;
-
-				if(licenseDiv == "S") {
-					licenseDiv = "Single License";
-
-					$('#cp').show();
-					$('.licenseMulti').hide();
-				} else if(licenseDiv == "M") {
-					licenseDiv = "Multi/Dual License";
-				} else {
-					licenseDiv = "";
-				}
-
-				$("#licenses").text(licenseDiv);
-				
-				//싱글라이센스일경우 데이터 입력
-				if(data.detail.licenseDiv == 'S') {
-					data.detail.ossLicenses.forEach(function(item){
-						$("#licenseSingle").html("<br>"+item.licenseName);
-						$('#lt td div').html(item.licenseType);
-						$('#ob td div').html('');
-						$(item.obligation).appendTo('#ob td div');
-						$("#licenseName").val(item.licenseName);
-					});
-				//멀티라이센스일 경우 데이터 입력
-				} else if(data.detail.licenseDiv == 'M') {
-					//가져온 데이터에 대한 라이센스 우선순위 체크
-					multiLicense();
-					var licenseType = autoLicense(data.list.rows);
-					var obligationHtml = autoObligation(data.list.rows);
-					$('#lt td div').html(licenseType);
-					$('#ob td div').html('');
-					$(obligationHtml).appendTo('#ob td div');
-				}
-				
+				//가져온 데이터에 대한 라이센스 우선순위 체크
+				multiLicense();
+				var licenseType = autoLicense(data.list.rows);
+				var obligationHtml = autoObligation(data.list.rows);
+				$('#lt td div').html(licenseType);
+				$('#ob td div').html('');
+				$(obligationHtml).appendTo('#ob td div');
 				
 				//닉네임 리스트 데이터 입력
 				data.detail.ossNicknames.forEach(function(nickName, index, obj){
@@ -717,22 +691,16 @@
 
     function showLicenseText(_licenseName) {
     	if(!_licenseName) {
-    		var licenseDiv = data.detail.licenseDiv;
-    		
-    		if(licenseDiv == 'M'){
-    			var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" ) ;
+    		var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" ) ;
 
-    			if(_selectedRow) {
-    				licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
-    			} else {
-    				if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
-    					_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
-    					licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
-    				}
-    			}
-    		} else {
-    			licenseName = $("#licenseName").val();
-    		}
+   			if(_selectedRow) {
+   				licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+   			} else {
+   				if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
+   					_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
+   					licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+   				}
+   			}
     	} else {
     		licenseName = _licenseName;
     	}

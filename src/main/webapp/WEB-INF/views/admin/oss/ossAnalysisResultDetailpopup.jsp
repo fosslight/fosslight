@@ -169,12 +169,9 @@
 						licenseObject["ossLicenseIdx"] = ossLicenseIdx;
 					} else {
 						licenseObject["licenseName"] = licenseName;
-						
-						if(licenseDiv == "M"){
-							licenseObject["licenseNameEx"] = licenseName;
-							licenseObject["ossLicenseComb"] = ossLicenseComb;
-							licenseObject["ossLicenseIdx"] = ossLicenseIdx;
-						}
+						licenseObject["licenseNameEx"] = licenseName;
+						licenseObject["ossLicenseComb"] = ossLicenseComb;
+						licenseObject["ossLicenseIdx"] = ossLicenseIdx;
 					}
 					
 					common_data["list"+seq]["rows"].push(licenseObject);
@@ -182,32 +179,11 @@
 
 				$("#_licenseChoice"+seq).jqGrid('clearGridData');
 				
-				if(licenseDiv == "S"){
-					var _item = grid_fn.checkLicenseSelected(licenseName);
-					$("#licenseName"+seq).val(licenseName);
-					
-					if(_item == null) {
-						$("#licenseName"+seq).parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
-					} else {
-						$("#licenseName"+seq).parent().find("span.retxt:first").hide();
-
-						var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
-						
-						$('#licenseName'+seq).val(licenseName);
-						$('#licenseType').val(_item.licenseType);
-						$('input[name=obligationType]').val(_item.obligationCode);
-						$('#lt'+seq+' td').html(_item.licenseType);
-						$('#ob'+seq+' td').html('');
-						$(_item.obligation).appendTo('#ob'+seq+' td');
-						selected = true;
-					}
-				} else {
-					$("#_licenseChoice"+seq).jqGrid('setGridParam',
+				$("#_licenseChoice"+seq).jqGrid('setGridParam',
 				        { 
 				            datatype: 'local',
 				            data : common_data["list"+seq]["rows"]
 				        }).trigger("reloadGrid");
-				}
 				
 				Ctrl_fn.setMessage(gridId, seq);
 			},
@@ -292,33 +268,38 @@
 			},
 			registSubmit : function(seq){
 				var ossForm = '#ossForm'+seq;
-				
-				var licenseDiv = $('[name=\'licenseDiv'+seq+'\']:checked').val();
+
+				var licenseDiv = "";
+				var licenseChoiceLength = $("#_licenseChoice"+seq).jqGrid("getDataIDs").length;
+
+				switch (licenseChoiceLength) {
+					case 0:
+						alertify.alert("No licenses entered.");
+						return false;
+						break;
+					case 1:
+						licenseDiv = "S";
+						break;
+					default:
+						licenseDiv = "M";
+						break;
+				}
+
 				var rows = grid_fn.getOssGridRows($("#_licenseChoice"+seq));
 				
 				$('#ossForm'+seq+' input[name=licenseDiv]').val(licenseDiv);
 				var newRows = [];
 				
-				if(licenseDiv == 'M'){
-					$(ossForm + ' input[name=licenseName]').val('multiple');
-
-					var dataIds = $('#_licenseChoice'+seq).jqGrid('getDataIDs');
-					
-					dataIds.forEach(function(dataId){
-						var rowData = $('#_licenseChoice'+seq).jqGrid('getRowData',dataId);
-						var licenseName = rowData.licenseName;
-						if( licenseName.indexOf('<div') > -1){
-							rowData['licenseName'] = '';
-						}
-						newRows.push(rowData);
-					});
-				}
+				var dataIds = $('#_licenseChoice'+seq).jqGrid('getDataIDs');
 				
-				if(licenseDiv == 'M' && newRows.length < 2){
-					alertify.alert("For Multi / Dual License, you must enter two or more licenses.");
-					
-					return false;
-				}
+				dataIds.forEach(function(dataId){
+					var rowData = $('#_licenseChoice'+seq).jqGrid('getRowData',dataId);
+					var licenseName = rowData.licenseName;
+					if( licenseName.indexOf('<div') > -1){
+						rowData['licenseName'] = '';
+					}
+					newRows.push(rowData);
+				});
 				
 				$(ossForm + ' input[name=\'ossLicensesJson\']').val(JSON.stringify(newRows));
 				
@@ -538,9 +519,9 @@
             },
             checkVdiff : function(seq){
         		var flag = "";
-        		if($('input[name=ossVersion]').val() == "") {
-        			var rows = grid_fn.getOssGridRows('#_licenseChoice');
-        			var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
+        		if($('#ossForm'+seq+' input[name=ossVersion]').val() == "") {
+        			var rows = grid_fn.getOssGridRows('#_licenseChoice'+seq);
+        			var postData = {'ossId' : $('#ossForm'+seq+' input[name=ossId]').val(), 'ossName' : $('#ossForm'+seq+' input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
         			
         			$.ajax({
         				url : '/oss/checkVdiff',
@@ -703,23 +684,6 @@
 					});
 				});
 
-				$("div[class*=detailLicense] > .radioSet > input[name*='licenseDiv']").on("click", function(){
-					var detailLicense = $(this).parent().parent();
-					var seq = detailLicense.attr("class").replace(/[^\d]+/g, "")
-					var id = $(this).attr('id');
-
-					if(id == 'single'){
-						detailLicense.find('.licenseSingle').show();
-						detailLicense.find('.licenseMulti').hide();
-					}
-
-					if(id == 'multi'){
-						detailLicense.find('.licenseSingle').hide();
-						detailLicense.find('.licenseMulti').show();
-						grid_fn.getOssGridRows($("#_licenseChoice"+seq));
-					}
-				});
-
 				$("[name='homepage']").on('blur', function(){
 					Ctrl_fn.homepageDuplication(this);
 				});
@@ -739,16 +703,22 @@
 						$(ossForm + " div.retxt").remove();
 					
 						// 멀티 일경우 라이센스는 1건 이상이어야 한다.
-						var licenseDiv = $(ossForm + ' input[type=radio]:checked').val();
+						var licenseDiv = "";
+						var licenseChoiceLength = $("#_licenseChoice"+seq).jqGrid("getDataIDs").length;
 
-						if(licenseDiv == 'M'){
-							if($('#_licenseChoice'+seq).jqGrid("getDataIDs").length < 1) {
-								alertify.alert("No licenses entered.");
-								return false;
-							} else if($('#_licenseChoice'+seq).jqGrid("getDataIDs").length < 2) {
-								alertify.alert("For Multi / Dual License, you must enter two or more licenses.");
-								return false;
-							}
+						switch (licenseChoiceLength) {
+						case 0:
+							alertify.alert("No licenses entered.");
+							return false;
+							break;
+						case 1:
+							$(ossForm + " input[name=licenseDiv]").val("S");
+							licenseDiv = "S";
+							break;
+						default:
+							$(ossForm + " input[name=licenseDiv]").val("M");
+							licenseDiv = "M";
+							break;
 						}
 					
 						var rows = grid_fn.getOssGridRows('#_licenseChoice'+seq);
@@ -756,29 +726,21 @@
 						var gridStr = "_licenseChoice"+seq;
 						var jsValidResult = true;
 					
-						if(licenseDiv == 'M'){ // multi license
-							dataIds.forEach(function(dataId){
-								var rowData = $('#_licenseChoice'+seq).jqGrid('getRowData',dataId);
-								var licenseName = rowData.licenseNameEx;
+						dataIds.forEach(function(dataId){
+							var rowData = $('#_licenseChoice'+seq).jqGrid('getRowData',dataId);
+							var licenseName = rowData.licenseNameEx;
 
-								if(grid_fn.checkLicenseSelected(licenseName) == null) {
-									var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
+							if(grid_fn.checkLicenseSelected(licenseName) == null) {
+								var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
 
-									if(errRow) {
-										errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
-									}
-
-									$("div.retxt._licenseChoice"+seq+"_"+dataId).show();
-									jsValidResult = false;
+								if(errRow) {
+									errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
 								}
-							});
-						} else { // single license
-							if(grid_fn.checkLicenseSelected($("#licenseName"+seq).val()) == null) {
-								$(ossForm + " #licenseName"+seq).parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
 
+								$("div.retxt._licenseChoice"+seq+"_"+dataId).show();
 								jsValidResult = false;
 							}
-						}
+						});
 					
 						if(!jsValidResult|| !detectedLicenseValid[seq]) {
 							alertify.error('<spring:message code="msg.common.valid" />', 0);
@@ -974,6 +936,12 @@
 						$('#ob'+seq+' td').html('');
 						
 						$(obligationHtml).appendTo('#ob'+seq+' td');
+
+						if (typeof(data.rows[0]) != "undefined"){
+							if (data.rows[0].licenseName == "" || typeof(data.rows[0].licenseNameEx) == "undefined"){
+								$(_target).clearGridData();
+							}
+						}
 					}
 				};
 			},
@@ -1489,22 +1457,31 @@
 			},
 			showLicenseText : function(_licenseName, _target, seq){
 				if(!_licenseName) {
-					var licenseDiv = $('input[type=radio]:checked').val();
+					var licenseChoiceLength = $(_target).jqGrid("getDataIDs").length;
+
+					switch (licenseChoiceLength) {
+						case 0:
+							alertify.alert("No licenses entered.");
+							return false;
+							break;
+						case 1:
+							$('#ossForm'+seq+' input[name=licenseDiv]').val("S");
+							break;
+						default:
+							$('#ossForm'+seq+' input[name=licenseDiv]').val("M");
+							break;
+					}
 					
-					if(licenseDiv == 'M'){
-						var _selectedRow = $(_target).jqGrid('getGridParam', "selrow" );
-						
-						if(_selectedRow) {
-							var licenseNameEx = $(_target).jqGrid('getRowData',_selectedRow,'licenseNameOrg');
-							licenseName = licenseNameEx['licenseNameEx'];
-						} else {
-							if($(_target).jqGrid("getDataIDs").length > 0) {
-								_selectedRow = $(_target).jqGrid("getDataIDs")[0];
-								licenseName = $(_target).jqGrid('getCell',_selectedRow,'licenseNameEx');
-							}
-						}
+					var _selectedRow = $(_target).jqGrid('getGridParam', "selrow" );
+					
+					if(_selectedRow) {
+						var licenseNameEx = $(_target).jqGrid('getRowData',_selectedRow,'licenseNameOrg');
+						licenseName = licenseNameEx['licenseNameEx'];
 					} else {
-						licenseName = $("#licenseName"+seq).val();
+						if($(_target).jqGrid("getDataIDs").length > 0) {
+							_selectedRow = $(_target).jqGrid("getDataIDs")[0];
+							licenseName = $(_target).jqGrid('getCell',_selectedRow,'licenseNameEx');
+						}
 					}
 				} else {
 					licenseName = _licenseName;
@@ -1681,12 +1658,6 @@
 										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense1">
-												<span class="radioSet"><input type="radio" name="licenseDiv1" id="single" value="S"/><label for="single">Single License</label></span>
-												<span class="radioSet"><input type="radio" name="licenseDiv1" id="multi" value="M"/><label for="multi">Multi/Dual License</label></span>
-												<div class="licenseSingle">
-													<input id="licenseName1" name="licenseName" type="text" class="autoComOssLicense1 w100P"/>
-													<span class="retxt"></span>
-												</div>
 												<div class="licenseMulti">
 													<div class="mark1"></div>
 													<div class="mt5"><table id="_licenseChoice1"><tr><td></td></tr></table></div>
@@ -1727,11 +1698,11 @@
 										<td class="dCase">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation1">
 												<div class="required">
-													<span><input type="text" name="downloadLocations" id="downloadLocations1" class="w250"/><input type="button" value="Delete" class="smallDelete"/></span>
+													<span><input type="text" name="downloadLocations" id="downloadLocations1" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
 												</div>
 											</div>
-											<input id="downloadLocationAdd1" type="button" value="+ Add" class="btnCLight gray"/>
+											<input id="downloadLocationAdd1" type="button" value="+" class="btnCLightAnalysis gray"/>
 										</td>
 									</tr>
 									<tr>
@@ -1826,12 +1797,6 @@
 										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense2">
-												<span class="radioSet"><input type="radio" name="licenseDiv2" id="single" value="S"/><label for="single">Single License</label></span>
-												<span class="radioSet"><input type="radio" name="licenseDiv2" id="multi" value="M"/><label for="multi">Multi/Dual License</label></span>
-												<div class="licenseSingle">
-													<input id="licenseName2" name="licenseName" type="text" class="autoComOssLicense2 w100P"/>
-													<span class="retxt"></span>
-												</div>
 												<div class="licenseMulti">
 													<div class="mark2"></div>
 													<div class="mt5"><table id="_licenseChoice2"><tr><td></td></tr></table></div>
@@ -1872,11 +1837,11 @@
 										<td class="dCase">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation2">
 												<div class="required">
-													<span><input type="text" name="downloadLocations" id="downloadLocations2" class="w250"/><input type="button" value="Delete" class="smallDelete"/></span>
+													<span><input type="text" name="downloadLocations" id="downloadLocations2" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
 												</div>
 											</div>
-											<input id="downloadLocationAdd2" type="button" value="+ Add" class="btnCLight gray"/>
+											<input id="downloadLocationAdd2" type="button" value="+" class="btnCLightAnalysis gray"/>
 										</td>
 									</tr>
 									<tr>
@@ -1971,12 +1936,6 @@
 										<th class="dCase txStr">Declared License</th>
 										<td class="dCase">
 											<div class="required detailLicense3">
-												<span class="radioSet"><input type="radio" name="licenseDiv3" id="single" value="S"/><label for="single">Single License</label></span>
-												<span class="radioSet"><input type="radio" name="licenseDiv3" id="multi" value="M"/><label for="multi">Multi/Dual License</label></span>
-												<div class="licenseSingle">
-													<input id="licenseName3" name="licenseName" type="text" class="autoComOssLicense3 w100P"/>
-													<span class="retxt"></span>
-												</div>
 												<div class="licenseMulti">
 													<div class="mark3"></div>
 													<div class="mt5"><table id="_licenseChoice3"><tr><td></td></tr></table></div>
@@ -2017,11 +1976,11 @@
 										<td class="dCase">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation3">
 												<div class="required">
-													<span><input type="text" name="downloadLocations" id="downloadLocations3" /><input type="button" value="Delete" class="smallDelete"/></span>
+													<span><input type="text" name="downloadLocations" id="downloadLocations3" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
 												</div>
 											</div>
-											<input id="downloadLocationAdd3" type="button" value="+ Add" class="btnCLight gray"/>
+											<input id="downloadLocationAdd3" type="button" value="+" class="btnCLightAnalysis gray"/>
 										</td>
 									</tr>
 									<tr>
