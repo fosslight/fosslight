@@ -69,6 +69,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -77,4 +81,5 @@ jobs:
           key: ${{ secrets.REMOTE_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
+            cd /service/deploy/fosslight/
             bash /service/deploy/fosslight/deploy.sh
