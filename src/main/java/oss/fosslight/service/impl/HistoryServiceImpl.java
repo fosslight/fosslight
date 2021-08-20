@@ -118,6 +118,9 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 			ret = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
 		} else if(inf[0].equals("Code")) {
 			ret = dMap != null ? nvl(CoCodeManager.getCodeString(inf[2], (String)dMap.get(dtlCd[1])), inf[2]) : "";
+		} else if(inf[0].equals("Array") && "999".equals(dtlCd[2])) {
+			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
+			ret = asArr != null && asArr.size() > 0 ? String.join("<br>", asArr) : "";
 		} else if(inf[0].equals("Array") && dtlCd[2] == null) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join(", ", asArr) : "";

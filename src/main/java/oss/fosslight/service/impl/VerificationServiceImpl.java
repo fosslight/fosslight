@@ -1652,27 +1652,26 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
 			if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
 				ossComponent.addOssComponentsLicense(license);
-				// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨. 
-				// -> identification confirm시점에 등록된 copyright이 아닌 경우는 출력하지 않도록 수정함.
+				// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
 				// MULTI LICENSE를 가지는 oss의 개별로 추가된 copyright의 경우, Identification Confirm시에 DB에 업데이트한 정보를 기준으로 추출되기 때문에, preview 단계에서 오류가 발견되어 수정하여도 반영되지 않는다
 				// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
 				// 여기서 oss id와 license id를 이용하여 찾는다.
 				// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
-//				 if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
-//					 bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
-//				
-//					 // multi license 추가 copyright
-//					 if(!isEmpty(bean.getOssCopyright())) {
-//						 String addCopyright = ossComponent.getCopyrightText();
-//						
-//						 if(!isEmpty(ossComponent.getCopyrightText())) {
-//							 addCopyright += "\r\n";
-//						 }
-//						
-//						 addCopyright += bean.getOssCopyright();
-//						 ossComponent.setCopyrightText(addCopyright);
-//					 }
-//				 }
+				 if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
+					 bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+				
+					 // multi license 추가 copyright
+					 if(!isEmpty(bean.getOssCopyright())) {
+						 String addCopyright = ossComponent.getCopyrightText();
+						
+						 if(!isEmpty(ossComponent.getCopyrightText())) {
+							 addCopyright += "\r\n";
+						 }
+						
+						 addCopyright += bean.getOssCopyright();
+						 ossComponent.setCopyrightText(addCopyright);
+					 }
+				 }
 			}
 			
 			if(isDisclosure) {
@@ -1916,11 +1915,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if(!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
 			
-			if(bean != null && CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())) {
-				for(OssLicense license : bean.getOssLicenses()) {
-					if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
-						return license.getOssCopyright();
-					}
+			for(OssLicense license : bean.getOssLicenses()) {
+				if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
+					return license.getOssCopyright();
 				}
 			}
 		}
