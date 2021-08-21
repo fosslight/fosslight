@@ -1103,7 +1103,7 @@
 			} else if(obligationType == 10){
 				display="<span class=\"iconSet ops\">Notice</span>";
 			} else if(obligationType == 11) {
-				display="<span class=\"iconSet ops\"></span><span class=\"iconSet man\">Notice & SoruceCode</span>";
+				display="<span class=\"iconSet ops\"></span><span class=\"iconSet man\">Notice & SourceCode</span>";
 			}
 			
 			return display;
