@@ -1643,7 +1643,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							break;
 						case 3: // maven
 							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-							
+
+							break;
+						case 4: // pub
+							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+							break;
+						case 5: // cocoapods
+							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 							break;
 						default:
 							break;
@@ -1794,6 +1802,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					case 3: // maven
 						p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 						
+						break;
+					case 4: // pub
+						p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+						break;
+					case 5: // cocoapods
+						p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 						break;
 					default:
 						break;
