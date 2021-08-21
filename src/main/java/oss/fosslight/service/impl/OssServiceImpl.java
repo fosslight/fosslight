@@ -1678,10 +1678,50 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
-							bean.setDownloadLocation(downloadlocationUrl);
-							bean.setCheckName(checkName);
-							result.add(bean);
+							bean.setCheckOssList("Y");
+						} else {
+
+							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
+
+							while(ossNameMatcher.find()){
+
+								switch(urlSearchSeq) {
+									case 0: // github
+										checkName = ossNameMatcher.group(3) + "-" + ossNameMatcher.group(4);
+										
+										break;
+									case 1: // npm
+										checkName = "npm:" + ossNameMatcher.group(3);
+										
+										break;
+									case 2: // pypi
+										checkName = "pypi:" + ossNameMatcher.group(3);
+										
+										break;
+									case 3: // maven
+										checkName = ossNameMatcher.group(3) + ":" + ossNameMatcher.group(4);
+			
+										break;
+									case 4: // pub
+										checkName = "pub:" + ossNameMatcher.group(3);
+			
+										break;
+									case 5: // cocoapods
+										checkName = "cocoapods:" + ossNameMatcher.group(3);
+			
+										break;
+									default:
+										break;
+								}
+
+							}
+							
 						}
+
+						bean.setDownloadLocation(downloadlocationUrl);
+						bean.setCheckName(checkName);
+						if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
+
 					}
 				} else if(semicolonFlag) {
 					String downloadlocationUrl = bean.getDownloadLocation().split(";")[0];
@@ -1719,9 +1759,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setDownloadLocation(downloadlocationUrl);
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				} else {
@@ -1731,8 +1772,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						String checkName = ossMapper.checkOssName(bean);
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				}
