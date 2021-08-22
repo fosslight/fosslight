@@ -1610,4 +1610,97 @@ public class OssController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(result);
 	}
+	
+	@GetMapping(value=OSS.OSS_SYNC_POPUP, produces = "text/html; charset=utf-8")
+	public String viewSyncOssPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster bean, Model model){
+		// oss list (oss name으로만)
+		model.addAttribute("ossInfo", bean);
+		
+		return OSS.OSS_SYNC_POPUP_JSP;
+	}
+	
+	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
+	public ResponseEntity<Object> ossSyncListValidation(HttpServletResponse res, Model model
+			, @RequestParam(value="ossId", required=true)String ossId
+			, @RequestParam(value="ossIds", required=true)String ossIds){
+		OssMaster bean = new OssMaster();
+		bean.setOssId(ossId);
+		
+		List<OssMaster> ossList = ossService.getOssListBySync(bean);
+		
+		String[] ossIdArr = ossIds.split(",");
+		List<String> chkOssIdList = new ArrayList<String>();
+		
+		for (int i=0; i<ossIdArr.length; i++) {
+			bean.setOssId(ossIdArr[i]);
+			List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
+			List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
+			if (checkList.size() == 0) {
+				chkOssIdList.add(ossIdArr[i]);
+			}
+		}
+		
+		return makeJsonResponseHeader(true, "true", chkOssIdList);
+	}
+	
+	@GetMapping(value=OSS.OSS_SYNC_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
+	public String ossSyncDetailView(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster bean, Model model){
+		List<OssMaster> selectOssList = ossService.getOssListBySync(bean);
+		
+		bean.setOssId(bean.getSyncRefOssId());
+		List<OssMaster> standardOssList = ossService.getOssListBySync(bean);
+		
+		// sync check
+		List<String> syncCheckList = ossService.getOssListSyncCheck(selectOssList, standardOssList);
+		
+		if(selectOssList != null && !selectOssList.isEmpty()) {
+			OssMaster _bean = selectOssList.get(0);
+			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
+			
+			model.addAttribute("ossInfo", selectOssList.get(0));
+		} else {
+			model.addAttribute("ossInfo", new OssMaster());
+		}
+		model.addAttribute("syncCheckList" , syncCheckList);
+		
+		return OSS.OSS_SYNC_DETAILS_VIEW_AJAX_JSP;
+	}
+
+	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
+	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
+			, @RequestParam(value="ossId", required=true)String ossId
+			, @RequestParam(value="comment", required=true)String comment
+			, @RequestParam(value="ossIds", required=true)String ossIds){
+		OssMaster param = new OssMaster();
+		param.setOssId(ossId);
+		param.setOssIds(ossIds.split(","));
+		param.setComment(comment);
+		
+		try {
+			// oss info sync
+			ossService.updateOssSync(param);
+			return makeJsonResponseHeader(true, "True");
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, "Fail");
+		}
+	}
+	
+	@GetMapping(value=OSS.COMMENT_LIST)
+	public @ResponseBody ResponseEntity<Object> getCommentList(
+			CommentsHistory commentsHistory
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		commentsHistory.setReferenceDiv("40");
+		List<CommentsHistory> result = null;
+		
+		try{
+			result = commentService.getCommentList(commentsHistory);	
+		}catch(Exception e){
+			log.error(e.getMessage(), e);
+		}
+		
+		return makeJsonResponseHeader(result);
+	}
 }

@@ -2236,4 +2236,170 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<OssMaster> list = ossMapper.getNewestOssInfoByOssMaster(ossMaster);
 		return makeBasicOssInfoMap(list, true, false);
 	}
+	
+	@Override
+	public List<OssMaster> getOssListBySync(OssMaster bean) {
+		List<OssMaster> list = ossMapper.getOssListByName(bean);
+		
+		if(list == null) {
+			list = new ArrayList<>();
+		}
+		
+		// oss id로 취합(라이선스 정보)
+		List<OssMaster> newList = new ArrayList<>();
+		Map<String, OssMaster> remakeMap = new HashMap<>();
+		OssMaster currentBean = null;
+		for(OssMaster ossBean : list) {
+			// name + version
+			if(!isEmpty(ossBean.getOssVersion())) {
+				ossBean.setOssNameVerStr(ossBean.getOssName() + " (" + ossBean.getOssVersion() + ")");
+			} else {
+				ossBean.setOssNameVerStr(ossBean.getOssName());
+			}
+			
+			if(remakeMap.containsKey(ossBean.getOssId())) {
+				currentBean = remakeMap.get(ossBean.getOssId());
+			} else {
+				currentBean = ossBean;
+				
+				if(!isEmpty(currentBean.getOssNickname())) {
+					currentBean.setOssNickname(currentBean.getOssNickname().replaceAll("\\|", "<br>"));
+				}
+				
+				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
+				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
+				
+				String detectedLicense = avoidNull(ossBean.getDetectedLicense());
+				List<String> detectedLicenseList = Arrays.asList(detectedLicense.split(","));
+				String resultDectedLicense = "";
+				
+				if(!isEmpty(detectedLicense)) {
+					for(String dl : detectedLicenseList) {
+						LicenseMaster licenseMaster = null;
+						
+						if(CoCodeManager.LICENSE_INFO.containsKey(dl)) {
+							licenseMaster = CoCodeManager.LICENSE_INFO.get(dl);
+						}
+						
+						resultDectedLicense += dl;
+					}
+					
+					ossBean.setDetectedLicense(resultDectedLicense);
+				}
+			}
+			
+			OssLicense licenseBean = new OssLicense();
+			licenseBean.setLicenseId(ossBean.getLicenseId());
+			licenseBean.setOssLicenseIdx(ossBean.getOssLicenseIdx());
+			licenseBean.setLicenseName(ossBean.getLicenseName());
+			licenseBean.setOssLicenseComb(ossBean.getOssLicenseComb());
+			licenseBean.setOssLicenseText(CommonFunction.lineReplaceToBR(ossBean.getOssLicenseText()));
+			licenseBean.setOssCopyright(CommonFunction.lineReplaceToBR(ossBean.getOssCopyright()));
+			
+			currentBean.addOssLicense(licenseBean);
+
+			if(remakeMap.containsKey(ossBean.getOssId())) {
+				remakeMap.replace(ossBean.getOssId(), currentBean);
+			} else {
+				remakeMap.put(ossBean.getOssId(), currentBean);
+			}
+		}
+		
+		for(OssMaster ossBean : remakeMap.values()) {
+			ossBean.setLicenseName(CommonFunction.makeLicenseExpression(ossBean.getOssLicenses()));
+			newList.add(ossBean);
+		}
+		
+		return newList;
+	}
+
+	@Override
+	public List<String> getOssListSyncCheck(List<OssMaster> selectOssList, List<OssMaster> standardOssList) {
+		OssMaster standardOss = standardOssList.get(0);
+		OssMaster selectOss = selectOssList.get(0);
+		
+		List<String> checkList = new ArrayList<String>();
+		
+		if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) checkList.add("Declared License");
+		if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
+		if (!standardOss.getCopyright().equals(selectOss.getCopyright())) checkList.add("Copyright");
+		if (!standardOss.getDownloadLocation().equals(selectOss.getDownloadLocation())) checkList.add("Download Location");
+		if (!standardOss.getHomepage().equals(selectOss.getHomepage())) checkList.add("Home Page");
+		if (!standardOss.getSummaryDescription().equals(selectOss.getSummaryDescription())) checkList.add("Summary Description");
+		if (!standardOss.getAttribution().equals(selectOss.getAttribution())) checkList.add("Attribution");
+		
+		return checkList;
+	}
+
+	@Override
+	public void updateOssSync(OssMaster param) {
+		String ossId = param.getOssId();
+		String[] ossIds = param.getOssIds();
+		String comment = param.getComment();
+		
+		OssMaster ossMaster = getOssMasterOne(param); // Standard Oss Info
+		try {
+			for (int i=0; i<ossIds.length; i++) {
+				ossMaster.setOssId(ossIds[i]);
+				ossMapper.updateOssSync(ossMaster); // Oss Sync Update
+				ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete
+			}
+			
+			ossMaster.setOssId(ossId); // Set Standard OssId
+			
+			List<OssLicense> ossLicenses = ossMapper.selectOssLicenseList(ossMaster); // Standard Declared License
+			List<OssMaster> ossDetectedLicense = ossMapper.selectOssDetectedLicenseIdList(ossMaster); // Standard Detected License
+			
+			// Declared License Insert
+			for (int j=0; j<ossIds.length; j++) {
+				int ossLicenseDeclaredIdx = 0;
+				
+				for (OssLicense license : ossLicenses) {
+					ossLicenseDeclaredIdx++;
+					
+					OssMaster om = new OssMaster(
+						  Integer.toString(ossLicenseDeclaredIdx)
+						, ossIds[j]
+						, license.getLicenseName()
+						, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb() // No Comb input when ossLicenseIdx is 1
+						, license.getOssLicenseText()
+						, license.getOssCopyright()
+						, ossMaster.getLicenseDiv()
+					);
+					
+					ossMapper.insertOssLicenseDeclared(om);
+				}
+			}
+			
+			// Detected License Insert
+			for (int j=0; j<ossIds.length; j++) {
+				int ossLicenseDetectedIdx = 0;
+				
+				for(OssMaster detectedLicense : ossDetectedLicense) {
+					
+					OssMaster om = new OssMaster(
+							  ossIds[j]
+							, detectedLicense.getLicenseId()
+							, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
+					);
+					
+					ossMapper.insertOssLicenseDetected(om);
+				}
+			}
+			
+			// Sync Comment Regist
+			if(!isEmpty(avoidNull(comment))) {
+				for (int k=0; k < ossIds.length; k++) {
+					CommentsHistory chParam = new CommentsHistory();
+					chParam.setReferenceId(ossIds[k]);
+					chParam.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+					chParam.setContents(comment);
+					
+					commentService.registComment(chParam);
+				}
+			}
+		}catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
 }
