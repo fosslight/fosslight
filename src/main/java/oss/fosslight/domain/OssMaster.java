@@ -269,6 +269,9 @@ public class OssMaster extends ComBean implements Serializable{
 	private String referenceDiv;
 	
 	private String deactivateFlag;
+	
+	private String[] ossIds;
+	private String syncRefOssId;
 
 	/**
 	 * Instantiates a new oss master.
@@ -1843,5 +1846,21 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDeactivateFlag(String deactivateFlag) {
 		this.deactivateFlag = deactivateFlag;
+	}
+
+	public String[] getOssIds() {
+		return ossIds;
+	}
+
+	public void setOssIds(String[] ossIds) {
+		this.ossIds = ossIds;
+	}
+
+	public String getSyncRefOssId() {
+		return syncRefOssId;
+	}
+
+	public void setSyncRefOssId(String syncRefOssId) {
+		this.syncRefOssId = syncRefOssId;
 	}
 }
