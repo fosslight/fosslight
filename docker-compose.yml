@@ -34,5 +34,6 @@ services:
                --spring.datasource.url=db:3306/fosslight
                --spring.datasource.username=fosslight
                --spring.datasource.password=fosslight
-               --logging.path=/data/fosslight/logs"
+               --logging.path=/data/fosslight/logs
+               --verify.bin.path=./verify"
 
