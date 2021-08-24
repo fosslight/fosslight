@@ -105,12 +105,7 @@ public class CommentController extends CoTopComponent {
 	
 	@GetMapping(value=COMMENT.DIV_COMMENT_LIST)
 	public @ResponseBody ResponseEntity<Object> getDivCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
-		List<CommentsHistory> result = null;
-		
-		if (commentsHistory.getReferenceDiv().equals("OSS")) {
-			commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
-			result = commentService.getCommentList(commentsHistory);
-		}
+		List<CommentsHistory> result = commentService.getCommentList(commentsHistory);
 		
 		return makeJsonResponseHeader(result);
 	}
