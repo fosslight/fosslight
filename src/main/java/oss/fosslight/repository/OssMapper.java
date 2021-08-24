@@ -204,6 +204,4 @@ public interface OssMapper {
 	void setDeactivateFlag(OssMaster ossMaster);
 
 	void updateOssSync(OssMaster ossMaster);
-
-	List<OssMaster> selectOssDetectedLicenseIdList(OssMaster ossMaster);
 }

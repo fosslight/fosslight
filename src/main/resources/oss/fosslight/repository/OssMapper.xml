@@ -1896,12 +1896,4 @@
     	WHERE
     		OSS_ID = #{ossId}
     </update>
-    
-    <select id="selectOssDetectedLicenseIdList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT ODT.LICENSE_ID AS LICENSE_ID
-		  FROM OSS_LICENSE_DETECTED ODT
-		 INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
-		 WHERE ODT.OSS_ID = #{ossId} 
-		 ORDER BY ODT.OSS_LICENSE_IDX ASC
-	</select>
 </mapper>

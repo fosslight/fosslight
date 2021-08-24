@@ -3402,6 +3402,9 @@ public class ProjectController extends CoTopComponent {
 		
 		model.addAttribute("project", project);
 		model.addAttribute("copy", toJson(project));
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
 		return PROJECT.EDIT_JSP;
 	}

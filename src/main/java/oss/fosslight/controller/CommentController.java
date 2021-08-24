@@ -5,6 +5,7 @@
 
 package oss.fosslight.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.COMMENT;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.PartnerMaster;
@@ -99,5 +101,17 @@ public class CommentController extends CoTopComponent {
 		Map<String, Object> map = commentService.getCommnetInfo(commId);
 		
 		return makeJsonResponseHeader(map);
+	}
+	
+	@GetMapping(value=COMMENT.DIV_COMMENT_LIST)
+	public @ResponseBody ResponseEntity<Object> getDivCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
+		List<CommentsHistory> result = null;
+		
+		if (commentsHistory.getReferenceDiv().equals("OSS")) {
+			commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+			result = commentService.getCommentList(commentsHistory);
+		}
+		
+		return makeJsonResponseHeader(result);
 	}
 }
