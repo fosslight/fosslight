@@ -102,6 +102,7 @@ public final class Url {
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
+		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
 	}
 	
 	public static final class PROCESSGUIDE {
@@ -193,7 +194,6 @@ public final class Url {
 		public static final String OSS_SYNC_DETAIL_VIEW_AJAX = PATH + "/ossSyncDetailViewAjax";
 		public static final String OSS_SYNC_DETAILS_VIEW_AJAX_JSP = TILES_AJAX_ROOT + PATH + "/ossSyncDetailview";
 		public static final String OSS_SYNC_UPDATE = PATH + "/ossSyncUpdate";
-		public static final String COMMENT_LIST = PATH + "/getCommentList";
 		public static final String OSS_SYNC_LIST_VALIDATION = PATH + "/ossSyncListValidation";
 	}
 	

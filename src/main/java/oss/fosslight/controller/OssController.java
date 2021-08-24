@@ -1685,22 +1685,4 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(false, "Fail");
 		}
 	}
-	
-	@GetMapping(value=OSS.COMMENT_LIST)
-	public @ResponseBody ResponseEntity<Object> getCommentList(
-			CommentsHistory commentsHistory
-			, HttpServletRequest req
-			, HttpServletResponse res
-			, Model model){
-		commentsHistory.setReferenceDiv("40");
-		List<CommentsHistory> result = null;
-		
-		try{
-			result = commentService.getCommentList(commentsHistory);	
-		}catch(Exception e){
-			log.error(e.getMessage(), e);
-		}
-		
-		return makeJsonResponseHeader(result);
-	}
 }
