@@ -405,7 +405,7 @@
 									<dd class="mt10">
 										<div class="basicCase">
 											<span class="right">
-												<c:if test="${project.verificationStatus ne 'CONF' and project.dropYn ne 'Y'}">
+												<c:if test="${project.verificationStatus ne 'CONF' and project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 													<input type="button" id="save" value="Save" class="btnColor red"/>
 												</c:if>
 											</span>
