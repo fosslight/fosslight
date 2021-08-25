@@ -29,7 +29,7 @@
 							<a href="javascript:void(0);" class="btnSet restart" onclick="fn.reviewStart()"><span>Review Start</span></a>
 							</c:if>
 								<c:if test="${detail.status eq 'PROG' }">
-							<a href="javascript:void(0);" class="btnSet review" onclick="fn.requestReview()"><span>Request Review</span></a>
+							<a href="javascript:void(0);" class="btnSet review" onclick="fn.requestReview()"><span>Request</span></a>
 							</c:if> 
 						</c:if>
 						<c:if test="${detail.loginUserRole ne 'ROLE_ADMIN'}">
@@ -37,7 +37,7 @@
 							<a href="javascript:void(0);" class="btnSet reject" onclick="fn.reject()"><span>Reject</span></a>
 							</c:if>
 							<c:if test="${detail.status eq 'PROG' }">
-							<a href="javascript:void(0);" class="btnSet review" onclick="fn.requestReview()"><span>Request Review</span></a>
+							<a href="javascript:void(0);" class="btnSet review" onclick="fn.requestReview()"><span>Request</span></a>
 							</c:if> 
 						</c:if>
 						</div>
