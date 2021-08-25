@@ -136,7 +136,7 @@ public class OssController extends CoTopComponent{
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
-		
+
 		if(sidx != null) {
 			sidx  = sidx.split("[,]")[1].trim();
 		}
@@ -145,7 +145,30 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setCurPage(page);
 		ossMaster.setPageListSize(rows);
-		
+
+		String homepage =req.getParameter("homepage");
+		String[] urls;
+		// download location check
+		if(homepage.startsWith("https://")){
+			ossMaster.setHomepage(homepage);
+		}else{
+			if(homepage.equals("http://")|| homepage.equals("www") || homepage.equals("")){
+				ossMaster.setHomepage("https://");
+			}else{
+				if(homepage.startsWith("http://")){
+					urls= homepage.split("://");
+					ossMaster.setHomepage("https://"+urls[1]);
+				}
+				else if(homepage.startsWith("www.")){
+					urls= homepage.split("www.");
+					ossMaster.setHomepage("https://"+urls[1]);
+				}
+				else{
+					ossMaster.setHomepage("https://"+homepage);
+				}
+			}
+		}
+
 		if("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, ossMaster);
