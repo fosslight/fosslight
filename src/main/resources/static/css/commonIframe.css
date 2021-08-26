@@ -232,7 +232,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnSet span {display:block;padding:0 0 0 18px;font-family:Tahoma;background: url("../images/bg_btn.png") no-repeat left -2px;}
 .btnSet.excel span {background-position:left -2px;}
 .btnSet.confirm span {background-position:left -32px;}
-.btnSet.review span {background-position:left -62px;}
+.btnSet.review span {background-position:left -62px;background-size:0 0px;padding:0 0 0 4px;}
 .btnSet.reject span {background-position:left -150px;}
 .btnSet.restart span {background-position:left -242px;}
 /**/
