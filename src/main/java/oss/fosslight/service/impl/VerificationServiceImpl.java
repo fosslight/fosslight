@@ -1662,7 +1662,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 					 // multi license 추가 copyright
 					 if(!isEmpty(bean.getOssCopyright())) {
-						 String addCopyright = ossComponent.getCopyrightText();
+						 String addCopyright = avoidNull(ossComponent.getCopyrightText());
 						
 						 if(!isEmpty(ossComponent.getCopyrightText())) {
 							 addCopyright += "\r\n";
