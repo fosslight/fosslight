@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.3 (27/08/2021)
+## Changes
+## 🚀 Features
+
+- Add a new function to synchronize from OSS information @FOSSLight-dev (#93)
+
+## 🐛 Hotfixes
+
+- Add a new function to synchronize from OSS information @FOSSLight-dev (#93)
+
+## 🔧 Maintenance
+
+- Modify 'Request Review' button(Delete icon and rename to 'Request') @ubermen5che (#91)
+- Fix header column names of Vulnerability Log table @kimtaehyun98 (#87)
+- Fix typo 'SourceCode' in Self-Check @hyewoncc (#83)
+- Add label:improvement to also appear as child of Feature in release draft @riyenas0925 (#81)
+- Modify github action to deploy 30 seconds after release @soimkim (#76)
+
+---
+
 ## v1.2.2 (20/08/2021)
 ## Changes
 ## 🚀 Features
