@@ -374,7 +374,7 @@ var binAndroid_fn = {
 		var loadFromAndroidProjectFlag = "N";
 		
 		if(androidNoticeFileId == ""){
-			alertify.alert('NOTICE.html을 업로드 해주세요!');
+			alertify.alert('NOTICE.html을 업로드 해주세요!', function(){});
 			
 			return;
 		}
@@ -814,7 +814,7 @@ var binAndroid_fn = {
 
 				if("false" == data.isValid) {
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
 					}
@@ -823,7 +823,7 @@ var binAndroid_fn = {
 					binAndroid_fn.makeOssList(data.resultData);
 					
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					}
 				}
 			},
@@ -848,7 +848,7 @@ var binAndroid_fn = {
 				
 				if("false" == data.isValid) {
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else {
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
 					}
@@ -873,12 +873,12 @@ var binAndroid_fn = {
 					if(data.validMsg) {
 						alertify.alert(data.validMsg, function(){
 							if(data.resultData.changehisLicenseName && data.resultData.changehisLicenseName != "") {
-								alertify.alert(data.resultData.changehisLicenseName);
+								alertify.alert(data.resultData.changehisLicenseName, function(){});
 							}
 						});
 					} else {
 						if(data.resultData.changehisLicenseName && data.resultData.changehisLicenseName != "") {
-							alertify.alert(data.resultData.changehisLicenseName);
+							alertify.alert(data.resultData.changehisLicenseName, function(){});
 						}
 					}
 				}
@@ -910,13 +910,13 @@ var binAndroid_fn = {
 		var srcAndroidResultFileId 	= $('#srcAndroidResultFileId').val();
 
 		if(srcAndroidCsvFileId == "") {
-			alertify.alert('<spring:message code="msg.project.android.bulidimagefile.required" />');
+			alertify.alert('<spring:message code="msg.project.android.bulidimagefile.required" />', function(){});
 
 			return false;
 		}
 		
 		if(srcAndroidNoticeFileId == "") {
-			alertify.alert('<spring:message code="msg.project.android.noticefile.required" />');
+			alertify.alert('<spring:message code="msg.project.android.noticefile.required" />', function(){});
 
 			return false;
 		}
@@ -1116,7 +1116,7 @@ var binAndroid_fn = {
     	var ValidCnt = Object.keys(binAndroidValidMsgData).reduce(binAndroid_fn.checkErrorData, []).length;
 
 		if(ValidCnt > 0){
-			alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.");
+			alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.", function(){});
 
 			return false;	
 		}
@@ -1124,7 +1124,7 @@ var binAndroid_fn = {
     	var DiffCnt = Object.keys(binAndroidDiffMsgData).reduce(binAndroid_fn.checkErrorData, []).length;
 
         if(DiffCnt > 0){
-        	alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.");
+        	alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.", function(){});
 
 			return false;
         }
@@ -1132,7 +1132,7 @@ var binAndroid_fn = {
         var notExcludeRow = $("#binAndroidList").getRowData().filter(function(a){ return a.excludeYn == "N"; }).length;
 
         if(notExcludeRow == 0){ // excludeYn이 N인 대상이 0 건일 경우(전체 Data가 excludeYn:Y 이거나 binAndroid의 Data가 0건 인 경우)
-        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.");
+        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.", function(){});
 
 			return false;
         }
@@ -1146,7 +1146,7 @@ var binAndroid_fn = {
         }, []).length;
 
         if(noticeCheckRow == 0){ //  "NOTICE Should be "ok" in case OSS is used" 인 대상이 0건 일 경우
-        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.");
+        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.", function(){});
 
 			return false;
         }
@@ -1178,7 +1178,7 @@ var binAndroid_fn = {
 					$(".ajs-close").trigger("click"); // dialog popup close
 					$(".ajs-dialog").css("height", ""); // height rollback
 
-					alertify.alert(data.validMsg);
+					alertify.alert(data.validMsg, function(){});
 				} else {
 					$(".ajs-close").trigger("click"); // dialog popup close
 

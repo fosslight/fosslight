@@ -597,11 +597,11 @@
 					break;
 				case 0:
 					isValid = false;
-					alertify.alert("Select the Project.");
+					alertify.alert("Select the Project.", function(){});
 					break;
 				default: // 2개 이상
 					isValid = false;
-					alertify.alert("Choose only one project.");
+					alertify.alert("Choose only one project.", function(){});
 					break;
 			}
 
@@ -623,7 +623,7 @@
 						var distributionStatus = data.distributionStatus;
 						
 						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size");
+							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size", function(){});
 							return false;
 						}
 						
@@ -717,7 +717,7 @@
 			}
 
 			if(commentFlag && reason.split(" ").join("") == "") {
-				alertify.alert("Please leave a comment.");
+				alertify.alert("Please leave a comment.", function(){});
 				$("#reason").next(".retxt").show();
 				return false;
 			}
@@ -924,7 +924,7 @@
 		
 				createTabInFrame(tabNm, tabLk);
 			}else {
-				alertify.alert('Choose two projects.');
+				alertify.alert('Choose two projects.', function(){});
 				return false;
 			}
 		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
@@ -1056,7 +1056,7 @@
 						var diffNum = +startDate - +endDate;
 						
 						if(diffNum > 0 && endDate > 0){
-							alertify.alert('<spring:message code="msg.common.search.check.date" />');
+							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
 					

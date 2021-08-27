@@ -339,7 +339,7 @@ var bin_fn = {
 						alertify.success('<spring:message code="msg.common.success" />');
 						
 						if(data.changeBySystemNotice && data.changeBySystemNotice && data.changeBySystemNotice != "") {
-							alertify.alert(data.changeBySystemNotice);
+							alertify.alert(data.changeBySystemNotice, function(){});
 						}
 					} else {
 						alertify.error('<spring:message code="msg.common.valid2" />');
@@ -565,7 +565,7 @@ var bin_fn = {
 				  , duplicateFlag = addListData.filter(function(a){ return a.referenceId == listData.prjId }).length > 0;
 				
 				if(duplicateFlag){
-			    	alertify.alert('<spring:message code="msg.id.duplicate" />');
+			    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){});
 
 			    	return;
 			    }
@@ -701,7 +701,7 @@ var bin_fn = {
 
 				if("false" == data.isValid) {
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
 					}
@@ -724,9 +724,9 @@ var bin_fn = {
 					bin_fn.makeOssList(data.resultData);
 					
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr);
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
 					}
 				}
 			},

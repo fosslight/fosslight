@@ -318,7 +318,7 @@
 											_popupAnalysisDetailData = window.open("/oss/getAnalysisResultDetail/"+groupId, "OSS Auto Analysis Result Detail", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 											if(!_popupAnalysisDetailData || _popupAnalysisDetailData.closed || typeof _popupAnalysisDetailData.closed=='undefined') {
-												alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+												alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 											}
 										} else {
 											alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -508,7 +508,7 @@
 					}
 
 					if(!hasChecked) {
-						alertify.alert('Please select OSS to register');
+						alertify.alert('Please select OSS to register', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				}, 0);
@@ -670,7 +670,7 @@
 					}
 					
 					if(!hasChecked) {
-						alertify.alert('Please select OSS to register');
+						alertify.alert('Please select OSS to register', function(){});
 
 						$('#loading_wrap_popup').hide();
 					}

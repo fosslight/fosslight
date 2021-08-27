@@ -146,7 +146,7 @@ var bom_fn = {
 		 		}
 		 		
 				if(checkObligationFlag) {
-					alertify.alert('<spring:message code="msg.info.include.needcheck.license.guide" />');
+					alertify.alert('<spring:message code="msg.info.include.needcheck.license.guide" />', function(){});
 				}
 				
 				// identification 상태가 초기 값인 경우, bom save시 progress 상태로 변경하기 때문에,
@@ -395,7 +395,7 @@ var bom_fn = {
 	},
 	analysisValidation : function(){
 		if("Y"!= $("#mergeYn").val()){
-			alertify.alert('<spring:message code="msg.project.required.merge" />');
+			alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 
 			return false;
 		}
@@ -406,7 +406,7 @@ var bom_fn = {
 			case "PROGRESS":
 				if(analysisStartDate != "") {
 					alertMsg = "This analysis has been started at " + analysisStartDate + "<br>It has not been completed yet";
-					alertify.alert(alertMsg);
+					alertify.alert(alertMsg, function(){});
 				} else {
 					bom_fn.showOssAutoAnalysis(ossAnalysisStatus);
 				}
@@ -486,7 +486,7 @@ var bom_fn = {
 			_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
-				alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 			}
 		}
 
@@ -529,7 +529,7 @@ var bom_fn = {
 					_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 					if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
-						alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+						alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 					}
 				},
 				error : function(){
@@ -542,7 +542,7 @@ var bom_fn = {
 		_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}&ossAnalysisStatus=result", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 		if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
 	}
 }

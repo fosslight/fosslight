@@ -202,7 +202,7 @@
 			// 삭제
 			$("#delete").click(function(){
 				if(data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
-					alertify.alert("If you want to delete, please  reject  identification first.");
+					alertify.alert("If you want to delete, please  reject  identification first.", function(){});
 
 					return;
 				} else {
@@ -214,7 +214,7 @@
 					
 					alertify.confirm(innerHtml, function () {
 						if(CKEDITOR.instances['editor3'].getData() == ""){
-							alertify.alert('<spring:message code="msg.project.required.comments" />');
+							alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
 							return false;
 						}else{
@@ -777,7 +777,7 @@
 			<c:if test="${ct:isAdmin() and not empty project.prjId and 'Y' ne project.copyFlag}">
 				var creator = $("input[name=creator]").val();
 				if(creator == ""){
-					alertify.alert("Creator의 autoComplete을 해 주시기 바랍니다.");
+					alertify.alert("Creator의 autoComplete을 해 주시기 바랍니다.", function(){});
 					
 					return false;
 				}
@@ -998,7 +998,7 @@
 				var editorVal = CKEDITOR.instances.editor2.getData();
 				
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment");
+					alertify.alert("Please enter a comment", function(){});
 					
 					return false;
 				}
@@ -1056,7 +1056,7 @@
 			editorDialog : function(){
 				var editorVal = CKEDITOR.instances.editor2.getData();
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment");
+					alertify.alert("Please enter a comment", function(){});
 					
 					return false;
 				}
@@ -1205,7 +1205,7 @@
 									<c:if test="${ct:isAdmin()}">
 									if (closeEvent.index == 2) {
 										if(CKEDITOR.instances['editor4'].getData() == "") {
-											alertify.alert('<spring:message code="msg.project.required.comments.reject.ignore" />');
+											alertify.alert('<spring:message code="msg.project.required.comments.reject.ignore" />', function(){});
 
 											closeEvent.cancel = true;
 										} else {
@@ -1232,18 +1232,18 @@
 						
 						if(commentsMode=="insert" || commentsMode=="update") {
 							if(CKEDITOR.instances['editor3'].getData() == ""){
-									alertify.alert('<spring:message code="msg.project.required.comments.reject" />');
+									alertify.alert('<spring:message code="msg.project.required.comments.reject" />', function(){});
 									return false;
 							}
 							
 							if(referenceDiv==undefined) {
-								alertify.alert('<spring:message code="msg.project.required.rejectDiv" />');
+								alertify.alert('<spring:message code="msg.project.required.rejectDiv" />', function(){});
 								return false;
 							}
 						} else if(commentsMode=="reject") {
 							if(referenceDiv==undefined){
 								if(deleteOsdd==undefined){
-									alertify.alert('<spring:message code="msg.project.required.rejectDiv" />');
+									alertify.alert('<spring:message code="msg.project.required.rejectDiv" />', function(){});
 
 									return false;
 								}
@@ -1251,7 +1251,7 @@
 								var hasDistribution = '${not empty project.distributeOsdKey}';
 								if(hasDistribution == "true") {
 									if(deleteOsdd==undefined){
-										alertify.alert('<spring:message code="msg.project.required.rejectDiv" />');
+										alertify.alert('<spring:message code="msg.project.required.rejectDiv" />', function(){});
 
 										return false;
 									}
@@ -1259,7 +1259,7 @@
 							}
 
 							if(CKEDITOR.instances['editor4'].getData() == ""){
-								alertify.alert('Please enter a reason for reject ok.');
+								alertify.alert('Please enter a reason for reject ok.', function(){});
 
 								return false;
 							}
@@ -1448,7 +1448,7 @@
 			},
 			CheckChar : function(){
 				if(event.keyCode == 64){//@ 특수문자 체크
-            		alertify.alert("\'@\' Special characters are not allowed!");
+            		alertify.alert("\'@\' Special characters are not allowed!", function(){});
             		
             		event.returnValue = false;
             	}

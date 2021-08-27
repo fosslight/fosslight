@@ -149,7 +149,7 @@
 						$(".ajs-close").trigger("click"); // dialog popup close
 						$(".ajs-dialog").css("height", ""); // height rollback
 						
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					}else {
 						$(".ajs-close").trigger("click"); // dialog popup close
 						$("#list").jqGrid().trigger('reloadGrid');
@@ -199,7 +199,7 @@
 			        success: function(json){
 			        	loading.hide();
 						if(json.resCd == '10'){
-							alertify.alert('Change the password to be the same as ID.'); 
+							alertify.alert('Change the password to be the same as ID.', function(){}); 
 						}else{
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}

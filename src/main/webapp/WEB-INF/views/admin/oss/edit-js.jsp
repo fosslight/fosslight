@@ -246,7 +246,7 @@
 
 					switch (licenseChoiceLength) {
 						case 0:
-							alertify.alert("No licenses entered.");
+							alertify.alert("No licenses entered.", function(){});
 							return false;
 							break;
 						case 1:
@@ -294,13 +294,13 @@
 					if(editorVal == "") {
 						if(deactivateFlag == "N" 
 							&& localDeactivateFlag == "Y"){ // deactivate Flag checked
-							alertify.alert("Please enter reason for deactivate");
+							alertify.alert("Please enter reason for deactivate", function(){});
 							return false;
 						}
 
 						if(deactivateFlag == "Y" 
 							&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
-							alertify.alert("Please enter reason for activate");
+							alertify.alert("Please enter reason for activate", function(){});
 							return false;
 						}
 					}
@@ -328,12 +328,12 @@
 			$('#delete').on('click', function(){
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(editorVal == "") {
-					alertify.alert("Please enter reason for deletion");
+					alertify.alert("Please enter reason for deletion", function(){});
 					return false;
 				}
 
 				if(deactivateFlag == "Y"){
-					alertify.alert("Deactivated OSS couldn't be deleted.");
+					alertify.alert("Deactivated OSS couldn't be deleted.", function(){});
 					return false;
 				}
 				
@@ -372,7 +372,7 @@
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
 	 				var newOssId = rowData.ossId;
 	 				if(newOssId == '${ossId}'){
-	 					alertify.alert("Can not choose myself!!");
+	 					alertify.alert("Can not choose myself!!", function(){});
 	 					return;
 	 				}
 	 				
@@ -956,7 +956,7 @@
 				onSelectRow: function(id){
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
 	 				if(rowData.ossId == '${ossId}'){
-	 					alertify.alert("Can not choose myself.");
+	 					alertify.alert("Can not choose myself.", function(){});
 					}
 				}
 			});			
@@ -1359,7 +1359,7 @@
 
 		switch (licenseChoiceLength) {
 			case 0:
-				alertify.alert("No licenses entered.");
+				alertify.alert("No licenses entered.", function(){});
 				return false;
 				break;
 			case 1:
@@ -1406,7 +1406,7 @@
 		});
 
 		if(!nicknameFormatErrorFlag){
-			alertify.alert("Formatting error");
+			alertify.alert("Formatting error", function(){});
 			
 			return false;
 		}
@@ -1587,11 +1587,11 @@
 					_alertMsg += '</span>';
 				}
 				
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 			} else if(json.resultData) {
 				var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
 					_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 
 				for(var k in json.resultData) {
 					$(data.clone).appendTo('.multiTxtSet');
@@ -1657,9 +1657,9 @@
 					}
 					_alertMsg += '</span>';
 				}
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 			} else if(json.resultData) {
-				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>');
+				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
 				for(var k in json.resultData) {
 					$(data.clone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
@@ -1838,7 +1838,7 @@ function showLicenseText(_licenseName) {
 
 		switch (licenseChoiceLength) {
 			case 0:
-				alertify.alert("No licenses entered.");
+				alertify.alert("No licenses entered.", function(){});
 				return false;
 				break;
 			case 1:
@@ -2142,7 +2142,7 @@ var fn = {
 		});
 		
 		if(result.length > 0){
-			alertify.alert("License must be filled in using autocomplete..");
+			alertify.alert("License must be filled in using autocomplete..", function(){});
 			return false;
 		}
 		return true;

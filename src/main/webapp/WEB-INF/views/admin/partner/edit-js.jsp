@@ -891,7 +891,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			
 			alertify.confirm(innerHtml, function () {
 				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />');
+					alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
 					return false;
 				} else {
@@ -1017,7 +1017,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			
 			alertify.confirm(innerHtml, function () {
 				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />');
+					alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
 					return false;
 				} else {
@@ -1159,7 +1159,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				success: function(data){
 					if("false" == data.isValid) {
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						} else {
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
@@ -1181,9 +1181,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 						fn.makeOssList(data.resultData);
 						
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-							alertify.alert(data.resultData.systemChangeHisStr);
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
 						}
 					}
 				},
@@ -1581,7 +1581,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		CheckChar : function(){
 			if(event.keyCode == 64){//@ 특수문자 체크
-        		alertify.alert("\'@\' Special characters are not allowed!");
+        		alertify.alert("\'@\' Special characters are not allowed!", function(){});
         		event.returnValue = false;
         	}
 		}

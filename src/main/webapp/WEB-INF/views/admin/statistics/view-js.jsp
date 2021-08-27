@@ -53,7 +53,7 @@ var common_fn = {
 				_popup = window.open(url, "statisticsPopup_"+id, "width=900, height=700, toolbar=no, location=no, left=100, top=100, resizable=no");
 
 				if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 				}
 			}else{
 				_popup.close();
@@ -97,17 +97,17 @@ var common_fn = {
 			case "DIV":
 				var divisionType = $("#divisionalProjectChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert("날짜값을 입력하세요.");
+					alertify.alert("날짜값을 입력하세요.", function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert("날짜 범위 오류");
+					alertify.alert("날짜 범위 오류", function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert("관리자에게 문의하세요.");
+					alertify.alert("관리자에게 문의하세요.", function(){});
 					return false;
 				}
 				
@@ -115,17 +115,17 @@ var common_fn = {
 			case "TRD":
 				var divisionType = $("#trdPartyRelatedChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert("날짜값을 입력하세요.");
+					alertify.alert("날짜값을 입력하세요.", function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert("날짜 범위 오류");
+					alertify.alert("날짜 범위 오류", function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert("관리자에게 문의하세요.");
+					alertify.alert("관리자에게 문의하세요.", function(){});
 					return false;
 				}
 				break;
@@ -133,7 +133,7 @@ var common_fn = {
 				var diffNum = +startDate - +endDate;
 				
 				if(diffNum > 0 && endDate > 0){
-					alertify.alert('<spring:message code="msg.common.search.check.date" />');
+					alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 
 					return false;
 				}

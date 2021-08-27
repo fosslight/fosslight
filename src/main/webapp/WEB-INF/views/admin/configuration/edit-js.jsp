@@ -25,7 +25,7 @@
 			$("#save").on('click',function(){
 				//var radioVal = $('input[name="defaultTab"]:checked').val();
 				if($('input:checkbox[name="defaultTab"]:checked').length == 0){
-					alertify.alert('<spring:message code="msg.configuration.required.selectDefaultTab" />'); 
+					alertify.alert('<spring:message code="msg.configuration.required.selectDefaultTab" />', function(){}); 
 					return false;
 				}
 				

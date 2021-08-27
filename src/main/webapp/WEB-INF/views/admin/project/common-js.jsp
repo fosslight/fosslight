@@ -47,7 +47,7 @@ var com_evt = {
 			} else {		 		
 				// 머지 체크
 				if("Y"!= $("#mergeYn").val()){
-					alertify.alert('<spring:message code="msg.project.required.merge" />');
+					alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 					com_fn.fnTabChange($(".tabMenu a:eq(4)"));	
 
 					return false;
@@ -55,7 +55,7 @@ var com_evt = {
 				
 				if(Bom_Save_Flg){
 					if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-						alertify.alert('<spring:message code="msg.project.required.merge" />');
+						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 
 						return false;
 					}
@@ -73,7 +73,7 @@ var com_evt = {
 
  					com_fn.checkSave(data, "CONF");	
 				} else {
-					alertify.alert('<spring:message code="msg.project.check.save" />');
+					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 				}				
 			}
 		});
@@ -101,7 +101,7 @@ var com_evt = {
 			
 			alertify.confirm(innerHtml, function () {
 				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />');
+					alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
 					return false;
 				} else {
@@ -162,7 +162,7 @@ var com_evt = {
 				});
 				
 			} else {
-				alertify.alert('<spring:message code="msg.project.check.save" />');
+				alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 			}
 		});
 		
@@ -172,7 +172,7 @@ var com_evt = {
 			
 			// 머지 체크
 			if("N"== $("#mergeYn").val()){
-				alertify.alert('<spring:message code="msg.project.required.merge2" />');
+				alertify.alert('<spring:message code="msg.project.required.merge2" />', function(){});
 
 				return false;
 			}
@@ -182,7 +182,7 @@ var com_evt = {
 
 				com_fn.checkSave(data, "REV");
 			} else {
-				alertify.alert('<spring:message code="msg.project.check.save" />');
+				alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 			}
 		});
 
@@ -547,7 +547,7 @@ var com_fn = {
 		var editorVal = CKEDITOR.instances.editor.getData(); //코멘트 저장
 
 		if(!editorVal || editorVal == "") {
-			alertify.alert("Please enter a comment");
+			alertify.alert("Please enter a comment", function(){});
 
 			return false;
 		}
@@ -600,7 +600,7 @@ var com_fn = {
 		var editorVal = CKEDITOR.instances.editor.getData();
 		
 		if(!editorVal || editorVal == "") {
-			alertify.alert("Please enter a comment");
+			alertify.alert("Please enter a comment", function(){});
 
 			return false;
 		}
@@ -783,7 +783,7 @@ var com_fn = {
 					loading.hide();
 					
 					if("false" == json.isValid) {
-						alertify.alert(json.validMsg == "" ? '<spring:message code="msg.project.required.merge2" />' : json.validMsg);
+						alertify.alert(json.validMsg == "" ? '<spring:message code="msg.project.required.merge2" />' : json.validMsg, function(){});
 
 						if(srcValidMsgData) {
 							gridValidMsgNew(srcValidMsgData, "srcList");
@@ -817,7 +817,7 @@ var com_fn = {
 
 						if(seqSuffix.length  > 1) {
 							rtnFlag = false;
-							alertify.alert(com_fn.setMessage("There is an error in BIN(${project.noticeTypeEtc})."));
+							alertify.alert(com_fn.setMessage("There is an error in BIN(${project.noticeTypeEtc})."), function(){});
 							return false;
 						}
 					}
@@ -853,7 +853,7 @@ var com_fn = {
 									$(".ajs-cancel").trigger("click");
 									
 									window.setTimeout(function(){
-										alertify.alert(com_fn.setMessage("There is an error in src."));
+										alertify.alert(com_fn.setMessage("There is an error in src."), function(){});
 										com_fn.fnTabChange($(".tabMenu a:eq(1)"));	
 									}, 100);
 									
@@ -883,7 +883,7 @@ var com_fn = {
 									$(".ajs-cancel").trigger("click");
 									
 									window.setTimeout(function(){
-										alertify.alert(com_fn.setMessage("There is an error in bin."));
+										alertify.alert(com_fn.setMessage("There is an error in bin."), function(){});
 										com_fn.fnTabChange($(".tabMenu a:eq(2)"));	
 									}, 100);
 									
@@ -1069,7 +1069,7 @@ var com_fn = {
 						com_fn.saveFlagObject["BIN"] = false;
 					</c:if>
 						
-						alertify.alert('<spring:message code="msg.common.success" />');
+						alertify.alert('<spring:message code="msg.common.success" />', function(){});
 					}
 				}
 			},
@@ -1107,7 +1107,7 @@ var com_fn = {
 		var referenceDiv;
 				
 		if(!saveFlag){
-			alertify.alert('<spring:message code="msg.project.required.checkOssName" />');
+			alertify.alert('<spring:message code="msg.project.required.checkOssName" />', function(){});
 			
 			return false;
 		}
@@ -1125,7 +1125,7 @@ var com_fn = {
 		_popupCheckOssName = window.open("/oss/checkOssName?prjId=${project.prjId}&referenceDiv="+referenceDiv+"-${initDiv}&targetName=identification", "Check OSS Name", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 		if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
 	}
 }

@@ -107,7 +107,7 @@
 				var editorVal = CKEDITOR.instances.editor.getData();
 				
 				if(editorVal == "") {
-					alertify.alert("Please enter reason for deletion");
+					alertify.alert("Please enter reason for deletion", function(){});
 					return false;
 				}
 				
@@ -227,7 +227,7 @@
 		var licenseId = $('input[name=licenseId]').val();
 		
 		if(json.isValid == 'false') {
-			alertify.alert(json.validMsg);
+			alertify.alert(json.validMsg, function(){});
 		} else {
 			alertify.alert('<spring:message code="msg.common.success" />',function(){
 				if(licenseId){

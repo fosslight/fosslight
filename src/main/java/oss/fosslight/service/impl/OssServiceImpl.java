@@ -2329,81 +2329,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (!standardOss.getDownloadLocation().equals(selectOss.getDownloadLocation())) checkList.add("Download Location");
 		if (!standardOss.getHomepage().equals(selectOss.getHomepage())) checkList.add("Home Page");
 		if (!standardOss.getSummaryDescription().equals(selectOss.getSummaryDescription())) checkList.add("Summary Description");
-		if (!standardOss.getAttribution().equals(selectOss.getAttribution())) checkList.add("Attribution");
+		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) checkList.add("Attribution");
 		
 		return checkList;
-	}
-
-	@Transactional
-	@Override
-	public void updateOssSync(OssMaster param) {
-		String[] ossIds = param.getOssIds();
-		String comment = param.getComment();
-		
-		OssMaster ossMaster = getOssMasterOne(param); // Standard Oss Info
-		
-		try {
-			List<OssLicense> ossDeclaredLicenseList = ossMaster.getOssLicenses(); // Standard Declared License
-			List<LicenseMaster> ossDetectedLicenseList = new ArrayList<LicenseMaster>(); // Standard Detected License
-			
-			if (!ossMaster.getDetectedLicenses().get(0).isEmpty()) {
-				for (String name : ossMaster.getDetectedLicenses()) {
-					ossDetectedLicenseList.add(CoCodeManager.LICENSE_INFO.get(name));
-				}
-			}
-			
-			for (int i=0; i<ossIds.length; i++) {
-				ossMaster.setOssId(ossIds[i]);
-				ossMapper.updateOssSync(ossMaster); // Oss Sync Update
-				ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete
-				
-				// Declared License Insert
-				if (ossDeclaredLicenseList.size() > 0) {
-					int ossLicenseDeclaredIdx = 0;
-					for (OssLicense license : ossDeclaredLicenseList) {
-						ossLicenseDeclaredIdx++;
-						
-						OssMaster om = new OssMaster(
-							  Integer.toString(ossLicenseDeclaredIdx)
-							, ossIds[i]
-							, license.getLicenseName()
-							, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb() // No Comb input when ossLicenseIdx is 1
-							, license.getOssLicenseText()
-							, license.getOssCopyright()
-							, ossMaster.getLicenseDiv()
-						);
-						
-						ossMapper.insertOssLicenseDeclared(om);
-					}
-				}
-				
-				// Detected License Insert
-				if (ossDetectedLicenseList.size() > 0) {
-					int ossLicenseDetectedIdx = 0;
-					for(LicenseMaster lm : ossDetectedLicenseList) {
-						
-						OssMaster om = new OssMaster(
-								  ossIds[i]
-								, lm.getLicenseId()
-								, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
-						);
-						
-						ossMapper.insertOssLicenseDetected(om);
-					}
-				}
-				
-				// Sync Comment Regist
-				if(!isEmpty(avoidNull(comment))) {
-					CommentsHistory chParam = new CommentsHistory();
-					chParam.setReferenceId(ossIds[i]);
-					chParam.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
-					chParam.setContents(comment);
-					
-					commentService.registComment(chParam);
-				}
-			}
-		}catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
 	}
 }

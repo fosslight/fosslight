@@ -1625,22 +1625,26 @@ public class OssController extends CoTopComponent{
 			, @RequestParam(value="ossIds", required=true)String ossIds){
 		OssMaster bean = new OssMaster();
 		bean.setOssId(ossId);
-		
-		List<OssMaster> ossList = ossService.getOssListBySync(bean);
-		
-		String[] ossIdArr = ossIds.split(",");
-		List<String> chkOssIdList = new ArrayList<String>();
-		
-		for (int i=0; i<ossIdArr.length; i++) {
-			bean.setOssId(ossIdArr[i]);
-			List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
-			List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
-			if (checkList.size() == 0) {
-				chkOssIdList.add(ossIdArr[i]);
+		try {
+			List<OssMaster> ossList = ossService.getOssListBySync(bean);
+			
+			String[] ossIdArr = ossIds.split(",");
+			List<String> chkOssIdList = new ArrayList<String>();
+			
+			for (int i=0; i<ossIdArr.length; i++) {
+				bean.setOssId(ossIdArr[i]);
+				List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
+				List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
+				if (checkList.size() == 0) {
+					chkOssIdList.add(ossIdArr[i]);
+				}
 			}
+			
+			return makeJsonResponseHeader(true, "true", chkOssIdList);
+		} catch (Exception e){
+			e.printStackTrace(); 
 		}
-		
-		return makeJsonResponseHeader(true, "true", chkOssIdList);
+		return makeJsonResponseHeader(false);
 	}
 	
 	@GetMapping(value=OSS.OSS_SYNC_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
@@ -1670,19 +1674,81 @@ public class OssController extends CoTopComponent{
 	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
 			, @RequestParam(value="ossId", required=true)String ossId
 			, @RequestParam(value="comment", required=true)String comment
-			, @RequestParam(value="ossIds", required=true)String ossIds){
+			, @RequestParam(value="ossIds", required=true)String ossIds
+			, @RequestParam(value="syncItem", required=true)String syncItem){
 		OssMaster param = new OssMaster();
 		param.setOssId(ossId);
-		param.setOssIds(ossIds.split(","));
-		param.setComment(comment);
+		
+		String[] ossIdsArr = ossIds.split(",");
+		String[] syncItemArr = syncItem.split(",");
+		String result = "";
+		
+		OssMaster standardOss = ossService.getOssMasterOne(param);
 		
 		try {
-			// oss info sync
-			ossService.updateOssSync(param);
-			return makeJsonResponseHeader(true, "True");
+			for (int i=0; i<ossIdsArr.length; i++) {
+				param.setOssId(ossIdsArr[i]);
+				OssMaster beforeBean = ossService.getOssMasterOne(param);
+				OssMaster afterBean = beforeBean;
+				afterBean.setComment(comment);
+				
+				for (int j=0; j<syncItemArr.length; j++) {
+					switch(syncItemArr[j]) {
+						case "Declared License" :
+							afterBean.setOssLicenses(standardOss.getOssLicenses());
+							break;
+							
+						case "Detected License" :
+							afterBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+							break;
+							
+						case "Copyright" :
+							afterBean.setCopyright(standardOss.getCopyright());
+							break;
+							
+						case "Download Location" :
+							afterBean.setDownloadLocation(standardOss.getDownloadLocation());
+							break;
+						
+						case "Home Page" :
+							afterBean.setHomepage(standardOss.getHomepage());
+							break;
+						
+						case "Summary Description" :
+							afterBean.setSummaryDescription(standardOss.getSummaryDescription());
+							break;
+						
+						case "Attribution" :
+							afterBean.setAttribution(standardOss.getAttribution());
+							break;
+					}
+				}
+				
+				result = ossService.registOssMaster(afterBean);
+				
+				if (!result.equals("")) {
+					try {
+						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+						
+						CoMail mailBean = new CoMail(mailType);
+						mailBean.setParamOssId(ossIdsArr[i]);
+						mailBean.setComment(comment);
+						mailBean.setCompareDataBefore(beforeBean);
+						mailBean.setCompareDataAfter(afterBean);
+						
+						CoMailManager.getInstance().sendMail(mailBean);				
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}
+			
+			return makeJsonResponseHeader(true, "true");
 		} catch (Exception e) {
+			log.error("OSS Sync Failed.", e);
 			log.error(e.getMessage(), e);
-			return makeJsonResponseHeader(false, "Fail");
 		}
+		
+		return makeJsonResponseHeader(false, "false");
 	}
 }

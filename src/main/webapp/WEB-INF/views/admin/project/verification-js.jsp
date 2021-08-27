@@ -92,7 +92,7 @@
 		
 		if($(".warningPop").length > 0 && "CONF" != curIdenStatus 
 			&& (!$('input[name=fileSeq_1]') || $('input[name=fileSeq_1]').val() == "")){
-			alertify.alert($("body > div.pop.warningPop > div.popdata").html());
+			alertify.alert($("body > div.pop.warningPop > div.popdata").html(), function(){});
 		}
 		
 		if(userRole == "ROLE_USER"){
@@ -127,7 +127,7 @@
 		// 20210617_autoVerify Change Alert ADD
 		$("input:checkbox[name='autoVerify']").change(function(){
 			if($("input:checkbox[name='autoVerify']").is(":checked") == true){
-				alertify.alert('Verify when file is uploaded');
+				alertify.alert('Verify when file is uploaded', function(){});
 			}
 		});
 	});
@@ -635,7 +635,7 @@
 				alertify.confirm().destroy(); // fullCustomize 와 중첩되는 영역을 초기화
 				alertify.confirm(innerHtml, function () {
 					if(CKEDITOR.instances['editor3'].getData() == ""){
-						alertify.alert('<spring:message code="msg.project.required.comments" />');
+						alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 						
 						return false;
 					} else {
@@ -1509,7 +1509,7 @@
 			var editorVal = CKEDITOR.instances.editor.getData();
 			
 			if(!editorVal || editorVal == "") {
-				alertify.alert("Please enter a comment");
+				alertify.alert("Please enter a comment", function(){});
 				return false;
 			}
 			
@@ -1567,7 +1567,7 @@
 			var editorVal = CKEDITOR.instances.editor.getData();
 
 			if(!editorVal || editorVal == "") {
-				alertify.alert("Please enter a comment");
+				alertify.alert("Please enter a comment", function(){});
 				return false;
 			}
 			
@@ -2251,7 +2251,7 @@
 							
 							verified = true;
 						} else {
-							alertify.alert(json.resMsg);
+							alertify.alert(json.resMsg, function(){});
 							verified = false;
 						}
 						
@@ -2277,7 +2277,7 @@
 						$("#deleteFlag").val("N");
 						$("#verifyBtnSet").show();
 					} else {
-						alertify.alert(json.resMsg);
+						alertify.alert(json.resMsg, function(){});
 					}
 					
 				},
