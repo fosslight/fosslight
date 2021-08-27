@@ -102,6 +102,7 @@ public final class Url {
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
+		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
 	}
 	
 	public static final class PROCESSGUIDE {
@@ -187,6 +188,13 @@ public final class Url {
 		public static final String START_CHECK_LICENSE_TEXT = "/checkLicenseText/start";
 		
 		public static final String UPDATE_ANALYSIS_COMPLETE = PATH + "/updateAnalysisComplete";
+		
+		public static final String OSS_SYNC_POPUP = PATH + "/osssyncpopup";
+		public static final String OSS_SYNC_POPUP_JSP = TILES_ROOT + PATH + "/osssyncpopup";
+		public static final String OSS_SYNC_DETAIL_VIEW_AJAX = PATH + "/ossSyncDetailViewAjax";
+		public static final String OSS_SYNC_DETAILS_VIEW_AJAX_JSP = TILES_AJAX_ROOT + PATH + "/ossSyncDetailview";
+		public static final String OSS_SYNC_UPDATE = PATH + "/ossSyncUpdate";
+		public static final String OSS_SYNC_LIST_VALIDATION = PATH + "/ossSyncListValidation";
 	}
 	
 	public static final class PROJECT {

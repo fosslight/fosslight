@@ -51,7 +51,7 @@
 					<c:when test="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.distributeDeployYn ne 'Y'}">
 						<a class="btnSet confirm"><span id="bomConfirm">Confirm</span></a>
 						<a class="btnSet reject"><span id="bomReject">Reject</span></a>
-						<a class="btnSet review"><span id="bomRequest">Request Review</span></a> 
+						<a class="btnSet review"><span id="bomRequest">Request</span></a>
 						<a class="btnSet restart"><span id="bomReviewStart">Review Start</span></a>
 					</c:when>
 					<c:otherwise>

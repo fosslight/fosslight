@@ -1883,4 +1883,17 @@
 		   SET DEACTIVATE_FLAG = #{deactivateFlag}
 		 WHERE OSS_NAME = #{ossName}
 	</update>
+	
+	<update id="updateOssSync" parameterType="oss.fosslight.domain.OssMaster">
+    	UPDATE 
+    		OSS_MASTER
+    	SET
+    		COPYRIGHT = #{copyright}
+    		, DOWNLOAD_LOCATION = #{downloadLocation}
+    		, HOMEPAGE = #{homepage}
+    		, SUMMARY_DESCRIPTION = #{summaryDescription}
+    		, ATTRIBUTION = #{attribution}
+    	WHERE
+    		OSS_ID = #{ossId}
+    </update>
 </mapper>
