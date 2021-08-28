@@ -14,6 +14,10 @@
 		evt.init();
 		data.init();
 		initYn = false;
+
+        $(document).on('click', '#obligationType', function(){
+            $('#obligationType option[value="90"]').hide();
+        });
 		
 		showHelpLink("License_List_Main");
 	});
