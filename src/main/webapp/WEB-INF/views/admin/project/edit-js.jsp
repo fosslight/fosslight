@@ -164,7 +164,12 @@
 						}
 					});
 				} else {
-					fn.exeProjectDrop();
+					var comment = CKEDITOR.instances.editor2.getData();
+					if(comment == ""){
+						alertify.alert("Please leave a comment.");
+					} else {
+						fn.exeProjectDrop();
+					}
 				}
 			});
 			
