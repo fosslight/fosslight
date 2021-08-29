@@ -1162,16 +1162,14 @@
 					<c:if test="${ct:isAdmin()}">
 						innerHtml    += '	<div class="grid-width-100" style="width:560px;height:40px;">';
 						innerHtml    += 'Creator : ' + info.creatorDivisionName + ' > ' + info.creatorName + '(' + info.creator + ')<br/>';
-						innerHtml    += 'Creator Date : ' + info.createdDate;
+						innerHtml    += 'Created Date : ' + info.createdDate;
 						innerHtml    += '</div>';
 					</c:if>
 					innerHtml    += '	</div>';
 					<c:if test="${ct:isAdmin()}">
 						readOnly = true;
 						height = "150px";
-						innerHtml    += '	<div class="grid-width-100" style="width:560px; height:300px;margin-top:10px;">Are you sure you want to reject?';
 						innerHtml    += '		<div id="editor4" style="width:560px; height:150px;"></div>';
-						innerHtml    += '	</div>';
 					</c:if>
 					innerHtml    += '</div>';
 					if(!alertify.rejectConfirm){
