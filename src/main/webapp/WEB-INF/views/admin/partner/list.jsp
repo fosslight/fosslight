@@ -93,7 +93,7 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
 			</span>
 		</div>
@@ -105,7 +105,7 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
 			</span>
 		</div>
