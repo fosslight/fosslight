@@ -150,7 +150,7 @@ public class OssController extends CoTopComponent{
 		String[] urls = new String[2];
 		// download location 변환
 		if(!homepage.startsWith("https://")){
-			if(homepage.equals("http://")|| homepage.equals("www")){
+			if(homepage.equals("http://")|| homepage.equals("www") || homepage.equals("")){
 				ossMaster.setHomepage("https://");
 			}else{
 				if(homepage.startsWith("http://")){
