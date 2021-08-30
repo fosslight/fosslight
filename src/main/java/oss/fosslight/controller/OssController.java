@@ -1642,7 +1642,7 @@ public class OssController extends CoTopComponent{
 			
 			return makeJsonResponseHeader(true, "true", chkOssIdList);
 		} catch (Exception e){
-			e.printStackTrace(); 
+			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader(false);
 	}
