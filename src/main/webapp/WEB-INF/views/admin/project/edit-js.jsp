@@ -166,7 +166,7 @@
 				} else {
 					var comment = CKEDITOR.instances.editor2.getData();
 					if(comment == ""){
-						alertify.alert("Please leave a comment.");
+						alertify.alert("Please leave a comment.", function(){});
 					} else {
 						fn.exeProjectDrop();
 					}
