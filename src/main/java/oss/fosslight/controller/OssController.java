@@ -147,7 +147,7 @@ public class OssController extends CoTopComponent{
 		ossMaster.setPageListSize(rows);
 
 		String homepage =req.getParameter("homepage");
-		String[] urls = new String[2];
+		String[] urls;
 		// download location check
 		if(homepage.startsWith("https://")){
 			ossMaster.setHomepage(homepage);
@@ -164,7 +164,7 @@ public class OssController extends CoTopComponent{
 					ossMaster.setHomepage("https://"+urls[1]);
 				}
 				else{
-					ossMaster.setHomepage(homepage);
+					ossMaster.setHomepage("https://"+homepage);
 				}
 			}
 		}
