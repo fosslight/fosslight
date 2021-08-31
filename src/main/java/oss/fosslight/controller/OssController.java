@@ -148,18 +148,24 @@ public class OssController extends CoTopComponent{
 
 		String homepage =req.getParameter("homepage");
 		String[] urls = new String[2];
-		// download location 변환
-		if(!homepage.startsWith("https://")){
+		// download location check
+		if(homepage.startsWith("https://")){
+			ossMaster.setHomepage(homepage);
+		}else{
 			if(homepage.equals("http://")|| homepage.equals("www") || homepage.equals("")){
 				ossMaster.setHomepage("https://");
 			}else{
 				if(homepage.startsWith("http://")){
 					urls= homepage.split("://");
+					ossMaster.setHomepage("https://"+urls[1]);
 				}
-				if(homepage.startsWith("www.")){
+				else if(homepage.startsWith("www.")){
 					urls= homepage.split("www.");
+					ossMaster.setHomepage("https://"+urls[1]);
 				}
-				ossMaster.setHomepage("https://"+urls[1]);
+				else{
+					ossMaster.setHomepage(homepage);
+				}
 			}
 		}
 
