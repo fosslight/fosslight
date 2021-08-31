@@ -258,10 +258,11 @@ var fn_grid_com = {
 		displayLicenseRestriction : function(cellvalue, options, rowObject){
 			var display = "";
 
-			if(cellvalue != ""  && cellvalue != undefined) {
-				display="<span class=\"iconSt review\" title=\""+cellvalue+"\" >"+cellvalue+"</span>";
+			if(cellvalue != "" && cellvalue != undefined) {
+				display = "<div class=\"tcenter\"><a class=\"iconSt review\" title=\""+cellvalue+"\" " +
+					"onclick=\"src_fn_com.showLicenseRestrictionViewPage('"+ options.gid +"','"+options.rowId+"')\">"+cellvalue+"</a></div>";
 			}
-			
+
 			return display;
 		},
 		// comment 포메터
@@ -1125,5 +1126,28 @@ var fn_grid_com = {
 				}
 			});
 		}
+}
+
+var src_fn_com = {
+	// License 상세 페이지 이동
+	showLicenseRestrictionViewPage : function(gridNm, rowid){
+		var target = $("#"+gridNm);
+		target.jqGrid('saveRow',rowid);
+
+		var licenseName = target.jqGrid('getCell',rowid,'licenseName');
+		target.jqGrid('editRow',rowid);
+
+		if(_popup == null || _popup.closed) {
+			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+
+			if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+			}
+		} else {
+			_popup.close();
+			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+		}
+
+	},
 }
 </script>
