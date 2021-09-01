@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -1676,60 +1677,79 @@ public class OssController extends CoTopComponent{
 			, @RequestParam(value="comment", required=true)String comment
 			, @RequestParam(value="ossIds", required=true)String ossIds
 			, @RequestParam(value="syncItem", required=true)String syncItem){
-		OssMaster param = new OssMaster();
-		param.setOssId(ossId);
-		
 		String[] ossIdsArr = ossIds.split(",");
 		String[] syncItemArr = syncItem.split(",");
 		String result = "";
+		String action = CoConstDef.ACTION_CODE_UPDATE;
 		
-		OssMaster standardOss = ossService.getOssMasterOne(param);
+		OssMaster standardOss = ossService.getOssInfo(ossId, true);
 		
 		try {
 			for (int i=0; i<ossIdsArr.length; i++) {
-				param.setOssId(ossIdsArr[i]);
-				OssMaster beforeBean = ossService.getOssMasterOne(param);
-				OssMaster afterBean = beforeBean;
-				afterBean.setComment(comment);
+				OssMaster beforeBean = null;
+				OssMaster syncBean = null;
+				OssMaster afterBean = null;
+				List<OssMaster> beforeList = new ArrayList<OssMaster>();
+				List<OssMaster> syncList = new ArrayList<OssMaster>();
+				
+				CoCodeManager.getInstance().refreshOssInfo();
+				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
+				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				if (syncBean.getLicenseDiv().contains("Single")) {
+					syncBean.setLicenseDiv("S");
+				}else {
+					syncBean.setLicenseDiv("M");
+				}
+				syncBean.setComment(comment);
 				
 				for (int j=0; j<syncItemArr.length; j++) {
 					switch(syncItemArr[j]) {
 						case "Declared License" :
-							afterBean.setOssLicenses(standardOss.getOssLicenses());
+							syncBean.setOssLicenses(standardOss.getOssLicenses());
+							syncBean.setLicenseName(standardOss.getLicenseName());
 							break;
 							
 						case "Detected License" :
-							afterBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+							syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 							break;
 							
 						case "Copyright" :
-							afterBean.setCopyright(standardOss.getCopyright());
+							syncBean.setCopyright(standardOss.getCopyright());
 							break;
 							
 						case "Download Location" :
-							afterBean.setDownloadLocation(standardOss.getDownloadLocation());
+							syncBean.setDownloadLocation(standardOss.getDownloadLocation());
 							break;
 						
 						case "Home Page" :
-							afterBean.setHomepage(standardOss.getHomepage());
+							syncBean.setHomepage(standardOss.getHomepage());
 							break;
 						
 						case "Summary Description" :
-							afterBean.setSummaryDescription(standardOss.getSummaryDescription());
+							syncBean.setSummaryDescription(standardOss.getSummaryDescription());
 							break;
 						
 						case "Attribution" :
-							afterBean.setAttribution(standardOss.getAttribution());
+							syncBean.setAttribution(standardOss.getAttribution());
 							break;
 					}
 				}
 				
-				result = ossService.registOssMaster(afterBean);
+				beforeList.add(beforeBean);
+				syncList.add(syncBean);
+				List<String> checkList = ossService.getOssListSyncCheck(beforeList, syncList);
 				
-				if (!result.equals("")) {
+				if (checkList.size() > 0) {
+					History h = new History();
+					result = ossService.registOssMaster(syncBean);
+					CoCodeManager.getInstance().refreshOssInfo();
+					afterBean = ossService.getOssInfo(ossIdsArr[i], true);
+					h = ossService.work(syncBean);
+					h.sethAction(action);
+					historyService.storeData(h);
+					
 					try {
 						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
-						
 						CoMail mailBean = new CoMail(mailType);
 						mailBean.setParamOssId(ossIdsArr[i]);
 						mailBean.setComment(comment);

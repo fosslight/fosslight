@@ -2322,9 +2322,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster selectOss = selectOssList.get(0);
 		
 		List<String> checkList = new ArrayList<String>();
-		
-		if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) checkList.add("Declared License");
-		if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
+				
+		if (!Arrays.equals(standardOss.getOssLicenses().toArray(), selectOss.getOssLicenses().toArray())) {
+			if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) checkList.add("Declared License");
+		}
+		if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), selectOss.getDetectedLicenses().toArray())) {
+			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
+		}
 		if (!standardOss.getCopyright().equals(selectOss.getCopyright())) checkList.add("Copyright");
 		if (!standardOss.getDownloadLocation().equals(selectOss.getDownloadLocation())) checkList.add("Download Location");
 		if (!standardOss.getHomepage().equals(selectOss.getHomepage())) checkList.add("Home Page");

@@ -405,6 +405,7 @@ public final class Url {
 		public static final String SAMPLEDOWNLOAD = PATH + "/sampleDownload";
 		
 		public static final String FILTERED_LIST = PATH + "/getFilteredList";
+		public static final String CHECK_STATUS = PATH + "/checkStatus/{partnerId}";
 	}
 	
 	public static final class USER {

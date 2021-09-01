@@ -1048,4 +1048,17 @@ public class PartnerController extends CoTopComponent{
 			return makeJsonResponseHeader(false, "filterList Error");
 		}
 	}
+	
+	@GetMapping(value=PARTNER.CHECK_STATUS)
+	public @ResponseBody ResponseEntity<Object> checkStatus(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		
+		resultMap.put("status", partnerMaster.getStatus());
+		
+		return makeJsonResponseHeader(resultMap);
+	}
 }
