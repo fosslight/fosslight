@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1689,8 +1690,6 @@ public class OssController extends CoTopComponent{
 				OssMaster beforeBean = null;
 				OssMaster syncBean = null;
 				OssMaster afterBean = null;
-				List<OssMaster> beforeList = new ArrayList<OssMaster>();
-				List<OssMaster> syncList = new ArrayList<OssMaster>();
 				
 				CoCodeManager.getInstance().refreshOssInfo();
 				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
@@ -1702,44 +1701,65 @@ public class OssController extends CoTopComponent{
 				}
 				syncBean.setComment(comment);
 				
+				boolean syncCheck = false;
+				
 				for (int j=0; j<syncItemArr.length; j++) {
 					switch(syncItemArr[j]) {
 						case "Declared License" :
-							syncBean.setOssLicenses(standardOss.getOssLicenses());
-							syncBean.setLicenseName(standardOss.getLicenseName());
+							if (!Arrays.equals(standardOss.getOssLicenses().toArray(), syncBean.getOssLicenses().toArray())) {
+								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
+									syncBean.setOssLicenses(standardOss.getOssLicenses());
+									syncBean.setLicenseName(standardOss.getLicenseName());
+									syncCheck = true;
+								}
+							}
 							break;
 							
 						case "Detected License" :
-							syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+							if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+								syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+								syncCheck = true;
+							}
 							break;
 							
 						case "Copyright" :
-							syncBean.setCopyright(standardOss.getCopyright());
+							if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
+								syncBean.setCopyright(standardOss.getCopyright());
+								syncCheck = true;
+							}
 							break;
 							
 						case "Download Location" :
-							syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+							if (!standardOss.getDownloadLocation().equals(syncBean.getDownloadLocation())) {
+								syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+								syncCheck = true;
+							}
 							break;
 						
 						case "Home Page" :
-							syncBean.setHomepage(standardOss.getHomepage());
+							if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
+								syncBean.setHomepage(standardOss.getHomepage());
+								syncCheck = true;
+							}
 							break;
 						
 						case "Summary Description" :
-							syncBean.setSummaryDescription(standardOss.getSummaryDescription());
+							if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
+								syncBean.setSummaryDescription(standardOss.getSummaryDescription());
+								syncCheck = true;
+							}
 							break;
 						
 						case "Attribution" :
-							syncBean.setAttribution(standardOss.getAttribution());
+							if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
+								syncBean.setAttribution(standardOss.getAttribution());
+								syncCheck = true;
+							}
 							break;
 					}
 				}
 				
-				beforeList.add(beforeBean);
-				syncList.add(syncBean);
-				List<String> checkList = ossService.getOssListSyncCheck(beforeList, syncList);
-				
-				if (checkList.size() > 0) {
+				if (syncCheck) {
 					History h = new History();
 					result = ossService.registOssMaster(syncBean);
 					CoCodeManager.getInstance().refreshOssInfo();
