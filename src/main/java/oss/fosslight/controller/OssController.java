@@ -1685,9 +1685,9 @@ public class OssController extends CoTopComponent{
 		String result = "";
 		String action = CoConstDef.ACTION_CODE_UPDATE;
 		
-		OssMaster standardOss = ossService.getOssInfo(ossId, true);
-		
 		try {
+			OssMaster standardOss = (OssMaster) BeanUtils.cloneBean(ossService.getOssInfo(ossId, true));
+			
 			for (int i=0; i<ossIdsArr.length; i++) {
 				OssMaster beforeBean = null;
 				OssMaster syncBean = null;
@@ -1696,6 +1696,7 @@ public class OssController extends CoTopComponent{
 				CoCodeManager.getInstance().refreshOssInfo();
 				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
 				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				
 				if (syncBean.getLicenseDiv().contains("Single")) {
 					syncBean.setLicenseDiv("S");
 				}else {
@@ -1718,10 +1719,21 @@ public class OssController extends CoTopComponent{
 							break;
 							
 						case "Detected License" :
-							if (!standardOss.getDetectedLicenses().equals(syncBean.getDetectedLicenses())) {
-								List<String> detectedLicenseList = Arrays.asList(standardOss.getDetectedLicenses().get(0).split(", "));
-								syncBean.setDetectedLicenses(detectedLicenseList);
-								syncCheck = true;
+							if (syncBean.getDetectedLicenses() == null) {
+								if (standardOss.getDetectedLicenses() != null) {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
+							}else {
+								if (standardOss.getDetectedLicenses() != null) {
+									if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+										syncCheck = true;
+									}
+								}else {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
 							}
 							break;
 							

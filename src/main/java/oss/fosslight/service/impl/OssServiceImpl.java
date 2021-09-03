@@ -2271,24 +2271,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
 				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
-				
-				String detectedLicense = avoidNull(ossBean.getDetectedLicense());
-				List<String> detectedLicenseList = Arrays.asList(detectedLicense.split(","));
-				String resultDectedLicense = "";
-				
-				if(!isEmpty(detectedLicense)) {
-					for(String dl : detectedLicenseList) {
-						LicenseMaster licenseMaster = null;
-						
-						if(CoCodeManager.LICENSE_INFO.containsKey(dl)) {
-							licenseMaster = CoCodeManager.LICENSE_INFO.get(dl);
-						}
-						
-						resultDectedLicense += dl;
-					}
-					
-					ossBean.setDetectedLicense(resultDectedLicense);
-				}
 			}
 			
 			OssLicense licenseBean = new OssLicense();
