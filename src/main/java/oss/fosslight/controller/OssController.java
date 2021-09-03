@@ -147,7 +147,15 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setCurPage(page);
 		ossMaster.setPageListSize(rows);
-		
+
+		// download location check
+		List<String> values = Arrays.asList("https://", "http://", "www.");
+		String homepage =req.getParameter("homepage");
+		if(!values.contains(homepage)){
+			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+			ossMaster.setHomepage(homepage);
+		}
+
 		if("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, ossMaster);
