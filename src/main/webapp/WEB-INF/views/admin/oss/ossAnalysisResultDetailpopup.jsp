@@ -274,7 +274,7 @@
 
 				switch (licenseChoiceLength) {
 					case 0:
-						alertify.alert("No licenses entered.");
+						alertify.alert("No licenses entered.", function(){});
 						return false;
 						break;
 					case 1:
@@ -349,9 +349,9 @@
 			    					_alertMsg += '</span>';
 			    				}
 			    				
-			    				alertify.alert(_alertMsg);
+			    				alertify.alert(_alertMsg, function(){});
 			    			} else if(json.resultData) {
-			    				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>');
+			    				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
 
 			    				for(var k in json.resultData) {
 			    					$(common_data.nickNameClone).appendTo(".detailNickName"+seq);
@@ -511,7 +511,7 @@
         		});
         		
         		if(result.length > 0){
-        			alertify.alert("License must be filled in using autocomplete.");
+        			alertify.alert("License must be filled in using autocomplete.", function(){});
         			return false;
         		}
         		
@@ -708,7 +708,7 @@
 
 						switch (licenseChoiceLength) {
 						case 0:
-							alertify.alert("No licenses entered.");
+							alertify.alert("No licenses entered.", function(){});
 							return false;
 							break;
 						case 1:
@@ -1461,7 +1461,7 @@
 
 					switch (licenseChoiceLength) {
 						case 0:
-							alertify.alert("No licenses entered.");
+							alertify.alert("No licenses entered.", function(){});
 							return false;
 							break;
 						case 1:

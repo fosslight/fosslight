@@ -1577,7 +1577,7 @@ function openNVD2(_ossName, _url){
 		_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
 		if(!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
 	} else {
 		_popupVuln.close();
@@ -1591,7 +1591,7 @@ function openCommentHistory(_url) {
 		_popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
 		if(!_popupComment || _popupComment.closed || typeof _popupComment.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
 	} else {
 		_popupComment.close();

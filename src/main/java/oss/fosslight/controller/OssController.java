@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -599,8 +601,10 @@ public class OssController extends CoTopComponent{
 		if(isEmpty(ossMaster.getOssId())) {
 			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
 			
-			if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
+			if(checkOssInfo != null) {
+				if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
+				}
 			} else {
 				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
 				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
@@ -1625,22 +1629,26 @@ public class OssController extends CoTopComponent{
 			, @RequestParam(value="ossIds", required=true)String ossIds){
 		OssMaster bean = new OssMaster();
 		bean.setOssId(ossId);
-		
-		List<OssMaster> ossList = ossService.getOssListBySync(bean);
-		
-		String[] ossIdArr = ossIds.split(",");
-		List<String> chkOssIdList = new ArrayList<String>();
-		
-		for (int i=0; i<ossIdArr.length; i++) {
-			bean.setOssId(ossIdArr[i]);
-			List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
-			List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
-			if (checkList.size() == 0) {
-				chkOssIdList.add(ossIdArr[i]);
+		try {
+			List<OssMaster> ossList = ossService.getOssListBySync(bean);
+			
+			String[] ossIdArr = ossIds.split(",");
+			List<String> chkOssIdList = new ArrayList<String>();
+			
+			for (int i=0; i<ossIdArr.length; i++) {
+				bean.setOssId(ossIdArr[i]);
+				List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
+				List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
+				if (checkList.size() == 0) {
+					chkOssIdList.add(ossIdArr[i]);
+				}
 			}
+			
+			return makeJsonResponseHeader(true, "true", chkOssIdList);
+		} catch (Exception e){
+			log.error(e.getMessage(), e);
 		}
-		
-		return makeJsonResponseHeader(true, "true", chkOssIdList);
+		return makeJsonResponseHeader(false);
 	}
 	
 	@GetMapping(value=OSS.OSS_SYNC_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
@@ -1670,19 +1678,119 @@ public class OssController extends CoTopComponent{
 	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
 			, @RequestParam(value="ossId", required=true)String ossId
 			, @RequestParam(value="comment", required=true)String comment
-			, @RequestParam(value="ossIds", required=true)String ossIds){
-		OssMaster param = new OssMaster();
-		param.setOssId(ossId);
-		param.setOssIds(ossIds.split(","));
-		param.setComment(comment);
+			, @RequestParam(value="ossIds", required=true)String ossIds
+			, @RequestParam(value="syncItem", required=true)String syncItem){
+		String[] ossIdsArr = ossIds.split(",");
+		String[] syncItemArr = syncItem.split(",");
+		String result = "";
+		String action = CoConstDef.ACTION_CODE_UPDATE;
+		
+		OssMaster standardOss = ossService.getOssInfo(ossId, true);
 		
 		try {
-			// oss info sync
-			ossService.updateOssSync(param);
-			return makeJsonResponseHeader(true, "True");
+			for (int i=0; i<ossIdsArr.length; i++) {
+				OssMaster beforeBean = null;
+				OssMaster syncBean = null;
+				OssMaster afterBean = null;
+				
+				CoCodeManager.getInstance().refreshOssInfo();
+				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
+				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				if (syncBean.getLicenseDiv().contains("Single")) {
+					syncBean.setLicenseDiv("S");
+				}else {
+					syncBean.setLicenseDiv("M");
+				}
+				syncBean.setComment(comment);
+				
+				boolean syncCheck = false;
+				
+				for (int j=0; j<syncItemArr.length; j++) {
+					switch(syncItemArr[j]) {
+						case "Declared License" :
+							if (!Arrays.equals(standardOss.getOssLicenses().toArray(), syncBean.getOssLicenses().toArray())) {
+								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
+									syncBean.setOssLicenses(standardOss.getOssLicenses());
+									syncBean.setLicenseName(standardOss.getLicenseName());
+									syncCheck = true;
+								}
+							}
+							break;
+							
+						case "Detected License" :
+							if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+								syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+								syncCheck = true;
+							}
+							break;
+							
+						case "Copyright" :
+							if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
+								syncBean.setCopyright(standardOss.getCopyright());
+								syncCheck = true;
+							}
+							break;
+							
+						case "Download Location" :
+							if (!standardOss.getDownloadLocation().equals(syncBean.getDownloadLocation())) {
+								syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+								syncCheck = true;
+							}
+							break;
+						
+						case "Home Page" :
+							if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
+								syncBean.setHomepage(standardOss.getHomepage());
+								syncCheck = true;
+							}
+							break;
+						
+						case "Summary Description" :
+							if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
+								syncBean.setSummaryDescription(standardOss.getSummaryDescription());
+								syncCheck = true;
+							}
+							break;
+						
+						case "Attribution" :
+							if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
+								syncBean.setAttribution(standardOss.getAttribution());
+								syncCheck = true;
+							}
+							break;
+					}
+				}
+				
+				if (syncCheck) {
+					History h = new History();
+					result = ossService.registOssMaster(syncBean);
+					CoCodeManager.getInstance().refreshOssInfo();
+					afterBean = ossService.getOssInfo(ossIdsArr[i], true);
+					h = ossService.work(syncBean);
+					h.sethAction(action);
+					historyService.storeData(h);
+					
+					try {
+						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+						CoMail mailBean = new CoMail(mailType);
+						mailBean.setParamOssId(ossIdsArr[i]);
+						mailBean.setComment(comment);
+						mailBean.setCompareDataBefore(beforeBean);
+						mailBean.setCompareDataAfter(afterBean);
+						
+						CoMailManager.getInstance().sendMail(mailBean);				
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}
+			
+			return makeJsonResponseHeader(true, "true");
 		} catch (Exception e) {
+			log.error("OSS Sync Failed.", e);
 			log.error(e.getMessage(), e);
-			return makeJsonResponseHeader(false, "Fail");
 		}
+		
+		return makeJsonResponseHeader(false, "false");
 	}
 }

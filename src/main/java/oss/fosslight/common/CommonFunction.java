@@ -1925,7 +1925,7 @@ public class CommonFunction extends CoTopComponent {
 		boolean result = false;
 		
 		if(!isEmpty(CoCodeManager.CD_ROLE_OUT_LICENSE)) {
-			for(String license : licenseName.split(",")) {
+			for(String license : avoidNull(licenseName).split(",")) {
 				result = false;
 				
 				for(String s : CoCodeManager.CD_ROLE_OUT_LICENSE.split("\\|")) {

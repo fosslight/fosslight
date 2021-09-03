@@ -448,9 +448,9 @@ var src_fn = {
 					src_fn.makeOssList(data.resultData);
 
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr);
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
 					} 
 				}
 			},
@@ -582,7 +582,7 @@ var src_fn = {
 			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 			if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-				alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 			}
 		} else {
 			_popup.close();
@@ -619,7 +619,7 @@ var src_fn = {
 							_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, title, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-								alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+								alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 							}
 						} else {
 							_popup.close();
@@ -682,7 +682,7 @@ var src_fn = {
 			}
 		}
 		
-		alertify.alert(displayHtml);
+		alertify.alert(displayHtml, function(){});
 	},
 	
 	getGuideData : function(licenseName){

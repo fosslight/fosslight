@@ -202,6 +202,4 @@ public interface OssMapper {
 	OssAnalysis getAutoAnalysisSuccessOssInfo(@Param("referenceOssId") String referenceOssId);
 	
 	void setDeactivateFlag(OssMaster ossMaster);
-
-	void updateOssSync(OssMaster ossMaster);
 }

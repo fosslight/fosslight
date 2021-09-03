@@ -209,7 +209,7 @@
 
 						if((diffNum > 0 && cEndDate > 0) 
 								|| (diffNum2 > 0 && mEndDate > 0)){
-							alertify.alert('<spring:message code="msg.common.search.check.date" />');
+							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
 					

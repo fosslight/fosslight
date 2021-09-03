@@ -166,7 +166,7 @@
 			</span>
 			
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#/project/edit')" />
 			</span>
 		</div>
@@ -185,7 +185,7 @@
 		
 			<input type="button" value="Reject" class="btnReject btnColor left" />
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#/project/edit')" />
 			</span>
 		</div>

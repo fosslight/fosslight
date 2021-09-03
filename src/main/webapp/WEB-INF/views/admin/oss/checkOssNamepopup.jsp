@@ -191,7 +191,7 @@
 							}
 						}, 0);
 					} else {
-						alertify.alert('Please select OSS to register');
+						alertify.alert('Please select OSS to register', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},
@@ -249,7 +249,7 @@
 							}
 						}, 0);
 					} else {
-						alertify.alert('Please select OSS to register');
+						alertify.alert('Please select OSS to register', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},
@@ -272,7 +272,7 @@
 										_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 										if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-											alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+											alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 										}
 									} else {
 										_popup.close();

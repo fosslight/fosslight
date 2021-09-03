@@ -152,7 +152,7 @@ var party_evt = {
 		if(addListData.length > 0){
 			for(var i=0;i<addListData.length;i++){
 				if(listData.partnerId == addListData[i].partnerId){
-			    	alertify.alert('<spring:message code="msg.id.duplicate" />');
+			    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){});
 
 			    	return;
 			    }
@@ -618,7 +618,7 @@ var party_evt = {
 						partnerIds = $("#_3rdAddList").jqGrid("getRowData").map(function(a){return a.partnerId});
 						
 						if(partnerIds.indexOf(rows[i].partnerId) > -1){
-					    	alertify.alert('<spring:message code="msg.id.duplicate" />'); // 기등록된 정보는 제외
+					    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){}); // 기등록된 정보는 제외
 
 					    	continue;
 					    }

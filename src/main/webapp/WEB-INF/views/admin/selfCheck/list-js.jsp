@@ -237,7 +237,7 @@
 						var diffNum = +startDate - +endDate;
 						
 						if(diffNum > 0 && endDate > 0){
-							alertify.alert('<spring:message code="msg.common.search.check.date" />');
+							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
 				},
