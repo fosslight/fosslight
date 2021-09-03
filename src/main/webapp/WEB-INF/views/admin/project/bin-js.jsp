@@ -40,20 +40,24 @@ var bin_evt = {
 		});
 		// 그리드 저장 버튼
 		$("#binSave, #binSaveUp").click(function(e){
-			e.preventDefault();
-			
-			com_fn.exitCell(_mainLastsel, "binList");
-			
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-				if (e) {
-					// 메인, 서브 그리드 세이브 모드
-					fn_grid_com.totalGridSaveMode('binList');
-					// 닉네임 체크
-					bin_fn.saveMakeData();
-				} else {
-					return false;
-				}
-			});
+			if (com_fn.checkStatus()){
+				e.preventDefault();
+				
+				com_fn.exitCell(_mainLastsel, "binList");
+				
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						// 메인, 서브 그리드 세이브 모드
+						fn_grid_com.totalGridSaveMode('binList');
+						// 닉네임 체크
+						bin_fn.saveMakeData();
+					} else {
+						return false;
+					}
+				});
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		});
 		// 프로젝트 조회 버튼
 		$('#binProjectSearchBtn').click(function(e){
