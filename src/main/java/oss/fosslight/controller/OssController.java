@@ -1718,8 +1718,9 @@ public class OssController extends CoTopComponent{
 							break;
 							
 						case "Detected License" :
-							if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
-								syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+							if (!standardOss.getDetectedLicenses().equals(syncBean.getDetectedLicenses())) {
+								List<String> detectedLicenseList = Arrays.asList(standardOss.getDetectedLicenses().get(0).split(", "));
+								syncBean.setDetectedLicenses(detectedLicenseList);
 								syncCheck = true;
 							}
 							break;

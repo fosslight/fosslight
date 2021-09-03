@@ -65,20 +65,24 @@ var binAndroid_evt = {
 		});
 		// 그리드 저장 버튼
 		$("#binAndroidSave, #binAndroidSaveUp").click(function(e){
-			e.preventDefault();
+			if (com_fn.checkStatus()){
+				e.preventDefault();
 
-			com_fn.exitCell(_mainLastsel, "binAndroidList");
-			
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-				if (e) {
-					// 메인, 서브 그리드 세이브 모드
-					fn_grid_com.totalGridSaveMode('binAndroidList');
-					// 닉네임 체크
-					binAndroid_fn.saveMakeData();
-				} else {
-					return false;
-				}
-			});
+				com_fn.exitCell(_mainLastsel, "binAndroidList");
+				
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						// 메인, 서브 그리드 세이브 모드
+						fn_grid_com.totalGridSaveMode('binAndroidList');
+						// 닉네임 체크
+						binAndroid_fn.saveMakeData();
+					} else {
+						return false;
+					}
+				});
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		});
 		// 프로젝트 조회 버튼
 		$('#binAndroidProjectSearchBtn').click(function(e){

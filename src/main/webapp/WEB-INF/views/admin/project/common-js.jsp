@@ -29,115 +29,112 @@ var com_evt = {
 
 		// bomConfirm 버튼 
 		$('#bomConfirm').click(function(e){
-			e.preventDefault();
-			
-			if(com_fn.isAndroidOnly()) {
-				var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData()};
+			if (com_fn.checkStatus()){
+				e.preventDefault();
 				
- 				if($("#ignoreBinaryDbFlag")) {
-					data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
-				}
-				
-				// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-				if(!com_fn.validBomChangeStatus(true)) {
-					return false;
-				}
-				
-				com_fn.checkSave(data, "CONF");	
-			} else {		 		
-				// 머지 체크
-				if("Y"!= $("#mergeYn").val()){
-					alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
-					com_fn.fnTabChange($(".tabMenu a:eq(4)"));	
-
-					return false;
-				}
-				
-				if(Bom_Save_Flg){
-					if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
-
-						return false;
-					}
-
-					// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-					if(!com_fn.validBomChangeStatus(false)) {
-						return false;
-					}
-
+				if(com_fn.isAndroidOnly()) {
 					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData()};
-
- 					if($("#ignoreBinaryDbFlag")) {
+					
+	 				if($("#ignoreBinaryDbFlag")) {
 						data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 					}
+					
+					// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+					if(!com_fn.validBomChangeStatus(true)) {
+						return false;
+					}
+					
+					com_fn.checkSave(data, "CONF");	
+				} else {		 		
+					// 머지 체크
+					if("Y"!= $("#mergeYn").val()){
+						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
+						com_fn.fnTabChange($(".tabMenu a:eq(4)"));	
 
- 					com_fn.checkSave(data, "CONF");	
-				} else {
-					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
-				}				
-			}
+						return false;
+					}
+					
+					if(Bom_Save_Flg){
+						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+							alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
+
+							return false;
+						}
+
+						// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+						if(!com_fn.validBomChangeStatus(false)) {
+							return false;
+						}
+
+						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData()};
+
+	 					if($("#ignoreBinaryDbFlag")) {
+							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
+						}
+
+	 					com_fn.checkSave(data, "CONF");	
+					} else {
+						alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
+					}				
+				}
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}	
 		});
 		
 		// bomReject 버튼 
 		$('#bomReject').click(function(e){
-			e.preventDefault();
+			if (com_fn.checkStatus()){
+				e.preventDefault();
 
-			if(distributionStatus == "PROC"){
-				var br = "<br>";
-				var comment = "Thank you so much for your patience." + br;
-				comment += "The distribution has already begun and has not yet completed." + br;
-				comment += "It takes a long time to deploy because of the large packaging file size.";
-				
-				alertify.error(comment, 0);
-
-				return false;
-			}
-			
-			var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
-			innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-			innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
-			innerHtml    += '	</div>';
-			innerHtml    += '</div>';
-			
-			alertify.confirm(innerHtml, function () {
-				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
+				if(distributionStatus == "PROC"){
+					var br = "<br>";
+					var comment = "Thank you so much for your patience." + br;
+					comment += "The distribution has already begun and has not yet completed." + br;
+					comment += "It takes a long time to deploy because of the large packaging file size.";
+					
+					alertify.error(comment, 0);
 
 					return false;
-				} else {
-					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "PROG", "userComment" : CKEDITOR.instances['editor2'].getData()};
-
-					com_fn.checkSave(data, "PROG");
 				}
-			});
+				
+				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
+				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+				innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
+				innerHtml    += '	</div>';
+				innerHtml    += '</div>';
+				
+				alertify.confirm(innerHtml, function () {
+					if(CKEDITOR.instances['editor2'].getData() == "") {
+						alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
-			var _editor = CKEDITOR.instances.editor2;
-			
-			if(_editor) {
-				_editor.destroy();
+						return false;
+					} else {
+						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "PROG", "userComment" : CKEDITOR.instances['editor2'].getData()};
+
+						com_fn.checkSave(data, "PROG");
+					}
+				});
+
+				var _editor = CKEDITOR.instances.editor2;
+				
+				if(_editor) {
+					_editor.destroy();
+				}
+				
+				CKEDITOR.replace('editor2', {});
+			}else{
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 			}
-			
-			CKEDITOR.replace('editor2', {});
-			
 		});
 		
 		// bomRequest 버튼 
 		$('#bomRequest').click(function(e){
-			e.preventDefault();
-			
-			// 머지 체크
-			if("Y"!= $("#mergeYn").val()){
-				alertify.alert('<spring:message code="msg.project.required.merge" />', function(){
-					// Identification 내 모든 탭 우측 상단에 request review 버튼 표시
-					// tab전환 하도록 함수를 새로만듦. (기존 tabMenuA.click callbac fucntion -> fnTabChange 으로 변경)
-					com_fn.fnTabChange($(".tabMenu a:eq(4)"));
-				});
+			if (com_fn.checkStatus()){
+				e.preventDefault();
 				
-				return false;
-			}
-			
-			if(Bom_Save_Flg) {
-				if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+				// 머지 체크
+				if("Y"!= $("#mergeYn").val()){
 					alertify.alert('<spring:message code="msg.project.required.merge" />', function(){
 						// Identification 내 모든 탭 우측 상단에 request review 버튼 표시
 						// tab전환 하도록 함수를 새로만듦. (기존 tabMenuA.click callbac fucntion -> fnTabChange 으로 변경)
@@ -147,42 +144,60 @@ var com_evt = {
 					return false;
 				}
 				
-				alertify.confirm('<spring:message code="msg.common.confirm.continue" />', function(e){
-					if(e) {
-						if(userRole != "ROLE_ADMIN"){
-							if(!com_fn.validBomChangeStatus(isAndroidModel)) {
-								return false;
-							}
-						}
+				if(Bom_Save_Flg) {
+					if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){
+							// Identification 내 모든 탭 우측 상단에 request review 버튼 표시
+							// tab전환 하도록 함수를 새로만듦. (기존 tabMenuA.click callbac fucntion -> fnTabChange 으로 변경)
+							com_fn.fnTabChange($(".tabMenu a:eq(4)"));
+						});
 						
-						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REQ", "userComment" : CKEDITOR.instances['editor'].getData()};
-
-						com_fn.checkSave(data, "REQ");
+						return false;
 					}
-				});
-				
-			} else {
-				alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
+					
+					alertify.confirm('<spring:message code="msg.common.confirm.continue" />', function(e){
+						if(e) {
+							if(userRole != "ROLE_ADMIN"){
+								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
+									return false;
+								}
+							}
+							
+							var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REQ", "userComment" : CKEDITOR.instances['editor'].getData()};
+
+							com_fn.checkSave(data, "REQ");
+						}
+					});
+					
+				} else {
+					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
+				}
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 			}
 		});
 		
 		// bomReviewStart 버튼 
 		$('#bomReviewStart').click(function(e) {
-			e.preventDefault();
-			
-			// 머지 체크
-			if("N"== $("#mergeYn").val()){
-				alertify.alert('<spring:message code="msg.project.required.merge2" />', function(){});
+			if (com_fn.checkStatus()){
+				e.preventDefault();
+				
+				// 머지 체크
+				if("N"== $("#mergeYn").val()){
+					alertify.alert('<spring:message code="msg.project.required.merge2" />', function(){});
 
-				return false;
-			}
-			
-			if(Bom_Save_Flg) {
-				var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REV", "userComment" : CKEDITOR.instances['editor'].getData()};
+					return false;
+				}
+				
+				if(Bom_Save_Flg) {
+					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REV", "userComment" : CKEDITOR.instances['editor'].getData()};
 
-				com_fn.checkSave(data, "REV");
-			} else {
-				alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
+					com_fn.checkSave(data, "REV");
+				} else {
+					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
+				}
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 			}
 		});
 
@@ -1127,6 +1142,29 @@ var com_fn = {
 		if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
+	},
+    checkStatus : function(){
+		var returnFlag = false;
+		
+		$.ajax({
+			url : '<c:url value="/project/getProjectStatus"/>',
+			type : 'POST',
+			data : JSON.stringify({"prjId" : "${project.prjId}"}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(data){
+				var status = data.identificationStatus||"";
+				returnFlag = (status == curIdenStatus);
+			},
+			error : function(){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				returnFlag = false;
+			}
+		});
+		
+		return returnFlag;
 	}
 }
 </script>

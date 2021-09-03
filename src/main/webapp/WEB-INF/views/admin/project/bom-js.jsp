@@ -35,18 +35,22 @@ var bom_evt = {
 		
 		// bomMerge 버튼 
 		$('#bomSave, #bomSaveUp').click(function(e){
-			e.preventDefault();
-			
- 			alertify.confirm('<spring:message code="msg.common.confirm.mergeAndSave" />', function (e) {
-				if (e) {
-					$("#mergeYn").val("Y");
-					Bom_Save_Flg = false;
-					
-					bom_fn.save();
-				} else {
-					return false;
-				}
-			});
+			if (com_fn.checkStatus()){
+				e.preventDefault();
+				
+	 			alertify.confirm('<spring:message code="msg.common.confirm.mergeAndSave" />', function (e) {
+					if (e) {
+						$("#mergeYn").val("Y");
+						Bom_Save_Flg = false;
+						
+						bom_fn.save();
+					} else {
+						return false;
+					}
+				});
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		});
 		
 		$(window).resize(function(){
@@ -394,88 +398,92 @@ var bom_fn = {
 		return result;
 	},
 	analysisValidation : function(){
-		if("Y"!= $("#mergeYn").val()){
-			alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
+		if (com_fn.checkStatus()){
+			if("Y"!= $("#mergeYn").val()){
+				alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 
-			return false;
-		}
-		
-		var alertMsg = "";
-		
-		switch(ossAnalysisStatus.toUpperCase()){
-			case "PROGRESS":
-				if(analysisStartDate != "") {
-					alertMsg = "This analysis has been started at " + analysisStartDate + "<br>It has not been completed yet";
-					alertify.alert(alertMsg, function(){});
-				} else {
-					bom_fn.showOssAutoAnalysis(ossAnalysisStatus);
-				}
-				
-				break;
-			case "SUCCESS":
-				if(!alertify.commentDialog) {
-					//define a new dialog
-					alertify.dialog('commentDialog',function factory(){
-						return {
-							main:function(message){
-								this.message = message;
-							},
-							setup:function(){
-								return { 
-									focus: { element:0 }
-								};
-							},
-							prepare:function(){
-									this.setContent(this.message);
-							}
-						}
-					});
-				}
-				
-				// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
-				alertMsg = 'Do you really reset the analyzed result and start the Auto Analysis again?';
-
-				var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
-				btnHtml += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'-reset\')"/>&nbsp;&nbsp;&nbsp;';
-				btnHtml +='<input type="button" value="Cancel" class="btnCancel btnColor" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
-				
-				alertify.commentDialog(btnHtml);
-				
-				break;
-			case "FAIL":
-				if(!alertify.commentDialog){
-					//define a new dialog
-					alertify.dialog('commentDialog',function factory(){
-						return {
-							main:function(message){
-								this.message = message;
-							},
-							setup:function(){
-								return { 
-									focus: { element:0 }
-								};
-							},
-							prepare:function(){
-									this.setContent(this.message);
-							}
-						}
-					});
-				}
-				
-				// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
-				alertMsg = 'The Auto analysis of this project was recently failed.<br>If you want to restart the Auto Analysis. click the \'Restart\' button';
-				var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
-				btnHtml += '<input type="button" value="Restart" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'\')"/>&nbsp;&nbsp;&nbsp;';
-				btnHtml +='<input type="button" value="Cancel" class="btnCancel btnColor" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
-				
-				alertify.commentDialog(btnHtml);
-				
-				break;
-			default:
-				bom_fn.showOssAutoAnalysis("NEW");
+				return false;
+			}
 			
-				break;
-		}		
+			var alertMsg = "";
+			
+			switch(ossAnalysisStatus.toUpperCase()){
+				case "PROGRESS":
+					if(analysisStartDate != "") {
+						alertMsg = "This analysis has been started at " + analysisStartDate + "<br>It has not been completed yet";
+						alertify.alert(alertMsg, function(){});
+					} else {
+						bom_fn.showOssAutoAnalysis(ossAnalysisStatus);
+					}
+					
+					break;
+				case "SUCCESS":
+					if(!alertify.commentDialog) {
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					alertMsg = 'Do you really reset the analyzed result and start the Auto Analysis again?';
+
+					var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
+					btnHtml += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'-reset\')"/>&nbsp;&nbsp;&nbsp;';
+					btnHtml +='<input type="button" value="Cancel" class="btnCancel btnColor" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
+					
+					alertify.commentDialog(btnHtml);
+					
+					break;
+				case "FAIL":
+					if(!alertify.commentDialog){
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					alertMsg = 'The Auto analysis of this project was recently failed.<br>If you want to restart the Auto Analysis. click the \'Restart\' button';
+					var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
+					btnHtml += '<input type="button" value="Restart" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'\')"/>&nbsp;&nbsp;&nbsp;';
+					btnHtml +='<input type="button" value="Cancel" class="btnCancel btnColor" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
+					
+					alertify.commentDialog(btnHtml);
+					
+					break;
+				default:
+					bom_fn.showOssAutoAnalysis("NEW");
+				
+					break;
+			}	
+		}else {
+			alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+		}	
 	},
 	showOssAutoAnalysis : function(status){
 		if(status.toUpperCase().indexOf("SUCCESS") > -1 || status.toUpperCase().indexOf("FAIL") > -1){
@@ -539,10 +547,14 @@ var bom_fn = {
 		}
 	},
 	showAnalysisResult : function(){
-		_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}&ossAnalysisStatus=result", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+		if (com_fn.checkStatus()){
+			_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}&ossAnalysisStatus=result", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
-		if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+			}
+		}else {
+			alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 		}
 	}
 }
