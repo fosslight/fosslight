@@ -139,7 +139,6 @@
 								
 								var rowdata = target.getRowData(rowId);
 								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
-
 								<c:if test="${projectInfo.targetName eq 'identification'}">
 								rowdata["refPrjId"] = rowdata["referenceId"];
 								rowdata["referenceId"] = commentId;
@@ -166,7 +165,6 @@
 										}
 										
 										result.push(resultData);
-
 										<c:if test="${projectInfo.targetName eq 'identification'}">
 										commentId = resultData.commentId;
 										</c:if>
@@ -202,11 +200,17 @@
 					var result = [];
 					var failFlag = false;
 					var idArry = grid_fn.getCheckedRow("ADD");
-					
-					if(idArry.length > 0){
+
+					var idArryOnlyInOssList = grid_fn.getCheckedRow("ADD").filter(i => {
+						let input = $("#ossList").getRowData(i)['checkName'];
+						let regexp = /^(<a).*(<\/a>)$/;
+						return regexp.test(input);
+					});
+
+					if(idArryOnlyInOssList.length > 0){
 						window.setTimeout(function(){
-							for(var i = 0 ; i < idArry.length ; i++){
-								var rowId = idArry[i];
+							for(var i = 0 ; i < idArryOnlyInOssList.length ; i++){
+								var rowId = idArryOnlyInOssList[i];
 
 								cleanErrMsg("ossList", rowId);
 								
@@ -223,21 +227,21 @@
 									contentType : 'application/json',
 									success: function(resultData){
 										if(resultData.isValid == "true"){
-											$("#ossList").jqGrid('setCell', idArry[i], 'addFlag', 'Y');
-											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'Y');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'Y');
 										}
 										else {
-											$("#ossList").jqGrid('setCell', idArry[i], 'addFlag', 'N');
-											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'N');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'N');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'N');
 											alertify.error('<spring:message code="already.added.nickname" />', 0);
 											failFlag = true;
 										}
 										
 										result.push(resultData);
 																
-										if(result.length == idArry.length){
+										if(result.length == idArryOnlyInOssList.length){
 											if(!failFlag){
-												alertify.success('Successfully add NickName');
+												alertify.success('Successfully add NickName except for oss not registered in oss list');
 												opener.location.reload();
 											}
 											
@@ -248,6 +252,9 @@
 								});
 							}
 						}, 0);
+					} else if(idArry.length > 0){
+						alertify.error('Unregistred OSS cannot add Nickname');
+						$('#loading_wrap_popup').hide();
 					} else {
 						alertify.alert('Please select OSS to register', function(){});
 						$('#loading_wrap_popup').hide();
@@ -320,11 +327,14 @@
 					displayCheckName : function(cellvalue, options, rowObject){
 						var display = "";
 						var checkName = rowObject["checkName"];
+						var checkOssList = rowObject["checkOssList"];
 						
 						display = checkName.split("|");
 
 						for(var i in display){
-							display[i] = "<a href='#' onclick='Ctrl_fn.showOssViewPage(\""+display[i]+"\")' style='color:#2883f3;text-decoration:underline;'>"+display[i]+"</a>";
+							display[i] = checkOssList == "Y" ? 
+								"<a href='#' onclick='Ctrl_fn.showOssViewPage(\""+display[i]+"\")' style='color:#2883f3;text-decoration:underline;'>"+display[i]+"</a>"
+								: display[i];
 						}
 						
 						return display.join("<br>");
