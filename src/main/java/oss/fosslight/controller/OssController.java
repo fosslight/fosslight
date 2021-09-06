@@ -1745,9 +1745,24 @@ public class OssController extends CoTopComponent{
 							break;
 							
 						case "Download Location" :
-							if (!standardOss.getDownloadLocation().equals(syncBean.getDownloadLocation())) {
-								syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-								syncCheck = true;
+							if (standardOss.getDownloadLocations() != null) {
+								if (syncBean.getDownloadLocations() == null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}else {
+									if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
+										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+										syncCheck = true;
+									}
+								}
+							}else {
+								if (syncBean.getDownloadLocations() != null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}
 							}
 							break;
 						

@@ -337,6 +337,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
+				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
+				if (ossDownloadLocation.size() > 0) {
+					StringBuilder sb = new StringBuilder();
+					
+					for(OssMaster location : ossDownloadLocation) {
+						sb.append(location.getDownloadLocation()).append(",");
+					}
+					
+					String[] ossDownloadLocations = new String(sb).split("[,]");
+					bean.setDownloadLocations(ossDownloadLocations);
+				}
+				
 				if(isMailFormat) {
 					bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
 					bean.setOssLicenses(CommonFunction.changeLicenseNameToShort(bean.getOssLicenses()));
@@ -2331,6 +2343,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
 			}
 			
+			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
+			if (ossDownloadLocation.size() > 0) {
+				StringBuilder sb = new StringBuilder();
+						
+				for(OssMaster location : ossDownloadLocation) {
+					sb.append(location.getDownloadLocation()).append(",");
+				}
+							
+				String[] ossDownloadLocations = new String(sb).split("[,]");
+				currentBean.setDownloadLocations(ossDownloadLocations);
+			}
+			
 			OssLicense licenseBean = new OssLicense();
 			licenseBean.setLicenseId(ossBean.getLicenseId());
 			licenseBean.setOssLicenseIdx(ossBean.getOssLicenseIdx());
@@ -2369,10 +2393,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), selectOss.getDetectedLicenses().toArray())) {
 			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
 		}
-		if (!standardOss.getCopyright().equals(selectOss.getCopyright())) checkList.add("Copyright");
-		if (!standardOss.getDownloadLocation().equals(selectOss.getDownloadLocation())) checkList.add("Download Location");
-		if (!standardOss.getHomepage().equals(selectOss.getHomepage())) checkList.add("Home Page");
-		if (!standardOss.getSummaryDescription().equals(selectOss.getSummaryDescription())) checkList.add("Summary Description");
+		if (!avoidNull(standardOss.getCopyright(), "").equals(avoidNull(selectOss.getCopyright(), ""))) checkList.add("Copyright");
+		if (standardOss.getDownloadLocations() != null) {
+			if (selectOss.getDownloadLocations() != null) {
+				if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(selectOss.getDownloadLocations()).toArray())) checkList.add("Download Location");
+			}else {
+				checkList.add("Download Location");
+			}
+		}else {
+			if (selectOss.getDownloadLocations() != null) {
+				checkList.add("Download Location");
+			}
+		}
+		if (!avoidNull(standardOss.getHomepage(), "").equals(avoidNull(selectOss.getHomepage(), ""))) checkList.add("Home Page");
+		if (!avoidNull(standardOss.getSummaryDescription(), "").equals(avoidNull(selectOss.getSummaryDescription(), ""))) checkList.add("Summary Description");
 		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) checkList.add("Attribution");
 		
 		return checkList;
