@@ -1713,6 +1713,11 @@ public class OssController extends CoTopComponent{
 								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
 									syncBean.setOssLicenses(standardOss.getOssLicenses());
 									syncBean.setLicenseName(standardOss.getLicenseName());
+									if (standardOss.getLicenseDiv().contains("Single")) {
+										syncBean.setLicenseDiv("S");
+									}else {
+										syncBean.setLicenseDiv("M");
+									}
 									syncCheck = true;
 								}
 							}

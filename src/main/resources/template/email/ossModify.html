@@ -54,16 +54,16 @@
 									
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-									#if($!before.ossType.contains("V"))
-										<td style="padding:5px;">$!before.ossVersion / <span class="iconSet vdif">v-Diff</span></td>
-									#else
-										<td style="padding:5px;">$!before.ossVersion</td>
-									#end
-									#if($!after.ossType.contains("V"))
-										<td style="padding:5px;">$!after.ossVersion / <span class="iconSet vdif">v-Diff</span></td>
-									#else
-										<td style="padding:5px;">$!after.ossVersion</td>
-									#end
+										<td style="padding:5px;">$!before.ossVersion #if($!before.ossType) / #end
+									#if($!before.ossType.contains("M"))<span class="iconSet multi">Multi</span>#end
+									#if($!before.ossType.contains("D"))<span class="iconSet dual">Dual</span>#end
+									#if($!before.ossType.contains("V"))<span class="iconSet vdif">v-Diff</span>#end
+										</td>
+										<td style="padding:5px;">$!after.ossVersion #if($!after.ossType) / #end
+									#if($!after.ossType.contains("M"))<span class="iconSet multi">Multi</span>#end
+									#if($!after.ossType.contains("D"))<span class="iconSet dual">Dual</span>#end
+									#if($!after.ossType.contains("V"))<span class="iconSet vdif">v-Diff</span>#end
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name / Type</th>
