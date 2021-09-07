@@ -337,7 +337,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
-				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
+				param.setOssId(ossId);
+				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
 				if (ossDownloadLocation.size() > 0) {
 					StringBuilder sb = new StringBuilder();
 					
