@@ -167,6 +167,7 @@
 			</c:if> 
 			<span class="right">
 				<c:if test="${!empty ossId}">
+				<input id="sync" type="button" value="Sync" class="btnColor" />
 				<input id="copy" type="button" value="Copy" class="btnColor" />
 				</c:if>
 				<input id="save" type="button" value="Save" class="btnColor red" />

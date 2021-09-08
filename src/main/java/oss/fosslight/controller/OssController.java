@@ -1687,6 +1687,9 @@ public class OssController extends CoTopComponent{
 		
 		try {
 			OssMaster standardOss = (OssMaster) BeanUtils.cloneBean(ossService.getOssInfo(ossId, true));
+			standardOss.setCopyright(CommonFunction.brReplaceToLine(standardOss.getCopyright()));
+			standardOss.setSummaryDescription(CommonFunction.brReplaceToLine(standardOss.getSummaryDescription()));
+			standardOss.setAttribution(CommonFunction.brReplaceToLine(standardOss.getAttribution()));
 			
 			for (int i=0; i<ossIdsArr.length; i++) {
 				OssMaster beforeBean = null;
@@ -1696,6 +1699,9 @@ public class OssController extends CoTopComponent{
 				CoCodeManager.getInstance().refreshOssInfo();
 				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
 				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
+				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
+				syncBean.setAttribution(CommonFunction.brReplaceToLine(syncBean.getAttribution()));
 				
 				if (syncBean.getLicenseDiv().contains("Single")) {
 					syncBean.setLicenseDiv("S");

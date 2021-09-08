@@ -2347,6 +2347,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
 				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
+				currentBean.setAttribution(CommonFunction.lineReplaceToBR(ossBean.getAttribution()));
 			}
 			
 			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
