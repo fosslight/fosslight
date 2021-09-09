@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.5 (09/09/2021)
+## Changes
+## 🚀 Features
+
+- Recommend the OSS Name according to the OSS Naming Rule @namkyu1999 (#82)
+
+## 🐛 Hotfixes
+
+- Update OSS Sync Function @FOSSLight-dev (#117)
+- Exclude from 'Check OSS Name' unless it is an 'Unconfirmed open source' @soimkim (#116)
+
+## 🔧 Maintenance
+
+- Delete "Need check" in the Obligation Type from the search box in the License List @Lee-JaeHyuk (#101)
+- Translate some korean comments to english @wkdalsgh192 (#60)
+
+---
+
 ## v1.2.4 (03/09/2021)
 ## Changes
 ## 🚀 Features
