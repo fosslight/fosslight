@@ -1685,9 +1685,12 @@ public class OssController extends CoTopComponent{
 		String result = "";
 		String action = CoConstDef.ACTION_CODE_UPDATE;
 		
-		OssMaster standardOss = ossService.getOssInfo(ossId, true);
-		
 		try {
+			OssMaster standardOss = (OssMaster) BeanUtils.cloneBean(ossService.getOssInfo(ossId, true));
+			standardOss.setCopyright(CommonFunction.brReplaceToLine(standardOss.getCopyright()));
+			standardOss.setSummaryDescription(CommonFunction.brReplaceToLine(standardOss.getSummaryDescription()));
+			standardOss.setAttribution(CommonFunction.brReplaceToLine(standardOss.getAttribution()));
+			
 			for (int i=0; i<ossIdsArr.length; i++) {
 				OssMaster beforeBean = null;
 				OssMaster syncBean = null;
@@ -1696,6 +1699,10 @@ public class OssController extends CoTopComponent{
 				CoCodeManager.getInstance().refreshOssInfo();
 				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
 				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
+				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
+				syncBean.setAttribution(CommonFunction.brReplaceToLine(syncBean.getAttribution()));
+				
 				if (syncBean.getLicenseDiv().contains("Single")) {
 					syncBean.setLicenseDiv("S");
 				}else {
@@ -1712,16 +1719,32 @@ public class OssController extends CoTopComponent{
 								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
 									syncBean.setOssLicenses(standardOss.getOssLicenses());
 									syncBean.setLicenseName(standardOss.getLicenseName());
+									if (standardOss.getLicenseDiv().contains("Single")) {
+										syncBean.setLicenseDiv("S");
+									}else {
+										syncBean.setLicenseDiv("M");
+									}
 									syncCheck = true;
 								}
 							}
 							break;
 							
 						case "Detected License" :
-							if (!standardOss.getDetectedLicenses().equals(syncBean.getDetectedLicenses())) {
-								List<String> detectedLicenseList = Arrays.asList(standardOss.getDetectedLicenses().get(0).split(", "));
-								syncBean.setDetectedLicenses(detectedLicenseList);
-								syncCheck = true;
+							if (syncBean.getDetectedLicenses() == null) {
+								if (standardOss.getDetectedLicenses() != null) {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
+							}else {
+								if (standardOss.getDetectedLicenses() != null) {
+									if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+										syncCheck = true;
+									}
+								}else {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
 							}
 							break;
 							
@@ -1733,9 +1756,24 @@ public class OssController extends CoTopComponent{
 							break;
 							
 						case "Download Location" :
-							if (!standardOss.getDownloadLocation().equals(syncBean.getDownloadLocation())) {
-								syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-								syncCheck = true;
+							if (standardOss.getDownloadLocations() != null) {
+								if (syncBean.getDownloadLocations() == null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}else {
+									if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
+										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+										syncCheck = true;
+									}
+								}
+							}else {
+								if (syncBean.getDownloadLocations() != null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}
 							}
 							break;
 						

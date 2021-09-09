@@ -490,6 +490,60 @@
 				
 				$("[name='deactivateFlag']").val(rtnVal);
 			});
+
+			$("#sync").on('click',function(){
+				var ossName = $("input[name=ossName]").val();
+				var ossVersion = $("input[name=ossVersion]").val();
+				var ossId = $("input[name=ossId]").val();
+
+				if(ossName!=""){
+					onAjaxLoadingHide = true;
+					$.ajax({
+						url : '<c:url value="/oss/getOssListByName"/>',
+						dataType : 'json',
+						cache : false,
+						data : {ossName : ossName},
+						contentType : 'application/json',
+						success : function(data){
+							var length = data.ossList.length;
+							if (length > 1) {
+								$.ajax({
+									url : '<c:url value="/oss/checkExistsOssByname"/>',
+									type : 'GET',
+									dataType : 'json',
+									cache : false,
+									async: false,
+									data : {ossName : ossName},
+									contentType : 'application/json',
+									success : function(data){
+										if(data.isValid == 'true') {
+											var _popup = null;
+											var _encUrl = "ossName="+fn.replaceGetParamChar(ossName)+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
+											
+											if(_popup == null || _popup.closed){
+												_popup = window.open("<c:url value='/oss/osssyncpopup?"+_encUrl+"'/>", "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
+
+												if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+												}
+											} else {
+												_popup.close();
+												_popup = window.open("<c:url value='/oss/osssyncpopup?"+_encUrl+"'/>", "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
+											}
+										}
+									},
+									error : function(){
+										alertify.error('<spring:message code="msg.common.valid2" />', 0);
+									}
+								});
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				}
+			});
 		}			
 	};
 	
@@ -2155,6 +2209,11 @@ var fn = {
 		} else {
 			$(target).parent().next("span.retxt").hide();
 		}
+	},
+	replaceGetParamChar : function(_param) {
+		_param = _param.replace(/&/g,"%26");
+		_param = _param.replace(/\+/g,"%2B"); 
+		 return _param;
 	}
 }
 </script>

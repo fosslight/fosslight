@@ -311,6 +311,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String attribution;
 
+	/** Check whether the Object is included in the oss list */
+	private String checkOssList = "N";
+
 	public String getGuireportFlag() {
 		return guireportFlag;
 	}
@@ -335,6 +338,24 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setObligationMsg(String obligationMsg) {
 		this.obligationMsg = obligationMsg;
+	}
+
+	/**
+	 * Gets the check oss list.
+	 *
+	 * @return the check oss list
+	 */
+	public String getCheckOssList(){
+		return checkOssList;
+	}
+
+	/**
+	 * Sets the check oss list.
+	 *
+	 * @param checkOssList the new check oss list
+	 */
+	public void setCheckOssList(String checkOssList){
+		this.checkOssList = checkOssList;
 	}
 
 	/**

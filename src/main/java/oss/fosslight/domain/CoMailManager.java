@@ -124,7 +124,7 @@ public class CoMailManager extends CoTopComponent {
     	}
     	
     	try {
-    		// 필수 체크
+    		// Check the required things
     		if(bean == null || isEmpty(bean.getMsgType())) {
     			log.error("Mail Bean or Type is Empty");
     			return false;
@@ -134,19 +134,18 @@ public class CoMailManager extends CoTopComponent {
 
     		Map<String, Object> convertDataMap = new HashMap<>();
     		convertDataMap.put("mailType", bean.getMsgType());
-    		convertDataMap.put("isModify", false);//데이터 변경여부
+    		convertDataMap.put("isModify", false); // Check if the data are modified
     		String msgType = bean.getMsgType();
     		
-    		// recalculated에 해당하는 경우 동일한 title로 사용하기 위함.
+    		// To use the same title in case of recalculated
     		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(msgType)) {
     			msgType = CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED;
     		}
     		
 			String title = (isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, msgType);
-			
-			// title
+
 			title = makeMailSubject(title, bean);
-			// oss 정보에 oss 바로가기 link 추가 (Admin only)    				
+			// Add a direct link to OSS information (ADMIN ONLY)
 			if(CoConstDef.CD_MAIL_TYPE_OSS_REGIST.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
@@ -161,10 +160,10 @@ public class CoMailManager extends CoTopComponent {
 				convertDataMap.put("contentsTitle", StringUtil.replace(title, "[FOSSLight]", ""));
 			}
     		
-    		// component 정보 취득
+    		// Get component information
     		String mailComponents = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT, bean.getMsgType());
-    		// component 별 Data 취득
-    		// 변경사항 비교는 제외(VO DATA를 직접 비교한다.)
+
+    		// Acquire data by component without comparing changes (compare VO data directly)
     		if(!isEmpty(mailComponents)) {
     			for(String component : mailComponents.split(",")) {
     				if(!isEmpty(component)) {
@@ -192,11 +191,12 @@ public class CoMailManager extends CoTopComponent {
     		}
     		
     		if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType()) && bean.getParamPrjInfo() != null) {
-    			// distribution reject의 경우 distribution info 정보를 별도 파라미터로 받아야함(이미 삭제됨)
+
+				// In case of distribution reject, distribution info must be received as a separate parameter (already deleted)
     			convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, CoConstDef.CD_MAIL_COMPONENT_PROJECT_DISTRIBUTIONINFO), bean.getParamPrjInfo()); // oss_basic_info
     		}
     		
-    		// 92번 메일 ( vulnerability recalculated )의 경우 as-is to-be 가 존재하기 때문에 예외처리한다.
+    		// TODO 92번 메일 ( vulnerability recalculated )의 경우 as-is to-be 가 존재하기 때문에 예외처리한다.
     		// 94번 메일 NVD Data > CVSS Score가 9.0이상인 대상중 현재 배치로인해 NVD Data가 삭제된 경우 mail 발송
     		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType())
     				|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
@@ -232,13 +232,12 @@ public class CoMailManager extends CoTopComponent {
     			if(_reMakeContents.isEmpty()) {
     				return false;
     			}
-    			
-    			// vulnerability_prj_recalc_oss_info 이름으로 매핑 정보를 설정한다.
+
     			convertDataMap.put("vulnerability_prj_recalc_oss_info", _reMakeContents);
     			
     		}
 
-    		// 공통사항
+    		// Common
     		{
         		if(isEmpty(bean.getCreationUserId())) {
         			bean.setCreationUserId(bean.getLoginUserName());
@@ -274,7 +273,7 @@ public class CoMailManager extends CoTopComponent {
     			
     			convertDataMap.put("modifierNm", makeUserNameFormatWithDivision(userInfo));
     			
-    			// 변경사항 비교의 경우
+    			// In case of comparing changes
     			if(bean.getCompareDataBefore() != null) {
     				convertDataMap.put("before", bean.getCompareDataBefore());
     			}
@@ -649,7 +648,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
-    			// Creator를 To, 나머지 전체 Admin사용자를 cc로 발송
+    			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
     			break;

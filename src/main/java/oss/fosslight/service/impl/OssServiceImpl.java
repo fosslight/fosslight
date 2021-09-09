@@ -337,6 +337,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
+				param.setOssId(ossId);
+				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
+				if (ossDownloadLocation.size() > 0) {
+					StringBuilder sb = new StringBuilder();
+					
+					for(OssMaster location : ossDownloadLocation) {
+						sb.append(location.getDownloadLocation()).append(",");
+					}
+					
+					String[] ossDownloadLocations = new String(sb).split("[,]");
+					bean.setDownloadLocations(ossDownloadLocations);
+				}
+				
 				if(isMailFormat) {
 					bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
 					bean.setOssLicenses(CommonFunction.changeLicenseNameToShort(bean.getOssLicenses()));
@@ -1646,7 +1659,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							break;
 						case 3: // maven
 							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-							
+
+							break;
+						case 4: // pub
+							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+							break;
+						case 5: // cocoapods
+							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 							break;
 						default:
 							break;
@@ -1673,10 +1694,55 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
-							bean.setDownloadLocation(downloadlocationUrl);
-							bean.setCheckName(checkName);
-							result.add(bean);
+							bean.setCheckOssList("Y");
+						} else {
+							OssMaster ossBean = new OssMaster();
+							ossBean.setOssName(bean.getOssName());
+							if(checkExistsOssByname(ossBean) > 0) {
+								continue;
+							}
+
+							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
+
+							while(ossNameMatcher.find()){
+
+								switch(urlSearchSeq) {
+									case 0: // github
+										checkName = ossNameMatcher.group(3) + "-" + ossNameMatcher.group(4);
+										
+										break;
+									case 1: // npm
+										checkName = "npm:" + ossNameMatcher.group(3);
+										
+										break;
+									case 2: // pypi
+										checkName = "pypi:" + ossNameMatcher.group(3);
+										
+										break;
+									case 3: // maven
+										checkName = ossNameMatcher.group(3) + ":" + ossNameMatcher.group(4);
+			
+										break;
+									case 4: // pub
+										checkName = "pub:" + ossNameMatcher.group(3);
+			
+										break;
+									case 5: // cocoapods
+										checkName = "cocoapods:" + ossNameMatcher.group(3);
+			
+										break;
+									default:
+										break;
+								}
+
+							}
+							
 						}
+
+						bean.setDownloadLocation(downloadlocationUrl);
+						bean.setCheckName(checkName);
+						if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
+
 					}
 				} else if(semicolonFlag) {
 					String downloadlocationUrl = bean.getDownloadLocation().split(";")[0];
@@ -1714,9 +1780,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setDownloadLocation(downloadlocationUrl);
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				} else {
@@ -1726,8 +1793,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						String checkName = ossMapper.checkOssName(bean);
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				}
@@ -1797,6 +1865,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					case 3: // maven
 						p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 						
+						break;
+					case 4: // pub
+						p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+						break;
+					case 5: // cocoapods
+						p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 						break;
 					default:
 						break;
@@ -2271,24 +2347,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
 				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
-				
-				String detectedLicense = avoidNull(ossBean.getDetectedLicense());
-				List<String> detectedLicenseList = Arrays.asList(detectedLicense.split(","));
-				String resultDectedLicense = "";
-				
-				if(!isEmpty(detectedLicense)) {
-					for(String dl : detectedLicenseList) {
-						LicenseMaster licenseMaster = null;
+				currentBean.setAttribution(CommonFunction.lineReplaceToBR(ossBean.getAttribution()));
+			}
+			
+			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
+			if (ossDownloadLocation.size() > 0) {
+				StringBuilder sb = new StringBuilder();
 						
-						if(CoCodeManager.LICENSE_INFO.containsKey(dl)) {
-							licenseMaster = CoCodeManager.LICENSE_INFO.get(dl);
-						}
-						
-						resultDectedLicense += dl;
-					}
-					
-					ossBean.setDetectedLicense(resultDectedLicense);
+				for(OssMaster location : ossDownloadLocation) {
+					sb.append(location.getDownloadLocation()).append(",");
 				}
+							
+				String[] ossDownloadLocations = new String(sb).split("[,]");
+				currentBean.setDownloadLocations(ossDownloadLocations);
 			}
 			
 			OssLicense licenseBean = new OssLicense();
@@ -2329,10 +2400,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), selectOss.getDetectedLicenses().toArray())) {
 			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
 		}
-		if (!standardOss.getCopyright().equals(selectOss.getCopyright())) checkList.add("Copyright");
-		if (!standardOss.getDownloadLocation().equals(selectOss.getDownloadLocation())) checkList.add("Download Location");
-		if (!standardOss.getHomepage().equals(selectOss.getHomepage())) checkList.add("Home Page");
-		if (!standardOss.getSummaryDescription().equals(selectOss.getSummaryDescription())) checkList.add("Summary Description");
+		if (!avoidNull(standardOss.getCopyright(), "").equals(avoidNull(selectOss.getCopyright(), ""))) checkList.add("Copyright");
+		if (standardOss.getDownloadLocations() != null) {
+			if (selectOss.getDownloadLocations() != null) {
+				if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(selectOss.getDownloadLocations()).toArray())) checkList.add("Download Location");
+			}else {
+				checkList.add("Download Location");
+			}
+		}else {
+			if (selectOss.getDownloadLocations() != null) {
+				checkList.add("Download Location");
+			}
+		}
+		if (!avoidNull(standardOss.getHomepage(), "").equals(avoidNull(selectOss.getHomepage(), ""))) checkList.add("Home Page");
+		if (!avoidNull(standardOss.getSummaryDescription(), "").equals(avoidNull(selectOss.getSummaryDescription(), ""))) checkList.add("Summary Description");
 		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) checkList.add("Attribution");
 		
 		return checkList;
