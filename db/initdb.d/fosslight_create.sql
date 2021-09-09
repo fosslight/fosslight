@@ -2132,7 +2132,6 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('216', '#ffe7e', '#ffe7e7', NULL, NULL, 2, 'Y'),
 	('217', '10', 'Notice', NULL, '<span class="iconSet ops" title="Notice"></span>', 1, 'Y'),
 	('217', '11', 'Notice & Distribute', NULL, '<span class="iconSet ops" title="Notice"></span><span class="iconSet man" title="Source Code"></span>', 2, 'Y'),
-	('217', '90', 'Needs check', NULL, '', 3, 'Y'),
 	('218', 'NA', 'N/A', '', '', 3, 'Y'),
 	('219', '1', 'Company Full Name', 'FOSSLight', '', 1, 'Y'),
 	('219', '2', 'Company Short Name', '', '', 2, 'Y'),
