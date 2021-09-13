@@ -84,7 +84,7 @@ public class ExcelUtil extends CoTopComponent {
 		int count = 0;
 		
 		for(int i = 0; i < codeExt.length; i++){
-			if(codeExt[i].equals(extType)){
+			if(codeExt[i].equalsIgnoreCase(extType)){
 				count++;
 			};
 		}
