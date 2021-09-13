@@ -1795,7 +1795,8 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('923', 'Self-Check List Detail Setting', 'System Detail Setting Code', 'Y'),
 	('924', 'Compliance Status Detail Setting', 'System Detail Setting Code', 'Y'),
 	('926', 'System Detail Setting', 'System Detail Setting Code', 'Y'),
-	('927', 'Notice Info', '', 'Y');
+	('927', 'Notice Info', '', 'Y'),
+	('990', 'System initialize flag', '', 'Y');
 /*!40000 ALTER TABLE `T2_CODE` ENABLE KEYS */;
 
 -- 테이블 fosslight.T2_CODE_DTL 구조 내보내기
@@ -2311,7 +2312,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('918', '100', 'Distribution Flag', '', 'N', 2, 'Y'),
 	('927', '100', 'HTML', '', 'Y', 1, 'Y'),
 	('927', '101', 'TEXT', '', 'Y', 2, 'Y'),
-	('927', '102', 'SPDX', '', 'Y', 3, 'Y');
+	('927', '102', 'SPDX', '', 'Y', 3, 'Y'),
+	('990', '100', 'N', '', 'NVD Data Feed initialize flag', 1, 'Y');
 /*!40000 ALTER TABLE `T2_CODE_DTL` ENABLE KEYS */;
 
 -- 테이블 fosslight.T2_FILE 구조 내보내기

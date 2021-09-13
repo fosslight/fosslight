@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2CodeDtl;
@@ -44,4 +45,23 @@ public interface CodeMapper {
 	public List<String> getCategoryList(String categoryCd);
 	
 	public void saveConfiguration(T2Code code);
+
+	/**
+	 * Gets the Detail Code Name.
+	 *
+	 * @param cdNo the cd no
+	 * @param cdDtlNo the cd dtl no
+	 * @return the code dtl nm
+	 */
+	public String getCodeDtlNm(@Param("cdNo") String cdNo, @Param("cdDtlNo") String cdDtlNo);
+	
+	/**
+	 * Update Detail Code Name.
+	 *
+	 * @param cdNo the cd no
+	 * @param cdDtlNo the cd dtl no
+	 * @param cdDtlNm the cd dtl nm
+	 * @return update result int
+	 */
+	public int updateCodeDtlNm(@Param("cdNo") String cdNo, @Param("cdDtlNo") String cdDtlNo, @Param("cdDtlNm") String cdDtlNm);
 }
