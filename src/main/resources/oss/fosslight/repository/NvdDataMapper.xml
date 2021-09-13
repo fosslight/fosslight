@@ -104,6 +104,13 @@
     	DELETE FROM NVD_VULN_SW WHERE CVE_ID = #{cveId}
     </delete>
     
+    <delete id="resetCveDataV3">
+    	TRUNCATE TABLE NVD_CVE_V3
+    </delete>
+    <delete id="resetNvdDataV3">
+    	TRUNCATE TABLE NVD_DATA_V3
+    </delete>
+    
     <!-- CPE 데이터 조회 -->
     <select id="selectOneCpeDicData" parameterType="HashMap" resultType="HashMap">
     	SELECT CPE_NM AS cpeNm, TITLE AS title, PART AS part, VENDOR AS vendor, PRODUCT AS product, VERSION AS version, REG_DATE AS regDate FROM NVD_CPE_DICTIONARY WHERE CPE_NM = #{cpeNm}

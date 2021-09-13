@@ -201,4 +201,11 @@
     	 WHERE CD_NO = #{cdNo}
     	  
     </update>
+    
+    <select id="getCodeDtlNm" resultType="string">
+    	SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo}
+    </select>
+    <update id="updateCodeDtlNm">
+    	UPDATE T2_CODE_DTL SET CD_DTL_NM = #{cdDtlNm} WHERE CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo}
+    </update>
 </mapper>
