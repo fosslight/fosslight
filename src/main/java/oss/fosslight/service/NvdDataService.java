@@ -56,7 +56,10 @@ public class NvdDataService {
 		// GET Nvd Meta Data
 		// 작업등록
 		try {
-			if(nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH")) {
+			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
+			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			
+			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
 				nvdMetaDataSyncJob();
 			}
@@ -83,7 +86,10 @@ public class NvdDataService {
 		}
 
 		try {
-			if(nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE")) {
+			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE");
+			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			
+			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_NVDCVE);
 				nvdCveDataSyncJob();
 			}
@@ -443,7 +449,30 @@ public class NvdDataService {
 		
 		return false;
 	}
-
+	
+	private boolean nvdMetaRetryCheckJob(String FILE_NM, String FILE_TYPE, boolean fileCheck, int cnt) {
+		int maxCnt = 3;
+		
+		log.debug("5초후 재시도합니다.");
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			fileCheck = nvdMetaCheckJob(FILE_NM, FILE_TYPE);
+		} catch (IOException ioe) {
+			log.error(ioe.getMessage(), ioe);
+		}
+		
+		if(!fileCheck && cnt < maxCnt) {
+			fileCheck = nvdMetaRetryCheckJob(FILE_NM, FILE_TYPE, fileCheck, ++cnt);
+		}
+		
+		return fileCheck;
+	}
+	
 	private void nvdFeedDataDownloadJob(String FILE_NAME) throws Exception  {
 		String NVD_CVE_PATH = env.getProperty("root.dir");
 		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
