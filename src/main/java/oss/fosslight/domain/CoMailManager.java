@@ -613,6 +613,8 @@ public class CoMailManager extends CoTopComponent {
 					}
 
 					convertDataMap.put("contentsSubTitle", subTitle);
+				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT.equals(bean.getMsgType())) {
+					convertDataMap.put("binaryCommitResult", bean.getBinaryCommitResult());
 				}
     		}
     		
@@ -697,6 +699,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT:
     			
     			// to : project creator + cc : watcher + reviewer
     			prjInfo = mailManagerMapper.getProjectInfo(bean.getParamPrjId());
@@ -808,6 +811,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT.equals(bean.getMsgType())
     						) {
         				if(!isEmpty(prjInfo.getReviewer())) {
         					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
@@ -3247,7 +3251,7 @@ public class CoMailManager extends CoTopComponent {
 			helper.setText(coMail.getEmlMessage(), true);
 			
 			// Email Send
-			mailSender.send(message);
+			//mailSender.send(message);
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료
 			mailManagerMapper.updateSendStatus(coMail);

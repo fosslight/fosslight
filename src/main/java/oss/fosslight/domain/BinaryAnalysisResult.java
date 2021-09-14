@@ -104,6 +104,10 @@ public class BinaryAnalysisResult extends ComBean implements Serializable {
 	
 	private String matchName;
 
+	private String prjId;
+	
+	private String result;
+	
 	public String getActionId() {
 		return actionId;
 	}
@@ -576,5 +580,21 @@ public class BinaryAnalysisResult extends ComBean implements Serializable {
 
 	public void setMatchName(String matchName) {
 		this.matchName = matchName;
+	}
+
+	public String getPrjId() {
+		return prjId;
+	}
+
+	public void setPrjId(String prjId) {
+		this.prjId = prjId;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
 	}
  }

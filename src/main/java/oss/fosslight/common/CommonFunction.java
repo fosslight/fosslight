@@ -503,15 +503,17 @@ public class CommonFunction extends CoTopComponent {
 		return rtnVal;
 	}
 	
-	public static String makeLicenseFromFiles(OssMaster _ossBean) {
+	public static String makeLicenseFromFiles(OssMaster _ossBean, boolean booleanflag) {
 		List<String> resultList = new ArrayList<>(); // declared License
 		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
 		
 		if (_ossBean != null) {
 			for (OssLicense license : _ossBean.getOssLicenses()) {
 				String licenseName = license.getLicenseName();
-				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-				licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+				if (booleanflag) {
+					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
+					licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+				}
 				
 				if(!resultList.contains(licenseName)) {
 					resultList.add(licenseName);
@@ -520,8 +522,10 @@ public class CommonFunction extends CoTopComponent {
 
 			if(detectedLicenseList != null) {
 				for(String licenseName : detectedLicenseList) {
-					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-					licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+					if (booleanflag) {
+						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
+						licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+					}
 					
 					if(!resultList.contains(licenseName)) {
 						resultList.add(licenseName);
