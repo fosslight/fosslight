@@ -27,6 +27,6 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             cd /home/ubuntu/workspace/fosslight
-            docker-compose down
+            sudo docker-compose down
             git pull
-            docker-compose up --build -d
+            sudo docker-compose up --build -d
