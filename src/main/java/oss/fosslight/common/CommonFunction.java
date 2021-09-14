@@ -3687,7 +3687,9 @@ public class CommonFunction extends CoTopComponent {
 	    props.put("input.encoding", "UTF-8");
 	    
 		ve.init(props);
-		
+
+		// Core Logic: Velocity engine decides which template should be loaded according to the model's template URL
+		// Refer to the 'template' directory for further information.
 		try {
 			Template template = ve.getTemplate((String) model.get("templateURL"));
 			template.merge(context, writer);

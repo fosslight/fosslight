@@ -1,8 +1,10 @@
 #set($hash = "#")
 $hash$hash$hash Open Source Software Notice $hash$hash$hash
 
-#if($!{editCompanyYn} == "Y")This product from $!{companyNameFull} contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.#end
-#if($!{editCompanyYn} != "Y")This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.#end
+#if($!{editCompanyYn} == "Y")This product from $!{companyNameFull} contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
+#end
+#if($!{editCompanyYn} != "Y")This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
+#end
 
 #if($!{disclosureObligationSize} != "0")	
 #foreach( $!{closeSource} in $!{disclosureObligationList} ) 
