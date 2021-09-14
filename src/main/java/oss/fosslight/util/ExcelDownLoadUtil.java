@@ -2152,7 +2152,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
-					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean)); // Declared & Detected License Info (중복제거)
+					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
 					
 					// License Comments
 					cellIdx++;
@@ -2195,7 +2195,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String ossName = ocBean.getOssName().replace("&#39;", "\'");
 					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
 					
-					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean).split(","));
+					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
 					
 					for(String licenseNm : licenseList) {
 						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);
