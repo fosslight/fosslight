@@ -506,7 +506,9 @@
 						contentType : 'application/json',
 						success : function(data){
 							var length = data.ossList.length;
-							if (length > 1) {
+							if (length == 1) {
+								alertify.alert('At least two OSS versions are required.', function(){});
+							} else if (length > 1) {
 								$.ajax({
 									url : '<c:url value="/oss/checkExistsOssByname"/>',
 									type : 'GET',
