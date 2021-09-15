@@ -392,7 +392,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				return "binAndroid"; 
 			} else {
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
-				
+
+				// Convert Map to Apache Velocity Template
 				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
 			}
 		}
