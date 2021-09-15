@@ -14,17 +14,13 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Sleep for 20 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '20s'
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DEV_REMOTE_IP }}
           username: ${{ secrets.DEV_REMOTE_SSH_ID }}
           key: ${{ secrets.DEV_REMOTE_SSH_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
+          port: ${{ secrets.DEV_REMOTE_SSH_PORT }}
           script: |
             cd /home/ubuntu/workspace/fosslight
             sudo docker-compose down
