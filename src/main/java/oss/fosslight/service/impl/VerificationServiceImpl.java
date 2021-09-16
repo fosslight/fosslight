@@ -1915,10 +1915,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
 		if(!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
-			
-			for(OssLicense license : bean.getOssLicenses()) {
-				if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
-					return license.getOssCopyright();
+			if (bean != null) {
+				for(OssLicense license : bean.getOssLicenses()) {
+					if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
+						return license.getOssCopyright();
+					}
 				}
 			}
 		}
