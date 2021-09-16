@@ -6,6 +6,7 @@
 package oss.fosslight.api.controller.v1;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
+import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
@@ -487,7 +489,17 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC");
+
+						// get Excel Sheet name starts with SRC
+						List<String> sheet = null;
+						try {
+							sheet = ExcelUtil.getSheetNoStartsWith("SRC", Arrays.asList(bean),
+									CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+						}  catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+
+						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC", sheet.toArray(new String[sheet.size()]));
 						String errorMsg = (String) result.get("errorMessage");
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
@@ -631,7 +643,8 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						ossReportBean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN");
+						String[] sheet = new String[1];
+						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN", sheet);
 						String errorMsg = (String) result.get("errorMessage");
 						ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
