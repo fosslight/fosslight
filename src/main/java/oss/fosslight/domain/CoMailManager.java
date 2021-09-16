@@ -3251,7 +3251,7 @@ public class CoMailManager extends CoTopComponent {
 			helper.setText(coMail.getEmlMessage(), true);
 			
 			// Email Send
-			//mailSender.send(message);
+			mailSender.send(message);
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료
 			mailManagerMapper.updateSendStatus(coMail);
