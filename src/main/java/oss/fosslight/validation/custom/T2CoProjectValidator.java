@@ -244,7 +244,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							break;
 						}
 						
-						if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+						if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())
+								&& !ossInfoByName.containsKey(checkKey)) {
 							if(CommonFunction.isAdmin() && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 							} else if(!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
@@ -523,7 +524,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							break;
 						}
 						
-						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())
+								&& !ossInfoByName.containsKey(checkKey)) {
 							if (CommonFunction.isAdmin()
 									&& !errMap.containsKey("LICENSE_NAME." + bean.getComponentId())) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
@@ -933,7 +935,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							break;
 						}
 						
-						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())
+								&& !ossInfoByName.containsKey(checkKey)) {
 							if (CommonFunction.isAdmin()) {
 								errMap.put("LICENSE_NAME." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
 							} else {
@@ -1783,7 +1786,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							
 							String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
 							if (!CoCodeManager.LICENSE_INFO_UPPER
-									.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
+									.containsKey(avoidNull(license.getLicenseName()).toUpperCase())
+									&& !ossInfo.containsKey(checkKey)) {
 								if (CommonFunction.isAdmin()) {
 									errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
 								} else {
@@ -1803,7 +1807,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 							}
 							
 							String LICENSE_KEY = "LICENSE_NAME." + bean.getGridId();
-							if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
+							if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())
+									&& !ossInfo.containsKey(checkKey)) {
 								if (CommonFunction.isAdmin()) {
 									errMap.put(LICENSE_KEY, "LICENSE_NAME.UNCONFIRMED");
 								} else {
