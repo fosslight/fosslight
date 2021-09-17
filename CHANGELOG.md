@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.2.6 (17/09/2021)
+## Changes
+## 🚀 Features
+
+- Update warning message condition @FOSSLight-dev (#132)
+- Add function to save NVD Feed Data from 2002 @FOSSLight-dev (#118)
+- Search website regardless of http://, https://, www. @doggai10 (#114)
+
+## 🔧 Maintenance
+- Add alert when the number of OSS versions is 1 @riyenas0925 (#123)
+- Add line separator between notice intro and OSS list @wkdalsgh192 (#121)
+- Add user guide and restriction to license popup @riyenas0925 (#125)
+
+## 🐛 Hotfixes
+
+- Update Oss Sync Function @FOSSLight-dev (#117)
+
+---
+
 ## v1.2.5 (09/09/2021)
 ## Changes
 ## 🚀 Features
