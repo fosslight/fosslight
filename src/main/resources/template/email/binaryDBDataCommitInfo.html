@@ -30,21 +30,9 @@
 							#if( $contentsSubTitle )
 								<p style="font-size:12px;">$!contentsSubTitle</p>
 							#end
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<col style="width:70%">
-        							<col style="width:*">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">File Name</th>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Result</th>
-									</tr>
-									#foreach( $binaryList in $binaryCommitResult )
-									<tr>
-										<td style="padding:5px;">$!binaryList.binaryName ($!binaryList.actionType)</td>
-										<td style="padding:5px;">$!binaryList.result</td>
-									</tr>
-									#end
-								</table>
-								<br />
+							#if( $comment )
+								<div style="padding:10px;font-size:12px;font-weight:bold;">$!comment</div>
+							#end
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
 								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
 								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
