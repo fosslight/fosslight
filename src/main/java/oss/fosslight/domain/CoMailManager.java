@@ -613,8 +613,6 @@ public class CoMailManager extends CoTopComponent {
 					}
 
 					convertDataMap.put("contentsSubTitle", subTitle);
-				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT.equals(bean.getMsgType())) {
-					convertDataMap.put("binaryCommitResult", bean.getBinaryCommitResult());
 				}
     		}
     		

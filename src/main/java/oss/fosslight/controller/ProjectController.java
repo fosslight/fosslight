@@ -2037,10 +2037,13 @@ public class ProjectController extends CoTopComponent {
 		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
 		projectService.registBom(prjId, merge, projectIdentification);
 
+		Map<String, String> resMap = new HashMap<>();
+		
 		try {
 			Project param = new Project();
 			param.setPrjId(prjId);
 			Project pDat = projectService.getProjectDetail(param);
+			resMap.put("identificationStatus", pDat.getIdentificationStatus());
 			History h = projectService.work(pDat);
 			h.sethAction(CoConstDef.ACTION_CODE_NEEDED);
 			historyService.storeData(h); // 메일로 보낼 데이터를 History에 저장합니다. -> h.gethData()로 확인 가능
@@ -2048,7 +2051,7 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		
-		return makeJsonResponseHeader(null);
+		return makeJsonResponseHeader(resMap);
 	}
 	
 	/**

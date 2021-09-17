@@ -130,6 +130,8 @@ var bom_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(data){
+				curIdenStatus = data.identificationStatus;
+				
 				var param = {referenceId : '${project.prjId}', merge : 'N'};
 				bom_data.getJqGrid(param);
 				
