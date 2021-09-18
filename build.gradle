@@ -3,6 +3,8 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
 	id 'war'
+	id 'eclipse' // optional (to generate Eclipse project files)
+	id 'idea' // optional (to generate IntelliJ IDEA project files)
 }
 
 group = 'oss.fosslight'
@@ -23,6 +25,9 @@ repositories {
 	mavenCentral()
 }
 
+test {
+	useJUnitPlatform()
+}
 
 bootWar.enabled = true // (1)
 war.enabled = false  // (2)
@@ -41,8 +46,13 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude module: 'junit'
+	}
+
+	testImplementation(platform('org.junit:junit-bom:5.8.0'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+
 	implementation group: 'javax.cache', name: 'cache-api', version: '1.1.1'
 	implementation group: 'org.ehcache', name: 'ehcache', version: '3.9.2'
 	
