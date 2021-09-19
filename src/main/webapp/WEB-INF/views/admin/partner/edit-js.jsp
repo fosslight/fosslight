@@ -356,8 +356,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			
 			$('.btnCommentHistory').on('click', function(e){
 	            e.preventDefault();
-	            openCommentHistory("3rd", "${detail.partnerId}");
-	        });
+                openCommentHistory('<c:url value="/comment/popup/3rd/${detail.partnerId}"/>');
+
+            });
 			
 			$(window).resize(function(){
 				fn.gridHeaderResize();

@@ -30,8 +30,8 @@
 		
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory("prj", "${project.prjId}");
-		});
+            openCommentHistory('<c:url value="/comment/popup/prj/${project.prjId}"/>');
+        });
 		
 		// distribution까지 진행되는 경우
 		isChangeModelInfo = "${!(project.destributionStatus ne 'NA' and (not empty project.destributionStatus or project.verificationStatus eq 'CONF') and !empty project.distributeDeployTime)}";
