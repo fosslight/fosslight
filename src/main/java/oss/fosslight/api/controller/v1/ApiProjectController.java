@@ -458,7 +458,7 @@ public class ApiProjectController extends CoTopComponent {
 	public CommonResult ossReportSrc(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "OSS Report > sheetName : 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
+    		@ApiParam(value = "OSS Report > sheetName : all sheets starting with 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
     		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
