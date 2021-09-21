@@ -1,13 +1,13 @@
 #Copyright (C) Sameer1046
 #SPDX-License-Identifier: AGPL-3.0-only
 #Build the image from source
-FROM gradle:4.7.0-jdk8-alpine AS build
+FROM gradle:6.8.2-jdk8 AS build
 
 COPY --chown=gradle:gradle . /home/gradle/src
 
 WORKDIR /home/gradle/src
 
-RUN gradle build --no-daemon
+RUN gradle build --no-daemon --exclude-task test
 
 
 #Create the containerized app
