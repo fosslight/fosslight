@@ -1095,7 +1095,7 @@ var src_grid = {
 												  , cloneToTop:true
 		});
 		
-		$('#srcList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#srcList').closest(".ui-jqgrid-bdiv").css({"height":"auto", "overflow-y" : "scroll"});
 	}
 }
 </script>

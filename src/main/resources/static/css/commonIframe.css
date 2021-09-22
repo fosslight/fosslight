@@ -199,6 +199,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 /*label span.fileex_back a*/
 /* ===== Btn ===== */
 .btnLayout {clear:left;display:inline-block;width:100%;padding:15px 0;}
+.btnLayout#belowGroup {display:none;}
 /*.btnLayout .btnColor.red {padding:0 10px 2px;width:auto;}*/
 .btnColor {display:inline-block;width:68px;height:21px;line-height:18px;text-align:center;vertical-align:top;color:#fff !important;font-family:Tahoma;font-weight:bold;cursor:pointer;border:none;/*border:1px solid #7b7b7;border-radius:3px;*/background:#a8a8a8;}
 input.btnColor {height:23px;padding-bottom:2px;line-height:normal;}

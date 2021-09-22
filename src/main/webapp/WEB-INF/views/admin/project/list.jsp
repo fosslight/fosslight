@@ -127,7 +127,7 @@
 			</form>
 		</fieldset>
 		<!---->
-		<div class="btnLayout">
+		<div class="btnLayout" id="upperGroup">
 			<input type="button" value="Reject" class="btnReject btnColor left" style="display: none;"/>
 			
 			<!-- Popup -->
@@ -176,7 +176,7 @@
 			<div id="pager"></div>
 		</div>
 		<!---->
-		<div class="btnLayout">
+		<div class="btnLayout" id="belowGroup">
 			<span class="left">
 				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
 				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>

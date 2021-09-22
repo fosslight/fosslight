@@ -193,12 +193,6 @@
 				<!---->
 				<!---->
 				<div class="btnLayout">
-		            <span class="right">
-			            <c:if test="${project.dropYn ne 'Y'}">
-			                <input type="button" value="Reset" class="btnColor btnReset partyBtn idenReset" onclick="party_evt.reset()"/>
-			                <input type="button" id="btnPartnerSaveUp"  value="Save" class="btnColor red btnSave idenSave" onclick="party_evt.save()"/>
-		            	</c:if>
-	            	</span>
 		        </div>
 				<div class="jqGridSet partyBtn">
 					<table id="list3"><tr><td></td></tr></table>
@@ -336,13 +330,6 @@
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn" style="width: 115px;" />
                     	</c:if>
-                    </span>
-                    <span class="right">
-                        <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
-                        <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
-	                        <input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
                     </span>
                 </div>
 				<!---->
@@ -519,13 +506,6 @@
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn" style="width: 115px;" />
                    		</c:if>
-                    </span>
-                    <span class="right">
-                        <input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
-                        <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
-	                        <input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
                     </span>
                 </div>
 				<div class="jqGridSet binBtn">
@@ -754,13 +734,6 @@
 	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn" style="width: 115px;" />
                     	</c:if>
                     </span>
-                    <span class="right">
-                        <input type="button" value="Export" onclick="binAndroid_fn.downloadExcel()" class="btnColor red btnExpor binAndroidBtn" />
-                        <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="binAndroidReset" type="button" value="Reset" class="btnColor btnReset binAndroidBtn idenReset" />
-	                        <input id="binAndroidSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
-                    </span>
                 </div>
 				<div class="jqGridSet binAndroidBtn">
 					<table id="binAndroidList"><tr><td></td></tr></table>
@@ -808,13 +781,6 @@
 							 </c:if>
 						</span>
 					</c:if>
-                    <span class="right">
-                        <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
-                        <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="bomReset" type="button" value="Reset" class="btnColor btnReset idenReset" />
-	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>
-                        </c:if>
-                    </span>
                 </div>
 				<div class="jqGridSet">
 					<table id="bomList"><tr><td></td></tr></table>

@@ -1562,7 +1562,7 @@ var binAndroid_grid = {
 		});
 		
 		
-		$('#binAndroidList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#binAndroidList').closest(".ui-jqgrid-bdiv").css({"height":"auto", "overflow-y" : "scroll"});
 	}
 }
 

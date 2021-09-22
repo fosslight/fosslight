@@ -657,7 +657,7 @@ var bom_data = {
 				, autoencode: true
 				, editurl:'clientArray'
 	 			, autowidth: true
-	 			, height: '500px'
+	 			, height: 'auto'
 				, gridview: true
 			   	, pager: '#bomPager'
 				, recordpos:'right'

@@ -1161,7 +1161,7 @@ var bin_grid = {
 												  , cloneToTop:true
 		});
 		
-		$('#binList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#binList').closest(".ui-jqgrid-bdiv").css({"height":"auto", "overflow-y" : "scroll"});
 	}
 }
 </script>
