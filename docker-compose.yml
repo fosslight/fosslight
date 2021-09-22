@@ -7,7 +7,7 @@ services:
       image: mariadb:10
       container_name: fosslight_db
       ports:
-        - 3306:3306
+        - "3306:3306"
       volumes:
         - ./db/conf.d:/etc/mysql/conf.d
         - ./db/data:/var/lib/mysql
@@ -17,14 +17,14 @@ services:
         TZ: Asia/Seoul
       restart: always
       expose:
-        - '3306'
+        - "3306"
     web:
        build: .
        container_name: fosslight_web
        depends_on:
          - db
        ports:
-         - 8180:8180
+         - "8180:8180"
        volumes:
          - ./web-data:/data/fosslight
        environment:
@@ -42,11 +42,11 @@ services:
       hostname: mail
       domainname: fosslight.org
       ports:
-        - 25:25
-        - 587:587
+        - "25:25"
+        - "587:587"
       expose:
-        - '25'
-        - '587'
+        - "25"
+        - "587"
       volumes:
         - ./mail/maildata/:/var/mail
         - ./mail/mailstate/:/var/mail-state
