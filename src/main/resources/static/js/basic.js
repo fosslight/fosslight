@@ -332,8 +332,12 @@ var loading = {
 
 /* iFrame에서 호출 (보안문제로 broadcast하여 호출) */
 function receiveMessage(event) {
-	var data = JSON.parse(event.data);
-	
+	var data = event.data;
+
+	if (typeof data === 'string') {
+		data = JSON.parse(event.data);
+	}
+
 	switch(data.action){
 		case 'create':
 			createTab(data.tabData[0], data.tabData[1]);
