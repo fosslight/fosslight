@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.8 (01/01/1970)
+## Changes
+## 🔧 Maintenance
+
+- Exclude test on release @soimkim (#144)
+
+---
+
 ## v1.2.7 (24/09/2021)
 ## Changes
 ## 🚀 Features
