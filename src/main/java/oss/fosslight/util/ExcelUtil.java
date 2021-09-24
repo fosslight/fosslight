@@ -73,7 +73,24 @@ public class ExcelUtil extends CoTopComponent {
 	// Mapper
 	private static ProjectMapper 	projectMapper 		= (ProjectMapper) 		getWebappContext().getBean(ProjectMapper.class);
 	private static CodeMapper 		codeMapper 			= (CodeMapper) 			getWebappContext().getBean(CodeMapper.class);
-	
+
+	// Sheet names that starts with specific word
+	public static List<String> getSheetNoStartsWith(String word, List<UploadFile> list, String excelLocalPath) throws InvalidFormatException, IOException {
+		List<Object> sheets = ExcelUtil.getSheetNames(list, excelLocalPath);
+
+		List<String> sheetNoList = new ArrayList<>();
+		for (Object sheet : sheets) {
+			HashMap<String, String> info = (HashMap<String, String>) sheet;
+			String sheetName = info.get("name");
+			String sheetNo = info.get("no");
+			if (sheetName.startsWith(word)) {
+				sheetNoList.add(sheetNo);
+			}
+		}
+
+		return sheetNoList;
+	}
+
 	public static List<Object> getSheetNames(List<UploadFile> list, String excelLocalPath) throws InvalidFormatException, FileNotFoundException, IOException {
 		List<Object> sheetNameList = new ArrayList<Object>();
 		//파일 만들기
