@@ -50,7 +50,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --exclude-task test
          
     - name: Rename package
       run: mv build/libs/FOSSLight*.war FOSSLight.war
