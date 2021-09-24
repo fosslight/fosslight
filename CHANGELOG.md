@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.2.8 (01/01/1970)
+## v1.2.8 (24/09/2021)
 ## Changes
 ## 🔧 Maintenance
 
