@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.7 (24/09/2021)
+## Changes
+## 🚀 Features
+
+- Update warning message condition @FOSSLight-dev (#143)
+- Change load all sheets starting with SRC in oss_report_src (REST_API) @riyenas0925 (#131)
+- Add deactivate flag on getOssInfo @doggai10 (#129)
+- Update warning message condition @FOSSLight-dev (#132)
+
+## 🐛 Hotfixes
+
+- Update warning message condition @FOSSLight-dev (#143)
+
+## 🔧 Maintenance
+
+- unquoted port mapping may be interpreted as a base-60 value @riyenas0925 (#139)
+- Initialize test code setting @astrod (#135)
+
+---
+
 ## v1.2.6 (17/09/2021)
 ## Changes
 ## 🚀 Features
