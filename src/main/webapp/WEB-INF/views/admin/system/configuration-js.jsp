@@ -79,6 +79,22 @@
 			} else {
 				params["smtpFlag"] = "N";
 			}
+
+			// External Service Setting
+			var externalServiceFlag = $("#externalServiceFlag").prop("checked");
+
+			if(externalServiceFlag){
+				params["externalServiceFlag"] = "Y";
+
+				var externalServiceDetail = {};
+			<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_SERVICE_SETTING'))}" varStatus="status">
+				externalServiceDetail["${code[0]}"] = $("#external${code[0]}").val();
+			</c:forEach>
+				params["externalServiceDetail"] = externalServiceDetail;
+
+			} else {
+				params["externalServiceFlag"] = "N";
+			}
 			
 			// Menu Detail
 				// ㄴ DashBoard
