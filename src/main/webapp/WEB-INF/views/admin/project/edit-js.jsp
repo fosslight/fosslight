@@ -134,39 +134,39 @@
 			})				
 			
 			$('#drop').on('click', function(){
-				if(distributionStatus == "PROC"){
-					var br = "<br>";
-					var comment = "Thank you so much for your patience." + br;
-					comment += "The distribution has already begun and has not yet completed." + br;
-					comment += "It takes a long time to deploy because of the large packaging file size.";
-					
-					alertify.error(comment, 0);
+				var comment = CKEDITOR.instances.editor2.getData();
+				if(comment == ""){
+					alertify.alert("Please leave a comment.", function(){});
+				}else{
+					if(distributionStatus == "PROC"){
+						var br = "<br>";
+						var comment = "Thank you so much for your patience." + br;
+						comment += "The distribution has already begun and has not yet completed." + br;
+						comment += "It takes a long time to deploy because of the large packaging file size.";
+						
+						alertify.error(comment, 0);
 
-					return false;
-				} else if(distributionStatus == "RSV"){
-					var dropMessage = "If you drop this project, then distribution will be cancled.";
+						return false;
+					} else if(distributionStatus == "RSV"){
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
-					alertify.confirm(dropMessage, function (e) {
-						if (e) {
-							fn.cancelDistributeReserve();
-						} else {
-							return false;
-						}
-					});
-				} else if(distributionStatus == "DONE"){
-					var dropMessage = "If you drop this project, then distribution will be cancled.";
+						alertify.confirm(dropMessage, function (e) {
+							if (e) {
+								fn.cancelDistributeReserve();
+							} else {
+								return false;
+							}
+						});
+					} else if(distributionStatus == "DONE"){
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
-					alertify.confirm(dropMessage, function (e) {
-						if (e) {
-							fn.deleteWithOSDD();
-						} else {
-							return false;
-						}
-					});
-				} else {
-					var comment = CKEDITOR.instances.editor2.getData();
-					if(comment == ""){
-						alertify.alert("Please leave a comment.", function(){});
+						alertify.confirm(dropMessage, function (e) {
+							if (e) {
+								fn.deleteWithOSDD();
+							} else {
+								return false;
+							}
+						});
 					} else {
 						fn.exeProjectDrop();
 					}
