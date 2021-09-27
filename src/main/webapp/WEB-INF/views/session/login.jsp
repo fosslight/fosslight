@@ -276,6 +276,8 @@
         </script>
     </head>
     <body id="login_before">
+	<a href="<c:url value='/session/login?lang=ko' />"><spring:message code="login.lan.ko" /></a>
+	<a href="<c:url value='/session/login?lang=en' />"><spring:message code="login.lan.en" /></a>
     	<!-- Login -->
 		<div id="login" class="loginArea">
 			<div class="back">

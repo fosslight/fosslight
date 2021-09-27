@@ -6,6 +6,7 @@
 package oss.fosslight.config;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
@@ -23,6 +24,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import com.google.gson.Gson;
@@ -63,6 +66,7 @@ public class WebConfig implements WebMvcConfigurer {
 	
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(localeChangeInterceptor());
 		registry.addInterceptor(new AjaxInterceptor()).excludePathPatterns("/error", "/error/**","/viewer","/viewer/**");
 	}
 	
@@ -98,4 +102,23 @@ public class WebConfig implements WebMvcConfigurer {
 		return messageSource;
 	}
 
+	/**
+	 * 변경된 언어 정보를 기억할 로케일 리졸버를 생성한다.
+	 * 여기서는 세션에 저장하는 방식을 사용한다.
+	 * @return
+	 */
+	@Bean
+	public SessionLocaleResolver localeResolver() {
+		return new SessionLocaleResolver();
+	}
+
+	/**
+	 * 언어 변경을 위한 인터셉터를 생성한다.
+	 */
+	@Bean
+	public LocaleChangeInterceptor localeChangeInterceptor() {
+		LocaleChangeInterceptor interceptor = new LocaleChangeInterceptor();
+		interceptor.setParamName("lang");
+		return interceptor;
+	}
 }
