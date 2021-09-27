@@ -117,7 +117,7 @@ public class DownloadProcController extends CoTopComponent {
 		// 파일명이 같을 경우만 다운로드되도록 한다.
 		if(file.exists() && file.isFile()){
 			fileName+=".html";
-		    String encordedFilename = URLEncoder.encode(fileName,"UTF-8").replace("+", "%20");
+		    String encodedFilename = URLEncoder.encode(fileName,"UTF-8").replace("+", "%20");
 		    File tempFile = Paths.get(CommonFunction.emptyCheckProperty("image.temp.path", "/imagetemp")).resolve("BAT").resolve(batId).resolve(file.getName()).toFile();
 		   
 		    try {
@@ -135,7 +135,7 @@ public class DownloadProcController extends CoTopComponent {
 		    HttpHeaders responseHeaders = new HttpHeaders();
 		    
 		    responseHeaders.add(HttpHeaders.CONTENT_TYPE, "application/octet-stream");
-		    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encordedFilename + ";filename*= UTF-8''" + encordedFilename);
+		    responseHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + encodedFilename + ";filename*= UTF-8''" + encodedFilename);
 		    responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Long.toString(fileSystemResource.contentLength()));
 		    
 		    responseEntity = new ResponseEntity<FileSystemResource>(fileSystemResource, responseHeaders, HttpStatus.OK);

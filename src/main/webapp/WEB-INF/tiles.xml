@@ -126,6 +126,14 @@
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
     </definition>
+    <definition name="tiles/admin/oss/osssyncpopup"    template="/WEB-INF/views/admin/oss/syncpopup.jsp">
+        <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
+        <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
+    </definition>
+    <definition name="tiles/ajax/oss/ossSyncDetailview" 	template="/WEB-INF/views/admin/oss/AJAX/ossSyncDetailview.jsp">
+		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
+		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
+	</definition>
     
 	<!-- 실서버 임시 index 페이지 -->
 	<definition name="tiles/main/index" extends="tiles/layout/template"/>

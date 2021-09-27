@@ -14,6 +14,7 @@
 	var commentTemp = '';
 	var gLicenseData = new Array();
 	var detectedLicenseValid = true;
+	var deactivateFlag = "N";
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
@@ -30,6 +31,7 @@
 			data.clone = $('.multiTxtSet').clone().html();
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
 			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
+			deactivateFlag = (data.detail&&data.detail.deactivateFlag)||"N";
 			//데이터 초기화(컨트롤러에서 가져온 데이터)
 			if(data.detail){
 				data.syncData(data.detail, false);
@@ -170,7 +172,8 @@
 						break;
 					case 'deactivateFlag':
 						if(v.toUpperCase() == "Y"){
-							$("#deactivateFlag").attr("checked", true).val(v);
+							$("#deactivateFlag").attr("checked", true);
+							$("[name='deactivateFlag']").val(v);
 						}
 						
 						break;
@@ -192,24 +195,6 @@
 				$('.pop').hide();
 				$('#blind_wrap').hide();
 			}); // 팝업 닫기
-			
-			//라이센스 라디오버튼 초기화
-			$('.radioSet input').on('click', function(){
-				var id = $(this).attr('id');
-				
-				if(id == 'single'){
-					$('.licenseSingle').show();
-					$('.licenseMulti').hide();
-				}
-				
-				if(id == 'multi'){
-					$('.licenseSingle').hide();
-					$('.licenseMulti').show();
-					getOssGridRows('#_licenseChoice');
-				}
-				
-				showLicenseText();
-			});
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
@@ -254,51 +239,47 @@
 					$("span.retxt").hide();
 					// 그리드 에러 메세지 지우기
 					$("div.retxt").remove();
-				
-					// 멀티 일경우 라이센스는 1건 이상이어야 한다.
-					var licenseDiv = $('input[type=radio]:checked').val();
-					
-					if(licenseDiv == 'M'){
-						if($("#_licenseChoice").jqGrid("getDataIDs").length < 1) {
-							alertify.alert("No licenses entered.");
-							
-							return false;
-						} else if($("#_licenseChoice").jqGrid("getDataIDs").length < 2) {
-							alertify.alert("For Multi / Dual License, you must enter two or more licenses.");
 
+					// 멀티 일경우 라이센스는 1건 이상이어야 한다.
+					var licenseDiv = "";
+					var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+					switch (licenseChoiceLength) {
+						case 0:
+							alertify.alert("No licenses entered.", function(){});
 							return false;
-						}
+							break;
+						case 1:
+							$("input[name=licenseDiv]").val("S");
+							licenseDiv = "S";
+							break;
+						default:
+							$("input[name=licenseDiv]").val("M");
+							licenseDiv = "M";
+							break;
 					}
-				
+
 					var rows = getOssGridRows('#_licenseChoice');
 					var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 					var gridStr = "_licenseChoice";
 					var jsValidResult = true;
 				
-					if(licenseDiv == 'M'){
-						dataIds.forEach(function(dataId){
-							var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
-							var licenseName = rowData.licenseNameEx;
+					dataIds.forEach(function(dataId){
+						var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+						var licenseName = rowData.licenseNameEx;
 
-							if(checkLicenseSelected(licenseName) == null) {
-								var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
+						if(checkLicenseSelected(licenseName) == null) {
+							var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
 
-								if(errRow) {
-									errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
-								}
-
-								$("div.retxt._licenseChoice_"+dataId).show();
-								
-								jsValidResult = false;
+							if(errRow) {
+								errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
 							}
-						});
-					} else {
-						if(checkLicenseSelected($("#licenseName").val()) == null) {
-							$("#licenseName").parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
 
+							$("div.retxt._licenseChoice_"+dataId).show();
+							
 							jsValidResult = false;
 						}
-					}
+					});
 					
 					if(!jsValidResult || !detectedLicenseValid) {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
@@ -308,10 +289,20 @@
 					}
 
 					var editorVal = CKEDITOR.instances.editor.getData();
-					var deactivateFlag = $("#deactivateFlag").val();
-					if(editorVal == "" && deactivateFlag == "Y") {
-						alertify.alert("Please enter reason for deactivate");
-						return false;
+					var localDeactivateFlag = $("[name='deactivateFlag']").val();
+
+					if(editorVal == "") {
+						if(deactivateFlag == "N" 
+							&& localDeactivateFlag == "Y"){ // deactivate Flag checked
+							alertify.alert("Please enter reason for deactivate", function(){});
+							return false;
+						}
+
+						if(deactivateFlag == "Y" 
+							&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
+							alertify.alert("Please enter reason for activate", function(){});
+							return false;
+						}
 					}
 					
 					alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
@@ -337,9 +328,15 @@
 			$('#delete').on('click', function(){
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(editorVal == "") {
-					alertify.alert("Please enter reason for deletion");
+					alertify.alert("Please enter reason for deletion", function(){});
 					return false;
 				}
+
+				if(deactivateFlag == "Y"){
+					alertify.alert("Deactivated OSS couldn't be deleted.", function(){});
+					return false;
+				}
+				
 				alertify.confirm("Are you sure you want to remove this OSS?\nThis will permanently delete all datas.", function (e) {
 					if (e) {
 						$('input[name=comment]').val(editorVal);
@@ -375,7 +372,7 @@
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
 	 				var newOssId = rowData.ossId;
 	 				if(newOssId == '${ossId}'){
-	 					alertify.alert("Can not choose myself!!");
+	 					alertify.alert("Can not choose myself!!", function(){});
 	 					return;
 	 				}
 	 				
@@ -491,7 +488,63 @@
 				var isChecked = $("#deactivateFlag").prop("checked");
 				var rtnVal = isChecked ? "Y" : "N";
 				
-				$(this).val(rtnVal);
+				$("[name='deactivateFlag']").val(rtnVal);
+			});
+
+			$("#sync").on('click',function(){
+				var ossName = $("input[name=ossName]").val();
+				var ossVersion = $("input[name=ossVersion]").val();
+				var ossId = $("input[name=ossId]").val();
+
+				if(ossName!=""){
+					onAjaxLoadingHide = true;
+					$.ajax({
+						url : '<c:url value="/oss/getOssListByName"/>',
+						dataType : 'json',
+						cache : false,
+						data : {ossName : ossName},
+						contentType : 'application/json',
+						success : function(data){
+							var length = data.ossList.length;
+							if (length == 1) {
+								alertify.alert('At least two OSS versions are required.', function(){});
+							} else if (length > 1) {
+								$.ajax({
+									url : '<c:url value="/oss/checkExistsOssByname"/>',
+									type : 'GET',
+									dataType : 'json',
+									cache : false,
+									async: false,
+									data : {ossName : ossName},
+									contentType : 'application/json',
+									success : function(data){
+										if(data.isValid == 'true') {
+											var _popup = null;
+											var _encUrl = "ossName="+fn.replaceGetParamChar(ossName)+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
+											
+											if(_popup == null || _popup.closed){
+												_popup = window.open("<c:url value='/oss/osssyncpopup?"+_encUrl+"'/>", "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
+
+												if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+												}
+											} else {
+												_popup.close();
+												_popup = window.open("<c:url value='/oss/osssyncpopup?"+_encUrl+"'/>", "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
+											}
+										}
+									},
+									error : function(){
+										alertify.error('<spring:message code="msg.common.valid2" />', 0);
+									}
+								});
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				}
 			});
 		}			
 	};
@@ -504,7 +557,7 @@
 				source: licenseTags,
 				select: function( event, ui ) {
 					var target = $(this).attr("id");
-					
+
 					if(target == "licenseName"){
 						$("#licenseName").parent().find("span.retxt:first").hide();
 						var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
@@ -525,38 +578,20 @@
 					var _item = checkLicenseSelected($(this).val());
 					var target = $(this).attr("id");
 					
-					if(target == "licenseName"){
-						if(_item == null) {
-							$("#licenseName").parent().find("span.retxt:first").text('<spring:message code="msg.oss.unknown.license" />').show();
-						} else {
-							$("#licenseName").parent().find("span.retxt:first").hide();
-	
-							var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
-							$('#licenseName').val(licenseName);
-							$('input[name=licenseName]').val(_item.licenseName);
-							$('#licenseType').val(_item.licenseType);
-							$('input[name=obligationType]').val(_item.obligationCode);
-							$('#lt td').html(_item.licenseType);
-							$('#ob td').html('');
-							$(_item.obligation).appendTo('#ob td');
-							selected = true;
-						}
+					// detected License
+					$(this).parent().next("span.retxt:first").empty();
+					detectedLicenseValid = true; // reset
+					
+					if(_item != null){
+						var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+						$(this).val(licenseName);
+						selected = true;
 					} else {
-						// detected License
-						$(this).parent().next("span.retxt:first").empty();
-						detectedLicenseValid = true; // reset
+						var value = $(this).val();
 						
-						if(_item != null){
-							var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
-							$(this).val(licenseName);
-							selected = true;
-						} else {
-							var value = $(this).val();
-							
-							if(value != ""){
-								$(this).parent().next("span.retxt:first").html('<spring:message code="msg.oss.unknown.license" />').show();
-								detectedLicenseValid = false;
-							}
+						if(value != ""){
+							$(this).parent().next("span.retxt:first").html('<spring:message code="msg.oss.unknown.license" />').show();
+							detectedLicenseValid = false;
 						}
 					}
 				}
@@ -977,7 +1012,7 @@
 				onSelectRow: function(id){
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
 	 				if(rowData.ossId == '${ossId}'){
-	 					alertify.alert("Can not choose myself.");
+	 					alertify.alert("Can not choose myself.", function(){});
 					}
 				}
 			});			
@@ -1045,7 +1080,18 @@
 		createMultiLicenseText();
 		lastsel=-1;
 	}
-	
+
+	function getLicenseGroup(groups){
+		var numbers = [];
+		
+		groups.forEach(function(group){
+			var number = compareLicenseGroupMax(group);
+			numbers.push(number);
+		});
+
+		return numbers;
+	}
+		
 	//라이센스 우선순위 자동 계산
 	function autoLicense(data){
 		var licenseCount = 0;
@@ -1057,17 +1103,11 @@
 		
 		var result = '';
 		if(licenseCount != 0){
-			var numbers = [];
 			//1. 그룹별 분류하기
 			var groups = distributeGroups(data);
+			var numbers = getLicenseGroup(groups);
 			
-			//2. 각 그룹별 내부 비교하기
-			groups.forEach(function(group){
-				var number = compareLicenseGroupMax(group);
-				numbers.push(number);
-			});
-			
-			//3. 각 그룹끼리 비교하기(OR 비교)
+			//2. 각 그룹끼리 비교하기(OR 비교)
 			if(numbers.length != 1){
  				var min = getMin(numbers);
  				switch(min){
@@ -1082,6 +1122,14 @@
 					case 3:
 						result = 'Copyleft';
 						$('#licenseType').val("CP");
+						break;
+					case 4:
+						result = 'Proprietary Free';
+						$('#licenseType').val("PF");
+						break;
+					case 5:	
+						result = 'Proprietary';
+						$('#licenseType').val("NA");
 						break;
 				}
 			} else {
@@ -1099,6 +1147,14 @@
 						result = 'Copyleft';
 						$('#licenseType').val("CP");
 						break;
+					case 4:
+						result = 'Proprietary Free';
+						$('#licenseType').val("PF");
+						break;
+					case 5:	
+						result = 'Proprietary';
+						$('#licenseType').val("NA");
+						break;
 				}
 			}
 		}
@@ -1115,20 +1171,15 @@
 		})
 		var result = '';
 		if(licenseCount != 0){
-			var numbers = [];
-			
 			//1. 그룹별 분류하기
 			var groups = distributeGroups(data);
-			//2. 각 그룹별 내부 비교하기
-			groups.forEach(function(group){
-				var number = compareObligationGroupMax(group);
-				numbers.push(number);
-			});
+			var numbers = getLicenseGroup(groups);
 			
-			//3. 각 그룹끼리 비교하기(OR 비교)
-			if(numbers.length != 1){
+			//2. 각 그룹끼리 비교하기(OR 비교)
+			if(numbers.length != 1) {
  				var min = getMin(numbers);
- 				switch(min){
+ 				var number = compareObligationGroupMax(groups[numbers.indexOf(min)]);
+ 				switch(number){
 					case 1:
 						result = '<span></span>';
 						break;
@@ -1141,10 +1192,11 @@
 						$('input[name=obligationType]').val("11");
 						break;
 				}
-			}else{
+			} else {
  				var min = numbers[0];
+ 				var number = compareObligationGroupMax(groups[0]);
  				
- 				switch(min){
+ 				switch(number){
 					case 1:
 						result = '<span></span>';
 						break;
@@ -1216,9 +1268,11 @@
 	function compareLicenseGroupMax(group){
 		var max = 0;
 		var constant = {
-			'Permissive' : 1,
-			'Weak Copyleft' : 2,
-			'Copyleft'  : 3
+			'Permissive' 		: 1,
+			'Weak Copyleft' 	: 2,
+			'Copyleft'  		: 3,
+			'Proprietary Free' 	: 4,
+			'Proprietary' 		: 5
 		};
 		group.forEach(function(item,index,ref){
 			if(max < constant[item.licenseType]){
@@ -1251,7 +1305,7 @@
 	
  	//숫자배열 중 최소값 찾기(AND조건의 역순)
  	function getMin(numbers){
- 		var min = 3;
+ 		var min = 9;
  		numbers.forEach(function(number){
  			if(min > number ){
  				min = number;
@@ -1356,14 +1410,26 @@
 	}
 	
 	function validationDataSet(){
-		var licenseDiv = $('input[type=radio]:checked').val();
+		var licenseDiv = "";
+		var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+		switch (licenseChoiceLength) {
+			case 0:
+				alertify.alert("No licenses entered.", function(){});
+				return false;
+				break;
+			case 1:
+				licenseDiv = "S";
+				break;
+			default:
+				licenseDiv = "M";
+				break;
+		}
+		
 		var rows = getOssGridRows('#_licenseChoice');
 		
 		$('input[name=licenseDiv]').val(licenseDiv);
-		if(licenseDiv == 'M'){
-			$('input[name=licenseName]').val('multiple');
-		}
-		
+				
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
 		dataIds.forEach(function(dataId){
@@ -1374,11 +1440,6 @@
 			}
 			newRows.push(rowData);
 		});
-		
-		if(licenseDiv == 'M' && newRows.length < 2){
-			alertify.alert("For Multi / Dual License, you must enter two or more licenses.");
-			return false;
-		}
 		
 		$('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
 		
@@ -1401,7 +1462,7 @@
 		});
 
 		if(!nicknameFormatErrorFlag){
-			alertify.alert("Formatting error");
+			alertify.alert("Formatting error", function(){});
 			
 			return false;
 		}
@@ -1582,11 +1643,11 @@
 					_alertMsg += '</span>';
 				}
 				
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 			} else if(json.resultData) {
 				var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
 					_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 
 				for(var k in json.resultData) {
 					$(data.clone).appendTo('.multiTxtSet');
@@ -1652,9 +1713,9 @@
 					}
 					_alertMsg += '</span>';
 				}
-				alertify.alert(_alertMsg);
+				alertify.alert(_alertMsg, function(){});
 			} else if(json.resultData) {
-				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>');
+				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
 				for(var k in json.resultData) {
 					$(data.clone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
@@ -1829,20 +1890,30 @@ function modifyComment(obj){
 
 function showLicenseText(_licenseName) {
 	if(!_licenseName) {
-		var licenseDiv = $('input[type=radio]:checked').val();
-		if(licenseDiv == 'M'){
-			var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" ) ;
-			if(_selectedRow) {
-				var licenseNameEx = $('#_licenseChoice').jqGrid('getRowData',_selectedRow,'licenseNameOrg');
-				licenseName = licenseNameEx['licenseNameEx'];
-			} else {
-				if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
-					_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
-					licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
-				}
-			}
+		var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+		switch (licenseChoiceLength) {
+			case 0:
+				alertify.alert("No licenses entered.", function(){});
+				return false;
+				break;
+			case 1:
+				$("input[name=licenseDiv]").val("S");
+				break;
+			default:
+				$("input[name=licenseDiv]").val("M");
+				break;
+		}
+		
+		var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" );
+		if(_selectedRow) {
+			var licenseNameEx = $('#_licenseChoice').jqGrid('getRowData',_selectedRow,'licenseNameOrg');
+			licenseName = licenseNameEx['licenseNameEx'];
 		} else {
-			licenseName = $("#licenseName").val();
+			if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
+				_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
+				licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+			}
 		}
 	} else {
 		licenseName = _licenseName;
@@ -2127,7 +2198,7 @@ var fn = {
 		});
 		
 		if(result.length > 0){
-			alertify.alert("License must be filled in using autocomplete..");
+			alertify.alert("License must be filled in using autocomplete..", function(){});
 			return false;
 		}
 		return true;
@@ -2140,6 +2211,11 @@ var fn = {
 		} else {
 			$(target).parent().next("span.retxt").hide();
 		}
+	},
+	replaceGetParamChar : function(_param) {
+		_param = _param.replace(/&/g,"%26");
+		_param = _param.replace(/\+/g,"%2B"); 
+		 return _param;
 	}
 }
 </script>

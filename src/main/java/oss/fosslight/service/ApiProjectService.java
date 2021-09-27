@@ -17,8 +17,8 @@ public interface ApiProjectService {
 	public Map<String, Object> selectProjectList(Map<String, Object> paramMap);
 	
 	public boolean existProjectCnt(Map<String, Object> paramMap);
-	
-	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType);
+
+	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);
 	
 	public Map<String, Object> readAndroidBuildImage(UploadFile ossReportBean, UploadFile noticeHtmlBean, UploadFile resultTxtBean);
 	

@@ -6,6 +6,7 @@
 package oss.fosslight.api.controller.v1;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
+import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
@@ -109,7 +111,7 @@ public class ApiProjectController extends CoTopComponent {
     		@ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
     		@ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
     		@ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-    		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete)", required = false, allowableValues = "PROG,REQ,REV,COMP") @RequestParam(required = false) String status,
+    		@ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
     		@ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
     		@ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator){
 		
@@ -458,7 +460,7 @@ public class ApiProjectController extends CoTopComponent {
 	public CommonResult ossReportSrc(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "OSS Report > sheetName : 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
+    		@ApiParam(value = "OSS Report > sheetName : all sheets starting with 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
     		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
@@ -487,7 +489,17 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC");
+
+						// get Excel Sheet name starts with SRC
+						List<String> sheet = null;
+						try {
+							sheet = ExcelUtil.getSheetNoStartsWith("SRC", Arrays.asList(bean),
+									CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+						}  catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+
+						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC", sheet.toArray(new String[sheet.size()]));
 						String errorMsg = (String) result.get("errorMessage");
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
@@ -631,7 +643,8 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						ossReportBean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN");
+						String[] sheet = new String[1];
+						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN", sheet);
 						String errorMsg = (String) result.get("errorMessage");
 						ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");

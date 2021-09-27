@@ -165,7 +165,7 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				},
-				colNames: ['ID','License Name', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Web site', 'User Guide'<c:if test="${ct:isAdmin()}">, 'Creator', 'Created Date', 'Modifier', 'Modified Date'</c:if>],
+				colNames: ['ID','License Name', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'<c:if test="${ct:isAdmin()}">, 'Creator', 'Created Date', 'Modifier', 'Modified Date'</c:if>],
 				colModel: [
 					  {name: 'licenseId', index: 'licenseId', width: 40, align: 'center', sorttype: 'int'}
 					, {name: 'licenseName', index: 'licenseName', width: 200, align: 'left', formatter: 'linkLicenseName'}
@@ -209,7 +209,7 @@
 
 						if((diffNum > 0 && cEndDate > 0) 
 								|| (diffNum2 > 0 && mEndDate > 0)){
-							alertify.alert('<spring:message code="msg.common.search.check.date" />');
+							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
 					

@@ -73,7 +73,24 @@ public class ExcelUtil extends CoTopComponent {
 	// Mapper
 	private static ProjectMapper 	projectMapper 		= (ProjectMapper) 		getWebappContext().getBean(ProjectMapper.class);
 	private static CodeMapper 		codeMapper 			= (CodeMapper) 			getWebappContext().getBean(CodeMapper.class);
-	
+
+	// Sheet names that starts with specific word
+	public static List<String> getSheetNoStartsWith(String word, List<UploadFile> list, String excelLocalPath) throws InvalidFormatException, IOException {
+		List<Object> sheets = ExcelUtil.getSheetNames(list, excelLocalPath);
+
+		List<String> sheetNoList = new ArrayList<>();
+		for (Object sheet : sheets) {
+			HashMap<String, String> info = (HashMap<String, String>) sheet;
+			String sheetName = info.get("name");
+			String sheetNo = info.get("no");
+			if (sheetName.startsWith(word)) {
+				sheetNoList.add(sheetNo);
+			}
+		}
+
+		return sheetNoList;
+	}
+
 	public static List<Object> getSheetNames(List<UploadFile> list, String excelLocalPath) throws InvalidFormatException, FileNotFoundException, IOException {
 		List<Object> sheetNameList = new ArrayList<Object>();
 		//파일 만들기
@@ -84,7 +101,7 @@ public class ExcelUtil extends CoTopComponent {
 		int count = 0;
 		
 		for(int i = 0; i < codeExt.length; i++){
-			if(codeExt[i].equals(extType)){
+			if(codeExt[i].equalsIgnoreCase(extType)){
 				count++;
 			};
 		}
@@ -996,7 +1013,11 @@ public class ExcelUtil extends CoTopComponent {
     				
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
-    				subBean.setLicenseName(licenseCol < 0 ? "" : getCellData(row.getCell(licenseCol)));
+    				String licenseName = getCellData(row.getCell(licenseCol));
+    				if(licenseName.contains(",")) {
+    					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+    				}
+    				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
     				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				
     				if("false".equals(subBean.getLicenseText()) || "-".equals(subBean.getLicenseText())) {
@@ -1357,7 +1378,12 @@ public class ExcelUtil extends CoTopComponent {
     			// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     			// license 정보
     			OssComponentsLicense subBean = new OssComponentsLicense();
-    			subBean.setLicenseName(licenseCol < 0 ? "" : getCellData(row.getCell(licenseCol)));
+    			String licenseName = getCellData(row.getCell(licenseCol));
+    			if(licenseName.contains(",")) {
+					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+				}
+				
+				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
     			subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     			
     			if("false".equals(subBean.getLicenseText()) || "-".equals(subBean.getLicenseText())) {

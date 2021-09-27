@@ -499,6 +499,8 @@ public class CoConstDef {
 	/** Project Identification self reject */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT = "45";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY = "46";
+	/* Project Identification Binary DB Check*/
+	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT = "47";
 	/** Project Request Review(packaging) */
 	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_REQ_REVIEW = "50";
 	/** Project packaging confirm */
@@ -519,6 +521,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_CANCELED = "62";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_INVATED = "63";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
+	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
 
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
@@ -629,7 +632,8 @@ public class CoConstDef {
 	public static final String CD_LICENSE_TYPE_CP 								= "CP";
 	public static final String CD_LICENSE_TYPE_WCP 								= "WCP";
 	public static final String CD_LICENSE_TYPE_PMS								= "PMS";
-	public static final String CD_LICENSE_TYPE_PF								= "PF";
+	public static final String CD_LICENSE_TYPE_PF								= "PF"; // Proprietary Free
+	public static final String CD_LICENSE_TYPE_NA								= "NA"; // Proprietary
 	
 	/** 라이센스 Restriction 코드 **/
 	public static final String CD_LICENSE_RESTRICTION							= "226";

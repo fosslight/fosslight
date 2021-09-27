@@ -259,7 +259,7 @@
             
             function CheckChar() {
             	if(event.keyCode == 64){//@ 특수문자 체크
-            		alertify.alert("\'@\' Special characters are not allowed!");
+            		alertify.alert("\'@\' Special characters are not allowed!", function(){});
 
             		event.returnValue = false;
             	}

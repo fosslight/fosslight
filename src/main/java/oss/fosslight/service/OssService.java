@@ -103,4 +103,8 @@ public interface OssService extends HistoryConfig{
 	OssAnalysis getAutoAnalysisSuccessOssInfo(String referenceOssId);
 	
 	List<ProjectIdentification> checkOssNameData(List<ProjectIdentification> componentData, Map<String, String> validMap, Map<String, String> diffMap);
+	
+	List<OssMaster> getOssListBySync(OssMaster bean);
+
+	List<String> getOssListSyncCheck(List<OssMaster> selectOssList, List<OssMaster> standardOssList);
 }

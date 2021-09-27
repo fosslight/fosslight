@@ -42,7 +42,7 @@
 						<textarea name="description" >${searchBean.description}</textarea>
 					</dd>
 					<dd>
-						<label>WebSite</label>
+						<label>Website</label>
 						<input name="webpage" type="text" value="${searchBean.webpage}"/>
 					</dd>
 					<dd>
@@ -102,7 +102,7 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<c:if test="${ct:isAdmin()}">
 					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#/license/edit')" />
 				</c:if>
@@ -116,7 +116,7 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<c:if test="${ct:isAdmin()}">
 					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#/license/edit')" />
 				</c:if>

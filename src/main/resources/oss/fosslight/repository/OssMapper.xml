@@ -92,61 +92,31 @@
 		INSERT INTO OSS_LICENSE_DECLARED
 		(
 			OSS_ID
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'M')">
 			, LICENSE_ID
 			, OSS_LICENSE_IDX
 			, OSS_LICENSE_COMB
 			, OSS_LICENSE_TEXT
 			, OSS_COPYRIGHT
-			</if>
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'S')">
-			, LICENSE_ID
-			, OSS_LICENSE_IDX
-			, OSS_LICENSE_COMB
-			, OSS_COPYRIGHT
-			</if>
 		)VALUES(
 			#{ossId}
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'M')">
-				,(SELECT LICENSE_ID FROM LICENSE_MASTER A 
-				  WHERE A.USE_YN = 'Y' AND  (A.LICENSE_NAME = #{licenseName}
-							  OR SHORT_IDENTIFIER = #{licenseName}
-							  OR EXISTS (SELECT 1 
-											     FROM LICENSE_NICKNAME B
-											   WHERE A.LICENSE_NAME = B.LICENSE_NAME
-												   AND B.LICENSE_NICKNAME = #{licenseName})))
-				, #{ossLicenseIdx}  
-				, #{ossLicenseComb} 
-				, #{ossLicenseText} 
-				, #{ossCopyright}
-			</if>   
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'S')">
-				,(SELECT LICENSE_ID FROM LICENSE_MASTER A 
-				  WHERE A.USE_YN = 'Y' 
-				  		AND (A.LICENSE_NAME = #{licenseName}
-							  OR SHORT_IDENTIFIER = #{licenseName}
-							  OR EXISTS (SELECT 1 
-											     FROM LICENSE_NICKNAME B
-											   WHERE A.LICENSE_NAME = B.LICENSE_NAME
-												   AND B.LICENSE_NICKNAME = #{licenseName})))
-				, 1
-				, ''
-				, #{ossCopyright} 
-			</if>   
+			,(SELECT LICENSE_ID FROM LICENSE_MASTER A 
+			  WHERE A.USE_YN = 'Y' AND  (A.LICENSE_NAME = #{licenseName}
+						  OR SHORT_IDENTIFIER = #{licenseName}
+						  OR EXISTS (SELECT 1 
+										     FROM LICENSE_NICKNAME B
+										   WHERE A.LICENSE_NAME = B.LICENSE_NAME
+											   AND B.LICENSE_NICKNAME = #{licenseName})))
+			, #{ossLicenseIdx}  
+			, #{ossLicenseComb} 
+			, #{ossLicenseText} 
+			, #{ossCopyright}
 		) ON DUPLICATE KEY UPDATE
 			OSS_ID = #{ossId}
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'M')">
-				, LICENSE_ID = (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND LICENSE_NAME = #{licenseName}) 	
-				, OSS_LICENSE_IDX 	= #{ossLicenseIdx}
-				, OSS_LICENSE_COMB 	= #{ossLicenseComb}
-				, OSS_LICENSE_TEXT 	= #{ossLicenseText}
-				, OSS_COPYRIGHT 	= #{ossCopyright}
-			</if>
-			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseDiv,'S')">
-				, LICENSE_ID = (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND LICENSE_NAME = #{licenseName}) 
-				, OSS_LICENSE_IDX 	= 1
-				, OSS_LICENSE_COMB 	= ''
-			</if>
+			, LICENSE_ID = (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND LICENSE_NAME = #{licenseName}) 	
+			, OSS_LICENSE_IDX 	= #{ossLicenseIdx}
+			, OSS_LICENSE_COMB 	= #{ossLicenseComb}
+			, OSS_LICENSE_TEXT 	= #{ossLicenseText}
+			, OSS_COPYRIGHT 	= #{ossCopyright}
 	</insert>
 	
 	<insert id="insertOssLicenseDetected" parameterType="oss.fosslight.domain.OssMaster">
@@ -621,6 +591,9 @@
         </if>
         <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(deactivateFlag,'Y')">
 			AND T1.DEACTIVATE_FLAG = #{deactivateFlag}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+			AND T1.LICENSE_TYPE = #{licenseType}
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
 		GROUP BY T1.OSS_NAME
@@ -1619,15 +1592,7 @@
 		)
 	</insert>
 	<select id="selectOssDownloadLocationList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT DISTINCT A.DOWNLOAD_LOCATION 
-	  	  FROM (SELECT DOWNLOAD_LOCATION 
-	  			  FROM OSS_MASTER 
-				 WHERE OSS_ID = #{ossId}
-				 UNION ALL
-			   (SELECT DOWNLOAD_LOCATION 
-			 	  FROM OSS_DOWNLOADLOCATION 
-				 WHERE OSS_ID = #{ossId}
-			    ORDER BY SORT_ORDER ASC)) A
+		SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} ORDER BY SORT_ORDER
 	</select>
 	
 	<select id="selectOssDetectedLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">

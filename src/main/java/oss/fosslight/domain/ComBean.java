@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.springframework.util.StringUtils;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -197,6 +198,10 @@ public class ComBean extends CoTopComponent implements Serializable {
 		return sidx;
 	}
     public String getSidxEx() {
+		if(StringUtils.isEmpty(sidx)) {
+			return sidx;
+		}
+
     	return sidx.toLowerCase();
     }
 

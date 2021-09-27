@@ -503,15 +503,17 @@ public class CommonFunction extends CoTopComponent {
 		return rtnVal;
 	}
 	
-	public static String makeLicenseFromFiles(OssMaster _ossBean) {
+	public static String makeLicenseFromFiles(OssMaster _ossBean, boolean booleanflag) {
 		List<String> resultList = new ArrayList<>(); // declared License
 		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
 		
 		if (_ossBean != null) {
 			for (OssLicense license : _ossBean.getOssLicenses()) {
 				String licenseName = license.getLicenseName();
-				licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-				licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+				if (booleanflag) {
+					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
+					licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+				}
 				
 				if(!resultList.contains(licenseName)) {
 					resultList.add(licenseName);
@@ -520,8 +522,10 @@ public class CommonFunction extends CoTopComponent {
 
 			if(detectedLicenseList != null) {
 				for(String licenseName : detectedLicenseList) {
-					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-					licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+					if (booleanflag) {
+						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
+						licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+					}
 					
 					if(!resultList.contains(licenseName)) {
 						resultList.add(licenseName);
@@ -693,10 +697,24 @@ public class CommonFunction extends CoTopComponent {
 		for(OssLicense bean : andList) {
 			// 가장 Strong한 라이선스부터 case
 			switch (bean.getLicenseType()) {
-				case CoConstDef.CD_LICENSE_TYPE_CP:
-					currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 					rtnVal = bean;
 					breakFlag = true;
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(!CoConstDef.CD_LICENSE_TYPE_NA.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_PF;
+						rtnVal = bean;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP:
+					if(!CoConstDef.CD_LICENSE_TYPE_PF.equals(currentType)) {
+						currentType = CoConstDef.CD_LICENSE_TYPE_CP;
+						rtnVal = bean;
+					}
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
@@ -1911,7 +1929,7 @@ public class CommonFunction extends CoTopComponent {
 		boolean result = false;
 		
 		if(!isEmpty(CoCodeManager.CD_ROLE_OUT_LICENSE)) {
-			for(String license : licenseName.split(",")) {
+			for(String license : avoidNull(licenseName).split(",")) {
 				result = false;
 				
 				for(String s : CoCodeManager.CD_ROLE_OUT_LICENSE.split("\\|")) {
@@ -3408,15 +3426,7 @@ public class CommonFunction extends CoTopComponent {
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
 				if(!isEmpty(successOssInfo.getDownloadLocationGroup())) {
-					String downloadLocation = successOssInfo.getDownloadLocation();
-					
-					for(String url : successOssInfo.getDownloadLocationGroup().split(",")) {
-						if(!url.equals(downloadLocation)) {
-							downloadLocation += "," + url;
-						}
-					}
-					
-					successOssInfo.setDownloadLocation(downloadLocation);
+					successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
 				}
 				
 				successOssInfo.setTitle("사용자 등록 정보");
@@ -3681,7 +3691,9 @@ public class CommonFunction extends CoTopComponent {
 	    props.put("input.encoding", "UTF-8");
 	    
 		ve.init(props);
-		
+
+		// Core Logic: Velocity engine decides which template should be loaded according to the model's template URL
+		// Refer to the 'template' directory for further information.
 		try {
 			Template template = ve.getTemplate((String) model.get("templateURL"));
 			template.merge(context, writer);

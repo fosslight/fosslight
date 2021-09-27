@@ -1,5 +1,6 @@
 # 1. Update changelog
 # 2. Build the exe file and upload it in the release assets.
+# 3. Deploy the latest release to demo.fosslight.org
 
 name: Release FOSSLight
 
@@ -10,8 +11,13 @@ on:
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ref: [main, develop]
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: ${{ matrix.ref }}
     - name: update changelog with gren
       env:
         GREN_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,12 +28,12 @@ jobs:
       run: |
         git config --local user.name "github-actions[bot]"
         git add CHANGELOG.md
-        git commit -m "Update ChangeLog"
+        git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: main
+        branch: ${{ matrix.ref }}
   build:
     needs: update-changelog
     runs-on: ubuntu-18.04
@@ -44,7 +50,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build --exclude-task test
          
     - name: Rename package
       run: mv build/libs/FOSSLight*.war FOSSLight.war
@@ -59,3 +65,21 @@ jobs:
         asset_path: ./FOSSLight.war
         asset_name: FOSSLight.war
         asset_content_type: application/octet-stream
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_SSH_ID }}
+          key: ${{ secrets.REMOTE_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            cd /service/deploy/fosslight/
+            bash /service/deploy/fosslight/deploy.sh

@@ -1795,7 +1795,8 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('923', 'Self-Check List Detail Setting', 'System Detail Setting Code', 'Y'),
 	('924', 'Compliance Status Detail Setting', 'System Detail Setting Code', 'Y'),
 	('926', 'System Detail Setting', 'System Detail Setting Code', 'Y'),
-	('927', 'Notice Info', '', 'Y');
+	('927', 'Notice Info', '', 'Y'),
+	('990', 'System initialize flag', '', 'Y');
 /*!40000 ALTER TABLE `T2_CODE` ENABLE KEYS */;
 
 -- 테이블 fosslight.T2_CODE_DTL 구조 내보내기
@@ -1853,6 +1854,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '44', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} rejected : "${Project Name}"', '', 'OSS Identification has been rejected.', 44, 'Y'),
 	('102', '45', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} canceled request : "${Project Name}"', '', 'OSS Identification Review Request has been canceled.', 45, 'Y'),
 	('102', '46', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} confirmed : "${Project Name}"', '', '', 46, 'Y'),
+	('102', '47', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} commit Binary DB (${BinaryCommitResult}) : "${Project Name}"', '', '', 47, 'Y'),
 	('102', '50', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested review : "${Project Name}"', '', 'Reviewing package is requested.', 50, 'Y'),
 	('102', '51', '[FOSSLight][PRJ-${Project ID}] ${User} published OSS Notice : "${Project Name}"', '', 'OSS Notice has been published by ${User Info}', 51, 'Y'),
 	('102', '52', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} rejected : "${Project Name}"', '', 'Packaging has been rejected.', 52, 'Y'),
@@ -2003,6 +2005,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '40', 'partnerInfo.html', '', '70,71,72,73,74,75,76,77', 7, 'Y'),
 	('110', '50', 'binaryAnalysisInfo.html', '', '80,81', 8, 'Y'),
 	('110', '60', 'vulnerabilityInfo.html', '', '91,93', 9, 'Y'),
+	('110', '70', 'binaryDBDataCommitInfo.html', '', '47', 17, 'Y'),
 	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Basic Information탭 우측하단의 "Request to Open" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Request to Open" button on Basic Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
 	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Basic Informatoin탭 우측하단의 "Open" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Open" button on Basic information Tab.</p>', 812, 'Y'),
 	('120', '11', '프로젝트 모델', '', 'xlsx,xls,xlsm', 1, 'Y'),
@@ -2132,7 +2135,6 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('216', '#ffe7e', '#ffe7e7', NULL, NULL, 2, 'Y'),
 	('217', '10', 'Notice', NULL, '<span class="iconSet ops" title="Notice"></span>', 1, 'Y'),
 	('217', '11', 'Notice & Distribute', NULL, '<span class="iconSet ops" title="Notice"></span><span class="iconSet man" title="Source Code"></span>', 2, 'Y'),
-	('217', '90', 'Needs check', NULL, '', 3, 'Y'),
 	('218', 'NA', 'N/A', '', '', 3, 'Y'),
 	('219', '1', 'Company Full Name', 'FOSSLight', '', 1, 'Y'),
 	('219', '2', 'Company Short Name', '', '', 2, 'Y'),
@@ -2247,6 +2249,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('903', '002', 'www.npmjs.com/package/', '', 'npm url', 2, 'Y'),
 	('903', '003', 'pypi.org/project/', '', 'pypi url', 3, 'Y'),
 	('903', '004', 'mvnrepository.com/artifact/', '', 'maven url', 4, 'Y'),
+	('903', '005', 'pub.dev/packages/', '', 'pub url', 5, 'Y'),
+	('903', '006', 'cocoapods.org/pods/', '', 'cocoapods url', 6, 'Y'),
 	('904', '100', 'server url', '', '180', 1, 'Y'),
 	('904', '200', 'download url', '', '180', 2, 'Y'),
 	('905', '100', 'idleTime', '', '180', 1, 'Y'),
@@ -2310,7 +2314,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('918', '100', 'Distribution Flag', '', 'N', 2, 'Y'),
 	('927', '100', 'HTML', '', 'Y', 1, 'Y'),
 	('927', '101', 'TEXT', '', 'Y', 2, 'Y'),
-	('927', '102', 'SPDX', '', 'Y', 3, 'Y');
+	('927', '102', 'SPDX', '', 'Y', 3, 'Y'),
+	('990', '100', 'N', '', 'NVD Data Feed initialize flag', 1, 'Y');
 /*!40000 ALTER TABLE `T2_CODE_DTL` ENABLE KEYS */;
 
 -- 테이블 fosslight.T2_FILE 구조 내보내기

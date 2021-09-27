@@ -33,7 +33,7 @@
 						}
 					});
 				}else{
-					alertify.alert('<spring:message code="msg.dashboard.comments.confirm.nocount" />');
+					alertify.alert('<spring:message code="msg.dashboard.comments.confirm.nocount" />', function(){});
 					return false;
 				}
 			});

@@ -597,11 +597,11 @@
 					break;
 				case 0:
 					isValid = false;
-					alertify.alert("Select the Project.");
+					alertify.alert("Select the Project.", function(){});
 					break;
 				default: // 2개 이상
 					isValid = false;
-					alertify.alert("Choose only one project.");
+					alertify.alert("Choose only one project.", function(){});
 					break;
 			}
 
@@ -623,7 +623,7 @@
 						var distributionStatus = data.distributionStatus;
 						
 						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size");
+							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size", function(){});
 							return false;
 						}
 						
@@ -669,21 +669,6 @@
 				}
 			}
 			
-			if(projectStatus == "REV"){
-				$("#CSIdentification > input[type=radio]").attr("disabled", true);
-				$("#CSDrop > input[type=radio]").attr("disabled", true);
-				$("#CSDelete > input[type=radio]").attr("disabled", true);
-			}
-
-			if(dropFlag){
-				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
-			}
-			
-			if(projectStatus != "REQ" && completeFlag){
-				$("#CSDrop > input[type=radio]").attr("disabled", true); // status : REV or complete or drop 시 disabled
-				$("#CSDelete > input[type=radio]").attr("disabled", true); // status : REV or complete 시 disabled
-			}
-
 			if('${sessUserInfo.authority}'=="ROLE_ADMIN"
 				&& identificationStatus == "CONF"
 				&& (!verificationStatus
@@ -695,8 +680,21 @@
 				$("#CSComplete > input[type=radio]").attr("disabled", false);
 			} else {
 				$("#CSComplete > input[type=radio]").attr("disabled", true);
+				$("#CSDelete > input[type=radio]").attr("disabled", true);
 			}
-						
+
+			if(!dropFlag && !completeFlag){
+				$("#CSDrop > input[type=radio]").attr("disabled", false);
+			}else{
+				$("#CSDrop > input[type=radio]").attr("disabled", true);
+			}
+			
+			if(projectStatus == "REV"){
+				$("#CSIdentification > input[type=radio]").attr("disabled", true);
+				$("#CSDrop > input[type=radio]").attr("disabled", true);
+				$("#CSDelete > input[type=radio]").attr("disabled", true);
+			}
+			
 			$("#changeStatusPop").show();
 		},
 		changeStatusProc : function(){
@@ -710,11 +708,17 @@
 			var distributionStatus = $("#distributionStatus").val();
 			var completeFlag = $("#completeFlag").val();
 			var dropFlag = $("#dropFlag").val();
-			
-			if(reason.split(" ").join("") == ""){
-				alertify.alert("Please leave a comment.");
+			var commentFlag = true;
+
+			if('${sessUserInfo.authority}'=="ROLE_ADMIN") {
+				if(changeSeq == 1 || changeSeq == 4) {
+					commentFlag = false;
+				}
+			}
+
+			if(commentFlag && reason.split(" ").join("") == "") {
+				alertify.alert("Please leave a comment.", function(){});
 				$("#reason").next(".retxt").show();
-				
 				return false;
 			}
 
@@ -920,7 +924,7 @@
 		
 				createTabInFrame(tabNm, tabLk);
 			}else {
-				alertify.alert('Choose two projects.');
+				alertify.alert('Choose two projects.', function(){});
 				return false;
 			}
 		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
@@ -1052,7 +1056,7 @@
 						var diffNum = +startDate - +endDate;
 						
 						if(diffNum > 0 && endDate > 0){
-							alertify.alert('<spring:message code="msg.common.search.check.date" />');
+							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
 					
@@ -1126,19 +1130,6 @@
 						}
 					
 					$('input[id*="_releaseDate"]').attr('class', 'cal');
-
-					$("input:checkbox[id='cb_list']").click(function(){
-						var checkboxBoolean = $(this).is(":checked");
-						if (checkboxBoolean == true){
-							$("input:checkbox[name^=jqg_list_]").each(function(){
-								if (this.checked){
-									checkboxParam.push(this.name.split('_').reverse()[0]);
-								}
-							});
-						}else{
-							checkboxParam = [];
-						}
-					});
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					var role = '${sessUserInfo.authority}';

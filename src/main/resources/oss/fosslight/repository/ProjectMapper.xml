@@ -1084,6 +1084,7 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
 			, REF_COMPONENT_ID
 			</if>
+			, REF_DIV
 			, PRE_OBLIGATION_TYPE
 			, ADMIN_CHECK_YN
 			)
@@ -1123,6 +1124,14 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refComponentId)">
 			, #{refComponentId}
 			</if>
+			<choose>
+				<when test="!@oss.fosslight.util.StringUtil@isEmpty(refDiv)">
+				, #{refDiv}
+				</when>
+				<otherwise>
+				, (SELECT REFERENCE_DIV FROM OSS_COMPONENTS WHERE COMPONENT_ID = #{refComponentId})
+				</otherwise>
+			</choose>
 			, #{preObligationType}
 			, #{adminCheckYn}
 			)

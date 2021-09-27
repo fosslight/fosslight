@@ -40,20 +40,24 @@ var bin_evt = {
 		});
 		// 그리드 저장 버튼
 		$("#binSave, #binSaveUp").click(function(e){
-			e.preventDefault();
-			
-			com_fn.exitCell(_mainLastsel, "binList");
-			
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-				if (e) {
-					// 메인, 서브 그리드 세이브 모드
-					fn_grid_com.totalGridSaveMode('binList');
-					// 닉네임 체크
-					bin_fn.saveMakeData();
-				} else {
-					return false;
-				}
-			});
+			if (com_fn.checkStatus()){
+				e.preventDefault();
+				
+				com_fn.exitCell(_mainLastsel, "binList");
+				
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						// 메인, 서브 그리드 세이브 모드
+						fn_grid_com.totalGridSaveMode('binList');
+						// 닉네임 체크
+						bin_fn.saveMakeData();
+					} else {
+						return false;
+					}
+				});
+			}else {
+				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		});
 		// 프로젝트 조회 버튼
 		$('#binProjectSearchBtn').click(function(e){
@@ -339,7 +343,7 @@ var bin_fn = {
 						alertify.success('<spring:message code="msg.common.success" />');
 						
 						if(data.changeBySystemNotice && data.changeBySystemNotice && data.changeBySystemNotice != "") {
-							alertify.alert(data.changeBySystemNotice);
+							alertify.alert(data.changeBySystemNotice, function(){});
 						}
 					} else {
 						alertify.error('<spring:message code="msg.common.valid2" />');
@@ -565,7 +569,7 @@ var bin_fn = {
 				  , duplicateFlag = addListData.filter(function(a){ return a.referenceId == listData.prjId }).length > 0;
 				
 				if(duplicateFlag){
-			    	alertify.alert('<spring:message code="msg.id.duplicate" />');
+			    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){});
 
 			    	return;
 			    }
@@ -701,7 +705,7 @@ var bin_fn = {
 
 				if("false" == data.isValid) {
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
 					}
@@ -724,9 +728,9 @@ var bin_fn = {
 					bin_fn.makeOssList(data.resultData);
 					
 					if(data.validMsg) {
-						alertify.alert(data.validMsg);
+						alertify.alert(data.validMsg, function(){});
 					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr);
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
 					}
 				}
 			},

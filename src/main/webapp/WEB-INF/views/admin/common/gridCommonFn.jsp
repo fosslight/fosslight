@@ -258,10 +258,11 @@ var fn_grid_com = {
 		displayLicenseRestriction : function(cellvalue, options, rowObject){
 			var display = "";
 
-			if(cellvalue != ""  && cellvalue != undefined) {
-				display="<span class=\"iconSt review\" title=\""+cellvalue+"\" >"+cellvalue+"</span>";
+			if(cellvalue != "" && cellvalue != undefined) {
+				display = "<div class=\"tcenter\"><a class=\"iconSt review\" title=\""+cellvalue+"\" " +
+					"onclick=\"src_fn_com.showLicenseRestrictionViewPage('"+ options.gid +"','"+options.rowId+"')\">"+cellvalue+"</a></div>";
 			}
-			
+
 			return display;
 		},
 		// comment 포메터
@@ -711,13 +712,13 @@ var fn_grid_com = {
 												_popupOss = window.open("/oss/copy/"+data.validMsg+"?ossVersion="+row['ossVersion'], "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 												if(!_popupOss || _popupOss.closed || typeof _popupOss.closed=='undefined') {
-													alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 												}
 											} else {
 												_popupOss = window.open("/oss/edit", "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 												if(!_popupOss || _popupOss.closed || typeof _popupOss.closed=='undefined') {
-													alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 												}
 											}
 										} else {
@@ -788,7 +789,7 @@ var fn_grid_com = {
 								_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-									alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
@@ -839,7 +840,7 @@ var fn_grid_com = {
 							if(_popup == null || _popup.closed) {
 								_popup = window.open("/system/bat/binarypopup?"+_encUrl, "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-									alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
@@ -1057,7 +1058,7 @@ var fn_grid_com = {
 				_popupBulkOssRef = window.open("/oss/ossBulkReg?prjId="+_prjId+"&referenceDiv="+_refDiv, "ossBulkRegPopup", "width=1500, height=800, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 				if(!_popupBulkOssRef || _popupBulkOssRef.closed || typeof _popupBulkOssRef.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 				}
 			}
 		},
@@ -1113,7 +1114,7 @@ var fn_grid_com = {
 						}
 						
 						location.href = _url;
-						alertify.alert(resultData.returnMsg);
+						alertify.alert(resultData.returnMsg, function(){});
 						createTabInFrame(_prjId+'_Identify', '#/project/identification/'+_prjId+'/1');
 					}else{
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -1125,5 +1126,28 @@ var fn_grid_com = {
 				}
 			});
 		}
+}
+
+var src_fn_com = {
+	// License 상세 페이지 이동
+	showLicenseRestrictionViewPage : function(gridNm, rowid){
+		var target = $("#"+gridNm);
+		target.jqGrid('saveRow',rowid);
+
+		var licenseName = target.jqGrid('getCell',rowid,'licenseName');
+		target.jqGrid('editRow',rowid);
+
+		if(_popup == null || _popup.closed) {
+			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+
+			if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+			}
+		} else {
+			_popup.close();
+			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+		}
+
+	},
 }
 </script>

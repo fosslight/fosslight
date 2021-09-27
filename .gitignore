@@ -32,3 +32,10 @@ out/
 .vscode/
 /bin/
 /logs/
+
+### Ignore personal data folders ###
+/web-data/
+/db/data/
+/mail/maildata/
+/mail/maillogs/
+/mail/mailstate/

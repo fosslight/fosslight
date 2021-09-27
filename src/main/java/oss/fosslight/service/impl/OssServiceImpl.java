@@ -337,6 +337,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
+				param.setOssId(ossId);
+				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
+				if (ossDownloadLocation.size() > 0) {
+					StringBuilder sb = new StringBuilder();
+					
+					for(OssMaster location : ossDownloadLocation) {
+						sb.append(location.getDownloadLocation()).append(",");
+					}
+					
+					String[] ossDownloadLocations = new String(sb).split("[,]");
+					bean.setDownloadLocations(ossDownloadLocations);
+				}
+				
 				if(isMailFormat) {
 					bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
 					bean.setOssLicenses(CommonFunction.changeLicenseNameToShort(bean.getOssLicenses()));
@@ -844,41 +857,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
 		
 		// v-Diff 체크를 위해 license list를 생성
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<OssLicense> list = ossMaster.getOssLicenses();
-			int ossLicenseDeclaredIdx = 0;
+		List<OssLicense> list = ossMaster.getOssLicenses();
+		int ossLicenseDeclaredIdx = 0;
+		
+		for(OssLicense license : list) {
+			ossLicenseDeclaredIdx++;
 			
-			for(OssLicense license : list) {
-				ossLicenseDeclaredIdx++;
-				
-				OssMaster om = new OssMaster(
-					  Integer.toString(ossLicenseDeclaredIdx)
-					, ossMaster.getOssId()
-					, license.getLicenseName()
-					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
-					, license.getOssLicenseText()
-					, license.getOssCopyright()
-					, ossMaster.getLicenseDiv()
-				);
-				
-				ossMapper.insertOssLicenseDeclared(om);
-			}
-		} else {
-			ossMapper.insertOssLicenseDeclared(ossMaster);
-			// single license의 경우 oss list에서 new 한 경우 osslicense list가 null 이거나, license id가 없는 경우 체워준다.
-			if(ossMaster.getOssLicenses() == null || ossMaster.getOssLicenses().isEmpty()) {
-				List<OssLicense> _ossLicenseList = new ArrayList<>();
-				
-				OssLicense _license = new OssLicense();
-				_license.setLicenseName(ossMaster.getLicenseName());
-				_ossLicenseList.add(_license);
-				
-				ossMaster.setOssLicenses(_ossLicenseList);
-			}
+			OssMaster om = new OssMaster(
+				  Integer.toString(ossLicenseDeclaredIdx)
+				, ossMaster.getOssId()
+				, license.getLicenseName()
+				, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
+				, license.getOssLicenseText()
+				, license.getOssCopyright()
+				, ossMaster.getLicenseDiv()
+			);
+			
+			ossMapper.insertOssLicenseDeclared(om);
 		}		
 		
-		// Detected License Insert
-		List<String> detectedLicenses = ossMaster.getDetectedLicenses();
+		// Detected License Insert / 20210806_Distinct Add
+		List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
 		
 		if(detectedLicenses != null) {
 			int ossLicenseDetectedIdx = 0;
@@ -1465,102 +1464,100 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	public void checkOssLicenseAndObligation(OssMaster ossMaster) {
-		if("M".equals(ossMaster.getLicenseDiv())) {
-			List<List<OssLicense>> orLicenseList = new ArrayList<>();
-			String currentType = null;
-			String currentObligation = null;
-			boolean isFirst = true;
-			List<OssLicense> andLicenseList = new ArrayList<>();
+		List<List<OssLicense>> orLicenseList = new ArrayList<>();
+		String currentType = null;
+		String currentObligation = null;
+		boolean isFirst = true;
+		List<OssLicense> andLicenseList = new ArrayList<>();
+		
+		for(OssLicense license : ossMaster.getOssLicenses()) {
+			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
+			license.setLicenseType(master.getLicenseType());
 			
-			for(OssLicense license : ossMaster.getOssLicenses()) {
-				LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-				license.setLicenseType(master.getLicenseType());
-				
-				// obligation 설정
-				if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-					license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-				}
-				
-				if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
-					if(!andLicenseList.isEmpty()) {
-						orLicenseList.add(andLicenseList);
-						andLicenseList = new ArrayList<>();
-						andLicenseList.add(license);
-					}
-					
+			// obligation 설정
+			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+			}
+			
+			if(!isFirst && "OR".equalsIgnoreCase(license.getOssLicenseComb()) ) {
+				if(!andLicenseList.isEmpty()) {
+					orLicenseList.add(andLicenseList);
 					andLicenseList = new ArrayList<>();
 					andLicenseList.add(license);
-				} else {
-					andLicenseList.add(license);
 				}
 				
-				isFirst = false;
-			}
-
-			if(!andLicenseList.isEmpty()) {
-				orLicenseList.add(andLicenseList);
+				andLicenseList = new ArrayList<>();
+				andLicenseList.add(license);
+			} else {
+				andLicenseList.add(license);
 			}
 			
-			//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
-			for(List<OssLicense> andlicenseGroup : orLicenseList) {
-				OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
-				
-				if(permissiveLicense != null) {
-					switch (permissiveLicense.getLicenseType()) {
-						case CoConstDef.CD_LICENSE_TYPE_PMS:
-							currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+			isFirst = false;
+		}
+
+		if(!andLicenseList.isEmpty()) {
+			orLicenseList.add(andLicenseList);
+		}
+		
+		//  or인 경우는 Permissive한 걸로, and인 경우는 Copyleft 가 강한 것으로 표시
+		for(List<OssLicense> andlicenseGroup : orLicenseList) {
+			OssLicense permissiveLicense = CommonFunction.getLicensePermissiveTypeLicense(andlicenseGroup);
+			
+			if(permissiveLicense != null) {
+				switch (permissiveLicense.getLicenseType()) {
+					case CoConstDef.CD_LICENSE_TYPE_PMS:
+						currentType = CoConstDef.CD_LICENSE_TYPE_PMS;
+						
+						currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_WCP:
+						if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
 							
 							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_CP:
+						if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)
+								&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_CP;
 							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_WCP:
-							if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_WCP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_PF:
+						if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(currentType)
+								&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(currentType)
+								&& !CoConstDef.CD_LICENSE_TYPE_CP.equals(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_PF;
 							
-							break;
-						case CoConstDef.CD_LICENSE_TYPE_CP:
-							if(isEmpty(currentType)) {
-								currentType = CoConstDef.CD_LICENSE_TYPE_CP;
-								
-								currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
-							}
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					case CoConstDef.CD_LICENSE_TYPE_NA:
+						if(isEmpty(currentType)) {
+							currentType = CoConstDef.CD_LICENSE_TYPE_NA;
 							
-							break;
-						default:
-							break;
-					}
+							currentObligation = CommonFunction.getObligationTypeWithAndLicense(andlicenseGroup);
+						}
+						
+						break;
+					default:
+						break;
 				}
 			}
-			
-			ossMaster.setLicenseType(currentType);
-			ossMaster.setObligationType(currentObligation);
-		} else {
-			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(ossMaster.getLicenseName().toUpperCase());
-			
-			if(master == null) {
-				log.error("############# Can not found license info : " + ossMaster.getLicenseName());
-			}
-			
-			ossMaster.setLicenseType(master.getLicenseType());
-			String obligationType = "";
-			
-			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
-				obligationType = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
-			}
-			
-			ossMaster.setObligationType(obligationType);
 		}
+		
+		ossMaster.setLicenseType(currentType);
+		ossMaster.setObligationType(currentObligation);
 	}
 
 	@Override
@@ -1662,7 +1659,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							break;
 						case 3: // maven
 							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-							
+
+							break;
+						case 4: // pub
+							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+							break;
+						case 5: // cocoapods
+							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 							break;
 						default:
 							break;
@@ -1689,10 +1694,55 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
-							bean.setDownloadLocation(downloadlocationUrl);
-							bean.setCheckName(checkName);
-							result.add(bean);
+							bean.setCheckOssList("Y");
+						} else {
+							OssMaster ossBean = new OssMaster();
+							ossBean.setOssName(bean.getOssName());
+							if(checkExistsOssByname(ossBean) > 0) {
+								continue;
+							}
+
+							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
+
+							while(ossNameMatcher.find()){
+
+								switch(urlSearchSeq) {
+									case 0: // github
+										checkName = ossNameMatcher.group(3) + "-" + ossNameMatcher.group(4);
+										
+										break;
+									case 1: // npm
+										checkName = "npm:" + ossNameMatcher.group(3);
+										
+										break;
+									case 2: // pypi
+										checkName = "pypi:" + ossNameMatcher.group(3);
+										
+										break;
+									case 3: // maven
+										checkName = ossNameMatcher.group(3) + ":" + ossNameMatcher.group(4);
+			
+										break;
+									case 4: // pub
+										checkName = "pub:" + ossNameMatcher.group(3);
+			
+										break;
+									case 5: // cocoapods
+										checkName = "cocoapods:" + ossNameMatcher.group(3);
+			
+										break;
+									default:
+										break;
+								}
+
+							}
+							
 						}
+
+						bean.setDownloadLocation(downloadlocationUrl);
+						bean.setCheckName(checkName);
+						if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
+
 					}
 				} else if(semicolonFlag) {
 					String downloadlocationUrl = bean.getDownloadLocation().split(";")[0];
@@ -1730,9 +1780,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setDownloadLocation(downloadlocationUrl);
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				} else {
@@ -1742,8 +1793,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						String checkName = ossMapper.checkOssName(bean);
 						
 						if(!isEmpty(checkName)) {
+							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
-							result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				}
@@ -1813,6 +1865,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					case 3: // maven
 						p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 						
+						break;
+					case 4: // pub
+						p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+						break;
+					case 5: // cocoapods
+						p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
 						break;
 					default:
 						break;
@@ -2151,7 +2211,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(!isEmpty(ossNewistData.getDownloadLocationGroup())) {
 				String url = "";
 				
-				String[] downloadLocationList = (ossNewistData.getDownloadLocation()+","+ossNewistData.getDownloadLocationGroup()).split(",");
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
 				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
 				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
 														.stream()
@@ -2254,5 +2314,108 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	private Map<String, OssMaster> getNewestOssInfoOnTime(OssMaster ossMaster) {
 		List<OssMaster> list = ossMapper.getNewestOssInfoByOssMaster(ossMaster);
 		return makeBasicOssInfoMap(list, true, false);
+	}
+	
+	@Override
+	public List<OssMaster> getOssListBySync(OssMaster bean) {
+		List<OssMaster> list = ossMapper.getOssListByName(bean);
+		
+		if(list == null) {
+			list = new ArrayList<>();
+		}
+		
+		// oss id로 취합(라이선스 정보)
+		List<OssMaster> newList = new ArrayList<>();
+		Map<String, OssMaster> remakeMap = new HashMap<>();
+		OssMaster currentBean = null;
+		for(OssMaster ossBean : list) {
+			// name + version
+			if(!isEmpty(ossBean.getOssVersion())) {
+				ossBean.setOssNameVerStr(ossBean.getOssName() + " (" + ossBean.getOssVersion() + ")");
+			} else {
+				ossBean.setOssNameVerStr(ossBean.getOssName());
+			}
+			
+			if(remakeMap.containsKey(ossBean.getOssId())) {
+				currentBean = remakeMap.get(ossBean.getOssId());
+			} else {
+				currentBean = ossBean;
+				
+				if(!isEmpty(currentBean.getOssNickname())) {
+					currentBean.setOssNickname(currentBean.getOssNickname().replaceAll("\\|", "<br>"));
+				}
+				
+				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
+				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
+				currentBean.setAttribution(CommonFunction.lineReplaceToBR(ossBean.getAttribution()));
+			}
+			
+			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
+			if (ossDownloadLocation.size() > 0) {
+				StringBuilder sb = new StringBuilder();
+						
+				for(OssMaster location : ossDownloadLocation) {
+					sb.append(location.getDownloadLocation()).append(",");
+				}
+							
+				String[] ossDownloadLocations = new String(sb).split("[,]");
+				currentBean.setDownloadLocations(ossDownloadLocations);
+			}
+			
+			OssLicense licenseBean = new OssLicense();
+			licenseBean.setLicenseId(ossBean.getLicenseId());
+			licenseBean.setOssLicenseIdx(ossBean.getOssLicenseIdx());
+			licenseBean.setLicenseName(ossBean.getLicenseName());
+			licenseBean.setOssLicenseComb(ossBean.getOssLicenseComb());
+			licenseBean.setOssLicenseText(CommonFunction.lineReplaceToBR(ossBean.getOssLicenseText()));
+			licenseBean.setOssCopyright(CommonFunction.lineReplaceToBR(ossBean.getOssCopyright()));
+			
+			currentBean.addOssLicense(licenseBean);
+
+			if(remakeMap.containsKey(ossBean.getOssId())) {
+				remakeMap.replace(ossBean.getOssId(), currentBean);
+			} else {
+				remakeMap.put(ossBean.getOssId(), currentBean);
+			}
+		}
+		
+		for(OssMaster ossBean : remakeMap.values()) {
+			ossBean.setLicenseName(CommonFunction.makeLicenseExpression(ossBean.getOssLicenses()));
+			newList.add(ossBean);
+		}
+		
+		return newList;
+	}
+
+	@Override
+	public List<String> getOssListSyncCheck(List<OssMaster> selectOssList, List<OssMaster> standardOssList) {
+		OssMaster standardOss = standardOssList.get(0);
+		OssMaster selectOss = selectOssList.get(0);
+		
+		List<String> checkList = new ArrayList<String>();
+				
+		if (!Arrays.equals(standardOss.getOssLicenses().toArray(), selectOss.getOssLicenses().toArray())) {
+			if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) checkList.add("Declared License");
+		}
+		if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), selectOss.getDetectedLicenses().toArray())) {
+			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
+		}
+		if (!avoidNull(standardOss.getCopyright(), "").equals(avoidNull(selectOss.getCopyright(), ""))) checkList.add("Copyright");
+		if (standardOss.getDownloadLocations() != null) {
+			if (selectOss.getDownloadLocations() != null) {
+				if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(selectOss.getDownloadLocations()).toArray())) checkList.add("Download Location");
+			}else {
+				checkList.add("Download Location");
+			}
+		}else {
+			if (selectOss.getDownloadLocations() != null) {
+				checkList.add("Download Location");
+			}
+		}
+		if (!avoidNull(standardOss.getHomepage(), "").equals(avoidNull(selectOss.getHomepage(), ""))) checkList.add("Home Page");
+		if (!avoidNull(standardOss.getSummaryDescription(), "").equals(avoidNull(selectOss.getSummaryDescription(), ""))) checkList.add("Summary Description");
+		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) checkList.add("Attribution");
+		
+		return checkList;
 	}
 }

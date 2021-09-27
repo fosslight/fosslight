@@ -59,7 +59,7 @@
 					}					
 				});
 				
-				if(data.detail.restriction != ''){
+				if(data.detail.restriction){
 					$('#restriction').append(data.detail.restriction.replace(/,/gi, ", "));
 				}
 				

@@ -158,7 +158,8 @@ public class ApiSelfCheckController extends CoTopComponent {
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
 						
 						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check");
+						String[] sheet = new String[1];
+						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check", sheet);
 						String errorMsg = (String) result.get("errorMessage");
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");

@@ -253,7 +253,7 @@
 				}
 				
 				if(!hasChecked) {
-					alertify.alert('Please select OSS to register');
+					alertify.alert('Please select OSS to register', function(){});
 
 					$('#loading_wrap_popup').hide();
 				}

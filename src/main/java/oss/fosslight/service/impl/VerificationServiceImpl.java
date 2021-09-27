@@ -392,7 +392,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				return "binAndroid"; 
 			} else {
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
-				
+
+				// Convert Map to Apache Velocity Template
 				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
 			}
 		}
@@ -1662,7 +1663,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 					 // multi license 추가 copyright
 					 if(!isEmpty(bean.getOssCopyright())) {
-						 String addCopyright = ossComponent.getCopyrightText();
+						 String addCopyright = avoidNull(ossComponent.getCopyrightText());
 						
 						 if(!isEmpty(ossComponent.getCopyrightText())) {
 							 addCopyright += "\r\n";
@@ -1914,8 +1915,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
 		if(!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
-			
-			if(bean != null && CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())) {
+			if (bean != null) {
 				for(OssLicense license : bean.getOssLicenses()) {
 					if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
 						return license.getOssCopyright();

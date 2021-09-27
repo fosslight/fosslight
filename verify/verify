@@ -1,0 +1,74 @@
+#! /bin/bash
+
+
+#parameter $1 -- upload file path in server
+#parameter $2 -- project id
+#parameter $3 -- exception words
+#parameter $4 -- exception ignore words
+#echo $1
+#echo $2
+#TYPE --- GZIP
+type_gz1=`expr $1 : '[^?]*\.tgz'`
+type_gz2=`expr $1 : '[^?]*\.gz'`
+
+let type_gz=type_gz1+type_gz2
+
+#TYPE --- BZ2
+type_bz1=`expr $1 : '[^?]*\.bz2'`
+type_bz2=`expr $1 : '[^?]*\.tar.bz2'`
+type_bz=type_bz1+type_bz2
+
+
+#TYPE --- ZIP
+type_zip=`expr $1 : '[^?]*\.zip'`
+
+#find $6/decompression/ -maxdepth 1 -name $2 -type d -delete
+#find $6/output/ -maxdepth 1 -name $2 -type d -delete
+verify_root_path = $6
+
+mkdir -p $6/decompression/$2/
+mkdir -p $6/output/$2/
+
+
+if((type_gz!=0))
+then
+    echo "success"
+    tar zxvf $1 -C $6/decompression/$2/
+elif((type_bz!=0))
+then
+    echo "success"
+    tar xvf $1 -C $6/decompression/$2/
+elif((type_zip!=0))
+then
+    echo "success"
+    unzip $1 -d $6/decompression/$2/
+else
+    F_CHK=`file --mime -b $1`
+    if [ "$F_CHK" = 'application/x-gzip' ];then
+	tar zxvf $1 -C $6/decompression/$2/
+    else
+	tar xvf $1 -C $6/decompression/$2/
+    fi
+fi
+
+chmod -R 777 $6/decompression/$2
+chmod -R 777 $6/output/$2
+
+#Verify Check File List
+echo $4 | sed -e "s/\@\@/ /g" >> $6/output/$2/verify_chk_list_$5
+tree -Ffi $6/decompression/$2/  >> $6/output/$2/verify_chk_list_$5
+
+echo $4 | sed -e "s/\@\@/ /g" >> $6/output/$2/verify_chk_list
+tree -Ffi $6/decompression/$2/  >> $6/output/$2/verify_chk_list
+#Verify Exception Result
+#find $6/decompression/$2/ | xargs grep 2> /dev/null -w -i "GPL\|LGPL\|CPL\|MPL\|EPL"  > $6/output/$2/except_file_result
+#if [ -n "$4" ]; then
+#  find $6/decompression/$2/ | xargs grep 2> /dev/null -w -i "$3" > $6/output/$2/except_file_result
+#else
+#  find $6/decompression/$2/ | xargs grep 2> /dev/null -w -i "$3" > $6/output/$2/except_file_result
+#fi
+find $6/decompression/$2/ | xargs grep 2> /dev/null -w -i "$3"  > $6/output/$2/except_file_result
+
+chmod -R 777 $6/output/$2/verify_chk_list_$5
+chmod -R 777 $6/output/$2/verify_chk_list
+chmod -R 777 $6/output/$2/except_file_result

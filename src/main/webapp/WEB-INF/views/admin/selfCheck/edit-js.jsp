@@ -508,7 +508,7 @@
 			},
 			CheckChar : function(){
 				if(event.keyCode == 64){//@ 특수문자 체크
-            		alertify.alert("\'@\' Special characters are not allowed!");
+            		alertify.alert("\'@\' Special characters are not allowed!", function(){});
 
             		event.returnValue = false;
             	}
@@ -977,7 +977,7 @@
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						}
 					} else {
 						$('.sheetSelectPop').hide();
@@ -995,9 +995,9 @@
 						src_fn.makeOssList(data.resultData);
 						
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-							alertify.alert(data.resultData.systemChangeHisStr);
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
 						}
 					}
 				},
@@ -1103,7 +1103,7 @@
 			} else if(obligationType == 10){
 				display="<span class=\"iconSet ops\">Notice</span>";
 			} else if(obligationType == 11) {
-				display="<span class=\"iconSet ops\"></span><span class=\"iconSet man\">Notice & SoruceCode</span>";
+				display="<span class=\"iconSet ops\"></span><span class=\"iconSet man\">Notice & SourceCode</span>";
 			}
 			
 			return display;
@@ -1141,7 +1141,7 @@
 				_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=950, height=600, toolbar=no, location=no, left=100, top=100");
 
 				if(!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 				}
 			} else {
 				_popupVuln.close();
@@ -1162,7 +1162,7 @@
 				_popupLicense = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 				if(!_popupLicense || _popupLicense.closed || typeof _popupLicense.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 				}
 			} else {
 				_popupLicense.close();
@@ -1198,14 +1198,14 @@
 								_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-									alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
 								_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 							}
 						} else {
-							alertify.alert("Unconfirmed open source");
+							alertify.alert("Unconfirmed open source", function(){});
 						}
 					},
 					error : function(){
@@ -1232,7 +1232,7 @@
 			var _guide = $("#srcList").jqGrid('getCell', row_id, 'licenseUserGuideStr');
 
 			if(_guide) {
-				alertify.alert(_guide);
+				alertify.alert(_guide, function(){});
 			}
 		},
 		
@@ -1308,10 +1308,10 @@
 				_popupCheckOssName = window.open("/oss/checkOssName?prjId=${project.prjId}&referenceDiv=10&targetName=self", "Check OSS Name", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />');
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 				}
 			} else {
-				alertify.alert('<spring:message code="msg.project.required.checkOssName" />');
+				alertify.alert('<spring:message code="msg.project.required.checkOssName" />', function(){});
 
 				return false;
 			}

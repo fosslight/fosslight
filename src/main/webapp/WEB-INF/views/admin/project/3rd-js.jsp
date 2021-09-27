@@ -152,7 +152,7 @@ var party_evt = {
 		if(addListData.length > 0){
 			for(var i=0;i<addListData.length;i++){
 				if(listData.partnerId == addListData[i].partnerId){
-			    	alertify.alert('<spring:message code="msg.id.duplicate" />');
+			    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){});
 
 			    	return;
 			    }
@@ -278,44 +278,48 @@ var party_evt = {
 		});
 	},
 	save : function(){
-		alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-			if (e) {
-				var mainDiv = $('#list3').jqGrid('getRowData');
-				var thirdPartyDiv = $('#_3rdAddList').jqGrid('getRowData');
-				var finalData = {
-					referenceId : '${project.prjId}',
-					identificationSubStatusPartner : $("#applicableParty:checked").val(),
-					mainData : JSON.stringify(mainDiv),
-					thirdPartyData : JSON.stringify(thirdPartyDiv)
-				}
-				
-				$.ajax({
-					url : '/project/save3rd',
-					type : 'POST',
-					dataType : 'json',
-					cache : false,
-					data : JSON.stringify(finalData),
-					contentType : 'application/json',
-					success : function(data){
-						alertify.success('<spring:message code="msg.common.success" />');
-						var param = {referenceId : '${project.prjId}'}
-						party_evt.getPartGridData(param);
-						$("#_3rdAddList").jqGrid('setGridParam', {postData:param}).trigger('reloadGrid');
-						$("#mergeYn").val("N");
-						
-						if(curIdenStatus == ""){
-							curIdenStatus = "PROG";
-							com_fn.btnCtl(userRole, curIdenStatus);
-						}
-					},
-					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+		if (com_fn.checkStatus()){
+			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+				if (e) {
+					var mainDiv = $('#list3').jqGrid('getRowData');
+					var thirdPartyDiv = $('#_3rdAddList').jqGrid('getRowData');
+					var finalData = {
+						referenceId : '${project.prjId}',
+						identificationSubStatusPartner : $("#applicableParty:checked").val(),
+						mainData : JSON.stringify(mainDiv),
+						thirdPartyData : JSON.stringify(thirdPartyDiv)
 					}
-				});
-			} else {
-				return false;
-			}
-		});
+					
+					$.ajax({
+						url : '/project/save3rd',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : JSON.stringify(finalData),
+						contentType : 'application/json',
+						success : function(data){
+							alertify.success('<spring:message code="msg.common.success" />');
+							var param = {referenceId : '${project.prjId}'}
+							party_evt.getPartGridData(param);
+							$("#_3rdAddList").jqGrid('setGridParam', {postData:param}).trigger('reloadGrid');
+							$("#mergeYn").val("N");
+							
+							if(curIdenStatus == ""){
+								curIdenStatus = "PROG";
+								com_fn.btnCtl(userRole, curIdenStatus);
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		}else {
+			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+		}
 	},
 	setParamParty1 : function(){
 		return {
@@ -618,7 +622,7 @@ var party_evt = {
 						partnerIds = $("#_3rdAddList").jqGrid("getRowData").map(function(a){return a.partnerId});
 						
 						if(partnerIds.indexOf(rows[i].partnerId) > -1){
-					    	alertify.alert('<spring:message code="msg.id.duplicate" />'); // 기등록된 정보는 제외
+					    	alertify.alert('<spring:message code="msg.id.duplicate" />', function(){}); // 기등록된 정보는 제외
 
 					    	continue;
 					    }

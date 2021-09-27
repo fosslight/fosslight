@@ -50,4 +50,6 @@ public interface NvdDataMapper {
 	void nickNameToOssNameMgrtCvssScore();
 	void insertCpeMatchData(Map<String, Object> params);
 	void insertCpeMatchNameData(Map<String, Object> params);
+	void resetCveDataV3();
+	void resetNvdDataV3();
 }

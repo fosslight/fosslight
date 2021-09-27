@@ -507,64 +507,68 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 		},
 		save : function(){
-
-			com_fn.exitCell(_mainLastsel, "list");
-			
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-				if (e) {
-					cleanErrMsg("list");
-					$("div.retxt").hide();
-					
-					//public 값 넣어주기
-					if($('#checkbox3').is(':checked')) {
-						$('#checkbox3').val('N');
-					} else {
-						$('#checkbox3').val('Y');
-					}
-					
-					fn_grid_com.totalGridSaveMode('list');
-					
-					var target = $("#list");
-					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
-					
-					mainData.forEach( function(_rowData){
-						var _rowId = _rowData['gridId'];
-
-						if(_rowData["obligationLicense"] == "90") {
-							if(_rowData["notify"] == "Y") {
-								if(_rowData["source"] == "Y") {
-									_rowData["obligationType"] = "11";
-								} else {
-									_rowData["obligationType"] = "10";
-								}
-							} else if(_rowData["notify"] == "N") {
-								_rowData["obligationType"] = "99";
+			if (fn.checkStatus()){
+				com_fn.exitCell(_mainLastsel, "list");
+				
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						cleanErrMsg("list");
+						$("div.retxt").hide();
+						
+						//public 값 넣어주기
+						if($('#checkbox3').is(':checked')) {
+							$('#checkbox3').val('N');
+						} else {
+							$('#checkbox3').val('Y');
+						}
+						
+						fn_grid_com.totalGridSaveMode('list');
+						
+						var target = $("#list");
+						var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
+						
+				 		mainData.forEach( function(_rowData){
+				 			var _rowId = _rowData['gridId'];
+				 			
+				 			if(_rowData["obligationLicense"] == "90") {
+				 				if(_rowData["notify"] == "Y") {
+				 					if(_rowData["source"] == "Y") {
+				 						_rowData["obligationType"] = "11";
+				 					} else {
+				 						_rowData["obligationType"] = "10";
+				 					}
+				 				} else if(_rowData["notify"] == "N") {
+				 					_rowData["obligationType"] = "99";
+				 				}
+				 			}
+				 		});
+				 		
+						$('#ossComponentsStr').val(JSON.stringify(mainData));
+						$('#userComment').val(JSON.stringify(CKEDITOR.instances['editor'].getData()));
+						
+						var prjId = '${detail.partnerId}';
+						var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+						
+						$.ajax({
+							url : '/project/nickNameValid/20',
+							type : 'POST',
+							data : JSON.stringify(postData),
+							dataType : 'json',
+							cache : false,
+							contentType : 'application/json',
+							success: function(data){fn.makeNickNamePopup(data);},
+							error: function(data){
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
 							}
-						}
-					});
+						});
+					} else {
+						return false;
+					}
+				});
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 
-					$('#ossComponentsStr').val(JSON.stringify(mainData));
-					$('#userComment').val(JSON.stringify(CKEDITOR.instances['editor'].getData()));
-					
-					var prjId = '${detail.partnerId}';
-					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
-					
-					$.ajax({
-						url : '/project/nickNameValid/20',
-						type : 'POST',
-						data : JSON.stringify(postData),
-						dataType : 'json',
-						cache : false,
-						contentType : 'application/json',
-						success: function(data){fn.makeNickNamePopup(data);},
-						error: function(data){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
-						}
-					});
-				} else {
-					return false;
-				}
-			});
 		},
 		makeNickNamePopup : function(obj) {
 			// ajax FormSubmit 사용시 huge String 문자가 포함되면 data가 전송되지 않는 문제가 있어서 formsubmi에서 applicaton/json으로 변경
@@ -883,48 +887,52 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 		},
 		delete : function(){
-			var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to remove this party?\nThis will permanently delete all datas.';
-			innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-			innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
-			innerHtml    += '	</div>';
-			innerHtml    += '</div>';
-			
-			alertify.confirm(innerHtml, function () {
-				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />');
+			if (fn.checkStatus()){
+				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to remove this party?\nThis will permanently delete all datas.';
+				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+				innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
+				innerHtml    += '	</div>';
+				innerHtml    += '</div>';
+				
+				alertify.confirm(innerHtml, function () {
+					if(CKEDITOR.instances['editor2'].getData() == "") {
+						alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
-					return false;
-				} else {
-					var partnerId = $('input[name=partnerId]').val();
-					$.ajax({
-						url : '/partner/delAjax',
-						type : 'POST',
-						dataType : 'json',
-						cache : false,
-						data : {'partnerId' : partnerId, userComment : CKEDITOR.instances['editor2'].getData()},
-						success: function(data){
-							if(partnerId) {
-								deleteTabInFrame('#/partner/edit/'+partnerId);			
-							} else {
-								deleteTabInFrame('#/partner/edit');			
+						return false;
+					} else {
+						var partnerId = $('input[name=partnerId]').val();
+						$.ajax({
+							url : '/partner/delAjax',
+							type : 'POST',
+							dataType : 'json',
+							cache : false,
+							data : {'partnerId' : partnerId, userComment : CKEDITOR.instances['editor2'].getData()},
+							success: function(data){
+								if(partnerId) {
+									deleteTabInFrame('#/partner/edit/'+partnerId);			
+								} else {
+									deleteTabInFrame('#/partner/edit');			
+								}
+								
+								reloadTabInframe('/partner/list');
+							},
+							error: function(){
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
 							}
-							
-							reloadTabInframe('/partner/list');
-						},
-						error: function(){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
-						}
-					});
-				}
-			});
+						});
+					}
+				});
 
-			var _editor = CKEDITOR.instances.editor2;
-			
-			if(_editor) {
-				_editor.destroy();
+				var _editor = CKEDITOR.instances.editor2;
+				
+				if(_editor) {
+					_editor.destroy();
+				}
+				
+				CKEDITOR.replace('editor2', {});
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 			}
-			
-			CKEDITOR.replace('editor2', {});
 		},
 		deleteConfirmationFile : function(obj){
 			$('.confirmationUpload').children().remove();
@@ -1003,120 +1011,135 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		//requestReview
 		requestReview : function(){
-			isStatusChangeFlag = true;
-			
-			fn.save();
+			if (fn.checkStatus()){
+				isStatusChangeFlag = true;
+				
+				fn.save();
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		},
 		//reject
 		reject : function(){
-			var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
-			innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-			innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
-			innerHtml    += '	</div>';
-			innerHtml    += '</div>';
-			
-			alertify.confirm(innerHtml, function () {
-				if(CKEDITOR.instances['editor2'].getData() == "") {
-					alertify.alert('<spring:message code="msg.project.required.comments" />');
+			if (fn.checkStatus()){
+				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
+				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+				innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
+				innerHtml    += '	</div>';
+				innerHtml    += '</div>';
+				
+				alertify.confirm(innerHtml, function () {
+					if(CKEDITOR.instances['editor2'].getData() == "") {
+						alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
 
-					return false;
-				} else {
-					var param = {status : 'PROG', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor2'].getData()};
+						return false;
+					} else {
+						var param = {status : 'PROG', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor2'].getData()};
 
-					$.ajax({
-						url : '/partner/changeStatus',
-						type : 'POST',
-						data : param,
-						dataType : 'json',
-						cache : false,
-						success : function(data){
-							reloadTabInframe('/partner/list');
-							
-							if('${detail.partnerId}' != ''){
-								reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+						$.ajax({
+							url : '/partner/changeStatus',
+							type : 'POST',
+							data : param,
+							dataType : 'json',
+							cache : false,
+							success : function(data){
+								reloadTabInframe('/partner/list');
+								
+								if('${detail.partnerId}' != ''){
+									reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+								}
+							},
+							error : function(){
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
 							}
-						},
-						error : function(){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
-						}
-					});
+						});
+					}
+				});
+
+				var _editor = CKEDITOR.instances.editor2;
+				
+				if(_editor) {
+					_editor.destroy();
 				}
-			});
-
-			var _editor = CKEDITOR.instances.editor2;
-			
-			if(_editor) {
-				_editor.destroy();
+				
+				CKEDITOR.replace('editor2', {});
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
 			}
-			
-			CKEDITOR.replace('editor2', {});
-
 		},
 		//reviewStart
 		reviewStart : function(){
-			var param = {status : 'REV', partnerId : '${detail.partnerId}'};
-			$.ajax({
-				url : '/partner/changeStatus',
-				type : 'POST',
-				data : param,
-				dataType : 'json',
-				cache : false,
-				success : function(data){
-					reloadTabInframe('/partner/list');
-					
-					if('${detail.partnerId}' != ''){
-						reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
-					}
-				},
-				error : function(){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			});
-		},
-		//confirm
-		confirm : function(){
-			cleanErrMsg();
-			checkObligationFlag = false;
-
-			var _list = $("#list");
-			var mainData = _list.jqGrid('getGridParam','data');
-			
-			mainData.forEach( function(_rowData){
-				if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
-					checkObligationFlag = true;
-				}
-			});
-			
-			if(checkObligationFlag) {
-				alert('<spring:message code="msg.warn.include.needcheck.license" />');
-				
-				return false;
-			}
-			var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor'].getData()};
-			$.ajax({
-				url : '/partner/changeStatus',
-				type : 'POST',
-				data : param,
-				dataType : 'json',
-				cache : false,
-				success : function(data){
-					if(data.isValid == "false") {
-						gridValidMsgNew(data, "list");
-						
-						alertify.error('<spring:message code="msg.common.valid" />', 0);
-					} else {
+			if (fn.checkStatus()){
+				var param = {status : 'REV', partnerId : '${detail.partnerId}'};
+				$.ajax({
+					url : '/partner/changeStatus',
+					type : 'POST',
+					data : param,
+					dataType : 'json',
+					cache : false,
+					success : function(data){
 						reloadTabInframe('/partner/list');
 						
 						if('${detail.partnerId}' != ''){
 							reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
 						}
+					},
+					error : function(){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
 					}
+				});
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
+		},
+		//confirm
+		confirm : function(){
+			if (fn.checkStatus()){
+				cleanErrMsg();
+				checkObligationFlag = false;
+
+				var _list = $("#list");
+				var mainData = _list.jqGrid('getGridParam','data');
+				
+				mainData.forEach( function(_rowData){
+					if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
+						checkObligationFlag = true;
+					}
+				});
+				
+				if(checkObligationFlag) {
+					alert('<spring:message code="msg.warn.include.needcheck.license" />');
 					
-				},
-				error : function(){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					return false;
 				}
-			});
+				var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor'].getData()};
+				$.ajax({
+					url : '/partner/changeStatus',
+					type : 'POST',
+					data : param,
+					dataType : 'json',
+					cache : false,
+					success : function(data){
+						if(data.isValid == "false") {
+							gridValidMsgNew(data, "list");
+							
+							alertify.error('<spring:message code="msg.common.valid" />', 0);
+						} else {
+							reloadTabInframe('/partner/list');
+							
+							if('${detail.partnerId}' != ''){
+								reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+							}
+						}
+						
+					},
+					error : function(){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}else{
+				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			}
 		},
 		closePop : function(){
 			$('.sheetSelectPop').hide();
@@ -1159,7 +1182,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				success: function(data){
 					if("false" == data.isValid) {
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						} else {
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
@@ -1181,9 +1204,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 						fn.makeOssList(data.resultData);
 						
 						if(data.validMsg) {
-							alertify.alert(data.validMsg);
+							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-							alertify.alert(data.resultData.systemChangeHisStr);
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
 						}
 					}
 				},
@@ -1581,9 +1604,38 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		CheckChar : function(){
 			if(event.keyCode == 64){//@ 특수문자 체크
-				alertify.alert("\'@\' Special characters are not allowed!");
-				event.returnValue = false;
+        		alertify.alert("\'@\' Special characters are not allowed!", function(){});
+        		event.returnValue = false;
+        	}
+		},
+		checkStatus : function(){
+			var partnerId = $("input[name=partnerId]").val();
+			var returnFlag = false;
+
+			if (partnerId||"" == ""){
+				returnFlag = true;
+			}else{
+				$.ajax({
+					url : '<c:url value="/partner/checkStatus/'+partnerId+'"/>',
+					type : 'GET',
+					dataType : 'json',
+					cache : false,
+					async : false,
+					success : function(data){
+						var status = data.status;
+						var editStatus = $("input[name=status]").val();
+
+						returnFlag = (status == editStatus);
+					},
+					error : function(){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						returnFlag = false;
+					}
+				});
 			}
+
+			return returnFlag;
+
 		}
 	}
 	

@@ -141,6 +141,8 @@ public class CoMail extends ComBean {
 	/** The bcc ids. */
 	private String[] bccIds = new String[]{};	// 숨김 참조 아이디들
 	
+	private String binaryCommitResult;
+	
 	/**
 	 *  //.
 	 *
@@ -949,6 +951,13 @@ public class CoMail extends ComBean {
 	public void setParamOssInfoMap(Map<String, OssMaster> paramOssInfoMap) {
 		this.paramOssInfoMap = paramOssInfoMap;
 	}
-	
-	
+
+	public String getBinaryCommitResult() {
+		return binaryCommitResult;
+	}
+
+	public void setBinaryCommitResult(String binaryCommitResult) {
+		this.binaryCommitResult = binaryCommitResult;
+	}
+
  } 

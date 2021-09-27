@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -145,7 +147,15 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setCurPage(page);
 		ossMaster.setPageListSize(rows);
-		
+
+		// download location check
+		List<String> values = Arrays.asList("https://", "http://", "www.");
+		String homepage =req.getParameter("homepage");
+		if(!values.contains(homepage)){
+			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+			ossMaster.setHomepage(homepage);
+		}
+
 		if("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, ossMaster);
@@ -241,17 +251,27 @@ public class OssController extends CoTopComponent{
 		
 		return OSS.EDIT_JSP;
 	}
-	
+
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String ossId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		OssMaster ossMaster = new OssMaster(ossId);
 		Map<String, Object> map = ossService.getOssLicenseList(ossMaster);
 		ossMaster = ossService.getOssMasterOne(ossMaster);
-		
+
 		if(ossMaster.getOssVersion() == null) {
 			ossMaster.setOssVersion("");
 		}
-		
+		//getDetectedLicenses()는 detectedLicenses가 null이면 비어있는 ArrayList객체를 생성해서 반환함.
+		if(!ossMaster.getDetectedLicenses().get(0).isEmpty()) {
+			List<String> detectedLicenseNames = ossMaster.getDetectedLicenses();
+			Map<String, String> detectedLicenseIdByName = new HashMap<>();
+			for (String name : detectedLicenseNames) {
+				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
+			}
+			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
+		} else
+			model.addAttribute("detectedLicenseIdByName", null);
+
 		model.addAttribute("list", toJson(map));
 		model.addAttribute("detail", toJson(ossMaster));
 		model.addAttribute("ossId", ossMaster.getOssId());
@@ -589,8 +609,10 @@ public class OssController extends CoTopComponent{
 		if(isEmpty(ossMaster.getOssId())) {
 			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
 			
-			if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
+			if(checkOssInfo != null) {
+				if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
+				}
 			} else {
 				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
 				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
@@ -1061,9 +1083,15 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(!isEmpty(ossMaster.getDownloadLocation())){
+			List<String> duplicateDownloadLocation = new ArrayList<>();
 			String result = "";
+			boolean isFirst = true;
 			
 			for(String url : ossMaster.getDownloadLocation().split(",")) {
+				if(duplicateDownloadLocation.contains(url)) {
+					continue;
+				}
+				
 				if(!isEmpty(result)) {
 					result += ",";
 				}
@@ -1073,10 +1101,16 @@ public class OssController extends CoTopComponent{
 				}else {
 					result += url;
 				}
+				
+				if(isFirst) {
+					ossMaster.setDownloadLocation(result);
+					isFirst = false;
+				}
+				
+				duplicateDownloadLocation.add(url);
 			}
 			
 			ossMaster.setDownloadLocations(result.split(","));
-			ossMaster.setDownloadLocation(result);
 		}
 		
 		if(!isEmpty(ossMaster.getHomepage())) {
@@ -1289,14 +1323,14 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		String donwloadId = null;
+		String downloadId = null;
 		Map<String, Object> result = null;
 		
 		try {
-			donwloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+			downloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(!isEmpty(donwloadId)) {
-				result = ossService.startAnalysis(ossBean.getPrjId(), donwloadId);
+			if(!isEmpty(downloadId)) {
+				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId);
 				return makeJsonResponseHeader(result);
 			}
 			
@@ -1587,5 +1621,223 @@ public class OssController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(result);
+	}
+	
+	@GetMapping(value=OSS.OSS_SYNC_POPUP, produces = "text/html; charset=utf-8")
+	public String viewSyncOssPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster bean, Model model){
+		// oss list (oss name으로만)
+		model.addAttribute("ossInfo", bean);
+		
+		return OSS.OSS_SYNC_POPUP_JSP;
+	}
+	
+	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
+	public ResponseEntity<Object> ossSyncListValidation(HttpServletResponse res, Model model
+			, @RequestParam(value="ossId", required=true)String ossId
+			, @RequestParam(value="ossIds", required=true)String ossIds){
+		OssMaster bean = new OssMaster();
+		bean.setOssId(ossId);
+		try {
+			List<OssMaster> ossList = ossService.getOssListBySync(bean);
+			
+			String[] ossIdArr = ossIds.split(",");
+			List<String> chkOssIdList = new ArrayList<String>();
+			
+			for (int i=0; i<ossIdArr.length; i++) {
+				bean.setOssId(ossIdArr[i]);
+				List<OssMaster> syncCheckList = ossService.getOssListBySync(bean);
+				List<String> checkList = ossService.getOssListSyncCheck(syncCheckList, ossList);
+				if (checkList.size() == 0) {
+					chkOssIdList.add(ossIdArr[i]);
+				}
+			}
+			
+			return makeJsonResponseHeader(true, "true", chkOssIdList);
+		} catch (Exception e){
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader(false);
+	}
+	
+	@GetMapping(value=OSS.OSS_SYNC_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
+	public String ossSyncDetailView(HttpServletRequest req, HttpServletResponse res, @ModelAttribute OssMaster bean, Model model){
+		List<OssMaster> selectOssList = ossService.getOssListBySync(bean);
+		
+		bean.setOssId(bean.getSyncRefOssId());
+		List<OssMaster> standardOssList = ossService.getOssListBySync(bean);
+		
+		// sync check
+		List<String> syncCheckList = ossService.getOssListSyncCheck(selectOssList, standardOssList);
+		
+		if(selectOssList != null && !selectOssList.isEmpty()) {
+			OssMaster _bean = selectOssList.get(0);
+			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
+			
+			model.addAttribute("ossInfo", selectOssList.get(0));
+		} else {
+			model.addAttribute("ossInfo", new OssMaster());
+		}
+		model.addAttribute("syncCheckList" , syncCheckList);
+		
+		return OSS.OSS_SYNC_DETAILS_VIEW_AJAX_JSP;
+	}
+
+	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
+	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
+			, @RequestParam(value="ossId", required=true)String ossId
+			, @RequestParam(value="comment", required=true)String comment
+			, @RequestParam(value="ossIds", required=true)String ossIds
+			, @RequestParam(value="syncItem", required=true)String syncItem){
+		String[] ossIdsArr = ossIds.split(",");
+		String[] syncItemArr = syncItem.split(",");
+		String result = "";
+		String action = CoConstDef.ACTION_CODE_UPDATE;
+		
+		try {
+			OssMaster standardOss = (OssMaster) BeanUtils.cloneBean(ossService.getOssInfo(ossId, true));
+			standardOss.setCopyright(CommonFunction.brReplaceToLine(standardOss.getCopyright()));
+			standardOss.setSummaryDescription(CommonFunction.brReplaceToLine(standardOss.getSummaryDescription()));
+			standardOss.setAttribution(CommonFunction.brReplaceToLine(standardOss.getAttribution()));
+			
+			for (int i=0; i<ossIdsArr.length; i++) {
+				OssMaster beforeBean = null;
+				OssMaster syncBean = null;
+				OssMaster afterBean = null;
+				
+				CoCodeManager.getInstance().refreshOssInfo();
+				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
+				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
+				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
+				syncBean.setAttribution(CommonFunction.brReplaceToLine(syncBean.getAttribution()));
+				
+				if (syncBean.getLicenseDiv().contains("Single")) {
+					syncBean.setLicenseDiv("S");
+				}else {
+					syncBean.setLicenseDiv("M");
+				}
+				syncBean.setComment(comment);
+				
+				boolean syncCheck = false;
+				
+				for (int j=0; j<syncItemArr.length; j++) {
+					switch(syncItemArr[j]) {
+						case "Declared License" :
+							if (!Arrays.equals(standardOss.getOssLicenses().toArray(), syncBean.getOssLicenses().toArray())) {
+								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
+									syncBean.setOssLicenses(standardOss.getOssLicenses());
+									syncBean.setLicenseName(standardOss.getLicenseName());
+									if (standardOss.getLicenseDiv().contains("Single")) {
+										syncBean.setLicenseDiv("S");
+									}else {
+										syncBean.setLicenseDiv("M");
+									}
+									syncCheck = true;
+								}
+							}
+							break;
+							
+						case "Detected License" :
+							if (syncBean.getDetectedLicenses() == null) {
+								if (standardOss.getDetectedLicenses() != null) {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
+							}else {
+								if (standardOss.getDetectedLicenses() != null) {
+									if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+										syncCheck = true;
+									}
+								}else {
+									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+									syncCheck = true;
+								}
+							}
+							break;
+							
+						case "Copyright" :
+							if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
+								syncBean.setCopyright(standardOss.getCopyright());
+								syncCheck = true;
+							}
+							break;
+							
+						case "Download Location" :
+							if (standardOss.getDownloadLocations() != null) {
+								if (syncBean.getDownloadLocations() == null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}else {
+									if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
+										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+										syncCheck = true;
+									}
+								}
+							}else {
+								if (syncBean.getDownloadLocations() != null) {
+									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+									syncCheck = true;
+								}
+							}
+							break;
+						
+						case "Home Page" :
+							if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
+								syncBean.setHomepage(standardOss.getHomepage());
+								syncCheck = true;
+							}
+							break;
+						
+						case "Summary Description" :
+							if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
+								syncBean.setSummaryDescription(standardOss.getSummaryDescription());
+								syncCheck = true;
+							}
+							break;
+						
+						case "Attribution" :
+							if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
+								syncBean.setAttribution(standardOss.getAttribution());
+								syncCheck = true;
+							}
+							break;
+					}
+				}
+				
+				if (syncCheck) {
+					History h = new History();
+					result = ossService.registOssMaster(syncBean);
+					CoCodeManager.getInstance().refreshOssInfo();
+					afterBean = ossService.getOssInfo(ossIdsArr[i], true);
+					h = ossService.work(syncBean);
+					h.sethAction(action);
+					historyService.storeData(h);
+					
+					try {
+						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+						CoMail mailBean = new CoMail(mailType);
+						mailBean.setParamOssId(ossIdsArr[i]);
+						mailBean.setComment(comment);
+						mailBean.setCompareDataBefore(beforeBean);
+						mailBean.setCompareDataAfter(afterBean);
+						
+						CoMailManager.getInstance().sendMail(mailBean);				
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}
+			
+			return makeJsonResponseHeader(true, "true");
+		} catch (Exception e) {
+			log.error("OSS Sync Failed.", e);
+			log.error(e.getMessage(), e);
+		}
+		
+		return makeJsonResponseHeader(false, "false");
 	}
 }

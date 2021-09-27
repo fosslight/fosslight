@@ -147,7 +147,7 @@
 				switch(key) {
 					case "division":
 						if(value == "") {
-							alertify.alert('<spring:message code="msg.project.required.selectDivision" />');
+							alertify.alert('<spring:message code="msg.project.required.selectDivision" />', function(){});
 
 							return false;
 						}
@@ -155,7 +155,7 @@
 						break;
 					case "createdDate1":
 						if(value == "") {
-							alertify.alert('Please, enter the created date first.');
+							alertify.alert('Please, enter the created date first.', function(){});
 
 							return false;
 						}
@@ -163,7 +163,7 @@
 						break;
 					case "createdDate2":
 						if(value == "") {
-							alertify.alert('Please, enter the created date first.');
+							alertify.alert('Please, enter the created date first.', function(){});
 
 							return false;
 						}

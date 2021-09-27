@@ -1612,11 +1612,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	@SuppressWarnings({ "unchecked", "serial" })
 	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
 		downloadpath = filepath;
-		String donwloadId = null;
+		String downloadId = null;
 		
 		switch (type) {
 			case "verification":
-				donwloadId = makeVerificationExcel((List<ProjectIdentification>) fromJson(dataStr, new TypeToken<List<ProjectIdentification>>(){}.getType()));
+				downloadId = makeVerificationExcel((List<ProjectIdentification>) fromJson(dataStr, new TypeToken<List<ProjectIdentification>>(){}.getType()));
 				
 				break;
 			case "project" :	//Project List			
@@ -1647,25 +1647,25 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> prjMap =	 projectService.getProjectList(project);
 				
 				if(isMaximumRowCheck((int) prjMap.get("records"))){
-					donwloadId	= getProjectExcel((List<Project>) prjMap.get("rows"));
+					downloadId	= getProjectExcel((List<Project>) prjMap.get("rows"));
 				}
 				
 				break;
 			case "report" :		//project report
 			case "bom" :		//project bom
-				donwloadId = getReportExcelPost(dataStr, null);
+				downloadId = getReportExcelPost(dataStr, null);
 				
 				break;
 			case "src" :		//SRC List
-				donwloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 				
 				break;
 			case "bin" :		//bin List
-				donwloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
 				
 				break;
 			case "binAndroid" :		//bin android List
-				donwloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				break;
 			case "license" :	//License List
@@ -1676,7 +1676,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				List<LicenseMaster> licenseList = licenseService.getLicenseMasterListExcel(license);
 				
 				if(isMaximumRowCheck(licenseService.selectLicenseMasterTotalCount(license))){
-					donwloadId 	= getLicenseExcel(licenseList);
+					downloadId 	= getLicenseExcel(licenseList);
 				}
 				
 				break;
@@ -1687,30 +1687,30 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				oss.setPageListSize(MAX_RECORD_CNT);
 				
 				Map<String,Object> ossMap 	= ossService.getOssMasterList(oss);
-				donwloadId 	= getOssExcel((List<OssMaster>) ossMap.get("rows"));
+				downloadId 	= getOssExcel((List<OssMaster>) ossMap.get("rows"));
 				
 				break;
 			case "model" :		//project model
 				Type 				modelType 	= new TypeToken<List<Project>>(){}.getType();
 				List<Project>		modelList 		= (List<Project>) fromJson(dataStr, modelType);
 				
-				donwloadId = getModelExcel(modelList, extParam);
+				downloadId = getModelExcel(modelList, extParam);
 				
 				break;
 			case "selfCheckList" :
-				donwloadId = getSelfCheckListExcelPost(dataStr, null);
+				downloadId = getSelfCheckListExcelPost(dataStr, null);
 				
 				break;
 			case "selfReport" :		//selfCheck Project
-				donwloadId = getSelftReportExcelPost(dataStr);
+				downloadId = getSelftReportExcelPost(dataStr);
 				
 				break;
 			case "partnerCheckList" :
-				donwloadId = getPartnerChecklistReportExcelPost(dataStr);
+				downloadId = getPartnerChecklistReportExcelPost(dataStr);
 				
 				break;
 			case "spdx" :				
-				donwloadId = getVerificationSPDX_SpreadSheetExcelPost(dataStr);
+				downloadId = getVerificationSPDX_SpreadSheetExcelPost(dataStr);
 				
 				break;
 			case "binaryDBLog" :
@@ -1740,7 +1740,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> bianryDbLogMap = binaryDataHistoryService.getBinaryDataHistoryList(bianryDbLogBean);
 				
 				if(isMaximumRowCheck((int) bianryDbLogMap.get("records"))){
-					donwloadId = getBinaryDBLogExcel((List<BinaryAnalysisResult>) bianryDbLogMap.get("rows"));
+					downloadId = getBinaryDBLogExcel((List<BinaryAnalysisResult>) bianryDbLogMap.get("rows"));
 				}
 				
 				break;
@@ -1762,7 +1762,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				partner.setModelFlag(CoConstDef.FLAG_NO);
 				
 				Map<String, Object> partnerList =	 partnerService.getPartnerMasterList(partner);
-				donwloadId	= getPartnerExcelId((List<PartnerMaster>) partnerList.get("rows"));
+				downloadId	= getPartnerExcelId((List<PartnerMaster>) partnerList.get("rows"));
 				
 				break;
 			case "3rdModel" :		//3rd Party List
@@ -1785,7 +1785,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> partnerModelList =	 partnerService.getPartnerStatusList(partnerModel);
 				
 				if(isMaximumRowCheck((int) partnerModelList.get("records"))){
-					donwloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
+					downloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
 				}
 				
 				break;
@@ -1815,7 +1815,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> map = complianceService.getModelList(ProjectModel);
 				
 				if(isMaximumRowCheck((int) map.get("records"))){
-					donwloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
+					downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
 				}
 				
 				break;
@@ -1828,7 +1828,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, Object> vulnerabilityMap =	 vulnerabilityService.getVulnerabilityList(vulnerability);
 				
 				if(isMaximumRowCheck((int) vulnerabilityMap.get("records"))){
-					donwloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"));
+					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"));
 				}
 				
 				break;
@@ -1840,23 +1840,23 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				Map<String, Object> analysisList = ossService.getOssAnalysisList(ossBean);
 				
-				donwloadId = getAnalysisListExcel((List<OssAnalysis>) analysisList.get("rows"), (String) ossBean.getPrjId());
+				downloadId = getAnalysisListExcel((List<OssAnalysis>) analysisList.get("rows"), (String) ossBean.getPrjId());
 				
 				break;
 			case "user" :		//UserManagement List
 				List<T2Users> 		userList = userService.getUserListExcel();
-				donwloadId = getUserExcelId(userList);
+				downloadId = getUserExcelId(userList);
 				
 				break;
 			case "bomcompare" :
-				donwloadId = getBomCompareExcelId(dataStr);
+				downloadId = getBomCompareExcelId(dataStr);
 				
 				break;
 			default:
 				break;
 		}
 		
-		return donwloadId;
+		return downloadId;
 	}
 	
 	/**
@@ -2152,7 +2152,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
-					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean)); // Declared & Detected License Info (중복제거)
+					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
 					
 					// License Comments
 					cellIdx++;
@@ -2195,7 +2195,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String ossName = ocBean.getOssName().replace("&#39;", "\'");
 					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
 					
-					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean).split(","));
+					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
 					
 					for(String licenseNm : licenseList) {
 						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);
@@ -2461,7 +2461,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 	public static String getExcelDownloadIdOss(String type, OssMaster oss, String filepath) throws Exception {
 		downloadpath = filepath;
-		String donwloadId = null;
+		String downloadId = null;
 		
 		if(isMaximumRowCheck(ossMapper.selectOssMasterTotalCount(oss))){
 			oss.setStartIndex(0);
@@ -2469,10 +2469,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			oss.setSearchFlag(CoConstDef.FLAG_NO); // 화면 검색일 경우 "Y" export시 "N"
 			Map<String,Object> ossMap 	= ossService.getOssMasterList(oss);
 			
-			donwloadId 	= getOssExcel((List<OssMaster>) ossMap.get("rows"));
+			downloadId 	= getOssExcel((List<OssMaster>) ossMap.get("rows"));
 		}
 		
-		return donwloadId;
+		return downloadId;
 	}
 	
 	private static String makeVerificationExcel (List<ProjectIdentification> verificationList)  throws Exception {

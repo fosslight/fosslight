@@ -43,7 +43,7 @@
 					<c:when test="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.verificationStatus ne 'NA' and project.distributeDeployYn ne 'Y'}">
 						<a class="btnSet confirm"><span id="verConfirm">Confirm</span></a>
 						<a class="btnSet reject"><span id="verReject">Reject</span></a>
-						<a class="btnSet review"><span id="verRequest">Request Review</span></a> 
+						<a class="btnSet review"><span id="verRequest">Request</span></a>
 						<a class="btnSet restart"><span id="verReviewStart">Review Start</span></a>
 					</c:when>
 					<c:otherwise>
@@ -405,7 +405,7 @@
 									<dd class="mt10">
 										<div class="basicCase">
 											<span class="right">
-												<c:if test="${project.verificationStatus ne 'CONF' and project.dropYn ne 'Y'}">
+												<c:if test="${project.verificationStatus ne 'CONF' and project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 													<input type="button" id="save" value="Save" class="btnColor red"/>
 												</c:if>
 											</span>

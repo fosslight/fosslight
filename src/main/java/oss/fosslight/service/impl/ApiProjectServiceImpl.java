@@ -117,12 +117,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType) {
+	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		String errMsg = "";
 		List<OssComponents> reportData = new ArrayList<OssComponents>();
-		String[] sheet = new String[1];
 		List<String> errMsgList = new ArrayList<>();
 		
 		try {

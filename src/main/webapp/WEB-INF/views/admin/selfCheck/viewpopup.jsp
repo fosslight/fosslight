@@ -98,7 +98,7 @@
 									repeatitems: false,
 									id: 'licenseId',
 								},
-								colNames: ['ID','License Name','Identifier','License Type','Obligation','Restriction','Web site','Nick Name','License Text'],
+								colNames: ['ID','License Name','Identifier','License Type','Obligation','Restriction','Website','Nick Name','License Text', 'User Guide'],
 								colModel: [
 									{name: 'licenseId', index: 'licenseId', key:true, hidden:true},
 									{name: 'licenseName', index: 'licenseName', width: 200, align: 'left'},
@@ -108,12 +108,34 @@
 									{name: 'restrictionStr', index: 'restrictionStr', width: 60, align: 'center', formatter: pop_fn.displayLicenseRestriction},
 									{name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link2'},
 									{name: 'licenseNicknameStr', index: 'licenseNicknameStr', width: 200, align: 'left', formatter: pop_fn.displayNickName},
-									{name: 'licenseText', index: 'licenseText', width: 300, align: 'left', hidden:true}
+									{name: 'licenseText', index: 'licenseText', width: 300, align: 'left', hidden:true},
+									{name: 'description', index: 'description', width: 300, align: 'left', hidden:true},
 								],
-								onSelectRow: function(id){
-										var rowLicenseText = $('#_licenseList').jqGrid('getCell',id,'licenseText');
+								onSelectRow: function(id) {
+									var rowLicenseUserGuide = $('#_licenseList').jqGrid('getCell',id,'description');
+									var rowLicenseRestriction = $('#_licenseList').jqGrid('getCell',id,'restrictionStr');
+									var rowLicenseText = $('#_licenseList').jqGrid('getCell',id,'licenseText');
+
+									if(rowLicenseUserGuide) {
+										$("#licenseUserGuideInfo").html(rowLicenseUserGuide.replace(/\n/g,'<br>'));
+										$("#userGuideGroup").show();
+									} else {
+										$("#userGuideGroup").hide();
+									}
+
+									if(rowLicenseRestriction) {
+										$("#licenseRestrictionInfo").html($(rowLicenseRestriction).attr("title").replace(/\n/g,'<br>'));
+										$("#restrictionsGroup").show();
+									} else {
+										$("#restrictionsGroup").hide();
+									}
+
+									if(rowLicenseText) {
 										$("#licenseTextInfo").html(rowLicenseText.replace(/\n/g,'<br>'));
-										
+										$("#licenseTextGroup").show();
+									} else {
+										$("#licenseTextGroup").hide();
+									}
 								},
 								autowidth: true,
 								gridview: true,
@@ -173,7 +195,17 @@
 				<table id="_licenseList"><tr><td></td></tr></table>
 			</div>
 			</div>
-			<div id="licenseTextInfo" style="padding: 10%;">
+			<div id="userGuideGroup" style="padding-left: 10%; padding-right: 10%; padding-bottom: 5%;">
+				<b>User Guide</b>
+				<div id="licenseUserGuideInfo"></div>
+			</div>
+			<div id="restrictionsGroup" style="padding-left: 10%; padding-right: 10%; padding-bottom: 5%;">
+				<b>Restrictions</b>
+				<div id="licenseRestrictionInfo"></div>
+			</div>
+			<div id="licenseTextGroup" style="padding-left: 10%; padding-right: 10%; padding-bottom: 10%;">
+				<b>License text</b>
+				<div id="licenseTextInfo"></div>
 			</div>
 		</div>
 	</body>

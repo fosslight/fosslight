@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
@@ -46,6 +47,7 @@ public class NvdDataService {
 	private final String NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/";
 	
 	@Autowired NvdDataMapper nvdDataMapper;
+	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
 	@Autowired SqlSessionFactory sqlSessionFactory;
 	
@@ -54,7 +56,10 @@ public class NvdDataService {
 		// GET Nvd Meta Data
 		// 작업등록
 		try {
-			if(nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH")) {
+			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
+			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			
+			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
 				nvdMetaDataSyncJob();
 			}
@@ -62,9 +67,29 @@ public class NvdDataService {
 			log.error(e.getMessage(), e);
 			return "91";
 		}
+		
+		try {
+			// initialize NVD Data Feed
+			// check initialize flag
+			if("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+				codeMapper.updateCodeDtlNm("990", "100", "N");
+
+				// delete all NVD Data and Max Score
+				resetNvdFeedData();
+				
+				// Put NVD Data feed from CPE2002 ~ current date year
+				initNvdDataFeed();
+				
+			}
+		} catch (Exception e) {
+			log.error("Failed to NVD Data initiallize", e);
+		}
 
 		try {
-			if(nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE")) {
+			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE");
+			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			
+			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_NVDCVE);
 				nvdCveDataSyncJob();
 			}
@@ -77,7 +102,6 @@ public class NvdDataService {
 	}
 	
 
-	@SuppressWarnings("unchecked")
 	@Transactional
 	private String nvdCveDataSyncJob() throws JsonParseException, JsonMappingException, IOException {
 		String resCd = "00";
@@ -97,150 +121,13 @@ public class NvdDataService {
 			// JobStatus가 W인 대상이 작업이 들어갔다면 G로 변경을 하여 추후에 다시 loop 돌지 않도록 처리함.
 			nvdDataMapper.updateJobStatus(param);
 			
-			Map<String, Object> map = null;
 			String NVD_CVE_PATH = env.getProperty("root.dir");
 			if(StringUtil.isEmpty(NVD_CVE_PATH)) {
 				NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 			}
 			NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
 
-			{
-				
-				ObjectMapper mapper = new ObjectMapper();
-				map = mapper.readValue(  new File(NVD_CVE_PATH + File.separator + (String) wMetaMap.get("fileNm") + ".json") , new TypeReference<Map<String, Object>>() { });
-				
-				if(map.containsKey("CVE_Items")) {
-					List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
-					for(Map<String, Object> cveItem : cveItems) {
-						
-						Map<String, Object> cveInfo = cveDatajsonReader(cveItem);
-						if(cveInfo == null || cveInfo.isEmpty()) {
-							continue;
-						}
-						
-						String cveId = (String) cveInfo.get("cveId");
-						Map<String, Object> comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
-						
-						List<Map<String, String>> ossList = null;
-						
-						ossList = new ArrayList<>();
-						// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
-						// 적용대상 cpe match list
-						List<Map<String, Object>> cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
-						for (Map<String, Object> cpe_match_data : cpe_match_all) {
-							// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
-							// Version Range 조건 취득
-							// 검색 조건 설정
-							Map<String, String> _matchNameParams = new HashMap<>();
-							_matchNameParams.put("cpe23Uri", (String) cpe_match_data.get("cpe23Uri"));
-							if (cpe_match_data.containsKey("versionStartIncluding")) {
-								_matchNameParams.put("versionStartIncluding",
-										(String) cpe_match_data.get("versionStartIncluding"));
-							}
-							if (cpe_match_data.containsKey("versionEndIncluding")) {
-								_matchNameParams.put("versionEndIncluding",
-										(String) cpe_match_data.get("versionEndIncluding"));
-							}
-							if (cpe_match_data.containsKey("versionStartExcluding")) {
-								_matchNameParams.put("versionStartExcluding",
-										(String) cpe_match_data.get("versionStartExcluding"));
-							}
-							if (cpe_match_data.containsKey("versionEndExcluding")) {
-								_matchNameParams.put("versionEndExcluding",
-										(String) cpe_match_data.get("versionEndExcluding"));
-							}
-
-							List<String> matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
-
-							// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
-							if (matchNames == null) {
-								matchNames = new ArrayList<>();
-							}
-
-							if (matchNames.isEmpty()) {
-								matchNames.add((String) cpe_match_data.get("cpe23Uri"));
-							}
-
-							// cpe23uri에서 product, version 정보를 추출한다.
-							for (String cpe23uri : matchNames) {
-								String[] cpeInfoArr = cpe23uri.split(":");
-
-								Map<String, String> _productInfo = new HashMap<>();
-								_productInfo.put("cveId", cveId);
-								_productInfo.put("product", cpeInfoArr[4].replaceAll("_", " "));
-								_productInfo.put("version", cpeInfoArr[5]);
-
-								ossList.add(_productInfo);
-							}
-						}
-						
-						// 신규등록
-						if(comapare == null){
-							nvdDataMapper.insertCveInfoV3(cveInfo);
-							
-							if(!ossList.isEmpty()) {
-								List<Map<String, String>> insertDataList = new ArrayList<>();
-								for(Map<String, String> item : ossList){
-									insertDataList.add(item);
-									if( (insertDataList.size() % 1000) == 0 ) {
-										nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-										insertDataList = new ArrayList<>();
-									}
-								}
-								// 미등록 data가 존재하는 경우 나머지를 등록한다.
-								if( !insertDataList.isEmpty() ) {
-									nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								}
-							}
-							
-							updateFlag = true;
-						}
-						// 변경(delete > insert)
-						else if(!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-								|| !((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore"))) ){
-							// 기존 데이터 삭제
-							nvdDataMapper.deleteCveDataV3(cveInfo);
-							nvdDataMapper.deleteNvdDataV3(cveInfo);
-							// 변경 데이터 등록
-							nvdDataMapper.insertCveInfoV3(cveInfo);
-							if(!ossList.isEmpty()) {
-								List<Map<String, String>> insertDataList = new ArrayList<>();
-								for(Map<String, String> item : ossList){
-									insertDataList.add(item);
-									if( (insertDataList.size() % 1000) == 0 ) {
-										nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-										insertDataList = new ArrayList<>();
-									}
-								}
-								// 미등록 data가 존재하는 경우 나머지를 등록한다.
-								if( !insertDataList.isEmpty() ) {
-									nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								}
-							}
-						} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-								&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
-							// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
-							
-							if(!ossList.isEmpty()) {
-								List<Map<String, String>> insertDataList = new ArrayList<>();
-								for(Map<String, String> item : ossList){
-									insertDataList.add(item);
-									if( (insertDataList.size() % 1000) == 0 ) {
-										nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-										insertDataList = new ArrayList<>();
-									}
-								}
-								// 미등록 data가 존재하는 경우 나머지를 등록한다.
-								if( !insertDataList.isEmpty() ) {
-									nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								}
-							}
-						}
-						updateFlag = true;
-					}
-				}
-				
-			}
+			updateFlag = updateNvdData(NVD_CVE_PATH, (String) wMetaMap.get("fileNm"));
 			
 			param.put("jobStatus", "C");
 			nvdDataMapper.updateJobStatus(param);
@@ -301,6 +188,150 @@ public class NvdDataService {
 		}
 		
 		return resCd;
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private boolean updateNvdData(String cpeFileRootPath, String cpeFileName) throws JsonParseException, JsonMappingException, IOException {
+
+		boolean updateFlag = false;
+		
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> map = mapper.readValue(  new File(cpeFileRootPath + File.separator + cpeFileName + ".json") , new TypeReference<Map<String, Object>>() { });
+		
+		if(map.containsKey("CVE_Items")) {
+			List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
+			for(Map<String, Object> cveItem : cveItems) {
+				
+				Map<String, Object> cveInfo = cveDatajsonReader(cveItem);
+				if(cveInfo == null || cveInfo.isEmpty()) {
+					continue;
+				}
+				
+				String cveId = (String) cveInfo.get("cveId");
+				Map<String, Object> comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
+				
+				List<Map<String, String>> ossList = null;
+				
+				ossList = new ArrayList<>();
+				// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
+				// 적용대상 cpe match list
+				List<Map<String, Object>> cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
+				for (Map<String, Object> cpe_match_data : cpe_match_all) {
+					// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
+					// Version Range 조건 취득
+					// 검색 조건 설정
+					Map<String, String> _matchNameParams = new HashMap<>();
+					_matchNameParams.put("cpe23Uri", (String) cpe_match_data.get("cpe23Uri"));
+					if (cpe_match_data.containsKey("versionStartIncluding")) {
+						_matchNameParams.put("versionStartIncluding",
+								(String) cpe_match_data.get("versionStartIncluding"));
+					}
+					if (cpe_match_data.containsKey("versionEndIncluding")) {
+						_matchNameParams.put("versionEndIncluding",
+								(String) cpe_match_data.get("versionEndIncluding"));
+					}
+					if (cpe_match_data.containsKey("versionStartExcluding")) {
+						_matchNameParams.put("versionStartExcluding",
+								(String) cpe_match_data.get("versionStartExcluding"));
+					}
+					if (cpe_match_data.containsKey("versionEndExcluding")) {
+						_matchNameParams.put("versionEndExcluding",
+								(String) cpe_match_data.get("versionEndExcluding"));
+					}
+
+					List<String> matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
+
+					// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
+					if (matchNames == null) {
+						matchNames = new ArrayList<>();
+					}
+
+					if (matchNames.isEmpty()) {
+						matchNames.add((String) cpe_match_data.get("cpe23Uri"));
+					}
+
+					// cpe23uri에서 product, version 정보를 추출한다.
+					for (String cpe23uri : matchNames) {
+						String[] cpeInfoArr = cpe23uri.split(":");
+
+						Map<String, String> _productInfo = new HashMap<>();
+						_productInfo.put("cveId", cveId);
+						_productInfo.put("product", cpeInfoArr[4].replaceAll("_", " "));
+						_productInfo.put("version", cpeInfoArr[5]);
+
+						ossList.add(_productInfo);
+					}
+				}
+				
+				// 신규등록
+				if(comapare == null){
+					nvdDataMapper.insertCveInfoV3(cveInfo);
+					
+					if(!ossList.isEmpty()) {
+						List<Map<String, String>> insertDataList = new ArrayList<>();
+						for(Map<String, String> item : ossList){
+							insertDataList.add(item);
+							if( (insertDataList.size() % 1000) == 0 ) {
+								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+								insertDataList = new ArrayList<>();
+							}
+						}
+						// 미등록 data가 존재하는 경우 나머지를 등록한다.
+						if( !insertDataList.isEmpty() ) {
+							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+						}
+					}
+					
+					updateFlag = true;
+				}
+				// 변경(delete > insert)
+				else if(!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
+						|| !((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore"))) ){
+					// 기존 데이터 삭제
+					nvdDataMapper.deleteCveDataV3(cveInfo);
+					nvdDataMapper.deleteNvdDataV3(cveInfo);
+					// 변경 데이터 등록
+					nvdDataMapper.insertCveInfoV3(cveInfo);
+					if(!ossList.isEmpty()) {
+						List<Map<String, String>> insertDataList = new ArrayList<>();
+						for(Map<String, String> item : ossList){
+							insertDataList.add(item);
+							if( (insertDataList.size() % 1000) == 0 ) {
+								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+								insertDataList = new ArrayList<>();
+							}
+						}
+						// 미등록 data가 존재하는 경우 나머지를 등록한다.
+						if( !insertDataList.isEmpty() ) {
+							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+						}
+					}
+				} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
+						&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
+					// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
+					
+					if(!ossList.isEmpty()) {
+						List<Map<String, String>> insertDataList = new ArrayList<>();
+						for(Map<String, String> item : ossList){
+							insertDataList.add(item);
+							if( (insertDataList.size() % 1000) == 0 ) {
+								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+								insertDataList = new ArrayList<>();
+							}
+						}
+						// 미등록 data가 존재하는 경우 나머지를 등록한다.
+						if( !insertDataList.isEmpty() ) {
+							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+						}
+					}
+				}
+				updateFlag = true;
+			}
+		}
+		
+	
+		return updateFlag;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -418,7 +449,30 @@ public class NvdDataService {
 		
 		return false;
 	}
-
+	
+	private boolean nvdMetaRetryCheckJob(String FILE_NM, String FILE_TYPE, boolean fileCheck, int cnt) {
+		int maxCnt = 3;
+		
+		log.debug("5초후 재시도합니다.");
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			fileCheck = nvdMetaCheckJob(FILE_NM, FILE_TYPE);
+		} catch (IOException ioe) {
+			log.error(ioe.getMessage(), ioe);
+		}
+		
+		if(!fileCheck && cnt < maxCnt) {
+			fileCheck = nvdMetaRetryCheckJob(FILE_NM, FILE_TYPE, fileCheck, ++cnt);
+		}
+		
+		return fileCheck;
+	}
+	
 	private void nvdFeedDataDownloadJob(String FILE_NAME) throws Exception  {
 		String NVD_CVE_PATH = env.getProperty("root.dir");
 		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
@@ -631,5 +685,34 @@ public class NvdDataService {
 		}
 		
 		return metaInfo;
+	}
+	
+	@Transactional
+	private void initNvdDataFeed() throws Exception {
+
+		int nvdBeginDateYear = 2002;
+		int currentDateYear = StringUtil.string2integer(DateUtil.getCurrentDateAsString("yyyy")) ;
+		for(int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
+			nvdFeedDataDownloadJob("nvdcve-1.1-" + year);
+		}
+		
+		String NVD_CVE_PATH = env.getProperty("root.dir");
+		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
+			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
+		}
+		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
+		for(int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
+			updateNvdData(NVD_CVE_PATH, "nvdcve-1.1-" + year);
+		}
+		
+	}
+
+
+	/**
+	 * Reset ALL NVD Feed Data 
+	 */
+	private void resetNvdFeedData() {
+		nvdDataMapper.resetCveDataV3();
+		nvdDataMapper.resetNvdDataV3();
 	}
 }

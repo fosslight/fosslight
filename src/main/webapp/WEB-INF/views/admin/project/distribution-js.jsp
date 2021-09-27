@@ -90,7 +90,7 @@
 			// 저장
 			$("#save").click(function(){
 				if(needVerifyFlag){
-					alertify.alert('Please verify the new package file');
+					alertify.alert('Please verify the new package file', function(){});
 					
 					return false;
 				}
@@ -536,7 +536,7 @@
 				//코멘트 저장
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment");
+					alertify.alert("Please enter a comment", function(){});
 					
 					return false;
 				}
@@ -595,7 +595,7 @@
 				var editorVal = CKEDITOR.instances.editor.getData();
 				
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment");
+					alertify.alert("Please enter a comment", function(){});
 					
 					return false;
 				}
@@ -1151,9 +1151,9 @@
 						modelData = json.externalData2;
 					}
 					
-					alertify.alert(_msgStr);
+					alertify.alert(_msgStr, function(){});
 				} else {
-					alertify.alert(json.validMsg);
+					alertify.alert(json.validMsg, function(){});
 				}
 			} else {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -1168,7 +1168,7 @@
 		//var data = json.resultData; // TODO - 왜 JSON.parse를 지웠는지 파악이 필요함.
 		
 		if(data.errorMsg) {
-			alertify.alert(data.errorMsg);
+			alertify.alert(data.errorMsg, function(){});
 
 			return false;
 		}
@@ -1451,7 +1451,7 @@
 			return true;
 		}
 		
-		alertify.alert('<spring:message code="msg.distribute.model.required" />');
+		alertify.alert('<spring:message code="msg.distribute.model.required" />', function(){});
 		
 		return false;
 	}
@@ -1592,7 +1592,7 @@
 				
 				needVerifyFlag = false;
 				
-				alertify.alert('Successfully completed.');
+				alertify.alert('Successfully completed.', function(){});
 				alertify.success('Successfully verified the new package file');
 				
 				$("#verifyYn").val("Y");
@@ -1615,7 +1615,7 @@
 						if(json.noCountOssCnt == 0){ // verify 성공
 							$("#btnVerify").val("Completed").attr("disabled", true).removeClass("red");
 							needVerifyFlag = false;
-							alertify.alert(json.resMsg);
+							alertify.alert(json.resMsg, function(){});
 							alertify.success('Successfully verified the new package file');
 							
 							$("#verifyYn").val("Y");
