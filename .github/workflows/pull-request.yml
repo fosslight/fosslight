@@ -37,3 +37,22 @@ jobs:
         run: cat docker-compose-web.log
       - name: Show mail container log
         run: cat docker-compose-mail.log
+        
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.head_ref }}
+        persist-credentials: false
+
+    - name: Prettify code
+      uses: creyD/prettier_action@v4.0
+      with:
+        dry: True
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        prettier_options: --check **/*.{js,md}
+        only_changed: True
