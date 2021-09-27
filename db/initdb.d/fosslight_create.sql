@@ -1854,7 +1854,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '44', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} rejected : "${Project Name}"', '', 'OSS Identification has been rejected.', 44, 'Y'),
 	('102', '45', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} canceled request : "${Project Name}"', '', 'OSS Identification Review Request has been canceled.', 45, 'Y'),
 	('102', '46', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} confirmed : "${Project Name}"', '', '', 46, 'Y'),
-	('102', '47', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} commit Binary DB (Success) : "${Project Name}"', '', '', 47, 'Y'),
+	('102', '47', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} commit Binary DB (${BinaryCommitResult}) : "${Project Name}"', '', '', 47, 'Y'),
 	('102', '50', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested review : "${Project Name}"', '', 'Reviewing package is requested.', 50, 'Y'),
 	('102', '51', '[FOSSLight][PRJ-${Project ID}] ${User} published OSS Notice : "${Project Name}"', '', 'OSS Notice has been published by ${User Info}', 51, 'Y'),
 	('102', '52', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} rejected : "${Project Name}"', '', 'Packaging has been rejected.', 52, 'Y'),
