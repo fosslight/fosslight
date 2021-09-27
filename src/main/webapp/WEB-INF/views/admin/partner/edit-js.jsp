@@ -32,8 +32,8 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		</c:if>
 		
 		// autoConplete 문제로 인한 처리
-	    $("#partnerName").val(partnerData.partnerName);
-	    $("#softwareName").val(partnerData.softwareName);
+		$("#partnerName").val(partnerData.partnerName);
+		$("#softwareName").val(partnerData.softwareName);
 		// ossNames auto complete
 		fn_grid_com.griOssNames().success(function(data, status, headers, config){
 			if(data != null){
@@ -355,10 +355,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 			
 			$('.btnCommentHistory').on('click', function(e){
-	            e.preventDefault();
-                openCommentHistory('<c:url value="/comment/popup/3rd/${detail.partnerId}"/>');
-
-            });
+				e.preventDefault();
+				openCommentHistory('<c:url value="/comment/popup/3rd/${detail.partnerId}"/>');
+			});
 			
 			$(window).resize(function(){
 				fn.gridHeaderResize();
@@ -528,22 +527,22 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					var target = $("#list");
 					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
 					
-			 		mainData.forEach( function(_rowData){
-			 			var _rowId = _rowData['gridId'];
-			 			
-			 			if(_rowData["obligationLicense"] == "90") {
-			 				if(_rowData["notify"] == "Y") {
-			 					if(_rowData["source"] == "Y") {
-			 						_rowData["obligationType"] = "11";
-			 					} else {
-			 						_rowData["obligationType"] = "10";
-			 					}
-			 				} else if(_rowData["notify"] == "N") {
-			 					_rowData["obligationType"] = "99";
-			 				}
-			 			}
-			 		});
-			 		
+					mainData.forEach( function(_rowData){
+						var _rowId = _rowData['gridId'];
+
+						if(_rowData["obligationLicense"] == "90") {
+							if(_rowData["notify"] == "Y") {
+								if(_rowData["source"] == "Y") {
+									_rowData["obligationType"] = "11";
+								} else {
+									_rowData["obligationType"] = "10";
+								}
+							} else if(_rowData["notify"] == "N") {
+								_rowData["obligationType"] = "99";
+							}
+						}
+					});
+
 					$('#ossComponentsStr').val(JSON.stringify(mainData));
 					$('#userComment').val(JSON.stringify(CKEDITOR.instances['editor'].getData()));
 					
@@ -875,7 +874,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 		},
 		reset : function(){
- 			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
+			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
 				if (e) {
 					$("#list").jqGrid('clearGridData');
 				} else {
@@ -1582,9 +1581,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		CheckChar : function(){
 			if(event.keyCode == 64){//@ 특수문자 체크
-        		alertify.alert("\'@\' Special characters are not allowed!");
-        		event.returnValue = false;
-        	}
+				alertify.alert("\'@\' Special characters are not allowed!");
+				event.returnValue = false;
+			}
 		}
 	}
 	
@@ -1657,7 +1656,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				datatype: 'local',
 				data : partyMainData,
 				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','Download Location'
-				           ,'Homepage','LicenseId','License','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
+						   ,'Homepage','LicenseId','License','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -1775,9 +1774,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 						}
 					},
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
-	 				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
-	 					editoptions: {
-	 						dataInit: function (e) {
+					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+						editoptions: {
+							dataInit: function (e) {
 									// licenseName auto complete
 									$(e).autocomplete({
 										source: licenseNames
@@ -1836,8 +1835,8 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 										}
 									});
 								}
-	 					}
-	 				},
+						}
+					},
 					{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
 						dataInit:
 							function (e) { 
@@ -1848,7 +1847,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 								});
 							}
 						}
-	 				},
+					},
 					
 					{name: 'cveId', index: 'cveId', hidden:true},
 					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
@@ -1862,21 +1861,21 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				],
 				autoencode: true,
 				editurl:'clientArray',
-	 			autowidth: true,
+				autowidth: true,
 				height: 'auto',
 				gridview: true,
-			   	pager: '#pager',
+				pager: '#pager',
 				rowNum: 200,
 				rowList: [200, 500, 1000, 5000],
 				recordpos:'right',
 				toppager:true,
-			   	loadonce:true,
+				loadonce:true,
 				cellEdit : true,
 				cellsubmit : 'clientArray',
 				ignoreCase: true,
-			    onSortCol: function (index, columnIndex, sortOrder) {
-			    	isSort = true;
-			    },
+				onSortCol: function (index, columnIndex, sortOrder) {
+					isSort = true;
+				},
 				loadComplete: function(data) {
 					_mainLastsel = -1;
 					
@@ -1948,7 +1947,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					ondblClickRowBln = false;
 					
 					$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '60px'});
+					$('#'+rowid+'_licenseName').css({'width' : '60px'});
 					var result = $('#'+rowid+'_licenseName').val().split(",");
 
 					result.forEach(function(cur,idx){
@@ -1975,15 +1974,15 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 						gridDiffMsg(partyDiffMsgData_e, "list");
 					}
 					
-			 		var arr = [];
-			 		arr = partnerList.jqGrid('getDataIDs');
+					var arr = [];
+					arr = partnerList.jqGrid('getDataIDs');
 
-			 		for(var i in arr){
+					for(var i in arr){
 						if(partnerList.jqGrid('getCell',arr[i],'obligationType') == 90) {
 							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
 							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
 						}
-			 		}
+					}
 				},
 				removeHighLight : true
 
@@ -2005,11 +2004,11 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		getLicenseName : function(obj){
 			return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
-			    if(cur.toUpperCase() != "X" && cur != ""){
-			        arr.push(cur);
-			    }
+				if(cur.toUpperCase() != "X" && cur != ""){
+					arr.push(cur);
+				}
 
-			    return arr;
+				return arr;
 			}, []).join(",");
 		},
 		exitCell : function(_mainLastsel, target){
