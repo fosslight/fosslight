@@ -30,7 +30,7 @@
 		
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory("prj", "${project.prjId}");
+			openCommentHistory('<c:url value="/comment/popup/prj/${project.prjId}"/>');
 		});
 		
 		// distribution까지 진행되는 경우
