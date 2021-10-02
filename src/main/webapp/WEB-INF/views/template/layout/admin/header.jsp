@@ -36,7 +36,7 @@
 				    <c:if test="${statisticsFlag and ct:isAdmin()}">
 							<li><a href="#/statistics/view" class="add-tab">Statistics</a></li>
 					</c:if>
-					<li><a href="#/license/list" class="add-tab"><spring:message code="license.list" /></a></li>
+					<li><a href="#/license/list" class="add-tab">License List</a></li>
 					<li><a href="#/oss/list" class="add-tab">OSS List</a></li>
 					<c:if test="${projectFlag}">
 						<li><a href="#/project/list" class="add-tab">Project List</a></li>
