@@ -2085,7 +2085,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Download Location
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
-					cellPackageDownloadLocation.setCellValue(avoidNull(bean.getDownloadLocation()));
+					String downloadLocation = bean.getDownloadLocation();
+
+					if(downloadLocation.isEmpty()) {
+						downloadLocation = "NONE";
+					}
+
+					cellPackageDownloadLocation.setCellValue(downloadLocation);
 					
 					// Package Checksum
 					cellIdx++;
@@ -2159,9 +2165,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Copyright Text
 					Cell cellPackageCopyrightText = getCell(row, cellIdx); cellIdx++;
-					cellPackageCopyrightText.setCellValue(StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762) );
-					
-					
+					String copyrightText = StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762);
+
+					if(copyrightText.isEmpty() || copyrightText.equals("-")) {
+						copyrightText = "NOASSERTION";
+					}
+
+					cellPackageCopyrightText.setCellValue(copyrightText);
+
+
 					// Summary
 					cellIdx++;
 					
