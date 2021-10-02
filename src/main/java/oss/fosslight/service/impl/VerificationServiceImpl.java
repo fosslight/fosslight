@@ -1173,7 +1173,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				tagFullPath += targetFileName;
-				SPDXUtil2.spreadsheetToRDF(project.getPrjId(), sheetFullPath, tagFullPath);
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				File spdxRdfFile = new File(tagFullPath);
 				
 				if(spdxRdfFile.exists() && spdxRdfFile.length() <= 0) {
@@ -1216,7 +1216,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				tagFullPath += targetFileName;
-				SPDXUtil2.spreadsheetToTAG(project.getPrjId(), sheetFullPath, tagFullPath);
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				
 				File spdxTafFile = new File(tagFullPath);
 				
