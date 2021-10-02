@@ -76,7 +76,7 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler( CoConstDef.STATIC_RESOURCES_URL_PATTERNS)
 				.addResourceLocations(CoConstDef.CLASSPATH_RESOURCE_LOCATIONS)
-				.setCachePeriod(60*60*24*7)// 60*60*24*7 => 일주일
+				.setCachePeriod(60*60*24*7)// 60*60*24*7 => 1 week
 				.resourceChain(true)
 				.addResolver(new PathResourceResolver());
 
@@ -95,7 +95,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Bean
 	public MessageSource messageSource() {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-		// WEB-INF 밑에 해당 폴더에서 properties를 찾는다.
+		// Search properties in "messages/message" below WEB-INF folder
 		messageSource.setBasename("messages/message");
 		messageSource.setDefaultEncoding("UTF-8");
 		// # -1 : never reload, 0 always reload
@@ -105,18 +105,18 @@ public class WebConfig implements WebMvcConfigurer {
 	}
 
 	/*
-	쿠키를 사용한 localeResolver
+	localeResolver using cookie
 	 */
 	@Bean
 	public LocaleResolver localeResolver() {
-		CookieLocaleResolver localeResolver = new CookieLocaleResolver(); // <--- 2
+		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setDefaultLocale(Locale.US);
 		localeResolver.setCookieName("lang");
 		return localeResolver;
 	}
 
 	/*
-	?lang="국가 코드" 쿼리가 들어오면, locale 설정 언어를 바꿔줍니다.
+	when ?lang="country code" input query, change locale language
 	 */
 	@Bean
 	public LocaleChangeInterceptor localeChangeInterceptor() {
