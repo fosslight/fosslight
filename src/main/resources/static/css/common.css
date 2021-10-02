@@ -223,8 +223,10 @@ body,html {overflow:hidden !important;/*letter-spacing:0.06em;*/background:#efef
 #wrapBack:after {clear:both;display:block;height:0;content:'';visibility:hidden}
 /**/
 #header {position:absolute;top:0;bottom:0;left:0;z-index:30;zoom:1;width:200px;overflow:visible;box-shadow:0 0 10px black;background:#f1f1f1;}
-#header h1 {padding:30px 0 0 0;height:74px;text-align:center;background:#fff;}
-#header .userLogout {padding:8px 34px 0 10px;height:35px;text-align:center;border-width:1px 0;border-color:#dbdbdb;border-style:solid;background:#fff;}
+#header h1 {padding:30px 0 0 0;height:64px;text-align:center;background:#fff;}
+#header .userLogout {padding:8px 17px 0 10px;height:30px;text-align:center;border-width:1px 0;border-color:#dbdbdb;border-style:solid;background:#fff;}
+#header .userLang {padding:0 17px 5px 10px;height:20px;text-align:center;background:#fff;}
+
 /* 2018-08-16 choye 변경 */
 #header .configurationSpan a {display:block;position:relative;float:left;width:95px;height:16px;line-height:16px;overflow:hidden;text-overflow: ellipsis;font-family:Tahoma;font-size:13px;color:#6d6e72;}
 #header .userLogoutSpan a {display:block;position:relative;float:right;width:55px;height:16px;line-height:16px;text-align:right;font-family:Tahoma;font-size:13px;color:#6d6e72;}

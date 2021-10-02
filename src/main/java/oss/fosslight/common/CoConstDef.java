@@ -96,6 +96,7 @@ public class CoConstDef {
 	public static final String CD_LDAP_USED_FLAG				= "910";
 	public static final String CD_SMTP_USED_FLAG				= "911";
 //	public static final String CD_MENU_AUTH_FLAG				= "912";
+	public static final String CD_EXTERNAL_SERVICE_USED_FLAG	= "940";
 	
 	// Login Setting
 	public static final String CD_LOGIN_SETTING					= "910";
@@ -138,7 +139,10 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_HTML				= "100";
 	public static final String CD_DTL_NOTICE_TEXT				= "101";
 	public static final String CD_DTL_NOTICE_SPDX				= "102";	
-	
+
+	// External Service Setting
+	public static final String CD_EXTERNAL_SERVICE_SETTING		= "930";
+	public static final String CD_DTL_GITHUB_TOKEN  			= "100";
 	
 	/** System Setting Code List End */
 	

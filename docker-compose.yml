@@ -35,7 +35,8 @@ services:
                --spring.datasource.username=fosslight
                --spring.datasource.password=fosslight
                --logging.path=/data/fosslight/logs
-               --verify.bin.path=./verify"
+               --verify.bin.path=./verify
+               --export.template.path=./template"
     mail:
       image: mailserver/docker-mailserver:10
       container_name: fosslight_mail
