@@ -67,60 +67,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		
 		if("REV".equals(statistics.getCategoryType())) {
 			// Reviewer None Statistic Sum Check
-			int noneSum = 0;
-			
-			switch(titleArray.size()) {
-			case 1:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory1Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 2:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory2Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 3:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory3Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 4:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory4Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 5:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory5Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 6:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory6Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 7:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory7Cnt();
-					noneSum += cnt;
-				}
-				break;
-			case 8:
-				for (int i=0; i<list.size(); i++) {
-					int cnt = list.get(i).getCategory8Cnt();
-					noneSum += cnt;
-				}
-				break;
-			}
-			
-			if (noneSum > 0) {
+			if (noneCheck(titleArray, list) > 0) {
 				titleArray.add("NONE");
 			}
 		}
@@ -221,7 +168,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		
 		list = list.stream().sorted(Comparator.comparing((Statistics s) -> s.getColumnName())).collect(Collectors.toList());
 		
-		titleArray.add("NONE");
+		// Reviewer None Statistic Sum Check
+		if (noneCheck(titleArray, list) > 0) {
+			titleArray.add("NONE");
+		}
 		
 		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
 			for(Statistics stat : list) {
@@ -304,7 +254,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		
 		list = list.stream().sorted(Comparator.comparing((Statistics s) -> s.getColumnName())).collect(Collectors.toList());
 		
-		titleArray.add("NONE");
+		// Reviewer None Statistic Sum Check
+		if (noneCheck(titleArray, list) > 0) {
+			titleArray.add("NONE");
+		}
 		
 		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
 			for(Statistics stat : list) {
@@ -385,7 +338,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> list = statisticsMapper.getTrdPartyRelatedChartData(statistics);
 		
 		if("REV".equals(statistics.getCategoryType())) {
-			titleArray.add("NONE");
+			// Reviewer None Statistic Sum Check
+			if (noneCheck(titleArray, list) > 0) {
+				titleArray.add("NONE");
+			}
 		}
 		
 		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
@@ -472,5 +428,61 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 		
 		return result;
+	}
+	
+	public int noneCheck(List<String> titleArray, List<Statistics> list) {
+		int noneSum = 0;
+		
+		switch(titleArray.size()) {
+		case 1:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory1Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 2:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory2Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 3:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory3Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 4:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory4Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 5:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory5Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 6:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory6Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 7:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory7Cnt();
+				noneSum += cnt;
+			}
+			break;
+		case 8:
+			for (int i=0; i<list.size(); i++) {
+				int cnt = list.get(i).getCategory8Cnt();
+				noneSum += cnt;
+			}
+			break;
+		}
+		return noneSum;
 	}
 }

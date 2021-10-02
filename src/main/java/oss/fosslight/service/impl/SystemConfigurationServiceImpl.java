@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ import oss.fosslight.util.CryptUtil;
 import oss.fosslight.util.StringUtil;
 
 @Service
+@Slf4j
 public class SystemConfigurationServiceImpl extends CoTopComponent implements SystemConfigurationService {
 	// Service
 	@Autowired CodeService codeService;
@@ -49,7 +51,10 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		
 		T2CodeDtl smtpAuth = new T2CodeDtl(CoConstDef.CD_SMTP_SETTING);
 		List<T2CodeDtl> smtpAuthList = codeMapper.selectCodeDetailList(smtpAuth);
-		
+
+		T2CodeDtl externalServiceAuth = new T2CodeDtl(CoConstDef.CD_EXTERNAL_SERVICE_SETTING);
+		List<T2CodeDtl> tokenAuthList = codeMapper.selectCodeDetailList(externalServiceAuth);
+
 		T2CodeDtl defaultTab = new T2CodeDtl(CoConstDef.CD_DEFAULT_TAB);
 		List<T2CodeDtl> defaultTabList = codeMapper.selectCodeDetailList(defaultTab);
 		
@@ -66,6 +71,10 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 				case CoConstDef.CD_SMTP_USED_FLAG:
 					c.setCdDtlExp((String) configurationMap.get("smtpFlag"));
 					
+					break;
+				case CoConstDef.CD_EXTERNAL_SERVICE_USED_FLAG:
+					c.setCdDtlExp((String) configurationMap.get("externalServiceFlag"));
+
 					break;
 			}
 			
@@ -137,6 +146,34 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 			}).collect(Collectors.toList());
 
 			codeService.setCodeDetails(smtpAuthList, CoConstDef.CD_SMTP_SETTING);
+		}
+
+		// External Service setting
+		Map<String, Object> tokenDetailMap = (Map<String, Object>) configurationMap.get("externalServiceDetail");
+
+		if(tokenDetailMap != null) {
+			tokenAuthList.stream().map(c -> {
+				switch (c.getCdDtlNo()) {
+					case CoConstDef.CD_DTL_GITHUB_TOKEN:
+						String _token = (String) tokenDetailMap.get(CoConstDef.CD_DTL_GITHUB_TOKEN);
+						if(!StringUtil.isEmpty(_token)) {
+							String _encToken = null;
+							try {
+								_encToken = CryptUtil.encryptAES256(_token, CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
+							} catch (Exception e) {
+                                log.error(e.getMessage(), e);
+							}
+							if(!StringUtil.isEmpty(_encToken)) {
+								c.setCdDtlExp(_encToken);
+							}
+						}
+						break;
+				}
+
+				return c;
+			}).collect(Collectors.toList());
+
+			codeService.setCodeDetails(tokenAuthList, CoConstDef.CD_EXTERNAL_SERVICE_SETTING);
 		}
 		
 		// default tab Setting

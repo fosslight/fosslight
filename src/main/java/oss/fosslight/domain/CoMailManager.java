@@ -1569,6 +1569,10 @@ public class CoMailManager extends CoTopComponent {
 			}
 		}
 		
+		if(title.indexOf("${BinaryCommitResult}") > -1) {
+			title = StringUtil.replace(title, "${BinaryCommitResult}", bean.getBinaryCommitResult());
+		}
+		
 		return title;
 	}
 

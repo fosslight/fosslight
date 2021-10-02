@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.9 (01/10/2021)
+## Changes
+## 🚀 Features
+
+- Update Statistics NONE value except @FOSSLight-dev (#149)
+- Add External Service settings to the configuration page @riyenas0925 (#145)
+- RestTemplate config for task 1 @riyenas0925 (#141)
+
+## 🐛 Hotfixes
+
+- Fix the comments history shows properly in identification(project), third-party, project info tabs @su-ram (#134)
+
+## 🔧 Maintenance
+
+- Check whether comments are entered when the drop button is clicked @namkyu1999 (#146)
+
+---
+
 ## v1.2.8 (24/09/2021)
 ## Changes
 ## 🔧 Maintenance

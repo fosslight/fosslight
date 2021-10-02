@@ -1796,6 +1796,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('924', 'Compliance Status Detail Setting', 'System Detail Setting Code', 'Y'),
 	('926', 'System Detail Setting', 'System Detail Setting Code', 'Y'),
 	('927', 'Notice Info', '', 'Y'),
+	('930', 'External Service Setting', 'System Detail Setting Code', 'Y'),
 	('990', 'System initialize flag', '', 'Y');
 /*!40000 ALTER TABLE `T2_CODE` ENABLE KEYS */;
 
@@ -1854,7 +1855,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '44', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} rejected : "${Project Name}"', '', 'OSS Identification has been rejected.', 44, 'Y'),
 	('102', '45', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} canceled request : "${Project Name}"', '', 'OSS Identification Review Request has been canceled.', 45, 'Y'),
 	('102', '46', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} confirmed : "${Project Name}"', '', '', 46, 'Y'),
-	('102', '47', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} commit Binary DB (Success) : "${Project Name}"', '', '', 47, 'Y'),
+	('102', '47', '[FOSSLight][PRJ-${Project ID}] Identification, ${User} commit Binary DB (${BinaryCommitResult}) : "${Project Name}"', '', '', 47, 'Y'),
 	('102', '50', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested review : "${Project Name}"', '', 'Reviewing package is requested.', 50, 'Y'),
 	('102', '51', '[FOSSLight][PRJ-${Project ID}] ${User} published OSS Notice : "${Project Name}"', '', 'OSS Notice has been published by ${User Info}', 51, 'Y'),
 	('102', '52', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} rejected : "${Project Name}"', '', 'Packaging has been rejected.', 52, 'Y'),
@@ -2277,6 +2278,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('909', '911', 'SMTP Flag', '', 'N', 2, 'Y'),
 	('909', '912', 'Menu Auth Flag', '', 'Y', 3, 'Y'),
 	('909', '913', 'file Path Flag', '', 'Y', 4, 'Y'),
+	('909', '940', 'External Service Flag', '', 'N', 5, 'Y'),
 	('910', '100', 'Provider Url', '', '', 1, 'Y'),
 	('911', '100', 'Mail Server', '', '', 100, 'Y'),
 	('911', '101', 'Email Address', '', '', 101, 'Y'),
@@ -2315,6 +2317,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('927', '100', 'HTML', '', 'Y', 1, 'Y'),
 	('927', '101', 'TEXT', '', 'Y', 2, 'Y'),
 	('927', '102', 'SPDX', '', 'Y', 3, 'Y'),
+	('930', '100', 'Github Token', '', 'github token', 1, 'Y'),
 	('990', '100', 'N', '', 'NVD Data Feed initialize flag', 1, 'Y');
 /*!40000 ALTER TABLE `T2_CODE_DTL` ENABLE KEYS */;
 
