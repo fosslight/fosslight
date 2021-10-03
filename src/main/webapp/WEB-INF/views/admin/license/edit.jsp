@@ -75,7 +75,7 @@
 							<td class="dCase">
 								<div class="multiTxtSet">	
 									<div class="required">								
-										<span><input type="text" name="licenseNicknames" /><input type="button" value="Delete" class="smallDelete" /></span>
+										<span><input type="text" name="licenseNicknames" style="width: 356px;"/><input type="button" value="Delete" class="smallDelete" /></span>
 										<span class="retxt"></span>
 									</div>
 								</div>
