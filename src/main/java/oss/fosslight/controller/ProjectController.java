@@ -26,6 +26,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -3153,6 +3154,9 @@ public class ProjectController extends CoTopComponent {
 		String fileId = req.getParameter("registFileId");
 		file.setTabGubn(req.getParameter("tabNm"));
 		log.info("tabNm ==> " + req.getParameter("tabNm"));
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
 		
 		// 파일 등록
 		try {
@@ -3165,8 +3169,12 @@ public class ProjectController extends CoTopComponent {
 					list = fileService.uploadFile(req, file, null, fileId);
 				}
 			}
-			
-			resultList = CommonFunction.checkXlsxFileLimit(list);
+
+			if(fileExtension.equals("csv")) {
+				// TODO : csv도 file limit 체크해줘야 하는지
+			} else {
+				resultList = CommonFunction.checkXlsxFileLimit(list);
+			}
 			
 			if(resultList.size() > 0) {
 				return toJson(resultList);
@@ -3175,20 +3183,28 @@ public class ProjectController extends CoTopComponent {
 			e.printStackTrace();
 		}
 
-		// sheet이름
-		List<Object> sheetNameList = null;
-		
-		try {
-			sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(fileExtension.equals("csv")) {
+			resultList.add(list);
+			resultList.add("SRC");
+			resultList.add("CSV_FILE");
+			return toJson(resultList);
+		} else {
+			// sheet이름
+			List<Object> sheetNameList = null;
+
+			try {
+				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			resultList.add(list);
+			resultList.add(sheetNameList);
+			resultList.add("EXCEL_FILE");
+
+			// 결과값 resultList에 담기
+			return toJson(resultList);
 		}
-
-		resultList.add(list);
-		resultList.add(sheetNameList);
-
-		// 결과값 resultList에 담기
-		return toJson(resultList);
 	}
 	
 	/**
