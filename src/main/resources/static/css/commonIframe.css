@@ -288,10 +288,10 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .iconSet.help:hover {background-position:-215px -30px;}
 .iconSet.ops {margin:0 3px;width:15px;height:15px;background-position:-245px -30px;}
 .iconSet.man {margin:0 3px;width:16px;height:15px;background-position:-275px -30px;}
-.iconSet.vulCritical {width:18px;height:16px;background-position:-90px -200px;}  /* 20180511 by mj-cho */
-.iconSet.vulHigh {width:18px;height:16px;background-position:0 -200px;}  /* 20161025 by mj-cho */
-.iconSet.vulMiddle {width:18px;height:16px;background-position:-60px -200px;}  /* 20161025 by mj-cho */
-.iconSet.vulLow {width:18px;height:16px;background-position:-30px -200px;}  /* 20161025 by mj-cho */
+.iconSet.vulCritical {cursor:pointer;width:18px;height:16px;background-position:-90px -200px;}  /* 2021-10-05 */
+.iconSet.vulHigh {cursor:pointer;width:18px;height:16px;background-position:0 -200px;}  /* 2021-10-05 */
+.iconSet.vulMiddle {cursor:pointer;width:18px;height:16px;background-position:-60px -200px;}  /* 2021-10-05 */
+.iconSet.vulLow {cursor:pointer;width:18px;height:16px;background-position:-30px -200px;}  /* 2021-10-05 */
 .iconSet.prj {width:28px;height:16px;background-position:-215px -60px;vertical-align:middle;}
 .iconSet.nick {width:25px;height:12px;background-position:-215px -150px;vertical-align:middle;} /* 20161025 by mj-cho */
 .iconSet.nick.dummy {width:25px;height:12px;background-position:-265px -170px;vertical-align:middle;} /* 20161025 by sw-yun empty */
