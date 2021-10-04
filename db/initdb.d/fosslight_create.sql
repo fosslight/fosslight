@@ -2010,7 +2010,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Basic Information탭 우측하단의 "Request to Open" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Request to Open" button on Basic Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
 	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Basic Informatoin탭 우측하단의 "Open" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Open" button on Basic information Tab.</p>', 812, 'Y'),
 	('120', '11', '프로젝트 모델', '', 'xlsx,xls,xlsm', 1, 'Y'),
-	('120', '12', '프로젝트 SRC CSV FILE', '', 'xlsx,xls,xlsm', 2, 'Y'),
+	('120', '12', '프로젝트 SRC CSV FILE', '', 'xlsx,xls,xlsm,csv', 2, 'Y'),
 	('120', '13', '프로젝트 SRC ANDROID CSV FILE', '', 'xlsx,xls,xlsm', 3, 'Y'),
 	('120', '14', '프로젝트 SRC ANDROID NOTICE FILE', '', 'html,htm', 4, 'Y'),
 	('120', '15', '프로젝트 BAT FILE', '', '', 5, 'Y'),
