@@ -3611,6 +3611,21 @@ public class CommonFunction extends CoTopComponent {
 		
 		return result;
 	}
+
+	public static ArrayList<Object> checkCsvFileLimit(List<UploadFile> list) {
+		ArrayList<Object> result = new ArrayList<Object>();
+
+		for(UploadFile f : list) {
+			if(f.getSize() > CoConstDef.CD_CSV_UPLOAD_FILE_SIZE_LIMIT && f.getFileExt().contains("csv")){
+				result.add("FILE_SIZE_LIMIT_OVER");
+				result.add("The file exceeded 5MB.<br>Please delete the blank row or unnecessary data, and then upload it.");
+
+				break;
+			}
+		}
+
+		return result;
+	}
 	
 	public static File convertXMLToHTML(File XmlFile) {
 		return convertXMLToHTML(XmlFile, false);
