@@ -109,7 +109,13 @@ var src_evt = {
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
 						});
-					} else {
+					} else if(result[2] == "CSV_FILE") {
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else if(result[2] == "EXCEL_FILE") {
 						if(result[1].length != 0) {
 							$('.sheetSelectPop').show();
 							$('.sheetSelectPop .sheetNameArea').children().remove();
@@ -133,6 +139,10 @@ var src_evt = {
 						$('.ajax-file-upload-statusbar').remove();
 						
 						src_fn.makeFileTag(result[0][0]);	
+					} else {
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
 					}
 				}
 			}
