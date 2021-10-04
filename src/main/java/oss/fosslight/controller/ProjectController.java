@@ -3171,7 +3171,7 @@ public class ProjectController extends CoTopComponent {
 			}
 
 			if(fileExtension.equals("csv")) {
-				// TODO : csv도 file limit 체크해줘야 하는지
+				resultList = CommonFunction.checkCsvFileLimit(list);
 			} else {
 				resultList = CommonFunction.checkXlsxFileLimit(list);
 			}

@@ -712,6 +712,7 @@ public class CoConstDef {
 	public static final String CD_BAT_ERROR_STRING_LIST							= "907";
 	
 	public static final int CD_XLSX_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
+	public static final int CD_CSV_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
 	
 	public static final String CD_ANDROID_NOTICE_XML							= "20";
 	
