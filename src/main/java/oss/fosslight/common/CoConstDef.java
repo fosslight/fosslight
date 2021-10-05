@@ -328,7 +328,13 @@ public class CoConstDef {
 	public static final String CD_DTL_COMPONENT_BAT = "30";
 	public static final String CD_DTL_COMPONENT_PACKAGING = "50";
 	
-
+	/** 3rd party status */
+	public static final String CD_PARTNER_STATUS				= "211";
+	public static final String CD_DTL_PARTNER_STATUS_PROGRESS 	= "PROG";
+	public static final String CD_DTL_PARTNER_STATUS_REQUEST 	= "REQ";
+	public static final String CD_DTL_PARTNER_STATUS_REVIEW		= "REV";
+	public static final String CD_DTL_PARTNER_STATUS_CONFIRM 	= "CONF";
+	
 	public static final String CD_DTL_SELF_COMPONENT_ID = "10";
 	
 	public static final String CD_BAT_STATUS = "212";

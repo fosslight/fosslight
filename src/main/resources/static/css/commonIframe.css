@@ -129,9 +129,10 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .mt10 {margin-top:10px;}
 .mt20 {margin-top:20px;}
 .mb5 {margin-bottom:5px;}
+.mr5 {margin-right:5px !important;}
 .w55 {width:56px !important;padding:0 0 0 !important;}
 .w60 {width:60px !important;}
-.w100 {width:100px ;}
+.w100 {width:100px !important;}
 .w120 {width:120px !important;}
 .w150 {width:150px !important;}
 .w155 {width:155px !important;} /* 161104 jh_son 추가 */

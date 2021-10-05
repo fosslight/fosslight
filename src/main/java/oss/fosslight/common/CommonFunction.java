@@ -4015,4 +4015,12 @@ public class CommonFunction extends CoTopComponent {
 		
 		return resultMap.containsKey(key) ? resultMap.get(key) : resultMap;
 	}
+	
+	public static String makeDuplicateErrorMessage(String prjId) {
+		String distributionDuplicateMsg = "";
+		distributionDuplicateMsg += getMessage("msg.distribute.description.duplicate");
+		distributionDuplicateMsg += getMessage("msg.distribute.origin.link", new String[]{prjId});
+		
+		return distributionDuplicateMsg;
+	}
 }

@@ -1119,7 +1119,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 			}
+		} else {
+			detectedLicenseList = detectedLicenseList.stream().map(dl -> dl.toUpperCase()).collect(Collectors.toList());
 		}
+		
+		boolean declaredLicenseEmptyCheck = true;
 		
 		for (OssComponentsLicense license : list) {
 			// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
@@ -1132,8 +1136,15 @@ public class T2CoProjectValidator extends T2CoValidator {
 			if (!CoConstDef.FLAG_YES.equals(license.getExcludeYn())
 				&& !checkLicenseNameList.contains(licenseName)) {
 				return false;
+			} else {
+				declaredLicenseEmptyCheck = false;
 			}
 		}
+		
+		if(declaredLicenseEmptyCheck) {
+			return false;
+		}
+		
 		return true;
 	}
 	
@@ -1278,10 +1289,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 					}
 				}
+			} else {
+				detectedLicenseList = detectedLicenseList.stream().map(dl -> dl.toUpperCase()).collect(Collectors.toList());
 			}
 		}
 
 		if (list != null) {
+			boolean declaredLicenseEmptyCheck = true; // detected License만 사용할 경우 check
 			for (ProjectIdentification license : list) {
 				// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
 				String licenseName = avoidNull(license.getLicenseName()).trim().toUpperCase();
@@ -1293,10 +1307,16 @@ public class T2CoProjectValidator extends T2CoValidator {
 				if (!CoConstDef.FLAG_YES.equals(license.getExcludeYn())
 					&& !checkLicenseNameList.contains(licenseName)) {
 					return false;
+				} else {
+					declaredLicenseEmptyCheck = false;
 				}
 			}
+			
+			if(declaredLicenseEmptyCheck) {
+				return false;
+			}
 		}
-
+		
 		return true;
 	}
 	

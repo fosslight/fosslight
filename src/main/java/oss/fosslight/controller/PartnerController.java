@@ -183,6 +183,42 @@ public class PartnerController extends CoTopComponent{
 		return PARTNER.EDIT_JSP;
 	}
 	
+	
+	@GetMapping(value=PARTNER.VIEW_ID, produces = "text/html; charset=utf-8")
+	public String view(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		
+		T2File confirmationFile = new T2File();
+		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
+		confirmationFile = fileMapper.getFileInfo(confirmationFile);
+		
+		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+		
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+		comHisBean.setReferenceId(partnerMaster.getPartnerId());
+		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
+		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
+		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", toJson(partnerMaster));
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("ossFile", ossFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		return PARTNER.VIEW_JSP;
+	}
+	
 	@GetMapping(value=PARTNER.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			PartnerMaster partnerMaster
