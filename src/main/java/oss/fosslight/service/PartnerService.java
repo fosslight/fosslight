@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2Users;
@@ -57,4 +58,6 @@ public interface PartnerService extends HistoryConfig{
 	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster);
 	
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
+
+
 }

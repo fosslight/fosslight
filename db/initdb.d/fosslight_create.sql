@@ -2540,3 +2540,14 @@ CREATE USER IF NOT EXISTS 'fosslight'@'localhost' IDENTIFIED BY 'fosslight';
 GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'%';
 GRANT ALL PRIVILEGES ON fosslight.* TO 'fosslight'@'localhost';
 FLUSH PRIVILEGES;
+
+
+/* `search` table : save data related search info  */
+CREATE TABLE `fosslight`.`search` (
+`filter` JSON NULL,
+`search_type` varchar(20),
+`created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`user_id` VARCHAR(45) NULL,
+PRIMARY KEY (`user_id`, `search_type`)
+);
