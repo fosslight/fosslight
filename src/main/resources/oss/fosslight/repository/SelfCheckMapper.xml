@@ -2379,4 +2379,9 @@
 							  AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y')
 		GROUP BY PRODUCT
 	</select>
+
+
+
+
+
 </mapper>

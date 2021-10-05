@@ -89,7 +89,7 @@ public class LicenseController extends CoTopComponent{
 		licenseMaster.setPageListSize(rows);
 		licenseMaster.setSortField(sidx);
 		licenseMaster.setSortOrder(sord);
-		
+
 		if("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, licenseMaster);
@@ -106,6 +106,7 @@ public class LicenseController extends CoTopComponent{
 			
 			licenseMaster.setTotListSize(licenseService.selectLicenseMasterTotalCount(licenseMaster));
 			map = licenseService.getLicenseMasterList(licenseMaster);
+
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}

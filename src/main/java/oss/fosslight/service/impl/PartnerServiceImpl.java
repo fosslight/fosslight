@@ -693,4 +693,6 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		return resultMap;
 	}
+
+
 }

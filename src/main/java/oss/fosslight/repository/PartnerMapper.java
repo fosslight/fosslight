@@ -137,5 +137,7 @@ public interface PartnerMapper {
 	
 	PartnerMaster getOssAnalysisData(@Param("partnerId") String partnerId);
 	
-	String getReviewerEmail(@Param("partnerId") String partnerId, @Param("loginUser") String loginUser);	
+	String getReviewerEmail(@Param("partnerId") String partnerId, @Param("loginUser") String loginUser);
+
+
 }

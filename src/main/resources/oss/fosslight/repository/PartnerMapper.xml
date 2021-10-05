@@ -1706,4 +1706,6 @@
 		  FROM OSS_ANALYSIS_STATUS
 		 WHERE PRJ_ID = #{partnerId}
 	 </select>
+
+
 </mapper>
