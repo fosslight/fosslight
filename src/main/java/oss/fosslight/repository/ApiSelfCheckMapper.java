@@ -16,5 +16,5 @@ public interface ApiSelfCheckMapper {
 	
 	int getCreateProjectCnt(@Param("userId") String userId);
 	
-	int selectProjectCount(@Param("userId") String userId, @Param("prjId") String prjId);
+	int selectProjectCount(Map<String, Object> paramMap);
 }

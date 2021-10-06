@@ -15,5 +15,5 @@ public interface ApiSelfCheckService {
 	
 	Map<String, Object> createSelfCheck(Map<String, Object> paramMap);
 	
-	boolean existProjectCnt(String userId, String prjId);
+	boolean existProjectCnt(Map<String, Object> paramMap);
 }
