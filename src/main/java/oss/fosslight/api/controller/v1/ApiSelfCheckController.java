@@ -150,7 +150,11 @@ public class ApiSelfCheckController extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 		
 		try {
-			boolean searchFlag = apiSelfCheckService.existProjectCnt(userInfo.getUserId(), prjId); // 조회가 안된다면 권한이 없는 project id를 입력함.
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", loginUserRole());
+			paramMap.put("prjId", prjId);
+			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
 			if(searchFlag) {
 				if(ossReport != null) {
@@ -203,6 +207,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}

@@ -207,6 +207,9 @@ public final class Url {
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{prjId}";
 		
+		public static final String VIEW_ID =  PATH + "/view/{prjId}";
+		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
+		
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
 		public static final String AUTOCOMPLETE_VERSION_AJAX = PATH + "/autoCompleteVersionAjax";
 		public static final String AUTOCOMPLETE_MODEL_AJAX = PATH + "/autoCompleteModelAjax";
@@ -368,6 +371,9 @@ public final class Url {
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{partnerId}";
 		
+		public static final String VIEW_ID =  PATH + "/view/{partnerId}";
+		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
+		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
@@ -459,6 +465,9 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_ID = PATH + "/edit/{prjId}";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
+		
+		public static final String VIEW_ID = PATH + "/view/{prjId}";
+		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		

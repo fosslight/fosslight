@@ -339,6 +339,36 @@ public class ProjectController extends CoTopComponent {
 		return PROJECT.EDIT_JSP;
 	}
 	
+	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET,
+			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = projectService.getProjectDetail(project);
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+		comHisBean.setReferenceId(project.getPrjId());
+		
+		project.setUserComment(commentService.getUserComment(comHisBean));
+
+		model.addAttribute("project", project);
+		model.addAttribute("detail", toJson(project));
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		
+		if (CommonFunction.isAdmin()) {
+			List<T2Users> userList = userService.selectAllUsers();
+			
+			if (userList != null) {
+				model.addAttribute("userWithDivisionList", userList);
+			}
+		}
+		
+		return PROJECT.VIEW_JSP;
+	}
+	
 	/**
 	 * [API] Identification 공통 메인 조회.
 	 * Identification 각 Tab에 저장되어있는 SRC / BIN / BIN(Android) / BOM 정보를 반환한다.
