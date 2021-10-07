@@ -516,7 +516,9 @@
 			</if>
 
 		<include refid="orderby"/>
-		<include refid="limitPage"/>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
+			<include refid="limitPage"/>
+		</if>
 	</select>
 	
 	<update id="updateReviewer" parameterType="oss.fosslight.domain.Project">

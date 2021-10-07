@@ -1110,7 +1110,24 @@
     		, OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
     	WHERE
     		OSS_ID = #{ossId}
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossMergeReferenceId)">
+    		AND REFERENCE_ID = #{ossMergeReferenceId}
+    	</if>
     		AND REFERENCE_DIV IN ('10','11','12','13','14','15')
+    		AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
+    </update>
+    
+    <update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
+    	UPDATE 
+    		OSS_COMPONENTS
+    	SET
+    		OSS_ID = #{newOssId}
+    		, OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID=#{newOssId})
+    		, OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
+    	WHERE
+    		OSS_ID = #{ossId}
+    		AND REFERENCE_ID = #{ossMergeReferenceId}
+    		AND REFERENCE_DIV = #{referenceDiv}
     		AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
     </update>
     
