@@ -764,4 +764,8 @@ public class CoConstDef {
 	public static final String CD_DISTRIBUTE_ACT_DESCRIPTION_SOFTWARE			= "DA";
 	public static final String CD_DISTRIBUTE_ACT_PACKAGING						= "DP";
 	public static final String CD_DISTRIBUTE_ACT_NOT_CHANGE						= "DNC";
+	
+	public static final String CD_LDAP_SEARCH_INFO								= "931";
+	public static final String CD_DTL_LDAP_SEARCH_ID							= "100";
+	public static final String CD_DTL_LDAP_SEARCH_PW							= "200";
 }
