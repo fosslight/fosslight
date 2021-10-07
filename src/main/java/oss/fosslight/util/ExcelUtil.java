@@ -517,7 +517,7 @@ public class ExcelUtil extends CoTopComponent {
 			errMsgList.add("파일 정보를 찾을 수 없습니다.");
 			return false;
 		}
-		if(!Arrays.asList("XLS", "XLSX", "XLSM").contains(avoidNull(fileInfo.getExt()).toUpperCase())) {
+		if(!Arrays.asList("XLS", "XLSX", "XLSM", "CSV").contains(avoidNull(fileInfo.getExt()).toUpperCase())) {
 			log.error("허용하지 않는 파일 입니다. fileSeq : " + avoidNull(fileSeq));
 			errMsgList.add("허용하지 않는 파일 입니다.");
 			return false;
@@ -538,7 +538,11 @@ public class ExcelUtil extends CoTopComponent {
 			 	다만, 확장자를 변경시 정상동작을 하고 있어서 해당 code는 주석처리를 해둠.
 			    //ZipSecureFile.setMinInflateRatio(-1.0d);
 			 */
-			 wb = WorkbookFactory.create(file);
+			if(fileInfo.getExt().equals("csv")) {
+				wb = CsvUtil.csvFileToExcelWorkbook(file, readType);
+			} else {
+				wb = WorkbookFactory.create(file);
+			}
 			
 			// Son System의 Final List 시트가 선택되어 잇을 경우, 다른 sheet는 무시한다.
 			try {
