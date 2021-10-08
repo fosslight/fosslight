@@ -183,6 +183,42 @@ public class PartnerController extends CoTopComponent{
 		return PARTNER.EDIT_JSP;
 	}
 	
+	
+	@GetMapping(value=PARTNER.VIEW_ID, produces = "text/html; charset=utf-8")
+	public String view(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		
+		T2File confirmationFile = new T2File();
+		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
+		confirmationFile = fileMapper.getFileInfo(confirmationFile);
+		
+		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+		
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+		comHisBean.setReferenceId(partnerMaster.getPartnerId());
+		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
+		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
+		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", toJson(partnerMaster));
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("ossFile", ossFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		return PARTNER.VIEW_JSP;
+	}
+	
 	@GetMapping(value=PARTNER.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			PartnerMaster partnerMaster
@@ -569,9 +605,36 @@ public class PartnerController extends CoTopComponent{
 	@PostMapping(value = PARTNER.ADD_WATCHER)
 	public @ResponseBody ResponseEntity<Object> addWatcher(@RequestBody PartnerMaster project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		try {
+			// addWatcher로 email을 등록할 경우 ldap search로 존재하는 사용자의 email인지 check가 필요함.
+			String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+			if(CoConstDef.FLAG_YES.equals(ldapFlag) && !isEmpty(project.getParEmail())) {
+				Map<String, String> userInfo = new HashMap<>();
+				userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
+				userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
+				
+				String userId = project.getParEmail().split("@")[0];
+				String filter = "(cn=" + userId + ")";
+				
+				boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", filter);
+				
+				if(!isAuthenticated) {
+					throw new Exception("add Watcher Failure");
+				}
+				
+				String email = (String) userInfo.get("EMAIL");
+				project.setParEmail(email);
+
+				// 사용자가 입력한 domain과 ldap search를 통해 확인된 domain이 다를 수 있기때문에 ldap search에서 확인된 domain을 우선적으로 처리함.
+				resultMap.put("email", email);
+			}
+						
 			if(!isEmpty(project.getParUserId()) || !isEmpty(project.getParEmail())) {
 				partnerService.addWatcher(project);
+				resultMap.put("isValid", "true");
 			} else {
 				return makeJsonResponseHeader(false, null);
 			}
@@ -579,7 +642,7 @@ public class PartnerController extends CoTopComponent{
 			return makeJsonResponseHeader(false, null);
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(resultMap);
 	}
 	
 	@PostMapping(value = PARTNER.REMOVE_WATCHER)

@@ -84,7 +84,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					
 					rdfFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm())+".rdf";
 					
-					SPDXUtil2.spreadsheetToRDF(prjId, sheetFullPath, rdfFullPath);
+					SPDXUtil2.convert(prjId, sheetFullPath, rdfFullPath);
 					
 					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".rdf", 
 							FilenameUtils.getBaseName(sheetFile.getLogiNm())+".rdf");
@@ -127,7 +127,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					
 					tagFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm())+".tag";
 					
-					SPDXUtil2.spreadsheetToTAG(prjId, sheetFullPath, tagFullPath);
+					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
 					
 					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm())+".tag", 
 							FilenameUtils.getBaseName(sheetFile.getLogiNm())+".tag");

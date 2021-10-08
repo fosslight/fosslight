@@ -1173,7 +1173,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				tagFullPath += targetFileName;
-				SPDXUtil2.spreadsheetToRDF(project.getPrjId(), sheetFullPath, tagFullPath);
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				File spdxRdfFile = new File(tagFullPath);
 				
 				if(spdxRdfFile.exists() && spdxRdfFile.length() <= 0) {
@@ -1216,7 +1216,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 				
 				tagFullPath += targetFileName;
-				SPDXUtil2.spreadsheetToTAG(project.getPrjId(), sheetFullPath, tagFullPath);
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				
 				File spdxTafFile = new File(tagFullPath);
 				
@@ -1571,6 +1571,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String prjId = "";
 		String distributeSite = "";
 		int dashSeq = 0;
+		String hideOssVersionYn = ossNotice.getHideOssVersionYn();
 		
 		// NETWORK SERVER 여부를 체크한다.
 		
@@ -1607,7 +1608,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		OssComponents ossComponent;
 		
 		for(OssComponents bean : ossComponentList) {
-			String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+			String componentKey = (CoConstDef.FLAG_YES.equals(hideOssVersionYn) 
+									? bean.getOssName() 
+									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 			
 			if("-".equals(bean.getOssName())) {
 				componentKey += dashSeq++;

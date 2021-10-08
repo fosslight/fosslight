@@ -32,7 +32,7 @@
 		   AND USE_YN = 'Y'
 	</select>
 	
-	<select id="selectProjectCount" parameterType="String" resultType="int">
+	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
 		/* SelfCheckMapper.selectProjectCount */
 		SELECT COUNT(*) 
 		  FROM (SELECT T1.PRJ_ID

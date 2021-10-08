@@ -19,6 +19,9 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	compile {
+		exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+	}
 }
 
 repositories {
@@ -41,6 +44,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.session:spring-session-core'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -106,6 +110,9 @@ dependencies {
 	implementation group: 'net.sf.sociaal', name: 'xmlpull-xpp3', version: '3.0.0.20130526'
 	
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+
+	implementation group: 'org.spdx', name: 'tools-java', version: '1.0.2'
+
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.10.7'
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	

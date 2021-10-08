@@ -81,9 +81,9 @@ public class T2CoAdminValidator extends T2BasicValidator {
         	 
         	if(CoConstDef.FLAG_YES.equals(ldapFlag)) { // configuration에서 LDAP을 선택시만 check함.
 	        	if(!isEmpty(map.get(targetKey2))) {
-	        		if(!userService.checkAdAccounts(map, targetKey, targetKey2)) {
+	        		if(!userService.checkAdAccounts(map, targetKey, targetKey2, null)) {
 	        			if(map.containsKey("EMAIL") && !errMap.containsKey("EMAIL")) {
-	        				if(!userService.checkAdAccounts(map, "EMAIL", targetKey2)) {
+	        				if(!userService.checkAdAccounts(map, "EMAIL", targetKey2, null)) {
 	        					errMap.put(targetKey2, targetKey2+".AUTH");
 	        				}
 	        			} else {
