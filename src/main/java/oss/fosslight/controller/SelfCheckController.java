@@ -110,7 +110,7 @@ public class SelfCheckController extends CoTopComponent {
 	}
 	
 	/**
-	 * [API] 프로젝트 상세 조회
+	 * [API] 프로젝트 상세 조회 Edit Page
 	 */
 	@RequestMapping(value = SELF_CHECK.EDIT_ID, method = { RequestMethod.GET,
 			RequestMethod.POST }, produces = "text/html; charset=utf-8")
@@ -136,6 +136,35 @@ public class SelfCheckController extends CoTopComponent {
 		}
 		
 		return SELF_CHECK.EDIT_JSP;
+	}
+	
+	/**
+	 * [API] 프로젝트 상세 조회 View Page
+	 */
+	@RequestMapping(value = SELF_CHECK.VIEW_ID, method = { RequestMethod.GET,
+			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+
+		model.addAttribute("project", project);
+		model.addAttribute("detail", toJson(project));
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		
+		// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
+		if(CommonFunction.isAdmin()) {
+			List<T2Users> userList = userService.selectAllUsers();
+			
+			if(userList != null) {
+				model.addAttribute("userWithDivisionList", userList);
+			}
+		}
+		
+		return SELF_CHECK.VIEW_JSP;
 	}
 	
 	/**

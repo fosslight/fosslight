@@ -40,8 +40,10 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
@@ -55,6 +57,9 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.PartnerService;
+import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
@@ -65,6 +70,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	// Service
 	@Autowired CommentService commentService;
 	@Autowired HistoryService historyService;
+	@Autowired ProjectService projectService;
+	@Autowired PartnerService partnerService;
+	@Autowired VerificationService verificationService;
 	
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -609,6 +617,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 		
+		// oss name merge
+		ossNameMerge(ossMaster, chagedOssName, beforOssName);
+		
 		CoCodeManager.getInstance().refreshOssInfo();
 
 		for(Map<String, OssMaster> mailInfoMap : mailBeanList) {
@@ -648,6 +659,177 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void ossNameMerge(OssMaster ossMaster, String chagedOssName, String beforeOssName) {
+		Map<String, Object> map = null;
+		String contents = "<p>The following OSS Name has been changed.</p>\r\n" +  
+				"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:500px;\">\r\n" + 
+				"	<tbody>\r\n" + 
+				"		<tr>\r\n" + 
+				"		    <th>OSS Name (Written before)</th>\r\n" + 
+				"                    <th>OSS Name (Changed)</th>\r\n" + 
+				"		</tr>\r\n" + 
+				"                <tr>\r\n" + 
+				"                    <td style=\"text-align:center;\">"+ beforeOssName +"</td>\r\n" + 
+				"                    <td style=\"text-align:center;\">"+ chagedOssName +"</td>\r\n" + 
+				"                </tr>\r\n" + 
+				"	</tbody>\r\n" + 
+				"</table>";
+		
+		// 3rdParty == 'CONF'
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setStatus("CONF");
+		partnerMaster.setOssNameMergeFlag("Y");
+		
+		map = partnerService.getPartnerMasterList(partnerMaster);
+		List<PartnerMaster> partnerList = (List<PartnerMaster>) map.get("rows");
+		
+		if (partnerList.size() > 0) {
+			int equalsCheck = 0;
+			
+			for (PartnerMaster partner : partnerList) {
+				ProjectIdentification identification = new ProjectIdentification();
+				identification.setReferenceId(partner.getPartnerId());
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				
+				List<ProjectIdentification> partnerOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("mainData");
+				
+				if(partnerOssComponentsList.size() > 0) {
+					if (partnerOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						equalsCheck++;
+					}
+				}
+				
+				if (equalsCheck > 0) {
+					// Update Oss Components
+					ossMaster.setOssMergeReferenceId(partner.getPartnerId());
+					ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+					ossMapper.mergeOssName(ossMaster);
+					
+					// partner Comment Regist
+					CommentsHistory historyBean = new CommentsHistory();
+					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+					historyBean.setReferenceId(partner.getPartnerId());
+					historyBean.setStatus("OSS Name Merged");
+					historyBean.setContents(contents);
+					
+					commentService.registComment(historyBean);
+				}
+				
+				equalsCheck = 0;
+			}
+		}
+		
+		map = null;
+		
+		Project project = new Project();
+		project.setIdentificationStatus("CONF");
+		project.setOssNameMergeFlag("Y");
+		
+		map = projectService.getProjectList(project);
+		List<Project> list = (List<Project>) map.get("rows");
+				
+		if (list.size() > 0) {
+			int idenCheck = 0;
+			int verifyCheck = 0;
+			
+			for (Project prj : list) {
+				// Project > IdentificationStatus == 'CONF'
+				ProjectIdentification identification = new ProjectIdentification();
+				identification.setReferenceId(prj.getPrjId());
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER); // 3rd
+				
+				List<ProjectIdentification> partnerOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("mainData");
+				
+				if(partnerOssComponentsList.size() > 0) {
+					if (partnerOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						idenCheck++;
+					}
+				}
+				
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC); //src
+				
+				List<ProjectIdentification> srcOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("mainData");
+				
+				if(srcOssComponentsList.size() > 0) {
+					if (srcOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						idenCheck++;
+					}
+				}
+				
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN); // bin
+				
+				List<ProjectIdentification> binOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("mainData");
+				
+				if(binOssComponentsList.size() > 0) {
+					if (binOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						idenCheck++;
+					}
+				}
+				
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID); // android
+				
+				List<ProjectIdentification> androidOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("mainData");
+				
+				if(androidOssComponentsList.size() > 0) {
+					if (androidOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						idenCheck++;
+					}
+				}
+				/*
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM); // bom
+				List<ProjectIdentification> bomOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("rows");
+				
+				if(bomOssComponentsList.size() > 0) {
+					if (bomOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						equalsCheck++;
+					}
+				}
+				*/
+				
+				// Project > verification
+				List<OssComponents> verificationList = verificationService.getVerifyOssList(prj);
+				verificationList = verificationService.setMergeGridData(verificationList);
+				
+				if(verificationList.size() > 0) {
+					if (verificationList.stream().filter(e -> avoidNull(e.getOssId(), "").equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
+						verifyCheck++;
+					}
+				}
+				
+				if (idenCheck > 0 || verifyCheck > 0) {
+					ossMaster.setOssMergeReferenceId(prj.getPrjId());
+					
+					// Project > Identification comment regist
+					CommentsHistory historyBean = new CommentsHistory();
+					historyBean.setReferenceId(prj.getPrjId());
+					historyBean.setStatus("OSS Name Merged");
+					historyBean.setContents(contents);
+					
+					if (idenCheck > 0) {
+						// Updated Oss Components
+						ossMapper.updateOssForProject(ossMaster);
+						
+						historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+						commentService.registComment(historyBean);
+					}
+					
+					if (verifyCheck > 0) {
+						// Updated Oss Components
+						ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
+						ossMapper.mergeOssName(ossMaster);
+						
+						historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+						commentService.registComment(historyBean);
+					}
+				}
+				
+				idenCheck = 0;
+				verifyCheck = 0;
+			}
+		}
+	}
+
 	private String makeTemplateComment(String comment, OssMaster ossMasterBefore, OssMaster ossMasterAfter) {
 		Map<String, Object> convertDataMap = new HashMap<>();
 		// 사용중인 프로젝트가 있는 경우

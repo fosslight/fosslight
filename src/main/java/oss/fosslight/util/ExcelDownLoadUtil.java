@@ -2085,7 +2085,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Download Location
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
-					cellPackageDownloadLocation.setCellValue(avoidNull(bean.getDownloadLocation()));
+					String downloadLocation = bean.getDownloadLocation();
+
+					if(downloadLocation.isEmpty()) {
+						downloadLocation = "NONE";
+					}
+
+					cellPackageDownloadLocation.setCellValue(downloadLocation);
 					
 					// Package Checksum
 					cellIdx++;
@@ -2159,9 +2165,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Copyright Text
 					Cell cellPackageCopyrightText = getCell(row, cellIdx); cellIdx++;
-					cellPackageCopyrightText.setCellValue(StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762) );
-					
-					
+					String copyrightText = StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762);
+
+					if(copyrightText.isEmpty() || copyrightText.equals("-")) {
+						copyrightText = "NOASSERTION";
+					}
+
+					cellPackageCopyrightText.setCellValue(copyrightText);
+
+
 					// Summary
 					cellIdx++;
 					
@@ -2193,9 +2205,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				for(OssComponents ocBean : noticeList) {
 					String ossName = ocBean.getOssName().replace("&#39;", "\'");
-					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
-					
-					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+
+					List<String> licenseList = new ArrayList<>();
+					if(ossName.equals("-")) {
+						licenseList = Arrays.asList(ocBean.getLicenseName());
+					} else {
+						OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
+						licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+					}
 					
 					for(String licenseNm : licenseList) {
 						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);

@@ -68,50 +68,6 @@
 	// 이벤트
 	var evt = {
 		init : function(){
-				// 왓쳐 추가
-				$("#addWatcher").click(function(){
-					/* division 정보 */
-					var $divSel	= $("#prjDivision"),
-						divVal	= $divSel.val(),
-						divTxt	= $divSel.find("option[value='"+divVal+"']").text();
-					
-					// 선택한 item이 없을 경우.
-					if(divisionUseFlag == "true" && divVal == "") {
-						return alertify.error('<spring:message code="msg.project.required.selectDivision" />', 0);
-					}
-					
-					/* division 정보 */
-					var $userSel	= $("#prjUserId"),
-						userVal		= $userSel.val(),
-						userTxt		= $userSel.find("option[value='"+userVal+"']").text();
-					
-					/* tag 정보 */
-					var isNew = true;
-					$(".watcherTags").each(function(i, tag){
-						var tagDiv = $(tag).val().split("/")[0]
-							tagUid = $(tag).val().split("/")[1];
-						
-						if(divVal == tagDiv) {
-							if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
-								isNew = false;
-								return false;
-							}
-							
-							if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
-								$(tag).closest('span').remove();
-							} else if(tagUid == userVal) {
-								isNew = false;	// 이미 등록된 watcher가 있을경우
-							}
-						}
-					});
-					
-					if(isNew) {
-						var watcherStr = divisionUseFlag == "true" ? (divTxt + "/" + userVal) : userVal;
-						fn.addWatcher(divVal, userVal, '');
-						fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
-					}
-				});
-				
 				// 저장
 				$("#save").click(function(){
 					alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
@@ -156,101 +112,16 @@
 						}
 					});
 				});
-								
-				// email 왓쳐 추가
-				$("#addEmail").click(function(){
-					/* AD ID 정보 */
-					var adId = $("#adId").val();
-					var domain = $("#emailTemp").val();
-
-					if(adId == "") {
-						$("#adId").focus();
-						
-						return alertify.error('Please enter watcher AD ID', 0);
-					}
-					
-					var _email = adId + "@" + domain;
-					var regEmail = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
-
-					if (!regEmail.test(_email)) {
-						$("#adId").focus();
-						
-						return alertify.error('Invalid email address.', 0);
-					}
-					
-					$.ajax({
-						type: "POST",
-						url: '/system/user/checkEmail', 
-						type : 'GET',
-						dataType : 'json',
-						cache : false,
-						data : {'email' : _email},
-						success: function (data) {
-							var watcherUseYn = data.useYn || "Y";
-						
-							if("true" == data.isValid) {
-								var watcherStr = divisionUseFlag == "true" ? (data.divisionName + "/" + data.userId) : data.userId;
-								fn.addWatcher(data.division, data.userId, '');
-								fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
-							} else {
-								fn.addWatcher('', '', _email);
-								fn.addHtml($("#multiDiv"), _email, _email, "Email");
-							}
-						},
-						error: function(data){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
-						}
-					});
-					
-					$("#adId").val('');
-					$("#domain").val("${ct:getConstDef('CD_DTL_DEFAULT_DOMAIN')}").trigger('change');
-				});
-
+				
 				commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
 					data.forEach(function(obj,index){
 						arr[index] = obj.userId+":"+obj.userName;
 					});
 				});
-				
-				$('#addList').on('click', function(){
-					var listKind = $("#listKind").val()
-					  , listId = $("#listId").val();
-						
-					if(fn.chkListValidation(listKind, listId)){
-						var obj = {};
-						obj["listKind"] = listKind;
-						obj["listId"] = listId;
-						
-						fn.copyWatcher(obj);
-					}
-				});
-
-				$("#domain").on("change", function(e){
-					var value = $(this).find("option:selected").val();
-					var domain = $(this).find("option:selected").text();
-					
-					if(etcDomain == value){
-						$("#emailTemp").val("").show();
-					} else {
-						$("#emailTemp").val(domain).hide();
-					}
-				});
 			}
-		}
+		};
 	
 	var fn = {
-			// 왓쳐 엘리먼트 그리기
-			addHtml : function(target, str, division, userId){
-				var rlt = division+((userId!="") ? "/"+userId : "");
-				var html  = '<span><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
-				html += '<strong>'+str+'</strong>';
-				html +='<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\''+division+'\',\''+userId+'\');" /></span>';
-				target.append(html);
-				
-				$('div.multiTxtSet2 .smallDelete').on('click', function(){
-					$(this).parent().remove();
-				});
-			},			
 			// 그리드 삭제 버튼
 			setDelBtn : function(cellvalue, options, rowObject){
 				return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
@@ -322,196 +193,6 @@
 			// 에러 콜백
 			onError : function(data, status){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
-			},
-			selectDivision : function(){
-				var division = $('#prjDivision').val();
-				$.ajax({
-					url : '/partner/getUserList',
-					type : 'GET',
-					dataType : 'json',
-					cache : false,
-					data : {'division' : division},
-					success : function(data){
-						$('#prjUserId').children().remove();
-						
-						data.forEach(function(obj){
-							$('#prjUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
-						});
-						
-						$('#prjUserId').change();
-					},
-					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					}
-				});
-			},
-			addWatcher : function(uDiv, uId, uEmail) {
-				var prjId = $('input[name=prjId]').val();
-				
-				if(prjId == "") {
-					return true;
-				}
-				
-				var data = {"prjId" : prjId , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
-				
-				$.ajax({
-					url : '/selfCheck/addWatcher',
-					type : 'POST',
-					data : JSON.stringify(data),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success('<spring:message code="msg.common.success" />');
-						}
-					},
-					error : fn.onError
-				});
-			},
-			removeWatcher : function(uDiv, uId) {
-				var uEmail = "";
-				
-				if("Email" == uId) {
-					uEmail = uDiv;
-					uId = "";
-					uDiv = "";
-				}
-				
-				var prjId = $('input[name=prjId]').val();
-				
-				if(prjId== "") {
-					return true;
-				}
-				
-				var data = {"prjId" : prjId , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
-				$.ajax({
-					url : '/selfCheck/removeWatcher',
-					type : 'POST',
-					data : JSON.stringify(data),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success('<spring:message code="msg.common.success" />');
-						}
-					},
-					error : fn.onError
-				});
-			},
-			copyWatcher : function(obj) {
-				var prjId = "${project.prjId}";
-				
-				obj["prjId"] = prjId;
-				
-				$.ajax({
-					url : '/selfCheck/copyWatcher',
-					type : 'POST',
-					data : JSON.stringify(obj),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-					success: function(resultData){
-						var copyWatcher = resultData.copyWatcher;
-						
-						if(copyWatcher.length){
-							for(var i = 0, len = copyWatcher.length ; i < len ; i++){
-								var isNew = true
-								  , division = copyWatcher[i].prjDivision || ""
-								  , divisionName = copyWatcher[i].prjDivisionName || ""
-								  , userId = copyWatcher[i].prjUserId || ""
-								  , userName = copyWatcher[i].prjUserName || ""
-								  , email = copyWatcher[i].prjEmail || ""
-								  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
-								  , userUseYn = copyWatcher[i].userUseYn || "Y";
-								
-								$(".watcherTags").each(function(idx, tag){
-									var tagDiv = $(tag).val().split("/")[0]
-									  , tagUid = $(tag).val().split("/")[1];
-									
-									if(division == tagDiv) {
-										if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
-											isNew = false;
-											
-											return false;
-										} else if(tagUid == userId)
-											isNew = false;	// 이미 등록된 watcher가 있을경우
-									}
-									
-									if(tagUid == "Email") {
-										if(email == tagDiv) {
-											isNew = false;
-										}
-									}
-								});
-								
-								if(isNew){
-									if(email != ""){
-										fn.addHtml($("#multiDiv"), email, email, "Email");
-									} else {
-										var str = "";
-										
-										if(userName == ""){
-											str = divisionName;
-										}else{
-											str = '<b';
-
-											if(divisionUseFlag == "true") {
-												if(deptUseYn == "N"){
-													str += ' class="deleteUser"';
-												}
-												
-												str += '>'+divisionName+'</b>/<b';
-											}
-										
-											if(userUseYn == "N"){
-												str += ' class="deleteUser"';
-											}
-											
-											str += '>'+userName+'</b>';
-										}
-										
-										fn.addHtml($("#multiDiv"), str, division, userId);
-									}
-								}
-							}
-							
-							if(prjId) {
-								alertify.success('<spring:message code="msg.common.success" />');
-							}
-						}
-						
-						if(!copyWatcher.length)
-							alertify.warning("The ID you entered does not exist.");
-					},
-					error : fn.onError
-				});
-			},
-			chkListValidation : function(listKind, listId){
-				
-				if(listKind == ""){
-					// TODO : 추후 문구 수정예정
-					alertify.error('<spring:message code="msg.project.watcher.selectlist" />', 0);
-					
-					return false;
-				}
-				
-				if(listId == ""){
-					// TODO : 추후 문구 수정예정
-					alertify.error('<spring:message code="msg.project.watcher.required.copyid" />', 0);
-					
-					return false;
-				}
-				
-				return true;
-			},
-			CheckChar : function(){
-				if(event.keyCode == 64){//@ 특수문자 체크
-            		alertify.alert("\'@\' Special characters are not allowed!", function(){});
-
-            		event.returnValue = false;
-            	}
 			}
 		}
 	
@@ -525,79 +206,7 @@
 				$('input[name=prjId]').val(data.detail.prjId);
 				$('input[name=prjName]').val(data.detail.prjName);
 				$('input[name=prjVersion]').val(data.detail.prjVersion);
-				$('select[name=osType]').val(data.detail.osType).trigger('change');
-				
-				if(data.detail.osType=='999'){
-					$('#osTypeEtc').attr("disabled",false);
-					$('#osTypeEtc').val(data.detail.osTypeEtc);
-				}
-				
-				$('select[name=distributionType]').val(data.detail.distributionType).trigger('change');
-				$('select[name=category]').val(data.detail.category).trigger('change');
-				$('select[name=prjDivision]').val(data.detail.prjDivision).trigger('change');
-				$('select[name=prjUserId]').val(data.detail.prjUserId).trigger('change');
-				data.detail.watcherList.forEach(function(watcher, index, obj){
-					var userUseYn = watcher.userUseYn || "Y";
-					var deptUseYn = watcher.deptUseYn || "Y";
-					
-					if(watcher!=""){
-						if(watcher.prjEmail){
-							fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
-						} else {
-							var str = "";
-							
-							if(watcher.prjUserName == undefined) {
-								str = watcher.prjDivisionName;
-							} else {
-								str = '<b';
-
-								if(divisionUseFlag == "true") {
-									if(deptUseYn == "N") {
-										str += ' class="deleteUser"';
-									}
-									
-									str += '>'+watcher.prjDivisionName+'</b>/<b';
-								}
-								
-								if(userUseYn == "N") {
-									str += ' class="deleteUser"';
-								}
-								
-								str += '>'+watcher.prjUserName+'</b>';
-							}
-							
-							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
-						}
-						
-					}
-				});
-
-				$('input[name=distributeTarget]').each(function(){
-					var value = $(this).val();
-					
-					if(value == data.detail.distributeTarget){
-						$(this).trigger('click');
-					}
-				});
 			}
-			
-			var _distributeTargetSelectedVal = "";
-			$('input[name=distributeTarget]').mouseup(function(){
-				_distributeTargetSelectedVal = $('input[name=distributeTarget]:checked').val();
-			});
-			$('input[name=distributeTarget]').on('change',function(e){
-				if($("#_modelList").jqGrid('getGridParam', 'records') > 0){
-					alertify.confirm('<spring:message code="msg.project.confirm.modelinfo.init" />', 
-						function(){
-							modelList.changeTarget();
-						}, 
-						function(){
-							$('input[name=distributeTarget]:input[value=' + _distributeTargetSelectedVal + ']').attr("checked", true);
-						});
-				} else {
-					modelList.changeTarget();
-				}
-			});
 		}
 	}
 	
@@ -642,6 +251,7 @@
 					}
 				});
 			});
+			
 			// 그리드 저장 버튼
 			$("#srcSave, #srcSaveUp").click(function(e){
 				e.preventDefault();
@@ -738,7 +348,8 @@
 				}
 			});
 		}
-	}	
+	};
+	
 	// src 그리드 데이터 전역 변수
 	var srcMainData;
 	var srcSubData;
@@ -839,7 +450,6 @@
 				}
 			});
 		},
-		
 		// 닉네임 팝업 띄우기
 		makeNickNamePopup : function(obj, finalData) {
 			if(obj.validMsg && obj.validMsg.length != 0) {
@@ -874,7 +484,6 @@
 			var appendHtml = '<br>'+obj.createdDate;
 			$('.csvFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
 		},
-		
 		deleteCsv : function(obj, type){
 			var Seq = $(obj).prev().val();
 			var object = {fileSeq : Seq};
@@ -1041,7 +650,6 @@
 			// totla record 표시
 			$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
 		},
-		
 		// upload Cancel시 DB삭제
 		cancelFileDel : function(){
 			var FileSeq = [];
@@ -1086,7 +694,6 @@
 				}
 			});
 		},
-		
 		displayNotify : function(cellvalue, options, rowObject){
 			var display = "";
 			var obligationType = rowObject["obligationType"];
@@ -1227,7 +834,6 @@
 			
 			return display;
 		},
-		
 		popGuide : function(row_id){
 			var _guide = $("#srcList").jqGrid('getCell', row_id, 'licenseUserGuideStr');
 
@@ -1235,7 +841,6 @@
 				alertify.alert(_guide, function(){});
 			}
 		},
-		
 		displayOssDetail : function(cellvalue, options, rowObject){
 			var display = "";
 			var ossName = rowObject["ossName"];
@@ -1252,7 +857,6 @@
 			
 			return display;
 		},
-		
 		displayLicenseDetail : function(cellvalue, options, rowObject){
 			var display = "";
 			var licenseName = rowObject["licenseName"];
@@ -1332,7 +936,7 @@
 				}
 			});
 		}
-	}
+	};
 
 	//SRC 그리드
 	var src_grid = {
@@ -1537,8 +1141,8 @@
 				            return rtnVal;
                         }
 					},
-					{name: 'notify', index: 'notify', width: 40, align: 'center', /* formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify *//* , cellattr: function(rowId, tv, rawObject, cm, rdata) {  return ' colspan=2'} */ hidden:true},
-					{name: 'source', index: 'source', width: 40, align: 'center', /* formatter: src_fn.displaySource, unformat: src_fn.unDisplaySource, */ /* cellattr: function(rowId, tv, rawObject, cm, rdata) {  return ' style="display:none;"' } */ hidden:true},
+					{name: 'notify', index: 'notify', width: 40, align: 'center', hidden:true},
+					{name: 'source', index: 'source', width: 40, align: 'center', hidden:true},
 					{name: 'restriction', index: 'restriction', width: 50, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
 					{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false,
 	 					editoptions: {
@@ -1675,6 +1279,7 @@
 					}
 				}
 			});
+			
 			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAdd('srcList',srcList,"main", null, com_fn.getLicenseName);}
@@ -1684,7 +1289,7 @@
 			
 			$('#srcList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
 		}
-	}
+	};
 	
 	var gridTooltip = {
 			typeCodes : [],
@@ -1698,28 +1303,28 @@
 	};
 
 	var com_fn = {
-			deleteLicense : function(target){
-				$(target).parent().remove();
-			},
-			getLicenseName : function(obj){
-				return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
-				    if(cur.toUpperCase() != "X" && cur != ""){
-				        arr.push(cur);
-				    }
-	
-				    return arr;
-				}, []).join(",");
-			},
-			exitCell : function(_mainLastsel, target){
-				if(_mainLastsel != -1){
-					var grid = $("#" + target);
-					var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+		deleteLicense : function(target){
+			$(target).parent().remove();
+		},
+		getLicenseName : function(obj){
+			return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
+			    if(cur.toUpperCase() != "X" && cur != ""){
+			        arr.push(cur);
+			    }
 
-					grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
-					fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
-					grid.jqGrid('saveRow',_mainLastsel);
-				}
+			    return arr;
+			}, []).join(",");
+		},
+		exitCell : function(_mainLastsel, target){
+			if(_mainLastsel != -1){
+				var grid = $("#" + target);
+				var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+
+				grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+				grid.jqGrid('saveRow',_mainLastsel);
 			}
-		};
+		}
+	};
 //]]>
 </script>

@@ -320,6 +320,7 @@ public class Project extends ComBean implements Serializable {
 	/* The ossReportFlag */
 	private String ossReportFlag;
 	
+	private String ossNameMergeFlag;
 
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -3978,5 +3979,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setModelSeq(String modelSeq) {
 		this.modelSeq = modelSeq;
+	}
+
+	public String getOssNameMergeFlag() {
+		return ossNameMergeFlag;
+	}
+
+	public void setOssNameMergeFlag(String ossNameMergeFlag) {
+		this.ossNameMergeFlag = ossNameMergeFlag;
 	}
 }

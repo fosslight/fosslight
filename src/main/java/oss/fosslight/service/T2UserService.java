@@ -41,7 +41,7 @@ public interface T2UserService extends UserDetailsService {
 	
 	public List<T2Users> getAllUsersDivision();
 
-	public boolean checkAdAccounts(Map<String, String> userInfo, String idKey, String pwKey);
+	public boolean checkAdAccounts(Map<String, String> userInfo, String idKey, String pwKey, String filter);
 
 	public List<T2Users> checkEmail(String email);
 
