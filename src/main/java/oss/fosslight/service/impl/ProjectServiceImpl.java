@@ -1279,10 +1279,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			project.setPublicYn(avoidNull(project.getPublicYn(), CoConstDef.FLAG_YES));
 			
 			// if complete value equals 'Y', set
-			if("Y".equals(projectMapper.selectProjectMaster(project).getCompleteYn())) {
-				project.setCompleteYn(CoConstDef.FLAG_YES);
+			if(!isNew) {
+				Project prjBean = projectMapper.selectProjectMaster(project);
+				
+				if(prjBean != null) {
+					if(CoConstDef.FLAG_YES.equals(prjBean.getCompleteYn())) {
+						project.setCompleteYn(CoConstDef.FLAG_YES);
+					}
+				}
 			}
-			
 			// project master
 			projectMapper.insertProjectMaster(project);
 			
