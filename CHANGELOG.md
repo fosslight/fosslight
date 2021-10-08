@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.2.10 (08/10/2021)
+## Changes
+## 🚀 Features
+
+- Updated bom compare & oss name merge @FOSSLight-dev (#178)
+- Delete spdx-tools jar file and add spdx tools java dependency @riyenas0925 (#148)
+
+## 🐛 Hotfixes
+
+- bug fix - Handling exceptions when creating a new project @FOSSLight-dev (#180)
+- Fix no items are printed in the "Per File Info" sheet @riyenas0925 (#173)
+- Updated bom compare & oss name merge @FOSSLight-dev (#178)
+- Update SPDX tool and fix typo @soimkim (#174)
+
+## 🔧 Maintenance
+
+- Update SPDX tool and fix typo @soimkim (#174)
+- Enable cursor pointer on the vulnerbility icon @epicarts (#157)
+- Fix the nickname input width size to double @epicarts (#155)
+- Change from RestTemplate to WebClient @riyenas0925 (#152)
+- Fix nickname typo in mail template @epicarts (#153)
+- Add template to docker environment @soimkim (#150)
+
+---
+
 ## v1.2.9 (01/10/2021)
 ## Changes
 ## 🚀 Features
