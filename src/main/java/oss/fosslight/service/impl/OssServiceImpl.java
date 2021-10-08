@@ -710,7 +710,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					CommentsHistory historyBean = new CommentsHistory();
 					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
 					historyBean.setReferenceId(partner.getPartnerId());
-					historyBean.setStatus("OSS Name Merged");
+					historyBean.setStatus("OSS Name Changed");
 					historyBean.setContents(contents);
 					
 					commentService.registComment(historyBean);
@@ -776,18 +776,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						idenCheck++;
 					}
 				}
-				/*
-				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM); // bom
-				List<ProjectIdentification> bomOssComponentsList = (List<ProjectIdentification>) projectService.getIdentificationGridList(identification, true).get("rows");
 				
-				if(bomOssComponentsList.size() > 0) {
-					if (bomOssComponentsList.stream().filter(e -> e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList()).size() > 0) {
-						equalsCheck++;
-					}
-				}
-				*/
-				
-				// Project > verification
+				// Oss Components ReferenceDiv == CoConstDef.CD_DTL_COMPONENT_PACKAGING List > not include obligation type in the query statement conditional clause
+				prj.setOssNameMergeFlag("Y");
 				List<OssComponents> verificationList = verificationService.getVerifyOssList(prj);
 				verificationList = verificationService.setMergeGridData(verificationList);
 				
@@ -803,7 +794,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					// Project > Identification comment regist
 					CommentsHistory historyBean = new CommentsHistory();
 					historyBean.setReferenceId(prj.getPrjId());
-					historyBean.setStatus("OSS Name Merged");
+					historyBean.setStatus("OSS Name Changed");
 					historyBean.setContents(contents);
 					
 					if (idenCheck > 0) {
@@ -818,9 +809,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						// Updated Oss Components
 						ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
 						ossMapper.mergeOssName(ossMaster);
-						
-						historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-						commentService.registComment(historyBean);
 					}
 				}
 				
@@ -1189,6 +1177,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		// Deactivate Flag Setting
 		ossMapper.setDeactivateFlag(ossMaster);
+		
+		// updated oss info, oss components > ossName update
+		if (!isNew && orgMasterInfo != null){
+			if (!orgMasterInfo.getOssName().equals(ossMaster.getOssName())) {
+				// oss name merge
+				ossMaster.setNewOssId(ossMaster.getOssId());
+				ossNameMerge(ossMaster, ossMaster.getOssName(), orgMasterInfo.getOssName());
+			}
+		}
 		
 		return ossMaster.getOssId();
 	}
