@@ -605,9 +605,36 @@ public class PartnerController extends CoTopComponent{
 	@PostMapping(value = PARTNER.ADD_WATCHER)
 	public @ResponseBody ResponseEntity<Object> addWatcher(@RequestBody PartnerMaster project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
 		try {
+			// addWatcher로 email을 등록할 경우 ldap search로 존재하는 사용자의 email인지 check가 필요함.
+			String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+			if(CoConstDef.FLAG_YES.equals(ldapFlag) && !isEmpty(project.getParEmail())) {
+				Map<String, String> userInfo = new HashMap<>();
+				userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
+				userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
+				
+				String userId = project.getParEmail().split("@")[0];
+				String filter = "(cn=" + userId + ")";
+				
+				boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", filter);
+				
+				if(!isAuthenticated) {
+					throw new Exception("add Watcher Failure");
+				}
+				
+				String email = (String) userInfo.get("EMAIL");
+				project.setParEmail(email);
+
+				// 사용자가 입력한 domain과 ldap search를 통해 확인된 domain이 다를 수 있기때문에 ldap search에서 확인된 domain을 우선적으로 처리함.
+				resultMap.put("email", email);
+			}
+						
 			if(!isEmpty(project.getParUserId()) || !isEmpty(project.getParEmail())) {
 				partnerService.addWatcher(project);
+				resultMap.put("isValid", "true");
 			} else {
 				return makeJsonResponseHeader(false, null);
 			}
@@ -615,7 +642,7 @@ public class PartnerController extends CoTopComponent{
 			return makeJsonResponseHeader(false, null);
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(resultMap);
 	}
 	
 	@PostMapping(value = PARTNER.REMOVE_WATCHER)

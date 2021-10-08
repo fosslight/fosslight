@@ -63,7 +63,9 @@ public interface OssMapper {
 	
 	int insertOssLicenseDetected(OssMaster ossMaster);
 	
-	int updateOssForProject(OssMaster ossMaster);				
+	int updateOssForProject(OssMaster ossMaster);
+	
+	int mergeOssName(OssMaster ossMaster);
 	
 	List<OssMaster> selectOssList2(OssMaster ossMaster); 				
 	

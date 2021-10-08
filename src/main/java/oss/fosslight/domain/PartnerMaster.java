@@ -181,7 +181,9 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	private String ossVersion;
 	
-	/**
+	private String ossNameMergeFlag;
+	
+	/*
 	 * Gets the partner id.
 	 *
 	 * @return the partner id
@@ -1105,5 +1107,13 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setOssVersion(String ossVersion) {
 		this.ossVersion = ossVersion;
+	}
+	
+	public String getOssNameMergeFlag() {
+		return ossNameMergeFlag;
+	}
+
+	public void setOssNameMergeFlag(String ossNameMergeFlag) {
+		this.ossNameMergeFlag = ossNameMergeFlag;
 	}
 }

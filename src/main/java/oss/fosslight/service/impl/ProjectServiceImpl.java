@@ -1278,6 +1278,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			project.setPublicYn(avoidNull(project.getPublicYn(), CoConstDef.FLAG_YES));
 			
+			// if complete value equals 'Y', set
+			if("Y".equals(projectMapper.selectProjectMaster(project).getCompleteYn())) {
+				project.setCompleteYn(CoConstDef.FLAG_YES);
+			}
+			
 			// project master
 			projectMapper.insertProjectMaster(project);
 			
@@ -4060,7 +4065,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								.stream()
 								.filter(afList -> 
 										(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim().replaceAll(" ", "")))
-										.equals(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim().replaceAll(" ", "")))
+										.equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim().replaceAll(" ", "")))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
 		
@@ -4071,7 +4076,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								.stream()
 								.filter(bfList -> 
 										(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim().replaceAll(" ", "")))
-										.equals(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim().replaceAll(" ", "")))
+										.equalsIgnoreCase(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim().replaceAll(" ", "")))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
 		
