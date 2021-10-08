@@ -2205,9 +2205,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				for(OssComponents ocBean : noticeList) {
 					String ossName = ocBean.getOssName().replace("&#39;", "\'");
-					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
-					
-					List<String> licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+
+					List<String> licenseList = new ArrayList<>();
+					if(ossName.equals("-")) {
+						licenseList = Arrays.asList(ocBean.getLicenseName());
+					} else {
+						OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
+						licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
+					}
 					
 					for(String licenseNm : licenseList) {
 						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);
