@@ -2041,10 +2041,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				for(OssComponents bean : noticeList) {
 					
-					if("-".equals(bean.getOssName())) {
-						continue;
-					}
-					
 					Row row = sheetPackage.getRow(rowIdx);
 					
 					if(row == null) {
@@ -2061,8 +2057,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// SPDX Identifier
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
-					cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
-					packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
+					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
+
+					if(ossName.equals("-")) {
+						cellSPDXIdentifier.setCellValue("SPDXRef-File-" + bean.getComponentId());
+						packageInfoidentifierList.add("SPDXRef-File-" + bean.getComponentId());
+					} else {
+						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
+						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
+					}
 					
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
@@ -2107,18 +2110,22 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// License Declared
 					Cell cellLicenseDeclared = getCell(row, cellIdx); cellIdx++;
-					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
-					OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
-					attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
-					
-					if(_ossBean != null) {
+
+					OssMaster _ossBean = null;
+					if(ossName.equals("-")) {
+						String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+						cellLicenseDeclared.setCellValue(licenseStr);
+						attributionText = bean.getAttribution();
+					} else {
+						_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
 						String licenseStr = CommonFunction.makeLicenseExpression(_ossBean.getOssLicenses(), false, true);
+
 						if(_ossBean.getOssLicenses().size() > 1) {
 							licenseStr = "(" + licenseStr + ")";
 						}
+
 						cellLicenseDeclared.setCellValue(licenseStr);
-					} else {
-						cellLicenseDeclared.setCellValue(bean.getLicenseName());
+						attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
 					}
 					
 					// License Concluded
@@ -2158,7 +2165,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
-					licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
+
+					if(ossName.equals("-")) {
+						licenseInfoFromFiles.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName()));
+					} else {
+						licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
+					}
 					
 					// License Comments
 					cellIdx++;
@@ -2264,7 +2276,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				List<OssComponents> nonIdetifierNoticeList = new ArrayList<>();
 				
 				for(OssComponents bean : noticeList) {
-					if("-".equals(bean.getOssName())) {
+					// set false because "Per file info sheet" is not currently output
+					if("-".equals(bean.getOssName()) && false) {
 						nonIdetifierNoticeList.add(bean);
 					}
 				}
