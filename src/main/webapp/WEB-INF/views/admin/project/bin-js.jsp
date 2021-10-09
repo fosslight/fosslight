@@ -103,7 +103,15 @@ var bin_evt = {
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
 						});
-					} else {
+					} else if(result[2] == "CSV_FILE") {
+						bin_fn.getCsvData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						bin_fn.makeFileTag(result[0][0]);
+					} else if(result[2] == "EXCEL_FILE") {
 						if(result[1].length != 0) {
 							$('.sheetSelectPop').show();
 							$('.sheetSelectPop .sheetNameArea').children().remove();
@@ -128,6 +136,10 @@ var bin_evt = {
 						$('.ajax-file-upload-statusbar').remove();
 						
 						bin_fn.makeFileTag(result[0][0]);	
+					} else {
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
 					}
 				}
 			}
@@ -652,6 +664,18 @@ var bin_fn = {
 
 			bin_fn.exeLoadReportData(finalData);
 		}
+	},
+	getCsvData : function(seq){
+		loading.show();
+		fn_grid_com.totalGridSaveMode('binList');
+		cleanErrMsg("binList");
+
+		var target = $("#binList");
+		var mainData = target.jqGrid('getGridParam','data');
+		var sheetNum = ["0"];
+		var finalData = {"readType":"bin","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+
+		bin_fn.exeLoadReportData(finalData);
 	},
 	getBinData : function(){
 		var sheetNum = [];
