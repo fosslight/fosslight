@@ -877,6 +877,10 @@
 					fn.downloadSpdxRdf();
 				} else if(type == 'spdxTag') {
 					fn.downloadSpdxTag();
+				} else if(type == 'spdxJson') {
+					fn.downloadSpdxJson();
+				} else if(type == 'spdxYaml') {
+					fn.downloadSpdxYaml();
 				}
 			});
 			
@@ -1849,6 +1853,48 @@
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
+		},
+
+		downloadSpdxJson : function() {
+			$.ajax({
+				type: "POST",
+				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+				data: JSON.stringify({"type":"spdxJson", "parameter":'${project.prjId}'}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			})
+		},
+
+		downloadSpdxYaml : function() {
+			$.ajax({
+				type: "POST",
+				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+				data: JSON.stringify({"type":"spdxYaml", "parameter":'${project.prjId}'}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			})
 		},
 		appendEditVisible : function(target){
 			var checked = $(target).prop("checked");

@@ -147,6 +147,89 @@ public class SPDXDownloadController extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 				}
+			} else if("spdxJson".equals(spdxType)) {
+				if (!isEmpty(prjBean.getSpdxTagFileId())) {
+					downloadId = prjBean.getSpdxTagFileId();
+				} else {
+					String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+					T2File sheetFile = fileService.selectFileInfo(sheetFileId);
+					String sheetFullPath = sheetFile.getLogiPath();
+
+					if (!sheetFullPath.endsWith("/")) {
+						sheetFullPath += "/";
+					}
+
+					sheetFullPath += sheetFile.getLogiNm();
+					String tagFullPath = sheetFile.getLogiPath();
+
+					if (!tagFullPath.endsWith("/")) {
+						tagFullPath += "/";
+					}
+
+					tagFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json";
+
+					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
+
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".json",
+							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json");
+
+					try {
+						File spdxTafFile = new File(tagFullPath);
+
+						if (spdxTafFile.exists() && spdxTafFile.length() <= 0) {
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+							commHisBean.setReferenceId(prjId);
+							commHisBean.setContents(getMessage("spdx.tag.failure"));
+							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
+							commentService.registComment(commHisBean);
+						}
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			} else if("spdxYaml".equals(spdxType)) {
+				if (!isEmpty(prjBean.getSpdxTagFileId())) {
+					downloadId = prjBean.getSpdxTagFileId();
+				} else {
+					String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+					T2File sheetFile = fileService.selectFileInfo(sheetFileId);
+					String sheetFullPath = sheetFile.getLogiPath();
+
+					if (!sheetFullPath.endsWith("/")) {
+						sheetFullPath += "/";
+					}
+
+					sheetFullPath += sheetFile.getLogiNm();
+
+					String tagFullPath = sheetFile.getLogiPath();
+
+					if (!tagFullPath.endsWith("/")) {
+						tagFullPath += "/";
+					}
+
+					tagFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml";
+
+					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
+
+					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".yaml",
+							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml");
+
+					try {
+						File spdxTafFile = new File(tagFullPath);
+
+						if (spdxTafFile.exists() && spdxTafFile.length() <= 0) {
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+							commHisBean.setReferenceId(prjId);
+							commHisBean.setContents(getMessage("spdx.tag.failure"));
+							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
+							commentService.registComment(commHisBean);
+						}
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
 			} else if("spdx".equals(spdxType)){
 				if(!isEmpty(prjBean.getSpdxSheetFileId())) {
 					downloadId = prjBean.getSpdxSheetFileId();
