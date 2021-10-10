@@ -44,8 +44,9 @@ public class OssComponents extends ComBean implements Serializable {
 	private String cveId;
 	
 	private String oldSystemFlag;
-	
-	
+
+	private String spdxIdentifier;
+
 
 	/** The check sum. */
 	private String batChecksum;
@@ -591,5 +592,13 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setOssNickName(String ossNickName) {
 		this.ossNickName = ossNickName;
+	}
+
+	public String getSpdxIdentifier() {
+		return spdxIdentifier;
+	}
+
+	public void setSpdxIdentifier(String spdxIdentifier) {
+		this.spdxIdentifier = spdxIdentifier;
 	}
 }

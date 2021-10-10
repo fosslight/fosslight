@@ -771,7 +771,12 @@ public class ExcelUtil extends CoTopComponent {
 		int noCol = -1;
 		// OSS Name => nickName check
 		int nickNameCol = -1;
-		
+		// SPDX Identifier
+		int spdxIdentifierCol = -1;
+		// Pacakge Identifier
+		int packageIdentifierCol = -1;
+
+
 		Map<String, String> errMsg = new HashMap<>();
 		
 		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
@@ -798,6 +803,7 @@ public class ExcelUtil extends CoTopComponent {
 					case "OSS NAME":
 					case "OSS NAME ( OPEN SOURCE SOFTWARE NAME )":
 					case "OSS COMPONENT":
+					case "PACKAGE NAME":
 						if(ossNameCol > -1) {
 							dupColList.add(value);
 						}
@@ -806,6 +812,7 @@ public class ExcelUtil extends CoTopComponent {
 						
 						break;
 					case "OSS VERSION":
+					case "PACKAGE VERSION":
 						if(ossVersionCol > -1) {
 							dupColList.add(value);
 						}
@@ -814,6 +821,7 @@ public class ExcelUtil extends CoTopComponent {
 						
 						break;
 					case "DOWNLOAD LOCATION":
+					case "PACKAGE DOWNLOAD LOCATION":
 						if(downloadLocationCol > -1) {
 							dupColList.add(value);
 						}
@@ -823,6 +831,7 @@ public class ExcelUtil extends CoTopComponent {
 						break;
 					case "HOMEPAGE":
 					case "OSS WEBSITE":
+					case "HOME PAGE":
 						if(homepageCol > -1) {
 							dupColList.add(value);
 						}
@@ -831,6 +840,7 @@ public class ExcelUtil extends CoTopComponent {
 						
 						break;
 					case "LICENSE":
+					case "LICENSE CONCLUDED":
 						if(licenseCol > -1) {
 							dupColList.add(value);
 						}
@@ -848,6 +858,8 @@ public class ExcelUtil extends CoTopComponent {
 						break;
 					case "COPYRIGHT TEXT":
 					case "COPYRIGHT & LICENSE":
+					case "PACKAGE COPYRIGHT TEXT":
+					case "FILE COPYRIGHT TEXT":
 						if(copyrightTextCol > -1) {
 							dupColList.add(value);
 						}
@@ -913,6 +925,7 @@ public class ExcelUtil extends CoTopComponent {
 						
 						break;
 					case "COMMENT":
+					case "LICENSE COMMENTS":
 						if(commentCol > -1) {
 							dupColList.add(value);
 						}
@@ -928,6 +941,34 @@ public class ExcelUtil extends CoTopComponent {
 						nickNameCol = colIdx;
 						
 						break;
+					case "FILE NAME":
+						if(binaryNameCol > -1) {
+							dupColList.add(value);
+						}
+						
+						binaryNameCol = colIdx;
+						
+						if(pathOrFileCol > -1) {
+							dupColList.add(value);
+						}
+						
+						pathOrFileCol = colIdx;
+						
+						break;
+					case "PACKAGE IDENTIFIER":
+						if(packageIdentifierCol > -1) {
+							dupColList.add(value);
+						}
+						
+						packageIdentifierCol = colIdx;
+						
+						break;
+					case "SPDX IDENTIFIER":
+						if(spdxIdentifierCol > -1) {
+							dupColList.add(value);
+						}
+						
+						spdxIdentifierCol = colIdx;
 					default:
 						break;
 				}
@@ -945,23 +986,26 @@ public class ExcelUtil extends CoTopComponent {
 			
 			// 필수 header 누락 시 Exception
 			List<String> colNames = new ArrayList<String>();
-			
-			if(ossNameCol < 0) {
-				colNames.add("OSS NAME");
-			}
-			
-			if(ossVersionCol < 0) {
-				colNames.add("OSS VERSION");
-			}
-			
-			if(licenseCol < 0) {
-				colNames.add("LICENSE");
-			}
-			
-			if(!colNames.isEmpty()) {
-				String msg = colNames.toString();
-				msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
-				errMsg.put("reqCol", msg);
+
+			// Per file info sheet of SPDX Spreadsheet does not proceed
+			if(packageIdentifierCol < 0) {
+				if(ossNameCol < 0) {
+					colNames.add("OSS NAME");
+				}
+
+				if(ossVersionCol < 0) {
+					colNames.add("OSS VERSION");
+				}
+
+				if(licenseCol < 0) {
+					colNames.add("LICENSE");
+				}
+
+				if(!colNames.isEmpty()) {
+					String msg = colNames.toString();
+					msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
+					errMsg.put("reqCol", msg);
+				}
 			}
 			
 			String lastOssName = "";
@@ -992,17 +1036,38 @@ public class ExcelUtil extends CoTopComponent {
     				}
     				
     				OssComponents bean = new OssComponents();
-    				
-    				// 기본정보
-    				bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
-    				bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
-    				bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", ""));
-    				bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\t", ""));
-    				bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
-    				bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
-    				bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    				bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
-    				bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
+
+    				// The SPDX Spradsheet reads the same row as the Package Identifier of the Per File Info sheet and the Spdx Identifier of the Package Info sheet
+    				if(ossNameCol < 0) {
+    					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
+    					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
+    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+
+    					String packageIdentifier = getCellData(row.getCell(packageIdentifierCol));
+    					for(int beanIndex = 0; beanIndex < list.size(); beanIndex++) {
+    						OssComponents temp = list.get(beanIndex);
+    						if(temp.getSpdxIdentifier().equals(packageIdentifier)){
+    							bean.setOssName(temp.getOssName());
+    							bean.setOssVersion(temp.getOssVersion());
+    							bean.setDownloadLocation(temp.getDownloadLocation());
+    							bean.setHomepage(temp.getHomepage());
+    							break;
+    						}
+    					}
+    				}
+    				else {
+    					// basic info
+    					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
+    					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
+    					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", ""));
+    					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\t", ""));
+    					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
+    					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
+    					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
+    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+    					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
+    					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
+    				}
     				
     				duplicateCheckList.add(avoidNull(bean.getOssName()) + "-" + avoidNull(bean.getOssVersion()) + "-" + avoidNull(bean.getLicenseName()));
     				
@@ -1502,7 +1567,7 @@ public class ExcelUtil extends CoTopComponent {
 			for (Cell cell : row) {
 				String id = avoidNull(getCellData(cell)).trim().toUpperCase();
 				
-				if("NO".equalsIgnoreCase(id) || "ID".equalsIgnoreCase(id)) {
+				if("NO".equalsIgnoreCase(id) || "ID".equalsIgnoreCase(id) || "PACKAGE NAME".equalsIgnoreCase(id) || "FILE NAME".equalsIgnoreCase(id)) {
 					return row.getRowNum();
 				}
 				
