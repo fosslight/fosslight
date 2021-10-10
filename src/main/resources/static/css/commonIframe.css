@@ -306,8 +306,10 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .iconSt {display:inline-block;width:16px;height:16px;line-height:1000%;font-size:0;overflow:hidden;border-radius:20px;background: url("../images/img_icon.png?v=20180612") no-repeat;}
 /* 2018-01-16 */
 .iconSt.draft {background-color:#80b600;background-position:-155px -200px}
+.iconSt.progress {background-color:#80b600;background-position:-155px -200px}
 .iconSt.review {cursor:pointer;background-color:#ff7d26;background-position:-185px -200px}
 .iconSt.complete {background-color:#4c84f5;background-position:-215px -200px}
+.iconSt.confirm {background-color:#4c84f5;background-position:-215px -200px}
 .iconSt.delay {background-color:#f5f34c;background-position:-245px -200px;border-radius:0;}
 .iconSt.request {background-color:#ffa4e6;background-position:-275px -200px;}
 .iconSt.drop {background-color:#a39d9b;background-position:-155px -225px;} /* 2021-01-26 */
