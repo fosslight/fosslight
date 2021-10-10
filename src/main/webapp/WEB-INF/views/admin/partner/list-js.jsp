@@ -25,8 +25,21 @@
 		showHelpLink("3rd-Party_List_Main");
 	});
 	
+	var gridTooltip = {
+	    typeCodes : [],
+		tooltipCont : "<div class=\"tooltipData\">"
+			+"<dl><dt><span class=\"iconSt progress\">Progress</span>Progress</dt></dl><br>"
+			+"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
+			+"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
+			+"<dl><dt><span class=\"iconSt confirm\">Confirm</span>Confirm</dt></dl><br>"
+			+"</div>",
+		existTooltip : false,
+		init : function(){
+	        list.load();	// Grid Load
+		}
+	};
 	
-	//이벤트
+	//event
 	var evt = {
 		init : function(){
 			refreshParam = $('#3rdSearch').serializeObject();
@@ -139,7 +152,30 @@
 			})
 		}, getUserName : function(cellvalue, options, rowObject){
 			return adminUserList[cellvalue] || "";
-		}
+		},
+		displayStatus: function (cellvalue, options, rowObject) {
+			// 			206 COMF	Confirm
+			// 			206 PROG	Progress
+			// 			206 REQ		Request
+			// 			206 REV		Review
+			var display = "";
+			
+			switch (cellvalue) {
+				case "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}":
+					display = "<span class=\"iconSt request\">Request</span>";
+					break;
+				case "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}":
+					display = "<span class=\"iconSt review\">Review</span>";
+					break;
+				case "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}":
+					display = "<span class=\"iconSt confirm\">Confirm</span>";
+					break;
+				case "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}":
+					display = "<span class=\"iconSt progress\">Progress</span>";
+					break;
+			}
+			return display;
+		},
 	}
 	
 	//http
@@ -195,7 +231,7 @@
 					{name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true},
 					{name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true},
 					{name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true},
-					{name: 'status', index: 'status', width: 50, align: 'center', sortable : true},
+					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true},
 					{name: 'deliveryForm', index: 'deliveryForm', width: 100, align: 'center', sortable : true},
 					{name: 'description', index: 'description', width: 100, align: 'left', sortable : true},
 					{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
@@ -273,28 +309,23 @@
 						}
 					}
 					for(var i=0; i<data.length; i++){
-						// 조건에 따라 cell 색상 변경
 						if(data[i].status){
 							if(data[i].status.indexOf("PROG") != -1){
 								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Progress');
 							}
 							
 							if(data[i].status.indexOf("REV") != -1){
-								$("#list").jqGrid("setCell", data[i].partnerId, "status", "", {'background-color':'#6d7e9c', 'color':'#fff'});
 								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Review');
 							}
 							
 							if(data[i].status.indexOf("REQ") != -1){
-								$("#list").jqGrid("setCell", data[i].partnerId, "status", "", {'background-color':'#9da5b8', 'color':'#fff'});
 								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Request');
 							}
 							
 							if(data[i].status.indexOf("CONF") != -1){
-								$("#list").jqGrid("setCell", data[i].partnerId, "status", "", {'background-color':'#384f7b', 'color':'#fff'});
 								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Confirm');
 							}							
 						}
-						
 						if(data[i].deliveryForm){
 							if(data[i].deliveryForm == 'SRC') {
 								$("#list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'source form');
@@ -302,6 +333,15 @@
 								$("#list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'binary form');
 							}
 						}
+					}
+					if(!gridTooltip.existTooltip){
+						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
+							.attr("title", gridTooltip.tooltipCont).tooltip({
+							content: function () {
+								return $(this).prop('title');
+							}
+						});
+						gridTooltip.existTooltip = true;
 					}
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
