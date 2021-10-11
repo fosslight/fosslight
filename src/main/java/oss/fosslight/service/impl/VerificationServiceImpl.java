@@ -1754,11 +1754,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
-			// oss 없이 라이선스만 확인한 경우, 고지문구 oss tag가 link로 생성되지 않도록 downloadlocation을 초기화
-			if(isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) {
-				bean.setDownloadLocation("");
-			}
-			
 			noticeList.add(bean);
 		}
 		List<OssComponents> srcList = new ArrayList<>();
@@ -1781,11 +1776,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			if(!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
-			}
-			
-			// oss 없이 라이선스만 확인한 경우, 고지문구 oss tag가 link로 생성되지 않도록 downloadlocation을 초기화
-			if(isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) {
-				bean.setDownloadLocation("");
 			}
 			
 			srcList.add(bean);
