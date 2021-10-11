@@ -3198,10 +3198,24 @@ public class ProjectController extends CoTopComponent {
 				e.printStackTrace();
 			}
 
-			resultList.add(list);
-			resultList.add(sheetNameList);
-			resultList.add("EXCEL_FILE");
+			Boolean isSpdxSpreadsheet = false;
+			for(Object sheet : sheetNameList) {
+				String sheetName = sheet.toString();
+				if(sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
+					isSpdxSpreadsheet = true;
+				}
+			}
 
+			if(isSpdxSpreadsheet){
+				resultList.add(list);
+				resultList.add(sheetNameList);
+				resultList.add("SPDX_SPREADSHEET_FILE");
+			}
+			else {
+				resultList.add(list);
+				resultList.add(sheetNameList);
+				resultList.add("EXCEL_FILE");
+			}
 			// 결과값 resultList에 담기
 			return toJson(resultList);
 		}
