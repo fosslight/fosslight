@@ -293,7 +293,15 @@
 								$('.ajax-file-upload-statusbar').fadeOut('slow');
 								$('.ajax-file-upload-statusbar').remove();
 							});
-						} else {
+						} else if(result[2] == "CSV_FILE") {
+							src_fn.getCsvData(result[0][0].registSeq);
+
+							$('#binCsvFileId').val(result[0][0].registFileId);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+
+							src_fn.makeFileTag(result[0][0]);
+						} else if(result[2] == "EXCEL_FILE") {
 							if(result[1].length != 0){
 								$('.sheetSelectPop').show();
 								$('.sheetSelectPop .sheetNameArea').children().remove();
@@ -313,6 +321,10 @@
 							$('.ajax-file-upload-statusbar').remove();
 							
 							src_fn.makeFileTag(result[0][0]);	
+						} else {
+							alertify.error('<spring:message code="msg.common.valid" />', 0);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
 						}
 					}
 				}
@@ -569,6 +581,21 @@
 				src_evt.csvFileSeq.push(object);
 				src_fn.exeLoadReportData(finalData);
 			}
+		},
+		getCsvData : function(seq){
+			loading.show();
+			fn_grid_com.totalGridSaveMode('srcList');
+			cleanErrMsg("srcList");
+			var target = $("#srcList");
+
+			// 메인 그리드
+			var mainData = target.jqGrid('getGridParam','data');
+			var sheetNum = ["0"];
+			var finalData = {"readType":"self","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+			var object = {fileSeq : seq};
+
+			src_evt.csvFileSeq.push(object);
+			src_fn.exeLoadReportData(finalData);
 		},
 		// load report data
 		exeLoadReportData : function(finalData){
