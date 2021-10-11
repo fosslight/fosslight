@@ -705,8 +705,9 @@
 				if(!_obligationMsg || _obligationMsg == "") {
 					_obligationMsg = "unknown obligation";
 				}
-				
-				display = "<div class=\"tcenter\"><a class='iconSet help'>"+_obligationMsg+"</a></div>";
+
+				display= "<span class=\"iconSet help\">Obligation is unclear</span>";
+
 			} else if(obligationType == 10){
 				display="<span class=\"iconSet ops\">Notice</span>";
 			} else if(obligationType == 11) {
