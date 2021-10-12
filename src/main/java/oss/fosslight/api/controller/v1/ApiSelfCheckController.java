@@ -75,10 +75,7 @@ public class ApiSelfCheckController extends CoTopComponent {
     public CommonResult createSelfCheck(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
-    		@ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
-    		@ApiParam(value = "OS Type", required = false) @RequestParam(required = false) String osType,
-    		@ApiParam(value = "OS Type etc", required = false) @RequestParam(required = false) String osTypeEtc,
-    		@ApiParam(value = "Distribution Type", required = false) @RequestParam(required = false) String distributionType){
+    		@ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion){
 		
 		// 사용자 인증
 		T2Users userInfo = userService.checkApiUserAuth(_token);
@@ -90,31 +87,9 @@ public class ApiSelfCheckController extends CoTopComponent {
 			
 			if(CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
 				Map<String, Object> paramMap = new HashMap<String, Object>();
-				String distributionSubCode = "";
-				
-				if(isEmpty(distributionType)) {
-					distributionSubCode = CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL;
-				} else {
-					String distributionJSON = CoCodeManager.getAllValuesJson(CoConstDef.CD_DISTRIBUTION_TYPE);
-					Type collectionType = new TypeToken<List<Map<String, Object>>>() {
-					}.getType();
-					List<Map<String, Object>> distributionCode = new ArrayList<>();
-					distributionCode = (List<Map<String, Object>>) fromJson(distributionJSON, collectionType);
-					
-					distributionCode = distributionCode.stream().filter(c -> ((String) c.get("cdDtlNm")).toUpperCase().equals(distributionType.toUpperCase())).collect(Collectors.toList());
-					
-					if(distributionCode.size() > 0) {
-						distributionSubCode = (String) distributionCode.get(0).get("cdDtlNo");
-					} else {
-						distributionSubCode = distributionType;
-					}
-				}
 				
 				paramMap.put("prjName", prjName);
 				paramMap.put("prjVersion", avoidNull(prjVersion, ""));
-				paramMap.put("osType", avoidNull(osType, ""));
-				paramMap.put("osTypeEtc", osTypeEtc);
-				paramMap.put("distributionType", distributionSubCode);
 				paramMap.put("loginUserName", userInfo.getUserId());
 				
 				result = apiSelfCheckService.createSelfCheck(paramMap);

@@ -33,7 +33,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 		
 		apiSelfcheckMapper.createSelfCheck(paramMap);
 		
-		BigInteger prjId = (BigInteger) paramMap.get("prjId");
+		Long prjId = (Long) paramMap.get("prjId");
 		result.put("prjId", prjId.toString());
 		
 		return result;
