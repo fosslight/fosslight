@@ -115,6 +115,12 @@ public class Project extends ComBean implements Serializable {
 	/** The allow download SPDX tag yn. */
 	private String allowDownloadSPDXTagYn;
 
+	/** The allow download SPDX json yn. */
+	private String allowDownloadSPDXJsonYn;
+
+	/** The allow download SPDX yaml yn. */
+	private String allowDownloadSPDXYamlYn;
+
 	/** The identification status. */
 	private String identificationStatus;
 	
@@ -428,6 +434,12 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The spdx tag file id. */
 	private String spdxTagFileId;
+
+	/** The spdx json file id. */
+	private String spdxJsonFileId;
+
+	/** The spdx yaml file id. */
+	private String spdxYamlFileId;
 	
 	/** The zip file id. */
 	private String zipFileId;
@@ -3322,6 +3334,42 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	/**
+	 * Gets the allow download SPDX json yn.
+	 *
+	 * @return the allow download SPDX json yn
+	 */
+	public String getAllowDownloadSPDXJsonYn() {
+		return allowDownloadSPDXJsonYn;
+	}
+
+	/**
+	 * Sets the allow download SPDX json yn.
+	 *
+	 * @param allowDownloadSPDXJsonYn the new allow download SPDX json yn
+	 */
+	public void setAllowDownloadSPDXJsonYn(String allowDownloadSPDXJsonYn) {
+		this.allowDownloadSPDXJsonYn = allowDownloadSPDXJsonYn;
+	}
+
+	/**
+	 * Gets the allow download SPDX yaml yn.
+	 *
+	 * @return the allow download SPDX yaml yn
+	 */
+	public String getAllowDownloadSPDXYamlYn() {
+		return allowDownloadSPDXYamlYn;
+	}
+
+	/**
+	 * Sets the allow download SPDX yaml yn.
+	 *
+	 * @param allowDownloadSPDXYamlYn the new allow download SPDX yaml yn
+	 */
+	public void setAllowDownloadSPDXYamlYn(String allowDownloadSPDXYamlYn) {
+		this.allowDownloadSPDXYamlYn = allowDownloadSPDXYamlYn;
+	}
+
+	/**
 	 * Gets the distribute deploy user.
 	 *
 	 * @return the distribute deploy user
@@ -3582,6 +3630,42 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setSpdxTagFileId(String spdxTagFileId) {
 		this.spdxTagFileId = spdxTagFileId;
+	}
+
+	/**
+	 * Gets the spdx json file id.
+	 *
+	 * @return the spdx json file id
+	 */
+	public String getSpdxJsonFileId() {
+		return spdxJsonFileId;
+	}
+
+	/**
+	 * Sets the spdx json file id.
+	 *
+	 * @param spdxJsonFileId the new spdx json file id
+	 */
+	public void setSpdxJsonFileId(String spdxJsonFileId) {
+		this.spdxJsonFileId = spdxJsonFileId;
+	}
+
+	/**
+	 * Gets the spdx yaml file id.
+	 *
+	 * @return the spdx yaml file id
+	 */
+	public String getSpdxYamlFileId() {
+		return spdxYamlFileId;
+	}
+
+	/**
+	 * Sets the spdx yaml file id.
+	 *
+	 * @param spdxYamlFileId the new spdx yaml file id
+	 */
+	public void setSpdxYamlFileId(String spdxYamlFileId) {
+		this.spdxYamlFileId = spdxYamlFileId;
 	}
 
 	/**

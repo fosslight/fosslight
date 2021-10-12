@@ -287,6 +287,8 @@
 								<input type="hidden" id="allowDownloadSPDXSheetYn" name="allowDownloadSPDXSheetYn" value="${project.allowDownloadSPDXSheetYn}" />
 								<input type="hidden" id="allowDownloadSPDXRdfYn" name="allowDownloadSPDXRdfYn" value="${project.allowDownloadSPDXRdfYn}" />
 								<input type="hidden" id="allowDownloadSPDXTagYn" name="allowDownloadSPDXTagYn" value="${project.allowDownloadSPDXTagYn}" />
+								<input type="hidden" id="allowDownloadSPDXJsonYn" name="allowDownloadSPDXJsonYn" value="${project.allowDownloadSPDXJsonYn}" />
+								<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" value="${project.allowDownloadSPDXYamlYn}" />
 								<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
 								<input type="hidden" name="previewOnly" id="previewOnly" value="N"/>
 
@@ -398,6 +400,16 @@
 															data-targetid="allowDownloadSPDXTagYn" <c:if test="${project.allowDownloadSPDXTagYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
 														<label for="chkAllowDownloadSPDXTag">SPDX(TAG)</label>
 													</span>
+													<span class="checkSet">
+														<input type="checkbox" id="chkAllowDownloadSPDXJson" name="chkAllowDownloadSPDXJson"
+															   data-targetid="allowDownloadSPDXJsonYn" <c:if test="${project.allowDownloadSPDXJsonYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
+														<label for="chkAllowDownloadSPDXJson">SPDX(JSON)</label>
+													</span>
+													<span class="checkSet">
+														<input type="checkbox" id="chkAllowDownloadSPDXYaml" name="chkAllowDownloadSPDXYaml"
+															   data-targetid="allowDownloadSPDXYamlYn" <c:if test="${project.allowDownloadSPDXYamlYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
+														<label for="chkAllowDownloadSPDXYaml">SPDX(YAML)</label>
+													</span>
 												</c:if>
 											</div>
 										</div>
@@ -485,6 +497,16 @@
 						<c:if test="${project.allowDownloadSPDXTagYn eq 'Y'}">
 						<span>
 							<a href="javascript:fn.downloadSpdxTag();" style="color: rgb(0, 112, 192);text-decoration: underline !important;margin-left: 5px;">SPDX(TAG)</a>
+						</span>
+						</c:if>
+						<c:if test="${project.allowDownloadSPDXJsonYn eq 'Y'}">
+						<span>
+							<a href="javascript:fn.downloadSpdxJson();" style="color: rgb(0, 112, 192);text-decoration: underline !important;margin-left: 5px;">SPDX(JSON)</a>
+						</span>
+						</c:if>
+						<c:if test="${project.allowDownloadSPDXYamlYn eq 'Y'}">
+						<span>
+							<a href="javascript:fn.downloadSpdxYaml();" style="color: rgb(0, 112, 192);text-decoration: underline !important;margin-left: 5px;">SPDX(YAML)</a>
 						</span>
 						</c:if>
 					</span>

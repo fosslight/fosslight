@@ -148,8 +148,8 @@ public class SPDXDownloadController extends CoTopComponent {
 					}
 				}
 			} else if("spdxJson".equals(spdxType)) {
-				if (!isEmpty(prjBean.getSpdxTagFileId())) {
-					downloadId = prjBean.getSpdxTagFileId();
+				if (!isEmpty(prjBean.getSpdxJsonFileId())) {
+					downloadId = prjBean.getSpdxJsonFileId();
 				} else {
 					String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 					T2File sheetFile = fileService.selectFileInfo(sheetFileId);
@@ -160,27 +160,27 @@ public class SPDXDownloadController extends CoTopComponent {
 					}
 
 					sheetFullPath += sheetFile.getLogiNm();
-					String tagFullPath = sheetFile.getLogiPath();
+					String jsonFullPath = sheetFile.getLogiPath();
 
-					if (!tagFullPath.endsWith("/")) {
-						tagFullPath += "/";
+					if (!jsonFullPath.endsWith("/")) {
+						jsonFullPath += "/";
 					}
 
-					tagFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json";
+					jsonFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json";
 
-					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
+					SPDXUtil2.convert(prjId, sheetFullPath, jsonFullPath);
 
 					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".json",
 							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".json");
 
 					try {
-						File spdxTafFile = new File(tagFullPath);
+						File spdxJsonFile = new File(jsonFullPath);
 
-						if (spdxTafFile.exists() && spdxTafFile.length() <= 0) {
+						if (spdxJsonFile.exists() && spdxJsonFile.length() <= 0) {
 							CommentsHistory commHisBean = new CommentsHistory();
 							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 							commHisBean.setReferenceId(prjId);
-							commHisBean.setContents(getMessage("spdx.tag.failure"));
+							commHisBean.setContents(getMessage("spdx.json.failure"));
 							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
 							commentService.registComment(commHisBean);
 						}
@@ -189,8 +189,8 @@ public class SPDXDownloadController extends CoTopComponent {
 					}
 				}
 			} else if("spdxYaml".equals(spdxType)) {
-				if (!isEmpty(prjBean.getSpdxTagFileId())) {
-					downloadId = prjBean.getSpdxTagFileId();
+				if (!isEmpty(prjBean.getSpdxYamlFileId())) {
+					downloadId = prjBean.getSpdxYamlFileId();
 				} else {
 					String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 					T2File sheetFile = fileService.selectFileInfo(sheetFileId);
@@ -201,28 +201,27 @@ public class SPDXDownloadController extends CoTopComponent {
 					}
 
 					sheetFullPath += sheetFile.getLogiNm();
+					String yamlFullPath = sheetFile.getLogiPath();
 
-					String tagFullPath = sheetFile.getLogiPath();
-
-					if (!tagFullPath.endsWith("/")) {
-						tagFullPath += "/";
+					if (!yamlFullPath.endsWith("/")) {
+						yamlFullPath += "/";
 					}
 
-					tagFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml";
+					yamlFullPath += FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml";
 
-					SPDXUtil2.convert(prjId, sheetFullPath, tagFullPath);
+					SPDXUtil2.convert(prjId, sheetFullPath, yamlFullPath);
 
 					downloadId = fileService.registFileDownload(sheetFile.getLogiPath(), FilenameUtils.getBaseName(sheetFile.getOrigNm()) + ".yaml",
 							FilenameUtils.getBaseName(sheetFile.getLogiNm()) + ".yaml");
 
 					try {
-						File spdxTafFile = new File(tagFullPath);
+						File spdxYamlFile = new File(yamlFullPath);
 
-						if (spdxTafFile.exists() && spdxTafFile.length() <= 0) {
+						if (spdxYamlFile.exists() && spdxYamlFile.length() <= 0) {
 							CommentsHistory commHisBean = new CommentsHistory();
 							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 							commHisBean.setReferenceId(prjId);
-							commHisBean.setContents(getMessage("spdx.tag.failure"));
+							commHisBean.setContents(getMessage("spdx.yaml.failure"));
 							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
 							commentService.registComment(commHisBean);
 						}

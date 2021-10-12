@@ -2910,7 +2910,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
 			bitFlag |= CoConstDef.FLAG_G;
-		}	
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_H;
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+			bitFlag |= CoConstDef.FLAG_I;
+		}
 		
 		return bitFlag;
 	}

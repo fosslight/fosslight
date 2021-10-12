@@ -323,6 +323,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxTagFileId)">
 				, SPDX_TAG_FILE_ID = #{spdxTagFileId}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxJsonFileId)">
+				, SPDX_JSON_FILE_ID = #{spdxJsonFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxYamlFileId)">
+				, SPDX_YAML_FILE_ID = #{spdxYamlFileId}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(zipFileId)">
 				, ZIP_FILE_ID = #{zipFileId}
 			</if>
