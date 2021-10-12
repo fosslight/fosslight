@@ -52,7 +52,9 @@ public class OssNotice extends ComBean implements Serializable {
 	private String spdxSheetFileId;
 	private String spdxRdfFileId;
 	private String spdxTagFileId;
-	
+	private String spdxJsonFileId;
+	private String spdxYamlFileId;
+
 	/** OSS_NOTICE_NEW UI 변경 후 사용되는 properties */
 	private String editNoticeYn = "N";
 	private String editCompanyYn = "N";
@@ -263,6 +265,18 @@ public class OssNotice extends ComBean implements Serializable {
 	}
 	public void setSpdxTagFileId(String spdxTagFileId) {
 		this.spdxTagFileId = spdxTagFileId;
+	}
+	public String getSpdxJsonFileId() {
+		return spdxJsonFileId;
+	}
+	public void setSpdxJsonFileId(String spdxJsonFileId) {
+		this.spdxJsonFileId = spdxJsonFileId;
+	}
+	public String getSpdxYamlFileId() {
+		return spdxYamlFileId;
+	}
+	public void setSpdxYamlFileId(String spdxYamlFileId) {
+		this.spdxYamlFileId = spdxYamlFileId;
 	}
 	public String getIgnoreBinaryDbFlag() {
 		return ignoreBinaryDbFlag;

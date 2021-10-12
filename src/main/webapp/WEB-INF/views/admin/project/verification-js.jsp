@@ -651,6 +651,8 @@
 								  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 								  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 								  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
+								  , "allowDownloadSPDXJsonYn"	: $("#allowDownloadSPDXJsonYn").val()
+								  , "allowDownloadSPDXYamlYn"	: $("#allowDownloadSPDXYamlYn").val()
 						};
 						
 						fn.exeProjectStatus(data, "PROG");
@@ -697,6 +699,8 @@
 						  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 						  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 						  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
+						  , "allowDownloadSPDXJsonYn" 	: $("#allowDownloadSPDXJsonYn").val()
+						  , "allowDownloadSPDXYamlYn" 	: $("#allowDownloadSPDXYamlYn").val()
 				};
 				
 				fn.exeProjectStatus(data, "REV");
@@ -963,7 +967,14 @@
 			$('#spdxTag').click(function(e){
 				fn.downloadSpdxTag();
 			});
-			
+
+			$('#spdxJson').click(function(e){
+				fn.downloadSpdxJson();
+			});
+
+			$('#spdxYaml').click(function(e){
+				fn.downloadSpdxYaml();
+			});
 			//// [Pakage Document Download END]
 			
 			$("#identificationTab").click(function(){
@@ -1943,6 +1954,8 @@
 				$("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
 			} else {
 				$("#companyName").attr("disabled",!checked);
 				$("#ossDistributionSite").attr("disabled",!checked);
@@ -1966,7 +1979,9 @@
 				$("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-			}
+				$("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
+            }
 		},
 		initNotice : function(){
 			window.setTimeout(function(){
@@ -2055,7 +2070,9 @@
 					  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 					  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 					  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
-			};
+					  , "allowDownloadSPDXJsonYn" 	: $("#allowDownloadSPDXJsonYn").val()
+					  , "allowDownloadSPDXYamlYn" 	: $("#allowDownloadSPDXYamlYn").val()
+            };
 			
 			//공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
 			var fileSeq = $("input[name='fileSeq_1']").val();
