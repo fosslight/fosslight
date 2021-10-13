@@ -150,6 +150,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .hidden {display:none;}
 .imgblock img {display:block;}
 .grp {margin:-10px 0 0 -2px;}
+.watcherEmail{padding-right:55px;}
 /* txt */
 .red {color:red;}
 .txt14 {font-size:14px;}
