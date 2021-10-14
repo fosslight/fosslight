@@ -1297,20 +1297,20 @@ public class ProjectController extends CoTopComponent {
 		List<PartnerMaster> thirdPartyList = new ArrayList<>();
 		thirdPartyList = (List<PartnerMaster>) fromJson(thirdPartyGrid, collectionType1);
 
+		Project project = new Project();
+		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusPartner)) {
-			Project param = new Project();
-			param.setPrjId(prjId);
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			param.setIdentificationSubStatusPartner(identificationSubStatusPartner);
+			project.setPrjId(prjId);
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			project.setIdentificationSubStatusPartner(identificationSubStatusPartner);
 			
 			// 상태값 변경
-			projectService.updateSubStatus(param);
+			projectService.updateSubStatus(project);
 		} else {
 			// 서브그리드
 			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
 			
 			try {
-				Project project = new Project();
 				project.setPrjId(prjId);
 				History h = new History();
 				h = projectService.work(project);
@@ -1323,7 +1323,7 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 
-		return makeJsonResponseHeader(null);
+		return makeJsonResponseHeader(true, "success", projectService.getProjectDetail(project).getIdentificationStatus());
 	}
 	
 	/**
