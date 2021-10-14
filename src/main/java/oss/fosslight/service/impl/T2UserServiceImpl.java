@@ -336,6 +336,9 @@ public class T2UserServiceImpl implements T2UserService {
 				vo.get(i).setAuthority("ROLE_USER");
 				userMapper.updateAuthorities(vo.get(i));
 			}
+			
+			// statisticsMostUsed > div_no value update
+			userMapper.updateStatisticsMostUsedInfo(vo.get(i));
 		}		
 	}
 	

@@ -130,14 +130,15 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	
 	public Map<String, Object> getMostUsedChartData(Statistics statistics) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		List<Statistics> list = null;
+		List<Statistics> list = statisticsMapper.getMostUsedChartData(statistics);
 		
+		/*
 		if("OSS".equals(statistics.getChartType())) {
 			list = statisticsMapper.getMostUsedOssChartData(statistics);
 		} else if("LICENSE".equals(statistics.getChartType())) {			
 			list = statisticsMapper.getMostUsedLicenseChartData(statistics);
 		}
-		
+		*/
 		result.put("chartData", list);
 		
 		return result;

@@ -63,4 +63,6 @@ public interface T2UserMapper {
 	public int procToken(T2Users bean);
 
 	public int existUserIdOrEmail(String userId);
+
+	public void updateStatisticsMostUsedInfo(T2Users t2Users);
 }

@@ -64,4 +64,6 @@ public interface CodeMapper {
 	 * @return update result int
 	 */
 	public int updateCodeDtlNm(@Param("cdNo") String cdNo, @Param("cdDtlNo") String cdDtlNo, @Param("cdDtlNm") String cdDtlNm);
+
+	public void updateStatisticsMostUsed(T2CodeDtl codeDtl);
 }

@@ -25,6 +25,8 @@ public class T2CodeDtl extends ComBean implements  Serializable {
 	private List<T2CodeDtl> modifyRowList;
 	private List<T2CodeDtl> deleteRowList;
 	
+	private String cdDtlNoNew;
+	
 	// 기본생성자
 	public T2CodeDtl() {}
 	
@@ -110,5 +112,11 @@ public class T2CodeDtl extends ComBean implements  Serializable {
 	}
 	public void setCdDtlNoOrign(String cdDtlNoOrign) {
 		this.cdDtlNoOrign = cdDtlNoOrign;
+	}
+	public String getCdDtlNoNew() {
+		return cdDtlNoNew;
+	}
+	public void setCdDtlNoNew(String cdDtlNoNew) {
+		this.cdDtlNoNew = cdDtlNoNew;
 	}
 }

@@ -497,4 +497,18 @@
 		 GROUP BY A.CD_DTL_NM
 		 ORDER BY A.CD_ORDER ASC
 	</select>
+	
+	<select id="getMostUsedChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
+		SELECT COMPONENT_NAME AS COLUMN_NAME
+		     , COUNT(1) AS COLUMN_CNT
+		  FROM STATISTICS_MOSTUSED
+		 WHERE CHART_TYPE = #{chartType}
+		   AND CREATED_DATE BETWEEN ${startDate} AND ${endDate}
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
+		   AND DIV_NO = #{divisionNo}
+		 </if>
+		 GROUP BY COMPONENT_NAME
+		 ORDER BY COLUMN_CNT DESC
+		 LIMIT 0, #{pieSize}
+	</select>
 </mapper>

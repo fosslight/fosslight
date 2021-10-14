@@ -30,4 +30,6 @@ public interface StatisticsMapper {
 	List<Statistics> getTrdPartyRelatedChartData(Statistics statistics);
 
 	List<Statistics> getUserRelatedChartData(Statistics statistics);
+
+	List<Statistics> getMostUsedChartData(Statistics statistics);
 }

@@ -2567,6 +2567,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 			}
+			
+			// StatisticsMostUsed > OssInfo INSERT
+			projectMapper.insertStatisticsMostUsedOssInfo(project);
+			
+			// StatisticsMostUsed > LicenseInfo INSERT
+			projectMapper.insertStatisticsMostUsedLicenseInfo(project);
 		}
 	}
 
@@ -4048,7 +4054,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return resultData;
 	}
 	
-	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) >>>
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag)
@@ -4365,5 +4370,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 	}
-	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) <<<
+
+	@Override
+	public void deleteStatisticsMostUsedInfo(Project project) {
+		projectMapper.deleteStatisticsMostUsedInfo(project);
+	}
 }
