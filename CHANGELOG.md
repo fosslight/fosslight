@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.2.11 (15/10/2021)
+## Changes
+## 🚀 Features
+
+- Changed - Recover Missing Messages @FOSSLight-dev (#198)
+- Supports Self-Check List OSS report as csv attachment @riyenas0925 (#190)
+- Supports BIN tab OSS report as csv attachment @riyenas0925 (#181)
+- Add send to everyone when sending comments @riyenas0925 (#176)
+- Add SPDX json and yaml types for pakaging notice download @hyewoncc (#177)
+- Supports SRC tab OSS report as csv attachment @riyenas0925 (#162)
+- Add a language change function using the dropdown for task 4 @suhwan-cheon (#151)
+
+## 🐛 Hotfixes
+
+- Changed - Recover Missing Messages @FOSSLight-dev (#198)
+- Change link format of vulnerability discovered mail (#168) @acafela (#175)
+- Restore message.properties @epicarts (#185)
+
+## 🔧 Maintenance
+
+- Translated from English to Korean in ko properties file @epicarts (#183)
+- Change Self-Check in Obligation Warning message @Lee-JaeHyuk (#192)
+- Fix error where download location is not output when ossname is "-" @riyenas0925 (#186)
+- Change the SPDX Spreadsheet output method for OSS Name is - @riyenas0925 (#179)
+- Change the status column to icon in 3rd party list @epicarts (#154)
+
+---
+
 ## v1.2.10 (08/10/2021)
 ## Changes
 ## 🚀 Features
