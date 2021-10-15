@@ -1,9 +1,26 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#selectLang").change(function () {
+			let selectedOption = $('#selectLang').val();
+			if (!(selectedOption === '')){
+				window.location.replace('?lang=' + selectedOption);
+			}
+		});
+	});
+</script>
 <!-- header -->
 <div id="header">
 	<div class="back">
 		<h1><img src="images/img_logo.png" alt="FOSSLight System"/></h1>
+		<div class="userLang">
+			<select id="selectLang">
+				<option value=""><spring:message code="lan.default" /></option>
+				<option value="ko"><spring:message code="lan.ko" /></option>
+				<option value="en-US"><spring:message code="lan.en" /></option>
+			</select>
+		</div>
 		<div class="userLogout">
 			<input type="hidden" id="defaultTabAnchorArr" value="${sessUserInfo.defaultTabAnchor}" />
 			<span class="configurationSpan"><a href="#/configuration/edit" class="add-tab" title="default tab">${sessUserInfo.userName}</a></span>

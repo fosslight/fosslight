@@ -423,19 +423,21 @@
 						<strong for="docType" title="selected value"></strong>
 						<select id="docType" name="docType">
 							<!-- <option value="noticePreview">Notice Preview</option> -->
-						    <option value="noticeDownload">Default (html)</option>
+							<option value="noticeDownload">Default (html)</option>
 							<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_TEXT')) eq 'Y'}">
-						    	<option value="noticeTextDownload">Default (text)</option>
-					    	</c:if>
-						    <option value="noticeSimpleDownload">Simple (html)</option>
-						    <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_TEXT')) eq 'Y'}">
-						    	<option value="noticeTextSimpleDownload">Simple (text)</option>
-						    </c:if>
-						    <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_SPDX')) eq 'Y'}">
-							    <option value="spdxSpreadSheet">SPDX (spreadsheet)</option>
-			  			    	<option value="spdxRdf">SPDX (RDF)</option>
-						    	<option value="spdxTag">SPDX (TAG)</option>
-					    	</c:if>
+								<option value="noticeTextDownload">Default (text)</option>
+							</c:if>
+							<option value="noticeSimpleDownload">Simple (html)</option>
+							<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_TEXT')) eq 'Y'}">
+								<option value="noticeTextSimpleDownload">Simple (text)</option>
+							</c:if>
+							<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_SPDX')) eq 'Y'}">
+								<option value="spdxSpreadSheet">SPDX (spreadsheet)</option>
+								<option value="spdxRdf">SPDX (RDF)</option>
+								<option value="spdxTag">SPDX (TAG)</option>
+								<option value="spdxJson">SPDX (JSON)</option>
+								<option value="spdxYaml">SPDX (YAML)</option>
+							</c:if>
 						</select>
 					</span>
 					<input type="button" id="packageDocDownload" value="download" class="btnColor" style="width: 100px;"/>

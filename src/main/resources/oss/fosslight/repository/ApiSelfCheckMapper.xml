@@ -6,19 +6,13 @@
 <mapper namespace="oss.fosslight.repository.ApiSelfCheckMapper">
 	<insert id="createSelfCheck" parameterType="hashMap" useGeneratedKeys="true" keyProperty="prjId">
 		INSERT INTO	PRE_PROJECT_MASTER (
-			PRJ_NAME
+			  PRJ_NAME
 			, PRJ_VERSION
-			, DISTRIBUTION_TYPE	
-			, OS_TYPE			
-			, OS_TYPE_ETC
 			, CREATOR
 			, MODIFIER
 		) VALUES (
-			#{prjName}
+			  #{prjName}
 			, #{prjVersion}
-			, #{distributionType}
-			, #{osType}
-			, #{osTypeEtc}
 			, #{loginUserName}
 			, #{loginUserName}
 		)

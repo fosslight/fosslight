@@ -3818,7 +3818,6 @@
 				 OR USER.USER_ID = #{loginUser}
 	 </select>
 	 
-	 <!-- 20210616_BOM COMPARE FUNC ADD -->
 	 <select id="selectProjectCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* bomCompareMapper.selectProjectCount */
 		SELECT COUNT(*) FROM (
@@ -3884,5 +3883,86 @@
 	     AND A.IDENTIFICATION_STATUS != 'CONF'
 	   </if>
 	</select>
-	<!-- 20210616_BOM COMPARE FUNC ADD -->
+	
+	<insert id="insertStatisticsMostUsedOssInfo" parameterType="oss.fosslight.domain.Project">
+		INSERT INTO STATISTICS_MOSTUSED (
+			PRJ_ID
+			, COMPONENT_NAME
+			, CREATED_DATE
+			, DIV_NO
+			, CHART_TYPE
+			)
+			SELECT PM.PRJ_ID
+				 , OC.OSS_NAME AS COMPONENT_NAME
+				 , OC.CREATED_DATE
+				 , T2.CD_DTL_NO AS DIV_NO
+				 , 'OSS' AS CHART_TYPE
+			  FROM (SELECT T1.REFERENCE_ID
+			  			 , T1.OSS_NAME
+			  			 , T2.CREATED_DATE
+				  	  FROM OSS_COMPONENTS T1
+				  	 INNER JOIN PROJECT_MASTER T2
+				  	    ON T1.REFERENCE_ID = T2.PRJ_ID
+				  	 WHERE T1.REFERENCE_DIV IN ('13', '14')
+				  	   AND T2.PRJ_ID = #{prjId}
+				  	   AND T2.IDENTIFICATION_STATUS = 'CONF'
+		     	   	   AND T1.OSS_NAME NOT IN ('', '-')
+		     	   	   AND T2.USE_YN = 'Y'
+		     	   	   AND T1.EXCLUDE_YN = 'N') OC
+			 INNER JOIN PROJECT_MASTER PM
+				ON OC.REFERENCE_ID = PM.PRJ_ID
+			 INNER JOIN T2_USERS T1
+				ON PM.CREATOR = T1.USER_ID
+			 INNER JOIN (SELECT CD_DTL_NO
+							  , CD_DTL_NM
+						   FROM T2_CODE_DTL 
+						  WHERE CD_NO = '200'
+							AND USE_YN = 'Y') T2
+				ON T1.DIVISION = T2.CD_DTL_NO
+	</insert>
+	
+	<insert id="insertStatisticsMostUsedLicenseInfo" parameterType="oss.fosslight.domain.Project">
+		INSERT INTO STATISTICS_MOSTUSED (
+			PRJ_ID
+			, COMPONENT_NAME
+			, CREATED_DATE
+			, DIV_NO
+			, CHART_TYPE
+			)
+			SELECT PM.PRJ_ID
+				 , CL.LICENSE_NAME AS COMPONENT_NAME
+				 , OC.CREATED_DATE
+				 , T2.CD_DTL_NO AS DIV_NO
+				 , 'LICENSE' AS CHART_TYPE
+			  FROM (SELECT T1.COMPONENT_ID
+			  			 , T1.REFERENCE_ID
+			  			 , T2.CREATED_DATE
+				  	  FROM OSS_COMPONENTS T1
+				     INNER JOIN PROJECT_MASTER T2
+				  		ON T1.REFERENCE_ID = T2.PRJ_ID
+				  	 WHERE T1.REFERENCE_DIV IN ('13', '14')
+				   	   AND T2.IDENTIFICATION_STATUS = 'CONF'
+		     	   	   AND T1.OSS_NAME NOT IN ('', '-')
+		     	   	   AND T2.PRJ_ID = #{prjId}
+		     	   	   AND T2.USE_YN = 'Y'
+		     	   	   AND T1.EXCLUDE_YN = 'N') OC
+				 	 INNER JOIN OSS_COMPONENTS_LICENSE CL
+				    	ON OC.COMPONENT_ID = CL.COMPONENT_ID
+				   	   AND UPPER(CL.LICENSE_NAME) NOT IN ('', 'LGE PROPRIETARY LICENSE', 'OTHER PROPRIETARY LICENSE')
+			     	 INNER JOIN PROJECT_MASTER PM
+				    	ON OC.REFERENCE_ID = PM.PRJ_ID
+				 	 INNER JOIN T2_USERS T1
+				    	ON PM.CREATOR = T1.USER_ID
+				 	 INNER JOIN (SELECT CD_DTL_NO
+				 	 				  , CD_DTL_NM
+							   	   FROM T2_CODE_DTL 
+							   	  WHERE CD_NO = '200'
+							    	AND USE_YN = 'Y') T2
+						ON T1.DIVISION = T2.CD_DTL_NO
+	</insert>
+	
+	<delete id="deleteStatisticsMostUsedInfo" parameterType="oss.fosslight.domain.Project">
+		DELETE FROM STATISTICS_MOSTUSED
+		WHERE PRJ_ID = #{prjId} 
+	</delete>
 </mapper>

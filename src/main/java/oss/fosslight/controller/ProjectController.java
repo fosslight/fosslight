@@ -26,6 +26,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -1296,20 +1297,20 @@ public class ProjectController extends CoTopComponent {
 		List<PartnerMaster> thirdPartyList = new ArrayList<>();
 		thirdPartyList = (List<PartnerMaster>) fromJson(thirdPartyGrid, collectionType1);
 
+		Project project = new Project();
+		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusPartner)) {
-			Project param = new Project();
-			param.setPrjId(prjId);
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			param.setIdentificationSubStatusPartner(identificationSubStatusPartner);
+			project.setPrjId(prjId);
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			project.setIdentificationSubStatusPartner(identificationSubStatusPartner);
 			
 			// 상태값 변경
-			projectService.updateSubStatus(param);
+			projectService.updateSubStatus(project);
 		} else {
 			// 서브그리드
 			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
 			
 			try {
-				Project project = new Project();
 				project.setPrjId(prjId);
 				History h = new History();
 				h = projectService.work(project);
@@ -1322,7 +1323,7 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 
-		return makeJsonResponseHeader(null);
+		return makeJsonResponseHeader(true, "success", projectService.getProjectDetail(project).getIdentificationStatus());
 	}
 	
 	/**
@@ -3153,6 +3154,9 @@ public class ProjectController extends CoTopComponent {
 		String fileId = req.getParameter("registFileId");
 		file.setTabGubn(req.getParameter("tabNm"));
 		log.info("tabNm ==> " + req.getParameter("tabNm"));
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
 		
 		// 파일 등록
 		try {
@@ -3165,8 +3169,12 @@ public class ProjectController extends CoTopComponent {
 					list = fileService.uploadFile(req, file, null, fileId);
 				}
 			}
-			
-			resultList = CommonFunction.checkXlsxFileLimit(list);
+
+			if(fileExtension.equals("csv")) {
+				resultList = CommonFunction.checkCsvFileLimit(list);
+			} else {
+				resultList = CommonFunction.checkXlsxFileLimit(list);
+			}
 			
 			if(resultList.size() > 0) {
 				return toJson(resultList);
@@ -3175,20 +3183,28 @@ public class ProjectController extends CoTopComponent {
 			e.printStackTrace();
 		}
 
-		// sheet이름
-		List<Object> sheetNameList = null;
-		
-		try {
-			sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(fileExtension.equals("csv")) {
+			resultList.add(list);
+			resultList.add("SRC");
+			resultList.add("CSV_FILE");
+			return toJson(resultList);
+		} else {
+			// sheet이름
+			List<Object> sheetNameList = null;
+
+			try {
+				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			resultList.add(list);
+			resultList.add(sheetNameList);
+			resultList.add("EXCEL_FILE");
+
+			// 결과값 resultList에 담기
+			return toJson(resultList);
 		}
-
-		resultList.add(list);
-		resultList.add(sheetNameList);
-
-		// 결과값 resultList에 담기
-		return toJson(resultList);
 	}
 	
 	/**
@@ -3212,6 +3228,9 @@ public class ProjectController extends CoTopComponent {
 		// 파일등록
 		List<UploadFile> list = new ArrayList<UploadFile>();
 		String fileId = req.getParameter("registFileId");
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
 		
 		// 파일 등록
 		try {
@@ -3223,8 +3242,12 @@ public class ProjectController extends CoTopComponent {
 					list = fileService.uploadFile(req, file, null, fileId);
 				}
 			}
-			
-			resultList = CommonFunction.checkXlsxFileLimit(list);
+
+			if(fileExtension.equals("csv")) {
+				resultList = CommonFunction.checkCsvFileLimit(list);
+			} else {
+				resultList = CommonFunction.checkXlsxFileLimit(list);
+			}
 			
 			if(resultList.size() > 0) {
 				return toJson(resultList);
@@ -3236,25 +3259,31 @@ public class ProjectController extends CoTopComponent {
 		if ("text".equals(fileType)) {
 			resultList.add(list);
 			resultList.add(fileType);
+			resultList.add("TEXT_FILE");
 
-			// 결과값 resultList에 담기
+			return toJson(resultList);
+		} else if (fileExtension.equals("csv")) {
+			resultList.add(list);
+			resultList.add("BIN");
+			resultList.add("CSV_FILE");
+
+			return toJson(resultList);
+		} else {
+			// sheet이름
+			List<Object> sheetNameList = null;
+
+			try {
+				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			resultList.add(list);
+			resultList.add(sheetNameList);
+			resultList.add("EXCEL_FILE");
+
 			return toJson(resultList);
 		}
-
-		// sheet이름
-		List<Object> sheetNameList = null;
-		
-		try {
-			sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		resultList.add(list);
-		resultList.add(sheetNameList);
-
-		// 결과값 resultList에 담기
-		return toJson(resultList);
 	}
 	
 	/**

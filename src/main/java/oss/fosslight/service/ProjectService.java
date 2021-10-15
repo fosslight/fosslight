@@ -169,8 +169,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	String makeZipFileId(Map<String, Object>paramMap, Project project);
 	
-	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) >>>
 	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag) throws Exception;
-	// 20210715_BOM COMPARE FUNC MOVE (LgeProjectService > ProjectService) <<<
+
+	public void deleteStatisticsMostUsedInfo(Project project);
 }
 

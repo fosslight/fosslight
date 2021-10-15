@@ -358,4 +358,14 @@
 	<select id="existUserIdOrEmail" resultType="int">
 		SELECT COUNT(*) FROM T2_USERS WHERE USE_YN = 'Y' AND (USER_ID = #{userId} OR EMAIL = #{userId})
 	</select>
+	
+	<update id="updateStatisticsMostUsedInfo" parameterType="oss.fosslight.domain.T2Users">
+    	UPDATE STATISTICS_MOSTUSED 
+    	   SET DIV_NO = #{division} 
+    	 WHERE PRJ_ID IN (SELECT PM.PRJ_ID 
+    	 					FROM PROJECT_MASTER PM
+    				  INNER JOIN T2_USERS T2
+    						  ON PM.CREATOR = T2.USER_ID
+    					   WHERE T2.USER_ID = #{userId})
+	</update>
 </mapper>

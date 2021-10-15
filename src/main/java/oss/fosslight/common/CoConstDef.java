@@ -402,6 +402,7 @@ public class CoConstDef {
 	public static final String DISTRIBUTE_LICENSE_URL_DELETE = "/pservice/deleteLicense";
 	public static final String DISTRIBUTE_AUTH_CALLED_URL = "/pservice/getLoginToken";
 	public static final String DISTRIBUTE_AUTH_URL = "/admin/login/loginWithToken";
+	public static final String DISTIRBUTE_DUPLICATE_CHECK_URL = "/pservice/getDescKey";
 //	public static final String DISTRIBUTE_LICENSE_URL = "/license/";
 //	public static final String DISTRIBUTE_MIGRATION_TEST = "/pservice/migTest";
 	
@@ -712,6 +713,7 @@ public class CoConstDef {
 	public static final String CD_BAT_ERROR_STRING_LIST							= "907";
 	
 	public static final int CD_XLSX_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
+	public static final int CD_CSV_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
 	
 	public static final String CD_ANDROID_NOTICE_XML							= "20";
 	

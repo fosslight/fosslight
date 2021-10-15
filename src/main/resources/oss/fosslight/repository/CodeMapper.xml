@@ -208,4 +208,8 @@
     <update id="updateCodeDtlNm">
     	UPDATE T2_CODE_DTL SET CD_DTL_NM = #{cdDtlNm} WHERE CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo}
     </update>
+    
+    <update id="updateStatisticsMostUsed" parameterType="oss.fosslight.domain.T2CodeDtl">
+    	UPDATE STATISTICS_MOSTUSED SET DIV_NO = #{cdDtlNoNew} WHERE DIV_NO = #{cdDtlNo} 
+    </update>
 </mapper>

@@ -486,11 +486,7 @@ public class CommonFunction extends CoTopComponent {
 					} else {
 						if(spdxConvert) {
 							// identifier가 없는 경우 라이선스 이름을 spdx 연동 용으로 변경한다.
-							if(CoCodeManager.LICENSE_INFO.containsKey(s) && isEmpty(CoCodeManager.LICENSE_INFO.get(s).getShortIdentifier())) {
-								s = "LicenseRef-" + s;
-							}
-							
-							s = s.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+							s = licenseStrToSPDXLicenseFormat(s);
 						}
 						andStr += s;
 					}
@@ -502,7 +498,16 @@ public class CommonFunction extends CoTopComponent {
 		
 		return rtnVal;
 	}
-	
+
+	public static String licenseStrToSPDXLicenseFormat(String licenseStr) {
+		if(CoCodeManager.LICENSE_INFO.containsKey(licenseStr) && isEmpty(CoCodeManager.LICENSE_INFO.get(licenseStr).getShortIdentifier())) {
+			licenseStr = "LicenseRef-" + licenseStr;
+		}
+
+		licenseStr = licenseStr.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+		return licenseStr;
+	}
+
 	public static String makeLicenseFromFiles(OssMaster _ossBean, boolean booleanflag) {
 		List<String> resultList = new ArrayList<>(); // declared License
 		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
@@ -3609,6 +3614,21 @@ public class CommonFunction extends CoTopComponent {
 			}
 		}
 		
+		return result;
+	}
+
+	public static ArrayList<Object> checkCsvFileLimit(List<UploadFile> list) {
+		ArrayList<Object> result = new ArrayList<Object>();
+
+		for(UploadFile f : list) {
+			if(f.getSize() > CoConstDef.CD_CSV_UPLOAD_FILE_SIZE_LIMIT && f.getFileExt().contains("csv")){
+				result.add("FILE_SIZE_LIMIT_OVER");
+				result.add("The file exceeded 5MB.<br>Please delete the blank row or unnecessary data, and then upload it.");
+
+				break;
+			}
+		}
+
 		return result;
 	}
 	

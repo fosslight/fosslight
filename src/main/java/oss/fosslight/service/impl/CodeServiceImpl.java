@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -87,6 +88,43 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	@CacheEvict(value="autocompleteCache", allEntries=true)
 	@Transactional
 	public void setCodeDetails(List<T2CodeDtl> dtlList, String cdNo) throws Exception {
+		// if code_no equals CD_USER_DIVISION value, after code_detail_name and detain_no check, division_no update
+		if (CoConstDef.CD_USER_DIVISION.equals(cdNo)) {
+			T2CodeDtl codeDtlVO = new T2CodeDtl();
+			codeDtlVO.setCdNo(cdNo);
+			List<T2CodeDtl> beforeCodeDetailList = codeMapper.selectCodeDetailList(codeDtlVO);
+			
+			List<T2CodeDtl> filteredCodeDetailList = beforeCodeDetailList
+							.stream()
+							.filter(before->
+									dtlList
+										.stream()
+										.filter(after->
+											(before.getCdDtlNm()).equalsIgnoreCase(after.getCdDtlNm()) && before.getUseYn().equals(after.getUseYn()) && !before.getCdDtlNo().equals(after.getCdDtlNo())).collect(Collectors.toList()).size() > 0
+									).collect(Collectors.toList());
+			
+			List<T2CodeDtl> filteredAfterCodeDetailList = dtlList
+					.stream()
+					.filter(before->
+							beforeCodeDetailList
+								.stream()
+								.filter(after->
+									(before.getCdDtlNm()).equalsIgnoreCase(after.getCdDtlNm()) && before.getUseYn().equals(after.getUseYn()) && !before.getCdDtlNo().equals(after.getCdDtlNo())).collect(Collectors.toList()).size() > 0
+							).collect(Collectors.toList());
+
+			// update division_no value of statistics_MostUsed table
+			for (T2CodeDtl cdDtl : filteredCodeDetailList) {
+				for (T2CodeDtl cdDtlAfter : filteredAfterCodeDetailList) {
+					if (cdDtl.getCdDtlNm().equalsIgnoreCase(cdDtlAfter.getCdDtlNm())) {
+						T2CodeDtl codeDtl = new T2CodeDtl();
+						codeDtl.setCdDtlNo(cdDtl.getCdDtlNo());
+						codeDtl.setCdDtlNoNew(cdDtlAfter.getCdDtlNo());
+						codeMapper.updateStatisticsMostUsed(codeDtl);
+					}
+				}
+			}
+		}
+		
 		// 1. 코드 상세 전체 삭제
 		T2Code codeVo = new T2Code();
 		codeVo.setCdNo(cdNo);
