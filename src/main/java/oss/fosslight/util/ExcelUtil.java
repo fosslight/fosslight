@@ -986,7 +986,9 @@ public class ExcelUtil extends CoTopComponent {
 			
 			// 필수 header 누락 시 Exception
 			List<String> colNames = new ArrayList<String>();
-
+			if(licenseCol < 0) {
+				colNames.add("LICENSE");
+			}
 			// Per file info sheet of SPDX Spreadsheet does not proceed
 			if(packageIdentifierCol < 0) {
 				if(ossNameCol < 0) {
@@ -996,16 +998,11 @@ public class ExcelUtil extends CoTopComponent {
 				if(ossVersionCol < 0) {
 					colNames.add("OSS VERSION");
 				}
-
-				if(licenseCol < 0) {
-					colNames.add("LICENSE");
-				}
-
-				if(!colNames.isEmpty()) {
-					String msg = colNames.toString();
-					msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
-					errMsg.put("reqCol", msg);
-				}
+			}
+			if(!colNames.isEmpty()) {
+				String msg = colNames.toString();
+				msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
+				errMsg.put("reqCol", msg);
 			}
 			
 			String lastOssName = "";
@@ -1042,17 +1039,28 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
     					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
-
+    					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
+    					if(bean.getCopyrightText() == ""){
+    						bean.setCopyrightText(" ");
+    					}
     					String packageIdentifier = getCellData(row.getCell(packageIdentifierCol));
+    					boolean nullCheck = true;
     					for(int beanIndex = 0; beanIndex < list.size(); beanIndex++) {
     						OssComponents temp = list.get(beanIndex);
-    						if(temp.getSpdxIdentifier().equals(packageIdentifier)){
+    						if(packageIdentifier.equals(temp.getSpdxIdentifier())){
+    							nullCheck = false;
     							bean.setOssName(temp.getOssName());
     							bean.setOssVersion(temp.getOssVersion());
     							bean.setDownloadLocation(temp.getDownloadLocation());
     							bean.setHomepage(temp.getHomepage());
     							break;
     						}
+    					}
+    					if(nullCheck) {
+    						bean.setOssName("");
+    						bean.setOssVersion("");
+    						bean.setDownloadLocation("");
+    						bean.setHomepage("");
     					}
     				}
     				else {
