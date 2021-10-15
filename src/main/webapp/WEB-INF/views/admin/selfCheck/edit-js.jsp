@@ -321,6 +321,14 @@
 							$('.ajax-file-upload-statusbar').remove();
 							
 							src_fn.makeFileTag(result[0][0]);	
+						} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+							src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+							$('#srcCsvFileId').val(result[0][0].registFileId);
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+
+							src_fn.makeFileTag(result[0][0]);
 						} else {
 							alertify.error('<spring:message code="msg.common.valid" />', 0);
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -597,6 +605,21 @@
 			src_evt.csvFileSeq.push(object);
 			src_fn.exeLoadReportData(finalData);
 		},
+		getSpdxSpreadsheetData : function(seq){
+			var sheetNum = ["1", "4"];
+
+			loading.show();
+			fn_grid_com.totalGridSaveMode('srcList');
+			cleanErrMsg("srcList");
+
+			var target = $("#srcList");
+			var mainData = target.jqGrid('getGridParam','data');
+			var finalData = {"readType":"self","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+			var object = {fileSeq : seq};
+
+			src_evt.csvFileSeq.push(object);
+			src_fn.exeLoadReportData(finalData);
+        },
 		// load report data
 		exeLoadReportData : function(finalData){
 			$.ajax({
