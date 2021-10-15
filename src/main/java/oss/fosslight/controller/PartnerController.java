@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.gson.reflect.TypeToken;
@@ -898,35 +899,52 @@ public class PartnerController extends CoTopComponent{
 		String excel = req.getParameter("excel");
 		List<UploadFile> list = new ArrayList<UploadFile>();
 		ArrayList<Object> resultList = new ArrayList<Object>();
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
 		
 		if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
 			file.setCreator(loginUserName());
 			list = fileService.uploadFile(req, file);
-			
-			resultList = CommonFunction.checkXlsxFileLimit(list);
+
+			if(fileExtension.equals("csv")) {
+				resultList = CommonFunction.checkCsvFileLimit(list);
+			} else {
+				resultList = CommonFunction.checkXlsxFileLimit(list);
+			}
 			
 			if(resultList.size() > 0) {
 				return toJson(resultList);
 			}
 		}
-		
-		// sheet name
-		List<Object> sheetNameList = null;
-		
-		try {
-			if(CoConstDef.FLAG_YES.equals(excel)){
-				if(list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt())) {
-					sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
+
+		if(fileExtension.equals("csv")) {
+			resultList.add(list);
+			resultList.add("SRC");
+			resultList.add("CSV_FILE");
+
+			return toJson(resultList);
+		} else {
+			// sheet name
+			List<Object> sheetNameList = null;
+
+			try {
+				if(CoConstDef.FLAG_YES.equals(excel)){
+					if(list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt())) {
+
+						sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
+					}
 				}
-			}	
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+			}
+
+			resultList.add(list);
+			resultList.add(sheetNameList);
+			resultList.add("EXCEL_FILE");
+
+			return toJson(resultList);
 		}
-		
-		resultList.add(list);
-		resultList.add(sheetNameList);
-		
-		return toJson(resultList);
 	}
 	
 	/**

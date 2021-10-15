@@ -2040,7 +2040,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('120', '19', 'android result.txt', '', 'txt', 19, 'Y'),
 	('120', '20', '프로젝트 ANDROID NOTICE XML', '', 'xml,gz,zip', 20, 'Y'),
 	('120', '21', '3rd Party 확약서', '', 'pdf,docx,xlsx,doc,xls,xlsm,ppt,dot,jpg,jpeg,png,zip', 9, 'Y'),
-	('120', '22', '3rd Party Oss List', '', 'xls,xlsm,xlsx', 10, 'Y'),
+	('120', '22', '3rd Party Oss List', '', 'xls,xlsm,xlsx,csv', 10, 'Y'),
 	('120', '31', 'BAT FILE', '', '', 11, 'Y'),
 	('121', '11', 'FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', '', '/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', 2, 'Y'),
 	('122', '1', 'AGPL-1.0', '', '', 1, 'Y'),
