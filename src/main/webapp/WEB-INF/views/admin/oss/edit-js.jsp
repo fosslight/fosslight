@@ -372,7 +372,7 @@
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
 	 				var newOssId = rowData.ossId;
 	 				if(newOssId == '${ossId}'){
-	 					alertify.alert("Can not choose myself!!", function(){});
+                        alertify.alert('<spring:message code="msg.oss.cannot.select" />', function(){});
 	 					return;
 	 				}
 	 				
