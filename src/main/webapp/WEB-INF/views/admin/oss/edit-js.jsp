@@ -246,7 +246,7 @@
 
 					switch (licenseChoiceLength) {
 						case 0:
-                            alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
+							alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
 							return false;
 							break;
 						case 1:
@@ -372,7 +372,7 @@
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
 	 				var newOssId = rowData.ossId;
 	 				if(newOssId == '${ossId}'){
-                        alertify.alert('<spring:message code="msg.oss.cannot.select" />', function(){});
+	 					alertify.alert("Can not choose myself!!", function(){});
 	 					return;
 	 				}
 	 				
