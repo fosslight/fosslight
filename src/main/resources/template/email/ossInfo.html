@@ -63,7 +63,11 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
-										<td style="padding:5px;">#foreach( $detectedLicense in $!oss_basic_info.detectedLicenses )$!detectedLicense #end</td>
+										<td style="padding:5px;">
+										#foreach( $detectedLicense in $!oss_basic_info.detectedLicenses )
+											$!detectedLicense#if( $foreach.hasNext ), #end
+										#end
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
