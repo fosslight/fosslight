@@ -136,7 +136,7 @@
 			$('#drop').on('click', function(){
 				var comment = CKEDITOR.instances.editor2.getData();
 				if(comment == ""){
-					alertify.alert("Please leave a comment.", function(){});
+					alertify.alert("<spring:message code="msg.project.confirm.comment" />", function(){});
 				}else{
 					if(distributionStatus == "PROC"){
 						var br = "<br>";
@@ -308,7 +308,7 @@
 
 				if(adId == "") {
 					$("#adId").focus();
-					return alertify.error('Please enter watcher AD ID', 0);
+					return alertify.error('<spring:message code="enter.watcher.error" />', 0);
 				}
 				
 				var _email = adId + "@" + domain;

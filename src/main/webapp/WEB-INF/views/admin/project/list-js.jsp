@@ -597,11 +597,11 @@
 					break;
 				case 0:
 					isValid = false;
-					alertify.alert("Select the Project.", function(){});
+					alertify.alert("<spring:message code='sg.oss.select.project' />", function(){});
 					break;
 				default: // 2개 이상
 					isValid = false;
-					alertify.alert("Choose only one project.", function(){});
+					alertify.alert("<spring:message code='msg.project.select.only.project' />", function(){});
 					break;
 			}
 
