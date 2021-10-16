@@ -136,15 +136,19 @@
 			$('#drop').on('click', function(){
 				var comment = CKEDITOR.instances.editor2.getData();
 				if(comment == ""){
-					alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
+					alertify.alert("Please leave a comment.", function(){});
 				}else{
 					if(distributionStatus == "PROC"){
-						var comment = '<spring:message code="msg.project.distribution.loading" />'
+						var br = "<br>";
+						var comment = "Thank you so much for your patience." + br;
+						comment += "The distribution has already begun and has not yet completed." + br;
+						comment += "It takes a long time to deploy because of the large packaging file size.";
+						
 						alertify.error(comment, 0);
 
 						return false;
 					} else if(distributionStatus == "RSV"){
-						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -154,7 +158,7 @@
 							}
 						});
 					} else if(distributionStatus == "DONE"){
-						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -203,7 +207,7 @@
 			// 삭제
 			$("#delete").click(function(){
 				if(data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
-					alertify.alert('<spring:message code="msg.project.warn.edit.delete" />', function(){});
+					alertify.alert("If you want to delete, please  reject  identification first.", function(){});
 
 					return;
 				} else {
@@ -639,7 +643,7 @@
 					}
 					
 					if(!copyWatcher.length) {
-						alertify.warning('<spring:message code="msg.project.required.id" />');
+						alertify.warning("The ID you entered does not exist.");
 					}
 				},
 				error : fn.onError
@@ -778,7 +782,8 @@
 			<c:if test="${ct:isAdmin() and not empty project.prjId and 'Y' ne project.copyFlag}">
 				var creator = $("input[name=creator]").val();
 				if(creator == ""){
-					alertify.alert('<spring:message code="msg.project.required.autocomplete" />', function(){});
+					alertify.alert("Creator의 autoComplete을 해 주시기 바랍니다.", function(){});
+					
 					return false;
 				}
 			</c:if>
@@ -874,7 +879,7 @@
 								}
 								
 								if(status == "DONE" && flag == "true") {
-									alertify.confirm('<spring:message code="msg.project.required.only" />', function () {
+									alertify.confirm('If you want to add models to OSS Distribution site, you have to click "Distribute model only" ', function () {
 											deleteTabInFrame('#/project/edit/'+prjId);
 											createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
 										}, function() {
@@ -998,7 +1003,7 @@
 				var editorVal = CKEDITOR.instances.editor2.getData();
 				
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment", function(){});
+                    alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
@@ -1056,7 +1061,7 @@
 			editorDialog : function(){
 				var editorVal = CKEDITOR.instances.editor2.getData();
 				if(!editorVal || editorVal == "") {
-					alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
+                    alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
@@ -1257,7 +1262,7 @@
 							}
 
 							if(CKEDITOR.instances['editor4'].getData() == ""){
-								alertify.alert('<spring:message code="msg.project.required.comments.reject.ok" />', function(){});
+								alertify.alert('Please enter a reason for reject ok.', function(){});
 
 								return false;
 							}
@@ -1796,7 +1801,7 @@
 			
 			if(!regExp.test(date)){
 				$this.val("");
-				alert('<spring:message code="msg.project.confirm.wrong.input.date" />');
+				alert("날짜 입력 형식이 틀립니다. 예:2016.01.01");
 			}
 		}
 	}

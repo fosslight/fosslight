@@ -535,7 +535,7 @@
 				//코멘트 저장
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment", function(){});
+                    alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
@@ -594,7 +594,7 @@
 				var editorVal = CKEDITOR.instances.editor.getData();
 				
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment", function(){});
+                    alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
