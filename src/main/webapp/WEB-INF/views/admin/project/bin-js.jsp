@@ -29,7 +29,7 @@ var bin_evt = {
 		$("#binReset, #binResetUp").click(function(e){
  			e.preventDefault();
  			
-			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
+			alertify.confirm('<spring:message code="msg.oss.required.license" />', function (e) {
 				if (e) {
 					$("#binList").jqGrid('clearGridData');
 					$("#_binAddList").jqGrid('clearGridData');
