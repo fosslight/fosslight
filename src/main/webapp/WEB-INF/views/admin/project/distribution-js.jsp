@@ -37,7 +37,7 @@
 		if(distributionStatus == "PROC"){
 			loading.show();
 			
-			alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){
+			alertify.alert('Thank you so much for your patience.<br>The distribution has already begun and has not yet completed.<br>It takes a long time to deploy because of the large packaging file size.', function(){
 				deleteTabInFrame('#/project/edit/'+'${project.prjId}');
 			});
 		}
@@ -90,8 +90,7 @@
 			// 저장
 			$("#save").click(function(){
 				if(needVerifyFlag){
-					alertify.alert('Please verify the new package file', function(){});
-					
+                    alertify.alert('<spring:message code="msg.project.need.verify" />', function(){});
 					return false;
 				}
 				
@@ -118,9 +117,9 @@
 				saveSubmit();
 			});
 			
-			// delete
+			// 삭제
 			$("#delete").click(function(){
-				var doDelete = confirm('<spring:message code="msg.project.warn.delete" />');
+				var doDelete = confirm('삭제된 정보는 복구 할 수 없습니다. 본 정보를 삭제 하시겠습니까?');
 
 				if(doDelete){
 					deleteSubmit();
@@ -635,7 +634,7 @@
 			},
 			// release date check function add
 			releaseDateCheck : function() {
-				var releaseDateCheckMessage = "'<spring:message code="msg.project.confirm.release" />'";
+				var releaseDateCheckMessage = "Models for which a release date has not been entered are not be disclosed to external customers.";
 				
 				alertify.confirm(releaseDateCheckMessage).set('onok', function(closeEvent){
 						availableCheck('save');
