@@ -318,7 +318,7 @@ var party_evt = {
 				}
 			});
 		}else {
-			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			alertify.alert('<spring:message code="msg.project.warn.third.party.status" />', function(){});
 		}
 	},
 	setParamParty1 : function(){

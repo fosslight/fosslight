@@ -616,11 +616,7 @@
 				e.preventDefault();
 				
 				if(distributionStatus == "PROC"){
-					var br = "<br>";
-					var comment = "Thank you so much for your patience." + br;
-					comment += "The distribution has already begun and has not yet completed." + br;
-					comment += "It takes a long time to deploy because of the large packaging file size.";
-					
+                    var comment = '<spring:message code="msg.project.distribution.loading" />'
 					alertify.error(comment, 0);
 					
 					return false;
@@ -2368,7 +2364,7 @@
 			activeTab = $(target).attr("rel");
 			
 			if(activeTab == "packaging" && datas.ossList.length < 1) {
-				alertify.alert("This project did not include open source under license that require you to make source code available. Therefore, you do not need to perform the OSS Packaging step.", function(){
+				alertify.alert('<spring:message code="msg.project.verification.confirm.package" />', function(){
 					tabMenuA.eq("1").click();
 				});
 			} else if(activeTab == "notice" && isAndroid == "Y") {
