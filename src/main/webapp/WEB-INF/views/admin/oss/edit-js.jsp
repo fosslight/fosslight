@@ -246,7 +246,7 @@
 
 					switch (licenseChoiceLength) {
 						case 0:
-							alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
+							alertify.alert("No licenses entered.", function(){});
 							return false;
 							break;
 						case 1:
