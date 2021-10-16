@@ -3,7 +3,7 @@
 <script>
 var CTX_PATH = "${ctxPath}";
 </script>
-<%-- 스크립트 추가 --%>
+<%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/common.css?${cssVersion}" />
 <script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>

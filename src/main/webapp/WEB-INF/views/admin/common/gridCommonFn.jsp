@@ -527,7 +527,7 @@ var fn_grid_com = {
 							fn_grid_com.deleteLocalDataAfterDelRow(target, selrow, flag);
 			    	   }
 					} else {
-						alert("삭제 할 수 없습니다.");
+                        alertify.error('<spring:message code="msg.common.cannot.delete" />', 0);
 					}
 				} else {
 					target.jqGrid('collapseSubGridRow', selrow);
@@ -542,7 +542,7 @@ var fn_grid_com = {
 					target.jqGrid('delRowData', selrow);
 					fn_grid_com.deleteLocalDataAfterDelRow(target, selrow, flag);
 				} else {
-					alert("등록된 라이센스는 삭제가 불가능 합니다.")
+                    alertify.error('<spring:message code="msg.common.cannot.registered.delete" />', 0);
 				}
 			}
 		},

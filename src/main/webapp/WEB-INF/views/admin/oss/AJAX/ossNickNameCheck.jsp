@@ -25,15 +25,15 @@ function showLicenseText(target) {
 				</colgroup>
 				<tbody>
 					<tr>
-						<th class="dCase txStr">OSS Name</th>
+						<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
 						<td class="dCase">${ossInfo.ossName}</td>
 					</tr>
 					<tr>
-						<th class="dCase">Nick Name</th>
+						<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 						<td class="dCase">${ossInfo.ossNickname}</td>
 					</tr>
 					<tr>
-						<th class="dCase">OSS Version</th>
+						<th class="dCase"><spring:message code="msg.common.field.OSS.version" /></th>
 						<td class="dCase">${ossInfo.ossVersion}</td>
 					</tr>
 					<tr>
@@ -51,15 +51,15 @@ function showLicenseText(target) {
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Copyright</th>
+						<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 						<td class="dCase">${ossInfo.copyright}</td>
 					</tr>
 					<tr>
-						<th class="dCase">License Type</th>
+						<th class="dCase"><spring:message code="msg.common.field.licenseType" /></th>
 						<td class="dCase">${ct:getCodeString(ct:getConstDef('CD_LICENSE_TYPE'), ossInfo.licenseType)}</td>
 					</tr>
 					<tr>
-						<th class="dCase">Obligation</th>
+						<th class="dCase"><spring:message code="msg.common.field.obligation" /></th>
 						<td class="dCase">
 							<c:choose>
 								<c:when test="${ossInfo.obligationType eq ct:getConstDef('CD_DTL_OBLIGATION_NOTICE')}"><span class="iconSet ops" title="Notice"></span></c:when>
@@ -69,7 +69,7 @@ function showLicenseText(target) {
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Download Location</th>
+						<th class="dCase"><spring:message code="msg.common.field.downloadLocation" /></th>
 						<td class="dCase">
 							<c:choose>
 								<c:when test="${not empty ossInfo.downloadLocation}"><a href="${ossInfo.downloadLocation}" class="urlLink" target="_blank">${ossInfo.downloadLocation}</a></c:when>
@@ -78,7 +78,7 @@ function showLicenseText(target) {
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Home Page</th>
+						<th class="dCase"><spring:message code="msg.common.field.homepage" /></th>
 						<td class="dCase">
 							<c:choose>
 								<c:when test="${not empty ossInfo.homepage}"><a href="${ossInfo.homepage}" class="urlLink" target="_blank">${ossInfo.homepage}</a></c:when>
@@ -87,7 +87,7 @@ function showLicenseText(target) {
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Summary Description</th>
+						<th class="dCase"><spring:message code="msg.common.field.summaryDescription" /></th>
 						<td class="dCase">${ossInfo.summaryDescription}</td>
 					</tr>
 				</tbody>

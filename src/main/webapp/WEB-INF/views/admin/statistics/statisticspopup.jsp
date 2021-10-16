@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
-<%-- 관리자 화면 템플릿 --%>
+<%-- Administrator screen template. --%>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -304,7 +304,7 @@
 						, viewrecords: true
 						, height: 'auto'
 						, loadonce: false
-						, loadComplete: function(data) { // 데이터 로딩 후
+						, loadComplete: function(data) { // After data loading
 							var rowId = $("#chartRawData").getGridParam("reccount");
 							var rowObject = $("#chartRawData").getRowData(rowId);
 							rowObject[colModel[0].name] = 'Total';

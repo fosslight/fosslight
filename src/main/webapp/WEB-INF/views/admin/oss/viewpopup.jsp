@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
-<%-- 관리자 화면 템플릿 --%>
+<%-- Administrator screen template. --%>
 <!DOCTYPE html>
 <html>
 	<head>

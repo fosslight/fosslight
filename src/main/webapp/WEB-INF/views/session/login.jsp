@@ -7,7 +7,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<title>FOSSLight System</title>
 		<%@ include file="/WEB-INF/constants.jsp"%>
-<%-- 스크립트 추가 --%>
+<%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/common.css?${cssVersion}" />
 <script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>
@@ -258,9 +258,8 @@
             }
             
             function CheckChar() {
-            	if(event.keyCode == 64){//@ 특수문자 체크
-            		alertify.alert("\'@\' Special characters are not allowed!", function(){});
-
+            	if(event.keyCode == 64){//@ Special character check
+                    alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
             		event.returnValue = false;
             	}
             }
@@ -303,7 +302,7 @@
 						</div>
 					</fieldset>
 					<!------------>
-					<p>If you have forgotten your password, please contact administrator</p>
+					<p><spring:message code="msg.login.description.forgot.pw" /></p>
 				</div>
 			</div>
 		</div>

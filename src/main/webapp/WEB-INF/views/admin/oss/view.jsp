@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ include file="/WEB-INF/constants.jsp"%>
 <!-- wrap -->
 <div id="wrapIframe">
 	<div>
@@ -11,7 +12,7 @@
 				</colgroup>
 				<tbody>
 					<tr>
-						<th class="dCase txStr">OSS Name</th>
+						<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
 						<td class="dCase">
 							<div class="required">
 								<div id="ossName" class="viewOssTd"></div>
@@ -19,7 +20,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Nick Name</th>
+						<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 						<td class="dCase">
 							<div class="multiTxtSet">
 								<div class="required">
@@ -29,7 +30,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">OSS Version</th>
+						<th class="dCase"><spring:message code="msg.common.field.OSS.version" /></th>
 						<td class="dCase">
 							<div class="required">
 								<div id="ossVersion" class="viewOssTd" ></div>
@@ -37,7 +38,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
+						<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /><br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 						<td class="dCase">
 							<div class="required">
 								<div class="licenseMulti">
@@ -50,7 +51,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Detected License</th>
+						<th class="dCase"><spring:message code="msg.common.field.detectedLicense" /></th>
 						<td class="dCase">
 							<div class="multiItemSet multiDetectedLicenseSet">
 								<div class="required">
@@ -60,21 +61,21 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Copyright</th>
+						<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 						<td class="dCase">
 							<div id="Copyright" class="viewOssTd viewOssTextArea">${copyright}</div>
 						</td>
 					</tr>
 					<tr id="lt">
-						<th class="dCase">License Type</th>
+						<th class="dCase"><spring:message code="msg.common.field.licenseType" /></th>
 						<td class="dCase"><div id="licenseType" class="viewOssTd" ></div></td>
 					</tr>
 					<tr id="ob">
-						<th class="dCase">Obligation</th>
+						<th class="dCase"><spring:message code="msg.common.field.obligation" /></th>
 						<td class="dCase"><div id="obligation" class="viewOssTd" ></div></td>
 					</tr>
 					<tr>
-						<th class="dCase">Download Location</th>
+						<th class="dCase"><spring:message code="msg.common.field.downloadLocation" /></th>
 						<td class="dCase">
 							<div class="multiItemSet multiDownloadLocationSet">
 								<div class="required">
@@ -84,29 +85,29 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Home Page</th>
+						<th class="dCase"><spring:message code="msg.common.field.homepage" /></th>
 						<td class="dCase">
 							<div id="homepage" class="viewOssTd"><a href="" class="urlLink" target="_blank"></a></div>
 						</td>
 					</tr>
 					<tr>
-						<th class="dCase">Summary Description</th>
+						<th class="dCase"><spring:message code="msg.common.field.summaryDescription" /></th>
 						<td class="dCase"><div id="summaryDescription" class="viewOssTd viewOssTextArea" ></div></td>
 					</tr>
 					<tr>
-						<th class="dCase">Attribution</th>
+						<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
 						<td class="dCase"><div id="attribution" class="viewOssTd viewOssTextArea" ></div></td>
 					</tr>
 					<c:if test="${!empty ossId}">
 					<tr>
-						<th class="dCase">Project<br/><input id="listMore" type="button" value="List more" class="btnCLight gray" /></th>
+						<th class="dCase"><spring:message code="msg.common.field.project" /><br/><input id="listMore" type="button" value="List more" class="btnCLight gray" /></th>
 						<td class="dCase">
 							<table id="_projectList"><tr><td></td></tr></table>
 						</td>
 					</tr>
 						<c:if test="${not empty vulnInfoList}">
 							<tr>
-								<th class="dCase">Vulnerability</th>
+								<th class="dCase"><spring:message code="msg.common.field.vulnerability" /></th>
 								<td class="dCase">
 									<table id="_vulnInfoList"><tr><td></td></tr></table>
 								</td>
