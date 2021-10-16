@@ -597,11 +597,11 @@
 					break;
 				case 0:
 					isValid = false;
-					alertify.alert('<spring:message code="msg.oss.select.project" />', function(){});
+					alertify.alert("Select the Project.", function(){});
 					break;
 				default: // 2개 이상
 					isValid = false;
-					alertify.alert('<spring:message code="msg.project.select.only.project" />', function(){});
+					alertify.alert("Choose only one project.", function(){});
 					break;
 			}
 
@@ -623,7 +623,7 @@
 						var distributionStatus = data.distributionStatus;
 						
 						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
+							alertify.alert("Thank you so much for your patience. The distribution has already begun and has not yet completed. It takes a long time to deploy because of the large packaging file size", function(){});
 							return false;
 						}
 						
@@ -717,7 +717,7 @@
 			}
 
 			if(commentFlag && reason.split(" ").join("") == "") {
-				alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
+				alertify.alert("Please leave a comment.", function(){});
 				$("#reason").next(".retxt").show();
 				return false;
 			}
@@ -773,7 +773,7 @@
 							
 						param["delOsdd"] = "Y"; // -> delete with OSDD
 
-						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -783,7 +783,7 @@
 							}
 						});
 					}else if (distributionStatus == "RSV"){
-                        var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = "If you drop this project, then distribution will be cancled.";
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -924,7 +924,7 @@
 		
 				createTabInFrame(tabNm, tabLk);
 			}else {
-				alertify.alert('Choose two projects.', function(){});
+				alertify.alert('<spring:message code="msg.project.choose" />', function(){});
 				return false;
 			}
 		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
