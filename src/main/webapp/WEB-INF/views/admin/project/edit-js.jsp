@@ -313,7 +313,7 @@
 				if (!regEmail.test(_email)) {
 					$("#adId").focus();
 
-					return alertify.error('Invalid email address.', 0);
+					return alertify.error('<spring:message code="invalid.email.error" />', 0);
 				}
 				
 				$.ajax({
