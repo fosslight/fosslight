@@ -56,7 +56,7 @@ var bin_evt = {
 					}
 				});
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		// 프로젝트 조회 버튼

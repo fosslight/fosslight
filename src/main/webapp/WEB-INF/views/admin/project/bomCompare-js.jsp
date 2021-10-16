@@ -13,7 +13,7 @@
 		setGrid.load();
 	});
 	
-	// 이벤트
+	// event
 	var evt = {
 		// ready event
 		init: function(){

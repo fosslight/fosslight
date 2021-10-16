@@ -34,7 +34,7 @@ var binAndroid_evt = {
 	init: function(){
 		$("#binAndroidList").jqGrid('GridUnload');
 
-		doNotUseAutoLoadingFlag = "Y"; // loading 이 표시되지 않는 현상이 발생하여, 수동으로 loading 조작
+		doNotUseAutoLoadingFlag = "Y"; // loading is not displayed, so loading operation manually occurs.
 
 		loading.show();
 		binAndroid_grid.load();
@@ -49,7 +49,7 @@ var binAndroid_evt = {
 			$('.binAndroidBtn').hide();
 		}
 		
-		// 그리드 리셋 버튼
+		// Grid reset button
 		$("#binAndroidReset, #binAndroidResetUp").click(function(e){
  			e.preventDefault();
  			
@@ -81,7 +81,7 @@ var binAndroid_evt = {
 					}
 				});
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		// 프로젝트 조회 버튼
@@ -378,13 +378,13 @@ var binAndroid_fn = {
 		var loadFromAndroidProjectFlag = "N";
 		
 		if(androidNoticeFileId == ""){
-			alertify.alert('NOTICE.html을 업로드 해주세요!', function(){});
+			alertify.alert('<spring:message code="msg.project.required.upload" />', function(){});
 			
 			return;
 		}
 		
-		// 다른 프로젝트에서 load한 경우, notice file과 result 파일을 프로젝트 load시 업로드한 파일로 대체한다.
-		if(globalBinAndroidNoticeFileId != "") {
+		// When loaded in another project, the notice file and the result file are replaced with the uploaded file when loading the project.
+        if(globalBinAndroidNoticeFileId != "") {
 			androidNoticeFileId = globalBinAndroidNoticeFileId;
 			androidResultFileId = globalBinAndroidResultFileId;
 			
