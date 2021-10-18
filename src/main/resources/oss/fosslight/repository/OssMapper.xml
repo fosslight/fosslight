@@ -1119,16 +1119,33 @@
     
     <update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
     	UPDATE 
-    		OSS_COMPONENTS
+    		OSS_COMPONENTS T1
     	SET
-    		OSS_ID = #{newOssId}
-    		, OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID=#{newOssId})
-    		, OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
+    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(registMergeFlag)">
+    		T1.OSS_ID = #{ossId}
+    		, T1.OSS_NAME = #{mergeOssName}
+    		, T1.OSS_VERSION = #{mergeOssVersion}
+    		</if>
+    		<if test="@oss.fosslight.util.StringUtil@isEmpty(registMergeFlag)">
+    		T1.OSS_ID = #{newOssId}
+    		, T1.OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID=#{newOssId})
+    		, T1.OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
+    		</if>
     	WHERE
-    		OSS_ID = #{ossId}
-    		AND REFERENCE_ID = #{ossMergeReferenceId}
-    		AND REFERENCE_DIV = #{referenceDiv}
-    		AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
+    		<choose>
+    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    				T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
+    				AND T1.REFERENCE_DIV IN ('20')
+    				AND T1.OSS_ID = #{ossId}
+    				AND T1.OSS_NAME = #{ossName}
+    			</when>
+    			<otherwise>
+    				T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
+    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    				AND T1.OSS_ID = #{ossId}
+    				AND T1.OSS_NAME = #{ossName}
+    			</otherwise>
+    		</choose>
     </update>
     
     <select id="checkExistsOss" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -1900,4 +1917,27 @@
 		   SET DEACTIVATE_FLAG = #{deactivateFlag}
 		 WHERE OSS_NAME = #{ossName}
 	</update>
+	
+	<select id="getOssNameMergePartnerList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.PartnerMaster">
+		SELECT * 
+		  FROM PARTNER_MASTER T1
+		 WHERE T1.STATUS = 'CONF'
+		   AND EXISTS (SELECT 1 
+						 FROM OSS_COMPONENTS SUB1
+						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
+						  AND SUB1.OSS_NAME = #{ossName}
+						  AND SUB1.OSS_VERSION = #{ossVersion})
+	</select>
+	
+	<select id="getOssNameMergeProjectList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Project">
+		SELECT * 
+		  FROM PROJECT_MASTER T1
+		 WHERE T1.USE_YN = 'Y'
+		   AND T1.IDENTIFICATION_STATUS = 'CONF'
+		   AND EXISTS (SELECT 1 
+						 FROM OSS_COMPONENTS SUB1
+						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
+						  AND SUB1.OSS_NAME = #{ossName}
+						  AND SUB1.OSS_VERSION = #{ossVersion})
+	</select>
 </mapper>
