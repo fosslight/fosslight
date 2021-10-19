@@ -1925,6 +1925,7 @@
 		   AND EXISTS (SELECT 1 
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
+						  AND SUB1.REFERENCE_DIV = '20'
 						  AND SUB1.OSS_NAME = #{ossName}
 						  AND SUB1.OSS_VERSION = #{ossVersion})
 	</select>
@@ -1937,6 +1938,7 @@
 		   AND EXISTS (SELECT 1 
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
+						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  AND SUB1.OSS_VERSION = #{ossVersion})
 	</select>

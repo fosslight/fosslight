@@ -313,9 +313,7 @@
 				ORDER BY A.COMMENT DESC
 			</if>
 		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
-			<include refid="limitPage"/>
-		</if>
+		<include refid="limitPage"/>
 	</select>
 
 
