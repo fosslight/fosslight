@@ -189,7 +189,7 @@
 							}
 						}, 0);
 					} else {
-						alertify.alert('Please select OSS to register', function(){});
+						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},
@@ -241,7 +241,7 @@
 																
 										if(result.length == idArryOnlyInOssList.length){
 											if(!failFlag){
-												alertify.success('Successfully add NickName except for oss not registered in oss list');
+												alertify.success('<spring:message code="msg.selfcheck.nickname.success" />');
 												opener.location.reload();
 											}
 											
@@ -253,10 +253,10 @@
 							}
 						}, 0);
 					} else if(idArry.length > 0){
-						alertify.error('Unregistred OSS cannot add Nickname');
+						alertify.error('<spring:message code="msg.oss.warn.unregistered" />');
 						$('#loading_wrap_popup').hide();
 					} else {
-						alertify.alert('Please select OSS to register', function(){});
+						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},

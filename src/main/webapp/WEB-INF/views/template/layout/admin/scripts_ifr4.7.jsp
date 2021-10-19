@@ -3,7 +3,7 @@
 <script>
 var CTX_PATH = "${ctxPath}";
 </script>
-<%-- 스크립트 추가 --%>
+<%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/jqgrid4.7/ui.jqgrid.css" />
 <link rel="stylesheet" type="text/css" href="/css/commonIframe.css?${cssVersion}" />

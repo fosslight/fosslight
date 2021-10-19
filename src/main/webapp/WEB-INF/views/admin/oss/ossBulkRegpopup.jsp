@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
-<%-- 관리자 화면 템플릿 --%>
+<%-- Administrator screen template. --%>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -14,7 +14,7 @@
 			fn_loadGridData();
 		});
 		
-		// oss name이 미등록인 data 또는 version이 미등록인 data만 보기 선택시
+		// If you select view only data whose os name is unregistered or data whose version is unregistered,
 		function fn_init() {
 			$("#loadTypeOSS, #loadTypeVER").change(function(){
 				fn_hideRowCtrl();
@@ -88,7 +88,7 @@
 													var value = e.value;
 													
 													if(value.charAt(value.length-1) == "/"){
-														value = value.slice(0, -1); // 마지막 문자열 제거
+														value = value.slice(0, -1); // Remove the last string.
 														$("#"+e.id).val(value);
 													}
 												});
@@ -103,7 +103,7 @@
 													var value = e.value;
 													
 													if(value.charAt(value.length-1) == "/"){
-														value = value.slice(0, -1); // 마지막 문자열 제거
+														value = value.slice(0, -1); // Remove the last string.
 														$("#"+e.id).val(value);
 													}
 												});
@@ -149,7 +149,7 @@
 				                    lastSelection = rowid;
 				                }
 				                
-		                    	// 이미 처리완료된 경우 체크박스의 값을 초기화한다.
+		                    	// If processing is already completed, the value of the check box is initialized.
 		                    	if($("input:checkbox[id='jqg_ossList_"+rowid+"']").attr( 'disabled') == "disabled") {
 			                    	$("input:checkbox[id='jqg_ossList_"+rowid+"']").attr( 'checked', false );
 		                    	}
@@ -174,22 +174,22 @@
 				}
 				
 				return arr;
-			}, []); // checkbox를 선택한 행만 가져옴.
+			}, []); // Imported only rows that selected checkbox.
 			
 			var result = [];
 			
-			// check 여부 
+			// Check whether it's okay or not.
 			var hasChecked = false;
 			var gridObj = $("#ossList");
 			var gridStr = "ossList";
 			
 			window.setTimeout(function(){
-				for (var i = 0; i < idArry.length; i++) { //row id수만큼 실행
+				for (var i = 0; i < idArry.length; i++) { //Run as many times as row id.
 				    	var rowId = idArry[i];
 				    	cleanErrMsg("ossList", rowId);
 				    	gridObj.jqGrid('saveRow',rowId);
 				    	
-					    var rowdata = gridObj.getRowData(rowId); // 해당 id의 row 데이터를 가져옴
+					    var rowdata = gridObj.getRowData(rowId); // Obtained row data of the id.
 					    hasChecked = true;
 		
 					    // 1. checked 된 row의 데이터를 그대로 배열에 담는 경우
@@ -253,7 +253,7 @@
 				}
 				
 				if(!hasChecked) {
-					alertify.alert('Please select OSS to register', function(){});
+					alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
 
 					$('#loading_wrap_popup').hide();
 				}

@@ -11,7 +11,7 @@
 	
 	$(document).ready(function () {
 		'use strict';
-		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
+		setMaxRowCnt(G_ROW_CNT); // maxRowCnt value setting
 		evt.init();
 		data.init();
 		initYn = false;
@@ -30,7 +30,7 @@
 		}
 		
 	};
-	//이벤트 객체
+	//event object
 	var evt = {
 		init : function(){
 			
@@ -110,15 +110,15 @@
 			var mStart = $('input[name=mStartDate]').val().replace(/\./g,'');
 			var mEnd = $('input[name=mEndDate]').val().replace(/\./g,'');
 			
-			//둘다 비었을때
+			//if both empty
 			if(!cStart && !cEnd) {
 				
 			} else {
 				if(!cStart) {
-					alert("시작 날짜를 확인해 주세요");
+					alert('<spring:message code="msg.license.confirm.startdate" />');
 					flag = false;
 				} else {
-					alert("끝 날짜를 확인해 주세요");
+					alert('<spring:message code="msg.license.confirm.enddate" />');
 					flag = false;
 				}
 			}
@@ -128,10 +128,10 @@
 					
 				} else {
 					if(!mStart) {
-						alert("시작 날짜를 확인해 주세요");
+						alert('<spring:message code="msg.license.confirm.startdate" />');
 						flag = false;
 					} else {
-						alert("끝 날짜를 확인해 주세요");
+						alert('<spring:message code="msg.license.confirm.enddate" />');
 						flag = false;
 					}
 				}
@@ -150,10 +150,10 @@
 					repeatitems: false,
 					id:'ossId',
 					root:function(obj){
-						//기존의 RowNum 저장
+						//original RowNum save
 						list.oldRowNum = $("#list").jqGrid('getGridParam', 'rowNum');
 						
-						//리스트 갯수에 따른 rowNum 변경@@1
+						//Change the rowNumber according to the number of lists.
 						$("#list").jqGrid('setGridParam', {rowNum:obj.rows.length});
 						$("#list").jqGrid('setGridParam', {defaultRowNum:list.oldRowNum});
 						
@@ -230,7 +230,7 @@
 				groupingView:{
 					groupField:['groupKey'],
 					groupColumnShow:[false]
-				},	// group by 하는 컬럼명 입력
+				},	// Enter the column name by group.
 				gridComplete: function(){
 					tableRefresh();
 				},
@@ -255,10 +255,10 @@
 						}
 					}
 					
-					//rowNum 초기화@@1
+					//rowNum initiate @@1
 					$("#list").jqGrid('setGridParam', {rowNum:list.oldRowNum});					
 					
-					// 기존 그룹헤더에 있는 펼침버튼을 그룹별 첫번째 row의 group컬럼에 삽입 (첫번째 row를 그룹헤더 기능하도록 커스텀)
+					// Insert the unfold button in the existing group header into the group column of the first row for each group (customize the first row to function as a group header).
 					$('[id^=listghead_0]').each(function(){
 						var addBtn = "<span style='cursor:pointer;' class='groupBtns ui-icon ui-icon-plus tree-wrap-ltr' onclick=\"$('#list').jqGrid('groupingToggle','" + $(this).attr("id") + "'); $('#" + $(this).next().attr("id") + "').show(); return false;\"> </span>";
 						var position = $(this).next().next().children().eq(1).text();
@@ -267,18 +267,18 @@
 							$(this).next().children().eq(0).append(addBtn);
 						}
 					});
-					//그룹에 색깔주기
-					//1. 그룹버튼 있는곳
+					//coloring groups
+					//1. exist group button
 					$('span.groupBtns').trigger('click').parent().parent().css('background-color' ,'#CDECFA');
 					 
-					//2. 이하 목록들
+					//2. below lists
 					$('tr td[isgroup="true"]', grid).parent().css('background-color' ,'#E1F6FA');
 					
-					//3. 이하 목록들에 그룹하위 표시 아이콘 주기
+					//3. Group sub display icon period in the following lists.
 					$('tr td[isgroup="true"]', grid).parent().find('td:first')
 					.prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display','inline-block'));
 					
-					//그룹 + - 토글
+					//group + - toggle
 					$('span.groupBtns').on('click', function(e) {
 						if($(this).hasClass('ui-icon-plus')) {
 							$(this).removeClass('ui-icon-plus').addClass('ui-icon-minus');
@@ -287,9 +287,9 @@
 						}
 					});
 					
-					$('.listghead_0').hide();	// 기존 그룹헤더 숨김
+					$('.listghead_0').hide();	// hide basic groupHeader
 					
-					// 헤더에 버튼 추가
+					// add button in header
 					if(!data.existTooltip){
 						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_obligation"))
 							.attr("title", data.tooltipCont).tooltip({

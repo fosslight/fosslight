@@ -60,7 +60,7 @@ var src_evt = {
 					}
 				});
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		
@@ -589,7 +589,7 @@ var src_fn = {
 		});
 		
 		if(sheetNum.length == 0) {
-			alert('please select sheet');
+			alert('<spring:message code="msg.common.check.sheet" />');
 			
 			return;
 		} else {

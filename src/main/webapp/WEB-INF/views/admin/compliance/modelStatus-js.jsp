@@ -112,10 +112,10 @@
 					$("#list").jqGrid('clearGridData');
 					
 					window.setTimeout(function(){
-						$(".ajax-file-upload-error").text("ERROR: The uploaded file does not contain a sheet named 'All Model(Software) List'.");
+						$(".ajax-file-upload-error").text("ERROR: " + '<spring:message code="msg.compliance.required.model" />');
 					}, 1);
 					
-					alertify.error("The uploaded file does not contain a sheet named 'All Model(Software) List'.", 0);
+					alertify.error('<spring:message code="msg.compliance.required.model" />', 0);
 				}
 			});
 			
@@ -155,7 +155,7 @@
 						break;
 					case "createdDate1":
 						if(value == "") {
-							alertify.alert('Please, enter the created date first.', function(){});
+							alertify.alert('<spring:message code="msg.compliance.required.date" />', function(){});
 
 							return false;
 						}
@@ -163,7 +163,7 @@
 						break;
 					case "createdDate2":
 						if(value == "") {
-							alertify.alert('Please, enter the created date first.', function(){});
+							alertify.alert('<spring:message code="msg.compliance.required.date" />', function(){});
 
 							return false;
 						}
@@ -395,7 +395,7 @@
 				, loadComplete: function(data) {
 					totalRow = data.records;
 					if(!data.records && initStatus != "init"){
-						alertify.error("Information that matches the value written in the 'Model (Software) Name' column can not be found in the FOSSLight system.", 0);
+						alertify.error('<spring:message code="msg.compliance.loading.failure" />', 0);
 					}
 				},
 				onSortCol : function(colNm, colIdx, sOrd){

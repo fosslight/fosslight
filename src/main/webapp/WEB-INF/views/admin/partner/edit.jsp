@@ -88,7 +88,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr">3rd Party Name</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.name" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input type="text" id="partnerName" name="partnerName" class="autoComParty w100P" value='' />
@@ -97,7 +97,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">3rd Party Software Name</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.softwareName" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input type="text" id="softwareName" name="softwareName" class="autoComSwNm w100P" value=''/>
@@ -106,13 +106,13 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">3rd Party Software Version</th>
+							<th class="dCase"><spring:message code="msg.common.field.3rdParty.softwareVersion" /></th>
 							<td class="dCase"><input type="text" id="softwareVersion" name="softwareVersion"
 							<c:if test="${not empty detail }">value="${detail.softwareVersion }"</c:if>/>
 							<div class="retxt" style="display:none;">This field is required.</div></td>
 						</tr>
 						<tr>
-							<th class="dCase">Delivery Form</th>
+							<th class="dCase"><spring:message code="msg.common.field.deliveryForm" /></th>
 							<td class="dCase">
 								<p class="pd5">If you exist in binary form 3rd party software, You can check opensource information using the <a href="#none" onclick="fn.binaryTab()" class="txBlueIt">Binary Analysis</a></p>
 								<span class="selectSet w150">
@@ -125,7 +125,7 @@
 						</tr>
 						<c:if test="${project.viewOnlyFlag ne 'Y'}">
 						<tr>
-							<th class="dCase">Permission</th>
+							<th class="dCase"><spring:message code="msg.common.field.permission" /></th>
 							<td class="dCase">
 								<span>View : </span>
 								<span class="radioSet">
@@ -137,11 +137,11 @@
 						</tr>
 						</c:if>
 						<tr>
-							<th class="dCase">Description</th>
+							<th class="dCase"><spring:message code="msg.common.field.description" /></th>
 							<td class="dCase"><textarea class="w100P h150" id="description" name="description"><c:if test="${not empty detail }">${detail.description }</c:if></textarea></td>
 						</tr>
 						<tr>
-							<th class="dCase">Open Source Agreement<br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
+							<th class="dCase"><spring:message code="msg.common.field.Agreement" /><br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
 							<td class="dCase uploadCase confirmationUpload">
 								<c:if test="${empty confirmationFile}">
 									<span class="fileex_back">
@@ -162,7 +162,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">OSS Checklist (Open Source List)<br/><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('chk')"><span>Sample</span></a></th>
+							<th class="dCase"><spring:message code="msg.common.field.OSSChecklist" />(Open Source List)<br/><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('chk')"><span>Sample</span></a></th>
 							<td class="dCase uploadCase ossUpload">
 								<c:if test="${empty ossFile}">
 									<span class="fileex_back">
@@ -184,7 +184,7 @@
 						</tr>
 					</tr>
 					<tr>
-						<th class="dCase">Related Documents</th>
+						<th class="dCase"><spring:message code="msg.common.field.relatedDocuments" /></th>
 						<td class="dCase uploadCase documentsUpload">
 							<span class="fileex_back">
 								<div id="documentsFile" <c:if test="${isCommited or detail.documentsFileCnt eq '5'}">style="display:none;"</c:if>>+ Add file</div>
@@ -210,7 +210,7 @@
 					<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 					
 					<tr>
-						<th class="dCase">Watcher</th>
+						<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
 						<td class="dCase watchCase">
 							<div class="pb5">
 								<span class="selectSet w150">
@@ -285,7 +285,7 @@
 					</c:if>
 					<c:if test="${ct:isAdmin() and not empty detail.partnerId}">
 						<tr>
-							<th class="dCase txStr">Creator</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input type="text" name="creatorNm" class="autoComCreatorDivision" value=""/>
@@ -297,7 +297,7 @@
 					</c:if>
 						<c:if test="${not empty detail.partnerId}">
                         <tr>
-                            <th class="dCase  txStr">Reviewer</th>
+                            <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">
                                 <div class="required">
                                     <input type="text" name="reviewerName" value="${detail.reviewerName}" disabled="disabled"/>
@@ -390,8 +390,8 @@
 										<table id="_binaryFileList"><tr><td></td></tr></table>
 									</div>
 								</div>
-								<div>Binary analysis results are used only as reference data. Until the accuracy of the tool is improved, it is not included in the BOM and OSS Notice</div>
-								<div>※ Uploaded firmware is only kept for one month.</div>
+								<div><spring:message code="msg.partner.notice"/></div>
+								<div>※<spring:message code="msg.partner.notice.term"/></div>
 							</div>
 						</form>
 					</fieldset>

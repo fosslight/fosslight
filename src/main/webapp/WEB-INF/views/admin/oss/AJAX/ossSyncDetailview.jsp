@@ -31,22 +31,22 @@ $(document).ready(function() {
 				<tbody>
 					<tr>
 						<th class="dCase"><input type="checkbox" id="Declared License" checked="checked"></th>
-						<th class="dCase">Declared License</th>
+						<th class="dCase"><spring:message code="msg.common.field.declaredLicense" /></th>
 						<td class="dCase">${ossInfo.licenseName}</td>
 					</tr>
 					<tr>
 						<th class="dCase"><input type="checkbox" id="Detected License" checked="checked"></th>
-						<th class="dCase">Detected License</th>
+						<th class="dCase"><spring:message code="msg.common.field.detectedLicense" /></th>
 						<td class="dCase">${ossInfo.detectedLicense}</td>
 					</tr>
 					<tr>
 						<th class="dCase" style="height:50px;"><input type="checkbox" id="Copyright"></th>
-						<th class="dCase">Copyright</th>
+						<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 						<td class="dCase">${ossInfo.copyright}</td>
 					</tr>
 					<tr>
 						<th class="dCase"><input type="checkbox" id="Download Location"></th>
-						<th class="dCase">Download Location</th>
+						<th class="dCase"><spring:message code="msg.common.field.downloadLocation" /></th>
 						<td class="dCase">
 							<c:choose>
 								<c:when test="${not empty ossInfo.downloadLocations}">
@@ -60,18 +60,18 @@ $(document).ready(function() {
 					</tr>
 					<tr>
 						<th class="dCase"><input type="checkbox" id="Home Page"></th>
-						<th class="dCase">Home Page</th>
+						<th class="dCase"><spring:message code="msg.common.field.homepage" /></th>
 						<td class="dCase">${ossInfo.homepage}</td>
 					</tr>
 					<tr>
 						<th class="dCase" style="height:50px;"><input type="checkbox" id="Summary Description"></th>
-						<th class="dCase">Summary Description</th>
+						<th class="dCase"><spring:message code="msg.common.field.summaryDescription" /></th>
 						<td class="dCase">${ossInfo.summaryDescription}</td>
 					</tr>
 					
 					<tr>
 						<th class="dCase" style="height:50px;"><input type="checkbox" id="Attribution"></th>
-						<th class="dCase">Attribution</th>
+						<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
 						<td class="dCase">${ossInfo.attribution}</td>
 					</tr>
 				</tbody>

@@ -246,7 +246,7 @@
 
 					switch (licenseChoiceLength) {
 						case 0:
-							alertify.alert("No licenses entered.", function(){});
+							alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
 							return false;
 							break;
 						case 1:
@@ -294,13 +294,13 @@
 					if(editorVal == "") {
 						if(deactivateFlag == "N" 
 							&& localDeactivateFlag == "Y"){ // deactivate Flag checked
-							alertify.alert("Please enter reason for deactivate", function(){});
+							alertify.alert('<spring:message code="msg.oss.required.deactivate" />', function(){});
 							return false;
 						}
 
 						if(deactivateFlag == "Y" 
 							&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
-							alertify.alert("Please enter reason for activate", function(){});
+							alertify.alert('<spring:message code="msg.oss.required.activate" />', function(){});
 							return false;
 						}
 					}
@@ -328,16 +328,16 @@
 			$('#delete').on('click', function(){
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(editorVal == "") {
-					alertify.alert("Please enter reason for deletion", function(){});
+					alertify.alert('<spring:message code="msg.oss.required.deletion" />', function(){});
 					return false;
 				}
 
 				if(deactivateFlag == "Y"){
-					alertify.alert("Deactivated OSS couldn't be deleted.", function(){});
+					alertify.alert('<spring:message code="msg.oss.required.deactivate.deletion" />', function(){});
 					return false;
 				}
 				
-				alertify.confirm("Are you sure you want to remove this OSS?\nThis will permanently delete all datas.", function (e) {
+				alertify.confirm('<spring:message code="msg.oss.warn.remove" />', function (e) {
 					if (e) {
 						$('input[name=comment]').val(editorVal);
 						
@@ -367,12 +367,12 @@
 			$("#wrapIframe > div > div.pop.ossSelectPop > div.pbtn input:eq(1)").on('click', function(){
 				var rowId = $('#_ossSelectList').jqGrid('getGridParam', 'selrow');
 				if(rowId === null) {
-					alert("Please select oss grid");
+					alert('<spring:message code="msg.oss.required.select.grid" />');
 				}else{
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
 	 				var newOssId = rowData.ossId;
 	 				if(newOssId == '${ossId}'){
-	 					alertify.alert("Can not choose myself!!", function(){});
+						alertify.alert('<spring:message code="msg.oss.cannot.select" />', function(){});
 	 					return;
 	 				}
 	 				
@@ -507,7 +507,7 @@
 						success : function(data){
 							var length = data.ossList.length;
 							if (length == 1) {
-								alertify.alert('At least two OSS versions are required.', function(){});
+								alertify.alert('<spring:message code="msg.oss.required.version" />', function(){});
 							} else if (length > 1) {
 								$.ajax({
 									url : '<c:url value="/oss/checkExistsOssByname"/>',
@@ -1012,7 +1012,7 @@
 				onSelectRow: function(id){
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
 	 				if(rowData.ossId == '${ossId}'){
-	 					alertify.alert("Can not choose myself.", function(){});
+	 					alertify.alert('<spring:message code="msg.oss.cannot.select" />', function(){});
 					}
 				}
 			});			
@@ -1415,7 +1415,7 @@
 
 		switch (licenseChoiceLength) {
 			case 0:
-				alertify.alert("No licenses entered.", function(){});
+				alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
 				return false;
 				break;
 			case 1:
@@ -1831,7 +1831,7 @@
     };
     
 	function deleteComment(obj){
-		if(!confirm("Are you sure you want to delete this comment?")) return;
+		if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
 		var commId = $(obj).next().val();
 		$.ajax({
 			url : '/oss/deleteComment',
@@ -1894,7 +1894,7 @@ function showLicenseText(_licenseName) {
 
 		switch (licenseChoiceLength) {
 			case 0:
-				alertify.alert("No licenses entered.", function(){});
+				alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
 				return false;
 				break;
 			case 1:
@@ -2024,7 +2024,7 @@ var fn_commemt = {
         });
     },
     deleteComment : function(_commId){
-        if(!confirm("Are you sure you want to delete this comment?")) return;
+        if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
         $.ajax({
             url : '/comment/deleteComment',
             type : 'POST',
@@ -2198,7 +2198,7 @@ var fn = {
 		});
 		
 		if(result.length > 0){
-			alertify.alert("License must be filled in using autocomplete..", function(){});
+			alertify.alert('<spring:message code="msg.oss.required.auto" />', function(){});
 			return false;
 		}
 		return true;

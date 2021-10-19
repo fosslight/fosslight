@@ -49,7 +49,7 @@ var bom_evt = {
 					}
 				});
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		
@@ -440,7 +440,7 @@ var bom_fn = {
 					}
 					
 					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
-					alertMsg = 'Do you really reset the analyzed result and start the Auto Analysis again?';
+					alertMsg = '<spring:message code="msg.project.confirm.bom" />';
 
 					var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
 					btnHtml += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'-reset\')"/>&nbsp;&nbsp;&nbsp;';
@@ -484,7 +484,7 @@ var bom_fn = {
 					break;
 			}	
 		}else {
-			alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 		}	
 	},
 	showOssAutoAnalysis : function(status){
@@ -556,7 +556,7 @@ var bom_fn = {
 				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 			}
 		}else {
-			alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+			alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 		}
 	}
 }

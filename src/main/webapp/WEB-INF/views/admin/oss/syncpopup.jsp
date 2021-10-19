@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
-<%-- 관리자 화면 템플릿 --%>
+<%-- Administrator screen template. --%>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -223,10 +223,10 @@
 							}
 						});
 					}else{
-						alertify.alert("Select the Synchronize OSS Attributes.", function(){});
+						alertify.alert('<spring:message code="msg.oss.select.synchronize" />', function(){});
 					}
 				} else{
-					alertify.alert("Select the Project.", function(){});
+					alertify.alert('<spring:message code="msg.oss.select.project" />', function(){});
 				}
 			},
 			syncClose : function(){

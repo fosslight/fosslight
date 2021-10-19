@@ -13,7 +13,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr">License Name</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseName" /></th>
 							<td class="dCase">
 								<div class="required">
 									<div id="licenseName" class="viewLicenseTd" >${licenseInfo.licenseName}</div>
@@ -21,7 +21,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">License Type</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseType" /></th>
 							<td class="dCase">
 								<div class="required">
 									<div id="licenseType" class="viewLicenseTd" >${ct:getCodeString(ct:getConstDef('CD_LICENSE_TYPE') ,licenseInfo.licenseType)}</div>
@@ -29,25 +29,25 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Restriction</th>
+							<th class="dCase"><spring:message code="msg.common.field.restriction" /></th>
 							<td class="dCase">
 								<div id="restriction" class="viewLicenseTd" ></div>
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Obligation</th>
+							<th class="dCase"><spring:message code="msg.common.field.obligation" /></th>
 							<td class="dCase">
 								<div id="obligation" class="viewLicenseTd" ></div>
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">SPDX Short Identifier</th>
+							<th class="dCase"><spring:message code="msg.common.field.SPDX" /></th>
 							<td class="dCase">
 								<div id="shortIdentifier" class="viewLicenseTd" >${licenseInfo.shortIdentifier}</div>
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Nick Name</th>
+							<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 							<td class="dCase">
 								<div class="multiTxtSet">	
 									<div class="required">						
@@ -57,17 +57,17 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Web site for the license</th>
+							<th class="dCase"><spring:message code="msg.common.field.licenseWebsite" /></th>
 							<td class="dCase">
 								<div id="webpage" class="viewLicenseTd" ><a href="" class="urlLink" target="_blank"></a></div>
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">User Guide</th>
+							<th class="dCase"><spring:message code="msg.common.field.userGuide" /></th>
 							<td class="dCase"><div id="description" class="viewLicenseTd viewLicenseTextArea">${licenseInfo.description}</div></td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">License Text</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseText" /></th>
 							<td class="dCase">
 								<div class="required">
 									<div id="licenseText" class="viewLicenseTd viewLicenseTextArea"></div>
@@ -75,7 +75,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Attribution</th>
+							<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
 							<td class="dCase"><div id="attribution" class="viewLicenseTd viewLicenseTextArea"></div></td>
 						</tr>
 					</tbody>

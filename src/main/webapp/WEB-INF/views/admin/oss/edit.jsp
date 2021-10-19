@@ -23,7 +23,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr">OSS Name</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/><c:if test="${!empty ossId}"><input type="checkbox" id="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate</c:if>
@@ -32,7 +32,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Nick Name</th>
+							<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 							<td class="dCase">
 								<div class="multiTxtSet">
 									<div class="required">
@@ -44,7 +44,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">OSS Version</th>
+							<th class="dCase"><spring:message code="msg.common.field.OSS.version" /></th>
 							<td class="dCase">
 								<div class="required">	
 									<input name="ossVersion" type="text" class="w350" value="${ossVersion}"/><span name="ossType"></span>
@@ -53,7 +53,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">Declared License<br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /><br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
 							<td class="dCase">
 								<div class="required">
 									<input type="hidden" name="licenseDiv"/>
@@ -67,7 +67,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Detected License</th>
+							<th class="dCase"><spring:message code="msg.common.field.detectedLicense" /></th>
 							<td class="dCase">
 								<div class="multiItemSet multiDetectedLicenseSet">
 									<div class="required">
@@ -79,21 +79,21 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Copyright</th>
+							<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 							<td class="dCase">
 								<textarea name="copyright" class="w100P h150">${copyright}</textarea>
 							</td>
 						</tr>
 						<tr id="lt">
-							<th class="dCase">License Type</th>
+							<th class="dCase"><spring:message code="msg.common.field.licenseType" /></th>
 							<td class="dCase"></td>
 						</tr>
 						<tr id="ob">
-							<th class="dCase">Obligation</th>
+							<th class="dCase"><spring:message code="msg.common.field.obligation" /></th>
 							<td class="dCase"></td>
 						</tr>
 						<tr>
-							<th class="dCase">Download Location</th>
+							<th class="dCase"><spring:message code="msg.common.field.downloadLocation" /></th>
 							<td class="dCase">
 								<div class="multiItemSet multiDownloadLocationSet">
 									<div class="required">
@@ -105,7 +105,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Home Page</th>
+							<th class="dCase"><spring:message code="msg.common.field.homepage" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="homepage" type="text" class="w100P" placeholder="http://" value="${homepage }"/>
@@ -114,11 +114,11 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Summary Description</th>
+							<th class="dCase"><spring:message code="msg.common.field.summaryDescription" /></th>
 							<td class="dCase"><textarea name="summaryDescription" class="w100P h150">${summaryDescription }</textarea></td>
 						</tr>
 						<tr>
-							<th class="dCase">Attribution</th>
+							<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
 							<td class="dCase"><textarea name="attribution" class="w100P h150">${attribution }</textarea></td>
 						</tr>
 						<c:if test="${!empty ossId}">
@@ -138,7 +138,7 @@
 							</c:if>
 							<c:if test="${not empty vulnInfoList}">
 								<tr>
-									<th class="dCase">Vulnerability</th>
+									<th class="dCase"><spring:message code="msg.common.field.vulnerability" /></th>
 									<td class="dCase">
 										<table id="_vulnInfoList"><tr><td></td></tr></table>
 									</td>
@@ -146,7 +146,7 @@
 							</c:if>
 						</c:if>
 						<tr>
-							<th class="dCase">Comment</th>
+							<th class="dCase"><spring:message code="msg.common.field.comment" /></th>
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">

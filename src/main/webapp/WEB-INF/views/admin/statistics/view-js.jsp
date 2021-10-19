@@ -97,17 +97,17 @@ var common_fn = {
 			case "DIV":
 				var divisionType = $("#divisionalProjectChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert("날짜값을 입력하세요.", function(){});
+					alertify.alert('<spring:message code="msg.statistics.required.date" />', function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert("날짜 범위 오류", function(){});
+					alertify.alert('<spring:message code="msg.statistics.warn.daterange" />', function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert("관리자에게 문의하세요.", function(){});
+					alertify.alert('<spring:message code="msg.statistics.notice.admin" />', function(){});
 					return false;
 				}
 				
@@ -115,17 +115,17 @@ var common_fn = {
 			case "TRD":
 				var divisionType = $("#trdPartyRelatedChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert("날짜값을 입력하세요.", function(){});
+					alertify.alert('<spring:message code="msg.statistics.required.date" />', function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert("날짜 범위 오류", function(){});
+					alertify.alert('<spring:message code="msg.statistics.warn.daterange" />', function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert("관리자에게 문의하세요.", function(){});
+					alertify.alert('<spring:message code="msg.statistics.notice.admin" />', function(){});
 					return false;
 				}
 				break;

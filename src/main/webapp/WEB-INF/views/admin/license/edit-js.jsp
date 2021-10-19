@@ -107,11 +107,11 @@
 				var editorVal = CKEDITOR.instances.editor.getData();
 				
 				if(editorVal == "") {
-					alertify.alert("Please enter reason for deletion", function(){});
+					alertify.alert('<spring:message code="msg.license.confirm.delete.required.comment" />', function(){});
 					return false;
 				}
 				
-				alertify.confirm("Are you sure you want to remove this license?\nThis will permanently delete all datas.", function (e) {
+				alertify.confirm('<spring:message code="msg.license.confirm.delete" />', function (e) {
 					if (e) {
 						$('input[name=comment]').val(editorVal);
 						deleteSubmit();
