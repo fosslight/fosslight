@@ -12,7 +12,7 @@ var _popupCheckOssName = null;
 //COMMON
 //==========================================================================================
 var com_evt = {
-	// 초기화
+	// init
 	init: function(){
 		com_fn.tabInit();
 
@@ -27,7 +27,7 @@ var com_evt = {
 			openCommentHistory('<c:url value="/comment/popup/prj/${project.prjId}"/>');
 		});
 
-		// bomConfirm 버튼 
+		// bomConfirm button
 		$('#bomConfirm').click(function(e){
 			if (com_fn.checkStatus()){
 				e.preventDefault();
@@ -78,7 +78,7 @@ var com_evt = {
 					}				
 				}
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}	
 		});
 		
@@ -88,10 +88,7 @@ var com_evt = {
 				e.preventDefault();
 
 				if(distributionStatus == "PROC"){
-					var br = "<br>";
-					var comment = "Thank you so much for your patience." + br;
-					comment += "The distribution has already begun and has not yet completed." + br;
-					comment += "It takes a long time to deploy because of the large packaging file size.";
+					var comment = '<spring:message code="msg.project.distribution.loading" />';
 					
 					alertify.error(comment, 0);
 
@@ -124,7 +121,7 @@ var com_evt = {
 				
 				CKEDITOR.replace('editor2', {});
 			}else{
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		
@@ -173,7 +170,7 @@ var com_evt = {
 					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 				}
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		
@@ -197,7 +194,7 @@ var com_evt = {
 					alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 				}
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 
@@ -562,7 +559,7 @@ var com_fn = {
 		var editorVal = CKEDITOR.instances.editor.getData(); //코멘트 저장
 
 		if(!editorVal || editorVal == "") {
-			alertify.alert("Please enter a comment", function(){});
+			alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 
 			return false;
 		}
@@ -615,7 +612,7 @@ var com_fn = {
 		var editorVal = CKEDITOR.instances.editor.getData();
 		
 		if(!editorVal || editorVal == "") {
-			alertify.alert("Please enter a comment", function(){});
+			alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 
 			return false;
 		}

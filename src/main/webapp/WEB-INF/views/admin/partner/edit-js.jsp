@@ -187,7 +187,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 							$('.confirmationUpload').append(' <span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteConfirmationFile(this)" style="vertical-align:super;"/></span>');
 							$('.confirmationUpload').append('<input type="hidden" name="confirmationFileId" value="'+result.registSeq+'"/>');
 						} else {
-							alert('파일 업로드에 실패하였습니다.');
+							alert('<spring:message code="msg.common.upload.failed" />');
 						}
 						
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -256,7 +256,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 								$('.ossUpload').append(' <span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteOssFile(this)" style="vertical-align:super;"/></span>');
 								$('.ossUpload').append('<input type="hidden" name="ossFileId" value="'+result[0][0].registSeq+'"/>');
 							} else {
-								alert('파일 업로드에 실패하였습니다.');
+								alertify.alert('<spring:message code="msg.common.upload.failed" />', function(){});
 							}
 							
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -298,7 +298,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 								$("#documentsFile").hide();
 							}
 						} else {
-							alert('파일 업로드에 실패하였습니다.');
+							alertify.alert('<spring:message code="msg.common.upload.failed" />', function(){});
 						}
 						
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -315,8 +315,8 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 				if(adId == "") {
 					$("#adId").focus();
-					
-					return alertify.error('Please enter watcher AD ID', 0);
+					// return alertify.error('Please enter watcher AD ID', 0);
+					return alertify.error('<spring:message code="enter.watcher.error" />', 0);
 				}
 				
 				var _email = adId + "@" + domain;
@@ -324,8 +324,8 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 				if (!regEmail.test(_email)) {
 					$("#adId").focus();
-					
-					return alertify.error('Invalid email address.', 0);
+					// return alertify.error('Invalid email address.', 0);
+					return alertify.error('<spring:message code="invalid.email.error" />', 0);
 				}
 				
 				$.ajax({
@@ -566,7 +566,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					}
 				});
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 
 		},
@@ -726,7 +726,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			$(obj).parent().remove();
 		},
 		deleteComment : function(obj){
-			if(!confirm("Are you sure you want to delete this comment?")) return;
+			if(!confirm('<spring:message code="msg.partner.confirm"/>')) return;
 			var commId = $(obj).next().val();
 			$.ajax({
 				url : '/partner/deleteComment',
@@ -888,7 +888,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		delete : function(){
 			if (fn.checkStatus()){
-				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to remove this party?\nThis will permanently delete all datas.';
+				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;"><spring:message code="msg.partner.delete.warning" />';
 				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
 				innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
 				innerHtml    += '	</div>';
@@ -931,7 +931,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				
 				CKEDITOR.replace('editor2', {});
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 		},
 		deleteConfirmationFile : function(obj){
@@ -1016,7 +1016,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				
 				fn.save();
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 		},
 		//reject
@@ -1064,7 +1064,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				
 				CKEDITOR.replace('editor2', {});
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 		},
 		//reviewStart
@@ -1089,7 +1089,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					}
 				});
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 		},
 		//confirm
@@ -1138,7 +1138,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					}
 				});
 			}else{
-				alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.partner.warning" />', function(){});
 			}
 		},
 		closePop : function(){
@@ -1155,7 +1155,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			var fileSeq = $('input[name=ossFileId]').val();
 			
 			if(sheetNum.length == 0){
-				alert('please select sheet');
+				alert('<spring:message code="msg.common.check.sheet" />');
 				
 				return;
 			}else{
@@ -1414,7 +1414,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					}
 					
 					if(!copyWatcher.length)
-						alertify.warning("The ID you entered does not exist.");
+						alertify.warning("<spring:message code='msg.partner.id.warning' />");
 				},
 				error : fn.onError
 			});
@@ -1604,7 +1604,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		},
 		CheckChar : function(){
 			if(event.keyCode == 64){//@ 특수문자 체크
-        		alertify.alert("\'@\' Special characters are not allowed!", function(){});
+        		alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
         		event.returnValue = false;
         	}
 		},

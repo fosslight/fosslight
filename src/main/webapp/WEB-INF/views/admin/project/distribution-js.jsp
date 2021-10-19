@@ -37,7 +37,7 @@
 		if(distributionStatus == "PROC"){
 			loading.show();
 			
-			alertify.alert('Thank you so much for your patience.<br>The distribution has already begun and has not yet completed.<br>It takes a long time to deploy because of the large packaging file size.', function(){
+			alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){
 				deleteTabInFrame('#/project/edit/'+'${project.prjId}');
 			});
 		}
@@ -90,8 +90,7 @@
 			// 저장
 			$("#save").click(function(){
 				if(needVerifyFlag){
-					alertify.alert('Please verify the new package file', function(){});
-					
+					alertify.alert('<spring:message code="msg.project.need.verify" />', function(){});
 					return false;
 				}
 				
@@ -120,7 +119,7 @@
 			
 			// 삭제
 			$("#delete").click(function(){
-				var doDelete = confirm('삭제된 정보는 복구 할 수 없습니다. 본 정보를 삭제 하시겠습니까?');
+				var doDelete = confirm('<spring:message code="msg.project.warn.delete" />');
 
 				if(doDelete){
 					deleteSubmit();
@@ -486,7 +485,7 @@
 				}
 				
 				if(!isDistribute){
-					alertify.error("no authorization.", 0);
+					alertify.error('<spring:message code="msg.project.required.authorization" />', 0);
 					
 					return;
 				}
@@ -536,7 +535,7 @@
 				//코멘트 저장
 				var editorVal = CKEDITOR.instances.editor.getData();
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment", function(){});
+					alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
@@ -595,7 +594,7 @@
 				var editorVal = CKEDITOR.instances.editor.getData();
 				
 				if(!editorVal || editorVal == "") {
-					alertify.alert("Please enter a comment", function(){});
+					alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 					
 					return false;
 				}
@@ -635,7 +634,7 @@
 			},
 			// release date check function add
 			releaseDateCheck : function() {
-				var releaseDateCheckMessage = "Models for which a release date has not been entered are not be disclosed to external customers.";
+				var releaseDateCheckMessage = "'<spring:message code="msg.project.confirm.release" />'";
 				
 				alertify.confirm(releaseDateCheckMessage).set('onok', function(closeEvent){
 						availableCheck('save');
@@ -1592,8 +1591,8 @@
 				
 				needVerifyFlag = false;
 				
-				alertify.alert('Successfully completed.', function(){});
-				alertify.success('Successfully verified the new package file');
+				alertify.alert('<spring:message code="msg.common.success" />', function(){});
+				alertify.success('<spring:message code="msg.project.verification.success" />');
 				
 				$("#verifyYn").val("Y");
 
@@ -1616,7 +1615,7 @@
 							$("#btnVerify").val("Completed").attr("disabled", true).removeClass("red");
 							needVerifyFlag = false;
 							alertify.alert(json.resMsg, function(){});
-							alertify.success('Successfully verified the new package file');
+							alertify.success('<spring:message code="msg.project.verification.success" />');
 							
 							$("#verifyYn").val("Y");
 						} else { // verify의 실패

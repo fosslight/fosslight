@@ -22,9 +22,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr">
-							Project Name
-							</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.project.name" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="prjName" type="text" class="w100P"/>
@@ -33,13 +31,13 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Version</th>
+							<th class="dCase"><spring:message code="msg.common.field.version" /></th>
 							<td class="dCase">
 								<input name="prjVersion" type="text" class="w100P"/>
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Comment</th>
+							<th class="dCase"><spring:message code="msg.common.field.comment" /></th>
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">

@@ -34,7 +34,7 @@ var binAndroid_evt = {
 	init: function(){
 		$("#binAndroidList").jqGrid('GridUnload');
 
-		doNotUseAutoLoadingFlag = "Y"; // loading 이 표시되지 않는 현상이 발생하여, 수동으로 loading 조작
+		doNotUseAutoLoadingFlag = "Y"; // loading is not displayed, so loading operation manually occurs.
 
 		loading.show();
 		binAndroid_grid.load();
@@ -49,7 +49,7 @@ var binAndroid_evt = {
 			$('.binAndroidBtn').hide();
 		}
 		
-		// 그리드 리셋 버튼
+		// Grid reset button
 		$("#binAndroidReset, #binAndroidResetUp").click(function(e){
  			e.preventDefault();
  			
@@ -81,7 +81,7 @@ var binAndroid_evt = {
 					}
 				});
 			}else {
-				alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+				alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 			}
 		});
 		// 프로젝트 조회 버튼
@@ -378,12 +378,12 @@ var binAndroid_fn = {
 		var loadFromAndroidProjectFlag = "N";
 		
 		if(androidNoticeFileId == ""){
-			alertify.alert('NOTICE.html을 업로드 해주세요!', function(){});
+			alertify.alert('<spring:message code="msg.project.required.upload" />', function(){});
 			
 			return;
 		}
 		
-		// 다른 프로젝트에서 load한 경우, notice file과 result 파일을 프로젝트 load시 업로드한 파일로 대체한다.
+		// When loaded in another project, the notice file and the result file are replaced with the uploaded file when loading the project.
 		if(globalBinAndroidNoticeFileId != "") {
 			androidNoticeFileId = globalBinAndroidNoticeFileId;
 			androidResultFileId = globalBinAndroidResultFileId;
@@ -762,7 +762,7 @@ var binAndroid_fn = {
 		});
 		
 		if(sheetNum.length == 0) {
-			alert('please select sheet');
+			alert('<spring:message code="msg.common.check.sheet" />');
 			return;
 		} else {
 			loading.show();
@@ -1120,7 +1120,7 @@ var binAndroid_fn = {
     	var ValidCnt = Object.keys(binAndroidValidMsgData).reduce(binAndroid_fn.checkErrorData, []).length;
 
 		if(ValidCnt > 0){
-			alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.", function(){});
+			alertify.alert("<spring:message code='msg.project.download.notice'>", function(){});
 
 			return false;	
 		}
@@ -1128,7 +1128,7 @@ var binAndroid_fn = {
     	var DiffCnt = Object.keys(binAndroidDiffMsgData).reduce(binAndroid_fn.checkErrorData, []).length;
 
         if(DiffCnt > 0){
-        	alertify.alert("You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.", function(){});
+        	alertify.alert("<spring:message code='msg.project.download.notice' />", function(){});
 
 			return false;
         }
@@ -1136,7 +1136,7 @@ var binAndroid_fn = {
         var notExcludeRow = $("#binAndroidList").getRowData().filter(function(a){ return a.excludeYn == "N"; }).length;
 
         if(notExcludeRow == 0){ // excludeYn이 N인 대상이 0 건일 경우(전체 Data가 excludeYn:Y 이거나 binAndroid의 Data가 0건 인 경우)
-        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.", function(){});
+        	alertify.alert("<spring:message code='msg.project.no.binary' />", function(){});
 
 			return false;
         }
@@ -1150,7 +1150,7 @@ var binAndroid_fn = {
         }, []).length;
 
         if(noticeCheckRow == 0){ //  "NOTICE Should be "ok" in case OSS is used" 인 대상이 0건 일 경우
-        	alertify.alert("There is no binary that meets the conditions for creating NOTICE.", function(){});
+			alertify.alert("<spring:message code='msg.project.no.binary' />", function(){});
 
 			return false;
         }

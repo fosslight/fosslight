@@ -91,7 +91,7 @@
 				});
 				
 				$(".selfCheckDelete").click(function(){
-					alertify.confirm("Are you sure you want to remove this project?\nThis will permanently delete all datas.", function (e) {
+					alertify.confirm('<spring:message code="msg.selfcheck.confirm.remove.project" />', function (e) {
 						if (e) {
 							fn.deleteSubmit();
 						} else {
@@ -225,7 +225,7 @@
 			
 			if(!regExp.test(date)){
 				$this.val("");
-				alert("날짜 입력 형식이 틀립니다. 예:2016.01.01");
+				alert('<spring:message code="msg.project.confirm.wrong.input.date" />');
 			}
 		}
 	}
@@ -564,7 +564,7 @@
 			});
 			
 			if(sheetNum.length == 0) {
-				alert('please select sheet');
+				alert('<spring:message code="msg.common.check.sheet" />');
 				
 				return;
 			} else {
@@ -840,7 +840,7 @@
 								_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 							}
 						} else {
-							alertify.alert("Unconfirmed open source", function(){});
+							alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
 						}
 					},
 					error : function(){

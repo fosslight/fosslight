@@ -17,7 +17,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr">License Name</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseName" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="licenseName" type="text" class="autoComLicenseLong w100P"/>
@@ -26,7 +26,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">License Type</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseType" /></th>
 							<td class="dCase">
 								<div class="required">
 									<span class="selectSet w100P">
@@ -42,7 +42,7 @@
 						</tr>
 						<c:if test="${not empty ct:getCodeValues(ct:getConstDef('CD_LICENSE_RESTRICTION'))}">
 						<tr>
-							<th class="dCase">Restriction</th>
+							<th class="dCase"><spring:message code="msg.common.field.restriction" /></th>
 							<td class="dCase">
 								<span class='checkSet'>
 								${ct:genCheckbox(ct:getConstDef("CD_LICENSE_RESTRICTION"), licenseInfo.restriction, 'edit')}
@@ -51,7 +51,7 @@
 						</tr>
 						</c:if>
 						<tr>
-							<th class="dCase">Obligation</th>
+							<th class="dCase"><spring:message code="msg.common.field.obligation" /></th>
 							<td class="dCase">
 								<span class="checkSet">
 									<input name="obligationNotificationYn" class="oblicationChk" type="checkbox" id="noticeChk" value="Y" /><label for="noticeChk">Notice</label>
@@ -62,7 +62,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">SPDX Short Identifier</th>
+							<th class="dCase"><spring:message code="msg.common.field.SPDX" /></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="shortIdentifier" type="text" class="w100P" />
@@ -71,7 +71,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Nick Name</th>
+							<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 							<td class="dCase">
 								<div class="multiTxtSet">	
 									<div class="required">								
@@ -83,23 +83,23 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Web site for the license</th>
+							<th class="dCase"><spring:message code="msg.common.field.licenseWebsite" /></th>
 							<td class="dCase">
 								<input name="webpage" type="text" class="w100P" placeholder="http://" />
 							</td>
 						</tr>
 						<c:if test="${not empty licenseInfo.internalUrl}">
 						<tr>
-							<th class="dCase">Internal URL</th>
+							<th class="dCase"><spring:message code="msg.common.field.internalURL" /></th>
 							<td class="dCase"><a href="${licenseInfo.internalUrl}" target="_blank">${licenseInfo.internalUrl}</a></td>
 						</tr>
 						</c:if>
 						<tr>
-							<th class="dCase">User Guide</th>
+							<th class="dCase"><spring:message code="msg.common.field.userGuide" /></th>
 							<td class="dCase"><textarea name="description" class="w100P h150"></textarea></td>
 						</tr>
 						<tr>
-							<th class="dCase txStr">License Text</th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.licenseText" /></th>
 							<td class="dCase">
 								<div class="required">
 									<textarea name="licenseText" class="w100P h150"></textarea>
@@ -108,7 +108,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Attribution</th>
+							<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
 							<td class="dCase"><textarea name="attribution" class="w100P h150"></textarea></td>
 						</tr>
 						<tr>

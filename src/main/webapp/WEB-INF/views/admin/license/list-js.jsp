@@ -123,11 +123,11 @@
 				
 			} else {
 				if(!cStart){
-					alert("시작 날짜를 확인해 주세요");
+					alert('<spring:message code="msg.license.confirm.startdate" />');
 
 					flag = false;
 				} else {
-					alert("끝 날짜를 확인해 주세요");
+					alert('<spring:message code="msg.license.confirm.enddate" />');
 
 					flag = false;
 				}
@@ -137,11 +137,11 @@
 					
 				} else {
 					if(!mStart){
-						alert("시작 날짜를 확인해 주세요");
+						alert('<spring:message code="msg.license.confirm.startdate" />');
 
 						flag = false;
 					} else {
-						alert("끝 날짜를 확인해 주세요");
+						alert('<spring:message code="msg.license.confirm.enddate" />');
 
 						flag = false;
 					}
