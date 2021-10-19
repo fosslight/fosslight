@@ -2060,7 +2060,9 @@ function getPieChart(obj){
 			text: ''
 		},
 		tooltip: {
-			pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.0f}%)'
+			formatter: function(){
+				return this.point.name + '</br>Count: ' + this.point.y + ' (' + Math.round(this.point.percentage) + '%)';
+			}
 		},
 		plotOptions: {
 			pie: {
