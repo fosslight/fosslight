@@ -268,7 +268,7 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String referenceDiv;
 	
-	private String deactivateFlag;
+	private String deactivateFlag = "N";
 	
 	private String[] ossIds;
 	private String syncRefOssId;

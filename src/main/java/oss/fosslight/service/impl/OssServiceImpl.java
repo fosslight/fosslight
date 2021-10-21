@@ -1072,6 +1072,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		registOssDownloadLocation(ossMaster);
 		
 		// Deactivate Flag Setting
+		if(isEmpty(ossMaster.getDeactivateFlag())) {
+			ossMaster.setDeactivateFlag(CoConstDef.FLAG_NO);
+		}
+		
 		ossMapper.setDeactivateFlag(ossMaster);
 		
 		// updated oss info, oss components > ossName update
