@@ -1083,7 +1083,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMaster.setOssName(orgMasterInfo.getOssName());
 				ossMaster.setMergeOssVersion(ossMaster.getOssVersion());
 				ossMaster.setOssVersion(orgMasterInfo.getOssVersion());
-				ossNameMerge(ossMaster, ossMaster.getOssName(), orgMasterInfo.getOssName());
+				ossNameMerge(ossMaster, ossMaster.getMergeOssName(), orgMasterInfo.getOssName());
 			}
 		}
 		
