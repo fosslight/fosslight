@@ -789,13 +789,13 @@
 				hidePageNav('_licenseChoicePager');
 
 				// 생성된 grid가 있는지 확인하기
-                if($('#_licenseChoice > tbody tr').length == 1) {
-                    var ids = $("#_licenseChoice").jqGrid("getDataIDs");
-                    var newId = ids.length ? Number(ids[ids.length - 1]) + 1 : 1;
-                    var row = {no: newId, ossLicenseIdx: newId};
-                    $("#_licenseChoice").jqGrid("addRowData", newId, row, "last");
-                    $("#_licenseChoice").jqGrid("setSelection", newId);
-                }
+				if($('#_licenseChoice > tbody tr').length == 1) {
+				    var ids = $("#_licenseChoice").jqGrid("getDataIDs");
+				    var newId = ids.length ? Number(ids[ids.length - 1]) + 1 : 1;
+				    var row = {no: newId, ossLicenseIdx: newId};
+				    $("#_licenseChoice").jqGrid("addRowData", newId, row, "last");
+				    $("#_licenseChoice").jqGrid("setSelection", newId);
+				}
 
 				// 첫 로우 ossLicenseComb 설정
 				setFristComb();
