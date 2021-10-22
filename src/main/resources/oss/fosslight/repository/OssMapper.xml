@@ -1116,38 +1116,7 @@
     		AND REFERENCE_DIV IN ('10','11','12','13','14','15')
     		AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
     </update>
-    
-    <update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
-    	UPDATE 
-    		OSS_COMPONENTS T1
-    	SET
-    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(registMergeFlag)">
-    		T1.OSS_ID = #{ossId}
-    		, T1.OSS_NAME = #{mergeOssName}
-    		, T1.OSS_VERSION = #{mergeOssVersion}
-    		</if>
-    		<if test="@oss.fosslight.util.StringUtil@isEmpty(registMergeFlag)">
-    		T1.OSS_ID = #{newOssId}
-    		, T1.OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID=#{newOssId})
-    		, T1.OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
-    		</if>
-    	WHERE
-    		<choose>
-    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-    				T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('20')
-    				AND T1.OSS_ID = #{ossId}
-    				AND T1.OSS_NAME = #{ossName}
-    			</when>
-    			<otherwise>
-    				T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
-    				AND T1.OSS_ID = #{ossId}
-    				AND T1.OSS_NAME = #{ossName}
-    			</otherwise>
-    		</choose>
-    </update>
-    
+   
     <select id="checkExistsOss" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
     	SELECT
     		*
@@ -1942,4 +1911,43 @@
 						  AND SUB1.OSS_NAME = #{ossName}
 						  AND SUB1.OSS_VERSION = #{ossVersion})
 	</select>
+	
+	<update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
+    	UPDATE 
+    		OSS_COMPONENTS T1
+    	SET
+    		<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
+    		T1.OSS_ID = #{ossId}
+    		</if>
+    		<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'N')">
+    		T1.OSS_ID = #{mergeOssId}
+    		</if>
+    		, T1.OSS_NAME = #{mergeOssName}
+    		, T1.OSS_VERSION = #{mergeOssVersion}
+    	WHERE
+    		<choose>
+    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    				T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
+    				AND T1.REFERENCE_DIV IN ('20')
+    				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
+    				AND T1.OSS_ID = #{ossId}
+    				</if>
+    				AND T1.OSS_NAME = #{ossName}
+    				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'N')">
+    				AND T1.OSS_VERSION = #{ossVersion}
+    				</if>
+    			</when>
+    			<otherwise>
+    				T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
+    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
+    				AND T1.OSS_ID = #{ossId}
+    				</if>
+    				AND T1.OSS_NAME = #{ossName}
+    				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'N')">
+    				AND T1.OSS_VERSION = #{ossVersion}
+    				</if>
+    			</otherwise>
+    		</choose>
+    </update>
 </mapper>
