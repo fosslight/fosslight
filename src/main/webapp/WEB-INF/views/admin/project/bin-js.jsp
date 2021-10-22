@@ -136,6 +136,14 @@ var bin_evt = {
 						$('.ajax-file-upload-statusbar').remove();
 						
 						bin_fn.makeFileTag(result[0][0]);	
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+						bin_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						bin_fn.makeFileTag(result[0][0]);
 					} else {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -673,6 +681,19 @@ var bin_fn = {
 		var target = $("#binList");
 		var mainData = target.jqGrid('getGridParam','data');
 		var sheetNum = ["0"];
+		var finalData = {"readType":"bin","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+
+		bin_fn.exeLoadReportData(finalData);
+	},
+	getSpdxSpreadsheetData : function(seq){
+		var sheetNum = ["1", "4"];
+
+		loading.show();
+		fn_grid_com.totalGridSaveMode('binList');
+		cleanErrMsg("binList");
+
+		var target = $("#binList");
+		var mainData = target.jqGrid('getGridParam','data');
 		var finalData = {"readType":"bin","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
 
 		bin_fn.exeLoadReportData(finalData);
