@@ -15,6 +15,7 @@ import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.Vulnerability;
@@ -204,4 +205,8 @@ public interface OssMapper {
 	OssAnalysis getAutoAnalysisSuccessOssInfo(@Param("referenceOssId") String referenceOssId);
 	
 	void setDeactivateFlag(OssMaster ossMaster);
+
+	List<PartnerMaster> getOssNameMergePartnerList(OssMaster ossMaster);
+
+	List<Project> getOssNameMergeProjectList(OssMaster ossMaster);
 }

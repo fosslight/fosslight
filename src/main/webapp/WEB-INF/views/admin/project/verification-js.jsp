@@ -127,7 +127,7 @@
 		// 20210617_autoVerify Change Alert ADD
 		$("input:checkbox[name='autoVerify']").change(function(){
 			if($("input:checkbox[name='autoVerify']").is(":checked") == true){
-				alertify.alert('Verify when file is uploaded', function(){});
+				alertify.alert("<spring:message code='msg.project.upload.verify' />", function(){});
 			}
 		});
 	});
@@ -616,10 +616,7 @@
 				e.preventDefault();
 				
 				if(distributionStatus == "PROC"){
-					var br = "<br>";
-					var comment = "Thank you so much for your patience." + br;
-					comment += "The distribution has already begun and has not yet completed." + br;
-					comment += "It takes a long time to deploy because of the large packaging file size.";
+                    var comment = '<spring:message code="msg.project.distribution.loading" />';
 					
 					alertify.error(comment, 0);
 					
@@ -651,6 +648,8 @@
 								  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 								  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 								  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
+								  , "allowDownloadSPDXJsonYn"	: $("#allowDownloadSPDXJsonYn").val()
+								  , "allowDownloadSPDXYamlYn"	: $("#allowDownloadSPDXYamlYn").val()
 						};
 						
 						fn.exeProjectStatus(data, "PROG");
@@ -697,6 +696,8 @@
 						  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 						  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 						  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
+						  , "allowDownloadSPDXJsonYn" 	: $("#allowDownloadSPDXJsonYn").val()
+						  , "allowDownloadSPDXYamlYn" 	: $("#allowDownloadSPDXYamlYn").val()
 				};
 				
 				fn.exeProjectStatus(data, "REV");
@@ -963,7 +964,14 @@
 			$('#spdxTag').click(function(e){
 				fn.downloadSpdxTag();
 			});
-			
+
+			$('#spdxJson').click(function(e){
+				fn.downloadSpdxJson();
+			});
+
+			$('#spdxYaml').click(function(e){
+				fn.downloadSpdxYaml();
+			});
 			//// [Pakage Document Download END]
 			
 			$("#identificationTab").click(function(){
@@ -1513,7 +1521,7 @@
 			var editorVal = CKEDITOR.instances.editor.getData();
 			
 			if(!editorVal || editorVal == "") {
-				alertify.alert("Please enter a comment", function(){});
+				alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 				return false;
 			}
 			
@@ -1571,7 +1579,7 @@
 			var editorVal = CKEDITOR.instances.editor.getData();
 
 			if(!editorVal || editorVal == "") {
-				alertify.alert("Please enter a comment", function(){});
+				alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
 				return false;
 			}
 			
@@ -1943,6 +1951,8 @@
 				$("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
 			} else {
 				$("#companyName").attr("disabled",!checked);
 				$("#ossDistributionSite").attr("disabled",!checked);
@@ -1966,7 +1976,9 @@
 				$("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
 				$("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-			}
+				$("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
+				$("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
+            }
 		},
 		initNotice : function(){
 			window.setTimeout(function(){
@@ -2055,7 +2067,9 @@
 					  , "allowDownloadSPDXSheetYn"  : $("#allowDownloadSPDXSheetYn").val()
 					  , "allowDownloadSPDXRdfYn" 	: $("#allowDownloadSPDXRdfYn").val()
 					  , "allowDownloadSPDXTagYn" 	: $("#allowDownloadSPDXTagYn").val()
-			};
+					  , "allowDownloadSPDXJsonYn" 	: $("#allowDownloadSPDXJsonYn").val()
+					  , "allowDownloadSPDXYamlYn" 	: $("#allowDownloadSPDXYamlYn").val()
+            };
 			
 			//공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
 			var fileSeq = $("input[name='fileSeq_1']").val();
@@ -2368,7 +2382,7 @@
 			activeTab = $(target).attr("rel");
 			
 			if(activeTab == "packaging" && datas.ossList.length < 1) {
-				alertify.alert("This project did not include open source under license that require you to make source code available. Therefore, you do not need to perform the OSS Packaging step.", function(){
+				alertify.alert('<spring:message code="msg.project.verification.confirm.package" />', function(){
 					tabMenuA.eq("1").click();
 				});
 			} else if(activeTab == "notice" && isAndroid == "Y") {

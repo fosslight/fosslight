@@ -82,7 +82,7 @@
 			var idx = '${licenseInfo.licenseName}';
 			
 			if('${isValid}' != "true") {
-				alertify.alert("Unconfirmed license", function(){ window.open("about:blank", "_self").close(); });
+				alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.license" />', function(){ window.open("about:blank", "_self").close(); });
 			} else {
 				$.ajax({
 					url : '/selfCheck/getLicenseData',

@@ -289,6 +289,14 @@
 				ORDER BY A.CREATED_DATE DESC
 			</if>
 		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('modifiedDate', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY A.MODIFIED_DATE ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY A.MODIFIED_DATE DESC
+			</if>
+		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
 			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
 				ORDER BY A.USER_NAME ASC
@@ -305,9 +313,7 @@
 				ORDER BY A.COMMENT DESC
 			</if>
 		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
-			<include refid="limitPage"/>
-		</if>
+		<include refid="limitPage"/>
 	</select>
 
 

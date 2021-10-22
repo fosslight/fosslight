@@ -503,7 +503,7 @@
 		     , COUNT(1) AS COLUMN_CNT
 		  FROM STATISTICS_MOSTUSED
 		 WHERE CHART_TYPE = #{chartType}
-		   AND CREATED_DATE BETWEEN ${startDate} AND ${endDate}
+		   AND DATE_FORMAT(CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
 		   AND DIV_NO = #{divisionNo}
 		 </if>

@@ -401,8 +401,12 @@
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",
 		tooltipCont2 : "<div class=\"tooltipData350\">"
-					   +"<dl><dt><span class=\"iconSet multi\">Multi License</span>Multi License</dt><dd>The OSS contains source codes under multiple licenses.</dd><dd>본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.</dd><dd>(e.g. \lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> \src is GPL-2.0)</dd></dl>"
-					   +"<dl><dt><span class=\"iconSet dual\">Dual License</span>Dual License</dt><dd>You can select one of registered licenses.</dd><dd>본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.</dd><dd>(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</dd></dl>"
+					   +"<dl><dt><span class=\"iconSet multi\">Multi License</span>Multi License</dt>" +
+                            "<dd><spring:message code='msg.oss.include.license' /></dd>"+
+                            "<dd>(e.g. \lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> \src is GPL-2.0)</dd></dl>"
+					   +"<dl><dt><span class=\"iconSet dual\">Dual License</span>Dual License</dt>" +
+                            "<dd><spring:message code='msg.oss.select.license' /></dd>"+
+                            "<dd>(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</dd></dl>"
 					   +"<dl><dt><span class=\"iconSet vdif\">Version Different License</span>Version Different License</dt><dd>The OSS is distributed under <span style=\"text-decoration : underline;\">different licenses</span> according to its <span style=\"text-decoration : underline;\">versions</span>.</dd><dd>본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.</dd><dd>(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</dd></dl>"
 					   +"</div>",
 		existTooltip : false,

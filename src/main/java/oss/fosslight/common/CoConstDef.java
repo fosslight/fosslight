@@ -89,6 +89,8 @@ public class CoConstDef {
 	public static final int FLAG_E = 0x10;
 	public static final int FLAG_F = 0x20;
 	public static final int FLAG_G = 0x40;
+	public static final int FLAG_H = 0x80;
+	public static final int FLAG_I = 0x100;
 	
 	/**	System Setting Code List */
 	// System Setting

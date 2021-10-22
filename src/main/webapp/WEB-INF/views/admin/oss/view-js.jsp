@@ -19,7 +19,7 @@
 			})
 			.on('keypress', function(e){
 				if((e.keyCode || e.which) == 13){
-					$('.search').trigger('click');	// 검색 엔터
+					$('.search').trigger('click');	// search enter
 				}
 			});
 		
@@ -27,7 +27,7 @@
 			$('#_projectList').parent().parent().hide();
 		}
 		
-		//자동완성 데이터 리스트 가져오기
+		//Get auto-completed data list.
 		commonAjax.getLicenseTags().success(function(data, status, headers, config){
 			if(data != null){
 				data.forEach(function(obj){
@@ -43,7 +43,7 @@
 				});
 			}
 		});
-		//자동완성 Single License 일때
+		//When it's an auto-complete single license,
 		setCustomAutoComplete('single');
 
 		$("#btnShowLicenseText").click(function() {
@@ -127,14 +127,14 @@
 		});
 		</c:if>
 		
-		//그리드에 버튼 표출
+		//Expressing a button on the grid.
 		function displayButtons(cellvalue, options, rowObject)
 		{
 			var deleted = "<input id='licenseBtn"+options.rowId+"' type='button' value='delete' class='btnCLight darkgray' />";
 			return deleted;
 		}
 
-		//프로젝트 리스트 더보기
+		//Look at the project list.
 		$('#listMore').on('click',function(){
 			createTabInFrameWithCondition('Project List', '#/project/list', 'OSSLISTMORE', '${ossId}');
 		});
@@ -150,7 +150,7 @@
 		return cellvalue;
 	}
 	
-	//데이터 객체
+	//date object
 	var data = {
 		detail : ${empty detail ? 'null':detail},
         detectedLicenseIdByName : ${empty detectedLicenseIdByName ? 'null': detectedLicenseIdByName},
@@ -165,9 +165,9 @@
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
 			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 
-			//데이터 초기화(컨트롤러에서 가져온 데이터)
+			//Data initialization (data from the controller)
 			if(data.detail){
-				/*Oss 정보*/
+				/*Oss info*/
 				$('#ossName').text(data.detail.ossName);
 				var ossVersion = data.detail.ossVersion;
 
@@ -206,7 +206,7 @@
 				$('#summaryDescription').text(data.detail.summaryDescription);
 				$('#attribution').text(data.detail.attribution);
 				
-				//가져온 데이터에 대한 라이센스 우선순위 체크
+				//Check license priorities for imported data
 				multiLicense();
 				var licenseType = autoLicense(data.list.rows);
 				var obligationHtml = autoObligation(data.list.rows);
@@ -214,7 +214,7 @@
 				$('#ob td div').html('');
 				$(obligationHtml).appendTo('#ob td div');
 				
-				//닉네임 리스트 데이터 입력
+				//Enter the nickname list data.
 				data.detail.ossNicknames.forEach(function(nickName, index, obj){
 					if(nickName!=''){
 						if(index > 0) $("#nickNames").append(", ");
@@ -256,7 +256,7 @@
 			},
 			loadComplete:function(){
 				$('#1_ossLicenseComb').hide().prop('enabled', false);
-				createMultiLicenseText();//라이센스 묶음 텍스트 출력
+				createMultiLicenseText();//License bundle text output.
 				makeBackGroundColor();
 
 				jQuery('#_licenseChoice').bind("jqGridInlineAfterSaveRow", function(ref,id){	
@@ -275,10 +275,10 @@
 					row['obligationChecks'] = temp.obligationChecks;
 					row['licenseType'] = temp.licenseType;
 					
-					list.splice(id-1,1,row);	//리스트에 데이터 추가
+					list.splice(id-1,1,row);//Add data to the list.
 					
 					makeBackGroundColor();
-					//라이센스 타입 및 Obligation 자동 체크
+					//License type and Obligation auto check
 					var type = autoLicense(list);
 					var obligationHtml = autoObligation(list);
 					
@@ -290,15 +290,15 @@
 					$('#lt td').html(type);
 					$('#ob td').html('');
 					$(obligationHtml).appendTo('#ob td');
-					createMultiLicenseText();	//라이센스 묶음 텍스트 출력
+					createMultiLicenseText();//License bundle text output.
 
-					lastsel=-1;					//선택 초기화
+					lastsel=-1;	//initialize choice
 				});	
 			}
 		});		
 	}
 	
-	//커스터마이징 자동완성 셀렉트
+	//Customizing autocomplete selection.
 	function setCustomAutoComplete(div) {
 		if(div == 'single') {
 			$( '.autoComOssLicense' ).autocomplete({
@@ -350,20 +350,20 @@
 	
 	
 	
-	//라이센스 우선순위 자동 계산
+	//Automatic calculation of license priorities.
 	function autoLicense(data){
 		var result = '';
 		var numbers = [];
-		//1. 그룹별 분류하기
+		//1. Classifying by group.
 		var groups = distributeGroups(data);
 		
-		//2. 각 그룹별 내부 비교하기
+		//2. Compare the inside of each group.
 		groups.forEach(function(group){
 			var number = compareLicenseGroupMax(group);
 			numbers.push(number);
 		});
 		
-		//3. 각 그룹끼리 비교하기(OR 비교)
+		//3. Compare each group (OR comparison)
 		if(numbers.length != 1) {
 			var min = getMin(numbers);
 			
