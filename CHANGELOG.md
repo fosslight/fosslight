@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.2.12 (22/10/2021)
+## Changes
+## 🚀 Features
+- Supports 3rd Party List OSS report as csv attachment @riyenas0925 (#203)
+- Support Import SPDX Spreadsheet in Self-Check List @kimtaehyun98 (#201)
+- Support Import SPDX Spreadsheet in BIN tab @kimtaehyun98 (#200)
+- Update statistics mostused & oss name merge function @FOSSLight-dev (#216)
+- Add SPDX json and yaml formats for modified notice packaging @hyewoncc (#193)
+- Support Import SPDX Spreadsheet in SRC tab @kimtaehyun98 (#184)
+
+## 🐛 Hotfixes
+
+- Update statistics mostused & oss name merge function @FOSSLight-dev (#216)
+- Add missing STATISTICS_MOSTUSED table @riyenas0925 (#214)
+- Modify detected licenses to be separated by , in mail sent @riyenas0925 (#205)
+- Bug Fix when Import SPDX Spreadsheet in SRC tab @kimtaehyun98 (#199)
+
+## 🔧 Maintenance
+
+- Moving hardcoded messages to US and KR properties @epicarts (#210)
+- Change PR merged action to only work for main @soimkim (#208)
+- Add contributors to README @soimkim (#202)
+
+---
+
 ## v1.2.11 (15/10/2021)
 ## Changes
 ## 🚀 Features
