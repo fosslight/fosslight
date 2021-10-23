@@ -276,6 +276,20 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 							
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
 							$('.ajax-file-upload-statusbar').remove();
+						} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
+							var result_ = result[0][0];
+							if(result && result_.uploadSucc) {
+								var appendHtml = '<span style="margin-left:20px;">'+result[0][0].createdDate+'</span>';
+								$('.ossUpload').children().remove();
+								$('.ossUpload').append('<a href="/download/'+result[0][0].registSeq+'/'+result[0][0].fileName+'">'+result[0][0].originalFilename+'</a>'+appendHtml);
+								$('.ossUpload').append(' <span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteOssFile(this)" style="vertical-align:super;"/></span>');
+								$('.ossUpload').append('<input type="hidden" name="ossFileId" value="'+result[0][0].registSeq+'"/>');
+								fn.getSpdxSpreadsheetData();
+							} else {
+								alert('파일 업로드에 실패하였습니다.');
+							}
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
 						} else {
 							alertify.error('<spring:message code="msg.common.valid" />', 0);
 							$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -1198,6 +1212,20 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 			var fileSeq = $('input[name=ossFileId]').val();
 			var sheetNum = ["0"];
+			var target = $("#list");
+			var mainData = target.jqGrid('getGridParam','data');
+			var finalData = {"readType":"partner","prjId" : '${detail.partnerId}', "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+			fn.exeLoadReportData(finalData);
+		},
+		getSpdxSpreadsheetData : function(){
+			loading.show();
+
+			fn_grid_com.totalGridSaveMode('list');
+			cleanErrMsg("list");
+
+			var fileSeq = $('input[name=ossFileId]').val();
+			var sheetNum = ["1", "4"];
 			var target = $("#list");
 			var mainData = target.jqGrid('getGridParam','data');
 			var finalData = {"readType":"partner","prjId" : '${detail.partnerId}', "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
