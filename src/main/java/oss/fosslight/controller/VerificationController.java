@@ -37,6 +37,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url.SELF_CHECK;
 import oss.fosslight.common.Url.VERIFICATION;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -56,6 +57,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VerificationService;
+import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -69,42 +71,46 @@ public class VerificationController extends CoTopComponent {
 	@Autowired VerificationService verificationService;
 	@Autowired FileService fileService;
 	@Autowired HistoryService historyService;
-	
+	@Autowired
+	SelfCheckService selfCheckService;
+
 	@Autowired VerificationMapper verificationMapper;
 	
-	@GetMapping(value = VERIFICATION.PAGE_ID, produces = "text/html; charset=utf-8")
-	public String list(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
-		log.info("URI: "+ "/project/verification/"+prjId);
+	@GetMapping(value = "/{startPath}/verification/{prjId}", produces = "text/html; charset=utf-8")
+	public String list(@PathVariable(value = "startPath") String startPath,@PathVariable(value = "prjId") String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+		log.info("URI: "+ "/"+startPath+"/verification/"+prjId);
 		Project project = new Project();
 		project.setPrjId(prjId);
-		
-		Project projectMaster = projectService.getProjectDetail(project);
-		
+
+		Project projectMaster;
+		if(startPath.equals("project")) projectMaster = projectService.getProjectDetail(project);
+		else projectMaster=selfCheckService.getProjectDetail(project);
+
 		if(!StringUtil.isEmpty(projectMaster.getCreator())){
-			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
+			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));
 		}
-		
+
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
 		comHisBean.setReferenceId(projectMaster.getPrjId());
 		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
-		
+
 		//프로젝트 정보
 		model.addAttribute("project", projectMaster);
-		
+
 		OssNotice _noticeInfo = projectService.setCheckNotice(projectMaster);
-		
+
 		if(_noticeInfo != null && CoConstDef.FLAG_NO.equals(projectMaster.getUseCustomNoticeYn())) {
 			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
 			model.addAttribute("ossNotice", _noticeInfo);
 		}
-		
+
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
 		list = verificationService.setMergeGridData(list);
-		
+
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		List<String> duplLicenseCheckList = new ArrayList<>(); // 중목제거용
-		
+
 		// 사용중인 라이선스에 user guide가 설정되어 있는 경우 체크
 		if(list != null && !list.isEmpty()) {
 			for(OssComponents bean : list) {
@@ -113,7 +119,7 @@ public class VerificationController extends CoTopComponent {
 					LicenseMaster licenseBean;
 					for(String license : bean.getLicenseName().split(",", -1)) {
 						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
-						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
+						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription())
 								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())
 								&& CoConstDef.FLAG_YES.equals(licenseBean.getObligationDisclosingSrcYn())) {
 							userGuideLicenseList.add(licenseBean);
@@ -123,25 +129,26 @@ public class VerificationController extends CoTopComponent {
 				}
 			}
 		}
-		
+
 		List<File> files = new ArrayList<File>();
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
-		
+
 		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
 		model.addAttribute("ossList", toJson(list));
 		model.addAttribute("files", files);
-		
+
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		
-		return VERIFICATION.PAGE_JSP;
+
+		if(startPath.equals("project"))	return VERIFICATION.PAGE_JSP;
+		else return SELF_CHECK.PAGE_JSP;
 	}
 	
-	@GetMapping(value = VERIFICATION.PAGE_DIV_ID, produces = "text/html; charset=utf-8")
-	public String list2(@PathVariable String prjId, @PathVariable String initDiv, HttpServletRequest req, HttpServletResponse res, Model model) {
-		log.info("URI: "+ "/project/verification/"+prjId);
+	@GetMapping(value = "/{startPath}/verification/{initDiv}/{prjId}", produces = "text/html; charset=utf-8")
+	public String list2(@PathVariable(value = "startPath") String startPath,@PathVariable(value = "prjId") String prjId, @PathVariable String initDiv, HttpServletRequest req, HttpServletResponse res, Model model) {
+		log.info("URI: "+ "/"+startPath+"/verification/"+prjId);
 		
 		Project project = new Project();
 		project.setPrjId(prjId);
@@ -204,8 +211,9 @@ public class VerificationController extends CoTopComponent {
 		
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		
-		return VERIFICATION.PAGE_JSP;
+
+        if(startPath.equals("project"))	return VERIFICATION.PAGE_JSP;
+        else return SELF_CHECK.PAGE_JSP;
 	}
 	
 	@ResponseBody

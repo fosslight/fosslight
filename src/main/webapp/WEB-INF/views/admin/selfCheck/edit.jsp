@@ -128,6 +128,7 @@
             <input id="delete" type="button" value="Delete" class="btnColor left selfCheckDelete" /><!-- 2018-07-19 choye 추가 class에  selfCheckDelete -->
             <span class="right">
             <a class="iconSet help left" id="helpLink_vulerabiityExport" style="display: none; position:relative; cursor: pointer; right:10px;"></a>
+                <input type="button" value="Notice" onclick="createTabInFrame('Notice','#/selfCheck/verification/'+'${project.prjId}')" class="btnColor red btnExpor srcBtn" />
                 <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
                 <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
                 <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
@@ -142,6 +143,7 @@
 		<div class="btnLayout">
 			<input id="delete" type="button" value="Delete" class="btnColor left selfCheckDelete" /><!-- 2018-07-19 choye 추가 class에  selfCheckDelete -->
 			<span class="right">
+				<input type="button" value="Notice" onclick="createTabInFrame('Notice','#/selfCheck/verification/'+'${project.prjId}')" class="btnColor red btnNotice srcBtn"/>
 				<input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
 				<input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
 				<input id="srcReset" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />

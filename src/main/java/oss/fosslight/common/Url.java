@@ -304,11 +304,11 @@ public final class Url {
 	
 	public static final class VERIFICATION {
 		public static final String PATH = "/project/verification";
-		
+
 		public static final String PAGE_ID = PATH + "/{prjId}";
 		public static final String PAGE_DIV_ID = PATH + "/{initDiv}/{prjId}";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
-		
+
 		public static final String REGIST_FILE = PATH + "/registFile";
 		public static final String UPLOAD_VERIFICATION = PATH + "/uploadVerification";
 		public static final String VERIFY = PATH + "/verify";
@@ -457,6 +457,9 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_ID = PATH + "/edit/{prjId}";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
+
+		public static final String VERIFICATION = PATH + "/verification";
+		public static final String VERIFICATION_JSP = TILES_ROOT + PATH + "/verification";
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		
@@ -480,6 +483,9 @@ public final class Url {
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String LICENSE_DATA = PATH + "/getLicenseData";
+
+		public static final String VER_PATH = "/selfCheck/verification";
+		public static final String PAGE_JSP = TILES_ROOT + VER_PATH + "";
 	}
 	
 	public static final class COMPLIANCE {
