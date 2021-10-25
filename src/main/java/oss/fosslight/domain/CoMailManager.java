@@ -1419,6 +1419,9 @@ public class CoMailManager extends CoTopComponent {
 					if(!isEmpty(project.getPrjVersion())) {
 						_s += " (" + project.getPrjVersion() +")";
 					}
+					
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/view/" + bean.getParamPrjId();
+					_s = "<a href='"+url+"' target='_blank'>" + _s + "</a>";
 				}
 				
 				if(title.indexOf("${Creator}") > -1) {
@@ -1494,8 +1497,11 @@ public class CoMailManager extends CoTopComponent {
 					if(!isEmpty(partnerInfo.getSoftwareName())) {
 						_s += " (" + partnerInfo.getSoftwareName() +")";
 					}
+					
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/view/" + bean.getParamPartnerId();
+					_s = "<a href='" + url + "' target='_blank'>" + _s + "</a>";
 				}
-
+				
 				if(title.indexOf("${Creator}") > -1) {
 					_s2 = avoidNull(makeUserNameFormat(partnerInfo.getCreator()));
 				}

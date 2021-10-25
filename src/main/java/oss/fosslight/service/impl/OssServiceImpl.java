@@ -548,6 +548,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(!isEmpty(bean.getMergeStr())) {
 				boolean isDel = false;
 				
+				OssMaster mergeBean = new OssMaster();
+				
 				// 신규 version의 등록이 필요한 경우
 				if("Added".equalsIgnoreCase(bean.getMergeStr())) {
 					CommentsHistory historyBean = new CommentsHistory();
@@ -560,6 +562,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMapper.changeOssNameByDelete(bean);
 					
 					commentService.registComment(historyBean);
+					
+					mergeBean.setMergeOssId(bean.getOssId());
 				} else {
 					// Duplicated
 					bean.setNewOssId(bean.getOssId());
@@ -580,6 +584,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMapper.deleteOssLicense(bean);
 					ossMapper.deleteOssMaster(bean);
 					
+					mergeBean.setMergeOssId(bean.getNewOssId());
+					
 					isDel = true;
 				}
 				
@@ -594,6 +600,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						log.error(e.getMessage(), e);
 					}
 				}
+				
+				mergeBean.setOssId(bean.getOssId());
+				mergeBean.setOssName(beforeBean.getOssName());
+				mergeBean.setMergeOssName(chagedOssName);
+				mergeBean.setOssVersion(bean.getOssVersion());
+				mergeBean.setMergeOssVersion(bean.getOssVersion());
+				mergeBean.setRegistMergeFlag("N");
+				ossNameMerge(mergeBean, chagedOssName, beforOssName);
 			}
 		}
 		
@@ -616,11 +630,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMapper.mergeOssNickname2(nickMergeParam);
 			}
 		}
-		
-		// oss name merge
-		ossMaster.setOssName(beforeBean.getOssName());
-		ossMaster.setOssVersion(beforeBean.getOssVersion());
-		ossNameMerge(ossMaster, chagedOssName, beforOssName);
 		
 		CoCodeManager.getInstance().refreshOssInfo();
 
@@ -663,15 +672,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	private void ossNameMerge(OssMaster ossMaster, String changedOssName, String beforeOssName) {
 		String contents = "<p>The following OSS Name has been changed.</p>\r\n" +  
-				"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:500px;\">\r\n" + 
+				"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" + 
 				"	<tbody>\r\n" + 
 				"		<tr>\r\n" + 
-				"		    <th>OSS Name (Written before)</th>\r\n" + 
-				"                    <th>OSS Name (Changed)</th>\r\n" + 
+				"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" + 
+				"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" + 
 				"		</tr>\r\n" + 
 				"                <tr>\r\n" + 
-				"                    <td style=\"text-align:center;\">"+ beforeOssName +"</td>\r\n" + 
-				"                    <td style=\"text-align:center;\">"+ changedOssName +"</td>\r\n" + 
+				"                    <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" + 
+				"                    <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" + 
 				"                </tr>\r\n" + 
 				"	</tbody>\r\n" + 
 				"</table>";

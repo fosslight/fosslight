@@ -208,7 +208,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 		String uploadThumbFilePath = "";
 		
 		try {
-			uploadFilePath = CommonFunction.emptyCheckProperty("android.notice.path", "/upload/android_notice")+ "/" + prjId;
+			uploadFilePath = CommonFunction.emptyCheckProperty("android.upload.path", "/upload/android_notice")+ "/" + prjId;
 			uploadThumbFilePath = CommonFunction.emptyCheckProperty("image.path", "/image")+ "/" + prjId + "/thumb";
 		} catch(Exception e) {
 			log.error("file upload path(get properties) : " + e.getMessage());

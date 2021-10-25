@@ -958,7 +958,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			String uploadThumbFilePath = "";
 			
 			try{
-				uploadFilePath = appEnv.getProperty("android.notice.path", "/upload/android_notice") + "/" + prjId;
+				uploadFilePath = appEnv.getProperty("android.upload.path", "/upload/android_notice") + "/" + prjId;
 				uploadThumbFilePath = appEnv.getProperty("image.path", "/image") + "/" + prjId + "/thumb";
 			}catch(Exception e){
 				log.error("file upload path(get properties) : " + e.getMessage());

@@ -276,6 +276,7 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String ossMergeReferenceId;
 	private String registMergeFlag;
+	private String mergeOssId;
 	private String mergeOssName;
 	private String mergeOssVersion;
 
@@ -1908,5 +1909,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setMergeOssVersion(String mergeOssVersion) {
 		this.mergeOssVersion = mergeOssVersion;
+	}
+
+	public String getMergeOssId() {
+		return mergeOssId;
+	}
+
+	public void setMergeOssId(String mergeOssId) {
+		this.mergeOssId = mergeOssId;
 	}
 }
