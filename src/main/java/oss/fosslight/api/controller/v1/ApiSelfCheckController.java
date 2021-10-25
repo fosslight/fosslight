@@ -119,7 +119,7 @@ public class ApiSelfCheckController extends CoTopComponent {
     public CommonResult ossReportSelfCheck(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "OSS Report > sheetName : 'Self-Check'", required = false) @RequestPart(required = false) MultipartFile ossReport){
+    		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
