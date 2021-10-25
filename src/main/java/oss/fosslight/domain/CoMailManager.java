@@ -624,6 +624,7 @@ public class CoMailManager extends CoTopComponent {
     		
     		bean.setEmlMessage(msgContents);
     		// title
+    		title = title.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
     		bean.setEmlTitle(title);
     		
     		Project prjInfo = null;
