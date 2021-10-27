@@ -86,6 +86,13 @@
 							</select>
 						</span>
 					</dd>
+					<dd style="padding-top: 6px;">
+						<label>OSS Type</label>
+						<span class="iconSet none" title="None">None</span><input type="checkbox" id="noneLicenseFlag" name="ossTypeSearch" value = "N"/>
+						<span class="iconSet multi" title="Multi">Multi</span><input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" value = "M"/>
+						<span class="iconSet dual" title="Dual">Dual</span><input type="checkbox" id="dualLicenseFlag" name="ossTypeSearch" value = "D"/>
+						<span class="iconSet vdif" title="Version Difference">v-Diff</span><input type="checkbox" id="versionDiffFlag" name="ossTypeSearch" value = "V"/>
+					</dd>
 				</dl>
 				</c:if>
 				<input name="act" type="hidden" value="search"/> 

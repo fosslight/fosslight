@@ -37,7 +37,7 @@
 			$('#search').on('click',function(e){
 				e.preventDefault();
 				
-				var postData=$('#ossSearch').serializeObject();
+				var postData = serializeObjectHelper();
 				
 				if(initYn) {
 					list.load();
@@ -73,7 +73,7 @@
 		hideURL:function(){},
 		downloadExcel : function(){
 			if(isMaximumRowCheck(totalRow)){
-				var data = $('#ossSearch').serializeObject();
+				var data = serializeObjectHelper();
 				
 				if(data.copyrights == ''){
 					data.copyrights = [];
@@ -377,7 +377,7 @@
 						createTabInFrame(rowData['ossId']+'_Opensource', '#/oss/edit/'+rowData['ossId']);
 					}
 				},
-				postData: $('#ossSearch').serializeObject()
+				postData: serializeObjectHelper()
 			});
 		}
 	};
@@ -387,5 +387,18 @@
 		var icon1 = "<a href=\""+cellvalue+"\" class=\"urlLink\" target=\"_blank\">"+cellvalue+"</a>";
 		
 		return icon1;
+	}
+
+	function serializeObjectHelper() {
+		var postData = $('#ossSearch').serializeObject();
+
+		if(postData.ossTypeSearch != null) {
+			postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+			postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+		} else {
+			postData.ossTypeSearch = "";
+		}
+
+		return postData;
 	}
 </script>
