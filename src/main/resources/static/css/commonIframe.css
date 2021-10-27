@@ -281,6 +281,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 /* end 2020-02-12 */
 /* ===== Icon ===== */
 .iconSet {display:inline-block;width:16px;height:16px;line-height:1000%;font-size:0;overflow:hidden;background: url("../images/img_icon.png?v=20180612") no-repeat;}
+.iconSet.none {margin:0 2px;background-position:-155px top;}
 .iconSet.reg {margin:0 2px;background-position:-185px top;}
 .iconSet.multi {margin:0 2px;background-position:-215px top;}
 .iconSet.dual {margin:0 2px;background-position:-245px top;}
@@ -408,6 +409,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .listSearch .adminSearch dt span {font-size:13px;color:#c00c3f;}
 .listSearch .adminSearch dd {padding:0 17px 0 0;}
 .listSearch .adminSearch dd input {width:60px;}
+.listSearch .adminSearch dd input[type=checkbox] {width: 13px;}
 .listSearch .adminSearch dd input.cal {width:92px;}
 .listSearch .adminSearch dd label {padding:0 15px 0 0;color:#454545;}
 .listSearch .hiddenSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:135px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
