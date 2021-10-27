@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.2.13 (27/10/2021)
+## Changes
+## 🚀 Features
+
+- Load and save all sheets with sheet names starting with Self-check, SRC, BIN @namkyu1999 (#223)
+- Support Import SPDX Spreadsheet in 3rd Party @kimtaehyun98 (#220)
+
+## 🐛 Hotfixes
+
+- Fix the missing item that print the "Declared :" message @FOSSLight-dev (#228)
+- Fix the bug where the link tag is displayed in the mail subject. @FOSSLight-dev (#225)
+
+
+---
+
 ## v1.2.12 (22/10/2021)
 ## Changes
 ## 🚀 Features
