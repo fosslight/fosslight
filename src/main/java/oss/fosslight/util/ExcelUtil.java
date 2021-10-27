@@ -1061,7 +1061,8 @@ public class ExcelUtil extends CoTopComponent {
     				if(ossNameCol < 0) {
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+//    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					if(bean.getCopyrightText() == ""){
     						bean.setCopyrightText(" ");
@@ -1095,7 +1096,8 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+//    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     				}
@@ -1114,10 +1116,11 @@ public class ExcelUtil extends CoTopComponent {
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
     				String licenseName = getCellData(row.getCell(licenseCol));
-    				if(licenseName.contains("(")){
-    					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
-    				}
-    				else if(licenseName.contains(",")) {
+//    				if(licenseName.contains("(")){
+//    					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
+//    				}
+//    				else 
+    				if(licenseName.contains(",")) {
     					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
     				}
     				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);

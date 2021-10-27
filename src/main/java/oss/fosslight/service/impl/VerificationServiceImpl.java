@@ -784,11 +784,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				checkResultMap.put(pathCheckList35.get(idx), deCompResultMap.containsKey(pathCheckList35.get(idx)) ? deCompResultMap.get(pathCheckList35.get(idx)) : 0);
 				checkResultMap.put(pathCheckList45.get(idx), deCompResultMap.containsKey(pathCheckList45.get(idx)) ? deCompResultMap.get(pathCheckList45.get(idx)) : 0);
 
-				checkResultMap.put(pathCheckList16.get(idx), deCompResultMap.containsKey(pathCheckList16.get(idx)) ? deCompResultMap.get(pathCheckList16.get(idx)) : 0);
-				checkResultMap.put(pathCheckList26.get(idx), deCompResultMap.containsKey(pathCheckList26.get(idx)) ? deCompResultMap.get(pathCheckList26.get(idx)) : 0);
-				checkResultMap.put(pathCheckList36.get(idx), deCompResultMap.containsKey(pathCheckList36.get(idx)) ? deCompResultMap.get(pathCheckList36.get(idx)) : 0);
-				checkResultMap.put(pathCheckList46.get(idx), deCompResultMap.containsKey(pathCheckList46.get(idx)) ? deCompResultMap.get(pathCheckList46.get(idx)) : 0);
-
+				
+				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList16.get(idx)), pathCheckList16.get(idx));
+				checkResultMap.put(pathCheckList16.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList26.get(idx)), pathCheckList26.get(idx));
+				checkResultMap.put(pathCheckList26.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList36.get(idx)), pathCheckList36.get(idx));
+				checkResultMap.put(pathCheckList36.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList46.get(idx)), pathCheckList46.get(idx));
+				checkResultMap.put(pathCheckList46.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				
 				idx ++;
 			}
 
@@ -1064,6 +1069,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
+	private String addDecompressionRootPath(String path, boolean flag, String val) {
+		return flag ? val : path + "/" + val;
+	}
+
 	@Override
 	public void updateVerifyFileCount(HashMap<String,Object> fileCounts) {
 		for(String componentId : fileCounts.keySet()){
