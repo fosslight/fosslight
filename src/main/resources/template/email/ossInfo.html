@@ -51,11 +51,11 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										#if($!oss_basic_info.ossType.contains("V"))
-										<td style="padding:5px;">$!oss_basic_info.ossVersion / <span class="iconSet vdif">v-Diff</span></td>
-										#else
-										<td style="padding:5px;">$!oss_basic_info.ossVersion</td>
-										#end
+										<td style="padding:5px;">$!oss_basic_info.ossVersion #if($!oss_basic_info.ossVersion != '') / #end 
+										#if($!oss_basic_info.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
+										#if($!oss_basic_info.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
+										#if($!oss_basic_info.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name / Type</th>
