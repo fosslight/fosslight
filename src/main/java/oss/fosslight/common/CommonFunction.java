@@ -1161,13 +1161,12 @@ public class CommonFunction extends CoTopComponent {
 			if(_list != null) {
 				Map<String, ProjectIdentification> sortMap = new TreeMap<String, ProjectIdentification>();
 				
-				/* [NEW] 1.OSS Table > If OSS Name, Oss Version equals "", delete row merge function
 				for(ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
 					String key = "";
 					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase())) {
-						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
+						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}else {
-						key = gridBean.getFilePath() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
+						key = gridBean.getFilePath() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}
 					
 					if(!sortMap.keySet().contains(key)) {
@@ -1204,11 +1203,11 @@ public class CommonFunction extends CoTopComponent {
 						gridBean.setComponentLicenseList(resultLicenseList);
 						sortMap.put(key, gridBean);
 					}
-				}*/
+				}
 				
 				String key = "";
 				String key3 = "";
-				for(ProjectIdentification gridBean : _list) {
+				for(ProjectIdentification gridBean : sortMap.values()) {
 					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO.get(gridBean.getLicenseName());
 					String ossName = isEmpty(gridBean.getOssName()) ? "-" : gridBean.getOssName();
 					String key2 = "";
