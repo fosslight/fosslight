@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.2.14 (29/10/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Revert - Column mapping for import SPDX Spreadsheet @FOSSLight-dev  (#229)
+
+## 🔧 Maintenance
+
+- Update send email function (oss type image) @FOSSLight-dev (#235)
+- Update OSS Table legacy function, OSS Info mail format @FOSSLight-dev (#231)
+
+---
+
 ## v1.2.13 (27/10/2021)
 ## Changes
 ## 🚀 Features
