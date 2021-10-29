@@ -1160,6 +1160,7 @@ public class CommonFunction extends CoTopComponent {
 			
 			if(_list != null) {
 				Map<String, ProjectIdentification> sortMap = new TreeMap<String, ProjectIdentification>();
+				
 				for(ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
 					String key = "";
 					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase())) {
@@ -1167,8 +1168,6 @@ public class CommonFunction extends CoTopComponent {
 					}else {
 						key = gridBean.getFilePath() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}
-					
-					
 					
 					if(!sortMap.keySet().contains(key)) {
 						List<ProjectIdentification> resultLicenseList = new ArrayList<ProjectIdentification>();
