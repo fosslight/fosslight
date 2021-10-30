@@ -229,7 +229,14 @@ Guide for Packaging : <a href="$packaging_requested_url_info">$packaging_request
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
-										<td style="padding:5px;">$!vulnerability_reCalc.cveId</td>
+										<td style="padding:5px;">
+											#if ($vulnerability_reCalc.cveId)
+												#set($cveIdRegExp = "((cve|CVE)-[0-9]{4}-[0-9]{4,})")
+												#set($cveLink = $vulnerability_reCalc.cveId.replaceAll($cveIdRegExp,
+													"<a href='https://nvd.nist.gov/vuln/detail/$1' target='_blank'>$1<a/>"))
+												$cveLink
+											#end
+										</td>
 										<td style="padding:5px;">$!vulnerability_reCalc.cveIdTo</td>
 									</tr>
 									<tr>
