@@ -4042,4 +4042,12 @@ public class CommonFunction extends CoTopComponent {
 		
 		return distributionDuplicateMsg;
 	}
+
+	public static String convertCveIdToLink(String cveId) {
+		if (StringUtil.isEmpty(cveId)) {
+			return "";
+		}
+		return cveId.replaceAll("((cve|CVE)-[0-9]{4}-[0-9]{4,})",
+				"<a href='https://nvd.nist.gov/vuln/detail/$1' target='_blank'>$1<a/>");
+	}
 }

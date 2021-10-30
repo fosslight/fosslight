@@ -3143,6 +3143,7 @@ public class CoMailManager extends CoTopComponent {
 		}
 		
 		context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
+		context.put("commonFunction", CommonFunction.class);
 	    
 		props.put("resource.loader", "class");
 	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
