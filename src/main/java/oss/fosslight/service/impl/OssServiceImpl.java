@@ -508,8 +508,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					OssMaster ossMailInfo2 = getOssInfo(bean.getOssId(), true);
 					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
 					
+					List<String> ossNickNameList = new ArrayList<String>();
+										
 					if(tempBean2.getOssNicknames() != null) {
-						tempBean2.setOssNickname(CommonFunction.arrayToString(tempBean2.getOssNicknames(), "<br>"));
+						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
+							ossNickNameList.add(nickName);
+						}
+						ossNickNameList.add(beforOssName);
+						tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
+						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
+					}else {
+						ossNickNameList.add(beforOssName);
+						tempBean2.setOssNickname(beforOssName);
+						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					}
 					
 					tempBean2.setOssName(chagedOssName);
@@ -531,8 +542,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
 					
+					List<String> ossNickNameList = new ArrayList<String>();
+					
 					if(tempBean2.getOssNicknames() != null) {
-						tempBean2.setOssNickname(CommonFunction.arrayToString(tempBean2.getOssNicknames(), "<br>"));
+						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
+							ossNickNameList.add(nickName);
+						}
+						ossNickNameList.add(beforOssName);
+						tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
+						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
+					}else {
+						ossNickNameList.add(beforOssName);
+						tempBean2.setOssNickname(beforOssName);
+						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					}
 					
 					tempBean2.setOssName(chagedOssName);
