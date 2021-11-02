@@ -288,63 +288,70 @@ public class FileUtil {
      */
     public static void downloadFile(String fileURL, String saveDir)
             throws Exception {
+    	HttpURLConnection httpConn = null;
+    	FileOutputStream outputStream = null;
+    	InputStream inputStream = null;
         URL url = new URL(fileURL);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        int responseCode = httpConn.getResponseCode();
- 
-        // always check HTTP response code first
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            String fileName = "";
-            String disposition = httpConn.getHeaderField("Content-Disposition");
-            String contentType = httpConn.getContentType();
-            int contentLength = httpConn.getContentLength();
- 
-            if (disposition != null) {
-                // extracts file name from header field
-                int index = disposition.indexOf("filename=");
-                
-                if (index > 0) {
-                    fileName = disposition.substring(index + 10,
-                            disposition.length() - 1);
+        try {
+             httpConn = (HttpURLConnection) url.openConnection();
+            int responseCode = httpConn.getResponseCode();
+     
+            // always check HTTP response code first
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                String fileName = "";
+                String disposition = httpConn.getHeaderField("Content-Disposition");
+     
+                if (disposition != null) {
+                    // extracts file name from header field
+                    int index = disposition.indexOf("filename=");
+                    
+                    if (index > 0) {
+                        fileName = disposition.substring(index + 10,
+                                disposition.length() - 1);
+                    }
+                } else {
+                    // extracts file name from URL
+                    fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
+                }
+     
+                // opens input stream from the HTTP connection
+                inputStream = httpConn.getInputStream();
+                String saveFilePath = saveDir + File.separator + fileName;
+
+                if(!Files.exists(Paths.get(saveDir))) {
+                    Files.createDirectories(Paths.get(saveDir));
+                }
+
+                // opens an output stream to save into file
+                outputStream = new FileOutputStream(saveFilePath);
+     
+                int bytesRead = -1;
+                byte[] buffer = new byte[4096];
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
                 }
             } else {
-                // extracts file name from URL
-                fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1, fileURL.length());
-            }
- 
-            log.debug("Content-Type = " + contentType);
-            log.debug("Content-Disposition = " + disposition);
-            log.debug("Content-Length = " + contentLength);
-            log.debug("fileName = " + fileName);
- 
-            // opens input stream from the HTTP connection
-            InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath = saveDir + File.separator + fileName;
+            	throw new Exception("No file to download. Server replied HTTP code: " + responseCode);
+            }			
+		} finally {
+			if(httpConn != null) {
+				try {
+					httpConn.disconnect();
+				} catch (Exception e) {}
+			}
 
-            if(!Files.exists(Paths.get(saveDir))) {
-                Files.createDirectories(Paths.get(saveDir));
-            }
+			if(outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (Exception e) {}
+			}
+			if(inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (Exception e) {}
+			}
+		}
 
-            // opens an output stream to save into file
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
- 
-            int bytesRead = -1;
-            byte[] buffer = new byte[4096];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
- 
-            outputStream.close();
-            inputStream.close();
-            
-            log.debug("File downloaded");
-            
-            httpConn.disconnect();
-        } else {
-        	httpConn.disconnect();
-        	
-        	throw new Exception("No file to download. Server replied HTTP code: " + responseCode);
-        }
     }
     
     
