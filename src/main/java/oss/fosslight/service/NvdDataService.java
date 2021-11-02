@@ -473,6 +473,12 @@ public class NvdDataService {
 		return fileCheck;
 	}
 	
+	/**
+	 * Nvd feed data download job.
+	 *
+	 * @param FILE_NAME the file name
+	 * @throws Exception the exception
+	 */
 	private void nvdFeedDataDownloadJob(String FILE_NAME) throws Exception  {
 		String NVD_CVE_PATH = env.getProperty("root.dir");
 		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
@@ -486,7 +492,21 @@ public class NvdDataService {
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		FileUtil.downloadFile((NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NAME) ? NVD_META_URL : NVD_CVE_URL) + FILE_NAME + ".json.zip", NVD_CVE_PATH);	// 수정 데이터 다운로드
+		
+		String downloadUrl = (NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NAME) ? NVD_META_URL : NVD_CVE_URL) + FILE_NAME + ".json.zip";
+		try {
+			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
+		} catch (Exception e) {
+			log.warn(e.getMessage(), e);
+			Thread.sleep(3000);
+			log.info("Retry downloading the NVD data file. FILE_NAME : " + FILE_NAME);
+			if(Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
+				try {
+					Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().delete();
+				} catch (Exception e2) {}
+			}
+			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
+		}
 		FileUtil.decompress(NVD_CVE_PATH + File.separator + FILE_NAME + ".json.zip", NVD_CVE_PATH);		// 압축해제
 	}
 	
