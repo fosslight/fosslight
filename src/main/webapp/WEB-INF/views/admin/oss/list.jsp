@@ -19,7 +19,7 @@
 					</dd>
 					<dd class="textArea">
 						<label>Copyright Text</label>
-						<textarea name="copyrights">${searchBean.copyright}</textarea>
+						<textarea name="copyrights"><c:out value="${searchBean.copyright}"/></textarea>
 					</dd>
 					<dd>
 						<label>License Name</label>
@@ -29,7 +29,7 @@
 					</dd>
 					<dd>
 						<label>Description</label>
-						<textarea name="summaryDescription">${searchBean.summaryDescription}</textarea>
+						<textarea name="summaryDescription"><c:out value="${searchBean.summaryDescription}"/></textarea>
 					</dd>
 					<dd>
 						<label>Website</label>

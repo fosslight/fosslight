@@ -81,7 +81,7 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 							<td class="dCase">
-								<textarea name="copyright" class="w100P h150">${copyright}</textarea>
+								<textarea name="copyright" class="w100P h150"><c:out value="${copyright}"/></textarea>
 							</td>
 						</tr>
 						<tr id="lt">
@@ -115,11 +115,11 @@
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.summaryDescription" /></th>
-							<td class="dCase"><textarea name="summaryDescription" class="w100P h150">${summaryDescription }</textarea></td>
+							<td class="dCase"><textarea name="summaryDescription" class="w100P h150"><c:out value="${summaryDescription}"/></textarea></td>
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.attribution" /></th>
-							<td class="dCase"><textarea name="attribution" class="w100P h150">${attribution }</textarea></td>
+							<td class="dCase"><textarea name="attribution" class="w100P h150"><c:out value="${attribution}"/></textarea></td>
 						</tr>
 						<c:if test="${!empty ossId}">
 							<c:if test="${projectListFlag}">
@@ -150,7 +150,7 @@
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">
-										<div id="editor">${project.comment }</div>
+										<div id="editor"><c:out value="${project.comment}"/></div>
 									</div>
 								</div>
 							</td>

@@ -63,7 +63,7 @@
 					<tr>
 						<th class="dCase"><spring:message code="msg.common.field.Copyright" /></th>
 						<td class="dCase">
-							<div id="Copyright" class="viewOssTd viewOssTextArea">${copyright}</div>
+							<div id="Copyright" class="viewOssTd viewOssTextArea"><c:out value="${copyright}"/></div>
 						</td>
 					</tr>
 					<tr id="lt">
