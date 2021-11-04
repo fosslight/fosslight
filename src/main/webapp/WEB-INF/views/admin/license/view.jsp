@@ -16,7 +16,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.licenseName" /></th>
 							<td class="dCase">
 								<div class="required">
-									<div id="licenseName" class="viewLicenseTd" >${licenseInfo.licenseName}</div>
+									<div id="licenseName" class="viewLicenseTd" ><c:out value="${licenseInfo.licenseName}"/></div>
 								</div>
 							</td>
 						</tr>
@@ -43,7 +43,7 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.SPDX" /></th>
 							<td class="dCase">
-								<div id="shortIdentifier" class="viewLicenseTd" >${licenseInfo.shortIdentifier}</div>
+								<div id="shortIdentifier" class="viewLicenseTd" ><c:out value="${licenseInfo.shortIdentifier}"/></div>
 							</td>
 						</tr>
 						<tr>
@@ -64,7 +64,7 @@
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.userGuide" /></th>
-							<td class="dCase"><div id="description" class="viewLicenseTd viewLicenseTextArea">${licenseInfo.description}</div></td>
+							<td class="dCase"><div id="description" class="viewLicenseTd viewLicenseTextArea"><c:out value="${licenseInfo.description}"/></div></td>
 						</tr>
 						<tr>
 							<th class="dCase txStr"><spring:message code="msg.common.field.licenseText" /></th>

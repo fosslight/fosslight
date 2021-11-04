@@ -91,7 +91,7 @@
 						<c:if test="${not empty licenseInfo.internalUrl}">
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.internalURL" /></th>
-							<td class="dCase"><a href="${licenseInfo.internalUrl}" target="_blank">${licenseInfo.internalUrl}</a></td>
+							<td class="dCase"><a href="${licenseInfo.internalUrl}" target="_blank"><c:out value="${licenseInfo.internalUrl}"/></a></td>
 						</tr>
 						</c:if>
 						<tr>

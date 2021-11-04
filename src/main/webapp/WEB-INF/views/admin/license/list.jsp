@@ -17,7 +17,7 @@
 					</dd>
 					<dd class="textArea">
 						<label>License Text</label>
-						<textarea name="licenseText">${searchBean.licenseText}</textarea>
+						<textarea name="licenseText"><c:out value="${searchBean.licenseText}"/></textarea>
 					</dd>
 					<dd>
 						<label>License Type</label>
@@ -39,7 +39,7 @@
 					</c:if>
 					<dd>
 						<label>User Guide</label>
-						<textarea name="description" >${searchBean.description}</textarea>
+						<textarea name="description" ><c:out value="${searchBean.description}"/></textarea>
 					</dd>
 					<dd>
 						<label>Website</label>
