@@ -183,9 +183,9 @@
 					} else {
 						var rowData = $("#commentsList").jqGrid('getRowData',rowid);
 						if(rowData['referenceDiv']=='20'){
-		    	            openCommentHistory("3rd", rowData['referenceId']);
+		    	            openCommentHistory('<c:url value="/comment/popup/3rd/'+rowData['referenceId']+'"/>');
 						}else{
-		    	            openCommentHistory("prj", rowData['referenceId']);
+		    	            openCommentHistory('<c:url value="/comment/popup/prj/'+rowData['referenceId']+'"/>');
 						}
 					}
 				}
