@@ -85,7 +85,13 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.licenseWebsite" /></th>
 							<td class="dCase">
-								<input name="webpage" type="text" class="w100P" placeholder="http://" />
+								<div class="multiItemSet multiWebPageSet">	
+									<div class="required">								
+										<span><input type="text" name="webpages" style="width: 400px;" placeholder="http://"/><input type="button" value="Delete" class="smallDelete" /></span>
+										<span class="retxt"></span>
+									</div>
+								</div>
+								<input id="webpageAdd" type="button" value="+ Add" class="btnCLight gray" />
 							</td>
 						</tr>
 						<c:if test="${not empty licenseInfo.internalUrl}">

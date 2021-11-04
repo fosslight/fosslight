@@ -709,4 +709,37 @@
 		WHERE T1.USE_YN = 'Y' 
 			T1.LICENSE_ID = #{licenseId}
 	</select>
+	
+	<select id="selectLicenseWebPageList" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT
+			LICENSE_ID
+			, WEBPAGE
+			, SORT_ORDER
+		FROM LICENSE_WEBPAGE
+		WHERE LICENSE_ID = #{licenseId}
+	</select>
+	
+	<insert id="insertLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
+		INSERT
+		INTO LICENSE_WEBPAGE
+		(
+			LICENSE_ID
+			, WEBPAGE
+			, SORT_ORDER
+		)
+		VALUES
+		(
+			#{licenseId}
+			, #{webpage}
+			, #{sortOrder}
+		)
+	</insert>
+	
+	<select id="existsLicenseWebPages"  parameterType="oss.fosslight.domain.LicenseMaster" resultType="int">
+    	SELECT COUNT(*) FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
+  	</select>
+    
+	<delete id="deleteLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
+		DELETE FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
+	</delete>
 </mapper>

@@ -40,4 +40,8 @@ public interface LicenseService extends HistoryConfig{
 	List<LicenseMaster> getLicenseNameList();											// 라이센스 자동완성
 	
 	void sendLicenseTypeChangedMail(String licenseId, LicenseMaster beforeBean, LicenseMaster afterBean, String comment);
+	
+	void registLicenseWebPage(LicenseMaster licenseMaster);
+	
+	String webPageStringFormat(String[] webpages);
 }

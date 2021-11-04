@@ -142,6 +142,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			nickNames.add(bean.getLicenseNickname());
 		}
 		
+		List<LicenseMaster> licenseWebPageList = licenseMapper.selectLicenseWebPageList(licenseMaster);
+		List<String> webPage = new ArrayList<>();
+		for(LicenseMaster bean : licenseWebPageList) {
+			webPage.add(bean.getWebpage());
+		}
+		
 		// 일반 user 화면 일 경우 restriction을 full name으로 화면 출력
 		// admin 화면 일 경우 restriction code를 사용하여 체크박스로 구성
 		if(!"ROLE_ADMIN".equals(loginUserRole())) {
@@ -168,6 +174,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
+		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
 		
 		return licenseMaster;
 	}
@@ -315,6 +322,8 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		} else {
 			licenseMapper.updateLicenseMaster(licenseMaster);
 		}
+		
+		registLicenseWebPage(licenseMaster); // license_webpage table data insert
 		
 		/*
 		 * 1. 라이센스 닉네임 삭제 
@@ -494,5 +503,41 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				CoMailManager.getInstance().sendMail(mailBean);	
 			}
 		}	
+	}
+
+	@Override
+	public void registLicenseWebPage(LicenseMaster licenseMaster) {
+		if(licenseMapper.existsLicenseWebPages(licenseMaster) > 0){
+			licenseMapper.deleteLicenseWebPages(licenseMaster);
+		}
+					
+		int idx = 0;
+					
+		String[] webPages = licenseMaster.getWebpages();
+					
+		if(webPages != null){
+			for(String url : webPages){
+				if(!isEmpty(url)){ // 공백의 downloadLocation은 save하지 않음.
+					LicenseMaster master = new LicenseMaster();
+					master.setLicenseId(licenseMaster.getLicenseId());
+					master.setWebpage(url);
+					master.setSortOrder(Integer.toString(++idx));
+								
+					licenseMapper.insertLicenseWebPages(master);
+				}
+			}
+		}
+	}
+
+	@Override
+	public String webPageStringFormat(String[] webpagesList) {
+		String webpages = "";
+		for(String webpage : webpagesList) {
+			webpages += webpage+",";
+		}
+		if (!("").equals(webpages)) {
+			webpages = webpages.substring(0, webpages.length()-1);
+		}
+		return webpages;
 	}
 }
