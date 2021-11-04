@@ -2,11 +2,16 @@
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript">
 	$(document).ready(function() {
+		let params = new URLSearchParams(window.location.search);
+
+		if(params.has('lang')) {
+			let lang = params.get('lang');
+			$("#selectLang").val(lang).prop("selected", true);
+		}
+
 		$("#selectLang").change(function () {
 			let selectedOption = $('#selectLang').val();
-			if (!(selectedOption === '')){
-				window.location.replace('?lang=' + selectedOption);
-			}
+			window.location.replace('?lang=' + selectedOption);
 		});
 	});
 </script>
@@ -16,9 +21,8 @@
 		<h1><img src="images/img_logo.png" alt="FOSSLight System"/></h1>
 		<div class="userLang">
 			<select id="selectLang">
-				<option value=""><spring:message code="lan.default" /></option>
-				<option value="ko"><spring:message code="lan.ko" /></option>
-				<option value="en-US"><spring:message code="lan.en" /></option>
+				<option value="en_US"><spring:message code="lan.en_US" /></option>
+				<option value="ko_KR"><spring:message code="lan.ko_KR" /></option>
 			</select>
 		</div>
 		<div class="userLogout">
