@@ -735,7 +735,7 @@ public class CoCodeManager extends CoTopComponent {
              throw new IllegalStateException();
         } else {
              CoCode code = getCodeInstance(s);
-             codes = code != null ? code.getCdDtlNoVector(false) : null;
+             codes = code != null ? code.getCdDtlNoVector(false) : new Vector<String>();
              
              while(i < codes.size()){
         		 if(!codes.get(i).equals("")){
