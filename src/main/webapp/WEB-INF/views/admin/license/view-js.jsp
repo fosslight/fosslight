@@ -27,8 +27,16 @@
 			data.clone = $('.multiTxtSet').clone().html();
 			
 			if(data.detail){
-				$('#webpage a').text(data.detail.webpage);
-				$('#webpage a').attr("href",data.detail.webpage);
+				if (data.detail.webpages.length == 0){
+					$('#webpage a').text(data.detail.webpage);
+					$('#webpage a').attr("href",data.detail.webpage);
+				}else{
+					$('#webpage').empty();
+					data.detail.webpages.forEach(function(webpage){
+						$('#webpage').append('<a href="'+webpage+'" class="urlLink" target="_blank">'+webpage+'</a>')
+					});
+				}
+								
 				$('#licenseText').text(data.detail.licenseText);
 				$('#attribution').text(data.detail.attribution);
 				

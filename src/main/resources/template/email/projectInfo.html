@@ -199,7 +199,9 @@ Guide for Packaging : <a href="$packaging_requested_url_info">$packaging_request
 									<tr>
 										<td style="padding:5px;">$!vulnerability.ossName</td>
 										<td style="padding:5px;">$!vulnerability.ossVersion</td>
-										<td style="padding:5px;">$!vulnerability.cveId</td>
+										<td style="padding:5px;">
+											$commonFunction.convertCveIdToLink($!vulnerability.cveId)
+										</td>
 										<td style="padding:5px;">$!vulnerability.cvssScore</td>
 										<td style="padding:5px;">$!vulnerability.vulnSummary</td>
 										<td style="padding:5px;">$!vulnerability.publishedDate</td>
@@ -229,8 +231,12 @@ Guide for Packaging : <a href="$packaging_requested_url_info">$packaging_request
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
-										<td style="padding:5px;">$!vulnerability_reCalc.cveId</td>
-										<td style="padding:5px;">$!vulnerability_reCalc.cveIdTo</td>
+										<td style="padding:5px;">
+											$commonFunction.convertCveIdToLink($!vulnerability_reCalc.cveId)
+										</td>
+										<td style="padding:5px;">
+											$commonFunction.convertCveIdToLink($$!vulnerability_reCalc.cveIdTo)
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Score</th>

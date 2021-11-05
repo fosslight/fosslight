@@ -595,6 +595,24 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
 			AND T1.LICENSE_TYPE = #{licenseType}
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossTypeSearch)">
+			AND
+			(
+				FALSE
+			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'N')">
+				OR OSS_TYPE LIKE '000' 
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'M')">
+				OR OSS_TYPE LIKE '1__'
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'D')">
+				OR OSS_TYPE LIKE '_1_'
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'V')">
+				OR OSS_TYPE LIKE '__1'
+			</if>
+			)
+		</if>
 		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
 		GROUP BY T1.OSS_NAME
 		</if>

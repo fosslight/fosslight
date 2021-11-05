@@ -230,6 +230,21 @@ public class LicenseController extends CoTopComponent{
 			beforeBean =  licenseService.getLicenseMasterOne(licenseMaster);
 		}
 		
+		// webpages이 n건일때 0번째 값은 oss Master로 저장.
+		String[] webpages = licenseMaster.getWebpages();
+		if(webpages != null){
+			if(webpages.length >= 1){
+				for(String url : webpages){
+					if(!isEmpty(url)){
+						licenseMaster.setWebpage(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
+						break;
+					}
+				}
+			}
+		} else if(webpages == null){
+			licenseMaster.setWebpage("");
+		}
+		
 		result = licenseService.registLicenseMaster(licenseMaster);
 		
 		if(!isNew) {
@@ -298,6 +313,7 @@ public class LicenseController extends CoTopComponent{
 					beforeBean.setDescription(CommonFunction.lineReplaceToBR(beforeBean.getDescription()));
 					beforeBean.setLicenseText(CommonFunction.lineReplaceToBR(beforeBean.getLicenseText()));
 					beforeBean.setAttribution(CommonFunction.lineReplaceToBR(beforeBean.getAttribution()));
+					beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
 				}
 				
 				if(afterBean != null) {
@@ -308,6 +324,7 @@ public class LicenseController extends CoTopComponent{
 					afterBean.setDescription(CommonFunction.lineReplaceToBR(afterBean.getDescription()));
 					afterBean.setLicenseText(CommonFunction.lineReplaceToBR(afterBean.getLicenseText()));
 					afterBean.setAttribution(CommonFunction.lineReplaceToBR(afterBean.getAttribution()));
+					afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
 				}
 				
 				mailBean.setCompareDataBefore(beforeBean);

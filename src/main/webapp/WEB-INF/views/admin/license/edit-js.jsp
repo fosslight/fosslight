@@ -26,13 +26,14 @@
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
+			data.cloneWebPage = $('.multiWebPageSet').clone().html();
 			
 			if(data.detail){
 				$('input[name=licenseId]').val(data.detail.licenseId);
 				$('select[name=licenseType]').val(data.detail.licenseType).trigger('change');
 				$('input[name=licenseName]').val(data.detail.licenseName);
 				$('input[name=shortIdentifier]').val(data.detail.shortIdentifier);
-				$('input[name=webpage]').val(data.detail.webpage);
+				//$('input[name=webpage]').val(data.detail.webpage);
 				$('textarea[name=description]').val(data.detail.description);
 				$('textarea[name=licenseText]').val(data.detail.licenseText);
 				$('textarea[name=attribution]').val(data.detail.attribution);
@@ -62,6 +63,24 @@
 						});
 					}					
 				});
+
+				if(data.detail.webpages.length <= 0){
+					$('input[name=webpages]').val(data.detail.webpage);
+				}else{
+					data.detail.webpages.forEach(function(webpage, index, obj){
+						if(index == 0){
+							$('.multiWebPageSet span:first').remove();
+						}
+											
+						if(webpage !=''){
+							$(data.cloneWebPage).appendTo('.multiWebPageSet');
+							$('.multiWebPageSet input[type=text]:last').val(webpage);
+							$('.smallDelete').on('click', function(){
+								$(this).parent().remove();
+							});
+						}					
+					});
+				}
 				
 				$('textarea[name=licenseText]').height(240);
 				
@@ -75,6 +94,14 @@
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
 				$(data.clone).appendTo('.multiTxtSet');
+				$('.smallDelete').on('click', function(){
+					$(this).parent().parent().remove();
+				});
+			});
+
+			// add web page
+			$('#webpageAdd').on('click', function(){
+				$(data.cloneWebPage).appendTo('.multiWebPageSet');
 				$('.smallDelete').on('click', function(){
 					$(this).parent().parent().remove();
 				});
