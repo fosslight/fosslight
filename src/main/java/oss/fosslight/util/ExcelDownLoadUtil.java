@@ -87,6 +87,8 @@ import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
+import org.spdx.library.SpdxVerificationHelper;
+
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
 public class ExcelDownLoadUtil extends CoTopComponent {
@@ -2091,6 +2093,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String downloadLocation = bean.getDownloadLocation();
 
 					if(downloadLocation.isEmpty()) {
+						downloadLocation = "NONE";
+					}
+
+					// Invalid download location is output as NONE
+					if(SpdxVerificationHelper.verifyDownloadLocation(downloadLocation) != null) {
 						downloadLocation = "NONE";
 					}
 
