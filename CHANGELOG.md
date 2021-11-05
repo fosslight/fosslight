@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.2.15 (05/11/2021)
+## Changes
+## 🚀 Features
+
+- Support multiple webpages of License @FOSSLight-dev (#247)
+- Add OSS ​​Type to search condition in OSS List @yugeeklab (#230)
+- Change CVE-ID to a link (#212) @acafela (#237)
+
+## 🐛 Hotfixes
+
+- Fix NPE in common/CoCodeManager @yugeeklab (#241)
+- Changed - Recover Missing Messages @riyenas0925 (#248)
+- Fix language select box unselected error @riyenas0925 (#240)
+- Fix bugs related to BOM loading and comment history @FOSSLight-dev(#243)
+
+## 🔧 Maintenance
+
+- Retry when NVD download fails and update email information. @FOSSLight-dev (#238)
+- Delete the github action for merging into main @soimkim (#239)
+
+---
+
 ## v1.2.14 (29/10/2021)
 ## Changes
 ## 🐛 Hotfixes
