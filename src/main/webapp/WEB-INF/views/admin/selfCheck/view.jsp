@@ -11,7 +11,7 @@
 				<li class="first"><span>Comment</span><strong><label></label></strong></li>
 			</ul>
 			<div style="padding:0 0 30px 130px;">
-				<div id="editor" style="overflow:auto; height:150px;">${project.comment}</div>
+				<div id="editor" style="overflow:auto; height:150px;"><c:out value="${project.comment}"/></div>
 				<div style="padding-top:10px;"><input type="button" value="Edit" onclick="src_fn.mvEdit()" class="btnColor btnExpor srcBtn right" /></div>
 			</div>
 		</div>
@@ -51,9 +51,9 @@
 														<li>
 															<span>
 																<strong>
-																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
 																	<br>
-																	${csvFile.createdDate}
+																	<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')"/>
 																</strong>
