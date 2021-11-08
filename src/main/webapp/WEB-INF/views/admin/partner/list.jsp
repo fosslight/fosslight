@@ -82,7 +82,7 @@
 					</dd>
 					<dd class="centerAign">
 						<label>Comment</label>
-						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.comment}</textarea>					
+						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;"><c:out value="${searchBean.comment}"/></textarea>					
 					</dd>
 				</dl>
 				<input name="act" type="hidden" value="search"/> 

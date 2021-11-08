@@ -58,7 +58,7 @@
 			</div>
 			<div class="grid-container" style="height:240px;">
 				<div class="grid-width-100">
-					<div id="editor">${detail.userComment }</div>
+					<div id="editor"><c:out value="${detail.userComment }"/></div>
 				</div>
 			</div>
 			<script>
@@ -138,7 +138,7 @@
 						</c:if>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.description" /></th>
-							<td class="dCase"><textarea class="w100P h150" id="description" name="description"><c:if test="${not empty detail }">${detail.description }</c:if></textarea></td>
+							<td class="dCase"><textarea class="w100P h150" id="description" name="description"><c:if test="${not empty detail }"><c:out value="${detail.description }"/></c:if></textarea></td>
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.Agreement" /><br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
@@ -150,7 +150,7 @@
 									</span>
 								</c:if>
 								<c:if test="${not empty confirmationFile}">
-									<a href="/download/${confirmationFile.fileSeq }/${confirmationFile.logiNm}">${confirmationFile.origNm }</a><span style="margin-left:20px;">${confirmationFile.createdDate}</span>
+									<a href="/download/${confirmationFile.fileSeq }/${confirmationFile.logiNm}"><c:out value="${confirmationFile.origNm }"/></a><span style="margin-left:20px;"><c:out value="${confirmationFile.createdDate}"/></span>
 									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteConfirmationFile(this)" style="vertical-align:super;" <c:if test="${isCommited}">style="display:none;"</c:if>/></span>
 									</c:if>
@@ -171,7 +171,7 @@
 									</span>
 								</c:if>
 								<c:if test="${not empty ossFile}">
-									<a href="/download/${ossFile.fileSeq }/${ossFile.logiNm}">${ossFile.origNm }</a><span style="margin-left:20px;">${ossFile.createdDate}</span>
+									<a href="/download/${ossFile.fileSeq }/${ossFile.logiNm}"><c:out value="${ossFile.origNm }"/></a><span style="margin-left:20px;"><c:out value="${ossFile.createdDate}"/></span>
 									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteOssFile(this)" style="vertical-align:super;"/></span>
 									</c:if>
@@ -193,8 +193,8 @@
 							<c:forEach var="documentsFile" items="${detail.documentsFile }" varStatus="vs">
 								<c:if test="${documentsFile.delYn == 'N'}">
 									<li>
-										<a href="/download/${documentsFile.fileSeq}/${documentsFile.logiNm}">${documentsFile.origNm }</a>
-										<span style="margin-left:20px;">${documentsFile.createdDate}</span>
+										<a href="/download/${documentsFile.fileSeq}/${documentsFile.logiNm}"><c:out value="${documentsFile.origNm }"/></a>
+										<span style="margin-left:20px;"><c:out value="${documentsFile.createdDate}"/></span>
 										<span>
 											<input type="button" value="Delete" class="smallDelete" onclick="fn.deleteDocumentsFile(this)" style="vertical-align:super;margin-left: 5px;<c:if test="${isCommited}">display:none;</c:if>"/>
 										</span>
@@ -274,7 +274,7 @@
 									</c:if>
 									<c:if test="${empty watcher.userId}">
 									<input class="watcherTags" type="hidden" name="watchers" value='${watcher.email}/Email' />
-									<strong>${watcher.email}</strong>
+									<strong><c:out value="${watcher.email}"/></strong>
 									<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher('${watcher.email}','Email');"/>
 									</c:if>
 								</span>

@@ -8,7 +8,7 @@
 			<h2>Project Information</h2>
 			<ul>
 				<li class="first"><span>Project Name</span>
-					<strong>${project.prjName }
+					<strong><c:out value="${project.prjName }"/>
 						<c:if test="${not empty project.prjId}">
 						<span id="identificationTab" class="btnIcon identi" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
 						</c:if>
@@ -20,7 +20,7 @@
 						</c:if>
 					</strong>
 				</li>
-				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
+				<li><span>Created</span><strong><c:out value="${project.prjUserName }"/>&nbsp;<c:out value="${project.prjDivisionName }"/> (${ct:formatDateSimple(project.createdDate)})</strong></li>
 			</ul>
 		</div>
 		<!---->
@@ -43,7 +43,7 @@
 		</div>
 		<div class="grid-container">
 			<div class="grid-width-100">
-				<div id="editor2">${project.userComment}</div>
+				<div id="editor2"><c:out value="${project.userComment}"/></div>
 			</div>
 		</div>
 	</div>
@@ -225,7 +225,7 @@
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">
-										<div id="editor">${project.comment}</div>
+										<div id="editor"><c:out value="${project.comment}"/></div>
 									</div>
 								</div>
 							</td>

@@ -250,9 +250,9 @@
 														<li>
 															<span>
 																<strong>
-																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
 																	<br>
-																	${csvFile.createdDate}
+																	<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
@@ -411,9 +411,9 @@
 														<li>
 															<span>
 																<strong>
-																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
 																	<br>
-																	${csvFile.createdDate}
+																	<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
@@ -434,9 +434,9 @@
 														<li>
 															<span>
 																<strong>
-																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
 																	<br>
-																	${csvFile.createdDate}
+																	<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, '2')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
@@ -595,8 +595,8 @@
 														<li>
 															<span>
 																<strong style="max-width:752px;">
-																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}">${csvFile.origNm }</a>
-																	&nbsp;&nbsp;${csvFile.createdDate}
+																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
+																	&nbsp;&nbsp;<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, '2')"/>
 																</strong>
@@ -617,8 +617,8 @@
 														<li>
 															<span>
 																<strong style="max-width:752px;">
-																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}">${csvFile.origNm }</a>
-																	&nbsp;&nbsp;${csvFile.createdDate}
+																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
+																	&nbsp;&nbsp;<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<!-- 여기에 xml,tar.gz,zip file의 경우 변환된 html file인지 확인하고 해당 될경우 delete button을 제거함. -->
 																	<c:if test="${vs.index eq '0'}"> 
@@ -642,8 +642,8 @@
 														<li>
 															<span>
 																<strong style="max-width:752px;">
-																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}">${csvFile.origNm }</a>
-																	&nbsp;&nbsp;${csvFile.createdDate}
+																	<a href="/download/${csvFile.fileSeq}/${csvFile.logiNm}"><c:out value="${csvFile.origNm }"/></a>
+																	&nbsp;&nbsp;<c:out value="${csvFile.createdDate}"/>
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, '4')"/>
 																</strong>

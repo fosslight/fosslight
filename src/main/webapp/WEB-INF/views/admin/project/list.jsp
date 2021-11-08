@@ -104,11 +104,11 @@
 					</dd>
 					<dd>
 						<label>Additional Information</label>
-						<textarea name="comment" style="margin: 0px; width: 201px; height: 54px;">${searchBean.comment}</textarea>
+						<textarea name="comment" style="margin: 0px; width: 201px; height: 54px;"><c:out value="${searchBean.comment}"/></textarea>
 					</dd>
 					<dd class="centerAign w600">
 						<label>Comment</label>
-						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.userComment}</textarea>					
+						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;"><c:out value="${searchBean.userComment}"/></textarea>					
 					</dd>
 						<dd>
 							<label>Binary Name</label>

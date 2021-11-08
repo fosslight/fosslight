@@ -7,7 +7,7 @@
 		<div class="projectInfo">
 			<h2>Project Information</h2>
 			<ul>
-				<li class="first"><span>Project Name</span><strong>${project.prjName }
+				<li class="first"><span>Project Name</span><strong><c:out value="${project.prjName }"/>
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${not empty project.identificationStatus}">
 					<span id="identificationTab" class="btnIcon identi" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
@@ -17,7 +17,7 @@
 					</c:if>
 					</strong>
 				</li>
-				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
+				<li><span>Created</span><strong><c:out value="${project.prjUserName }"/>&nbsp;<c:out value="${project.prjDivisionName }"/> (${ct:formatDateSimple(project.createdDate)})</strong></li>
 			</ul>
 			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="/images/user-guide.png" /></a>
 		</div>
@@ -41,7 +41,7 @@
 		</div>
 		<div class="grid-container">
 			<div class="grid-width-100">
-				<div id="editor">${project.userComment}</div>
+				<div id="editor"><c:out value="${project.userComment}"/></div>
 			</div>
 		</div>
 	</div>

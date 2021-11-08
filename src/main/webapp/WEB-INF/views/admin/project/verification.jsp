@@ -8,7 +8,7 @@
 		<div class="projectInfo">
 			<h2>Project Information</h2>
 			<ul>
-				<li class="first"><span>Project Name</span><strong>${project.prjName }
+				<li class="first"><span>Project Name</span><strong><c:out value="${project.prjName }"/>
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${not empty project.identificationStatus}">
 					<span id="identificationTab" class="btnIcon identi" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
@@ -17,7 +17,7 @@
 					<span id="distributionTab" class="btnIcon distr" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Distribution</span>
 					</c:if></strong>
 				</li>
-				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
+				<li><span>Created</span><strong><c:out value="${project.prjUserName }&nbsp;${project.prjDivisionName }"/> (${ct:formatDateSimple(project.createdDate)})</strong></li>
 			</ul>
 			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="<c:url value="/images/user-guide.png"/>" /></a>
 		</div>
@@ -63,7 +63,7 @@
 		</div>
 		<div class="grid-container">
 			<div class="grid-width-100">
-				<div id="editor">${project.userComment}</div>
+				<div id="editor"><c:out value="${project.userComment}"/></div>
 			</div>
 		</div>
 	</div>
@@ -130,7 +130,7 @@
 																			<c:when test="${empty project.verificationStatus or project.verificationStatus eq '' or project.verificationStatus eq 'PROG' or (ct:isAdmin() and project.verificationStatus eq 'REV')}">
 																				<li>
 																					<span>
-																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
+																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>"><c:out value="${file.origNm}"/><span style="margin-left:20px;"><c:out value="${file.createdDate}"/></span></a></strong>
 																						<input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,'${file.fileSeq}', '${i}' )">
 																					</span>
 																				</li>
@@ -138,7 +138,7 @@
 																			<c:otherwise>
 																				<li>
 																					<span>
-																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>">${file.origNm}<span style="margin-left:20px;">${file.createdDate}</span></a></strong>
+																						<strong><a class="urlLink" href="<c:url value="/download/${file.fileSeq}/${file.logiNm}"/>"><c:out value="${file.origNm}"/><span style="margin-left:20px;"><c:out value="${file.createdDate}"/></span></a></strong>
 																					</span>
 																				</li>
 																			</c:otherwise>
@@ -347,7 +347,7 @@
 													<div class="grid-container">
 														<div class="grid-width-100">
 															<c:set var="appended" value="${ossNotice.appended}"/>
-															<div id="editor2" class="packagingAppend">${appended}</div>
+															<div id="editor2" class="packagingAppend"><c:out value="${appended}"/></div>
 														</div>
 													</div>
 												</div>
@@ -526,8 +526,8 @@
 	<div class="popdata">
 		<p><b><spring:message code="msg.project.packaging.verify.userguide" /></b></p><br/>
 		<c:forEach items="${userGuideLicenseList}" var="userGuide">
-			<p style="font-style: italic;"><b>${userGuide.licenseName}</b></p>
-			<p style="margin-left: 30px;">${userGuide.descriptionHtml}</p><br/>
+			<p style="font-style: italic;"><b><c:out value="${userGuide.licenseName}"/></b></p>
+			<p style="margin-left: 30px;"><c:out value="${userGuide.descriptionHtml}"/></p><br/>
 		</c:forEach>
 	</div>
 	<div class="pbtn">
