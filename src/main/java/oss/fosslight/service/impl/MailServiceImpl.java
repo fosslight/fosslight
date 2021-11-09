@@ -114,7 +114,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		// Data : dtlCd
 		// Param : String CD_NO
         // Result : Vector [ String CD_DTL_NO, String CD_DTL_NM(Key), String CD_SUB_NO(Ref Entity) ] 
-		String cdNm = afterData.gethType(); 
+		String cdNm = afterData != null ? afterData.gethType() : null; 
 		
 		for(String[] dtlCd : CoCodeManager.getValues(cdNm)){
 			Object beforeD_ = getDataForType(cdNm, dtlCd, beforeMap);
@@ -185,7 +185,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		/*
 		 * hMap 맵에서 dtlCd[1]의 값을 가져온다.
 		 */
-		String cdNm = history.gethType(); 
+		String cdNm = history != null ? history.gethType() : null; 
 		
 		CoCodeManager.getValues(cdNm).forEach((dtlCd) -> {
 			Object d = getDataForType(cdNm, dtlCd, hMap);
