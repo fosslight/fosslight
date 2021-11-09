@@ -456,10 +456,15 @@
 							src_evt.csvDelFileSeq = [];
 							src_evt.csvFileSeq = [];
 							reloadTabInframe('/selfCheck/list');
-							
-							saveFlag = true;
-							
-							alertify.success('<spring:message code="msg.common.success" />');
+
+                            // 라이센스 기입 안되어 있거나 등록이 안된 경우
+                            if("00"==data.resLicense){
+                                alertify.error('<spring:message code="msg.selfCheck.license" />', 0);
+                            }
+                            else{
+                                saveFlag = true;
+                                alertify.success('<spring:message code="msg.common.success" />');
+                            }
 						} else {
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
@@ -986,7 +991,18 @@
 					return false;
 				}
 			});
-		}
+		},
+        createNoticeTab : function () {
+            if(saveFlag) {
+                alertify.alert('<spring:message code="msg.common.success" />', function(){
+                    createTabInFrame('Notice', '#<c:url value="/selfCheck/verification/${project.prjId}"/>');
+                });
+            } else {
+                alertify.error('<spring:message code="msg.project.required.checkOssName" />', 0);
+
+                return false;
+            }
+        }
 	};
 
 	//SRC 그리드
