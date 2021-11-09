@@ -64,7 +64,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		// Param : String CD_NO
         // Result : Vector [ String CD_DTL_NO, String CD_DTL_NM(Key), String CD_SUB_NO(Ref Entity) ] 
 		int cnt = 1;
-		String cdNm = beData.gethType(); 
+		String cdNm = beData != null ? beData.gethType() : null; 
 		
 		for(String[] dtlCd : CoCodeManager.getValues(cdNm)){
 			Map<String, Object> dataMap = new HashMap<String, Object>();

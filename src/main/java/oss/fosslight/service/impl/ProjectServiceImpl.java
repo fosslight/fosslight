@@ -3901,10 +3901,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if(path.contains("/")) {
 					File f = new File(binaryFilePath + "/" + path);
 					fileName = f.getName();
-					binaryFilePath = f.getParentFile().toString();
-					
-					f = new File(binaryFilePath);
-					f.mkdirs(); // path전체의 directory 생성
+					File parentFile = f.getParentFile();
+					if(parentFile != null) {
+						binaryFilePath = parentFile.toString();
+						f = new File(binaryFilePath);
+						f.mkdirs(); // path전체의 directory 생성
+					} else {
+						fileName = path;	
+					}
 				} else {
 					fileName = path;
 				}
