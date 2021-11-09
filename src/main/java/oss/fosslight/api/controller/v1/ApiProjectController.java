@@ -7,6 +7,7 @@ package oss.fosslight.api.controller.v1;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -647,6 +648,7 @@ public class ApiProjectController extends CoTopComponent {
 						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN", sheet);
 						String errorMsg = (String) result.get("errorMessage");
 						ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+						ossComponents = (ossComponents != null ? ossComponents : Collections.emptyList()); 
 						ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
 						if(!isEmpty(errorMsg)) {
@@ -667,7 +669,7 @@ public class ApiProjectController extends CoTopComponent {
 							// 현재 osslist의 binary 목록을 격납
 							Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
 							for(ProjectIdentification bean : ossComponents) {
-								if(!isEmpty(bean.getBinaryName())) {
+								if(bean != null && !isEmpty(bean.getBinaryName())) {
 									componentBinaryList.put(bean.getBinaryName(), bean);
 								}
 							}
