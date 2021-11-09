@@ -608,6 +608,10 @@ public final class DateUtil {
 		Calendar cal1 = convertStringToCalender(date1);
 		Calendar cal2 = convertStringToCalender(date2);
 
+		if(cal1 == null || cal2 == null) {
+			return -1;
+		}
+
 		return getMinutes(cal1, cal2);
 	}
 
