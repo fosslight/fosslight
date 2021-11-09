@@ -1738,6 +1738,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		for(ProjectIdentification bean : list) {
 			int seq = 0;
+			urlSearchSeq = -1;
 			
 			if(isEmpty(bean.getDownloadLocation())) {
 				continue;
@@ -1914,7 +1915,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				}
 				
-				urlSearchSeq = -1;
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
@@ -2010,36 +2010,38 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
 					updateCnt = ossMapper.updateOssCheckName(paramBean);
 					
-					String commentId = paramBean.getReferenceId();
-					String checkOssNameComment = "";
-					String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
-					CommentsHistory commentInfo = null;
-					
-					if(isEmpty(commentId)) {
-						checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-						checkOssNameComment += "<p><b>Opensource Names</b></p>";
-						checkOssNameComment += changeOssNameInfo;
-						CommentsHistory commHisBean = new CommentsHistory();
-						commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-						commHisBean.setReferenceId(paramBean.getRefPrjId());
-						commHisBean.setContents(checkOssNameComment);
-						commentInfo = commentService.registComment(commHisBean, false);
-					} else {
-						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+					if(updateCnt >= 1) {
+						String commentId = paramBean.getReferenceId();
+						String checkOssNameComment = "";
+						String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
+						CommentsHistory commentInfo = null;
 						
-						if(commentInfo != null) {
-							if(!isEmpty(commentInfo.getContents())) {
-								checkOssNameComment  = commentInfo.getContents();
-								checkOssNameComment += changeOssNameInfo;
-								commentInfo.setContents(checkOssNameComment);
-								
-								commentService.updateComment(commentInfo, false);
+						if(isEmpty(commentId)) {
+							checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
+							checkOssNameComment += "<p><b>Opensource Names</b></p>";
+							checkOssNameComment += changeOssNameInfo;
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+							commHisBean.setReferenceId(paramBean.getRefPrjId());
+							commHisBean.setContents(checkOssNameComment);
+							commentInfo = commentService.registComment(commHisBean, false);
+						} else {
+							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+							
+							if(commentInfo != null) {
+								if(!isEmpty(commentInfo.getContents())) {
+									checkOssNameComment  = commentInfo.getContents();
+									checkOssNameComment += changeOssNameInfo;
+									commentInfo.setContents(checkOssNameComment);
+									
+									commentService.updateComment(commentInfo, false);
+								}
 							}
 						}
-					}
-					
-					if(commentInfo != null) {
-						map.put("commentId", commentInfo.getCommId());
+						
+						if(commentInfo != null) {
+							map.put("commentId", commentInfo.getCommId());
+						}
 					}
 					
 					break;
