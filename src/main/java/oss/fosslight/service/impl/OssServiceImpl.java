@@ -880,6 +880,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registOssMaster(OssMaster ossMaster) {
+
 		String[] ossNicknames = ossMaster.getOssNicknames();
 		String ossId = ossMaster.getOssId();
 		boolean isNew = StringUtil.isEmpty(ossId);
@@ -1417,8 +1418,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							licenseMaster = CoCodeManager.LICENSE_INFO.get(dl);
 						}
 						
-						resultDectedLicense += "<a href='javascript:void(0);' class='urlLink'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + dl + "</a>";
-						resultLicenseText += "<div id='license_"+licenseMaster.getLicenseId()+"' class='classLicenseText' style='display: none;'>"+CommonFunction.lineReplaceToBR(licenseMaster.getLicenseText())+"</div>";
+						if(licenseMaster != null) {
+							resultDectedLicense += "<a href='javascript:void(0);' class='urlLink'  onclick='showLicenseText(" + avoidNull(licenseMaster.getLicenseId()) + ");' >" + dl + "</a>";
+							resultLicenseText += "<div id='license_"+ avoidNull(licenseMaster.getLicenseId())+"' class='classLicenseText' style='display: none;'>"+CommonFunction.lineReplaceToBR(avoidNull(licenseMaster.getLicenseText()))+"</div>";
+						}
 					}
 					
 					ossBean.setDetectedLicense(resultDectedLicense + resultLicenseText);
@@ -1593,6 +1596,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		for(OssLicense license : ossMaster.getOssLicenses()) {
 			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
+			master = master != null ? master : new LicenseMaster();
 			license.setLicenseType(master.getLicenseType());
 			
 			// obligation 설정
@@ -2283,7 +2287,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				String result = br.readLine();
 				oss_auto_analysis_log.info("OSS AUTO ANALYSIS READLINE : " + result);
 				
-				if(result.toLowerCase().indexOf("start download oss") > -1) {
+				if(result != null && result.toLowerCase().indexOf("start download oss") > -1) {
 					oss_auto_analysis_log.info("ANALYSIS START SUCCESS PRJ ID : " + prjId);
 					Project prjInfo = new Project();
 					prjInfo.setPrjId(prjId);
