@@ -135,4 +135,6 @@ public interface SelfCheckService extends HistoryConfig{
 	List<Project> copyWatcher(Project project);
 	
 	boolean existsWatcher(Project project);
+
+	String checkLicense(List<List<ProjectIdentification>> ossComponentLicense);
 }
