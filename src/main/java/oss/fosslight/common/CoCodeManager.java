@@ -485,7 +485,7 @@ public class CoCodeManager extends CoTopComponent {
         } else {
             CoCode code = getCodeInstance(s);
             
-            return code != null ? code.getCdDtlNoVector(false) : null;
+            return code != null ? code.getCdDtlNoVector(false) : new Vector<String>();
         }
     }
     
@@ -505,7 +505,7 @@ public class CoCodeManager extends CoTopComponent {
         } else {
             CoCode code = getCodeInstance(s);
             
-            return code != null ? code.getCdDtlNmVector(false) : null;
+            return code != null ? code.getCdDtlNmVector(false) : new Vector<String>();
         }
     }
     
@@ -515,7 +515,7 @@ public class CoCodeManager extends CoTopComponent {
         } else {
             CoCode code = getCodeInstance(s);
             
-            return code != null ? code.getCdDtlNmVector(false) : null;
+            return code != null ? code.getCdDtlNmVector(false) : new Vector<String>();
         }
     }
     
@@ -738,7 +738,7 @@ public class CoCodeManager extends CoTopComponent {
              codes = code != null ? code.getCdDtlNoVector(false) : new Vector<String>();
              
              while(i < codes.size()){
-        		 if(!codes.get(i).equals("")){
+        		 if(!("").equals(codes.get(i))){
         			 String temp = code != null ? code.getCdDtlExp(codes.get(i)) : "";
         			 
         			 if(!temp.equals("")){
