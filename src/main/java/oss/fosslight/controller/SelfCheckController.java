@@ -321,6 +321,8 @@ public class SelfCheckController extends CoTopComponent {
 		// default 00:java error check code, 10:success code
 		String resCd = "00";
 
+		String resLicense="10";
+
 		String prjId = (String) map.get("prjId");
 		String csvFileId = (String) map.get("csvFileId");
 		String delFileString = (String) map.get("csvDelFileIds");
@@ -385,6 +387,8 @@ public class SelfCheckController extends CoTopComponent {
 			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
 			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
 			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+
+			resLicense=selfCheckService.checkLicense(ossComponentsLicense);
 			
 			selfCheckService.registSrcOss(ossComponents, ossComponentsLicense, project);
 		}
@@ -397,6 +401,7 @@ public class SelfCheckController extends CoTopComponent {
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		resMap.put("resLicense",resLicense);
 		
 		return makeJsonResponseHeader(resMap);
 	}
