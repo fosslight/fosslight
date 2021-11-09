@@ -1008,4 +1008,28 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 
 	@Override
 	public void updateWithoutVerifyYn(OssNotice ossNotice) {}
+
+	@Override
+	public String checkLicense(List<List<ProjectIdentification>> ossComponentLicense){
+		String result = "10";
+		boolean flag=false;
+		for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+			for (ProjectIdentification comLicense : comLicenseList) {
+				//warning message
+				String msg = comLicense.getObligationMsg();
+
+				// warning message가 없을 경우 null이므로 "null"으로 변경
+				msg = msg != null ? msg : "null";
+
+				// 라이센스 기입 안되어 있거나 등록이 안된 경우
+				if(!(msg.equals("Unconfirmed open source")||msg.equals("Unconfirmed version")||msg.equals("null"))){
+					result="00";
+					flag=true;
+					break;
+				}
+			}
+			if(flag)	break;
+		}
+		return result;
+	}
 }
