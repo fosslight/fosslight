@@ -118,13 +118,84 @@
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
 					});	
+				},
+				changeProc : function(){
+					$('#loading_wrap_popup').show();
+
+					var target = $("#ossList");
+					var result = [];
+					var failFlag = false;
+					var idArry = grid_fn.getCheckedRow("CHANGE");
+
+					if(idArry.length > 0){
+						window.setTimeout(function(){
+							for(var i = 0 ; i < idArry.length ; i++){
+								var rowId = idArry[i];
+
+								cleanErrMsg("ossList", rowId);
+
+								var rowdata = target.getRowData(rowId);
+								rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
+								<c:if test="${projectInfo.targetName eq 'identification'}">
+								rowdata["refPrjId"] = rowdata["referenceId"];
+								rowdata["referenceId"] = commentId;
+								rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+								</c:if>
+
+								$.ajax({
+									url : '/oss/saveOssCheckLicense/${projectInfo.targetName}',
+									type : 'POST',
+									data : JSON.stringify(rowdata),
+									dataType : 'json',
+									cache : false,
+									async: false,
+									contentType : 'application/json',
+									success: function(resultData){
+										if(resultData.isValid == true){
+											$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'Y'); // popup grid Data change => success
+											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
+										} else {
+											$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'N');
+											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'N');
+											alertify.error('<spring:message code="msg.common.valid2" />', 0);
+											failFlag = true;
+										}
+
+										result.push(resultData);
+										<c:if test="${projectInfo.targetName eq 'identification'}">
+										commentId = resultData.commentId;
+										</c:if>
+
+										if(result.length == idArry.length){
+											if(!failFlag){
+												var successMsg = 'Successfully changed OSS License <br> into OSS table';
+
+												<c:if test="${projectInfo.targetName eq 'identification'}">
+												successMsg += '.<br>(It moves to the tab you entered first.)';
+												</c:if>
+
+												alertify.success(successMsg, 5); // 5sec동안 message 출력
+												opener.location.reload();
+											}
+
+											$('#loading_wrap_popup').hide();
+										}
+									},
+									error: function(resultData){}
+								});
+							}
+						}, 0);
+					} else {
+						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
+						$('#loading_wrap_popup').hide();
+					}
 				}
 			};
 			var grid_fn = {
 					displayStatus : function(cellvalue, options, rowObject){
 						var display = "";
-						var changeFlag = rowObject.changeFlag || rowObject[6];
-						
+						var changeFlag = rowObject.changeFlag || rowObject[8];
+
 						if(changeFlag =="Y"){
 							display += "<a class='btnPG wAnd onAnd'>Change</a>";
 						} else {
@@ -133,20 +204,32 @@
 						
 						return display;
 					},
-					displayCheckLicense : function(cellvalue, options, rowObject){
+					displayDownloadLocation : function(cellvalue, options, rowObject){
 						var display = "";
-						var checkLicense = rowObject["checkLicense"];
-						var checkOssList = rowObject["checkOssList"];
-						
-						display = checkLicense.split("|");
+						var downloadLocation = rowObject["downloadLocation"];
 
-						for(var i in display){
-							display[i] = checkOssList == "Y" ? 
-								"<a href='#' onclick='Ctrl_fn.showOssViewPage(\""+display[i]+"\")' style='color:#2883f3;text-decoration:underline;'>"+display[i]+"</a>"
-								: display[i];
-						}
+						display = downloadLocation.split(",");
 
 						return display.join("<br>");
+					},
+					unformatter : function(cellvalue, options, rowObject){
+						return cellvalue;
+					},
+					displayCheckLicense : function(cellvalue, options, rowObject){
+						var checkLicense = rowObject["checkLicense"];
+						var display = checkLicense.split("|");
+
+						return display.join("<br>");
+					},
+					getCheckedRow : function(processType){
+						var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
+						return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
+							if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
+								arr.push(item);
+							}
+
+							return arr;
+						}, []);
 					}
 			};
 		</script>
@@ -166,10 +249,7 @@
 					</div>
 					<table id="ossList"><tr><td></td></tr></table>
 					<div align="left" style="padding-top: 10px;">
-						<input type="button" value="Change OSS Name" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
-						<c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">
-							<input type="button" value="Add Nickname" id="btnAddNickname" class="btnColor red" style="display: none; width:120px;" />
-						</c:if>
+						<input type="button" value="Change OSS License" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
 					</div>
 				</div>
 			</div>
