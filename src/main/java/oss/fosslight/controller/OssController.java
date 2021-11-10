@@ -54,6 +54,7 @@ import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.service.AutoFillOssInfoService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
@@ -82,6 +83,7 @@ public class OssController extends CoTopComponent{
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired SelfCheckService selfCheckService;
 	@Autowired ProjectService projectService;
+	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_OSS_LIST";
 	
@@ -1172,6 +1174,69 @@ public class OssController extends CoTopComponent{
 	public @ResponseBody ResponseEntity<Object> checkExistsOssByname(
 			@ModelAttribute OssMaster bean, Model model) {
 		return makeJsonResponseHeader(ossService.checkExistsOssByname(bean) > 0, "unconfirmed oss");
+	}
+
+	@GetMapping(value = OSS.CHECK_OSS_LICENSE)
+	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		model.addAttribute("projectInfo", bean);
+
+		return OSS.CHECK_OSS_LICENSE_JSP;
+	}
+
+	@SuppressWarnings("unchecked")
+	@GetMapping(value = OSS.CHECK_OSS_LICENSE_AJAX, produces = "text/html; charset=utf-8")
+	public @ResponseBody ResponseEntity<Object> getCheckOssLicenseAjax(
+			HttpServletRequest req, 
+			HttpServletResponse res,
+			@ModelAttribute ProjectIdentification paramBean, 
+			Model model,
+			@PathVariable String targetLicense) {
+		Map<String, Object> resMap = new HashMap<>();
+		Map<String, Object> map = null;
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+		
+		switch(targetLicense.toUpperCase()) {
+			case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+				map = selfCheckService.getIdentificationGridList(paramBean);
+				
+				break;
+			case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+				map = projectService.getIdentificationGridList(paramBean);
+				
+				break;
+		}		
+
+		// 중간 저장을 기능 대응을 위해 save시 유효성 체크를 data load시로 일괄 변경
+		if (map != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+			pv.setAppendix("mainList", mainData);
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());	
+		
+			if (!vr.isValid()) {
+				Map<String, String> validMap = vr.getValidMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, validMap, null));
+				resMap.put("validMap", validMap);
+			}
+			
+			if(!vr.isDiff()){
+				Map<String, String> diffMap = vr.getDiffMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
+				resMap.put("diffMap", diffMap);
+			}
+		}
+		
+		if(result.size() > 0) {
+			// TODO License 기준으로 변경 필요
+			result = ossService.checkOssName(result);
+			resMap.put("list", result);
+		}
+		
+		return makeJsonResponseHeader(resMap);
 	}
 	
 	@GetMapping(value=OSS.CHECK_OSS_NAME, produces = "text/html; charset=utf-8")
