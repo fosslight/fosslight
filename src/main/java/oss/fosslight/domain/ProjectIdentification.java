@@ -52,6 +52,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The check name */
 	private String checkName;
 
+	/** The check license */
+	private String checkLicense;
+
 	/** The oss name exists yn. */
 	private String ossNameExistsYn;
 	
@@ -503,7 +506,25 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	public void setCheckName(String checkName) {
 		this.checkName = checkName;
 	}
-	
+
+	/**
+	 * Gets the check license.
+	 *
+	 * @return the check license
+	 */
+	public String getCheckLicense() {
+		return checkLicense;
+	}
+
+	/**
+	 * Sets the check license.
+	 *
+	 * @param checkLicense the new check license
+	 */
+	public void setCheckLicense(String checkLicense) {
+		this.checkLicense = checkLicense;
+	}
+
 	/**
 	 * Gets the oss version.
 	 *
