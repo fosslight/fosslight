@@ -1943,115 +1943,126 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public Map<String, Object> saveOssCheckName(ProjectIdentification paramBean, String targetName) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
-			int updateCnt = 0;
-			
 			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
-			int urlSearchSeq = -1;
-			int seq = 0;
+			String[] downloadLocations = paramBean.getDownloadLocation().split("<br>");
 			
-			for(String url : checkOssNameUrl) {
-				if(urlSearchSeq == -1 && paramBean.getDownloadLocation().contains(url)) {
-					urlSearchSeq = seq;
-					
-					break;
-				}
+			// If there are multiple download paths > add
+			if (downloadLocations.length > 0) {
+				int updateCnt = 0;
+				int urlSearchSeq = -1;
+				int seq = 0;
 				
-				seq++;
-			}
-			
-			if( urlSearchSeq > -1 ) {
-				String downloadlocationUrl = paramBean.getDownloadLocation().split("<br>")[0];
-				Pattern p = null;
-				
-				switch(urlSearchSeq) {
-					case 0: // github
-						p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-						
-						break;
-					case 1: // npm
-						p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
-						
-						break;
-					case 2: // pypi
-						p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-						
-						break;
-					case 3: // maven
-						p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-						
-						break;
-					case 4: // pub
-						p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
-						break;
-					case 5: // cocoapods
-						p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
-						break;
-					default:
-						break;
-				}
-				
-				Matcher m = p.matcher(downloadlocationUrl);
-				
-				while(m.find()) {
-					paramBean.setDownloadLocation(m.group(0));
-				}
-			}
-			
-			switch(targetName.toUpperCase()) {
-				case CoConstDef.CD_CHECK_OSS_NAME_SELF:
-					String[] gridId = paramBean.getGridId().split("-");
-					paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+				for (String downloadLocation : downloadLocations) {
+					paramBean.setDownloadLocation(downloadLocation);
 					
-					updateCnt = ossMapper.updateOssCheckNameBySelfCheck(paramBean);
-					
-					break;
-				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
-					updateCnt = ossMapper.updateOssCheckName(paramBean);
-					
-					if(updateCnt >= 1) {
-						String commentId = paramBean.getReferenceId();
-						String checkOssNameComment = "";
-						String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
-						CommentsHistory commentInfo = null;
-						
-						if(isEmpty(commentId)) {
-							checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-							checkOssNameComment += "<p><b>Opensource Names</b></p>";
-							checkOssNameComment += changeOssNameInfo;
-							CommentsHistory commHisBean = new CommentsHistory();
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-							commHisBean.setReferenceId(paramBean.getRefPrjId());
-							commHisBean.setContents(checkOssNameComment);
-							commentInfo = commentService.registComment(commHisBean, false);
-						} else {
-							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+					for(String url : checkOssNameUrl) {
+						if(urlSearchSeq == -1 && downloadLocation.contains(url)) {
+							urlSearchSeq = seq;
 							
-							if(commentInfo != null) {
-								if(!isEmpty(commentInfo.getContents())) {
-									checkOssNameComment  = commentInfo.getContents();
-									checkOssNameComment += changeOssNameInfo;
-									commentInfo.setContents(checkOssNameComment);
-									
-									commentService.updateComment(commentInfo, false);
-								}
-							}
+							break;
 						}
 						
-						if(commentInfo != null) {
-							map.put("commentId", commentInfo.getCommId());
+						seq++;
+					}
+					
+					if( urlSearchSeq > -1 ) {
+						Pattern p = null;
+						
+						switch(urlSearchSeq) {
+							case 0: // github
+								p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
+								
+								break;
+							case 1: // npm
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+								
+								break;
+							case 2: // pypi
+								p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+								
+								break;
+							case 3: // maven
+								p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+								
+								break;
+							case 4: // pub
+								p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+								break;
+							case 5: // cocoapods
+								p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
+								break;
+							default:
+								break;
+						}
+						
+						Matcher m = p.matcher(downloadLocation);
+						
+						while(m.find()) {
+							paramBean.setDownloadLocation(m.group(0));
 						}
 					}
 					
-					break;
-			}
-			
-			if(updateCnt >= 1) {
-				map.put("isValid", true);
-				map.put("returnType", "Success");
-			} else {
-				throw new Exception("update Cnt가 비정상적인 값임.");
+					switch(targetName.toUpperCase()) {
+						case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+							String[] gridId = paramBean.getGridId().split("-");
+							paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+							
+							updateCnt = ossMapper.updateOssCheckNameBySelfCheck(paramBean);
+							
+							break;
+						case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+							updateCnt = ossMapper.updateOssCheckName(paramBean);
+							
+							if(updateCnt >= 1) {
+								String commentId = paramBean.getReferenceId();
+								String checkOssNameComment = "";
+								String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
+								CommentsHistory commentInfo = null;
+								
+								if(isEmpty(commentId)) {
+									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
+									checkOssNameComment += "<p><b>Opensource Names</b></p>";
+									checkOssNameComment += changeOssNameInfo;
+									CommentsHistory commHisBean = new CommentsHistory();
+									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+									commHisBean.setReferenceId(paramBean.getRefPrjId());
+									commHisBean.setContents(checkOssNameComment);
+									commentInfo = commentService.registComment(commHisBean, false);
+								} else {
+									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+									
+									if(commentInfo != null) {
+										if(!isEmpty(commentInfo.getContents())) {
+											checkOssNameComment  = commentInfo.getContents();
+											checkOssNameComment += changeOssNameInfo;
+											commentInfo.setContents(checkOssNameComment);
+											
+											commentService.updateComment(commentInfo, false);
+										}
+									}
+								}
+								
+								if(commentInfo != null) {
+									map.put("commentId", commentInfo.getCommId());
+								}
+							}
+							
+							break;
+					}
+					
+					updateCnt = 0;
+					urlSearchSeq = -1;
+					seq = 0;
+					
+					if(updateCnt >= 1) {
+						map.put("isValid", true);
+						map.put("returnType", "Success");
+					} else {
+						throw new Exception("update Cnt가 비정상적인 값임.");
+					}
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
