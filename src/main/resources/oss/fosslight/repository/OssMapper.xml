@@ -1737,6 +1737,18 @@
 		   AND OSS_NAME = #{ossName}
 	</update>	
 	
+	<update id="updateOssCheckLicense" parameterType="oss.fosslight.domain.ProjectIdentification">
+		UPDATE OSS_COMPONENTS_LICENSE OCL
+			INNER JOIN OSS_COMPONENTS OC
+		ON OCL.COMPONENT_ID = OC.COMPONENT_ID
+			SET OCL.LICENSE_NAME = #{checkLicense}
+		WHERE REFERENCE_ID = #{refPrjId}
+		  AND REFERENCE_DIV = #{referenceDiv}
+		  AND (OC.DOWNLOAD_LOCATION = #{downloadLocation}
+		   OR OC.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
+		  AND OSS_NAME = #{ossName}
+	</update>
+
 	<select id="checkOssNameCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
 		SELECT COUNT(*) AS CNT
 		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM

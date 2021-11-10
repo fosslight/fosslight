@@ -7,25 +7,35 @@ package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.AutoFillOssInfoService;
+import oss.fosslight.service.CommentService;
 import oss.fosslight.validation.T2CoValidationConfig;
 
 @Service
 @Slf4j
 public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFillOssInfoService {
+	// Service
+	@Autowired CommentService commentService;
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -175,5 +185,69 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		}
 
 		return result;
+	}
+
+	@Transactional
+	@Override
+	public Map<String, Object> saveOssCheckLicense(ProjectIdentification paramBean, String targetName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		try {
+			int updateCnt = 0;
+
+			switch(targetName.toUpperCase()) {
+				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+					updateCnt = ossMapper.updateOssCheckLicense(paramBean);
+
+					if(updateCnt >= 1) {
+						String commentId = paramBean.getReferenceId();
+						String checkOssLicenseComment = "";
+						String changeOssLicenseInfo = "<p>" + paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
+						CommentsHistory commentInfo = null;
+
+						if(isEmpty(commentId)) {
+							checkOssLicenseComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
+							checkOssLicenseComment += "<p><b>Opensource Names</b></p>";
+							checkOssLicenseComment += changeOssLicenseInfo;
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+							commHisBean.setReferenceId(paramBean.getRefPrjId());
+							commHisBean.setContents(checkOssLicenseComment);
+							commentInfo = commentService.registComment(commHisBean, false);
+						} else {
+							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+							if(commentInfo != null) {
+								if(!isEmpty(commentInfo.getContents())) {
+									checkOssLicenseComment  = commentInfo.getContents();
+									checkOssLicenseComment += changeOssLicenseInfo;
+									commentInfo.setContents(checkOssLicenseComment);
+
+									commentService.updateComment(commentInfo, false);
+								}
+							}
+						}
+
+						if(commentInfo != null) {
+							map.put("commentId", commentInfo.getCommId());
+						}
+					}
+
+					break;
+			}
+
+			if(updateCnt >= 1) {
+				map.put("isValid", true);
+				map.put("returnType", "Success");
+			} else {
+				throw new Exception("update Cnt가 비정상적인 값임.");
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+
+			map.put("isValid", false);
+			map.put("returnType", "");
+		}
+
+		return map;
 	}
 }

@@ -1190,12 +1190,12 @@ public class OssController extends CoTopComponent{
 			HttpServletResponse res,
 			@ModelAttribute ProjectIdentification paramBean, 
 			Model model,
-			@PathVariable String targetLicense) {
+			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
 		Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
-		switch(targetLicense.toUpperCase()) {
+		switch(targetName.toUpperCase()) {
 			case CoConstDef.CD_CHECK_OSS_NAME_SELF:
 				map = selfCheckService.getIdentificationGridList(paramBean);
 				
@@ -1236,6 +1236,18 @@ public class OssController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(resMap);
+	}
+
+	@PostMapping(value=OSS.SAVE_OSS_CHECK_LICENSE)
+	public @ResponseBody ResponseEntity<Object> saveOssCheckLicense(
+			@RequestBody ProjectIdentification paramBean
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model
+			, @PathVariable String targetName){
+		Map<String, Object> map = autoFillOssInfoService.saveOssCheckLicense(paramBean, targetName);
+
+		return makeJsonResponseHeader(map);
 	}
 	
 	@GetMapping(value=OSS.CHECK_OSS_NAME, produces = "text/html; charset=utf-8")
