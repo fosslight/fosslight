@@ -1669,7 +1669,23 @@
 			)
 		GROUP BY OM.OSS_NAME;
 	</select>
-	
+
+	<select id="checkOssLicenseByDownloadLocation" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
+		SELECT OM.DOWNLOAD_LOCATION, OM.OSS_NAME, OM.OSS_VERSION, GROUP_CONCAT(DISTINCT LICENSE.LICENSE_NAME separator ',') AS LICENSE_NAME
+		FROM (SELECT OSS_ID, OSS_NAME, OSS_VERSION, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+				 LEFT JOIN OSS_DOWNLOADLOCATION DOWN
+						   ON OM.OSS_ID = DOWN.OSS_ID
+				 LEFT JOIN OSS_LICENSE_DECLARED DECLARED
+						   ON OM.OSS_ID = DECLARED.OSS_ID
+				 LEFT JOIN LICENSE_MASTER LICENSE
+						   ON DECLARED.LICENSE_ID = LICENSE.LICENSE_ID
+		WHERE OM.DOWNLOAD_LOCATION = #{downloadLocation}
+		   OR OM.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+		   OR DOWN.DOWNLOAD_LOCATION = #{downloadLocation}
+		   OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+		GROUP BY OM.OSS_NAME
+	</select>
+
 	<select id="checkOssNameUrl2" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME 
 		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM

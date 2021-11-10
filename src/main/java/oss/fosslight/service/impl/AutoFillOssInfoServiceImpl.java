@@ -128,11 +128,31 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 			}
 
+			if(isEmpty(bean.getDownloadLocation())) {
+				continue;
+			}
+
 			// TODO : find by oss download location and version
 
 
-			// TODO : find by oss download location
+			// Search Priority 3. find by oss download location
+			ossLicenseList = ossMapper.checkOssLicenseByDownloadLocation(bean);
 
+			if (isEmpty(checkLicense) && !ossLicenseList.isEmpty()) {
+
+				for(OssMaster ossBean : ossLicenseList) {
+					if(!isEmpty(checkLicense)) {
+						checkLicense += "|";
+					}
+
+					checkLicense += ossBean.getLicenseName();
+				}
+
+				if(!isEmpty(checkLicense)) {
+					bean.setCheckLicense(checkLicense);
+					if(!bean.getLicenseName().equals(bean.getCheckLicense())) result.add(bean);
+				}
+			}
 
 			// TODO : Clearly Defined, Github API
 
