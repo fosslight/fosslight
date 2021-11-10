@@ -109,7 +109,26 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			String checkLicense = "";
 			List<OssMaster> ossLicenseList = new ArrayList<>();
 
-			// TODO : find by oss name and oss version
+			// Search Priority 1. find by oss name and oss version
+			ossLicenseList = ossMapper.checkOssLicenseByNameAndVersion(bean);
+
+			if (isEmpty(checkLicense) && !ossLicenseList.isEmpty()) {
+
+				for(OssMaster ossBean : ossLicenseList) {
+					if(!isEmpty(checkLicense)) {
+						checkLicense += "|";
+					}
+
+					checkLicense += ossBean.getLicenseName();
+				}
+
+				if(!isEmpty(checkLicense)) {
+					bean.setCheckLicense(checkLicense);
+					if(!bean.getLicenseName().equals(bean.getCheckLicense())) result.add(bean);
+				}
+			}
+
+			// TODO : find by oss download location and version
 
 
 			// TODO : find by oss download location

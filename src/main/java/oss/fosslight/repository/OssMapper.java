@@ -181,7 +181,9 @@ public interface OssMapper {
 	int checkOssNameUrlCnt(ProjectIdentification bean);
 	
 	int checkOssNameUrl2Cnt(ProjectIdentification bean);
-	
+
+	List<OssMaster> checkOssLicenseByNameAndVersion(ProjectIdentification bean);
+
 	int ossAnalysisListCnt(@Param("prjId") String prjId, @Param("startAnalysisFlag") String startAnalysisFlag);
 	
 	void deleteOssAnalysisList(@Param("prjId") String prjId);
