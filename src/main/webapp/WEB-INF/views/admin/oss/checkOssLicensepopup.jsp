@@ -58,7 +58,7 @@
 										{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
 										{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
 										{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
-										{name: 'checkName', index: 'checkName', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
+										{name: 'checkLicense', index: 'checkLicense', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
 										{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
 										{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
 										{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
@@ -86,7 +86,7 @@
 													rowData = data.rows[rowIdx++];
 													var dataObject = datas.filter(function(a){return a.componentId==rowid})[0];
 													
-													if(dataObject.checkName.indexOf("|") > -1) {
+													if(dataObject.checkLicense.indexOf("|") > -1) {
 														className= className + ' excludeRow';
 													}
 													
@@ -135,10 +135,10 @@
 					},
 					displayCheckLicense : function(cellvalue, options, rowObject){
 						var display = "";
-						var checkName = rowObject["checkName"];
+						var checkLicense = rowObject["checkLicense"];
 						var checkOssList = rowObject["checkOssList"];
 						
-						display = checkName.split("|");
+						display = checkLicense.split("|");
 
 						for(var i in display){
 							display[i] = checkOssList == "Y" ? 

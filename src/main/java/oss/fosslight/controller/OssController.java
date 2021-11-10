@@ -1231,8 +1231,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(result.size() > 0) {
-			// TODO License 기준으로 변경 필요
-			result = ossService.checkOssName(result);
+			result = autoFillOssInfoService.checkOssLicense(result);
 			resMap.put("list", result);
 		}
 		

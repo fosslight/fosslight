@@ -13,4 +13,5 @@ import oss.fosslight.domain.ProjectIdentification;
 
 public interface AutoFillOssInfoService {
 	List<ProjectIdentification> checkOssLicenseData(List<ProjectIdentification> componentData, Map<String, String> validMap, Map<String, String> diffMap);
+	List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> list);
 }

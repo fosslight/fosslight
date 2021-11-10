@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.AutoFillOssInfoService;
@@ -95,5 +97,28 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		}
 
 		return resultData;
+	}
+
+	@Override
+	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> list){
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+
+		list = list.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+"-"+p.getDownloadLocation()+"-"+p.getOssVersion())).collect(Collectors.toList());
+
+		for(ProjectIdentification bean : list) {
+			String checkLicense = "";
+			List<OssMaster> ossLicenseList = new ArrayList<>();
+
+			// TODO : find by oss name and oss version
+
+
+			// TODO : find by oss download location
+
+
+			// TODO : Clearly Defined, Github API
+
+		}
+
+		return result;
 	}
 }
