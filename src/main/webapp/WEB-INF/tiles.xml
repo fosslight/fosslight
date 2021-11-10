@@ -118,6 +118,10 @@
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
     </definition>
+	<definition name="tiles/admin/oss/checkOssLicensepopup"    template="/WEB-INF/views/admin/oss/checkOssLicensepopup.jsp">
+        <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
+        <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
+    </definition>
     <definition name="tiles/admin/oss/ossAutoAnalysispopup"    template="/WEB-INF/views/admin/oss/ossAutoAnalysispopup.jsp">
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />

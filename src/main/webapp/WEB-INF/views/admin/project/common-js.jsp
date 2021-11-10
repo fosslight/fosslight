@@ -7,6 +7,7 @@ var projectStatus = '${project.status}';
 var distributionStatus = '${project.destributionStatus}';
 var isAndroidModel = '${project.androidFlag}' == "Y";
 var _popupCheckOssName = null;
+var _popupCheckOssLicense = null;
 
 //==========================================================================================
 //COMMON
@@ -1139,6 +1140,32 @@ var com_fn = {
 		if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 		}
+	},
+	CheckOssLicenseViewPage : function(target){
+		var saveFlag = com_fn.saveFlagObject[target.toUpperCase()];
+		var referenceDiv;
+				
+		if(!saveFlag){
+			alertify.alert('<spring:message code="msg.project.required.checkOssLicense" />', function(){});
+			
+			return false;
+		}
+
+		switch(target.toUpperCase()){
+			case "SRC":		referenceDiv = "11";	break;
+			case "ANDROID":	referenceDiv = "14";	break;
+			case "BIN":		referenceDiv = "15";	break;
+		}
+		
+		if(_popupCheckOssLicense != null){
+			_popupCheckOssLicense.close();
+		}
+		
+		_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv="+referenceDiv+"-${initDiv}&targetName=identification", "Check OSS License", "width=1150, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+		if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+		}	
 	},
     checkStatus : function(){
 		var returnFlag = false;
