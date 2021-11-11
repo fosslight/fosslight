@@ -1948,11 +1948,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// If there are multiple download paths > add
 			if (downloadLocations.length > 0) {
-				int updateCnt = 0;
-				int urlSearchSeq = -1;
-				int seq = 0;
+				int updateCnt;
+				int urlSearchSeq;
+				int seq;
 				
 				for (String downloadLocation : downloadLocations) {
+					updateCnt = 0;
+					urlSearchSeq = -1;
+					seq = 0;
+					
 					paramBean.setDownloadLocation(downloadLocation);
 					
 					for(String url : checkOssNameUrl) {
@@ -2051,10 +2055,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 							break;
 					}
-					
-					updateCnt = 0;
-					urlSearchSeq = -1;
-					seq = 0;
 					
 					if(updateCnt >= 1) {
 						map.put("isValid", true);
