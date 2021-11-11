@@ -49,6 +49,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.PROJECT;
+import oss.fosslight.common.XssFilter;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
@@ -185,8 +186,9 @@ public class ProjectController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
-		
-		return makeJsonResponseHeader(projectService.getProjectNameList(project));
+		List<Project> list = projectService.getProjectNameList(project);
+		XssFilter.projectFilter(list);
+		return makeJsonResponseHeader(list);
 		
 	}
 	
@@ -284,7 +286,7 @@ public class ProjectController extends CoTopComponent {
 		}
 
 		Map<String, Object> map = projectService.getProjectList(project);
-
+		XssFilter.projectFilter((List<Project>) map.get("rows"));
 		return makeJsonResponseHeader(map);
 	}
 	
