@@ -113,6 +113,8 @@ dependencies {
 
 	implementation group: 'org.spdx', name: 'tools-java', version: '1.0.2'
 
+	implementation group: 'com.navercorp.lucy', name: 'lucy-xss', version: '1.6.3'
+
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.10.7'
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	

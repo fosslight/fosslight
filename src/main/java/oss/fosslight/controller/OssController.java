@@ -38,6 +38,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.XssFilter;
 import oss.fosslight.common.Url.OSS;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -172,7 +173,7 @@ public class OssController extends CoTopComponent{
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+		XssFilter.ossMasterFilter((List<OssMaster>) map.get("rows"));
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -182,7 +183,9 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		return makeJsonResponseHeader(ossService.getOssNameList());
+		List<OssMaster> list = ossService.getOssNameList();
+		XssFilter.ossMasterFilter(list);
+		return makeJsonResponseHeader(list);
 	}
 	
 	@GetMapping(value={OSS.EDIT}, produces = "text/html; charset=utf-8")

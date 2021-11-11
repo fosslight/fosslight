@@ -28,6 +28,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.LICENSE;
+import oss.fosslight.common.XssFilter;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
@@ -108,7 +109,7 @@ public class LicenseController extends CoTopComponent{
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+		XssFilter.licenseMasterFilter((List<LicenseMaster>) map.get("rows"));
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -447,6 +448,7 @@ public class LicenseController extends CoTopComponent{
 			, Model model){
 		
 		List<LicenseMaster> list = licenseService.getLicenseNameList();
+		XssFilter.licenseMasterFilter(list);
 		return makeJsonResponseHeader(list);
 	}	
 }
