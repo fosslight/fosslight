@@ -498,8 +498,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					OssMaster ossMailInfo1 = getOssInfo(bean.getDelOssId(), true);
 					OssMaster tempBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
 					
+					List<String> ossNickNameList = new ArrayList<String>();
+					
 					if(tempBean1.getOssNicknames() != null) {
 						tempBean1.setOssNickname(CommonFunction.arrayToString(tempBean1.getOssNicknames(), "<br>"));
+						
+						for(String nickName : Arrays.asList(tempBean1.getOssNicknames())) {
+							ossNickNameList.add(nickName);
+						}
 					}
 					
 					tempBean1.setOssId(bean.getDelOssId());
@@ -508,21 +514,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					OssMaster ossMailInfo2 = getOssInfo(bean.getOssId(), true);
 					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
 					
-					List<String> ossNickNameList = new ArrayList<String>();
-										
 					if(tempBean2.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
 							ossNickNameList.add(nickName);
 						}
-						ossNickNameList.add(beforOssName);
-						tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
-						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
-					}else {
-						ossNickNameList.add(beforOssName);
-						tempBean2.setOssNickname(beforOssName);
-						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					}
 					
+					ossNickNameList.add(beforOssName);
+					tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
+					tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					tempBean2.setOssName(chagedOssName);
 					mailDiffMap.put("after", tempBean2);
 					
@@ -544,19 +544,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					List<String> ossNickNameList = new ArrayList<String>();
 					
+					OssMaster ossMailInfo2 = getOssInfo(ossMaster.getNewOssId(), true);
+					OssMaster beforeBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
+					if(beforeBean1.getOssNicknames() != null) {
+						for(String nickName : Arrays.asList(beforeBean1.getOssNicknames())) {
+							ossNickNameList.add(nickName);
+						}
+					}
+					
 					if(tempBean2.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
 							ossNickNameList.add(nickName);
 						}
-						ossNickNameList.add(beforOssName);
-						tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
-						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
-					}else {
-						ossNickNameList.add(beforOssName);
-						tempBean2.setOssNickname(beforOssName);
-						tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					}
 					
+					ossNickNameList.add(beforOssName);
+					tempBean2.setOssNickname(CommonFunction.arrayToString(ossNickNameList.toArray(new String[ossNickNameList.size()]), "<br>"));
+					tempBean2.setOssNicknames(ossNickNameList.toArray(new String[ossNickNameList.size()]));
 					tempBean2.setOssName(chagedOssName);
 					mailDiffMap.put("after", tempBean2);
 					
