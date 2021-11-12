@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.16 (12/11/2021)
+## Changes
+## 🐛 Hotfixes
+
+- Update Check OSS Name Function @FOSSLight-dev (#257)
+- Fix SPDX convert error (when invalid download location) @riyenas0925 (#251)
+
+## 🔧 Maintenance
+
+- Update spdx/tools-java version @riyenas0925 (#260)
+- Fix the bug that occurs when loading the BOM @FOSSLight-dev (#253)
+
+---
+
 ## v1.2.15 (05/11/2021)
 ## Changes
 ## 🚀 Features
