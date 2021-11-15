@@ -61,6 +61,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The oss version. */
 	private String ossVersion;
 	
+	/** The version diff flag. */
+	private String versionDiffFlag;
+	
 	/** The download location. */
 	private String downloadLocation;
 	
@@ -541,6 +544,24 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 */
 	public void setOssVersion(String ossVersion) {
 		this.ossVersion = ossVersion;
+	}
+
+	/**
+	 * Gets the version diff flag.
+	 *
+	 * @return the version diff flag
+	 */
+	public String getVersionDiffFlag() {
+		return versionDiffFlag;
+	}
+	
+	/**
+	 * Sets the version diff flag.
+	 *
+	 * @param versionDiffFlag the new version diff flag
+	 */
+	public void setVersionDiffFlag(String versionDiffFlag) {
+		this.versionDiffFlag = versionDiffFlag;
 	}
 
 	/**

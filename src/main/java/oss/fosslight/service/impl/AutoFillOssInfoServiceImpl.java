@@ -116,7 +116,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 
-		list = list.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+"-"+p.getDownloadLocation()+"-"+p.getOssVersion())).collect(Collectors.toList());
+		list = list.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+"-"+p.getDownloadLocation()+"-"+p.getOssVersion()+"-"+p.getLicenseName())).collect(Collectors.toList());
 
 		for(ProjectIdentification bean : list) {
 			String checkLicense = "";
@@ -156,7 +156,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			prjOssMasters = projectMapper.getOssFindByDownloadLocation(bean);
 			checkLicense = makeCheckLicenseExpression(prjOssMasters);
 
-			if (!isEmpty(checkLicense)) {
+			Boolean versionDiffFlag = prjOssMasters.stream().allMatch(oss -> {
+				return oss.getVersionDiffFlag().equals("Y");
+			});
+
+			if (!isEmpty(checkLicense) && versionDiffFlag == false) {
 				bean.setCheckLicense(checkLicense);
 
 				if(!bean.getLicenseName().equals(bean.getCheckLicense())) {
