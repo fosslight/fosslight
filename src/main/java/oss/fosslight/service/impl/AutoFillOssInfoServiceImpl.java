@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.tools.ant.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
+import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.AutoFillOssInfoService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.validation.T2CoValidationConfig;
@@ -39,6 +41,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
+	@Autowired ProjectMapper projectMapper;
     
     @Override
 	public List<ProjectIdentification> checkOssLicenseData(List<ProjectIdentification> componentData, Map<String, String> validMap, Map<String, String> diffMap){
@@ -117,24 +120,18 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 		for(ProjectIdentification bean : list) {
 			String checkLicense = "";
-			List<OssMaster> ossLicenseList = new ArrayList<>();
+			List<ProjectIdentification> prjOssMasters = new ArrayList<>();
 
 			// Search Priority 1. find by oss name and oss version
-			ossLicenseList = ossMapper.checkOssLicenseByNameAndVersion(bean);
+			prjOssMasters = projectMapper.getOssFindByNameAndVersion(bean);
+			checkLicense = makeCheckLicenseExpression(prjOssMasters);
+			
+			if (!isEmpty(checkLicense)) {
+				bean.setCheckLicense(checkLicense);
 
-			if (isEmpty(checkLicense) && !ossLicenseList.isEmpty()) {
-
-				for(OssMaster ossBean : ossLicenseList) {
-					if(!isEmpty(checkLicense)) {
-						checkLicense += "|";
-					}
-
-					checkLicense += ossBean.getLicenseName();
-				}
-
-				if(!isEmpty(checkLicense)) {
-					bean.setCheckLicense(checkLicense);
-					if(!bean.getLicenseName().equals(bean.getCheckLicense())) result.add(bean);
+				if(!bean.getLicenseName().equals(bean.getCheckLicense())) {
+					result.add(bean);
+					continue;
 				}
 			}
 
@@ -143,48 +140,64 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 2. find by oss download location and version
-			ossLicenseList = ossMapper.checkOssLicenseByDownloadLocationAndVersion(bean);
+			prjOssMasters = projectMapper.getOssFindByVersionAndDownloadLocation(bean);
+			checkLicense = makeCheckLicenseExpression(prjOssMasters);
 
-			if (isEmpty(checkLicense) && !ossLicenseList.isEmpty()) {
+			if (!isEmpty(checkLicense)) {
+				bean.setCheckLicense(checkLicense);
 
-				for(OssMaster ossBean : ossLicenseList) {
-					if(!isEmpty(checkLicense)) {
-						checkLicense += "|";
-					}
-
-					checkLicense += ossBean.getLicenseName();
-				}
-
-				if(!isEmpty(checkLicense)) {
-					bean.setCheckLicense(checkLicense);
-					if(!bean.getLicenseName().equals(bean.getCheckLicense())) result.add(bean);
+				if(!bean.getLicenseName().equals(bean.getCheckLicense())) {
+					result.add(bean);
+					continue;
 				}
 			}
-
+			
 			// Search Priority 3. find by oss download location
-			ossLicenseList = ossMapper.checkOssLicenseByDownloadLocation(bean);
+			prjOssMasters = projectMapper.getOssFindByDownloadLocation(bean);
+			checkLicense = makeCheckLicenseExpression(prjOssMasters);
 
-			if (isEmpty(checkLicense) && !ossLicenseList.isEmpty()) {
+			if (!isEmpty(checkLicense)) {
+				bean.setCheckLicense(checkLicense);
 
-				for(OssMaster ossBean : ossLicenseList) {
-					if(!isEmpty(checkLicense)) {
-						checkLicense += "|";
-					}
-
-					checkLicense += ossBean.getLicenseName();
-				}
-
-				if(!isEmpty(checkLicense)) {
-					bean.setCheckLicense(checkLicense);
-					if(!bean.getLicenseName().equals(bean.getCheckLicense())) result.add(bean);
+				if(!bean.getLicenseName().equals(bean.getCheckLicense())) {
+					result.add(bean);
+					continue;
 				}
 			}
 
-			// TODO : Clearly Defined, Github API
-
+			// Search Priority 4. find by Clearly Defined And Github API
 		}
 
+		// Request at once when using external API(Clearly Defined, Github API)
+
 		return result;
+	}
+
+	private String makeCheckLicenseExpression(List<ProjectIdentification> prjOssMasters) {
+		String checkLicense = "";
+		List<ProjectIdentification> licenses = new ArrayList<>();;
+
+		for(ProjectIdentification prjOssMaster : prjOssMasters) {
+
+			if(!isEmpty(checkLicense)) {
+				checkLicense += "|";
+			}
+
+			licenses = projectMapper.getLicenses(prjOssMaster);
+			checkLicense += makeLicenseExpression(licenses);
+		}
+		return checkLicense;
+	}
+
+	private String makeLicenseExpression(List<ProjectIdentification> licenses) {
+		String license = "";
+
+		if(licenses.size() != 0){
+			licenses = CommonFunction.makeLicenseExcludeYn(licenses);
+			license = CommonFunction.makeLicenseExpressionIdentify(licenses, ",");
+		}
+
+		return license;
 	}
 
 	@Transactional
