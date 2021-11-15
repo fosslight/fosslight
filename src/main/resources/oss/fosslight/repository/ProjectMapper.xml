@@ -940,7 +940,56 @@
 									AND B.OSS_NICKNAME = #{ossName})
 					)
 	</select>
+
+	<select id="getOssFindByNameAndVersion" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT A.OSS_ID
+				 , A.LICENSE_DIV
+				 , A.HOMEPAGE
+				 , A.DOWNLOAD_LOCATION
+				 , A.VULN_YN
+				 , A.CVE_ID
+				 , A.CVSS_SCORE
+				 , A.COPYRIGHT AS COPYRIGHT_TEXT
+		  FROM OSS_MASTER A
+		WHERE A.USE_YN = 'Y'
+			AND A.OSS_VERSION = #{ossVersion}
+			AND (A.OSS_NAME = #{ossName}
+			  OR EXISTS (	SELECT 1 
+								  FROM OSS_NICKNAME B
+								WHERE A.OSS_NAME = B.OSS_NAME
+									AND B.OSS_NICKNAME = #{ossName})
+					)
+	</select>
+
+	<select id="getOssFindByVersionAndDownloadLocation" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT A.OSS_ID
+				 , A.LICENSE_DIV
+				 , A.HOMEPAGE
+				 , A.DOWNLOAD_LOCATION
+				 , A.VULN_YN
+				 , A.CVE_ID
+				 , A.CVSS_SCORE
+				 , A.COPYRIGHT AS COPYRIGHT_TEXT
+		  FROM OSS_MASTER A
+		WHERE A.USE_YN = 'Y'
+			AND A.OSS_VERSION = #{ossVersion}
+			AND A.DOWNLOAD_LOCATION = #{downloadLocation}
+	</select>
 	
+	<select id="getOssFindByDownloadLocation" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT A.OSS_ID
+				 , A.LICENSE_DIV
+				 , A.HOMEPAGE
+				 , A.DOWNLOAD_LOCATION
+				 , A.VULN_YN
+				 , A.CVE_ID
+				 , A.CVSS_SCORE
+				 , A.COPYRIGHT AS COPYRIGHT_TEXT
+		  FROM OSS_MASTER A
+		WHERE A.USE_YN = 'Y'
+			AND A.DOWNLOAD_LOCATION = #{downloadLocation}
+	</select>
+
 	<select id="getLicenses" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
 	/* ProjectMapper.getLicenses */
 		SELECT T1.LICENSE_ID, T1.OSS_LICENSE_COMB, T1.OSS_COPYRIGHT, CASE WHEN IFNULL(SHORT_IDENTIFIER, '') = '' THEN T2.LICENSE_NAME ELSE T2.SHORT_IDENTIFIER END AS LICENSE_NAME
