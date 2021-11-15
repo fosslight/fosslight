@@ -249,7 +249,7 @@
 					</div>
 					<table id="ossList"><tr><td></td></tr></table>
 					<div align="left" style="padding-top: 10px;">
-						<input type="button" value="Change OSS License" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
+						<input type="button" value="Change License" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
 					</div>
 				</div>
 			</div>
