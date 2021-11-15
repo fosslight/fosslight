@@ -1161,7 +1161,7 @@ var com_fn = {
 			_popupCheckOssLicense.close();
 		}
 		
-		_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv="+referenceDiv+"-${initDiv}&targetName=identification", "Check OSS License", "width=1150, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+		_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv="+referenceDiv+"-${initDiv}&targetName=identification", "Check License", "width=1150, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 		if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
 			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
