@@ -212,6 +212,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			int updateCnt = 0;
 
 			switch(targetName.toUpperCase()) {
+				case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+					String[] gridId = paramBean.getGridId().split("-");
+					paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+
+					if(paramBean.getOssVersion() == null) paramBean.setOssVersion("");
+					
+					updateCnt = ossMapper.updateOssCheckLicenseBySelfCheck(paramBean);
+					
+					break;
 				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
 					updateCnt = ossMapper.updateOssCheckLicense(paramBean);
 
