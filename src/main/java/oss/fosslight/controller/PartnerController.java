@@ -256,7 +256,7 @@ public class PartnerController extends CoTopComponent{
 		try{
 			map = partnerService.getPartnerMasterList(partnerMaster);
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(map);
@@ -319,7 +319,7 @@ public class PartnerController extends CoTopComponent{
 		try{
 			result = partnerService.getUserList(t2Users);	
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(result);
@@ -450,7 +450,7 @@ public class PartnerController extends CoTopComponent{
 			historyService.storeData(h);
 			resCd="10";
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		if("10".equals(resCd) && !isEmpty(partnerMaster.getPartnerId())) {
@@ -559,7 +559,7 @@ public class PartnerController extends CoTopComponent{
 			resCd="10";
 			
 		} catch (Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		if("10".equals(resCd)) {
@@ -993,7 +993,7 @@ public class PartnerController extends CoTopComponent{
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		// 결과값 resultList에 담기
@@ -1063,7 +1063,7 @@ public class PartnerController extends CoTopComponent{
 			//validation check
 			 vResult = validate(req);	
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		if(!vResult.isValid()){
@@ -1073,7 +1073,7 @@ public class PartnerController extends CoTopComponent{
 		try{
 			commentService.deleteComment(commentsHistory);
 		} catch (Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -1100,7 +1100,7 @@ public class PartnerController extends CoTopComponent{
 		try{
 			 result = commentService.getCommentList(commentsHistory);	
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(result);

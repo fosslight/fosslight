@@ -19,6 +19,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -29,6 +30,7 @@ import oss.fosslight.service.FileService;
 
 
 @Controller
+@Slf4j
 public class ImageViewController extends CoTopComponent {
 	@Autowired FileService fileService;
 	
@@ -62,7 +64,7 @@ public class ImageViewController extends CoTopComponent {
 				f.setLogiNm(imageName);
 				modelMap.put("imageFile", f);
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 				
 				return null;
 			}

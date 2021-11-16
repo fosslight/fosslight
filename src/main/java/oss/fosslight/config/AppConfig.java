@@ -17,6 +17,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -26,6 +27,7 @@ import oss.fosslight.util.StringUtil;
 @Configuration
 @ComponentScan(value=AppConstBean.APP_COMPONENT_SCAN_PACKAGE)
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
+@Slf4j
 public class AppConfig {
 	
 	@Bean(name={"mailSender"})
@@ -68,7 +70,7 @@ public class AppConfig {
 				}
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 			}
 		}
 		

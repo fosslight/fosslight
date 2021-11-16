@@ -118,7 +118,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			map.put("records", records);
 			map.put("rows", list);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return map;

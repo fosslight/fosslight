@@ -328,7 +328,7 @@ public class OssController extends CoTopComponent{
 		try{
 			map = ossService.getOssPopupList(ossMaster);
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(map);
@@ -755,7 +755,7 @@ public class OssController extends CoTopComponent{
 			// validation check
 			vResult = validate(req);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		if (!vResult.isValid()) {
@@ -767,7 +767,7 @@ public class OssController extends CoTopComponent{
 		try {
 			result = commentService.registComment(commentsHistory);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(result);
@@ -785,7 +785,7 @@ public class OssController extends CoTopComponent{
 			//validation check
 			 vResult = validate(req);	
 		} catch(Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		if(!vResult.isValid()) {
@@ -795,7 +795,7 @@ public class OssController extends CoTopComponent{
 		try {
 			commentService.deleteComment(commentsHistory);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -1583,7 +1583,7 @@ public class OssController extends CoTopComponent{
 				return makeJsonResponseHeader(false, "Fail", resMap);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 			
 			return makeJsonResponseHeader(false, "Fail");
 		}
