@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.repository.CodeManagerMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.OssMapper;
@@ -18,6 +19,7 @@ import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
 @Component
+@Slf4j
 public class CoPostConstruct {
 	@Autowired T2UserService t2UserService;
 	@Autowired OssService ossService;
@@ -38,7 +40,7 @@ public class CoPostConstruct {
 			CoCodeManager.getInstance().init();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 	}
 }

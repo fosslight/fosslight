@@ -22,10 +22,6 @@
 					$("#btnChangeOss").on("click", function(){
 						Ctrl_fn.changeProc();				
 					});
-
-					$("#btnAddNickname").on("click", function(){
-						Ctrl_fn.addProc();				
-					});
 				}
 			};
 			
@@ -42,7 +38,7 @@
 					</c:if>
 					
 					$.ajax({
-						url : '/oss/getCheckOssNameAjax/${projectInfo.targetName}',
+						url : '/oss/getCheckOssLicenseAjax/${projectInfo.targetName}',
 						dataType : 'json',
 						cache : false,
 						data : params,
@@ -54,13 +50,15 @@
 							$('#ossList').jqGrid({
 									datatype: 'local',
 									data : resultData.list,
-									colNames: ['ID','Result','Download location','OSS name (now)', 'Registered OSS name<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv'],
+									colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv'],
 									colModel: [
 										{name: 'gridId', index: 'gridId', hidden:true, key:true},
-										{name: 'result', index: 'result', <c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">width: 20</c:if><c:if test="${sessUserInfo.authority ne 'ROLE_ADMIN'}">width:12</c:if>, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
+										{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
 										{name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:grid_fn.displayDownloadLocation, sortable:false},
 										{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
-										{name: 'checkName', index: 'checkName', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckName, sortable:false},
+										{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
+										{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
+										{name: 'checkLicense', index: 'checkLicense', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
 										{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
 										{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
 										{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
@@ -77,7 +75,6 @@
 									loadComplete: function(data){
 										if(data.total > 0){
 											$("#btnChangeOss").show();
-											$("#btnAddNickname").show();
 											
 											var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 											for(var _idx=0;_idx<rowsCount;_idx++) {
@@ -89,7 +86,7 @@
 													rowData = data.rows[rowIdx++];
 													var dataObject = datas.filter(function(a){return a.componentId==rowid})[0];
 													
-													if(dataObject.checkName.indexOf("|") > -1) {
+													if(dataObject.checkLicense.indexOf("|") > -1) {
 														className= className + ' excludeRow';
 													}
 													
@@ -124,29 +121,29 @@
 				},
 				changeProc : function(){
 					$('#loading_wrap_popup').show();
-					
+
 					var target = $("#ossList");
 					var result = [];
 					var failFlag = false;
 					var idArry = grid_fn.getCheckedRow("CHANGE");
-						
+
 					if(idArry.length > 0){
 						window.setTimeout(function(){
 							for(var i = 0 ; i < idArry.length ; i++){
 								var rowId = idArry[i];
-								
+
 								cleanErrMsg("ossList", rowId);
-								
+
 								var rowdata = target.getRowData(rowId);
-								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
+								rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
 								<c:if test="${projectInfo.targetName eq 'identification'}">
 								rowdata["refPrjId"] = rowdata["referenceId"];
 								rowdata["referenceId"] = commentId;
 								rowdata["referenceDiv"] = referenceDiv.split("-")[0];
 								</c:if>
-								
+
 								$.ajax({
-									url : '/oss/saveOssCheckName/${projectInfo.targetName}',
+									url : '/oss/saveOssCheckLicense/${projectInfo.targetName}',
 									type : 'POST',
 									data : JSON.stringify(rowdata),
 									dataType : 'json',
@@ -163,24 +160,24 @@
 											alertify.error('<spring:message code="msg.common.valid2" />', 0);
 											failFlag = true;
 										}
-										
+
 										result.push(resultData);
 										<c:if test="${projectInfo.targetName eq 'identification'}">
 										commentId = resultData.commentId;
 										</c:if>
-										
+
 										if(result.length == idArry.length){
 											if(!failFlag){
-												var successMsg = 'Successfully changed OSS name into OSS table';
-												
+												var successMsg = 'Successfully changed OSS License <br> into OSS table';
+
 												<c:if test="${projectInfo.targetName eq 'identification'}">
 												successMsg += '.<br>(It moves to the tab you entered first.)';
 												</c:if>
-												
+
 												alertify.success(successMsg, 5); // 5sec동안 message 출력
 												opener.location.reload();
 											}
-											
+
 											$('#loading_wrap_popup').hide();
 										}
 									},
@@ -192,172 +189,46 @@
 						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
 						$('#loading_wrap_popup').hide();
 					}
-				},
-				addProc : function(){
-					$('#loading_wrap_popup').show();
-					
-					var target = $("#ossList");
-					var result = [];
-					var failFlag = false;
-					var idArry = grid_fn.getCheckedRow("ADD");
-
-					var idArryOnlyInOssList = grid_fn.getCheckedRow("ADD").filter(i => {
-						let input = $("#ossList").getRowData(i)['checkName'];
-						let regexp = /^(<a).*(<\/a>)$/;
-						return regexp.test(input);
-					});
-
-					if(idArryOnlyInOssList.length > 0){
-						window.setTimeout(function(){
-							for(var i = 0 ; i < idArryOnlyInOssList.length ; i++){
-								var rowId = idArryOnlyInOssList[i];
-
-								cleanErrMsg("ossList", rowId);
-								
-								var rowdata = target.getRowData(rowId);
-								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
-								
-								$.ajax({
-									url : '/oss/saveOssNickname',
-									type : 'POST',
-									data : JSON.stringify(rowdata),
-									dataType : 'json',
-									cache : false,
-									async: false,
-									contentType : 'application/json',
-									success: function(resultData){
-										if(resultData.isValid == "true"){
-											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'Y');
-											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'Y');
-										}
-										else {
-											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'N');
-											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'N');
-											alertify.error('<spring:message code="already.added.nickname" />', 0);
-											failFlag = true;
-										}
-										
-										result.push(resultData);
-																
-										if(result.length == idArryOnlyInOssList.length){
-											if(!failFlag){
-												alertify.success('<spring:message code="msg.selfcheck.nickname.success" />');
-												opener.location.reload();
-											}
-											
-											$('#loading_wrap_popup').hide();
-										}
-									},
-									error: function(resultData){}
-								});
-							}
-						}, 0);
-					} else if(idArry.length > 0){
-						alertify.error('<spring:message code="msg.oss.warn.unregistered" />');
-						$('#loading_wrap_popup').hide();
-					} else {
-						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
-						$('#loading_wrap_popup').hide();
-					}
-				},
-				showOssViewPage : function(ossName){
-					if(ossName!=""){
-						onAjaxLoadingHide = true;
-						$.ajax({
-							url : '/oss/checkExistsOssByname',
-							type : 'GET',
-							dataType : 'json',
-							cache : false,
-							async: false,
-							data : {ossName : ossName},
-							contentType : 'application/json',
-							success : function(data){
-								if(data.isValid == 'true') {
-									var _encUrl = "ossName="+Ctrl_fn.replaceGetParamChar(ossName);
-									
-									if(_popup == null || _popup.closed) {
-										_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
-
-										if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-											alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
-										}
-									} else {
-										_popup.close();
-										
-										_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
-									}
-								}
-							},
-							error : function(){
-								alertify.error('<spring:message code="msg.common.valid2" />', 0);
-							}
-						});
-					}
-				},
-				replaceGetParamChar : function(_param) {
-					_param = _param.replace(/&/g,"%26");
-					_param = _param.replace(/\+/g,"%2B"); 
-					
-					 return _param;
 				}
 			};
-
 			var grid_fn = {
 					displayStatus : function(cellvalue, options, rowObject){
 						var display = "";
-						var changeFlag = rowObject.changeFlag || rowObject[6];
-						var addFlag = rowObject.addFlag || rowObject[7];
-						
+						var changeFlag = rowObject.changeFlag || rowObject[8];
+
 						if(changeFlag =="Y"){
 							display += "<a class='btnPG wAnd onAnd'>Change</a>";
 						} else {
 							display += "<a class='btnPG wAnd off'>Change</a>";
 						}
-
-						if('${sessUserInfo.authority}' == 'ROLE_ADMIN'){
-							if(addFlag =="Y" ){
-								display += "<a class='btnPG onBin'>Add</a>";
-							} else {
-								display += "<a class='btnPG off'>Add</a>";
-							}
-						}
 						
 						return display;
-					},
-					displayCheckName : function(cellvalue, options, rowObject){
-						var display = "";
-						var checkName = rowObject["checkName"];
-						var checkOssList = rowObject["checkOssList"];
-						
-						display = checkName.split("|");
-
-						for(var i in display){
-							display[i] = checkOssList == "Y" ? 
-								"<a href='#' onclick='Ctrl_fn.showOssViewPage(\""+display[i]+"\")' style='color:#2883f3;text-decoration:underline;'>"+display[i]+"</a>"
-								: display[i];
-						}
-						
-						return display.join("<br>");
 					},
 					displayDownloadLocation : function(cellvalue, options, rowObject){
 						var display = "";
 						var downloadLocation = rowObject["downloadLocation"];
-						
+
 						display = downloadLocation.split(",");
-						
+
 						return display.join("<br>");
 					},
 					unformatter : function(cellvalue, options, rowObject){
 						return cellvalue;
 					},
+					displayCheckLicense : function(cellvalue, options, rowObject){
+						var checkLicense = rowObject["checkLicense"];
+						var display = checkLicense.split("|");
+
+						return display.join("<br>");
+					},
 					getCheckedRow : function(processType){
-						var seq = processType.toUpperCase() == "CHANGE" ? 6 : 7;
+						var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
 						return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
-						    if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
-						        arr.push(item);
-						    }
-						    
-						    return arr;
+							if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
+								arr.push(item);
+							}
+
+							return arr;
 						}, []);
 					}
 			};
@@ -372,14 +243,11 @@
 			<div  align="center" >
 				<div class="jqGridSet" style="overflow: auto; width: 98%; height: 500px;">
 					<div align="left" style="padding-bottom: 20px;">
-						<b><spring:message code="msg.project.check.oss.name" /></b>
+						<b><spring:message code="msg.project.check.license" /></b>
 					</div>
 					<table id="ossList"><tr><td></td></tr></table>
 					<div align="left" style="padding-top: 10px;">
-						<input type="button" value="Change OSS Name" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
-						<c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">
-							<input type="button" value="Add Nickname" id="btnAddNickname" class="btnColor red" style="display: none; width:120px;" />
-						</c:if>
+						<input type="button" value="Change License" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
 					</div>
 				</div>
 			</div>

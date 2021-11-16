@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -38,6 +39,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.ExcelUtil;
 
 @Controller
+@Slf4j
 public class ComplianceController extends CoTopComponent {
 	
 	@Autowired PartnerService partnerService;
@@ -87,7 +89,7 @@ public class ComplianceController extends CoTopComponent {
 			
 			map = partnerService.getPartnerStatusList(partnerMaster);
 		}catch(Exception e){
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(map);

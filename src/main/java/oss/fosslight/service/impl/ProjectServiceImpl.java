@@ -189,7 +189,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			map.put("records", records);
 			map.put("rows", list);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return map;
@@ -1080,7 +1080,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			return sb.toString();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return sb.toString();
@@ -1401,7 +1401,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			map.put("prjOssMaster", prjOssMaster);
 			map.put("prjLicense", Licenselist);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return map;

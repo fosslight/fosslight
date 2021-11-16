@@ -57,6 +57,12 @@ public interface ProjectMapper {
 	List<ProjectIdentification> getOssVersions(String ossName);
 	
 	ProjectIdentification getOssId(ProjectIdentification identification);
+
+	List<ProjectIdentification> getOssFindByNameAndVersion(ProjectIdentification identification);
+	
+	List<ProjectIdentification> getOssFindByVersionAndDownloadLocation(ProjectIdentification identification);
+
+	List<ProjectIdentification> getOssFindByDownloadLocation(ProjectIdentification identification);
 	
 	List<ProjectIdentification> getLicenses(ProjectIdentification identification);
 

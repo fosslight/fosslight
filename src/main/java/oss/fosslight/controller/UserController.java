@@ -130,7 +130,7 @@ public class UserController extends CoTopComponent {
 		try {
 			list = codeService.getCodeDetailList(t2CodeDtl);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(list);

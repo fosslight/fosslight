@@ -175,13 +175,15 @@ public interface OssMapper {
 	int updateOssCheckNameBySelfCheck(ProjectIdentification bean);
 	
 	int updateOssCheckName(ProjectIdentification bean);
-	
+
+	int updateOssCheckLicense(ProjectIdentification bean);
+
 	int checkOssNameCnt(ProjectIdentification bean);
 	
 	int checkOssNameUrlCnt(ProjectIdentification bean);
 	
 	int checkOssNameUrl2Cnt(ProjectIdentification bean);
-	
+
 	int ossAnalysisListCnt(@Param("prjId") String prjId, @Param("startAnalysisFlag") String startAnalysisFlag);
 	
 	void deleteOssAnalysisList(@Param("prjId") String prjId);

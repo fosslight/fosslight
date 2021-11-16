@@ -399,7 +399,7 @@ public abstract class T2CoValidator extends CoTopComponent {
                 }
             }
         } catch(Exception e) {
-        	e.printStackTrace();
+        	log.debug(e.getMessage());
         }
 
         customValidation(map, errMap, diffMap, infoMap);

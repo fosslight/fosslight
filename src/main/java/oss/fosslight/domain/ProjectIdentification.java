@@ -52,11 +52,17 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The check name */
 	private String checkName;
 
+	/** The check license */
+	private String checkLicense;
+
 	/** The oss name exists yn. */
 	private String ossNameExistsYn;
 	
 	/** The oss version. */
 	private String ossVersion;
+	
+	/** The version diff flag. */
+	private String versionDiffFlag;
 	
 	/** The download location. */
 	private String downloadLocation;
@@ -503,7 +509,25 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	public void setCheckName(String checkName) {
 		this.checkName = checkName;
 	}
-	
+
+	/**
+	 * Gets the check license.
+	 *
+	 * @return the check license
+	 */
+	public String getCheckLicense() {
+		return checkLicense;
+	}
+
+	/**
+	 * Sets the check license.
+	 *
+	 * @param checkLicense the new check license
+	 */
+	public void setCheckLicense(String checkLicense) {
+		this.checkLicense = checkLicense;
+	}
+
 	/**
 	 * Gets the oss version.
 	 *
@@ -520,6 +544,24 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 */
 	public void setOssVersion(String ossVersion) {
 		this.ossVersion = ossVersion;
+	}
+
+	/**
+	 * Gets the version diff flag.
+	 *
+	 * @return the version diff flag
+	 */
+	public String getVersionDiffFlag() {
+		return versionDiffFlag;
+	}
+	
+	/**
+	 * Sets the version diff flag.
+	 *
+	 * @param versionDiffFlag the new version diff flag
+	 */
+	public void setVersionDiffFlag(String versionDiffFlag) {
+		this.versionDiffFlag = versionDiffFlag;
 	}
 
 	/**

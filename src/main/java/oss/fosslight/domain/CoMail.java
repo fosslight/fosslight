@@ -17,6 +17,9 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CoMail extends ComBean {
 	
 	/** The Constant serialVersionUID. */
@@ -607,7 +610,7 @@ public class CoMail extends ComBean {
 			return writer.toString();
 		} catch (Exception e) {
 			System.out.println("Exception occured while processing velocity template");
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		return "";
 	}

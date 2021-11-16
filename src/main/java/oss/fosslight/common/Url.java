@@ -170,7 +170,13 @@ public final class Url {
 		public static final String CHECK_OSS_NAME_AJAX = PATH + "/getCheckOssNameAjax/{targetName}";
 		public static final String SAVE_OSS_CHECK_NAME = PATH + "/saveOssCheckName/{targetName}";
 		public static final String SAVE_OSS_NICKNAME = PATH + "/saveOssNickname";
-		
+
+		public static final String CHECK_OSS_LICENSE = PATH + "/checkOssLicense";
+		public static final String CHECK_OSS_LICENSE_JSP = TILES_ROOT + PATH + "/checkOssLicensepopup";
+
+		public static final String CHECK_OSS_LICENSE_AJAX = PATH + "/getCheckOssLicenseAjax/{targetName}";
+		public static final String SAVE_OSS_CHECK_LICENSE = PATH + "/saveOssCheckLicense/{targetName}";
+
 		public static final String SAVE_OSS_ANALYSIS_LIST = PATH + "/saveOssAnalysisList/{targetName}";
 		public static final String OSS_AUTO_ANALYSIS = PATH + "/ossAutoAnalysis";
 		public static final String OSS_AUTO_ANALYSIS_JSP = TILES_ROOT + PATH + "/ossAutoAnalysispopup";
