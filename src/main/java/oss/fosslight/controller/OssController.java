@@ -1206,7 +1206,7 @@ public class OssController extends CoTopComponent{
 				break;
 		}		
 
-		// 중간 저장을 기능 대응을 위해 save시 유효성 체크를 data load시로 일괄 변경
+		// intermediate storage function correspondence : validation check when loading data
 		if (map != null) {
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			
@@ -1281,7 +1281,7 @@ public class OssController extends CoTopComponent{
 				break;
 		}		
 
-		// 중간 저장을 기능 대응을 위해 save시 유효성 체크를 data load시로 일괄 변경
+		// intermediate storage function correspondence : validation check when loading data
 		if (map != null) {
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			
