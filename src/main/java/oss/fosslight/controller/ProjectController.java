@@ -569,7 +569,7 @@ public class ProjectController extends CoTopComponent {
 								OssComponentUtil.getInstance().makeOssComponent(addCheckList, true);
 							} catch (IllegalAccessException | InstantiationException | InvocationTargetException
 									| NoSuchMethodException e) {
-								e.printStackTrace();
+								log.debug(e.getMessage());
 							}
 
 							for (OssComponents bean : addCheckList) {
@@ -1319,7 +1319,7 @@ public class ProjectController extends CoTopComponent {
 				h.sethEtc(project.etcStr());
 				historyService.storeData(h);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 			}
 		}
 
@@ -2737,7 +2737,7 @@ public class ProjectController extends CoTopComponent {
 		try {
 			sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return makeJsonResponseHeader(sheetNameList);
@@ -2891,7 +2891,7 @@ public class ProjectController extends CoTopComponent {
 		try {
 			map = projectService.get3rdMapList(project);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return makeJsonResponseHeader(map);
@@ -3095,7 +3095,7 @@ public class ProjectController extends CoTopComponent {
 		try {
 			map = projectService.getAddList(project);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return makeJsonResponseHeader(map);
@@ -3127,7 +3127,7 @@ public class ProjectController extends CoTopComponent {
 		try {
 			map = projectService.getPartnerList(partnerMaster);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		return makeJsonResponseHeader(map);
@@ -3180,7 +3180,7 @@ public class ProjectController extends CoTopComponent {
 				return toJson(resultList);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		if(fileExtension.equals("csv")) {
@@ -3195,7 +3195,7 @@ public class ProjectController extends CoTopComponent {
 			try {
 				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 			}
 
 			Boolean isSpdxSpreadsheet = false;
@@ -3267,7 +3267,7 @@ public class ProjectController extends CoTopComponent {
 				return toJson(resultList);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 
 		if ("text".equals(fileType)) {
@@ -3289,7 +3289,7 @@ public class ProjectController extends CoTopComponent {
 			try {
 				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 			}
 			
 			Boolean isSpdxSpreadsheet = false;
@@ -3977,7 +3977,7 @@ public class ProjectController extends CoTopComponent {
 						String contents = projectService.makeNoticeFileContents(result);
 						fileId = projectService.makeSupplementFileId(contents, projectDetail);
 					} catch(Exception e) {
-						e.printStackTrace();
+						log.debug(e.getMessage());
 					}
 				}
 			} else {

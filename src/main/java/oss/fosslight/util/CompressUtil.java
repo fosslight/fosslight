@@ -18,6 +18,9 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CompressUtil {
     public static void compressGZIP(File input, File output, boolean deleteInputFile) throws IOException {
         try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(new FileOutputStream(output))){
@@ -52,7 +55,7 @@ public class CompressUtil {
             	}
             }
         } catch(Exception e) {
-        	e.printStackTrace();
+        	log.debug(e.getMessage());
         } finally {
 			if(in != null) {
 				try {

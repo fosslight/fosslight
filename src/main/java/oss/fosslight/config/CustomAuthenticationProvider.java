@@ -25,6 +25,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -34,6 +35,7 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
 
 @Component
+@Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 	@Autowired T2UserService userService;
 	
@@ -97,7 +99,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				con = new InitialDirContext(properties);
 				isAuthenticated = true;
 			}catch (NamingException e) {
-				e.printStackTrace();
+				log.debug(e.getMessage());
 			} finally {
 				if(con != null) {
 					try {
