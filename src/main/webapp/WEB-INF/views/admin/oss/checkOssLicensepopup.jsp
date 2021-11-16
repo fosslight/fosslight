@@ -243,9 +243,9 @@
 			<div  align="center" >
 				<div class="jqGridSet" style="overflow: auto; width: 98%; height: 500px;">
 					<div align="left" style="padding-bottom: 20px;">
-						<b>There exists another OSS which has same download location. Please click "Change OSS Name" if you want to change to the registered OSS Name.</b>
+						<b>License detected based on OSS Name, Version, and Download location. To change the license, click the "Check License" button.</b>
 						<br>
-						<b>동일한 Download Location으로 등록된 OSS가 있습니다. 시스템에 등록된 OSS 이름으로 변경하시려면 체크 후 "Change OSS Name" 버튼을 클릭하시기 바랍니다.</b>
+						<b>OSS Name, Version, Download location을 기반으로 검출된 License 입니다. License를 변경하시려면 Check License 버튼을 클릭하세요.</b>
 					</div>
 					<table id="ossList"><tr><td></td></tr></table>
 					<div align="left" style="padding-top: 10px;">
