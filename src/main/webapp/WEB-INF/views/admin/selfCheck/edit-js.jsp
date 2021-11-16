@@ -13,6 +13,7 @@
 	var licenseNames = [];
 	var isSort = false;
 	var _popupCheckOssName = null;
+	var _popupCheckOssLicense = null;
 	var saveFlag = false;
 	var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 	var divisionUseFlag = "${not empty ct:getCodeValues(ct:getConstDef('CD_USER_DIVISION'))}";
@@ -972,6 +973,23 @@
 			}
 			
 			
+		},
+		CheckOssLicenseViewPage : function(){
+			if(saveFlag) {
+				if(_popupCheckOssLicense != null){
+					_popupCheckOssLicense.close();
+				}
+				
+				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv=10&targetName=self", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+				}
+			} else {
+				alertify.alert('<spring:message code="msg.project.required.checkOssLicense" />', function(){});
+
+				return false;
+			}
 		},
 		saveAjax : function(){
 			com_fn.exitCell(_mainLastsel, "srcList");

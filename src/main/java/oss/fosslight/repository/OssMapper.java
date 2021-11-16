@@ -173,6 +173,8 @@ public interface OssMapper {
 	List<OssMaster> checkOssNameUrl2(ProjectIdentification bean);
 	
 	int updateOssCheckNameBySelfCheck(ProjectIdentification bean);
+
+	int updateOssCheckLicenseBySelfCheck(ProjectIdentification bean);
 	
 	int updateOssCheckName(ProjectIdentification bean);
 
