@@ -379,7 +379,7 @@ public class LicenseController extends CoTopComponent{
 			//validation check
 			 vResult = validate(req);	
 		}catch(Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		if(!vResult.isValid()){
@@ -388,7 +388,7 @@ public class LicenseController extends CoTopComponent{
 		try{
 			commentService.deleteComment(commentsHistory);
 		} catch (Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -403,7 +403,7 @@ public class LicenseController extends CoTopComponent{
 			// validation check
 			vResult = validate(req);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		if (!vResult.isValid()) {
@@ -416,7 +416,7 @@ public class LicenseController extends CoTopComponent{
 
 			result = commentService.registComment(commentsHistory);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(result);

@@ -852,7 +852,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/LicenseList.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.debug(e.getMessage());}
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "LicenseList");
 			
@@ -923,7 +923,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/OssList.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.debug(e.getMessage());}
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "ossList");
 			
@@ -2583,7 +2583,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/selfCheckList.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.debug(e.getMessage());}
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "selfCheckList");
 			
@@ -2726,7 +2726,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.debug(e.getMessage());}
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "vulnerabilityList");
 			
@@ -2963,7 +2963,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/AutoAnalysisList.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.debug(e.getMessage());}
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "Auto Analysis Input");
 			
@@ -3083,7 +3083,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
 		} catch (IOException e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return null;

@@ -133,7 +133,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 							try {
 								_encPw = CryptUtil.encryptAES256(_pw, CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
 							} catch (Exception e) {
-								log.debug(e.getMessage());
+								log.error(e.getMessage());
 							}
 							if(!StringUtil.isEmpty(_encPw)) {
 								c.setCdDtlExp(_encPw);

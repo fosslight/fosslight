@@ -158,7 +158,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				try {
 					t2CodeDtlList = codeMapper.selectCodeDetailList(t2CodeDtl);
 				} catch (Exception e) {
-					log.debug(e.getMessage());
+					log.error(e.getMessage());
 				}
 				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
 				String restrictionStr = "";

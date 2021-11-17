@@ -99,7 +99,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				con = new InitialDirContext(properties);
 				isAuthenticated = true;
 			}catch (NamingException e) {
-				log.debug(e.getMessage());
+				log.error(e.getMessage());
 			} finally {
 				if(con != null) {
 					try {

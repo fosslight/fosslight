@@ -814,7 +814,7 @@ public class VerificationController extends CoTopComponent {
 		try {
 			result = verificationService.getPackage(prjId, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return result;
@@ -834,7 +834,7 @@ public class VerificationController extends CoTopComponent {
 		try {
 			result = verificationService.getPackageMulti(prjId, CommonFunction.emptyCheckProperty("upload.path", "/upload"), fileIdx);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return result;
@@ -870,7 +870,7 @@ public class VerificationController extends CoTopComponent {
 			//validation check
 			 vResult = validate(req);	
 		}catch(Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		if(!vResult.isValid()){
@@ -885,7 +885,7 @@ public class VerificationController extends CoTopComponent {
 			commentService.registComment(commentsHistory);
 			verificationMapper.deleteComment(commentsHistory);
 		} catch (Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
