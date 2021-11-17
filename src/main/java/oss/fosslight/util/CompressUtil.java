@@ -55,7 +55,7 @@ public class CompressUtil {
             	}
             }
         } catch(Exception e) {
-        	log.debug(e.getMessage());
+        	log.error(e.getMessage());
         } finally {
 			if(in != null) {
 				try {

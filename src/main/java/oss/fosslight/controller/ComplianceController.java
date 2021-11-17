@@ -89,7 +89,7 @@ public class ComplianceController extends CoTopComponent {
 			
 			map = partnerService.getPartnerStatusList(partnerMaster);
 		}catch(Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(map);

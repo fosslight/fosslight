@@ -610,7 +610,7 @@ public class CoMail extends ComBean {
 			return writer.toString();
 		} catch (Exception e) {
 			System.out.println("Exception occured while processing velocity template");
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		return "";
 	}
