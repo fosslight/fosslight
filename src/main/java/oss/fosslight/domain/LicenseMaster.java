@@ -553,7 +553,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	 * @return the license nicknames
 	 */
 	public String[] getLicenseNicknames() {
-		return licenseNicknames;
+		return licenseNicknames != null ? licenseNicknames.clone() : null;
 	}
 	
 	/**
@@ -784,7 +784,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	}
 	
 	public String[] getArrRestriction() {
-		return arrRestriction;
+		return arrRestriction != null ? arrRestriction.clone() : null;
 	}
 
 	public void setArrRestriction(String[] arrRestriction) {

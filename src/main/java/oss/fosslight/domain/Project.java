@@ -1280,7 +1280,7 @@ public class Project extends ComBean implements Serializable {
 	 * @return the watchers
 	 */
 	public String[] getWatchers() {
-		return watchers;
+		return watchers != null ? watchers.clone() : null;
 	}
 
 	/**
@@ -1819,7 +1819,7 @@ public class Project extends ComBean implements Serializable {
 	 * @return the prj ids
 	 */
 	public String[] getPrjIds() {
-		return prjIds;
+		return prjIds != null ? prjIds.clone() : null;
 	}
 
 	/**
@@ -2221,7 +2221,7 @@ public class Project extends ComBean implements Serializable {
 	 * @return the android sheet num
 	 */
 	public String[] getAndroidSheetNum() {
-		return androidSheetNum;
+		return androidSheetNum != null ? androidSheetNum.clone() : null;
 	}
 
 	/**
@@ -3703,7 +3703,7 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	public String[] getOssNickNames() {
-		return ossNickNames;
+		return ossNickNames != null ? ossNickNames.clone() : null;
 	}
 
 	public void setOssNickNames(String[] ossNickNames) {
@@ -3719,7 +3719,7 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	public String[] getArrStatuses() {
-		return arrStatuses;
+		return arrStatuses != null ? arrStatuses.clone() : null;
 	}
 
 	public void setArrStatuses(String[] arrStatuses) {
