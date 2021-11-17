@@ -682,7 +682,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @param watcherDivision the new watcher division
 	 */
 	public void setWatcherDivision(String[] watcherDivision) {
-		this.watcherDivision = watcherDivision;
+		this.watcherDivision = watcherDivision != null ? 
+			watcherDivision.clone() : null;
 	}
 	
 	/**
@@ -700,7 +701,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @param watcherUserId the new watcher user id
 	 */
 	public void setWatcherUserId(String[] watcherUserId) {
-		this.watcherUserId = watcherUserId;
+		this.watcherUserId = watcherUserId != null ?
+			watcherUserId.clone() : null;
 	}
 	
 	/**
@@ -900,7 +902,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @param watchers the new watchers
 	 */
 	public void setWatchers(String[] watchers) {
-		this.watchers = watchers;
+		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
 	/**
@@ -998,7 +1000,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	}
 
 	public void setArrStatuses(String[] arrStatuses) {
-		this.arrStatuses = arrStatuses;
+		this.arrStatuses = arrStatuses != null ?
+			arrStatuses.clone() : null;
 	}
 	
 	/**
