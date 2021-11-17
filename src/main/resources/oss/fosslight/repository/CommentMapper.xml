@@ -166,7 +166,9 @@
 			AND REFERENCE_DIV = #{schReferenceDiv}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
-			AND ${schKeywordSql}
+			<foreach item="item" index="index" collection="schKeywordList">
+        		AND CONTENTS LIKE CONCAT('%', #{item}, '%')
+  			</foreach>
 		</if>
 		AND USE_YN = 'Y'
 	ORDER BY 
@@ -233,7 +235,9 @@
 				AND T1.REFERENCE_DIV = #{schReferenceDiv}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
-				AND ${schKeywordSql}
+				<foreach item="item" index="index" collection="schKeywordList">
+					AND CONTENTS LIKE CONCAT('%', #{item}, '%')
+				</foreach>
 			</if>
 			AND T1.USE_YN = 'Y'
 		ORDER BY 
@@ -275,7 +279,9 @@
 			AND REFERENCE_DIV = #{schReferenceDiv}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
-			AND ${schKeywordSql}
+			<foreach item="item" index="index" collection="schKeywordList">
+				AND CONTENTS LIKE CONCAT('%', #{item}, '%')
+			</foreach>
 		</if>
 		AND USE_YN = 'Y'
 	</select>
