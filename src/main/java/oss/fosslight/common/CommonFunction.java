@@ -2740,7 +2740,7 @@ public class CommonFunction extends CoTopComponent {
 		
 		return resultMap;
 	}
-
+	//TODO : Deprecated
 	public static String makeSearchQuery(String schKeyword, String field) {
 		StringBuffer sb = new StringBuffer();
 		
