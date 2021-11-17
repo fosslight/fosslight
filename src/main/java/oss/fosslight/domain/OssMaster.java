@@ -491,7 +491,7 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 	
 	public String[] getDownloadLocations() {
-		return downloadLocations;
+		return downloadLocations != null ? downloadLocations.clone() : null;
 	}
 
 	public void setDownloadLocations(String[] downloadLocations) {
@@ -738,7 +738,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the copyrights
 	 */
 	public String[] getCopyrights() {
-		return copyrights;
+		return copyrights != null ? copyrights.clone() : null;
 	}
 	
 	/**
@@ -1017,7 +1017,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the oss names
 	 */
 	public String[] getOssNames() {
-		return ossNames;
+		return ossNames != null ? ossNames.clone() : null;
 	}
 	
 	/**
@@ -1092,7 +1092,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the oss nicknames
 	 */
 	public String[] getOssNicknames() {
-		return ossNicknames;
+		return ossNicknames != null ? ossNicknames.clone() : null;
 	}
 	
 	/**

@@ -29,7 +29,7 @@ public class ReportCombean implements Serializable{
 	private String androidResultFileSeq;
 	
 	public String[] getSheetNums() {
-		return sheetNums;
+		return sheetNums != null ? sheetNums.clone() : null;
 	}
 	public void setSheetNums(String[] sheetNums) {
 		this.sheetNums = sheetNums;

@@ -673,7 +673,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @return the watcher division
 	 */
 	public String[] getWatcherDivision() {
-		return watcherDivision;
+		return watcherDivision != null ? watcherDivision.clone() : null;
 	}
 	
 	/**
@@ -691,7 +691,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @return the watcher user id
 	 */
 	public String[] getWatcherUserId() {
-		return watcherUserId;
+		return watcherUserId != null ? watcherUserId.clone() : null;
 	}
 	
 	/**
@@ -891,7 +891,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 * @return the watchers
 	 */
 	public String[] getWatchers() {
-		return watchers;
+		return watchers != null ? watchers.clone() : null;
 	}
 
 	/**
@@ -994,7 +994,7 @@ public class PartnerMaster extends ComBean implements Serializable{
 	}
 	
 	public String[] getArrStatuses() {
-		return arrStatuses;
+		return arrStatuses != null ? arrStatuses.clone() : null;
 	}
 
 	public void setArrStatuses(String[] arrStatuses) {

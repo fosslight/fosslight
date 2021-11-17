@@ -127,7 +127,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 	 * @return the ids
 	 */
 	public String[] getIds() {
-		return ids;
+		return ids != null ? ids.clone() : null;
 	}
 
 	/**
