@@ -136,7 +136,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 	 * @param ids the new ids
 	 */
 	public void setIds(String[] ids) {
-		this.ids = ids;
+		this.ids = ids != null ? ids.clone() : null;
 	}
 
 

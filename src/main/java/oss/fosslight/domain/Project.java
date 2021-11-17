@@ -1289,7 +1289,7 @@ public class Project extends ComBean implements Serializable {
 	 * @param watchers the new watchers
 	 */
 	public void setWatchers(String[] watchers) {
-		this.watchers = watchers;
+		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
 	/**
@@ -1828,7 +1828,7 @@ public class Project extends ComBean implements Serializable {
 	 * @param prjIds the new prj ids
 	 */
 	public void setPrjIds(String[] prjIds) {
-		this.prjIds = prjIds;
+		this.prjIds = prjIds != null ? prjIds.clone() : null;
 	}
 
 	/**
@@ -2230,7 +2230,8 @@ public class Project extends ComBean implements Serializable {
 	 * @param androidSheetNum the new android sheet num
 	 */
 	public void setAndroidSheetNum(String[] androidSheetNum) {
-		this.androidSheetNum = androidSheetNum;
+		this.androidSheetNum = androidSheetNum != null ?
+			androidSheetNum.clone() : null;
 	}
 
 	/**
@@ -3707,7 +3708,8 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	public void setOssNickNames(String[] ossNickNames) {
-		this.ossNickNames = ossNickNames;
+		this.ossNickNames = ossNickNames != null ?
+			ossNickNames.clone() : null;
 	}
 
 	public String getStatuses() {
@@ -3723,7 +3725,8 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	public void setArrStatuses(String[] arrStatuses) {
-		this.arrStatuses = arrStatuses;
+		this.arrStatuses = arrStatuses != null ?
+			arrStatuses.clone() : null;
 	}
 	
 	public String getPublicYn() {

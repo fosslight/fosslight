@@ -562,7 +562,8 @@ public class LicenseMaster extends ComBean implements Serializable {
 	 * @param licenseNicknames the new license nicknames
 	 */
 	public void setLicenseNicknames(String[] licenseNicknames) {
-		this.licenseNicknames = licenseNicknames;
+		this.licenseNicknames = licenseNicknames != null ?
+			licenseNicknames.clone() : null;
 	}
 	
 	/**
@@ -788,7 +789,8 @@ public class LicenseMaster extends ComBean implements Serializable {
 	}
 
 	public void setArrRestriction(String[] arrRestriction) {
-		this.arrRestriction = arrRestriction;
+		this.arrRestriction = arrRestriction != null ?
+			arrRestriction.clone() : null;
 	}
 	
 	public String getRestrictionList() {
