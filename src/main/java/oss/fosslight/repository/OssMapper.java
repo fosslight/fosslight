@@ -211,4 +211,10 @@ public interface OssMapper {
 	List<PartnerMaster> getOssNameMergePartnerList(OssMaster ossMaster);
 
 	List<Project> getOssNameMergeProjectList(OssMaster ossMaster);
+
+	void updateOssMasterSync(OssMaster ossMaster);
+
+	void deleteOssLicenseDeclaredSync(OssMaster ossMaster);
+
+	void deleteOssLicenseDetectedSync(OssMaster ossMaster);
 }

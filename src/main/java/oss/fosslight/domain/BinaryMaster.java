@@ -199,13 +199,15 @@ public class BinaryMaster extends ComBean implements Serializable{
 		return watcherDivision != null ? watcherDivision.clone() : null;
 	}
 	public void setWatcherDivision(String[] watcherDivision) {
-		this.watcherDivision = watcherDivision;
+		this.watcherDivision = watcherDivision != null ?
+			watcherDivision.clone() : null;
 	}
 	public String[] getWatcherUserId() {
 		return watcherUserId != null ? watcherUserId.clone() : null;
 	}
 	public void setWatcherUserId(String[] watcherUserId) {
-		this.watcherUserId = watcherUserId;
+		this.watcherUserId = watcherUserId != null ?
+			watcherUserId.clone() : null;
 	}
 	public String getBinaryFileName() {
 		return binaryFileName;
@@ -266,7 +268,7 @@ public class BinaryMaster extends ComBean implements Serializable{
 	}
 
 	public void setWatchers(String[] watchers) {
-		this.watchers = watchers;
+		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
 	public List<BinaryMaster> getWatcherList() {

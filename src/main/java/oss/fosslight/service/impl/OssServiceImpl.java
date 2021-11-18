@@ -2549,4 +2549,120 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return checkList;
 	}
+
+	@Override
+	public void syncOssMaster(OssMaster ossMaster, boolean declaredLicenseCheckFlag, boolean detectedLicenseCheckFlag, boolean downloadLocationCheckFlag) {
+		Map<String, OssMaster> updateOSSLicenseMap = new HashMap<>();
+		
+		ossMaster.setModifier(ossMaster.getLoginUserName());
+		checkOssLicenseAndObligation(ossMaster);
+		
+		ossMapper.updateOssMasterSync(ossMaster);
+		
+		if (declaredLicenseCheckFlag) {
+			ossMapper.deleteOssLicenseDeclaredSync(ossMaster);
+			
+			List<OssLicense> list = ossMaster.getOssLicenses();
+			int ossLicenseDeclaredIdx = 0;
+			
+			for(OssLicense license : list) {
+				ossLicenseDeclaredIdx++;
+				
+				OssMaster om = new OssMaster(
+					  Integer.toString(ossLicenseDeclaredIdx)
+					, ossMaster.getOssId()
+					, license.getLicenseName()
+					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()
+					, license.getOssLicenseText()
+					, license.getOssCopyright()
+					, ossMaster.getLicenseDiv()
+				);
+				
+				ossMapper.insertOssLicenseDeclared(om);
+			}
+			
+			updateOSSLicenseMap.put(ossMaster.getOssId(), ossMaster);
+			
+			for(OssMaster bean : updateOSSLicenseMap.values()) {
+				updateLicenseDivDetail(bean);
+			}
+		}
+		
+		if (detectedLicenseCheckFlag) {
+			ossMapper.deleteOssLicenseDetectedSync(ossMaster);
+			
+			List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
+			
+			if(detectedLicenses != null) {
+				int ossLicenseDetectedIdx = 0;
+				
+				for(String detectedLicense : detectedLicenses) {			
+					if(!isEmpty(detectedLicense)) {
+						LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
+						
+						OssMaster om = new OssMaster(
+							  ossMaster.getOssId() // ossId
+							, detectedLicenseInfo.getLicenseId() // licenseId
+							, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
+						);
+						
+						ossMapper.insertOssLicenseDetected(om);
+					}
+				}
+			}
+		}
+		
+		if (downloadLocationCheckFlag) {
+			registOssDownloadLocation(ossMaster);
+		}
+		
+		if(!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
+			CommentsHistory param = new CommentsHistory();
+			param.setReferenceId(ossMaster.getOssId());
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+			param.setContents(ossMaster.getComment());
+			
+			commentService.registComment(param);
+		}
+		
+		// Deactivate Flag Setting
+		if(isEmpty(ossMaster.getDeactivateFlag())) {
+			ossMaster.setDeactivateFlag(CoConstDef.FLAG_NO);
+		}
+		
+		ossMapper.setDeactivateFlag(ossMaster);
+	}
+
+	@Override
+	public OssMaster makeEmailSendFormat(OssMaster bean) {
+		bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
+		bean.setOssLicenses(CommonFunction.changeLicenseNameToShort(bean.getOssLicenses()));
+		
+		if(!isEmpty(bean.getLicenseDiv())) {
+			bean.setMultiLicenseFlag(bean.getLicenseDiv());
+			bean.setLicenseDiv(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_DIV, bean.getLicenseDiv()));
+		}
+		
+		if(!isEmpty(bean.getLicenseType())) {
+			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
+		}
+		
+		if(!isEmpty(bean.getObligationType())) {
+			bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, bean.getObligationType()));
+		}
+		
+		if(!isEmpty(bean.getModifiedDate())) {
+			bean.setModifiedDate(DateUtil.dateFormatConvert(bean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+		}
+		
+		if(!isEmpty(bean.getModifier())) {
+			bean.setModifier(CoMailManager.getInstance().makeUserNameFormat(bean.getModifier()));
+		}
+		
+		bean.setAttribution(CommonFunction.lineReplaceToBR(bean.getAttribution()));
+		bean.setSummaryDescription(CommonFunction.lineReplaceToBR(bean.getSummaryDescription()));
+		bean.setCopyright(CommonFunction.lineReplaceToBR(bean.getCopyright()));
+		
+		return bean;
+	}
 }

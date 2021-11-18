@@ -107,4 +107,8 @@ public interface OssService extends HistoryConfig{
 	List<OssMaster> getOssListBySync(OssMaster bean);
 
 	List<String> getOssListSyncCheck(List<OssMaster> selectOssList, List<OssMaster> standardOssList);
+
+	void syncOssMaster(OssMaster syncBean, boolean declaredLicenseCheckFlag, boolean detectedLicenseCheckFlag, boolean downloadLocationCheckFlag);
+
+	OssMaster makeEmailSendFormat(OssMaster beforeBean);
 }

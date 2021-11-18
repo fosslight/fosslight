@@ -32,7 +32,7 @@ public class ReportCombean implements Serializable{
 		return sheetNums != null ? sheetNums.clone() : null;
 	}
 	public void setSheetNums(String[] sheetNums) {
-		this.sheetNums = sheetNums;
+		this.sheetNums = sheetNums != null ? sheetNums.clone() : null;
 	}
 	public String getFileSeq() {
 		return fileSeq;

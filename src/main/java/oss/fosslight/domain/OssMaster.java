@@ -495,7 +495,8 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 
 	public void setDownloadLocations(String[] downloadLocations) {
-		this.downloadLocations = downloadLocations;
+		this.downloadLocations = downloadLocations != null ?
+			downloadLocations.clone() : null;
 	}
 	
 	/**
@@ -1026,7 +1027,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossNames the new oss names
 	 */
 	public void setOssNames(String[] ossNames) {
-		this.ossNames = ossNames;
+		this.ossNames = ossNames != null ? ossNames.clone() : null;
 	}
 	
 	/**
@@ -1101,7 +1102,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossNicknames the new oss nicknames
 	 */
 	public void setOssNicknames(String[] ossNicknames) {
-		this.ossNicknames = ossNicknames;
+		this.ossNicknames = ossNicknames != null ? ossNicknames.clone() : null;
 	}
 	
 	/**
