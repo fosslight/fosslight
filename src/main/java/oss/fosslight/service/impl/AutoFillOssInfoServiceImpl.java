@@ -11,10 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.tools.ant.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +25,8 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.CoConstDef.DependencyType;
+import oss.fosslight.common.CoConstDef.ExternalService;
 import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -176,7 +174,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			DependencyType dependencyType = DependencyType.downloadLocationToType(bean.getDownloadLocation());
 
 			// Search Priority 4-1. Github API : empty oss version and download location
-			if(ossVersion.isEmpty() && dependencyType == DependencyType.GITHUB) {
+			if(ossVersion.isEmpty() && ExternalService.GITHUB_LICENSE_API.hasDependencyType(dependencyType)) {
 				Matcher matcher = dependencyType.getPattern().matcher(bean.getDownloadLocation());
 				String owner = "", repo = "";
 
@@ -186,12 +184,13 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 
 				try {
-					Mono<Object> mono = requestGithubLicense("https://api.github.com/repos/" + owner + "/" + repo + "/license");
+					String requestUri = ExternalService.githubLicenseRequestUri(owner, repo);
+					Mono<Object> mono = requestGithubLicense(requestUri);
 					Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
 					Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("license");
 					checkLicense = licenseInfo.get("spdx_id");
 				} catch (Exception e) {
-					log.error(downloadLocation + " : " + e.getMessage());
+					log.error("Github -> " + downloadLocation + " : " + e.getMessage());
 					checkLicense = "NONE";
 				}
 
@@ -203,6 +202,43 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
+			if(!ossVersion.isEmpty() && ExternalService.CLEARLY_DEFINED_DEFINITIONS_API.hasDependencyType(dependencyType)) {
+				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
+				String type = dependencyType.getType();
+				String provider = dependencyType.getProvider();
+				String revision = ossVersion;
+				String namespace = "-", name = "";
+
+				while(matcher.find()) {
+					if(dependencyType.getIsNameSpaceRequired()) {
+						namespace = matcher.group(3);
+						name = matcher.group(4);
+					} else {
+						name = matcher.group(3);
+					}
+				}
+
+				if(!dependencyType.getIsNameSpaceRequired()) {
+					namespace = "-";
+				}
+
+				try {
+					String requestUri = ExternalService.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
+					Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
+					Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
+					Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
+					checkLicense = licenseInfo.get("declared");
+				} catch (Exception e) {
+					log.error("Clearly Defined -> " + downloadLocation + " : " + e.getMessage());
+					checkLicense = "NONE";
+				}
+
+				if(!currentLicense.equals(checkLicense) && !checkLicense.equals("NOASSERTION") && !checkLicense.equals("NONE")) {
+					bean.setCheckLicense(checkLicense);
+					result.add(bean);
+					continue;
+				}
+			}
 		}
 
 		// Request at once when using external API(Clearly Defined, Github API)
@@ -233,6 +269,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			.header("Authorization", "token " + githubToken)
 			.retrieve()
 			.bodyToMono(Object.class);
+	}
+
+	@Override
+	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
+		return Flux.fromIterable(locations)
+				.parallel()
+				.runOn(Schedulers.elastic())
+				.flatMap(this::requestClearlyDefinedLicense);
+	}
+
+	@Override
+	public Mono<Object> requestClearlyDefinedLicense(String location) {
+		return webClient.get()
+				.uri(location)
+				.retrieve()
+				.bodyToMono(Object.class);
 	}
 
 	private String makeCheckLicenseExpression(List<ProjectIdentification> prjOssMasters) {
