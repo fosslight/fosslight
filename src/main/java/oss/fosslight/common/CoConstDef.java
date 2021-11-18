@@ -5,11 +5,7 @@
 
 package oss.fosslight.common;
 
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
 import java.util.regex.Pattern;
-import java.util.Arrays;
 
 public class CoConstDef {
 	
@@ -269,144 +265,11 @@ public class CoConstDef {
 	public static final Pattern NPM_PATTERN = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
 	public static final Pattern PYPI_PATTERN = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
 	public static final Pattern MAVEN_CENTRAL_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://maven.google.com/web/index.html#([^:]+):([^:]+))");
 	public static final Pattern PUB_PATTERN = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
 	public static final Pattern COCOAPODS_PATTERN = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-	public static final Pattern UNSUPPORTED_PATTERN = Pattern.compile("(?!)");	// nothing match
-
-	/* dependency type enum */
-	public enum DependencyType {
-		GITHUB("git", "github", false, CoConstDef.GITHUB_PATTERN),
-		NPM("npm", "npmjs", false, CoConstDef.NPM_PATTERN),
-		PYPI("pypi", "pypi", false, CoConstDef.PYPI_PATTERN),
-		MAVEN_CENTRAL("maven", "mavencentral", true, CoConstDef.MAVEN_CENTRAL_PATTERN),
-		MAVEN_GOOGLE("maven", "mavengoogle", true, CoConstDef.MAVEN_GOOGLE_PATTERN),
-		COCOAPODS("pod", "cocoapods", false, CoConstDef.COCOAPODS_PATTERN),
-		UNSUPPORTED("", "", false, CoConstDef.UNSUPPORTED_PATTERN);
-
-		String type;
-		String provider;
-		Boolean isNameSpaceRequired;
-		private Pattern pattern;
-
-		DependencyType(String type, String provider, Boolean isNameSpaceRequired, Pattern pattern) {
-			this.type = type;
-			this.provider = provider;
-			this.pattern = pattern;
-			this.isNameSpaceRequired = isNameSpaceRequired;
-		}
-
-		public String getType() {
-			return type;
-		}
-
-		public String getProvider() {
-			return provider;
-		}
-
-		public Pattern getPattern() {
-			return pattern;
-		}
-
-		public Boolean getIsNameSpaceRequired() {
-			return isNameSpaceRequired;
-		}
-
-		public static DependencyType downloadLocationToType(String downloadLocation) {
-			return Arrays.stream(DependencyType.values())
-				.filter(dependency -> {
-					Pattern pattern = dependency.getPattern();
-					return pattern.matcher(downloadLocation).matches();
-				})
-				.findAny()
-				.orElse(DependencyType.UNSUPPORTED);
-		}
-	}
-
-	/* External API support dependency type (GitHub, Clearly Defined) */
-	public enum ExternalService {
-		GITHUB_LICENSE_API(
-				"https",
-				"api.github.com",
-				"/repos/{onwer}/{repo}/license",
-				"github license api",
-				Arrays.asList(
-						DependencyType.GITHUB
-				)
-		),
-		CLEARLY_DEFINED_DEFINITIONS_API(
-				"https",
-				"api.clearlydefined.io",
-				"/definitions/{type}/{provider}/{namespace}/{name}/{revision}",
-				"Clearly Defined definitions api",
-				Arrays.asList(
-						DependencyType.NPM,
-						DependencyType.MAVEN_CENTRAL,
-						DependencyType.MAVEN_GOOGLE,
-						DependencyType.PYPI,
-						DependencyType.COCOAPODS
-				)
-		);
-
-		private String schema;
-		private String host;
-		private String path;
-		private String description;
-		private List<DependencyType> types;
-
-		ExternalService(String schema, String host, String path, String description, List<DependencyType> types) {
-			this.schema = schema;
-			this.host = host;
-			this.path = path;
-			this.description = description;
-			this.types = types;
-		}
-
-		public List<DependencyType> getTypes() {
-			return types;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		public String getPath() {
-			return path;
-		}
-
-		public String getSchema() {
-			return schema;
-		}
-
-		public String getHost() {
-			return host;
-		}
-
-		public boolean hasDependencyType(DependencyType type) {
-			return types.stream()
-					.anyMatch(dependencyType -> dependencyType.equals(type));
-		}
-
-		public static String githubLicenseRequestUri(String owner, String repo) {
-			return UriComponentsBuilder.newInstance()
-					.scheme(GITHUB_LICENSE_API.getSchema())
-					.host(GITHUB_LICENSE_API.getHost())
-					.path(GITHUB_LICENSE_API.getPath())
-					.build()
-					.expand(owner, repo)
-					.encode().toUriString();
-		}
-
-		public static String clearlyDefinedLicenseRequestUri(String type, String provider, String namespace, String name, String revision) {
-			return UriComponentsBuilder.newInstance()
-					.scheme(CLEARLY_DEFINED_DEFINITIONS_API.getSchema())
-					.host(CLEARLY_DEFINED_DEFINITIONS_API.getHost())
-					.path(CLEARLY_DEFINED_DEFINITIONS_API.getPath())
-					.build()
-					.expand(type, provider, namespace, name, revision)
-					.encode().toUriString();
-		}
-	}
+	/* nothing match */
+	public static final Pattern UNSUPPORTED_PATTERN = Pattern.compile("(?!)");
 
 	/**
 	 * Co Code Master - 대표 코드 [S]
