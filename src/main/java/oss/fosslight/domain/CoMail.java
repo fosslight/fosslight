@@ -423,7 +423,7 @@ public class CoMail extends ComBean {
 	 * @return the to ids
 	 */
 	public String[] getToIds() {
-		return toIds;
+        return toIds != null ? toIds.clone() : null;
 	}
 	
 	/**
@@ -450,7 +450,7 @@ public class CoMail extends ComBean {
 	 * @return the cc ids
 	 */
 	public String[] getCcIds() {
-		return ccIds;
+        return ccIds != null ? ccIds.clone() : null;
 	}
 	
 	/**
@@ -476,7 +476,7 @@ public class CoMail extends ComBean {
 	 * @return the bcc ids
 	 */
 	public String[] getBccIds() {
-		return bccIds;
+        return bccIds != null ? bccIds.clone() : null;
 	}
 	
 	/**
