@@ -60,14 +60,14 @@
 							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  	   STAT.CATEGORY = #{user}
 					  </foreach>
 					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
 	  			  </if>
@@ -97,7 +97,7 @@
 										   WHERE CD_NO = '200'
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
-							  WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate} AND PM.USE_YN ='Y') STAT
+							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -121,7 +121,7 @@
 						 				  INNER JOIN T2_AUTHORITIES AUTH
 						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 						        ON PM.REVIEWER = ADMIN.USER_ID
-						     WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate} AND PM.USE_YN ='Y') STAT
+						     WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -281,14 +281,14 @@
 			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
 	  			  </foreach>
 	  			  	 , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  	   STAT.CATEGORY = #{user}
 				  </foreach>
 				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
 					 	 LIMIT ${diffMonthCnt}) A
@@ -318,11 +318,11 @@
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
 							  	 ON OM.CREATOR = ADMIN.USER_ID AND OM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}) STAT
+							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate} 
+							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
 								AND OM.CREATOR != OM.MODIFIER) STAT
 						</when>
 					</choose>    
@@ -341,14 +341,14 @@
 			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
 	  			  </foreach>
 	  			     , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  	   STAT.CATEGORY = #{user}
 				  </foreach>
 				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
 					 	 LIMIT ${diffMonthCnt}) A
@@ -378,11 +378,11 @@
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
 							  	 ON LM.CREATOR = ADMIN.USER_ID AND LM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}) STAT
+							  WHERE DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON LM.MODIFIER = ADMIN.USER_ID AND LM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate} 
+							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
 							    AND LM.CREATOR != LM.MODIFIER) STAT
 						</when>
 					</choose>
@@ -409,14 +409,14 @@
 							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  	   STAT.CATEGORY = #{user}
 					  </foreach>
 					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
 	  			  </if>
@@ -437,7 +437,7 @@
 										   WHERE CD_NO = '200'
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
-							  WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}) STAT
+							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -461,7 +461,7 @@
 						 				  INNER JOIN T2_AUTHORITIES AUTH
 						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 						        ON PM.REVIEWER = ADMIN.USER_ID
-						     WHERE PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}) STAT
+						     WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -491,7 +491,7 @@
 						 ON USR.USER_ID = PM.CREATOR AND PM.USE_YN = 'Y'
 					  INNER JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200' AND USE_YN = 'Y') DIVISION
 					     ON USR.DIVISION = DIVISION.CD_DTL_NO
-						AND PM.CREATED_DATE BETWEEN ${startDate} AND ${endDate}
+						AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
 					  GROUP BY USR.USER_ID) STAT
 		    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 GROUP BY A.CD_DTL_NM

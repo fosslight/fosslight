@@ -11,27 +11,27 @@
     <sql id="orderby">
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY PRJ_ID desc</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('asc', sord)">
+    		<when test="@oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('asc', sord)">
     			ORDER BY (
     			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 1 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 2 
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 3 
+    				WHEN PRJ_NAME REGEXP '^[a-zA-Z].+$' then 1 
+					WHEN PRJ_NAME REGEXP '^[가-힣].+$' then 2 
+					WHEN PRJ_NAME REGEXP '^[0-9].+$' then 3 
 					ELSE 4 
-			      END), ${sidx} ${sord}
+			      END), PRJ_NAME
     		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('desc', sord)">
+			<when test="@oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('desc', sord)">
     			ORDER BY (
     			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 4 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 3 
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 2 
+    				WHEN PRJ_NAME REGEXP '^[a-zA-Z].+$' then 4 
+					WHEN PRJ_NAME REGEXP '^[가-힣].+$' then 3 
+					WHEN PRJ_NAME REGEXP '^[0-9].+$' then 2 
 					ELSE 1 
-			      END), ${sidx} ${sord}
+			      END), PRJ_NAME
     		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('IDENTIFICATION_STATUS', sidx)">
+    		<when test="@oss.fosslight.util.StringUtil@equals('IDENTIFICATION_STATUS', sidx)">
     			ORDER BY (
-    				CASE ${sidx}
+    				CASE IDENTIFICATION_STATUS
     					WHEN '' THEN 1
 	    				WHEN 'NA' THEN 2
 	    				WHEN 'PROG' THEN 3
@@ -39,44 +39,53 @@
 	    				WHEN 'REV' THEN 5
 	    				WHEN 'CONF' THEN 6
 	    			END
-    			) ${sord}
+    			)
     		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('VERIFICATION_STATUS', sidx)">
+    		<when test="@oss.fosslight.util.StringUtil@equals('VERIFICATION_STATUS', sidx)">
     			ORDER BY (
     				CASE 
     					WHEN IDENTIFICATION_STATUS != 'CONF' THEN 1
-    					WHEN ${sidx} = '' AND IDENTIFICATION_STATUS = 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
-    					WHEN ${sidx} = '' AND A.COMPLETE_YN = 'Y' THEN 3
-    					WHEN ${sidx} = 'NA' THEN 4
-	    				WHEN ${sidx} = 'PROG' THEN 5
-	    				WHEN ${sidx} = 'REQ' THEN 6
-	    				WHEN ${sidx} = 'REV' THEN 7
-	    				WHEN ${sidx} = 'CONF' THEN 8
+    					WHEN VERIFICATION_STATUS = '' AND IDENTIFICATION_STATUS = 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+    					WHEN VERIFICATION_STATUS = '' AND A.COMPLETE_YN = 'Y' THEN 3
+    					WHEN VERIFICATION_STATUS = 'NA' THEN 4
+	    				WHEN VERIFICATION_STATUS = 'PROG' THEN 5
+	    				WHEN VERIFICATION_STATUS = 'REQ' THEN 6
+	    				WHEN VERIFICATION_STATUS = 'REV' THEN 7
+	    				WHEN VERIFICATION_STATUS = 'CONF' THEN 8
 	    			END
-    			) ${sord}
+    			)
     		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
+			<!--TODO: What is destribution?-->
+    		<when test="@oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
     			ORDER BY (
     				CASE
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'ERROR' THEN 7
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'DONE' THEN 6
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'RSV' THEN 5
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'PROG' THEN 4
-						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND ${sidx} = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND ${sidx} = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-						WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND ${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'ERROR' THEN 7
+						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'DONE' THEN 6
+						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'RSV' THEN 5
+						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'PROG' THEN 4
+						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND DESTRIBUTION_STATUS = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+						WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
 						ELSE 1
 					END
-    			) ${sord}
+    			)
     		</when>
     		<when test="@oss.fosslight.util.StringUtil@equals('DIVISION', sidx)">
-    			ORDER BY (SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '200' AND CD.CD_DTL_NO =  DIVISION) ${sord}
+    			ORDER BY (SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '200' AND CD.CD_DTL_NO =  DIVISION)
     		</when>
     		<when test="@oss.fosslight.util.StringUtil@equals('REVIEWER', sidx)">
-    			ORDER BY (SELECT u.USER_NAME FROM T2_USERS u WHERE REVIEWER = u.USER_ID) ${sord}
+    			ORDER BY (SELECT u.USER_NAME FROM T2_USERS u WHERE REVIEWER = u.USER_ID)
     		</when>
-    		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+    		<otherwise>ORDER BY ${sidx}</otherwise>
     	</choose>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+				ASC
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+				DESC
+			</when>
+		</choose>
     </sql>
     	
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
@@ -3727,26 +3736,35 @@
    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
    			ORDER BY (
    				CASE
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'ERROR' THEN 7
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'DONE' THEN 6
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'RSV' THEN 5
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'PROG' THEN 4
-					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND ${sidx} = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND ${sidx} = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-					WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND ${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'ERROR' THEN 7
+					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'DONE' THEN 6
+					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'RSV' THEN 5
+					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'PROG' THEN 4
+					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND DESTRIBUTION_STATUS = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+					WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
 					ELSE 1
 				END
-   			) ${sord}
+   			)
    		</when>
-   		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+		<!--TODO : Chagne ${} to #{}-->
+   		<otherwise>ORDER BY ${sidx}</otherwise>
    	</choose>
-		 <include refid="limitPage"/>
+	<choose>
+		<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+			ASC
+		</when>
+		<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+			DESC
+		</when>
+	</choose>
+	<include refid="limitPage"/>
 	</select>
 	
 	<update id="updateProjectAllowDownloadBitFlag"  parameterType="oss.fosslight.domain.Project">
 		UPDATE PROJECT_MASTER
 		   SET ALLOW_DOWNLOAD_BIT_FLAG = #{allowDownloadBitFlag}
-		 WHERE PRJ_ID = ${prjId}
+		 WHERE PRJ_ID = #{prjId}
 	</update>
 	
 	<update id="updateProjectDistributionStatus"  parameterType="String">
