@@ -7,7 +7,76 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-        ORDER BY ${sidx} ${sord}
+		ORDER BY
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('ACTION_ID', sidx)">
+				ACTION_ID
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('ACTION_TYPE', sidx)">
+				ACTION_TYPE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('BINARY_NAME', sidx)">
+				BINARY_NAME
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('FILE_PATH', sidx)">
+				FILE_PATH
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('SOURCE_PATH', sidx)">
+				SOURCE_PATH
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('CHECK_SUM', sidx)">
+				CHECK_SUM
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('ACTION_ID', sidx)">
+				ACTION_ID
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('TLSH', sidx)">
+				TLSH
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sidx)">
+				OSS_NAME
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sidx)">
+				OSS_VERSION
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('LICENSE', sidx)">
+				LICENSE
+			</when>
+			<!--TODO : Change it to snake_case-->
+			<when test="@oss.fosslight.util.StringUtil@equals('PARENTNAME', sidx)">
+				PARENT_NAME
+			</when>
+			<!--TODO : Change it to snake_case-->
+			<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMNAME', sidx)">
+				PLATFORM_NAME
+			</when>
+			<!--TODO : Change it to snake_case-->
+			<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMVERSION', sidx)">
+				PLATFORM_VERSION
+			</when>
+			<!--TODO : Change it to snake_case-->
+			<when test="@oss.fosslight.util.StringUtil@equals('UPDATEDATE', sidx)">
+				UPDATE_DATE
+			</when>
+			<!--TODO : Change it to snake_case-->
+			<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
+				CREATED_DATE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sidx)">
+				MODIFIER
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('COMMENT', sidx)">
+				COMMENT
+			</when>
+		</choose>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+				ASC
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+				DESC
+			</when>
+		</choose>
     </sql>
     
     <select id="selectBinaryDataHistoryTotalCount" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="int">

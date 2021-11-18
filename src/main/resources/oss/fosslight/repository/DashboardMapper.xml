@@ -447,7 +447,8 @@
             </if>
         <choose>
             <when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY T1.MODIFIED_DATE DESC</when>
-            <otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+			<!--jQGrid uses "loadonce" option. So below line will have never been used.-->
+            <!--<otherwise>ORDER BY ${sidx} ${sord}</otherwise>-->
         </choose>
     </select>
    
@@ -496,7 +497,8 @@
 	        </if>
 	    <choose>
             <when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY T1.MODIFIED_DATE DESC</when>
-            <otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+			<!--jQGrid uses "loadonce" option. So below line will have never been used.-->
+            <!--<otherwise>ORDER BY ${sidx} ${sord}</otherwise>-->
         </choose>
     </select>
    
