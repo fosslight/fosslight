@@ -1915,6 +1915,8 @@ public class OssController extends CoTopComponent{
 				}
 			}
 			
+			CoCodeManager.getInstance().refreshOssInfo();
+			
 			return makeJsonResponseHeader(true, "true");
 		} catch (Exception e) {
 			log.error("OSS Sync Failed.", e);

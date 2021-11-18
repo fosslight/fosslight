@@ -1674,6 +1674,18 @@
 				OR DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
 		   AND OSS_NAME = #{ossName}
 	</update>
+
+	<update id="updateOssCheckLicenseBySelfCheck" parameterType="oss.fosslight.domain.ProjectIdentification">
+		UPDATE PRE_OSS_COMPONENTS_LICENSE OCL
+			INNER JOIN PRE_OSS_COMPONENTS OC
+		ON CONCAT(OC.REFERENCE_ID, '-', OC.REFERENCE_DIV, '-', OC.COMPONENT_IDX) = OCL.COMPONENT_ID
+			SET OCL.LICENSE_NAME = #{checkLicense}
+		WHERE CONCAT(REFERENCE_ID, '-', REFERENCE_DIV) = #{gridId}
+		  AND (OC.DOWNLOAD_LOCATION = #{downloadLocation}
+		   OR OC.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
+		  AND OSS_NAME = #{ossName}
+		  AND OSS_VERSION = #{ossVersion}
+	</update>
 	
 	<update id="updateOssCheckName" parameterType="oss.fosslight.domain.ProjectIdentification">
 		UPDATE OSS_COMPONENTS 
