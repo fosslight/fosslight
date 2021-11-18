@@ -9,7 +9,36 @@
 	</sql>
 	
     <sql id="orderby">
-        ORDER BY ${sidx} ${sord}
+        ORDER BY
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('SEQ',sidx)">
+				SEQ
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('TITLE',sidx)">
+				TITLE
+			</when>
+			<!--Why do we need replaceNotice-->
+			<when test="@oss.fosslight.util.StringUtil@equals('REPLACE_NOTICE',sidx)">
+				NOTICE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('S_DATE',sidx)">
+				S_DATE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('E_DATE',sidx)">
+				E_DATE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('PUBLISH_YN',sidx)">
+				PUBLISH_YN
+			</when>
+		</choose>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+				ASC
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+				DESC
+			</when>
+		</choose>
     </sql>
 	
 	<select id="selectNoticeTotalCount" parameterType="oss.fosslight.domain.Notice" resultType="int">

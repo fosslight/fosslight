@@ -7,7 +7,41 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-        ORDER BY ${sidx} ${sord}
+        ORDER BY
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('MSG_TYPE', sidx)">
+				MSG_TYPE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('SND_STATUS', sidx)">
+				SND_STATUS
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('EML_TITLE', sidx)">
+				EML_TITLE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('CREATION_DATE', sidx)">
+				CREATION_DATE
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('CREATION_USER_ID', sidx)">
+				CREATION_USER_ID
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('ERROR_MSG', sidx)">
+				ERROR_MSG
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('EML_TO', sidx)">
+				EML_TO
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('EML_CC', sidx)">
+				EML_CC
+			</when>
+		</choose>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+				ASC
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+				DESC
+			</when>
+		</choose>
     </sql>
     
     <select id="selectSentMailTotalCount" parameterType="oss.fosslight.domain.CoMail" resultType="int">
