@@ -40,7 +40,7 @@ public class CoPostConstruct {
 			CoCodeManager.getInstance().init();
 			
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 	}
 }

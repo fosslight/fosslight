@@ -457,7 +457,7 @@ public class NvdDataService {
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		try {
@@ -660,7 +660,7 @@ public class NvdDataService {
 					sqlSession.commit();
 
 				} catch (Exception e) {
-					log.debug(e.getMessage());
+					log.error(e.getMessage());
 					sqlSession.rollback();
 				} finally {
 					sqlSession.close();

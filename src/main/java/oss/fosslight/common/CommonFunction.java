@@ -1187,7 +1187,7 @@ public class CommonFunction extends CoTopComponent {
 												resultLicenseList.add(copyLicenseList);
 												duplicateLicense.add(licenseList.getLicenseName());
 											} catch (CloneNotSupportedException e) {
-												log.debug(e.getMessage());
+												log.error(e.getMessage());
 											}
 										}
 									}
@@ -3719,7 +3719,7 @@ public class CommonFunction extends CoTopComponent {
 			
 			return writer.toString();
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return "";

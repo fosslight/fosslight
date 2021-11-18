@@ -224,14 +224,16 @@ public class FileUtil {
 		
 		// inputFolder의 구성파일이 파일이면 zipFile 메소드를 호출하고,
 		// 폴더일 경우 현재 zipFolder 메소드를 재귀호출
-		for (File file : contents) {
-			if (file.isFile()) {
-				zipFile(zipOutputStream, file, myName);
-			} else if (file.isDirectory()) {
-				zipFolder(zipOutputStream, file, myName, "");
+		if(contents != null) {
+			for (File file : contents) {
+				if (file.isFile()) {
+					zipFile(zipOutputStream, file, myName);
+				} else if (file.isDirectory()) {
+					zipFolder(zipOutputStream, file, myName, "");
+				}
+				
+				zipOutputStream.closeEntry();
 			}
-			
-			zipOutputStream.closeEntry();
 		}
 	}
 

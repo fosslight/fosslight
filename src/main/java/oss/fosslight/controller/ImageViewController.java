@@ -64,7 +64,7 @@ public class ImageViewController extends CoTopComponent {
 				f.setLogiNm(imageName);
 				modelMap.put("imageFile", f);
 			} catch (IOException e) {
-				log.debug(e.getMessage());
+				log.error(e.getMessage());
 				
 				return null;
 			}

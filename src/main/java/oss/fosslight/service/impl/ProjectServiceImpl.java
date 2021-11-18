@@ -189,7 +189,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			map.put("records", records);
 			map.put("rows", list);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return map;
@@ -1080,7 +1080,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			return sb.toString();
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return sb.toString();
@@ -1401,7 +1401,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			map.put("prjOssMaster", prjOssMaster);
 			map.put("prjLicense", Licenselist);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		return map;
@@ -3901,10 +3901,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if(path.contains("/")) {
 					File f = new File(binaryFilePath + "/" + path);
 					fileName = f.getName();
-					binaryFilePath = f.getParentFile().toString();
-					
-					f = new File(binaryFilePath);
-					f.mkdirs(); // path전체의 directory 생성
+					File parentFile = f.getParentFile();
+					if(parentFile != null) {
+						binaryFilePath = parentFile.toString();
+						f = new File(binaryFilePath);
+						f.mkdirs(); // path전체의 directory 생성
+					} else {
+						fileName = path;	
+					}
 				} else {
 					fileName = path;
 				}

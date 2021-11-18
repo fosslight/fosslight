@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,11 +47,9 @@ public class ApiOssServiceImpl implements ApiOssService {
 	
 	
 	public String[] getOssNickNameListByOssName(String ossName) {
-		List<String> nickList = new ArrayList<>();
-		
+		List<String> nickList = null;
 		if(!StringUtil.isEmpty(ossName)) {
 			nickList =  apiOssMapper.selectOssNicknameList(ossName);
-					
 			if(nickList != null) {
 				nickList = nickList.stream()
 									.filter(CommonFunction.distinctByKey(nick -> nick.trim().toUpperCase()))
@@ -58,6 +57,7 @@ public class ApiOssServiceImpl implements ApiOssService {
 			}
 		}
 		
+		nickList = (nickList != null ? nickList : Collections.emptyList());
 		return nickList.toArray(new String[nickList.size()]);
 	}
 	

@@ -197,7 +197,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocation", avoidNull(bean.getDownloadLocation()));
 			model.addAttribute("homepage", avoidNull(bean.getHomepage()));
 			
-			if(bean.getLicenseName().contains(",")) {
+			if(bean.getLicenseName() != null && bean.getLicenseName().contains(",")) {
 				List<OssLicense> licenseList = new ArrayList<OssLicense>();
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				int idx = 1;
@@ -330,7 +330,7 @@ public class OssController extends CoTopComponent{
 		try{
 			map = ossService.getOssPopupList(ossMaster);
 		}catch(Exception e){
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(map);
@@ -757,7 +757,7 @@ public class OssController extends CoTopComponent{
 			// validation check
 			vResult = validate(req);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 
 		if (!vResult.isValid()) {
@@ -769,7 +769,7 @@ public class OssController extends CoTopComponent{
 		try {
 			result = commentService.registComment(commentsHistory);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(result);
@@ -787,7 +787,7 @@ public class OssController extends CoTopComponent{
 			//validation check
 			 vResult = validate(req);	
 		} catch(Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		if(!vResult.isValid()) {
@@ -797,7 +797,7 @@ public class OssController extends CoTopComponent{
 		try {
 			commentService.deleteComment(commentsHistory);
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -1659,7 +1659,7 @@ public class OssController extends CoTopComponent{
 				return makeJsonResponseHeader(false, "Fail", resMap);
 			}
 		} catch (Exception e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 			
 			return makeJsonResponseHeader(false, "Fail");
 		}
