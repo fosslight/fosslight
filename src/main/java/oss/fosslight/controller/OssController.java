@@ -1761,28 +1761,31 @@ public class OssController extends CoTopComponent{
 	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
 	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
 			, @RequestParam(value="ossId", required=true)String ossId
+			, @RequestParam(value="ossName", required=true)String ossName
 			, @RequestParam(value="comment", required=true)String comment
 			, @RequestParam(value="ossIds", required=true)String ossIds
 			, @RequestParam(value="syncItem", required=true)String syncItem){
 		String[] ossIdsArr = ossIds.split(",");
 		String[] syncItemArr = syncItem.split(",");
-		String result = "";
+		
 		String action = CoConstDef.ACTION_CODE_UPDATE;
+		OssMaster param = new OssMaster();
+		param.setOssId(ossId);
+		param.setOssName(ossName.trim());
 		
 		try {
-			OssMaster standardOss = (OssMaster) BeanUtils.cloneBean(ossService.getOssInfo(ossId, true));
-			standardOss.setCopyright(CommonFunction.brReplaceToLine(standardOss.getCopyright()));
-			standardOss.setSummaryDescription(CommonFunction.brReplaceToLine(standardOss.getSummaryDescription()));
-			standardOss.setAttribution(CommonFunction.brReplaceToLine(standardOss.getAttribution()));
+			OssMaster standardOss = ossService.getOssMasterOne(param);
 			
+			boolean declaredLicenseCheckFlag;
+			boolean detectedLicenseCheckFlag;
+			boolean downloadLocationCheckFlag;
+			boolean ossMasterCheclFlag;
+		
 			for (int i=0; i<ossIdsArr.length; i++) {
-				OssMaster beforeBean = null;
-				OssMaster syncBean = null;
-				OssMaster afterBean = null;
+				param.setOssId(ossIdsArr[i]);
 				
-				CoCodeManager.getInstance().refreshOssInfo();
-				beforeBean = ossService.getOssInfo(ossIdsArr[i], true);
-				syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
+				OssMaster beforeBean = ossService.getOssMasterOne(param);
+				OssMaster syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
 				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
 				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
 				syncBean.setAttribution(CommonFunction.brReplaceToLine(syncBean.getAttribution()));
@@ -1794,22 +1797,23 @@ public class OssController extends CoTopComponent{
 				}
 				syncBean.setComment(comment);
 				
-				boolean syncCheck = false;
+				declaredLicenseCheckFlag = false;
+				detectedLicenseCheckFlag = false;
+				downloadLocationCheckFlag = false;
+				ossMasterCheclFlag = false;
 				
 				for (int j=0; j<syncItemArr.length; j++) {
 					switch(syncItemArr[j]) {
 						case "Declared License" :
-							if (!Arrays.equals(standardOss.getOssLicenses().toArray(), syncBean.getOssLicenses().toArray())) {
-								if (!standardOss.getLicenseName().equals(syncBean.getLicenseName())) {
-									syncBean.setOssLicenses(standardOss.getOssLicenses());
-									syncBean.setLicenseName(standardOss.getLicenseName());
-									if (standardOss.getLicenseDiv().contains("Single")) {
-										syncBean.setLicenseDiv("S");
-									}else {
-										syncBean.setLicenseDiv("M");
-									}
-									syncCheck = true;
+							if (!CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()).equals(CommonFunction.makeLicenseExpression(syncBean.getOssLicenses()))) {
+								syncBean.setOssLicenses(standardOss.getOssLicenses());
+								syncBean.setLicenseName(CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()));
+								if (standardOss.getLicenseDiv().contains("Single")) {
+									syncBean.setLicenseDiv("S");
+								}else {
+									syncBean.setLicenseDiv("M");
 								}
+								declaredLicenseCheckFlag = true;
 							}
 							break;
 							
@@ -1817,17 +1821,17 @@ public class OssController extends CoTopComponent{
 							if (syncBean.getDetectedLicenses() == null) {
 								if (standardOss.getDetectedLicenses() != null) {
 									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-									syncCheck = true;
+									detectedLicenseCheckFlag = true;
 								}
 							}else {
 								if (standardOss.getDetectedLicenses() != null) {
 									if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
 										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-										syncCheck = true;
+										detectedLicenseCheckFlag = true;
 									}
 								}else {
 									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-									syncCheck = true;
+									detectedLicenseCheckFlag = true;
 								}
 							}
 							break;
@@ -1835,7 +1839,7 @@ public class OssController extends CoTopComponent{
 						case "Copyright" :
 							if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
 								syncBean.setCopyright(standardOss.getCopyright());
-								syncCheck = true;
+								ossMasterCheclFlag = true;
 							}
 							break;
 							
@@ -1844,19 +1848,19 @@ public class OssController extends CoTopComponent{
 								if (syncBean.getDownloadLocations() == null) {
 									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
 									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-									syncCheck = true;
+									downloadLocationCheckFlag = true;
 								}else {
 									if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
 										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
 										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-										syncCheck = true;
+										downloadLocationCheckFlag = true;
 									}
 								}
 							}else {
 								if (syncBean.getDownloadLocations() != null) {
 									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
 									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-									syncCheck = true;
+									downloadLocationCheckFlag = true;
 								}
 							}
 							break;
@@ -1864,44 +1868,47 @@ public class OssController extends CoTopComponent{
 						case "Home Page" :
 							if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
 								syncBean.setHomepage(standardOss.getHomepage());
-								syncCheck = true;
+								ossMasterCheclFlag = true;
 							}
 							break;
 						
 						case "Summary Description" :
 							if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
 								syncBean.setSummaryDescription(standardOss.getSummaryDescription());
-								syncCheck = true;
+								ossMasterCheclFlag = true;
 							}
 							break;
 						
 						case "Attribution" :
 							if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
 								syncBean.setAttribution(standardOss.getAttribution());
-								syncCheck = true;
+								ossMasterCheclFlag = true;
 							}
 							break;
 					}
 				}
 				
-				if (syncCheck) {
+				if (ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) {
+					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, downloadLocationCheckFlag);
+					
 					History h = new History();
-					result = ossService.registOssMaster(syncBean);
-					CoCodeManager.getInstance().refreshOssInfo();
-					afterBean = ossService.getOssInfo(ossIdsArr[i], true);
 					h = ossService.work(syncBean);
 					h.sethAction(action);
 					historyService.storeData(h);
+					
+					beforeBean.setDownloadLocation(String.join(",", beforeBean.getDownloadLocations()));
+					OssMaster afterBean = ossService.getOssMasterOne(param);
+					afterBean.setDownloadLocation(String.join(",", afterBean.getDownloadLocations()));
 					
 					try {
 						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
 						CoMail mailBean = new CoMail(mailType);
 						mailBean.setParamOssId(ossIdsArr[i]);
 						mailBean.setComment(comment);
-						mailBean.setCompareDataBefore(beforeBean);
-						mailBean.setCompareDataAfter(afterBean);
+						mailBean.setCompareDataBefore(ossService.makeEmailSendFormat(beforeBean));
+						mailBean.setCompareDataAfter(ossService.makeEmailSendFormat(afterBean));
 						
-						CoMailManager.getInstance().sendMail(mailBean);				
+						CoMailManager.getInstance().sendMail(mailBean);
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
 					}

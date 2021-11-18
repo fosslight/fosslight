@@ -639,6 +639,8 @@
 			, T2.OSS_COPYRIGHT	
 			, SUB1.OSS_TYPE
 			, T1.DEACTIVATE_FLAG
+			, T1.MODIFIER
+			, T1.MODIFIED_DATE
 		FROM 
 			OSS_MASTER 									T1
 			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
@@ -1981,4 +1983,32 @@
     			</otherwise>
     		</choose>
     </update>
+    
+    <update id="updateOssMasterSync" parameterType="oss.fosslight.domain.OssMaster">
+    	UPDATE OSS_MASTER
+		   SET LICENSE_DIV 			= #{licenseDiv},
+		       COPYRIGHT 			= #{copyright},
+		       DOWNLOAD_LOCATION 	= #{downloadLocation},
+		       HOMEPAGE 			= #{homepage},
+		       SUMMARY_DESCRIPTION 	= #{summaryDescription},
+		       ATTRIBUTION 			= #{attribution},
+		       MODIFIED_DATE 		= now(),
+		       MODIFIER 			= #{modifier},
+		       LICENSE_TYPE 		= #{licenseType},
+		       OBLIGATION_TYPE 		= #{obligationType},
+		       DEACTIVATE_FLAG 		= #{deactivateFlag}
+		 WHERE OSS_ID = #{ossId}
+    </update>
+    
+    <delete id="deleteOssLicenseDeclaredSync" parameterType="oss.fosslight.domain.OssMaster">
+    	DELETE ODC
+		  FROM OSS_LICENSE_DECLARED ODC
+		 WHERE ODC.OSS_ID = #{ossId}
+    </delete>
+    
+    <delete id="deleteOssLicenseDetectedSync" parameterType="oss.fosslight.domain.OssMaster">
+    	DELETE ODT
+		  FROM OSS_LICENSE_DETECTED ODT
+		 WHERE ODT.OSS_ID = #{ossId}
+    </delete>
 </mapper>
