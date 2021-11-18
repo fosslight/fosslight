@@ -24,8 +24,8 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.CoConstDef.DependencyType;
-import oss.fosslight.common.CoConstDef.ExternalService;
+import oss.fosslight.common.DependencyType;
+import oss.fosslight.common.ExternalServiceType;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
@@ -120,66 +120,69 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	}
 
 	@Override
-	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> list){
-		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> ossList){
+		List<ProjectIdentification> result = new ArrayList<>();
 
-		list = list.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+"-"+p.getDownloadLocation()+"-"+p.getOssVersion()+"-"+p.getLicenseName())).collect(Collectors.toList());
+		ossList = ossList.stream().filter(
+				CommonFunction.distinctByKey(p -> {
+					return p.getOssName() + "-" + p.getDownloadLocation() + "-" + p.getOssVersion() + "-" + p.getLicenseName();
+				}))
+				.collect(Collectors.toList());
 
-		for(ProjectIdentification bean : list) {
-			List<ProjectIdentification> prjOssMasters = new ArrayList<>();
-			String downloadLocation = bean.getDownloadLocation();
-			String currentLicense = bean.getLicenseName();
-			String ossVersion = bean.getOssVersion();
-			String checkLicense = "";
+		for(ProjectIdentification oss : ossList) {
+			List<ProjectIdentification> prjOssLicenses;
+			String downloadLocation = oss.getDownloadLocation();
+			String ossVersion = oss.getOssVersion();
+			String currentLicense = oss.getLicenseName();
+			String checkedLicense = "";
 
 			// Search Priority 1. find by oss name and oss version
-			prjOssMasters = projectMapper.getOssFindByNameAndVersion(bean);
-			checkLicense = makeCheckLicenseExpression(prjOssMasters);
-			
-			if (!isEmpty(checkLicense) && !currentLicense.equals(checkLicense)) {
-				bean.setCheckLicense(checkLicense);
-				result.add(bean);
+			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
+			checkedLicense = combineOssLicenses(prjOssLicenses);
+
+			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
+				oss.setCheckOssList("Y");
+				oss.setCheckLicense(checkedLicense);
+				result.add(oss);
 				continue;
 			}
 
-			if(isEmpty(downloadLocation)) {
+			if(downloadLocation.isEmpty()) {
 				continue;
 			}
 
 			// Search Priority 2. find by oss download location and version
-			prjOssMasters = projectMapper.getOssFindByVersionAndDownloadLocation(bean);
-			checkLicense = makeCheckLicenseExpression(prjOssMasters);
+			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
+			checkedLicense = combineOssLicenses(prjOssLicenses);
 
-			if (!isEmpty(checkLicense) && !currentLicense.equals(checkLicense)) {
-				bean.setCheckLicense(checkLicense);
-				result.add(bean);
+			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
+				oss.setCheckOssList("Y");
+				oss.setCheckLicense(checkedLicense);
+				result.add(oss);
 				continue;
 			}
 			
 			// Search Priority 3. find by oss download location
-			prjOssMasters = projectMapper.getOssFindByDownloadLocation(bean);
-			checkLicense = makeCheckLicenseExpression(prjOssMasters);
+			prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss);
+			checkedLicense = combineOssLicenses(prjOssLicenses);
 
-			Boolean versionDiff = prjOssMasters.stream().allMatch(oss -> {
-				return oss.getVersionDiffFlag().equals("Y");
-			});
-
-			if (!isEmpty(checkLicense) && versionDiff == false && !currentLicense.equals(checkLicense)) {
-				bean.setCheckLicense(checkLicense);
-				result.add(bean);
+			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense) && !isEachOssVersionDiff(prjOssLicenses)) {
+				oss.setCheckOssList("Y");
+				oss.setCheckLicense(checkedLicense);
+				result.add(oss);
 				continue;
 			}
 
 			// Search Priority 4. find by Clearly Defined And Github API
-			DependencyType dependencyType = DependencyType.downloadLocationToType(bean.getDownloadLocation());
+			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
 
 			if(dependencyType.equals(DependencyType.UNSUPPORTED)) {
 				continue;
 			}
 
 			// Search Priority 4-1. Github API : empty oss version and download location
-			if(ossVersion.isEmpty() && ExternalService.GITHUB_LICENSE_API.hasDependencyType(dependencyType)) {
-				Matcher matcher = dependencyType.getPattern().matcher(bean.getDownloadLocation());
+			if(ossVersion.isEmpty() && ExternalServiceType.GITHUB.hasDependencyType(dependencyType)) {
+				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String owner = "", repo = "";
 
 				while(matcher.find()) {
@@ -187,59 +190,42 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					repo = matcher.group(4);
 				}
 
-				try {
-					String requestUri = ExternalService.githubLicenseRequestUri(owner, repo);
-					Mono<Object> mono = requestGithubLicense(requestUri);
-					Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
-					Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("license");
-					checkLicense = licenseInfo.get("spdx_id");
-				} catch (Exception e) {
-					log.error("Github -> " + downloadLocation + " : " + e.getMessage());
-					checkLicense = "NONE";
-				}
+				String requestUri = ExternalServiceType.githubLicenseRequestUri(owner, repo);
+				checkedLicense = requestGithubLicenseApi(requestUri);
 
-				if(!currentLicense.equals(checkLicense) && !checkLicense.equals("NOASSERTION") && !checkLicense.equals("NONE")) {
-					bean.setCheckLicense(checkLicense);
-					result.add(bean);
+				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense);
+					result.add(oss);
 					continue;
 				}
 			}
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
-			if(!ossVersion.isEmpty() && ExternalService.CLEARLY_DEFINED_DEFINITIONS_API.hasDependencyType(dependencyType)) {
+			if(!ossVersion.isEmpty() && ExternalServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType)) {
 				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String type = dependencyType.getType();
 				String provider = dependencyType.getProvider();
 				String revision = ossVersion;
-				String namespace = "-", name = "";
+				String namespace = "", name = "";
 
 				while(matcher.find()) {
-					if(dependencyType.getIsNameSpaceRequired()) {
+					if(dependencyType.equals(DependencyType.MAVEN_CENTRAL) || dependencyType.equals(DependencyType.MAVEN_GOOGLE)) {
 						namespace = matcher.group(3);
 						name = matcher.group(4);
 					} else {
+						namespace = "-";
 						name = matcher.group(3);
 					}
 				}
 
-				if(!dependencyType.getIsNameSpaceRequired()) {
-					namespace = "-";
-				}
+				String requestUri = ExternalServiceType.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
+				checkedLicense = requestClearlyDefinedLicenseApi(requestUri);
 
-				try {
-					String requestUri = ExternalService.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
-					Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
-					Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
-					Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
-					checkLicense = licenseInfo.get("declared");
-				} catch (Exception e) {
-					log.error("Clearly Defined -> " + downloadLocation + " : " + e.getMessage());
-					checkLicense = "NONE";
-				}
-
-				if(!currentLicense.equals(checkLicense) && !checkLicense.equals("NOASSERTION") && !checkLicense.equals("NONE")) {
-					bean.setCheckLicense(checkLicense);
-					result.add(bean);
+				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense);
+					result.add(oss);
 					continue;
 				}
 			}
@@ -248,6 +234,65 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		// Request at once when using external API(Clearly Defined, Github API)
 
 		return result;
+	}
+
+	private String requestClearlyDefinedLicenseApi(String requestUri) {
+		String checkedLicense;
+		try {
+			Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
+			Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
+			Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
+			checkedLicense = licenseInfo.get("declared");
+		} catch (Exception e) {
+			log.error("Clearly Defined -> " + requestUri + " : " + e.getMessage());
+			checkedLicense = "NONE";
+		}
+		return checkedLicense;
+	}
+
+	private String requestGithubLicenseApi(String requestUri) {
+		String checkedLicense;
+		try {
+			Mono<Object> mono = requestGithubLicense(requestUri);
+			Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
+			Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("license");
+			checkedLicense = licenseInfo.get("spdx_id");
+		} catch (Exception e) {
+			log.error("Github Request -> " + requestUri + " : " + e.getMessage());
+			checkedLicense = "NONE";
+		}
+		return checkedLicense;
+	}
+
+	private Boolean isEachOssVersionDiff(List<ProjectIdentification> prjOssMasters) {
+		return prjOssMasters.stream().allMatch(oss -> oss.getVersionDiffFlag().equals("Y"));
+	}
+
+	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters) {
+		String checkLicense = "";
+		List<ProjectIdentification> licenses;
+
+		for(ProjectIdentification prjOssMaster : prjOssMasters) {
+
+			if(!isEmpty(checkLicense)) {
+				checkLicense += "|";
+			}
+
+			licenses = projectMapper.getLicenses(prjOssMaster);
+			checkLicense += makeLicenseExpression(licenses);
+		}
+		return checkLicense;
+	}
+
+	private String makeLicenseExpression(List<ProjectIdentification> licenses) {
+		String license = "";
+
+		if(licenses.size() != 0){
+			licenses = CommonFunction.makeLicenseExcludeYn(licenses);
+			license = CommonFunction.makeLicenseExpressionIdentify(licenses, ",");
+		}
+
+		return license;
 	}
 
 	@Override
@@ -260,7 +305,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 	@Override
 	public Mono<Object> requestGithubLicense(String location) {
-
 		String githubToken = "";
 		try {
 			githubToken = CryptUtil.decryptAES256(CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_SERVICE_SETTING, CoConstDef.CD_DTL_GITHUB_TOKEN), CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
@@ -289,33 +333,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				.uri(location)
 				.retrieve()
 				.bodyToMono(Object.class);
-	}
-
-	private String makeCheckLicenseExpression(List<ProjectIdentification> prjOssMasters) {
-		String checkLicense = "";
-		List<ProjectIdentification> licenses = new ArrayList<>();;
-
-		for(ProjectIdentification prjOssMaster : prjOssMasters) {
-
-			if(!isEmpty(checkLicense)) {
-				checkLicense += "|";
-			}
-
-			licenses = projectMapper.getLicenses(prjOssMaster);
-			checkLicense += makeLicenseExpression(licenses);
-		}
-		return checkLicense;
-	}
-
-	private String makeLicenseExpression(List<ProjectIdentification> licenses) {
-		String license = "";
-
-		if(licenses.size() != 0){
-			licenses = CommonFunction.makeLicenseExcludeYn(licenses);
-			license = CommonFunction.makeLicenseExpressionIdentify(licenses, ",");
-		}
-
-		return license;
 	}
 
 	@Transactional
