@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.17 (19/11/2021)
+## Changes
+## 🚀 Features
+
+- Create integration test codes @astrod @mingukang-kr  @sw-develop @Lee-JaeHyuk (#254)
+- Add Check License in Self-Check @riyenas0925 (#265)
+- Check OSS License in existing db @riyenas0925 (#258)
+
+## 🔧 Maintenance
+
+- Shorten the time required to save during OSS sync @FOSSLight-dev (#273)
+- Fix the vulnerability that public array is assigned to private variable @yugeeklab (#267)
+- Fix the vulnerability for public method that return private type @yugeeklab (#266)
+- Fix Null pointer exception  @yugeeklab (#252)
+- Fix the vulnerability for inapproate error message @yugeeklab (#268)
+- Fix the vulnerability for inapproate error message @yugeeklab (#263)
+- Refactor Check License, Check OSS Name @riyenas0925 (#262)
+
+---
+
 ## v1.2.16 (12/11/2021)
 ## Changes
 ## 🐛 Hotfixes
