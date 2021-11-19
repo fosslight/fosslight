@@ -272,6 +272,7 @@ public class CoConstDef {
 	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
 	public static final Pattern PUB_PATTERN = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
 	public static final Pattern COCOAPODS_PATTERN = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+	public static final Pattern UNSUPPORTED_PATTERN = Pattern.compile("(?!)");	// nothing match
 
 	/* dependency type enum */
 	public enum DependencyType {
@@ -280,7 +281,8 @@ public class CoConstDef {
 		PYPI("pypi", "pypi", false, CoConstDef.PYPI_PATTERN),
 		MAVEN_CENTRAL("maven", "mavencentral", true, CoConstDef.MAVEN_CENTRAL_PATTERN),
 		MAVEN_GOOGLE("maven", "mavengoogle", true, CoConstDef.MAVEN_GOOGLE_PATTERN),
-		COCOAPODS("pod", "cocoapods", false, CoConstDef.COCOAPODS_PATTERN);
+		COCOAPODS("pod", "cocoapods", false, CoConstDef.COCOAPODS_PATTERN),
+		UNSUPPORTED("", "", false, CoConstDef.UNSUPPORTED_PATTERN);
 
 		String type;
 		String provider;
@@ -317,7 +319,7 @@ public class CoConstDef {
 					return pattern.matcher(downloadLocation).matches();
 				})
 				.findAny()
-				.get();
+				.orElse(DependencyType.UNSUPPORTED);
 		}
 	}
 

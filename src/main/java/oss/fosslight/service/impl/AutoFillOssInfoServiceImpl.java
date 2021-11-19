@@ -173,6 +173,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(bean.getDownloadLocation());
 
+			if(dependencyType.equals(DependencyType.UNSUPPORTED)) {
+				continue;
+			}
+
 			// Search Priority 4-1. Github API : empty oss version and download location
 			if(ossVersion.isEmpty() && ExternalService.GITHUB_LICENSE_API.hasDependencyType(dependencyType)) {
 				Matcher matcher = dependencyType.getPattern().matcher(bean.getDownloadLocation());
