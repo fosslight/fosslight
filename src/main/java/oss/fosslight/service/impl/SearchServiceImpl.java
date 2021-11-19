@@ -15,7 +15,7 @@ import oss.fosslight.repository.*;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.common.Type;
+import oss.fosslight.common.SearchType;
 
 
 
@@ -31,7 +31,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void saveOssSearchFilter(OssMaster ossMaster, String userId) {
 
         String stringjson = new Gson().toJson(ossMaster);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.OSS.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.OSS.getName());
 
     }
 
@@ -50,7 +50,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void saveProjectSearchFilter(Project project, String userId) {
 
         String stringjson = new Gson().toJson(project);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.PROJECT.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.PROJECT.getName());
 
     }
 
@@ -80,7 +80,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 
 
         String stringjson = new Gson().toJson(licenseMaster);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.LICENSE.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.LICENSE.getName());
 
     }
 
@@ -99,7 +99,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void saveSelfCheckSearchFilter(Project project, String userId) {
 
         String stringjson = new Gson().toJson(project);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.SELFCHECK.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.SELF_CHECK.getName());
 
     }
 
@@ -118,7 +118,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void savePartnerSearchFilter(PartnerMaster partnerMaster, String userId) {
 
         String stringjson = new Gson().toJson(partnerMaster);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.THIRDPARTY.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.THIRD_PARTY.getName());
 
     }
 
@@ -126,7 +126,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void saveVulnerabilitySearchFilter(Vulnerability vulnerability, String userId) {
 
         String stringjson =new Gson().toJson(vulnerability);
-        searchMapper.upsertSearchFilter(stringjson, userId, Type.VULNERABILITY.getName());
+        searchMapper.upsertSearchFilter(stringjson, userId, SearchType.VULNERABILITY.getName());
     }
 
 
@@ -147,7 +147,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
         Class<?> resultClass = null;
 
         if (!StringUtil.isBlank(jsonString)) {
-            switch (Type.valueOf(type)) {
+            switch (SearchType.valueOf(type)) {
 
                 case LICENSE:
                     resultClass = LicenseMaster.class;
@@ -161,11 +161,11 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
                     resultClass = Project.class;
                     break;
 
-                case THIRDPARTY:
+                case THIRD_PARTY:
                     resultClass = PartnerMaster.class;
                     break;
 
-                case SELFCHECK:
+                case SELF_CHECK:
                     resultClass = Project.class;
                     break;
 
