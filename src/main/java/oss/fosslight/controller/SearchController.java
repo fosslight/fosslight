@@ -5,7 +5,6 @@
 package oss.fosslight.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tools.ant.taskdefs.condition.Http;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
