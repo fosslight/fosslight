@@ -50,7 +50,7 @@
 							$('#ossList').jqGrid({
 									datatype: 'local',
 									data : resultData.list,
-									colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv'],
+									colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList'],
 									colModel: [
 										{name: 'gridId', index: 'gridId', hidden:true, key:true},
 										{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
@@ -62,7 +62,8 @@
 										{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
 										{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
 										{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
-										{name: 'referenceDiv', index: 'referenceDiv', width: 50, hidden: true, sortable: false}
+										{name: 'referenceDiv', index: 'referenceDiv', width: 50, hidden: true, sortable: false},
+										{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false}
 									],
 									autoencode: true,
 									autowidth: true,
@@ -136,6 +137,7 @@
 
 								var rowdata = target.getRowData(rowId);
 								rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
+								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");							
 								<c:if test="${projectInfo.targetName eq 'identification'}">
 								rowdata["refPrjId"] = rowdata["referenceId"];
 								rowdata["referenceId"] = commentId;

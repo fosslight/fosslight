@@ -6,7 +6,8 @@
 package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
-
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
-import oss.fosslight.common.ExternalServiceType;
+import oss.fosslight.common.ExternalLicenseServiceType;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
@@ -33,6 +34,7 @@ import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.AutoFillOssInfoService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.util.CryptUtil;
+import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -123,10 +125,16 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> ossList){
 		List<ProjectIdentification> result = new ArrayList<>();
 
-		ossList = ossList.stream().filter(
-				CommonFunction.distinctByKey(p -> {
-					return p.getOssName() + "-" + p.getDownloadLocation() + "-" + p.getOssVersion() + "-" + p.getLicenseName();
-				}))
+		// oss name,과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
+		ossList = ossList.stream()
+				.collect(Collectors.groupingBy(oss -> oss.getOssName() + "-" + oss.getDownloadLocation() + "-" + oss.getOssVersion() + "-" + oss.getLicenseName()))
+				.values().stream()
+				.map(list -> {
+					ProjectIdentification uniqueOss = list.stream().distinct().findFirst().get();
+					List<String> componentIds = list.stream().map(oss -> oss.getComponentId()).distinct().collect(Collectors.toList());
+					uniqueOss.setComponentIdList(componentIds);
+					return uniqueOss;
+				})
 				.collect(Collectors.toList());
 
 		for(ProjectIdentification oss : ossList) {
@@ -181,7 +189,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4-1. Github API : empty oss version and download location
-			if(ossVersion.isEmpty() && ExternalServiceType.GITHUB.hasDependencyType(dependencyType)) {
+			if(ossVersion.isEmpty() && ExternalLicenseServiceType.GITHUB.hasDependencyType(dependencyType)) {
 				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String owner = "", repo = "";
 
@@ -190,7 +198,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					repo = matcher.group(4);
 				}
 
-				String requestUri = ExternalServiceType.githubLicenseRequestUri(owner, repo);
+				String requestUri = ExternalLicenseServiceType.githubLicenseRequestUri(owner, repo);
 				checkedLicense = requestGithubLicenseApi(requestUri);
 
 				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
@@ -202,7 +210,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
-			if(!ossVersion.isEmpty() && ExternalServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType)) {
+			if(!ossVersion.isEmpty() && ExternalLicenseServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType)) {
 				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String type = dependencyType.getType();
 				String provider = dependencyType.getProvider();
@@ -219,7 +227,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					}
 				}
 
-				String requestUri = ExternalServiceType.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
+				String requestUri = ExternalLicenseServiceType.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
 				checkedLicense = requestClearlyDefinedLicenseApi(requestUri);
 
 				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
@@ -231,9 +239,48 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 		}
 
-		// Request at once when using external API(Clearly Defined, Github API)
+		// TODO : Request at once when using external API(Clearly Defined, Github API)
 
-		return result;
+
+
+		/* grouping same oss */
+		final Comparator<ProjectIdentification> comp = (p1, p2) -> Integer.compare(StringUtil.countMatches(p1.getCheckLicense(), ","), StringUtil.countMatches(p2.getCheckLicense(), ","));
+		
+		// oss name, oss version, oss license, checked license는 unique하게 출력
+		List<ProjectIdentification> sortedData = result.stream()
+				.filter(CommonFunction.distinctByKeys(
+						ProjectIdentification::getOssName,
+						ProjectIdentification::getOssVersion,
+						ProjectIdentification::getLicenseName,
+						ProjectIdentification::getCheckLicense
+				))
+				.sorted(comp)
+				.collect(Collectors.toList());
+		
+		// oss name, oss version, oss license와 checked license가 unique하지 않다면 중복된 data의 downloadlocation을 전부 합쳐서 출력함. 
+		for(ProjectIdentification p : sortedData) {
+			String downloadLocation = result.stream()
+					.filter(e -> e.getOssName().equals(p.getOssName()))
+					.filter(e -> e.getOssVersion().equals(p.getOssVersion()))
+					.filter(e -> e.getLicenseName().equals(p.getLicenseName()))
+					.filter(e -> e.getCheckLicense().equals(p.getCheckLicense()))
+					.map(e -> e.getDownloadLocation())
+					.collect(Collectors.joining(","));
+
+			List<String> componentIds = result.stream()
+					.filter(e -> e.getOssName().equals(p.getOssName()))
+					.filter(e -> e.getOssVersion().equals(p.getOssVersion()))
+					.filter(e -> e.getLicenseName().equals(p.getLicenseName()))
+					.filter(e -> e.getCheckLicense().equals(p.getCheckLicense()))
+					.map(e -> e.getComponentIdList())
+					.flatMap(Collection::stream)
+					.collect(Collectors.toList());
+			
+			p.setDownloadLocation(downloadLocation);
+			p.setComponentIdList(componentIds);
+		}
+
+		return sortedData;
 	}
 
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
@@ -342,18 +389,26 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		try {
 			int updateCnt = 0;
 
+			List<String> componentIds = paramBean.getComponentIdList();
+
 			switch(targetName.toUpperCase()) {
 				case CoConstDef.CD_CHECK_OSS_NAME_SELF:
-					String[] gridId = paramBean.getGridId().split("-");
-					paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+					for(String componentId : componentIds) {
+						String[] gridId = componentId.split("-");
+						paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+						paramBean.setComponentId(gridId[2]);
 
-					if(paramBean.getOssVersion() == null) paramBean.setOssVersion("");
-					
-					updateCnt = ossMapper.updateOssCheckLicenseBySelfCheck(paramBean);
+						if(paramBean.getOssVersion() == null) paramBean.setOssVersion("");
+						
+						updateCnt += ossMapper.updateOssCheckLicenseBySelfCheck(paramBean);
+					}
 					
 					break;
 				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
-					updateCnt = ossMapper.updateOssCheckLicense(paramBean);
+					for(String componentId : componentIds) {
+						paramBean.setComponentId(componentId);
+						updateCnt += ossMapper.updateOssCheckLicense(paramBean);
+					}
 
 					if(updateCnt >= 1) {
 						String commentId = paramBean.getReferenceId();

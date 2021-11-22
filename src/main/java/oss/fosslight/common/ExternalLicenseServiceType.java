@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Dongmin Kang
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 package oss.fosslight.common;
 
 import java.util.Arrays;
@@ -6,7 +11,7 @@ import java.util.List;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /* External API support dependency type (GitHub, Clearly Defined) */
-public enum ExternalServiceType {
+public enum ExternalLicenseServiceType {
 	GITHUB(
 			"https",
 			"api.github.com",
@@ -36,7 +41,7 @@ public enum ExternalServiceType {
 	private String description;
 	private List<DependencyType> types;
 
-	ExternalServiceType(String schema, String host, String path, String description, List<DependencyType> types) {
+	ExternalLicenseServiceType(String schema, String host, String path, String description, List<DependencyType> types) {
 		this.schema = schema;
 		this.host = host;
 		this.path = path;
