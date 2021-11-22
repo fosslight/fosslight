@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Dongmin Kang
+ * SPDX-License-Identifier: AGPL-3.0-only
+ */
+
 package oss.fosslight.common;
 
 import java.util.Arrays;

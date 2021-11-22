@@ -1679,10 +1679,7 @@
 		ON CONCAT(OC.REFERENCE_ID, '-', OC.REFERENCE_DIV, '-', OC.COMPONENT_IDX) = OCL.COMPONENT_ID
 			SET OCL.LICENSE_NAME = #{checkLicense}
 		WHERE CONCAT(REFERENCE_ID, '-', REFERENCE_DIV) = #{gridId}
-		  AND (OC.DOWNLOAD_LOCATION = #{downloadLocation}
-		   OR OC.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
-		  AND OSS_NAME = #{ossName}
-		  AND OSS_VERSION = #{ossVersion}
+		  AND OC.COMPONENT_IDX = #{componentId}
 	</update>
 	
 	<update id="updateOssCheckName" parameterType="oss.fosslight.domain.ProjectIdentification">
@@ -1700,10 +1697,7 @@
 			SET OCL.LICENSE_NAME = #{checkLicense}
 		WHERE REFERENCE_ID = #{refPrjId}
 		  AND REFERENCE_DIV = #{referenceDiv}
-		  AND (OC.DOWNLOAD_LOCATION = #{downloadLocation}
-		   OR OC.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
-		  AND OSS_NAME = #{ossName}
-		  AND OSS_VERSION = #{ossVersion}
+		  AND OC.COMPONENT_ID = #{componentId}
 	</update>
 
 	<select id="checkOssNameCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
