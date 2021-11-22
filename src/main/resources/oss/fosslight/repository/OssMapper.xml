@@ -1670,9 +1670,7 @@
 		UPDATE PRE_OSS_COMPONENTS 
 		   SET OSS_NAME = #{checkName} 
 		 WHERE CONCAT(REFERENCE_ID, '-', REFERENCE_DIV) = #{gridId}
-		   AND (DOWNLOAD_LOCATION = #{downloadLocation}
-				OR DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
-		   AND OSS_NAME = #{ossName}
+		   AND COMPONENT_IDX = #{componentId}
 	</update>
 
 	<update id="updateOssCheckLicenseBySelfCheck" parameterType="oss.fosslight.domain.ProjectIdentification">
@@ -1692,9 +1690,7 @@
 		   SET OSS_NAME = #{checkName}
 		 WHERE REFERENCE_ID = #{refPrjId}
 		   AND REFERENCE_DIV = #{referenceDiv}
-		   AND (DOWNLOAD_LOCATION = #{downloadLocation}
-		   		OR DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%'))
-		   AND OSS_NAME = #{ossName}
+		   AND COMPONENT_ID = #{componentId}
 	</update>	
 	
 	<update id="updateOssCheckLicense" parameterType="oss.fosslight.domain.ProjectIdentification">
