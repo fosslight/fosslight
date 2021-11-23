@@ -1307,7 +1307,11 @@
 					fn_grid_com.setWarningClass(srcList,rowid,["ossName","licenseName"]);
 					return true;
 				},
-				onCellSelect: function(rowid,iCol,cellcontent,e) {},
+				onCellSelect: function(rowid,iCol,cellcontent,e) {
+					if(iCol=="1") {
+						fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+					}
+				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					// 체크 박스 영역 제외
 					if(iCol!="22") {

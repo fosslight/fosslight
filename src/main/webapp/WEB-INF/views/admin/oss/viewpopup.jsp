@@ -41,6 +41,8 @@
 								data : {ossId : id},
 								success : function(detailResult){
 									$("#ossDetailInfo").html(detailResult);
+									$("#viewPopupOssId").val(id);
+									fn_commemt.getCommentList();
 								},
 								error : function(request,status,error){
 									alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -104,7 +106,97 @@
 			});
 			
 		});
-		
+
+		var fn_commemt = {
+			    getCommentList : function(){
+			        $.ajax({
+			            url : '/comment/getCommentList',
+			            type : 'GET',
+			            dataType : 'html',
+			            cache : false,
+			            data : {
+			                referenceId : $('input[name=viewPopupOssId]').val(),
+			                referenceDiv : 'oss'
+			            },
+			            success : function(data){
+			                $('#viewPopupCommentListArea').html(data);
+			                $('#viewPopupCommentListArea').css('height', 'auto');
+			            },
+			            error : function(xhr, ajaxOptions, thrownError){
+			                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			            }
+			        });
+			    },
+			    deleteComment : function(_commId){
+			        if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
+			        $.ajax({
+			            url : '/comment/deleteComment',
+			            type : 'POST',
+			            dataType : 'json',
+			            cache : false,
+			            data : {'commId' : _commId},
+			            success : function(data){
+			                alertify.success('<spring:message code="msg.common.success" />');
+			                fn_commemt.getCommentList();
+			            },
+			            error : function(){
+			                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			            }
+			        });
+			    },
+			    editComment : function(_commId){
+			        if(CKEDITOR.instances['comm_editor_'+_commId]) {
+			            var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+			            _editor.destroy();
+			        }
+			        _editor = CKEDITOR.replace('comm_editor_'+_commId);
+
+			        $("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
+			        $("#spanBtnArea_"+_commId+" > .btnEditMode").show();
+			        
+			        $("#spanBtnArea_"+_commId+" > .closeModComment").click(function(e){
+			            e.preventDefault();
+			            fn_commemt.createNonToolbarEditor(_commId);
+			            $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
+			            $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
+			        });
+			        
+			        $("#spanBtnArea_"+_commId+" > .modifyComment").click(function(e){
+			            e.preventDefault();
+			            var _referenceId = $('input[name=viewPopupOssId]').val();
+			            var param = {commId : _commId, contents : _editor.getData(), referenceDiv: '40', referenceId: _referenceId};
+			            $.ajax({
+			                url : '/comment/updateComment',
+			                type : 'POST',
+			                dataType : 'json',
+			                cache : false,
+			                data : param,
+			                success : function(json){
+			                    fn_commemt.createNonToolbarEditor(_commId);
+			                    $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
+			                    $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
+			                    alertify.success('<spring:message code="msg.common.success" />');
+			                },
+			                error : function(){
+			                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			                }
+			            });
+			            
+			            return false;
+			        });
+			        
+			    },
+			    createNonToolbarEditor : function(_commId) {
+
+			        var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+			        if(_editor) {
+			            _editor.destroy();
+			        }
+			        if($('#comm_editor_'+_commId).html().length > 0) {
+			            CKEDITOR.replace('comm_editor_'+_commId, {customConfig:'/js/customEditorConf_Comment.js'});
+			        }
+			    }
+			}
 		</script>
 	</head>
 	<body>
@@ -116,6 +208,15 @@
 			</div>
 			<div id="ossDetailInfo" style="padding: 10%;">
 			</div>
+		<c:if test="${ct:isAdmin()}">
+			<input type="hidden" id="viewPopupOssId" name="viewPopupOssId"/>
+        	<div align="center">
+           		<div class="commentList" align="left" style="overflow: auto; width: 90%; height: 200px; margin-bottom:0px;">
+              		<strong class="tit">Comments</strong>
+               		<div class="commentBack" id="viewPopupCommentListArea"></div>
+           		</div>
+        	</div>
+		</c:if>
 		</div>
 	</body>
 </html>
