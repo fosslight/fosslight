@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.extern.slf4j.Slf4j;
@@ -449,4 +450,18 @@ public class LicenseController extends CoTopComponent{
 		List<LicenseMaster> list = licenseService.getLicenseNameList();
 		return makeJsonResponseHeader(list);
 	}	
+	
+	@PostMapping(value=LICENSE.LICENSE_ID)
+	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res, 
+			@RequestParam(value="licenseName", required=true)String licenseName) {
+		Map<String, String> map = new HashMap<String, String>();
+		
+		LicenseMaster lm = new LicenseMaster();
+		lm.setLicenseName(licenseName.trim());
+		
+		lm = licenseService.getLicenseId(lm);
+		map.put("licenseId", lm.getLicenseId());
+		
+		return makeJsonResponseHeader(map);
+	}
 }

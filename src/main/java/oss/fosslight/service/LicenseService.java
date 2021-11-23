@@ -44,4 +44,6 @@ public interface LicenseService extends HistoryConfig{
 	void registLicenseWebPage(LicenseMaster licenseMaster);
 	
 	String webPageStringFormat(String[] webpages);
+
+	LicenseMaster getLicenseId(LicenseMaster licenseMaster);
 }

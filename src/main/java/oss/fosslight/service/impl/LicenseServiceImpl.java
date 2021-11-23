@@ -540,4 +540,9 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		return webpages;
 	}
+
+	@Override
+	public LicenseMaster getLicenseId(LicenseMaster licenseMaster) {
+		return CoCodeManager.LICENSE_INFO_UPPER.get(licenseMaster.getLicenseName().toUpperCase());
+	}
 }
