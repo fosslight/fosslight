@@ -25,6 +25,7 @@ import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.History;
 
 public interface SelfCheckService extends HistoryConfig{
 	String getUserList();
@@ -103,8 +104,6 @@ public interface SelfCheckService extends HistoryConfig{
 
 	Map<String, Map<String, String>> getProjectDownloadExpandInfo(Project param);
 
-	Project getProjectBasicInfo(String prjId);
-
 	boolean isPermissiveOnlyAndGeneralNotice(String prjId, boolean isAndroidModel);
 	
 	void cancelFileDel(Project project);
@@ -136,5 +135,36 @@ public interface SelfCheckService extends HistoryConfig{
 	
 	boolean existsWatcher(Project project);
 
+	public OssNotice setCheckNotice(Project project);
 
+	public OssNotice selectOssNoticeOne(String prjId);
+
+	public List<OssComponents> getVerifyOssList(Project projectMaster);
+	
+	public Map<String, Object> getVerificationOne(Project project);
+
+	public Project getProjectBasicInfo(String prjId);
+
+	public boolean getNoticeHtmlFile(OssNotice ossNotice) throws IOException;
+
+	public boolean getNoticeHtmlFile(OssNotice ossNotice, String contents) throws IOException;
+
+	public String getNoticeHtml(OssNotice ossNotice) throws IOException;
+
+	public void updateStatusWithConfirm(Project project, OssNotice ossNotice) throws Exception ;
+
+	public void updateProjectStatus(Project project);
+
+	public History work(Object param);
+
+	public void changePackageFileNameDistributeFormat(String prjId);
+
+	public String getNoticeTextFileForPreview(OssNotice ossNotice, boolean isConfirm) throws IOException;
+
+	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice);
+
+	public String getNoticeHtmlFileForPreview(OssNotice ossNotice) throws IOException;
+
+	public String getNoticeTextFileForPreview(OssNotice ossNotice) throws IOException;
+	
 }
