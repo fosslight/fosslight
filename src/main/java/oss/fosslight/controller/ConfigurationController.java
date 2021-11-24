@@ -40,4 +40,12 @@ public class ConfigurationController extends CoTopComponent {
 		resMap.put("resCd", "10");
 		return makeJsonResponseHeader(resMap);
 	}
+
+	@PostMapping(value=CONFIGURATION.SAVE_DEFAULT_LOCALE_AJAX, produces = "text/html; charset=utf-8")
+	public @ResponseBody ResponseEntity<Object> saveDefaultLocale(@ModelAttribute oss.fosslight.domain.Configuration configuration, HttpServletRequest req, HttpServletResponse res){
+		HashMap<String,Object> resMap = new HashMap<>();
+		configurationService.updateDefaultLocale(configuration);
+		resMap.put("resCd", "10");
+		return makeJsonResponseHeader(resMap);
+	}
 }

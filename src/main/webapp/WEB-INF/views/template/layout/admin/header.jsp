@@ -21,8 +21,9 @@
 		<h1><img src="images/img_logo.png" alt="FOSSLight System"/></h1>
 		<div class="userLang">
 			<select id="selectLang">
-				<option value="en_US"><spring:message code="lan.en_US" /></option>
-				<option value="ko_KR"><spring:message code="lan.ko_KR" /></option>
+				<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_DEFAULT_LOCALE'))}" varStatus="status">
+					<option value="${code[3]}">${code[1]}</option>
+				</c:forEach>
 			</select>
 		</div>
 		<div class="userLogout">

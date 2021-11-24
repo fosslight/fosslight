@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script>
+	var defaultLocale = '${sessUserInfo.defaultLocale}';
 	var defaultTab = '${sessUserInfo.defaultTab}';
 	$(document).ready(function(){
 		'use strict';
@@ -17,7 +18,13 @@
 					$("#defaultTab"+val).attr('checked', true);
 				});
 			}
-		}
+
+			if(!defaultLocale) {
+				$("#selectLang").val("1").prop("selected", true);
+			} else {
+				$("#selectLang").val(defaultLocale).prop("selected", true);
+			}
+		},
 	};
 	
 	var evt = {
@@ -37,10 +44,30 @@
 					}
 				});
 			});
+
+			$("#saveDefaultLocale").on('click',function(){
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						fn.updateDefaultLocale();
+					} else {
+						return false;
+					}
+				});
+			});
 		}			
 	};
 
 	var fn = {
+		updateDefaultLocale : function (){
+			$("#localeConfigurationForm").ajaxForm({
+				url :'/configuration/saveDefaultLocaleAjax',
+				type : 'POST',
+				dataType:"json",
+				cache : false,
+				success: fn.onUpdateSuccess,
+				error : fn.onError
+			}).submit();
+		},
 		updateSubmit : function(){
 		    $("#ConfigurationForm").ajaxForm({
 	            url :'/configuration/saveAjax',
