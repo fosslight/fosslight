@@ -42,6 +42,7 @@ public class T2Users extends ComBean implements Serializable{
 	private String defaultTab; // 로그인후 tab정보
 	private String defaultTabAnchor; // 로그인후 tab정보
 
+	/** The Default Locale. */
 	private String defaultLocale;
 
 	/** The authorities list. */
