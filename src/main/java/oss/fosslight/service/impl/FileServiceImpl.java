@@ -53,7 +53,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@Autowired VerificationMapper verificationMapper;
 	@Autowired ProjectMapper projectMapper;
 	
-	
+	private static final String lockSetClearFiles = "LOCK_SET_CLEAR_FILES";
+	private static final String lockDeleteFiles = "LOCK_DELETE_FILES";
+
 	@Override
 	public List<UploadFile> uploadFile(HttpServletRequest req, T2File registFile) {
 		return uploadFile(req, registFile, null);
@@ -686,175 +688,179 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String setClearFiles(Map<Object, Object> map) {
-		String deleteComment = "";
-		String uploadComment = "";
-		String prjId = (String) map.get("prjId");
-		List<String> fileSeqs =	(List<String>)map.get("fileSeqs");
-		List<T2File> uploadFileInfos = new ArrayList<T2File>();
-		File file = null;
-		
-		Project prjParam = new Project();
-		prjParam.setPrjId(prjId);
-		ArrayList<String> newPackagingFileIdList = new ArrayList<String>();
-		newPackagingFileIdList.add(fileSeqs.size() > 0 ? fileSeqs.get(0) : null);
-		newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
-		newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
-		prjParam.setPackageFileId(newPackagingFileIdList.get(0));
-		prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
-		prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
-		
-		for(String fileSeq : fileSeqs){
-			T2File paramT2File = new T2File();
+		synchronized(lockSetClearFiles) {
+			String deleteComment = "";
+			String uploadComment = "";
+			String prjId = (String) map.get("prjId");
+			List<String> fileSeqs =	(List<String>)map.get("fileSeqs");
+			List<T2File> uploadFileInfos = new ArrayList<T2File>();
+			File file = null;
 			
-			paramT2File.setFileSeq(fileSeq);
-			uploadFileInfos.add(fileMapper.getFileInfo(paramT2File));
-		}
-						
-		String publicUrl = appEnv.getProperty("upload.path", "/upload");
-		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
-		List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
-
-		if(result.size() > 0){
-			for(T2File res : result){
-				String rtnFilePath = res.getLogiPath();
-				String rtnFileName = res.getLogiNm();
-				String rtnFileSeq = res.getFileSeq();
+			Project prjParam = new Project();
+			prjParam.setPrjId(prjId);
+			ArrayList<String> newPackagingFileIdList = new ArrayList<String>();
+			newPackagingFileIdList.add(fileSeqs.size() > 0 ? fileSeqs.get(0) : null);
+			newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
+			newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
+			prjParam.setPackageFileId(newPackagingFileIdList.get(0));
+			prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
+			prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
+			
+			for(String fileSeq : fileSeqs){
+				T2File paramT2File = new T2File();
 				
-				if(publicUrl.equals(rtnFilePath)){
-					// select한 filePath가 upload Dir 일 경우 해당 파일만 삭제함.
-					file = new File(rtnFilePath + "/" + rtnFileName);
+				paramT2File.setFileSeq(fileSeq);
+				uploadFileInfos.add(fileMapper.getFileInfo(paramT2File));
+			}
+							
+			String publicUrl = appEnv.getProperty("upload.path", "/upload");
+			String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
+			List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
+	
+			if(result.size() > 0){
+				for(T2File res : result){
+					String rtnFilePath = res.getLogiPath();
+					String rtnFileName = res.getLogiNm();
+					String rtnFileSeq = res.getFileSeq();
 					
-					for (String fileSeq : fileSeqs) {
-						if(file.exists() && !rtnFileSeq.equals(fileSeq)){
-							int reuseCnt = fileMapper.getPackgingReuseCnt(rtnFileName);
-								
-							if(reuseCnt == 0){
-								T2File delFile = new T2File();
-								delFile.setFileSeq(rtnFileSeq);
-								delFile.setGubn("A");
-								int returnSuccess = fileMapper.updateFileDelYnKessan(delFile);
-								
-								if(returnSuccess > 0) {
-									if(file.delete()){
-										log.debug(rtnFilePath + "/" + rtnFileName + " is delete success.");
-									} else {
-										log.debug(rtnFilePath + "/" + rtnFileName + " is delete failed.");
+					if(publicUrl.equals(rtnFilePath)){
+						// select한 filePath가 upload Dir 일 경우 해당 파일만 삭제함.
+						file = new File(rtnFilePath + "/" + rtnFileName);
+						
+						for (String fileSeq : fileSeqs) {
+							if(file.exists() && !rtnFileSeq.equals(fileSeq)){
+								int reuseCnt = fileMapper.getPackgingReuseCnt(rtnFileName);
+									
+								if(reuseCnt == 0){
+									T2File delFile = new T2File();
+									delFile.setFileSeq(rtnFileSeq);
+									delFile.setGubn("A");
+									int returnSuccess = fileMapper.updateFileDelYnKessan(delFile);
+									
+									if(returnSuccess > 0) {
+										if(file.delete()){
+											log.debug(rtnFilePath + "/" + rtnFileName + " is delete success.");
+										} else {
+											log.debug(rtnFilePath + "/" + rtnFileName + " is delete failed.");
+										}
 									}
 								}
 							}
 						}
 					}
 				}
+				
+				deleteFiles(packagingUrl, uploadFileInfos, prjId); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
+			} else {
+				deleteFiles(packagingUrl, uploadFileInfos, prjId); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
 			}
 			
-			deleteFiles(packagingUrl, uploadFileInfos, prjId); // 'upload/packaging/#{prjId}' 의 Directory가 있는지 체크 후 삭제 처리함.( 현재등록한 file을 제외한 나머지를 삭세처리 )
-		} else {
-			deleteFiles(packagingUrl, uploadFileInfos, prjId); // verify 한 file이 없을경우 packagingUrl도 같이 검사하여 delete를 함.
-		}
-		
-		// packaging File comment
-		try {
-			Project project = projectMapper.selectProjectMaster(prjParam);
-			ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
-			origPackagingFileIdList.add(project.getPackageFileId());
-			origPackagingFileIdList.add(project.getPackageFileId2());
-			origPackagingFileIdList.add(project.getPackageFileId3());
-			
-			int idx = 0;
-			
-			for(String fileId : origPackagingFileIdList){
-				T2File fileInfo = new T2File();
+			// packaging File comment
+			try {
+				Project project = projectMapper.selectProjectMaster(prjParam);
+				ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
+				origPackagingFileIdList.add(project.getPackageFileId());
+				origPackagingFileIdList.add(project.getPackageFileId2());
+				origPackagingFileIdList.add(project.getPackageFileId3());
 				
-				if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
-					//fileInfo.setFileSeq(fileId);
-					fileInfo = fileMapper.selectFileInfo(fileId);
-					deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
-				}
+				int idx = 0;
 				
-				if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
-					//fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
-					fileInfo = fileMapper.selectFileInfo(newPackagingFileIdList.get(idx));
-					oss.fosslight.domain.File resultFile = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
+				for(String fileId : origPackagingFileIdList){
+					T2File fileInfo = new T2File();
 					
-					if(CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
-						uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+resultFile.getRefPrjId()+" by "+loginUserName()+". <br>";
-					} else {
-						uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
+					if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+						//fileInfo.setFileSeq(fileId);
+						fileInfo = fileMapper.selectFileInfo(fileId);
+						deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
 					}
+					
+					if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+						//fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
+						fileInfo = fileMapper.selectFileInfo(newPackagingFileIdList.get(idx));
+						oss.fosslight.domain.File resultFile = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
+						
+						if(CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
+							uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+resultFile.getRefPrjId()+" by "+loginUserName()+". <br>";
+						} else {
+							uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
+						}
+					}
+					
+					idx++;
 				}
-				
-				idx++;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage());
-		}		
-		
-		verificationMapper.updatePackagingReuseMap(prjParam);
-		
-		return deleteComment + uploadComment;
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}		
+			
+			verificationMapper.updatePackagingReuseMap(prjParam);
+			
+			return deleteComment + uploadComment;
+		}
 	}
 
 	@Override
 	public void deleteFiles(String url, List<T2File> uploadFileInfos, String prjId) {
-		File file = new File(url);
-		ArrayList<String> LogiNms = new ArrayList<String>();
-		ArrayList<String> reuseNms = new ArrayList<String>();
-		
-		for(T2File uploadFileInfo : uploadFileInfos){
-			LogiNms.add(uploadFileInfo.getLogiNm());
-		}
-		
-		// 현재 proejct Packaging File 중 재사용중인 packaging File 이 있다면 제거 불가
-		List<T2File> reusePackaging = fileMapper.getReusePackagingInfo();
-		
-		for(T2File reuse : reusePackaging){
-			reuseNms.add(reuse.getLogiNm());
-		}
-		
-		if(file.exists()){
-			for(File f : file.listFiles()){
-				String fileNm = f.getName();
-				
-				if(!LogiNms.contains(fileNm)){
-					T2File delFile = new T2File();
-					delFile.setLogiPath(url);
-					delFile.setLogiNm(f.getName());
-					
-					int returnSuccess = fileMapper.updateReuseChkFileDelYnByFilePathNm(delFile);
-					
-					if(returnSuccess > 0 && !reuseNms.contains(fileNm)){
-						if(f.delete()){
-							log.debug(url + "/" + f.getName() + " is delete success.");
-						}else{
-							log.debug(url + "/" + f.getName() + " is delete failed.");
-						}
-					}
-				}
-			}
-		}
-		
-		// 재사용을 했었던 file중 다른 project에서도 재사용을 하지 않은 file 있는지 확인하고 재사용을 안한다면 file 삭제 / 추후 reuse하는 다른 project에서도 reuseFlag가 N이 되면 지우는 case이므로 log는 남기지 않음.
-		List<T2File> reusePackagingFileList = fileMapper.getPackgingReuseCntToList(prjId);
-		
-		for(T2File reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
-			File reuseFile = new File(reusePackagingFile.getLogiPath());
+		synchronized(lockDeleteFiles) {
+			File file = new File(url);
+			ArrayList<String> LogiNms = new ArrayList<String>();
+			ArrayList<String> reuseNms = new ArrayList<String>();
 			
-			if(reuseFile.exists()){
-				for(File f : reuseFile.listFiles()){
-					if(reusePackagingFile.getLogiNm().equals(f.getName())){
+			for(T2File uploadFileInfo : uploadFileInfos){
+				LogiNms.add(uploadFileInfo.getLogiNm());
+			}
+			
+			// 현재 proejct Packaging File 중 재사용중인 packaging File 이 있다면 제거 불가
+			List<T2File> reusePackaging = fileMapper.getReusePackagingInfo();
+			
+			for(T2File reuse : reusePackaging){
+				reuseNms.add(reuse.getLogiNm());
+			}
+			
+			if(file.exists()){
+				for(File f : file.listFiles()){
+					String fileNm = f.getName();
+					
+					if(!LogiNms.contains(fileNm)){
 						T2File delFile = new T2File();
-						delFile.setLogiPath(reusePackagingFile.getLogiPath());
+						delFile.setLogiPath(url);
 						delFile.setLogiNm(f.getName());
-						int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(delFile);
-						String[] refPrjId = reusePackagingFile.getLogiPath().split("/");
 						
-						fileMapper.setReusePackagingFileHidden(refPrjId[refPrjId.length-1], reusePackagingFile.getLogiPath(), f.getName());
+						int returnSuccess = fileMapper.updateReuseChkFileDelYnByFilePathNm(delFile);
 						
-						if(returnSuccess > 0){
+						if(returnSuccess > 0 && !reuseNms.contains(fileNm)){
 							if(f.delete()){
 								log.debug(url + "/" + f.getName() + " is delete success.");
 							}else{
 								log.debug(url + "/" + f.getName() + " is delete failed.");
+							}
+						}
+					}
+				}
+			}
+			
+			// 재사용을 했었던 file중 다른 project에서도 재사용을 하지 않은 file 있는지 확인하고 재사용을 안한다면 file 삭제 / 추후 reuse하는 다른 project에서도 reuseFlag가 N이 되면 지우는 case이므로 log는 남기지 않음.
+			List<T2File> reusePackagingFileList = fileMapper.getPackgingReuseCntToList(prjId);
+			
+			for(T2File reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
+				File reuseFile = new File(reusePackagingFile.getLogiPath());
+				
+				if(reuseFile.exists()){
+					for(File f : reuseFile.listFiles()){
+						if(reusePackagingFile.getLogiNm().equals(f.getName())){
+							T2File delFile = new T2File();
+							delFile.setLogiPath(reusePackagingFile.getLogiPath());
+							delFile.setLogiNm(f.getName());
+							int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(delFile);
+							String[] refPrjId = reusePackagingFile.getLogiPath().split("/");
+							
+							fileMapper.setReusePackagingFileHidden(refPrjId[refPrjId.length-1], reusePackagingFile.getLogiPath(), f.getName());
+							
+							if(returnSuccess > 0){
+								if(f.delete()){
+									log.debug(url + "/" + f.getName() + " is delete success.");
+								}else{
+									log.debug(url + "/" + f.getName() + " is delete failed.");
+								}
 							}
 						}
 					}

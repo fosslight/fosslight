@@ -74,6 +74,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired ProjectMapper projectMapper;
 	@Autowired T2UserMapper userMapper;
 	@Autowired PartnerMapper partnerMapper;
+
+	// Lock
+	private static final String lockMakeZipFileId = "LOCK_MAKE_ZIP_FILE_ID";
+	private static final String lockMakeSupplementFileId = "LOCK_MAKE_SUPPLEMENT_FILE_ID";
 	
 	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
@@ -3843,117 +3847,121 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public String makeZipFileId(Map<String, Object> paramMap, Project project) {
-		String fileId = "";
-		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
-		File dir = new File(filePath);
+		synchronized(lockMakeZipFileId) {
+			String fileId = "";
+			String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
+			File dir = new File(filePath);
 		
-		if(dir.exists()) {  // 전체 삭제 예쩡( html file은 제외함)
-			for(File item : dir.listFiles()) {
-				if(!item.isDirectory() && item.getName().contains(".html")){
-					item.delete();
-				} else if(item.isDirectory()) {
-					CommonFunction.removeAll(item); // 하위폴더, file 전체 삭제
+			if(dir.exists()) {  // 전체 삭제 예쩡( html file은 제외함)
+				for(File item : dir.listFiles()) {
+					if(!item.isDirectory() && item.getName().contains(".html")){
+						item.delete();
+					} else if(item.isDirectory()) {
+						CommonFunction.removeAll(item); // 하위폴더, file 전체 삭제
+					}
 				}
 			}
-		}
 		
-		String LicensesfilePath = filePath + "/needtoadd-notice/LICENSES";
-		dir = new File(LicensesfilePath);
-		dir.mkdirs();
+			String LicensesfilePath = filePath + "/needtoadd-notice/LICENSES";
+			dir = new File(LicensesfilePath);
+			dir.mkdirs();
 		
-		Map<String, List<ProjectIdentification>> mergedBinaryData = getMergedBinaryData(paramMap);
-		List<String> ObligationNoticeLicenseList = new ArrayList<String>();
-		
-		for(List<ProjectIdentification> bean : mergedBinaryData.values()) { // Licenses proc
-			for(ProjectIdentification p : bean) {
-				for(String licenseName : p.getLicenseName().split(",")) {
-					if(!ObligationNoticeLicenseList.contains(licenseName)) {
-						LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
-						
-						if(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
-							String LICENSEFileName = avoidNull(licenseBean.getShortIdentifier(), "");
+			Map<String, List<ProjectIdentification>> mergedBinaryData = getMergedBinaryData(paramMap);
+			List<String> ObligationNoticeLicenseList = new ArrayList<String>();
+			
+			for(List<ProjectIdentification> bean : mergedBinaryData.values()) { // Licenses proc
+				for(ProjectIdentification p : bean) {
+					for(String licenseName : p.getLicenseName().split(",")) {
+						if(!ObligationNoticeLicenseList.contains(licenseName)) {
+							LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
 							
-							if(isEmpty(LICENSEFileName)) {
-								LICENSEFileName = "LicenseRef-"+licenseBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+							if(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
+								String LICENSEFileName = avoidNull(licenseBean.getShortIdentifier(), "");
+								
+								if(isEmpty(LICENSEFileName)) {
+									LICENSEFileName = "LicenseRef-"+licenseBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
+								}
+								
+								FileUtil.writhFile(LicensesfilePath, LICENSEFileName+".txt", licenseBean.getLicenseText());
+								ObligationNoticeLicenseList.add(licenseName);
 							}
-							
-							FileUtil.writhFile(LicensesfilePath, LICENSEFileName+".txt", licenseBean.getLicenseText());
-							ObligationNoticeLicenseList.add(licenseName);
 						}
 					}
 				}
 			}
-		}
-		
-		String binaryDirPath = filePath + "/needtoadd-notice";
-		
-		for(String binaryPath : mergedBinaryData.keySet()) { // Binary proc
-			Map<String, Object> model = new HashMap<String, Object>();
-			model.put("templateURL", CoCodeManager.getCodeExpString(CoConstDef.CD_NOTICE_DEFAULT, CoConstDef.CD_DTL_SUPPLMENT_NOTICE_TXT_TEMPLATE));
-			model.put("noticeData", mergedBinaryData.get(binaryPath));
 			
-			String contents = CommonFunction.VelocityTemplateToString(model);
+			String binaryDirPath = filePath + "/needtoadd-notice";
 			
-			for(String path : binaryPath.split(",")) {
-				String fileName = "";
-				String binaryFilePath = binaryDirPath;
+			for(String binaryPath : mergedBinaryData.keySet()) { // Binary proc
+				Map<String, Object> model = new HashMap<String, Object>();
+				model.put("templateURL", CoCodeManager.getCodeExpString(CoConstDef.CD_NOTICE_DEFAULT, CoConstDef.CD_DTL_SUPPLMENT_NOTICE_TXT_TEMPLATE));
+				model.put("noticeData", mergedBinaryData.get(binaryPath));
 				
-				if(path.contains("/")) {
-					File f = new File(binaryFilePath + "/" + path);
-					fileName = f.getName();
-					File parentFile = f.getParentFile();
-					if(parentFile != null) {
-						binaryFilePath = parentFile.toString();
-						f = new File(binaryFilePath);
-						f.mkdirs(); // path전체의 directory 생성
+				String contents = CommonFunction.VelocityTemplateToString(model);
+				
+				for(String path : binaryPath.split(",")) {
+					String fileName = "";
+					String binaryFilePath = binaryDirPath;
+					
+					if(path.contains("/")) {
+						File f = new File(binaryFilePath + "/" + path);
+						fileName = f.getName();
+						File parentFile = f.getParentFile();
+						if(parentFile != null) {
+							binaryFilePath = parentFile.toString();
+							f = new File(binaryFilePath);
+							f.mkdirs(); // path전체의 directory 생성
+						} else {
+							fileName = path;	
+						}
 					} else {
-						fileName = path;	
+						fileName = path;
 					}
-				} else {
-					fileName = path;
+					
+					FileUtil.writhFile(binaryFilePath, fileName, contents);
 				}
-				
-				FileUtil.writhFile(binaryFilePath, fileName, contents);
 			}
+			
+			try {
+				String zipFileName = "needtoadd-notice_"+CommonFunction.getCurrentDateTime("yyMMdd")+".zip";
+				FileUtil.zip(binaryDirPath, filePath, zipFileName, null);
+				fileId = fileService.registFileDownload(filePath, zipFileName, zipFileName);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			return fileId;
 		}
-		
-		try {
-			String zipFileName = "needtoadd-notice_"+CommonFunction.getCurrentDateTime("yyMMdd")+".zip";
-			FileUtil.zip(binaryDirPath, filePath, zipFileName, null);
-			fileId = fileService.registFileDownload(filePath, zipFileName, zipFileName);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		return fileId;
 	}
 	
 	@Override
 	public String makeSupplementFileId(String contents, Project project) {
-		String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), "needtoadd-notice",  DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN), "html");
-		String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
-		String fileId = "";
-		
-		File fileDir = new File(filePath);
-		
-		if(fileDir.exists()) {
-			for(File f : fileDir.listFiles()) {
-				if(f.getName().contains(".html")) {
-					if(f.delete()) {
-						log.debug(filePath + "/" + f.getName() + " is delete success.");
-					} else {
-						log.debug(filePath + "/" + f.getName() + " is delete failed.");
+		synchronized(lockMakeSupplementFileId) {
+			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), "needtoadd-notice",  DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN), "html");
+			String filePath = CommonFunction.emptyCheckProperty("common.public_supplement_notice_path", "/supplement_notice") + "/" + project.getPrjId();
+			String fileId = "";
+			
+			File fileDir = new File(filePath);
+			
+			if(fileDir.exists()) {
+				for(File f : fileDir.listFiles()) {
+					if(f.getName().contains(".html")) {
+						if(f.delete()) {
+							log.debug(filePath + "/" + f.getName() + " is delete success.");
+						} else {
+							log.debug(filePath + "/" + f.getName() + " is delete failed.");
+						}
 					}
 				}
 			}
+			
+			if(FileUtil.writhFile(filePath, fileName, contents)) {
+				// 파일 등록
+				fileId = fileService.registFileDownload(filePath, fileName, fileName);
+			}
+			
+			return fileId;
 		}
-		
-		if(FileUtil.writhFile(filePath, fileName, contents)) {
-			// 파일 등록
-			fileId = fileService.registFileDownload(filePath, fileName, fileName);
-		}
-		
-		return fileId;
 	}
 	
 	@SuppressWarnings("unchecked")
