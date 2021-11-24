@@ -570,6 +570,7 @@ public final class Url {
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		public static final String SAVE_DEFAULT_LOCALE_AJAX = PATH + "/saveDefaultLocaleAjax";
 	}
 	
 	public static final class SENT_MAIL {

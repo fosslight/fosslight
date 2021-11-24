@@ -654,6 +654,9 @@ public class CoConstDef {
 	
 	/** 사용자별 Default Tab Menu 코드 */
 	public static final String CD_DEFAULT_TAB = "701";
+
+	/** 사용자별 Default Locale List 코드 **/
+	public static final String CD_DEFAULT_LOCALE = "704";
 	
 	/** marquee contents */
 	public static final String CD_MARQUEE										= "702";

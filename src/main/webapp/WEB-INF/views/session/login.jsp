@@ -170,8 +170,8 @@
                     
                     showErrMsg();
                 } else {
-                    location.href = "/index?lang=" + json.response.locale;
-                    
+					location.href = "/index?lang=" + json.response.locale;
+
                     return; 
                 }
             };
