@@ -77,6 +77,8 @@ public final class Url {
 		public static final String LICENSE_TEXT = PATH + "/getLicenseText";
 		
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
+		
+		public static final String LICENSE_ID = PATH + "/getLicenseId";
 	}
 	
 	public static final class EXCELDOWNLOAD {

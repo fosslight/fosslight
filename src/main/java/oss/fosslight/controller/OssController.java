@@ -1163,6 +1163,11 @@ public class OssController extends CoTopComponent{
 			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
 			
 			model.addAttribute("ossInfo", ossList.get(0));
+			
+			CommentsHistory commentsHistory = new CommentsHistory();
+			commentsHistory.setReferenceId(bean.getOssId());
+			commentsHistory.setReferenceDiv("oss");
+			model.addAttribute("commentList", commentService.getCommentListHis(commentsHistory));
 		} else {
 			model.addAttribute("ossInfo", new OssMaster());
 		}
