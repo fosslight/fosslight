@@ -47,12 +47,16 @@ public class ImageView extends AbstractView {
 	 */
 	private byte[] readFile(String filePath, String fileName) throws IOException {
 		String path = filePath + "/" + fileName;
-		
-		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path));
-		int length = bis.available();
-		byte[] bytes = new byte[length];
-		bis.read(bytes);
-		bis.close();
+		byte[] bytes = null;
+		try(
+			BufferedInputStream bis = new BufferedInputStream(new FileInputStream(path));
+		) {
+			int length = bis.available();
+			bytes = new byte[length];
+			bis.read(bytes);
+		} catch (Exception e){
+			throw e;
+		}
 		
 		return bytes;
 	}
