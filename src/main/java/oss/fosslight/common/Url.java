@@ -506,6 +506,17 @@ public final class Url {
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String LICENSE_DATA = PATH + "/getLicenseData";
+
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "/verification" + "";
+		public static final String VERIFICATION_PAGE_ID = PATH + "/verification/{prjId}";
+		public static final String VERIFICATION_PAGE_DIV_ID = PATH + "/verification/{initDiv}/{prjId}";
+		public static final String VERIFICATION_NOTICE_AJAX = PATH + "/verification/noticeAjax";
+		public static final String VERIFICATION_MAKE_NOTICE_PREVIEW = PATH + "/verification/makeNoticePreview";
+		public static final String VERIFICATION_DOWNLOAD_NOTICE_PREVIEW = PATH + "/verification/downloadNoticePreview";
+		public static final String VERIFICATION_MAKE_NOTICE_TEXT = PATH + "/verification/makeNoticeText";
+		public static final String VERIFICATION_MAKE_NOTICE_SIMPLE = PATH + "/verification/makeNoticeSimple";
+		public static final String VERIFICATION_MAKE_NOTICE_TEXT_SIMPLE = PATH + "/verification/makeNoticeTextSimple";
+		
 	}
 	
 	public static final class COMPLIANCE {

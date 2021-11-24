@@ -22,6 +22,7 @@ import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.Vulnerability;
 
+
 @Mapper
 public interface SelfCheckMapper {
 	int selectProjectTotalCount(Project project);
@@ -254,5 +255,20 @@ public interface SelfCheckMapper {
 	
 	List<String> getAllVulnList(Project project);
 
+	OssNotice selectOssNoticeOne(Project project);
+
+	List<OssComponents> selectVerifyOssList(Project project);
+
+	Map<String, Object> getNoticeTypeReturnMap(String prjId);
+
+	void updateNoticeFileInfo(Project projectParam);
+
+	List<OssComponents> selectVerificationNotice(OssNotice ossNotice);
+
+	List<OssComponents> selectVerificationNoticeClassAppend(OssNotice ossNotice);
+
+	Project getProjectBasicInfo(Project project);
+	
+	void updateNoticeFileInfoEtc(Project project);
 
 }
