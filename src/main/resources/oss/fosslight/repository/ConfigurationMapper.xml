@@ -11,5 +11,11 @@
 			DEFAULT_TAB = #{defaultTab}
 		WHERE USER_ID = #{loginUserName}
 	</update>
-	
+
+	<update id="updateDefaultLocale" parameterType="oss.fosslight.domain.Configuration">
+		UPDATE T2_USERS
+		SET
+			DEFAULT_LOCALE = #{defaultLocale}
+		WHERE USER_ID = #{loginUserName}
+	</update>
 </mapper>

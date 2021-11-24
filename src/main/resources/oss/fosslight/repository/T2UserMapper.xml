@@ -66,6 +66,7 @@
             U.DIVISION,
             U.ENABLED,
             U.DEFAULT_TAB,	/* 2018-08-14 choye 추가 */
+            U.DEFAULT_LOCALE,
             U.USE_YN,
             U.CREATED_DATE,
             U.TOKEN,

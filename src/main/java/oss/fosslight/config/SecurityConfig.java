@@ -145,24 +145,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             //User Detail
             T2Users user = new T2Users();
             user.setUserId(auth.getName());
-            T2Users getUser = userService.getUserAndAuthorities(user);
+            T2Users userInfo = userService.getUserAndAuthorities(user);
             
             HashMap<String, Object> info = new HashMap<String, Object>();
             
-            info.put("sessUserInfo", getUser);
+            info.put("sessUserInfo", userInfo);
             auth.setDetails(info);
             
             // ajax 로그인 체크시에만 사용
 			String accept = request.getHeader("accept");
 			String error = "false";
 			String message = "로그인성공하였습니다.";
+			String locale = userInfo.getDefaultLocale();
 
 			if (StringUtil.indexOf(accept, "json") > -1) {
 				response.setContentType("application/json");
 				response.setCharacterEncoding("utf-8");
 
-				String data = StringUtil.join(new String[] { " { \"response\" : {", " \"error\" : ", error, ", ",
-						" \"message\" : \"", message, "\" ", "} } " });
+				String data = StringUtil.join(new String[] {
+						"{",
+							"\"response\" : { ",
+								"\"error\" : " + error + ", ",
+								"\"message\" : \"" + message + "\", ",
+								"\"locale\" : \"" + locale + "\"",
+							"}",
+						"}"
+				});
 
 				PrintWriter out = response.getWriter();
 				out.print(data);
