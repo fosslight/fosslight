@@ -23,9 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CompressUtil {
     public static void compressGZIP(File input, File output, boolean deleteInputFile) throws IOException {
-        try (GzipCompressorOutputStream out = new GzipCompressorOutputStream(new FileOutputStream(output))){
+        
+		try(
+			GzipCompressorOutputStream out = new GzipCompressorOutputStream(new FileOutputStream(output));
+		) {	
             IOUtils.copy(new FileInputStream(input), out);
-        }
+        } catch (Exception e){
+			throw e;
+		}
         
         if(deleteInputFile) {
         	try {
@@ -84,42 +89,45 @@ public class CompressUtil {
     		dir.mkdirs();
     	}
     	
-		TarArchiveInputStream tarIn = null;
-		 
-		tarIn = new TarArchiveInputStream(
-					new GzipCompressorInputStream(
-						new BufferedInputStream(
-							new FileInputStream(tarFile)
-						)
+		try(
+			TarArchiveInputStream tarIn = new TarArchiveInputStream(
+			new GzipCompressorInputStream(
+				new BufferedInputStream(
+					new FileInputStream(tarFile)
 					)
-				);
-		
-		TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
-		
-		while (tarEntry != null) {
-			File destPath = new File(dest, tarEntry.getName());
+				)
+			);
+		) {
+			TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
 			
-			if (tarEntry.isDirectory()) { // tar.gz의 하위 file이 dir일 경우 dir 생성
-				destPath.mkdirs();
-			} else { // tar.gz의 하위 file이 dir가 아닐경우 file로 생성
-				destPath.createNewFile();
-				byte [] btoRead = new byte[1024];
-				BufferedOutputStream bout = 
-				new BufferedOutputStream(new FileOutputStream(destPath));
-				int len = 0;
-				 
-				while((len = tarIn.read(btoRead)) != -1){
-					bout.write(btoRead,0,len);
+			while (tarEntry != null) {
+				File destPath = new File(dest, tarEntry.getName());
+				
+				if (tarEntry.isDirectory()) { // tar.gz의 하위 file이 dir일 경우 dir 생성
+					destPath.mkdirs();
+				} else { // tar.gz의 하위 file이 dir가 아닐경우 file로 생성
+					destPath.createNewFile();
+					byte [] btoRead = new byte[1024];
+					try(
+						BufferedOutputStream bout = 
+						new BufferedOutputStream(new FileOutputStream(destPath));
+					){
+						int len = 0;
+					
+						while((len = tarIn.read(btoRead)) != -1){
+							bout.write(btoRead,0,len);
+						}
+						
+						btoRead = null;
+					} catch(Exception e) {
+						throw e;
+					}
 				}
-				 
-				bout.close();
-				btoRead = null;
-				 
+				
+				tarEntry = tarIn.getNextTarEntry();
 			}
-			
-			tarEntry = tarIn.getNextTarEntry();
+		} catch (Exception e) {
+			throw e;
 		}
-		
-		tarIn.close();
 	}
 }

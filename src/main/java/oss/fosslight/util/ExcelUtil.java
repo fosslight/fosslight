@@ -2335,10 +2335,11 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			}
 		}
-		
-		try {
+
+		try(
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
 			CSVReader csvReader = new CSVReader(csvFile, '|');
+		) {
 			List<String[]> allData = csvReader.readAll();
 			
 			readData = readAnalysisList(allData, (List<OssAnalysis>) map.get("rows"));
@@ -2356,7 +2357,7 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		} catch(Exception e) {
 			log.error(e.getMessage());
-		} 
+		}
 		
 		return readData;
 	}

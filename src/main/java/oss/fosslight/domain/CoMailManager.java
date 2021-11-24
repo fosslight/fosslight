@@ -2981,19 +2981,18 @@ public class CoMailManager extends CoTopComponent {
 	private List<Map<String, Object>> getMailComponentData(List<String> params, String key) {
 		// sql 문 생성
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		List<Map<String, Object>> dataList = new ArrayList<>();
 
-		try {
-			conn = DriverManager.getConnection(connStr, connUser, connPw);
-			pstmt = conn.prepareStatement(sql);
+		try(
+			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery()
+			) {
+
 			int parameterIndex = 1;
 			for(String param : params) {
 				pstmt.setString(parameterIndex++, param);
 			}
-			rs = pstmt.executeQuery();
 			
 			if (rs != null) {
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -3033,20 +3032,6 @@ public class CoMailManager extends CoTopComponent {
 			
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-			} catch (Exception e2) {
-				log.error(e2.getMessage(), e2);
-			}
 		}
 		return dataList;
 	}
@@ -3055,19 +3040,16 @@ public class CoMailManager extends CoTopComponent {
 	private List<Map<String, Object>> getMailComponentDataWithArray(List<String> params, String key) {
 		// sql 문 생성
 		String sql = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_NAME, key);
-		Connection conn = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
 		List<Map<String, Object>> dataList = new ArrayList<>();
 
-		try {
-			conn = DriverManager.getConnection(connStr, connUser, connPw);
+		try(
+			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery()
+		) {
 			
 			// sql param 생성
 			sql = sql.replace("?", createInQuery(params));
-			
-			pstmt = conn.prepareStatement(sql);
-			rs = pstmt.executeQuery();
 			
 			if (rs != null) {
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -3093,20 +3075,6 @@ public class CoMailManager extends CoTopComponent {
 			
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-			} catch (Exception e2) {
-				log.error(e2.getMessage(), e2);
-			}
 		}
 		return dataList;
 	}

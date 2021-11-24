@@ -189,24 +189,25 @@ public class FileUtil {
 
 	public static void zip(String inputFolder, String filePath, String zipName, String zipRootEntryName) throws Exception {
 		// 압축파일을 저장할 파일을 선언한다.
-		FileOutputStream fileOutputStream = null;
 		File file = new File(filePath + File.separator + zipName);
-		fileOutputStream = new FileOutputStream(file);
-		// ZipOutputStream 선언
-		ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-		// 압축할 대상이 있는 폴더를 파일로 선언한다.
-		File inputFile = new File(inputFolder);
-		
-		// 압축을 할 대상이 file이면 zipFile 메소드를,
-		// 폴더이면 zipFolder 메소드를 호출한다.
-		if (inputFile.isFile()) {
-			zipFile(zipOutputStream, inputFile, "");
-		} else if (inputFile.isDirectory()) {
-			zipFolder(zipOutputStream, inputFile, "", zipRootEntryName);
+		try(			
+			FileOutputStream fileOutputStream = new FileOutputStream(file);
+			// ZipOutputStream 선언
+			ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+		) {
+			// 압축할 대상이 있는 폴더를 파일로 선언한다.
+			File inputFile = new File(inputFolder);
+			
+			// 압축을 할 대상이 file이면 zipFile 메소드를,
+			// 폴더이면 zipFolder 메소드를 호출한다.
+			if (inputFile.isFile()) {
+				zipFile(zipOutputStream, inputFile, "");
+			} else if (inputFile.isDirectory()) {
+				zipFolder(zipOutputStream, inputFile, "", zipRootEntryName);
+			}
+		} catch (Exception e) {
+			throw e;
 		}
-		
-		zipOutputStream.close();
-		fileOutputStream.close();
 	}
 
 	public static void zipFolder(ZipOutputStream zipOutputStream, File inputFile, String parentName, String zipEntryName) throws Exception {
@@ -238,21 +239,22 @@ public class FileUtil {
 	}
 
 	public static void zipFile(ZipOutputStream zipOutputStream, File inputFile, String parentName) throws Exception {
-		// ZipEntry생성 후 zip 메소드에서 인자값으로 전달받은 파일의 구성 정보를 생성한다.
 		ZipEntry zipEntry = new ZipEntry(parentName + inputFile.getName());
-		zipOutputStream.putNextEntry(zipEntry);
-		FileInputStream fileInputStream = new FileInputStream(inputFile);
-		byte[] buf = new byte[4096];
-		int byteRead;
-		
-		// 압축대상 파일을 설정된 사이즈만큼 읽어들인다.
-		// buf의 size는 원하는대로 설정가능하다.
-		while ((byteRead = fileInputStream.read(buf)) > 0) {
-			zipOutputStream.write(buf, 0, byteRead);
+		try(
+			FileInputStream fileInputStream = new FileInputStream(inputFile);
+		){
+			// ZipEntry생성 후 zip 메소드에서 인자값으로 전달받은 파일의 구성 정보를 생성한다.
+			zipOutputStream.putNextEntry(zipEntry);
+			byte[] buf = new byte[4096];
+			int byteRead;
+			// 압축대상 파일을 설정된 사이즈만큼 읽어들인다.
+			// buf의 size는 원하는대로 설정가능하다.
+			while ((byteRead = fileInputStream.read(buf)) > 0) {
+				zipOutputStream.write(buf, 0, byteRead);
+			}
+		} catch (Exception e) {
+			throw e;
 		}
-		
-		zipOutputStream.closeEntry();
-		fileInputStream.close();
 	}
 	
 	public static boolean copyFile(String srcFilePath, String copyFilePath, String copyFileName) {

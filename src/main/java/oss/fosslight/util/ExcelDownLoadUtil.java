@@ -2722,10 +2722,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getVulnerabilityExcel(List<Vulnerability> vulnerabilityList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
-		FileInputStream inFile=null;
 		
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
+		try(
+			FileInputStream inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
+		) {
 			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
 			sheet = wb.getSheetAt(0);
 			wb.setSheetName(0, "vulnerabilityList");
