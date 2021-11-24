@@ -41,7 +41,9 @@ public class T2Users extends ComBean implements Serializable{
 	/** The Default Tab. 2018-08-14 choye 추가 */
 	private String defaultTab; // 로그인후 tab정보
 	private String defaultTabAnchor; // 로그인후 tab정보
-	
+
+	private String defaultLocale;
+
 	/** The authorities list. */
 	private List<T2Authorities> authoritiesList; // 사용자 권한 목록
 	
@@ -177,7 +179,25 @@ public class T2Users extends ComBean implements Serializable{
 	public void setEnabled(String enabled) {
 		this.enabled = enabled;
 	}
-	
+
+	/**
+	 * Gets the defaultLocale.
+	 *
+	 * @return the defaultLocale
+	 */
+	public String getDefaultLocale() {
+		return defaultLocale;
+	}
+
+	/**
+	 * Sets the defaultLocale.
+	 *
+	 * @param defaultLocale the new defaultLocale
+	 */
+	public void setDefaultLocale(String defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
 	/**
 	 * Gets the defaultTab. 2018-08-14 choye 추가
 	 *
