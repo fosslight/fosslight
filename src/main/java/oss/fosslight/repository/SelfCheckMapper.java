@@ -253,4 +253,6 @@ public interface SelfCheckMapper {
 	List<Project> getSelfCheckList(Project project);
 	
 	List<String> getAllVulnList(Project project);
+
+
 }

@@ -954,7 +954,7 @@
 		WHERE A.USE_YN = 'Y'
 			AND A.OSS_VERSION = #{ossVersion}
 			AND (A.OSS_NAME = #{ossName}
-			  OR EXISTS (	SELECT 1 
+			  OR EXISTS (	SELECT 1
 								  FROM OSS_NICKNAME B
 								WHERE A.OSS_NAME = B.OSS_NAME
 									AND B.OSS_NICKNAME = #{ossName})
@@ -975,7 +975,7 @@
 			AND A.OSS_VERSION = #{ossVersion}
 			AND A.DOWNLOAD_LOCATION = #{downloadLocation}
 	</select>
-	
+
 	<select id="getOssFindByDownloadLocation" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
 		SELECT A.OSS_ID
 				 , A.LICENSE_DIV
@@ -3876,7 +3876,7 @@
 		 WHERE PRJ.PRJ_ID = #{prjId}
 				 OR USER.USER_ID = #{loginUser}
 	 </select>
-	 
+
 	 <select id="selectProjectCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* bomCompareMapper.selectProjectCount */
 		SELECT COUNT(*) FROM (
@@ -3942,7 +3942,7 @@
 	     AND A.IDENTIFICATION_STATUS != 'CONF'
 	   </if>
 	</select>
-	
+
 	<insert id="insertStatisticsMostUsedOssInfo" parameterType="oss.fosslight.domain.Project">
 		INSERT INTO STATISTICS_MOSTUSED (
 			PRJ_ID
@@ -3974,12 +3974,12 @@
 						ON T2.CREATOR = T3.USER_ID
 			 		 INNER JOIN (SELECT CD_DTL_NO
 							  		  , CD_DTL_NM
-						   		   FROM T2_CODE_DTL 
+						   		   FROM T2_CODE_DTL
 						  		  WHERE CD_NO = '200'
 									AND USE_YN = 'Y') T4
 						ON T3.DIVISION = T4.CD_DTL_NO
 	</insert>
-	
+
 	<insert id="insertStatisticsMostUsedLicenseInfo" parameterType="oss.fosslight.domain.Project">
 		INSERT INTO STATISTICS_MOSTUSED (
 			PRJ_ID
@@ -4019,14 +4019,14 @@
 				    	ON PM.CREATOR = T1.USER_ID
 				 	 INNER JOIN (SELECT CD_DTL_NO
 				 	 				  , CD_DTL_NM
-							   	   FROM T2_CODE_DTL 
+							   	   FROM T2_CODE_DTL
 							   	  WHERE CD_NO = '200'
 							    	AND USE_YN = 'Y') T2
 						ON T1.DIVISION = T2.CD_DTL_NO
 	</insert>
-	
+
 	<delete id="deleteStatisticsMostUsedInfo" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM STATISTICS_MOSTUSED
-		WHERE PRJ_ID = #{prjId} 
+		WHERE PRJ_ID = #{prjId}
 	</delete>
 </mapper>

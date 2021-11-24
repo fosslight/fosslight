@@ -600,7 +600,7 @@
 			(
 				FALSE
 			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'N')">
-				OR OSS_TYPE LIKE '000' 
+				OR OSS_TYPE LIKE '000'
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@contains(ossTypeSearch, 'M')">
 				OR OSS_TYPE LIKE '1__'
@@ -641,7 +641,7 @@
 			, T1.DEACTIVATE_FLAG
 			, T1.MODIFIER
 			, T1.MODIFIED_DATE
-		FROM 
+		FROM
 			OSS_MASTER 									T1
 			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
 			INNER JOIN (
@@ -1136,7 +1136,7 @@
     		AND REFERENCE_DIV IN ('10','11','12','13','14','15')
     		AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
     </update>
-   
+
     <select id="checkExistsOss" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
     	SELECT
     		*
@@ -1931,34 +1931,34 @@
 		   SET DEACTIVATE_FLAG = #{deactivateFlag}
 		 WHERE OSS_NAME = #{ossName}
 	</update>
-	
+
 	<select id="getOssNameMergePartnerList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.PartnerMaster">
-		SELECT * 
+		SELECT *
 		  FROM PARTNER_MASTER T1
 		 WHERE T1.STATUS = 'CONF'
-		   AND EXISTS (SELECT 1 
+		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
 						  AND SUB1.REFERENCE_DIV = '20'
 						  AND SUB1.OSS_NAME = #{ossName}
 						  AND SUB1.OSS_VERSION = #{ossVersion})
 	</select>
-	
+
 	<select id="getOssNameMergeProjectList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Project">
-		SELECT * 
+		SELECT *
 		  FROM PROJECT_MASTER T1
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.IDENTIFICATION_STATUS = 'CONF'
-		   AND EXISTS (SELECT 1 
+		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
 						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  AND SUB1.OSS_VERSION = #{ossVersion})
 	</select>
-	
+
 	<update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
-    	UPDATE 
+    	UPDATE
     		OSS_COMPONENTS T1
     	SET
     		<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
@@ -1995,7 +1995,7 @@
     			</otherwise>
     		</choose>
     </update>
-    
+
     <update id="updateOssMasterSync" parameterType="oss.fosslight.domain.OssMaster">
     	UPDATE OSS_MASTER
 		   SET LICENSE_DIV 			= #{licenseDiv},
@@ -2011,13 +2011,13 @@
 		       DEACTIVATE_FLAG 		= #{deactivateFlag}
 		 WHERE OSS_ID = #{ossId}
     </update>
-    
+
     <delete id="deleteOssLicenseDeclaredSync" parameterType="oss.fosslight.domain.OssMaster">
     	DELETE ODC
 		  FROM OSS_LICENSE_DECLARED ODC
 		 WHERE ODC.OSS_ID = #{ossId}
     </delete>
-    
+
     <delete id="deleteOssLicenseDetectedSync" parameterType="oss.fosslight.domain.OssMaster">
     	DELETE ODT
 		  FROM OSS_LICENSE_DETECTED ODT

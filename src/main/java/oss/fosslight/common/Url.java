@@ -740,5 +740,17 @@ public final class Url {
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
 	}
+
+	public static final class SEARCH {
+
+		public static final String PATH = "/searchFilter";
+		public static final String LICENSE = PATH + "/license";
+		public static final String OSS = PATH + "/oss";
+		public static final String PROJECT = PATH + "/project";
+		public static final String SELFCHECK = PATH + "/selfcheck";
+		public static final String PARTNER = PATH + "/partner";
+		public static final String VULNERABILITY = PATH + "/vulnerability";
+
+	}
 	
 }

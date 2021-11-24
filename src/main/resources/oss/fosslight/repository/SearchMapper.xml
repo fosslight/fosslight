@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.SearchMapper">
+
+    <select id="selectProjectSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE SEARCH_TYPE = 'project' AND USER_ID = #{userId}
+    </select>
+
+
+    <select id="selectSelfCheckSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE SEARCH_TYPE = 'selfcheck' AND USER_ID = #{userId}
+    </select>
+
+
+    <select id="selectPartnerSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE SEARCH_TYPE = 'partner' AND USER_ID = #{userId}
+    </select>
+
+
+    <select id="selectOssSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE SEARCH_TYPE = 'oss' AND USER_ID = #{userId}
+    </select>
+
+
+    <select id="selectLicenseSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE SEARCH_TYPE = 'license' AND USER_ID = #{userId}
+    </select>
+
+
+    <select id="selectSearchFilter" resultType="java.lang.String">
+        SELECT FILTER
+        FROM SEARCH
+        WHERE USER_ID = #{userId} AND SEARCH_TYPE = #{type}
+    </select>
+
+    <insert id="upsertSearchFilter">
+        INSERT
+        INTO SEARCH
+        (
+            FILTER,
+            SEARCH_TYPE,
+            USER_ID
+        )
+        VALUES
+        (
+            #{jsonfilter},
+            #{type},
+            #{userId}
+        )
+        ON DUPLICATE KEY UPDATE
+            FILTER = #{jsonfilter},
+            UPDATED_TIME = NOW()
+    </insert>
+
+</mapper>
