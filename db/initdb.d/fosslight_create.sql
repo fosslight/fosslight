@@ -2544,7 +2544,7 @@ FLUSH PRIVILEGES;
 
 /* `search` table : save data related search info  */
 CREATE TABLE `fosslight`.`search` (
-`filter` JSON NULL,
+`filter` longtext DEFAULT NULL,
 `search_type` varchar(20),
 `created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
