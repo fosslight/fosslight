@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -501,7 +502,8 @@ public class ApiProjectController extends CoTopComponent {
 							log.error(e.getMessage(), e);
 						}
 
-						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC", sheet.toArray(new String[sheet.size()]));
+						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC", 
+							sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
 						String errorMsg = (String) result.get("errorMessage");
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
@@ -621,7 +623,7 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
 			if(searchFlag) {
-				List<ProjectIdentification> ossComponents = null;
+				List<ProjectIdentification> ossComponents = Collections.emptyList();
 				List<List<ProjectIdentification>> ossComponentsLicense = null;
 				String changeExclude = "";
 				String changeAdded = "";
