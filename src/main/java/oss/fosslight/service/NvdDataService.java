@@ -595,24 +595,16 @@ public class NvdDataService {
 							mapper.insertCpeMatchData(cpeMetaMap);
 
 							// CPE Names
-//							if (matchItem.containsKey("cpe_name")) {
-//								int nameIdx = 0;
-//								for (Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem
-//										.get("cpe_name")) {
-//									cpe_name.put("cpeSeq", seq);
-//									cpe_name.put("idx", nameIdx);
-//									mapper.insertCpeMatchNameData(cpe_name);
-//									nameIdx++;
-//								}
-//							}
-
-							// CPE Names
 								if(matchItem.containsKey("cpe_name")) {
 									int nameIdx = 0;
 									for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
 										cpe_name.put("cpeSeq", seq);
 										cpe_name.put("idx", nameIdx);
 										cpeNameList.add(cpe_name);
+										if(cpeNameList.size() >= 1000) {
+											mapper.insertBulkCpeMatchNameData(cpeNameList);
+											cpeNameList = new ArrayList<>();
+										}
 										nameIdx++;
 									}
 								}
@@ -622,39 +614,15 @@ public class NvdDataService {
 									cpeNameList = new ArrayList<>();
 								}
 								
-//								if(cpeMetaList.size() >= 500) {
-//									mapper.insertBulkCpeMatchData(cpeMetaList);
-//									cpeMetaList = new ArrayList<>();
-//									if(!cpeNameList.isEmpty()) {
-//										mapper.insertBulkCpeMatchNameData(cpeNameList);
-//										cpeNameList = new ArrayList<>();
-//									}
-//								}
 
 							if(seq % batchSize == 0 || seq == totSize) {
-								System.out.println(seq + "/" + totSize);
-//								mapper.insertBulkCpeMatchData(cpeMetaList);
-//								cpeMetaList = new ArrayList<>();
-//								if(!cpeNameList.isEmpty()) {
-//									mapper.insertBulkCpeMatchNameData(cpeNameList);
-//									cpeNameList = new ArrayList<>();
-//								}
 								List<BatchResult> batResults = sqlSession.flushStatements();
 								batResults.clear();
-								//sqlSession.clearCache();
 							}
 
 							seq++;
 						}
 
-//							if(!cpeMetaList.isEmpty()) {
-//								nvdDataMapper.insertBulkCpeMatchData(cpeMetaList);
-//								cpeMetaList = new ArrayList<>();
-//								if(!cpeNameList.isEmpty()) {
-//									nvdDataMapper.insertBulkCpeMatchNameData(cpeNameList);
-//									cpeNameList = new ArrayList<>();
-//								}
-//							}
 					}
 
 					sqlSession.commit();
