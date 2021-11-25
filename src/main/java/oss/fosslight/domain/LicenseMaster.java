@@ -830,7 +830,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	}
 
 	public void setWebpages(String[] webpages) {
-		this.webpages = webpages;
+		this.webpages = webpages != null ? webpages.clone() : null;
 	}
 
 	public String getsOrder() {
