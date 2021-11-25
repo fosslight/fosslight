@@ -927,7 +927,8 @@ public class PartnerController extends CoTopComponent{
 		} else {
 			// sheet name
 			List<Object> sheetNameList = null;
-
+			Boolean isSpdxSpreadsheet = false;
+			
 			try {
 				if(CoConstDef.FLAG_YES.equals(excel)){
 					if(list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt())) {
@@ -935,16 +936,15 @@ public class PartnerController extends CoTopComponent{
 						sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
 					}
 				}
+			
+				for(Object sheet : sheetNameList) {
+					String sheetName = sheet.toString();
+					if(sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
+						isSpdxSpreadsheet = true;
+					}
+				}
 			} catch(Exception e) {
 				log.error(e.getMessage(), e);
-			}
-			
-			Boolean isSpdxSpreadsheet = false;
-			for(Object sheet : sheetNameList) {
-				String sheetName = sheet.toString();
-				if(sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
-					isSpdxSpreadsheet = true;
-				}
 			}
 
 			if(isSpdxSpreadsheet){

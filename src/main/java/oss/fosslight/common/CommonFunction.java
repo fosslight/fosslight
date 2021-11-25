@@ -3275,7 +3275,8 @@ public class CommonFunction extends CoTopComponent {
 				int idx=0;
 				
 				for(OssLicense ossLicense : ossMaster.getOssLicenses()) {
-					if(ossComponentsLicenseList.size() >= idx+1 
+					if(ossComponentsLicenseList != null 
+							&&ossComponentsLicenseList.size() >= idx+1 
 							&& ossLicense.getLicenseId().equals(ossComponentsLicenseList.get(idx).getLicenseId())) {
 						// license text
 						// oss_license에 존재하는 경우만 설정
