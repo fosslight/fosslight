@@ -138,7 +138,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 		if(mFile.getSize()!=0) { //File Null Check
 			if(! file.exists()) { //경로상에 파일이 존재하지 않을 경우
 				try {
-					if(file.getParentFile().mkdirs()) { //경로에 해당하는 디렉토리들을 생성
+					if(file.getParentFile() != null && file.getParentFile().mkdirs()) { //경로에 해당하는 디렉토리들을 생성
 						boolean upSucc = file.createNewFile(); //이후 파일 생성
 						
 						if(!upSucc) {
@@ -252,7 +252,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 		if(mFile.getSize()!=0){ //File Null Check
 			if(! file.exists()){ //경로상에 파일이 존재하지 않을 경우
 				try {
-					if(file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
+					if(file.getParentFile() != null && file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
 							boolean upSucc = file.createNewFile(); //이후 파일 생성
 							if(!upSucc){
 								uploadSucc=false;
@@ -310,7 +310,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 					registConvertHTML.setOrigNm(convertNoticeFileName);
 					registConvertHTML.setLogiNm(convertHTMLFile.getName());
 					registConvertHTML.setLogiPath(uploadFilePath + "/" + randomUUID);
-					registConvertHTML.setLogiThumbNm(convertHTMLFile.getName().replace(".html", "_thumb.html"));
+					registConvertHTML.setLogiThumbNm(StringUtil.avoidNull(convertHTMLFile.getName(), "").replace(".html", "_thumb.html"));
 					registConvertHTML.setLogiThumbPath(uploadFilePath + "/" + randomUUID + "/thumb");
 					registConvertHTML.setExt("html");
 					registConvertHTML.setSize(Long.toString(convertHTMLFileSize));

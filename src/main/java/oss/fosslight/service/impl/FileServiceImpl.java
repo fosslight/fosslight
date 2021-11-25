@@ -483,11 +483,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		fileInfo.setExt(FilenameUtils.getExtension(fileName));
 		
 		try {
-			if(fileName.toLowerCase().endsWith(".tgz.gz")) {
+			if(avoidNull(fileName.toLowerCase()).endsWith(".tgz.gz")) {
 				fileInfo.setExt("tgz.gz");
-			} else if(fileName.toLowerCase().endsWith(".tar.bz2")) {
+			} else if(avoidNull(fileName.toLowerCase()).endsWith(".tar.bz2")) {
 				fileInfo.setExt("tar.bz2");
-			} else if(fileName.toLowerCase().endsWith(".tar.gz")) {
+			} else if(avoidNull(fileName.toLowerCase()).endsWith(".tar.gz")) {
 				fileInfo.setExt("tar.gz");
 			}
 		} catch (Exception e) {

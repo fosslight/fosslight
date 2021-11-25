@@ -601,17 +601,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 			}
 			
-			Project vnlnUpdBean = null;
+			Project vnlnUpdBean = new Project();
 			
 			if(!isEmpty(max_vuln_ossName)) {
-				vnlnUpdBean = new Project();
 				vnlnUpdBean.setOssName(max_vuln_ossName);
 				vnlnUpdBean.setOssVersion(avoidNull(max_vuln_ossVersion));
 				vnlnUpdBean = selfCheckMapper.getMaxVulnByOssName(vnlnUpdBean);				
-			}
-
-			if(vnlnUpdBean == null) {
-				vnlnUpdBean = new Project();
 			}
 			
 			vnlnUpdBean.setUpdVuln(CoConstDef.FLAG_YES);
