@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.2.18 (26/11/2021)
+## Changes
+- Modify the length of the license name and revert it @FOSSLight-dev (#281)
+
+## 🚀 Features
+
+- Add file path and copyright to Self-check @FOSSLight-dev (#292)
+- Add license inquiry function using external API (Github, Clearly Defined) @riyenas0925 (#269)
+- Save configuration when users search @astrod (#276)
+- Update OSS Table Function @FOSSLight-dev (#284)
+- Update OSS Table > view comment info of oss popup @FOSSLight-dev (#282)
+
+## 🐛 Hotfixes
+
+- Fix check oss name save error @riyenas0925 (#277)
+
+## 🔧 Maintenance
+
+- Fix heap memory issue when registering CPE Match Feed @FOSSLight-dev (#289)
+- Update the project's report template @soimkim (#286)
+
+---
+
 ## v1.2.17 (19/11/2021)
 ## Changes
 ## 🚀 Features
