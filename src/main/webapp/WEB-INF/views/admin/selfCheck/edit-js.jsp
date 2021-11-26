@@ -1018,8 +1018,8 @@
 			srcList.jqGrid({
 				datatype: 'local',
 				data : srcMainData,
-				colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
-				           ,'LicenseId','Download Location','OSS Detail','License Detail','User<br/>Guide','CVE ID'//,'CVSS_SCORE'
+				colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'Binary Name or Source Path', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
+				           ,'LicenseId','Download Location','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'//,'CVSS_SCORE'
 				           ,'Vulnera<br/>bility','Obligation','Notify','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
@@ -1027,6 +1027,17 @@
 					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
 					{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
 					{name: 'componentId', index: 'componentId', hidden:true},
+					{name: 'filePath', index: 'filePath', width: 170, align: 'left', editable:false, template: searchStringOptions,
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									});
+								}
+						}
+					},
 					{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
 					{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
 							editoptions: {
@@ -1153,6 +1164,17 @@
 					{name: 'licenseNameExistsYn', index: 'licenseNameExistsYn', hidden:true},
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
 					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', edittype:'text'},
+					{name: 'copyrightText', index: 'copyrightText', width: 150, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								});
+							}
+						}
+					},
 					{name: 'ossDetail', index: 'ossDetail', width: 50, align: 'center', formatter:src_fn.displayOssDetail, search : false, //template: searchStringOptions,
 						sorttype: function (cell, rowData) {
 							var rtnVal = rowData.ossNameExistsYn;

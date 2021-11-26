@@ -55,8 +55,8 @@ public class ApiControllerAspect {
 			return pjp.proceed(pjp.getArgs()); // 6
 		} finally {
 			long end = System.currentTimeMillis();
-			log.debug("Request: {} {} {}{} < {} ({}ms)", request.getMethod(), request.getHeader("_uid"), request.getRequestURI(), params,
-					request.getRemoteHost(), end - start);
+			log.info("IP: {}, method: {}, token: {} {}ms, URL: {}, params: {}", request.getRemoteHost(),request.getMethod(), request.getHeader("_token"),
+					end - start, request.getRequestURI(), params);
 		}
 	}
 	
@@ -80,8 +80,8 @@ public class ApiControllerAspect {
 			return pjp.proceed(pjp.getArgs()); // 6
 		} finally {
 			long end = System.currentTimeMillis();
-			log.debug("Request: {} {} {}{} < {} ({}ms)", request.getMethod(), request.getHeader("_uid"), request.getRequestURI(), params,
-					request.getRemoteHost(), end - start);
+			log.info("IP: {}, method: {}, token: {} {}ms, URL: {}, params: {}", request.getRemoteHost(),request.getMethod(), request.getHeader("_token"),
+					end - start, request.getRequestURI(), params);
 		}
 	}
 	

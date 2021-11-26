@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.mapping.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -1739,8 +1741,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		int urlSearchSeq = -1;
 		
-		list = list.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+"-"+p.getDownloadLocation())).collect(Collectors.toList());
-		
+		// oss name과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
+		list = list.stream()
+				.collect(Collectors.groupingBy(oss -> oss.getOssName() + "-" + oss.getDownloadLocation()))
+				.values().stream()
+				.map(ossList -> {
+					ProjectIdentification uniqueOss = ossList.stream().distinct().findFirst().get();
+					List<String> componentIds = ossList.stream().map(oss -> oss.getComponentId()).distinct().collect(Collectors.toList());
+					uniqueOss.setComponentIdList(componentIds);
+					return uniqueOss;
+				})
+				.collect(Collectors.toList());
+				
 		for(ProjectIdentification bean : list) {
 			int seq = 0;
 			urlSearchSeq = -1;
@@ -1935,9 +1947,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			String downloadLocation = result.stream()
 											.filter(e -> (e.getOssName()+e.getCheckName()).equals(p.getOssName()+p.getCheckName()))
 											.map(e -> e.getDownloadLocation())
+											.distinct()
 											.collect(Collectors.joining(","));
-			
+
+			List<String> componentIds = result.stream()
+											.filter(e -> (e.getOssName()+e.getCheckName()).equals(p.getOssName()+p.getCheckName()))
+											.map(e -> e.getComponentIdList())
+											.flatMap(Collection::stream)
+											.distinct()
+											.collect(Collectors.toList());
+
 			p.setDownloadLocation(downloadLocation);
+			p.setComponentIdList(componentIds);
 		}
 		
 		return sortedData;
@@ -2013,17 +2034,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 					}
 
+					List<String> componentIds = paramBean.getComponentIdList();
+					
 					switch(targetName.toUpperCase()) {
-						case CoConstDef.CD_CHECK_OSS_NAME_SELF:
-							String[] gridId = paramBean.getGridId().split("-");
-							paramBean.setGridId(gridId[0]+"-"+gridId[1]);
-
-							updateCnt = ossMapper.updateOssCheckNameBySelfCheck(paramBean);
-
+						case CoConstDef.CD_CHECK_OSS_NAME_SELF:				
+							for(String componentId : componentIds) {
+								String[] gridId = componentId.split("-");
+								paramBean.setGridId(gridId[0]+"-"+gridId[1]);
+								paramBean.setComponentId(gridId[2]);
+								updateCnt += ossMapper.updateOssCheckNameBySelfCheck(paramBean);
+							}
+							
 							break;
 						case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
-							updateCnt = ossMapper.updateOssCheckName(paramBean);
 
+							for(String componentId : componentIds) {
+								paramBean.setComponentId(componentId);
+								updateCnt += ossMapper.updateOssCheckName(paramBean);
+							}
+							
 							if(updateCnt >= 1) {
 								String commentId = paramBean.getReferenceId();
 								String checkOssNameComment = "";

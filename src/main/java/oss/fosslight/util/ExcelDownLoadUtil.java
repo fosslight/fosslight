@@ -261,7 +261,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		if(listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
 			List<String[]> rows = new ArrayList<>();
-			boolean isCellCntMerge = false;
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			
@@ -467,7 +466,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						params.add(bean.getBinaryName()); // Binary Name
 					}
 
-					if(!CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) && !isSelfCheck) {
+					if(!CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
 						params.add(bean.getFilePath()); // path
 					}
 					

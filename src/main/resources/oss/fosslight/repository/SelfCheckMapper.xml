@@ -1760,7 +1760,9 @@
 		SET OSS_ID = (CASE WHEN #{ossId} = '' THEN NULL ELSE #{ossId} END)
 			, OSS_NAME = #{ossName}
 			, OSS_VERSION = REPLACE(#{ossVersion}, 'N/A','')
+			, FILE_PATH = #{filePath}
 			, DOWNLOAD_LOCATION = #{downloadLocation}
+			, COPYRIGHT = #{copyrightText}
 			, EXCLUDE_YN = #{excludeYn}
 		WHERE
 			REFERENCE_ID = #{referenceId}

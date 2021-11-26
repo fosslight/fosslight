@@ -5,6 +5,8 @@
 
 package oss.fosslight.common;
 
+import java.util.regex.Pattern;
+
 public class CoConstDef {
 	
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
@@ -255,8 +257,20 @@ public class CoConstDef {
 	public static final String SESSION_KEY_PREFIX_DEFAULT_SEARCHVALUE = "PREFIX_DEFAULT_SEARCHVALUE_";
 	public static final String SESSION_KEY_ANALYSIS_RESULT_DATA = "ANALYSIS_RESULT_DATA";
 	
-	
-	
+	/**
+	 * Auto Fill OSS 기능에서 사용하는 Dependency 타입과 url 패턴 정의
+	 */
+	/* dependency url pattern code */
+	public static final Pattern GITHUB_PATTERN = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
+	public static final Pattern NPM_PATTERN = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+	public static final Pattern PYPI_PATTERN = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+	public static final Pattern MAVEN_CENTRAL_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://maven.google.com/web/index.html#([^:]+):([^:]+))");
+	public static final Pattern PUB_PATTERN = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+	public static final Pattern COCOAPODS_PATTERN = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+	/* nothing match */
+	public static final Pattern UNSUPPORTED_PATTERN = Pattern.compile("(?!)");
+
 	/**
 	 * Co Code Master - 대표 코드 [S]
 	 */

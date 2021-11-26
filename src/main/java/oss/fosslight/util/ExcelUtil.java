@@ -42,6 +42,9 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.opencsv.CSVReader;
+
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -60,9 +63,6 @@ import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
-import com.opencsv.CSVReader;
-
-import lombok.extern.slf4j.Slf4j;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -529,7 +529,6 @@ public class ExcelUtil extends CoTopComponent {
 			return false;
 		}
 		List<Map<String, String>> errList = new ArrayList<>(); // 전체 sheet에 대한 에러메시지 저장 리스트
-		//File file = new File("D:/yuns/test/ETD-929/ETD-929.xlsx");
 		// read excel file
 		Workbook wb = null;
 		try {
@@ -617,22 +616,9 @@ public class ExcelUtil extends CoTopComponent {
 										// file 단위로 입력되어 있기 때문에, ref col 이 1개 이상일 경우 path단위로 그룹핑
 										// path 취득
 										String _path = allDataMap.get(refKey).getFilePath();
-/*										if(isEmpty(_path)) {
-											continue;
-										}
-										// 디렉토리 경로로 설정되어 있는지 확인
-										if(!_path.endsWith("/") && !_path.endsWith("/*") && _path.indexOf("/") > -1) {
-											_path = _path.substring(0, _path.lastIndexOf("/") + 1);
-										}
-										
-										if(_path.endsWith("/*")) {
-											_path = _path.substring(0, _path.length() -1);
-										}*/
 										
 										if(!_keyList.contains(_path)) {
 											if(!isEmpty(bean.getFilePath()) && !_keyList.contains(bean.getFilePath())) {
-												// TODO 기존에 등록된 path와 다른 경로가 참조되었을 경우 어떻게 할 것인가?
-												// row를 추가 한다.
 												addDiffRefList.add(bean);
 											} else {
 												bean.setFilePath(_path);
@@ -903,6 +889,19 @@ public class ExcelUtil extends CoTopComponent {
 							dupColList.add(value);
 						}
 						pathOrFileCol = colIdx;
+						break;
+					case "BINARY NAME OR SOURCE PATH":
+						if("BIN".equalsIgnoreCase(readType)) {
+							if(binaryNameCol > -1) {
+								dupColList.add(value);
+							}
+							binaryNameCol = colIdx;
+						} else {
+							if(pathOrFileCol > -1) {
+								dupColList.add(value);
+							}
+							pathOrFileCol = colIdx;
+						}
 						break;
 					case "LOADED ON PRODUCT":
 						if(loadOnProductCol > -1) {
