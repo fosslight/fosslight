@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.Url.CONFIGURATION;
+import oss.fosslight.domain.Configuration;
 import oss.fosslight.service.ConfigurationService;
 
 @Controller
@@ -34,9 +35,17 @@ public class ConfigurationController extends CoTopComponent {
 	}
 	
 	@PostMapping(value=CONFIGURATION.SAVE_AJAX, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> listajax(@ModelAttribute oss.fosslight.domain.Configuration configuration, HttpServletRequest req, HttpServletResponse res){
+	public @ResponseBody ResponseEntity<Object> listajax(@ModelAttribute Configuration configuration, HttpServletRequest req, HttpServletResponse res){
 		HashMap<String,Object> resMap = new HashMap<>();
 		configurationService.updateDefaultTab(configuration);
+		resMap.put("resCd", "10");
+		return makeJsonResponseHeader(resMap);
+	}
+
+	@PostMapping(value=CONFIGURATION.SAVE_DEFAULT_LOCALE_AJAX, produces = "text/html; charset=utf-8")
+	public @ResponseBody ResponseEntity<Object> saveDefaultLocale(@ModelAttribute Configuration configuration, HttpServletRequest req, HttpServletResponse res){
+		HashMap<String,Object> resMap = new HashMap<>();
+		configurationService.updateDefaultLocale(configuration);
 		resMap.put("resCd", "10");
 		return makeJsonResponseHeader(resMap);
 	}

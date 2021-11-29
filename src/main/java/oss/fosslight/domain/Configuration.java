@@ -18,6 +18,9 @@ public class Configuration extends ComBean implements Serializable {
 
 	/** The Default Tab. */
 	private String defaultTab;
+
+	/** The Default Locale. */
+	private String defaultLocale;
 	
 	/**
 	 * Gets the Default Tab.
@@ -35,6 +38,24 @@ public class Configuration extends ComBean implements Serializable {
 	 */
 	public void setDefaultTab(String defaultTab) {
 		this.defaultTab = defaultTab;
+	}
+
+	/**
+	 * Gets the Default Locale.
+	 *
+	 * @return the Default Locale
+	 */
+	public String getDefaultLocale() {
+		return defaultLocale;
+	}
+
+	/**
+	 * Sets the Default Locale.
+	 *
+	 * @param Default Locale the new Default Locale
+	 */
+	public void setDefaultLocale(String defaultLocale) {
+		this.defaultLocale = defaultLocale;
 	}
 	
 }

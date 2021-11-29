@@ -9,4 +9,5 @@ import oss.fosslight.domain.Configuration;
 
 public interface ConfigurationService {
 	public void updateDefaultTab(Configuration configuration);
+	public void updateDefaultLocale(Configuration configuration);
 }
