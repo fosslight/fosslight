@@ -1793,6 +1793,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('701', 'sub User Configutation', 'Sub User Configuration definition that are related to User Configuration', 'N'),
 	('702', 'marguee Contents', '', 'N'),
 	('703', 'regist Domain', '', 'N'),
+	('704', 'Support Locale List', '', 'N'),
 	('901', 'Excel Download/Export', 'Maximum rows that can be exported when downloading Excel file or Export at List', 'N'),
 	('903', 'checkOssNameUrl', 'Managing information to find OSS information from Download Location', 'N'),
 	('904', 'check License Text Server Info', '', 'N'),
@@ -2266,6 +2267,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('701', '008', 'Vulnerability', '', '/vulnerability/list', 80, 'Y'),
 	('701', '009', 'Self-check List', '', '/selfCheck/list', 90, 'Y'),
 	('702', '100', 'contents', '', '', 1, 'Y'),
+	('704', '001', 'English', '', 'en_US', 1, 'Y'),
+	('704', '002', '한국어', '', 'ko_KR', 2, 'Y'),
 	('901', '100', 'MaxRowCount', '', '5000', 1, 'Y'),
 	('903', '001', 'github.com', '', 'github url', 1, 'Y'),
 	('903', '002', 'www.npmjs.com/package/', '', 'npm url', 2, 'Y'),
@@ -2475,6 +2478,7 @@ CREATE TABLE IF NOT EXISTS `T2_USERS` (
   `DIVISION` varchar(6) DEFAULT NULL,
   `ENABLED` bit(1) DEFAULT b'1',
   `DEFAULT_TAB` varchar(200) DEFAULT NULL,
+  `DEFAULT_LOCALE` varchar(10) DEFAULT 'en_US',
   `USE_YN` char(1) DEFAULT 'Y',
   `TOKEN` varchar(200) DEFAULT NULL,
   `EXPIRE_DATE` datetime DEFAULT NULL,
@@ -2488,9 +2492,9 @@ CREATE TABLE IF NOT EXISTS `T2_USERS` (
 -- 테이블 데이터 fosslight.T2_USERS:~1 rows (대략적) 내보내기
 DELETE FROM `T2_USERS`;
 /*!40000 ALTER TABLE `T2_USERS` DISABLE KEYS */;
-INSERT INTO `T2_USERS` (`USER_ID`, `USER_NAME`, `PASSWORD`, `EMAIL`, `DIVISION`, `ENABLED`, `DEFAULT_TAB`, `USE_YN`, `TOKEN`, `EXPIRE_DATE`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`) VALUES
-	('admin', '시스템관리자', '$2a$10$XYU3br/w7y2VYmVju74kMu/Ma1wcw5IdadA2pwHP/VElKLk4osynC', 'admin@fosslight.org', '', b'1', '001', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now()),
-	('user', '사용자', '$2a$10$b.VehympJvYfccwGNRYqi.po8UH4uhkbpTanUXDyBLCnfclqy.wgy', 'user@fosslight.org', '', b'1', '001', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now());
+INSERT INTO `T2_USERS` (`USER_ID`, `USER_NAME`, `PASSWORD`, `EMAIL`, `DIVISION`, `ENABLED`, `DEFAULT_TAB`, `DEFAULT_LOCALE`, `USE_YN`, `TOKEN`, `EXPIRE_DATE`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`) VALUES
+	('admin', '시스템관리자', '$2a$10$XYU3br/w7y2VYmVju74kMu/Ma1wcw5IdadA2pwHP/VElKLk4osynC', 'admin@fosslight.org', '', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now()),
+	('user', '사용자', '$2a$10$b.VehympJvYfccwGNRYqi.po8UH4uhkbpTanUXDyBLCnfclqy.wgy', 'user@fosslight.org', '', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now());
 /*!40000 ALTER TABLE `T2_USERS` ENABLE KEYS */;
 
 -- 테이블 fosslight.USER_NOTICE 구조 내보내기
