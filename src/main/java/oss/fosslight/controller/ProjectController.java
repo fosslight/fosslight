@@ -2188,6 +2188,10 @@ public class ProjectController extends CoTopComponent {
 		/* 2018-07-27 choye 추가 */
 		String resCd = "";
 		String resMsg = "";
+
+		if(project.getPrjId() == null || "".equals(project.getPrjId())) {
+			return makeJsonResponseHeader(false, "prjId is empty", null);
+		}
 		
 		if(project.getDelOsdd()!=null && (project.getDelOsdd().equals(CoConstDef.FLAG_YES) || project.getDelOsdd().equals(CoConstDef.FLAG_NO))) {
 			project.setCompleteYn(CoConstDef.FLAG_NO);
