@@ -1093,4 +1093,25 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		return result;
 	}
+
+	@Override
+	public void deletePhysicalFile(T2File file, String flag) {
+		String filePath = "";
+		
+		if(flag.equals("VERIFY")) {
+			filePath = file.getLogiPath() + "/" + file.getLogiNm();
+		}else {
+			T2File T2file = fileMapper.getFileInfo(file);
+			filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
+		}
+				
+		File LogiFile = new File(filePath);
+		if(LogiFile.exists()){
+			if(!LogiFile.delete()){
+				log.info("Failed to delete the file.");
+			}
+		}else{
+			log.info("Failed to find the file.");
+		}
+	}
 }

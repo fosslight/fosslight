@@ -48,4 +48,6 @@ public interface FileService {
 	public void deleteFiles(String url, List<T2File> uploadFileInfo, String prjId);
 	
 	public List<UploadFile> setReusePackagingFile(String refFileSeq);
+
+	public void deletePhysicalFile(T2File t2File, String flag);
 }
