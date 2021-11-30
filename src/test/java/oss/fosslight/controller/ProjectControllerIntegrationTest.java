@@ -155,10 +155,10 @@ class ProjectControllerIntegrationTest {
                 .content(new ObjectMapper().writeValueAsString(project))
                 .header("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36")
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is5xxServerError())
+                .andExpect(status().isOk())
                 .andDo(result -> {
                     Map<String, String> responseMap = new ObjectMapper().readValue(result.getResponse().getContentAsString(), Map.class);
-                    assertThat(String.valueOf(responseMap.get("success"))).isEqualTo("false");
+                    assertThat(responseMap.get("isValid")).isEqualTo("false");
                 });
 
         // then
