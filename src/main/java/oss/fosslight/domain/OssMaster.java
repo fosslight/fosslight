@@ -1867,11 +1867,11 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 
 	public String[] getOssIds() {
-		return ossIds;
+		return ossIds != null ? ossIds.clone() : null;
 	}
 
 	public void setOssIds(String[] ossIds) {
-		this.ossIds = ossIds;
+		this.ossIds = ossIds != null ? ossIds.clone() : null;
 	}
 
 	public String getSyncRefOssId() {
@@ -1883,11 +1883,11 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 
 	public String[] getSyncItem() {
-		return syncItem;
+		return syncItem != null ? syncItem.clone() : null;
 	}
 
 	public void setSyncItem(String[] syncItem) {
-		this.syncItem = syncItem;
+		this.syncItem = syncItem != null ? syncItem.clone() : null;
 	}
 
 	public String getOssMergeReferenceId() {
