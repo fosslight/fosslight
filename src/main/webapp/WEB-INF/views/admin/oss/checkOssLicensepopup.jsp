@@ -50,7 +50,7 @@
 							$('#ossList').jqGrid({
 									datatype: 'local',
 									data : resultData.list,
-									colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList'],
+									colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'Evidence', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList', 'checkedRuleType'],
 									colModel: [
 										{name: 'gridId', index: 'gridId', hidden:true, key:true},
 										{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
@@ -59,11 +59,13 @@
 										{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
 										{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
 										{name: 'checkLicense', index: 'checkLicense', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
+										{name: 'checkedEvidence', index: 'checkedEvidence',  width: 20, align: 'left',editable: false, formatter:grid_fn.displayCheckedEvidence, sortable:false},
 										{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
 										{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
 										{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
 										{name: 'referenceDiv', index: 'referenceDiv', width: 50, hidden: true, sortable: false},
-										{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false}
+										{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false},
+										{name: 'checkedEvidenceType', index: 'checkedEvidenceType', width: 50, hidden: true, sortable: false},
 									],
 									autoencode: true,
 									autowidth: true,
@@ -222,6 +224,24 @@
 						var display = checkLicense.split("|");
 
 						return display.join("<br>");
+					},
+					displayCheckedEvidence : function(cellvalue, options, rowObject){
+						var checkedEvidenceType = rowObject["checkedEvidenceType"];
+						var display = "";
+
+						console.log(checkedEvidenceType);
+
+						if(cellvalue != "" && cellvalue != undefined) {
+							if(checkedEvidenceType == "CD") {
+								display = "<div class=\"tcenter\"><a class=\"evidenceIcon clearlydefined\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+							} else if(checkedEvidenceType == "GH") {
+								display = "<div class=\"tcenter\"><a class=\"evidenceIcon github\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+							} else if(checkedEvidenceType == "DB") {
+								display = "<div class=\"tcenter\"><a class=\"evidenceIcon existdb\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+							}
+						}
+
+						return display;
 					},
 					getCheckedRow : function(processType){
 						var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
