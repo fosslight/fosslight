@@ -18,6 +18,9 @@
 				<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 					<c:if test="${detail.loginUserRole ne 'ROLE_VIEWER'}">
 						<div class="projdecBtn" style="top:0px;">
+						<c:if test="${detail.status eq 'CONF'}">
+							<input id="createProject" type="button" value="Create Project for OSS Notice" class="btnColor red w200" />
+						</c:if>
 						<c:if test="${detail.loginUserRole eq 'ROLE_ADMIN'}">
 							<c:if test="${detail.status eq 'REV' }">
 							<a href="javascript:void(0);" class="btnSet confirm" onclick="fn.confirm()"><span>Confirm</span></a>
@@ -208,7 +211,14 @@
 						</td>
 					</tr>
 					<c:if test="${detail.viewOnlyFlag ne 'Y'}">
-					
+					<c:if test="${not empty prjList}">
+						<tr>
+							<th class="dCase"><spring:message code="msg.common.field.project" /><br/><input id="listMore" type="button" value="List more" class="btnCLight gray" /></th>
+							<td class="dCase">
+								<table id="_projectList"><tr><td></td></tr></table>
+							</td>
+						</tr>
+					</c:if>
 					<tr>
 						<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
 						<td class="dCase watchCase">

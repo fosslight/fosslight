@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1109,10 +1110,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return ossComponentList == null || ossComponentList.isEmpty();
 	}
 	
+	@Transactional
+	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
+	private void updateProjectStatus(Project project) {
+		//다운로드 허용 플래그
+		project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
+		
+		// 프로젝트 상태 변경
+		projectMapper.updateProjectMaster(project);
+	}
+	
 	@Override
 	@Transactional
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice) throws Exception {
-		projectService.updateProjectStatus(project);
+		updateProjectStatus(project);
 		
 		boolean makeZipFile = false;
 		String spdxComment = "";
@@ -1580,7 +1591,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String prjId = "";
 		String distributeSite = "";
 		int dashSeq = 0;
-		String hideOssVersionYn = ossNotice.getHideOssVersionYn();
+		boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
 		
 		// NETWORK SERVER 여부를 체크한다.
 		
@@ -1613,11 +1624,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Map<String, OssComponents> noticeInfo = new LinkedHashMap<>();
 		Map<String, OssComponents> srcInfo = new LinkedHashMap<>();
 		Map<String, OssComponentsLicense> licenseInfo = new LinkedHashMap<>();
+		Map<String, List<String>> componentCopyright = new LinkedHashMap<>();
+		Map<String, List<String>> componentAttribution = new LinkedHashMap<>();
 		
 		OssComponents ossComponent;
 		
 		for(OssComponents bean : ossComponentList) {
-			String componentKey = (CoConstDef.FLAG_YES.equals(hideOssVersionYn) 
+			String componentKey = (hideOssVersionFlag
 									? bean.getOssName() 
 									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 			
@@ -1625,84 +1638,159 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				componentKey += dashSeq++;
 			}
 			
-			// type
-			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
-			// 2017.05.16 add by yuns start
-			// obligation을 특정할 수 없는 oss도 bom에 merge 되도록 수정하면서, identification confirm시 refDiv가 '50'(고지대상)에 obligation을 특정할 수 없는 oss도 포함되어 등록되어
-			// confirm 처리에서 obligation이 고지의무가 있거나 소스코드 공개의무가 있는 경우만 '50'으로 copy되도록 수정하였으나, 여기서 한번도 필터링함
-			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
-			
-			if(!isDisclosure && !isNotice) {
-				continue;
-			}
-			
-			// 2017.07.05
-			// Accompanied with source code 의 경우
-			// 소스공개여부와 상관없이 모두 소스공개가 필요한 oss table에 표시
-			if(CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
-				isDisclosure = true;
-			}
-			
-			// 2017.05.16 add by yuns end
-			boolean addDisclosure = isDisclosure && srcInfo.containsKey(componentKey);
-			boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
-			
-			if(addDisclosure) {
-				ossComponent = srcInfo.get(componentKey);
-			} else if(addNotice) {
-				ossComponent = noticeInfo.get(componentKey);
-			} else {
-				ossComponent = bean;
-			}
-					
-			// 라이선스 정보 생성
-			OssComponentsLicense license = new OssComponentsLicense();
-			license.setLicenseId(bean.getLicenseId());
-			license.setLicenseName(bean.getLicenseName());
-			license.setLicenseText(bean.getLicenseText());
-			license.setAttribution(bean.getAttribution());
-			// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
-			// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
-			if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
-				ossComponent.addOssComponentsLicense(license);
-				// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
-				// MULTI LICENSE를 가지는 oss의 개별로 추가된 copyright의 경우, Identification Confirm시에 DB에 업데이트한 정보를 기준으로 추출되기 때문에, preview 단계에서 오류가 발견되어 수정하여도 반영되지 않는다
-				// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
-				// 여기서 oss id와 license id를 이용하여 찾는다.
-				// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
-				 if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
-					 bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+			if(hideOssVersionFlag) {
+				if(srcInfo.containsKey(componentKey)) {
+					ossComponent = srcInfo.get(componentKey);
+				} else {
+					ossComponent = bean;
+				}
 				
-					 // multi license 추가 copyright
-					 if(!isEmpty(bean.getOssCopyright())) {
-						 String addCopyright = avoidNull(ossComponent.getCopyrightText());
+				List<String> copyrightList = componentCopyright.containsKey(componentKey) 
+						? (List<String>) componentCopyright.get(componentKey) 
+						: new ArrayList<>();
 						
-						 if(!isEmpty(ossComponent.getCopyrightText())) {
-							 addCopyright += "\r\n";
-						 }
+				List<String> attributionList = componentAttribution.containsKey(componentKey) 
+						? (List<String>) componentAttribution.get(componentKey) 
+						: new ArrayList<>();
 						
-						 addCopyright += bean.getOssCopyright();
-						 ossComponent.setCopyrightText(addCopyright);
-					 }
-				 }
-			}
-			
-			if(isDisclosure) {
-				if(addDisclosure) {
+				if(!isEmpty(bean.getCopyrightText())) {
+					for(String copyright : bean.getCopyrightText().split("\n")) {
+						copyrightList.add(copyright);
+					}
+				}
+				
+				if(!isEmpty(bean.getOssAttribution())) {
+					attributionList.add(bean.getOssAttribution());
+				}
+
+				// 라이선스 정보 생성
+				OssComponentsLicense license = new OssComponentsLicense();
+				license.setLicenseId(bean.getLicenseId());
+				license.setLicenseName(bean.getLicenseName());
+				license.setLicenseText(bean.getLicenseText());
+				license.setAttribution(bean.getAttribution());
+
+				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+					ossComponent.addOssComponentsLicense(license);
+				}
+				
+				if(CoConstDef.FLAG_NO.equals(bean.getAdminCheckYn())) {
+					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
+					
+					// multi license 추가 copyright
+					if(!isEmpty(ossCopyright)) {
+						for(String copyright : ossCopyright.split("\n")) {
+							copyrightList.add(copyright);
+						}
+					}
+				}
+				
+				// 중복제거
+				copyrightList = copyrightList.stream()
+												.filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase()))
+												.collect(Collectors.toList()); 
+				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
+				componentCopyright.put(componentKey, copyrightList);
+				
+				attributionList = attributionList.stream()
+													.filter(CommonFunction.distinctByKey(a -> avoidNull(a).trim().toUpperCase()))
+													.collect(Collectors.toList()); 
+				ossComponent.setOssAttribution(String.join("\r\n", attributionList));
+				componentAttribution.put(componentKey, attributionList);
+				
+				if(srcInfo.containsKey(componentKey)) {
 					srcInfo.replace(componentKey, ossComponent);
 				} else {
 					srcInfo.put(componentKey, ossComponent);
 				}
-			} else {
-				if(addNotice) {
-					noticeInfo.replace(componentKey, ossComponent);
-				} else {
-					noticeInfo.put(componentKey, ossComponent);
+				
+				if(!licenseInfo.containsKey(license.getLicenseName())) {
+					licenseInfo.put(license.getLicenseName(), license);
 				}
-			}
-			
-			if(!licenseInfo.containsKey(license.getLicenseName())) {
-				licenseInfo.put(license.getLicenseName(), license);
+			} else {
+				
+				// type
+				boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+				// 2017.05.16 add by yuns start
+				// obligation을 특정할 수 없는 oss도 bom에 merge 되도록 수정하면서, identification confirm시 refDiv가 '50'(고지대상)에 obligation을 특정할 수 없는 oss도 포함되어 등록되어
+				// confirm 처리에서 obligation이 고지의무가 있거나 소스코드 공개의무가 있는 경우만 '50'으로 copy되도록 수정하였으나, 여기서 한번도 필터링함
+				boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
+				
+				if(!isDisclosure && !isNotice) {
+					continue;
+				}
+				
+				// 2017.07.05
+				// Accompanied with source code 의 경우
+				// 소스공개여부와 상관없이 모두 소스공개가 필요한 oss table에 표시
+				if(CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
+					isDisclosure = true;
+				}
+				
+				// 2017.05.16 add by yuns end
+				boolean addDisclosure = isDisclosure && srcInfo.containsKey(componentKey);
+				boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
+				
+				
+				if(addDisclosure) {
+					ossComponent = srcInfo.get(componentKey);
+				} else if(addNotice) {
+					ossComponent = noticeInfo.get(componentKey);
+				} else {
+					ossComponent = bean;
+				}
+				
+				// 라이선스 정보 생성
+				OssComponentsLicense license = new OssComponentsLicense();
+				license.setLicenseId(bean.getLicenseId());
+				license.setLicenseName(bean.getLicenseName());
+				license.setLicenseText(bean.getLicenseText());
+				license.setAttribution(bean.getAttribution());
+				
+				// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
+				// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
+				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+					ossComponent.addOssComponentsLicense(license);
+					
+					// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
+					// MULTI LICENSE를 가지는 oss의 개별로 추가된 copyright의 경우, Identification Confirm시에 DB에 업데이트한 정보를 기준으로 추출되기 때문에, preview 단계에서 오류가 발견되어 수정하여도 반영되지 않는다
+					// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
+					// 여기서 oss id와 license id를 이용하여 찾는다.
+					// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
+					if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
+						bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+						
+						// multi license 추가 copyright
+						if(!isEmpty(bean.getOssCopyright())) {
+							String addCopyright = avoidNull(ossComponent.getCopyrightText());
+							
+							if(!isEmpty(ossComponent.getCopyrightText())) {
+								addCopyright += "\r\n";
+							}
+							 
+							addCopyright += bean.getOssCopyright();
+							ossComponent.setCopyrightText(addCopyright);
+						}
+					}
+				}
+				
+				if(isDisclosure) {
+					if(addDisclosure) {
+						srcInfo.replace(componentKey, ossComponent);
+					} else {
+						srcInfo.put(componentKey, ossComponent);
+					}
+				} else {
+					if(addNotice) {
+						noticeInfo.replace(componentKey, ossComponent);
+					} else {
+						noticeInfo.put(componentKey, ossComponent);
+					}
+				}
+				
+				if(!licenseInfo.containsKey(license.getLicenseName())) {
+					licenseInfo.put(license.getLicenseName(), license);
+				}
 			}
 		}
 		
@@ -1712,7 +1800,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if(addOssComponentList != null) {
 			for(OssComponents bean : addOssComponentList) {
-				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				String componentKey = (hideOssVersionFlag
+											? bean.getOssName() 
+											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				
 				if("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -1726,7 +1816,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.addOssComponentsLicense(license);
 				
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
+						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
+						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
@@ -2107,5 +2198,54 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			commentService.registComment(commHisBean);
 		}
+	}
+	
+	@Override
+	public void updateProjectAllowDownloadBitFlag(Project project) {
+		project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
+		
+		projectMapper.updateProjectAllowDownloadBitFlag(project);
+	}
+
+	public int allowDownloadMultiFlagToBitFlag(Project project) {
+		int bitFlag = 1;
+		
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeHTMLYn())) {
+			bitFlag |= CoConstDef.FLAG_A;
+		}
+			
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
+			bitFlag |= CoConstDef.FLAG_B;
+		}
+		
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
+			bitFlag |= CoConstDef.FLAG_C;
+		}
+			
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
+			bitFlag |= CoConstDef.FLAG_D;
+		}
+			
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
+			bitFlag |= CoConstDef.FLAG_E;
+		}
+			
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
+			bitFlag |= CoConstDef.FLAG_F;
+		}
+			
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
+			bitFlag |= CoConstDef.FLAG_G;
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_H;
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+			bitFlag |= CoConstDef.FLAG_I;
+		}
+		
+		return bitFlag;
 	}
 }

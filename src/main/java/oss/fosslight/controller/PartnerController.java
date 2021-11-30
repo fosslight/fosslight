@@ -46,12 +46,14 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
+import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
+import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
@@ -76,6 +78,7 @@ public class PartnerController extends CoTopComponent{
 	
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired FileMapper fileMapper;
+	@Autowired ProjectMapper projectMapper;
 	
 	/** The session key search. */
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_PARTNER_LIST";
@@ -171,6 +174,12 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		
+		if(prjList.size() > 0) {
+			model.addAttribute("prjList", toJson(prjList));
+		}
 		
 		model.addAttribute("detail", partnerMaster);
 		model.addAttribute("detailJson", toJson(partnerMaster));

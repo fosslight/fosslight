@@ -2244,8 +2244,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for(ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
+			int isAdminCheck = projectMapper.selectAdminCheckCnt(bean);
 			
-			if(!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName)) {
+			if(!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName) && isAdminCheck < 1) {
 				ossCheckParam.add(_ossName);
 			}
 			
@@ -2403,54 +2404,366 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateIdentifcationProgress(_tempPrjInfo);
 		}
 	}
-
+	
 	@Override
-	@Transactional
-	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
-	public void updateProjectStatus(Project project) {
-		CoMail mailBean = null;
+	public void checkProjectReviewer(Project project) {
+		Project param = new Project();
+		param.setPrjId(project.getPrjId());
+		param = projectMapper.selectProjectMaster2(param);
+		
 		//review 상태로 변경시 reviewer가 설정되어 있지 않은 경우, reviewer도 업데이트 한다.
 		if(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus())) {
-			Project param = new Project();
-			param.setPrjId(project.getPrjId());
-			param = projectMapper.selectProjectMaster2(param);
-			
 			if(isEmpty(param.getReviewer())) {
 				param.setModifier(param.getLoginUserName());
 				param.setReviewer(param.getLoginUserName());
 				
 				projectMapper.updateReviewer(param);
 				
-				mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD);
-				mailBean.setToIds(new String[] {param.getLoginUserName()});
-				mailBean.setParamPrjId(project.getPrjId());
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD);
+					mailBean.setToIds(new String[] {param.getLoginUserName()});
+					mailBean.setParamPrjId(project.getPrjId());
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
 			}
 		}
+	}
+	
+	@Override
+	@Transactional
+	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
+	public Map<String, Object> updateProjectStatus(Project project) throws Exception {
+		Map<String, Object> resultMap = new HashMap<>();
 		
-		// 프로젝트 완료처리
-		if(CoConstDef.FLAG_YES.equals(project.getCompleteYn())) {
-			// Identification N/A 처리
-			// identification sub status
-			// distribution status
-			Project _param = new Project();
-			_param.setPrjId(project.getPrjId());
+		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS
+				: project.getReferenceDiv();
+		
+		String userComment = project.getUserComment();
+		String statusCode = project.getIdentificationStatus();
+		
+		if(isEmpty(statusCode)) {
+			statusCode = project.getVerificationStatus();
+		}
+		
+		String status = CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, statusCode);
+		String mailType = null;
+		log.info("statusCode : " + statusCode + "/  status : " + status);
+		
+		log.debug("PARAM: " + "identificationStatus="+project.getIdentificationStatus());
+		log.debug("PARAM: " + "completeYn="+project.getCompleteYn());
+		
+		// Identification confirm시 validation check 수행
+		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(project.getIdentificationStatus())) {
+			boolean isAndroidModel = false;
+			boolean isNetworkRestriction = false;
+			boolean hasSourceOss = false;
+			boolean hasNotificationOss = false; 
 			
-			projectMapper.updateProjectStatusWithComplete(_param);
+			Map<String, Object> map = null;
+			
+			// confirm 시 다시 DB Data를 가져와서 체크한다.
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceId(project.getPrjId());
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			param.setMerge(CoConstDef.FLAG_NO);
+			map = getIdentificationGridList(param);
+			
+			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+				T2CoProjectValidator pv = new T2CoProjectValidator();
+				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+
+				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				
+				// return validator result
+				if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+//					return makeJsonResponseHeader(vr.getValidMessageMap());
+					resultMap.put("validMap", vr.getValidMessageMap());
+					return resultMap;
+				}
+				
+				String networkRedistribution = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, CoConstDef.CD_LICENSE_NETWORK_RESTRICTION);
+				
+				for(ProjectIdentification _projectBean : (List<ProjectIdentification>) map.get("rows")) {
+					if(hasSourceOss && hasNotificationOss && isNetworkRestriction) {
+						break;
+					}
+					
+					if(!hasNotificationOss) {
+						if(!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
+							hasNotificationOss = true;
+						}
+					}
+					
+					if(!hasSourceOss) {
+						if("11".equals(_projectBean.getObligationType())){
+							hasSourceOss = true;
+						}
+					}
+					
+					if(!isNetworkRestriction) {
+						if(_projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
+							isNetworkRestriction = true;
+						}
+					}
+				}
+			}
+
+			Project prjInfo = null;
+			
+			{
+				// ANDROID PROJECT인 경우
+				Project prjParam = new Project();
+				prjParam.setPrjId(project.getPrjId());
+				prjInfo = getProjectDetail(prjParam);
+				
+				if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
+						&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
+						&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
+					param = new ProjectIdentification();
+					param.setReferenceId(project.getPrjId());
+					param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+					map = getIdentificationGridList(param);
+
+					if (map != null && map.containsKey("mainData")
+							&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+						isAndroidModel = true;
+						T2CoProjectValidator pv = new T2CoProjectValidator();
+						pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+
+						pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+						pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+						T2CoValidationResult vr = pv.validate(new HashMap<>());
+						
+						// return validator result
+						if (!vr.isValid()) {
+//							return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
+							resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
+							return resultMap;
+						}
+					}
+				}
+			}
+			
+			if(CoConstDef.FLAG_YES.equals(prjInfo.getNetworkServerType())) {
+				if(!isNetworkRestriction) {
+					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
+					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
+					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+				}
+			} else {
+				if (isAndroidModel) {
+					project.setAndroidFlag(CoConstDef.FLAG_YES);
+				} else if (!hasNotificationOss) {
+					// Android model이 아니면서 bom 대상이 없는 경우
+					// package, distribute를 N/A 처리한다.
+					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
+					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
+					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+				}
+			}
+			
+			if(CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
+				if(!hasSourceOss) {
+					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
+					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
+					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+				}
+			}
+			
+			project.setModifier(project.getLoginUserName());
+			updateProjectIdentificationConfirm(project);
+			
+			// network server 이면서 notice 생성 대상이 없을 경우
+			if( hasNotificationOss
+					&& CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE,
+							prjInfo.getDistributionType())).trim().toUpperCase())
+					&& verificationService.checkNetworkServer(prjInfo.getPrjId()) ) {
+				project.setSkipPackageFlag(CoConstDef.FLAG_YES);
+				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
+				project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+				updateIdentificationConfirmSkipPackaing(project);
+				
+				hasNotificationOss = false;
+			}
+
+			// permissive로만 이루어져있고, notice type이 기본인 경우, 바로 packaging review상태로
+			// 변경한다.
+			if ((!isAndroidModel && !hasNotificationOss) 
+					|| (CoConstDef.FLAG_YES.equals(prjInfo.getNetworkServerType()) && !isNetworkRestriction) // Network service Only : yes 이지만 network restriction이 없는 case 
+					|| (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType()) && !hasSourceOss)) { // OSS Notice가 N/A이면서 packaging이 필요 없는 경우
+				// do nothing
+				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY;
+			} else {
+				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF;
+			}
+		} else if (!isEmpty(project.getCompleteYn())) {
+			// project complete 시
+			updateProjectMaster(project);
+			
+			String _tempComment = "";
+			
+			if(CoConstDef.FLAG_YES.equals(project.getCompleteYn())) {
+				_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED));
+				userComment = _tempComment + "<br />" + avoidNull(userComment);
+			}
+			
+			// complete log 추가
+			commentDiv = CoConstDef.CD_DTL_COMMENT_PROJECT_HIS;
+			status = CoConstDef.FLAG_YES.equals(project.getCompleteYn()) ? "Completed" : "Reopened";
+			
+			// complete mail 발송
+			mailType = CoConstDef.FLAG_YES.equals(project.getCompleteYn()) ? CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED : CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED;
+		} else if(!isEmpty(project.getDropYn())){
+			// project drop 시
+			updateProjectMaster(project);
+			
+			String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED));
+				userComment = _tempComment + "<br />" + avoidNull(userComment);
+			
+			// complete log 추가
+			commentDiv = CoConstDef.CD_DTL_COMMENT_PROJECT_HIS;
+			status = "Dropped";
+			
+			// complete mail 발송
+			mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED;
 		} else {
-			//다운로드 허용 플래그
-			project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
+			boolean ignoreValidation = CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus()) 
+					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(project.getVerificationStatus()) 
+					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getVerificationStatus());
+			boolean isIdentificationReject = false;
+			Project beforeInfo = getProjectDetail(project);
 			
-			// 프로젝트 상태 변경
+			// Identification
+			// default -> request
+			if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(project.getIdentificationStatus())
+					&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(beforeInfo.getIdentificationStatus())) {
+				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW;
+				
+				// Admin 사용자의 경우 오류가 있어도 request review 가능하도록 수정
+				if(CommonFunction.isAdmin()) {
+					ignoreValidation = true;
+				}
+			} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equals(project.getIdentificationStatus())) {
+				ignoreValidation = true;
+				isIdentificationReject = true;
+				
+				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(beforeInfo.getIdentificationStatus())) {
+					// self reject
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT;
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW
+						.equals(beforeInfo.getIdentificationStatus())) {
+					// reject by review
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT;
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM
+						.equals(beforeInfo.getIdentificationStatus())) {
+					// confirm to review
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF;
+				}
+			} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(project.getVerificationStatus()) // Packaging
+					&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(beforeInfo.getVerificationStatus())) {
+				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REQ_REVIEW;
+				//ignoreValidation = true;
+			} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equals(project.getVerificationStatus())) {
+				ignoreValidation = true;
+				
+				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(beforeInfo.getVerificationStatus())) {
+					// self reject
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_SELF_REJECT;
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(beforeInfo.getVerificationStatus())) {
+					// review -> reject
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REJECT;
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(beforeInfo.getVerificationStatus())) {
+					mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CANCELED_CONF;
+				}
+			}
+			
+			// 사용자가 reject하는 경우는 validation check 수행하지 않음
+			if(!ignoreValidation) {
+				// Identification Reqeust review인 경우, 필수 항목 체크 추가
+				Map<String, Object> map = null;
+				// confirm 시 다시 DB Data를 가져와서 체크한다.
+				ProjectIdentification param = new ProjectIdentification();
+				param.setReferenceId(project.getPrjId());
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setMerge(CoConstDef.FLAG_NO);
+				map = getIdentificationGridList(param);
+				
+				if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+					T2CoProjectValidator pv = new T2CoProjectValidator();
+					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+					pv.setValidLevel(pv.VALID_LEVEL_REQUEST);
+					pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+
+					T2CoValidationResult vr = pv.validate(new HashMap<>());
+					// return validator result
+					if (!vr.isValid()) {
+						if (!vr.isDiff()) {
+//							return makeJsonResponseHeader(false, null, vr.getValidMessageMap(), vr.getDiffMessageMap());
+							resultMap.put("diffMap", vr.getDiffMessageMap());
+						}
+//						return makeJsonResponseHeader(false, null, vr.getValidMessageMap());
+						resultMap.put("validMap", vr.getValidMessageMap());
+						return resultMap;
+					}
+				}
+				
+				Project prjInfo = null;
+				
+				{
+					// ANDROID PROJECT인 경우
+					Project prjParam = new Project();
+					prjParam.setPrjId(project.getPrjId());
+					prjInfo = getProjectDetail(prjParam);
+					
+					if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
+							&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
+							&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
+						param = new ProjectIdentification();
+						param.setReferenceId(project.getPrjId());
+						param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+						map = getIdentificationGridList(param);
+
+						if (map != null && map.containsKey("mainData")
+								&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+							T2CoProjectValidator pv = new T2CoProjectValidator();
+							pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+
+							pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+							pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+							T2CoValidationResult vr = pv.validate(new HashMap<>());
+							
+							// return validator result
+							if (!vr.isValid()) {
+//								return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
+								resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
+								return resultMap;
+							}
+						}
+					}
+				}			
+			}
+			
+			project.setModifier(project.getLoginUserName());
+			project.setModifiedDate(project.getCreatedDate());
+			
+			if(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus())) {
+				checkProjectReviewer(project);
+			}
+			
 			projectMapper.updateProjectMaster(project);
 		}
 		
-		if(mailBean != null) {
-			try {
-				CoMailManager.getInstance().sendMail(mailBean);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
+		resultMap.put("mailType", mailType);
+		resultMap.put("userComment", userComment);
+		resultMap.put("commentDiv", commentDiv);
+		resultMap.put("status", status);
+		
+		return resultMap;
 	}
 	
 	@Override
@@ -2586,6 +2899,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void updateProjectMaster(Project project) {
 		projectMapper.updateProjectMaster(project);
 		
+		if(CoConstDef.FLAG_YES.equals(project.getCompleteYn())) {
+			projectMapper.updateProjectStatusWithComplete(project);
+		}
 	}
 
 	@Override
@@ -2872,55 +3188,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		map.put("rows", list);
 		
 		return map; 
-	}
-
-	@Override
-	public void updateProjectAllowDownloadBitFlag(Project project) {
-		project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
-		
-		projectMapper.updateProjectAllowDownloadBitFlag(project);
-	}
-
-	public int allowDownloadMultiFlagToBitFlag(Project project) {
-		int bitFlag = 1;
-		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeHTMLYn())) {
-			bitFlag |= CoConstDef.FLAG_A;
-		}
-			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
-			bitFlag |= CoConstDef.FLAG_B;
-		}
-		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
-			bitFlag |= CoConstDef.FLAG_C;
-		}
-			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
-			bitFlag |= CoConstDef.FLAG_D;
-		}
-			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
-			bitFlag |= CoConstDef.FLAG_E;
-		}
-			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
-			bitFlag |= CoConstDef.FLAG_F;
-		}
-			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
-			bitFlag |= CoConstDef.FLAG_G;
-		}
-
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
-			bitFlag |= CoConstDef.FLAG_H;
-		}
-
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
-			bitFlag |= CoConstDef.FLAG_I;
-		}
-		
-		return bitFlag;
 	}
 	
 	@Override
@@ -3414,8 +3681,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for(ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
+			int isAdminCheck = projectMapper.selectAdminCheckCnt(bean);
 			
-			if(!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName)) {
+			if(!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName) && isAdminCheck < 1) {
 				ossCheckParam.add(_ossName);
 			}
 		}
@@ -4387,5 +4655,50 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public void deleteStatisticsMostUsedInfo(Project project) {
 		projectMapper.deleteStatisticsMostUsedInfo(project);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	@Transactional
+	public void addPartnerData(Project project) {
+		{
+			Project projectSubStatus = new Project();
+			projectSubStatus.setPrjId(project.getPrjId());
+			projectSubStatus.setIdentificationSubStatusPartner(CoConstDef.FLAG_YES);
+			
+			// 최초 저장시에만 상태 변경
+			// row count가 0이어도 사용자가 한번이라도 저장하면 progress 상태로 인지되어야함
+			if(isEmpty(project.getIdentificationStatus())) {
+				projectSubStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+			}
+			
+			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
+			projectMapper.updateProjectMaster(projectSubStatus);
+		}
+		
+		OssComponents component = new OssComponents();
+		component.setReferenceId(project.getRefPartnerId());
+		component.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		
+		// select partner Data
+		Map<String, Object> resultMap = getPartnerOssList(component);
+		List<OssComponents> partnerList = (List<OssComponents>) resultMap.get("rows");
+		
+		// Identification > 3rd Party Tab Insert
+		for(OssComponents bean : partnerList) {
+			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			bean.setReferenceId(project.getPrjId());
+			bean.setRefPartnerId(project.getRefPartnerId());
+			
+			projectMapper.insertOssComponentsCopy(bean);
+			projectMapper.insertOssComponentsLicenseCopy(bean);
+		}
+		
+		PartnerMaster partnerBean = new PartnerMaster();
+		partnerBean.setPrjId(project.getPrjId());
+		partnerBean.setPartnerId(project.getRefPartnerId());
+		
+		// project - partner Map Insert
+		partnerMapper.insertPartnerMapList(partnerBean);
 	}
 }

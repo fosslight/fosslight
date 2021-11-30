@@ -57,7 +57,9 @@ public interface ProjectService extends HistoryConfig{
 
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification);
 	
-	public void updateProjectStatus(Project project);
+	public void checkProjectReviewer(Project project);
+	
+	public Map<String, Object> updateProjectStatus(Project project) throws Exception;
 	
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom);
 	
@@ -149,8 +151,6 @@ public interface ProjectService extends HistoryConfig{
 	void insertAddList(List<Project> project);
 	
 	public OssNotice setCheckNotice(Project project);
-	
-	public void updateProjectAllowDownloadBitFlag(Project project);
 
 	Map<String, Object> identificationSubGrid(ProjectIdentification identification);
 	
@@ -167,6 +167,8 @@ public interface ProjectService extends HistoryConfig{
 	public List<Map<String, String>> getBomCompare(List<ProjectIdentification> beforeBomList, List<ProjectIdentification> afterBomList, String flag) throws Exception;
 
 	public void deleteStatisticsMostUsedInfo(Project project);
+	
+	public void addPartnerData(Project project);
 }
 
 

@@ -602,7 +602,7 @@ public class VerificationController extends CoTopComponent {
 		project.setAllowDownloadSPDXJsonYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXJsonYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXYamlYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXYamlYn 	 : CoConstDef.FLAG_NO);
 
-		projectService.updateProjectAllowDownloadBitFlag(project);
+		verificationService.updateProjectAllowDownloadBitFlag(project);
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
 	}

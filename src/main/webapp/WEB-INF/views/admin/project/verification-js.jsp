@@ -1801,10 +1801,12 @@
 			}).submit();
 		},
 		downloadSpdxSpreadSheetExcel : function(){
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
 			$.ajax({
 				type: "POST",
 				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdx", "parameter":'${project.prjId}'}),
+				data: JSON.stringify({"type":"spdx", "prjId":'${project.prjId}', "dataStr":dataStr}),
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',
@@ -1822,10 +1824,12 @@
 		},
 		
 		downloadSpdxRdf : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
 			$.ajax({
 				type: "POST",
 				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxRdf", "parameter":'${project.prjId}'}),
+				data: JSON.stringify({"type":"spdxRdf", "prjId":'${project.prjId}', "dataStr":dataStr}),
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',
@@ -1843,10 +1847,12 @@
 		},
 		
 		downloadSpdxTag : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
 			$.ajax({
 				type: "POST",				   
 				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxTag", "parameter":'${project.prjId}'}),
+				data: JSON.stringify({"type":"spdxTag", "prjId":'${project.prjId}', "dataStr":dataStr}),
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',
@@ -1864,10 +1870,12 @@
 		},
 
 		downloadSpdxJson : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
 			$.ajax({
 				type: "POST",
 				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxJson", "parameter":'${project.prjId}'}),
+				data: JSON.stringify({"type":"spdxJson", "prjId":'${project.prjId}', "dataStr":dataStr}),
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',
@@ -1885,10 +1893,12 @@
 		},
 
 		downloadSpdxYaml : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
 			$.ajax({
 				type: "POST",
 				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxYaml", "parameter":'${project.prjId}'}),
+				data: JSON.stringify({"type":"spdxYaml", "prjId":'${project.prjId}', "dataStr":dataStr}),
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',

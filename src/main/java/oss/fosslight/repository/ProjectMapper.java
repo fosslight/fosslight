@@ -18,6 +18,7 @@ import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.OssNotice;
+import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
@@ -327,4 +328,8 @@ public interface ProjectMapper {
 	void insertStatisticsMostUsedLicenseInfo(Project project);
 
 	void deleteStatisticsMostUsedInfo(Project project);
+	
+	int selectAdminCheckCnt(ProjectIdentification projectIdentification);
+	
+	List<Project> selectPartnerRefPrjList(PartnerMaster partner);
 }
