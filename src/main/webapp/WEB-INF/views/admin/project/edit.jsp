@@ -60,6 +60,7 @@
 				<!-- 2018-07-19 choye 추가 -->
 				<input type="hidden" name="commId" />
 				<input type="hidden" name="statusRequestYn" />
+				<input type="hidden" id="refPartnerId" name="refPartnerId" value="${project.refPartnerId}" />
 				<table class="dCase">
 					<colgroup>
 						<col width="188" />

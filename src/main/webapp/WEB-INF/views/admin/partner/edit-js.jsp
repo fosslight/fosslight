@@ -16,6 +16,7 @@ var delDocumentsFile = [];
 var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
 var partnerData = ${empty detailJson ? '{}' : detailJson};
+var prjList = ${empty prjList ? '{}' : prjList};
 var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 	$(document).ready(function () {
@@ -67,6 +68,46 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 		if(userRole == "ROLE_ADMIN" && '${detail.partnerId}' != ""){
 			$("input[name=creatorNm]").val('${detail.creatorName }');
 		}
+		
+		$("#_projectList").jqGrid({
+			datatype: 'local',
+			data: prjList,
+			colNames:['ID','Project Name', 'Project Version'],
+			colModel:[
+				{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
+				{name:'prjName',index:'prjName', width:400, sortable:false},
+				{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"}
+			],
+			rowNum:100,
+			viewrecords: true,
+			height: 'auto',
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
+				if("Y" != rowData.oldSystemFlag) {
+					createTabInFrame(rowData['prjId']+'_Project','#<c:url value="/project/edit/'+rowData['prjId']+'"/>');
+				}
+			},
+			loadComplete: function(data) {
+				if(data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							if(rowData.oldSystemFlag == "Y") {
+								className = className + ' excludeRow';
+							}
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+					}
+				}
+			}
+		});
 	});
 	var commentTemp = '';
 	var modifyCommentId = '${detail.comment}';
@@ -449,6 +490,15 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				} else {
 					$("#emailTemp").val(domain).hide();
 				}
+			});
+
+			//프로젝트 리스트 더보기
+			$("#listMore").on("click",function(){
+				createTabInFrameWithCondition("Project List", '#<c:url value="/project/list"/>', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
+			});
+
+			$("#createProject").on("click", function(){
+				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', "${detail.partnerId}||${detail.partnerName}||${detail.softwareName}");
 			});
 		},
 		tabInit: function(){

@@ -1203,7 +1203,6 @@
 		  AND  A.COMPONENT_ID = #{componentId}
 		  AND  A.LICENSE_ID = #{licenseId}
 		  AND  A.LICENSE_NAME = #{licenseName}
-		  AND  A.LICENSE_TEXT = #{licenseText}
 		  AND  A.COPYRIGHT_TEXT = #{copyrightText}
 	</select>	
 	
@@ -1214,7 +1213,6 @@
 			COMPONENT_ID
 			, LICENSE_ID
 			, LICENSE_NAME
-			, LICENSE_TEXT
 			, COPYRIGHT_TEXT
 			, EXCLUDE_YN
 			)
@@ -1223,9 +1221,8 @@
 			#{componentId}
 			, #{licenseId}
 			, TRIM(#{licenseName})
-			, #{licenseText}
 			, #{copyrightText}
-			, #{excludeYn}
+			, 'N'
 			)
 	</insert>
 	
@@ -2023,7 +2020,6 @@
 			COMPONENT_ID
 			, LICENSE_ID
 			, LICENSE_NAME
-			, LICENSE_TEXT
 			, COPYRIGHT_TEXT
 			, EXCLUDE_YN
 			)
@@ -2032,9 +2028,8 @@
 			#{componentId}
 			, #{licenseId}
 			, #{licenseName}
-			, #{licenseText}
 			, #{copyrightText}
-			, #{excludeYn}
+			, 'N'
 			)
 	</insert>
 	
@@ -2649,14 +2644,6 @@
 			ORDER BY IFNULL(T1.EXCLUDE_YN, 'N') ASC, GROUP_CONCAT(T2.LICENSE_NAME ORDER BY T2.LICENSE_ID DESC SEPARATOR ',') DESC
 		</if>
 	</if>
-	<if test="sortField eq 'licenseText'">
-		<if test="sortOrder eq 'asc'">
-			ORDER BY IFNULL(T1.EXCLUDE_YN, 'N') ASC, GROUP_CONCAT(T2.LICENSE_TEXT ORDER BY T2.LICENSE_ID DESC SEPARATOR ',') ASC
-		</if>
-		<if test="sortOrder eq 'desc'">
-			ORDER BY IFNULL(T1.EXCLUDE_YN, 'N') ASC, GROUP_CONCAT(T2.LICENSE_TEXT ORDER BY T2.LICENSE_ID DESC SEPARATOR ',') DESC
-		</if>
-	</if>
 	<if test="sortField eq 'copyrightText'">
 		<if test="sortOrder eq 'asc'">
 			ORDER BY IFNULL(T1.EXCLUDE_YN, 'N') ASC, GROUP_CONCAT(T2.COPYRIGHT_TEXT ORDER BY T2.LICENSE_ID DESC SEPARATOR ',') ASC
@@ -2706,13 +2693,15 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
+					, EXCLUDE_YN
 					)
 			SELECT
 					#{componentId}
 					, LICENSE_ID
 					, LICENSE_NAME
 					, LICENSE_TEXT
-					, COPYRIGHT_TEXT	
+					, COPYRIGHT_TEXT
+					, 'N' AS EXCLUDE_YN	
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 
@@ -2909,7 +2898,7 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
-					, EXCLUDE_YN
+					, 'N' AS EXCLUDE_YN
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 
@@ -4029,4 +4018,46 @@
 		DELETE FROM STATISTICS_MOSTUSED
 		WHERE PRJ_ID = #{prjId}
 	</delete>
+	
+	<select id="selectAdminCheckCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
+		SELECT COUNT(1) AS CNT 
+		  FROM OSS_COMPONENTS 
+		 WHERE REFERENCE_ID = #{referenceId}
+		   AND REFERENCE_DIV = '13' 
+		   AND (
+				 REF_COMPONENT_ID = #{componentId}
+		    	 OR (
+				  	  	(
+				  	  		OSS_NAME IN (SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossName})
+				  	  		OR OSS_NAME = #{ossName}
+				  	  	)
+						AND OSS_VERSION = #{ossVersion} 
+						AND REF_DIV = #{referenceDiv}
+				 	)
+		   	   )
+		   AND ADMIN_CHECK_YN = 'Y'
+	</select>
+	
+	<select id="selectPartnerRefPrjList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.Project">
+		SELECT PM.PRJ_ID
+			 , PM.PRJ_NAME
+			 , PM.PRJ_VERSION
+			 , PM.MODIFIED_DATE
+		  FROM PROJECT_MASTER PM
+		 INNER JOIN PROJECT_PARTNER_MAP PP
+		    ON PM.PRJ_ID = PP.PRJ_ID
+		 WHERE PP.PARTNER_ID = #{partnerId}
+		 <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+		   AND (
+				PM.CREATOR = #{loginUserName} 
+				OR EXISTS (
+							SELECT 1
+						  	  FROM PROJECT_WATCHER PW 
+						 	 INNER JOIN T2_USERS USR ON USR.USE_YN = 'Y' AND USR.USER_ID = #{loginUserName}
+						 	 WHERE PW.PRJ_ID = PM.PRJ_ID AND (PW.USER_ID = USR.USER_ID OR (PW.USER_ID = 'all' AND PW.DIVISION = USR.DIVISION))
+				)
+			)
+		 </if>
+		ORDER BY PM.MODIFIED_DATE DESC LIMIT 100
+	</select>
 </mapper>

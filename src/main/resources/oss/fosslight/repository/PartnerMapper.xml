@@ -699,16 +699,16 @@
 		COMPONENT_ID
 		, LICENSE_ID
 		, LICENSE_NAME
-		, LICENSE_TEXT
 		, COPYRIGHT_TEXT
+		, EXCLUDE_YN
 		)
 		VALUES
 		(
 		#{componentId}
 		, #{licenseId}
 		, #{licenseName}
-		, #{licenseText}
 		, #{copyrightText}
+		, 'N'
 		)
 	</insert>
 	
@@ -1706,6 +1706,4 @@
 		  FROM OSS_ANALYSIS_STATUS
 		 WHERE PRJ_ID = #{partnerId}
 	 </select>
-
-
 </mapper>

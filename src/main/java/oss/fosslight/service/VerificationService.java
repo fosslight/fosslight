@@ -77,4 +77,6 @@ public interface VerificationService {
 	List<OssComponents> setMergeGridData(List<OssComponents> gridData);
 
 	void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception;
+	
+	public void updateProjectAllowDownloadBitFlag(Project project);
 }

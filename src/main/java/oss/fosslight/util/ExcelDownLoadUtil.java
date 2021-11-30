@@ -1926,7 +1926,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	private static String getVerificationSPDX_SpreadSheetExcelPost(String prjId) throws IOException {
+	private static String getVerificationSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
 
 		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
@@ -1938,6 +1938,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
+		
+		Type ossNoticeType = new TypeToken<OssNotice>(){}.getType();
+		
+		OssNotice ossNotice = (OssNotice) fromJson(dataStr, ossNoticeType);
+		ossNotice.setFileType("text");
+		
+		String prjId = ossNotice.getPrjId();
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
@@ -1959,9 +1966,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 			T2Users userInfo = new T2Users();
 			userInfo.setUserId(projectInfo.getCreator());
-			
-			OssNotice ossNotice = verificationService.selectOssNoticeOne(prjId);
-			ossNotice.setFileType("text");
 			
 			Map<String, Object> packageInfo = verificationService.getNoticeHtmlInfo(ossNotice);
 			
@@ -2031,6 +2035,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
 				
+				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
+				
 				// permissive oss와 copyleft oss를 병합
 				if(sourceList != null && !sourceList.isEmpty()) {
 					noticeList.addAll(sourceList);
@@ -2070,7 +2076,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
-					cellPackageVersion.setCellValue(avoidNull(bean.getOssVersion()));
+					cellPackageVersion.setCellValue(hideOssVersionFlag ? "" : avoidNull(bean.getOssVersion()));
 					
 					// Package FileName
 					cellIdx++;
@@ -2199,15 +2205,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					cellIdx++;
 					
 					
-					// Attribution Info 
+					// Attribution Text
 					Cell attributionInfo = getCell(row, cellIdx); cellIdx++;
-					attributionInfo.setCellValue(attributionText);
+					attributionInfo.setCellValue(hideOssVersionFlag ? bean.getOssAttribution().replaceAll("<br>", "\n") : attributionText);
 					
 					// Files Analyzed
 					Cell filesAnalyzed = getCell(row, cellIdx); cellIdx++;
 					filesAnalyzed.setCellValue("false");
-					
-					// Files Analyzed
 					
 					// User Defined Columns...
 					
