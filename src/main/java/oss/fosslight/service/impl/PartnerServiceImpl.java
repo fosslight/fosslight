@@ -183,6 +183,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Transactional
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
 	public void registPartnerMaster(PartnerMaster partnerMaster, List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense) {
+		PartnerMaster beforePartner =  partnerMapper.selectPartnerMaster(partnerMaster);
+		
 		//파트너 마스터 테이블
 		if(partnerMaster.getPartnerId() != null) {
 			// admin이 아니라면 creator를 변경하지 않는다.
@@ -206,11 +208,30 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		if(delDocumentsFile.length > 0){
 			for(String fileSeq : delDocumentsFile){
+				if(!isEmpty(fileSeq)) {
+					T2File delFile = new T2File();
+					delFile.setFileSeq(fileSeq);
+					delFile.setGubn("A");
+					
+					fileMapper.updateFileDelYnKessan(delFile);
+					fileService.deletePhysicalFile(delFile, "PARTNER");
+				}
+			}
+		}
+		
+		if(!isEmpty(beforePartner.getConfirmationFileId())) {
+			if(partnerMaster.getConfirmationFileId() == null || !partnerMaster.getConfirmationFileId().equals(beforePartner.getConfirmationFileId())) {
 				T2File delFile = new T2File();
-				delFile.setFileSeq(fileSeq);
-				delFile.setGubn("A");
-				
-				fileMapper.updateFileDelYnKessan(delFile);
+				delFile.setFileSeq(beforePartner.getConfirmationFileId());
+				fileService.deletePhysicalFile(delFile, "PARTNER");
+			}
+		}
+		
+		if(!isEmpty(beforePartner.getOssFileId())) {
+			if(partnerMaster.getOssFileId() == null || !partnerMaster.getOssFileId().equals(beforePartner.getOssFileId())) {
+				T2File delFile = new T2File();
+				delFile.setFileSeq(beforePartner.getOssFileId());
+				fileService.deletePhysicalFile(delFile, "PARTNER");
 			}
 		}
 		

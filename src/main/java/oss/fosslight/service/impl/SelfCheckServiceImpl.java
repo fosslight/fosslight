@@ -569,6 +569,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			if(project.getCsvFile() != null) {
 				for (int i = 0; i < project.getCsvFile().size(); i++) {
+					fileService.deletePhysicalFile(project.getCsvFile().get(i), "SELF");
 					selfCheckMapper.deleteFileBySeq(project.getCsvFile().get(i));
 				}		
 				
