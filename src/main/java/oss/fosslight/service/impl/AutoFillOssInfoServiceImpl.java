@@ -10,11 +10,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	// Service
 	@Autowired CommentService commentService;
 	@Autowired WebClient webClient;
+	@Autowired MessageSource messageSource;
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -149,8 +153,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			checkedLicense = combineOssLicenses(prjOssLicenses);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
+				String evidence = getMessage("check.evidence.exist.nameAndVersion");
 				oss.setCheckOssList("Y");
 				oss.setCheckLicense(checkedLicense);
+				oss.setCheckedEvidence(evidence);
+				oss.setCheckedEvidenceType("DB");
 				result.add(oss);
 				continue;
 			}
@@ -164,8 +171,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			checkedLicense = combineOssLicenses(prjOssLicenses);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
+				String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
 				oss.setCheckOssList("Y");
 				oss.setCheckLicense(checkedLicense);
+				oss.setCheckedEvidence(evidence);
+				oss.setCheckedEvidenceType("DB");
 				result.add(oss);
 				continue;
 			}
@@ -175,8 +185,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			checkedLicense = combineOssLicenses(prjOssLicenses);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense) && !isEachOssVersionDiff(prjOssLicenses)) {
+				String evidence = getMessage("check.evidence.exist.downloadLocation");
 				oss.setCheckOssList("Y");
 				oss.setCheckLicense(checkedLicense);
+				oss.setCheckedEvidence(evidence);
+				oss.setCheckedEvidenceType("DB");
 				result.add(oss);
 				continue;
 			}
@@ -202,8 +215,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				checkedLicense = requestGithubLicenseApi(requestUri);
 
 				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+					String evidence = getMessage("check.evidence.github.downloadLocation");
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("GH");
 					result.add(oss);
 					continue;
 				}
@@ -231,8 +247,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				checkedLicense = requestClearlyDefinedLicenseApi(requestUri);
 
 				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+					String evidence = getMessage("check.evidence.clearlyDefined.downloadLocationAndVersion");
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("CD");
 					result.add(oss);
 					continue;
 				}
@@ -244,7 +263,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 
 		/* grouping same oss */
-		final Comparator<ProjectIdentification> comp = (p1, p2) -> Integer.compare(StringUtil.countMatches(p1.getCheckLicense(), ","), StringUtil.countMatches(p2.getCheckLicense(), ","));
+		final Comparator<ProjectIdentification> comp = (p1, p2) -> p1.getDownloadLocation().compareTo(p2.getDownloadLocation());
 		
 		// oss name, oss version, oss license, checked license는 unique하게 출력
 		List<ProjectIdentification> sortedData = result.stream()

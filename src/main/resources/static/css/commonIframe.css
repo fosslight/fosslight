@@ -319,6 +319,11 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .iconSt.drop {background-color:#a39d9b;background-position:-155px -225px;} /* 2021-01-26 */
 /* end 2018-01-16 */
 
+.evidenceIcon {display:inline-block;width:16px;height:16px;line-height:1000%;font-size:0;overflow:hidden;border-radius:20px;background: url("../images/img_icon_evidence.png?v=20180612") no-repeat;}
+.evidenceIcon.github {background-color:#C56272; background-position:-4px -1px}
+.evidenceIcon.existdb {background-color:#9B59B6;background-position:-28px -1px;}
+.evidenceIcon.clearlydefined {background-color:#0064B5;background-position:-52px -1px}
+
 .iconReport {display:inline-block;margin-left:3px;width:20px;height:20px;font-size:0;background: url("../images/report-icon-32.png") center top no-repeat;}
 
 /* 2017-06-07 */

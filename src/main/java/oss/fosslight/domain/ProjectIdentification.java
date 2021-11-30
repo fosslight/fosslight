@@ -55,6 +55,10 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The check license */
 	private String checkLicense;
 
+	/** The check license and name evidence */
+	private String checkedEvidence;
+	private String checkedEvidenceType;
+
 	/** The oss name exists yn. */
 	private String ossNameExistsYn;
 	
@@ -1959,4 +1963,20 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	public void setAttribution(String attribution) {
 		this.attribution = attribution;
 	}
+
+	public String getCheckedEvidenceType() {
+		return checkedEvidenceType;
+	}
+
+	public void setCheckedEvidenceType(String checkedEvidenceType) {
+		this.checkedEvidenceType = checkedEvidenceType;
+	}
+
+	public String getCheckedEvidence() {
+		return checkedEvidence;
+	}
+
+	public void setCheckedEvidence(String checkedEvidence) {
+		this.checkedEvidence = checkedEvidence;
+    }
 }
