@@ -54,7 +54,7 @@
 											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="external${code[0]}" <c:if test="${code[3] eq 'Y'}">checked</c:if> /></dd>
 										</c:when>
 										<c:otherwise>
-											<dd><label>${code[1]}</label><input type="text" id="external${code[0]}" value="${code[0] eq '100' ? '' : code[3]}"/></dd>
+											<dd><label>${code[1]}</label><input type="text" id="external${code[0]}" value="${code[3]}"/></dd>
 										</c:otherwise>
 									</c:choose>
 								</c:forEach>

@@ -143,10 +143,6 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_HTML				= "100";
 	public static final String CD_DTL_NOTICE_TEXT				= "101";
 	public static final String CD_DTL_NOTICE_SPDX				= "102";	
-
-	// External Service Setting
-	public static final String CD_EXTERNAL_SERVICE_SETTING		= "930";
-	public static final String CD_DTL_GITHUB_TOKEN  			= "100";
 	
 	/** System Setting Code List End */
 	
@@ -667,10 +663,7 @@ public class CoConstDef {
 	public static final String CD_LICENSE_NETWORK_RESTRICTION					= "2";
 	
 	/** 사용자별 Default Tab Menu 코드 */
-	public static final String CD_DEFAULT_TAB = "701";
-
-	/** 사용자별 Default Locale List 코드 **/
-	public static final String CD_DEFAULT_LOCALE = "704";
+	public static final String CD_DEFAULT_TAB 									= "701";
 	
 	/** marquee contents */
 	public static final String CD_MARQUEE										= "702";
@@ -680,6 +673,13 @@ public class CoConstDef {
 	public static final String CD_REGIST_DOMAIN									= "703";
 	public static final String CD_DTL_DEFAULT_DOMAIN							= "100";
 	public static final String CD_DTL_ECT_DOMAIN								= "ETC";
+
+	/** 사용자별 Default Locale List 코드 **/
+	public static final String CD_DEFAULT_LOCALE 								= "704";
+
+	/** External Service Setting */
+	public static final String CD_EXTERNAL_SERVICE_SETTING						= "705";
+	public static final String CD_DTL_GITHUB_TOKEN  							= "100";
 	
 	// -------------- 서브메뉴 대표 코드
 	/** 대메뉴 */

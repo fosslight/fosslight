@@ -371,12 +371,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 	@Override
 	public Mono<Object> requestGithubLicense(String location) {
-		String githubToken = "";
-		try {
-			githubToken = CryptUtil.decryptAES256(CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_SERVICE_SETTING, CoConstDef.CD_DTL_GITHUB_TOKEN), CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
-		} catch(Exception e) {
-			log.error(e.getMessage());		
-		}
+		String githubToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_SERVICE_SETTING, CoConstDef.CD_DTL_GITHUB_TOKEN);
 
 		return webClient.get()
 			.uri(location)
