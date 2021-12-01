@@ -144,7 +144,7 @@ public class CoCode {
     public int getCdDtlPrior(String s)
     {
         CoCodeDtl codedtl = (CoCodeDtl)codeDtlsHash.get(s);
-        return ((codedtl != null && CoConstDef.FLAG_YES.equals(codedtl.useYn)) ? Integer.valueOf(codedtl.cdOrder) : null).intValue();
+        return ((codedtl != null && CoConstDef.FLAG_YES.equals(codedtl.useYn)) ? Integer.valueOf(codedtl.cdOrder).intValue() : null);
     }
 
     /**
