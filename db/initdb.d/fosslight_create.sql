@@ -1795,6 +1795,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('702', 'marguee Contents', '', 'N'),
 	('703', 'regist Domain', '', 'N'),
 	('704', 'Support Locale List', '', 'N'),
+	('705', 'External Service Setting', 'System Detail Setting Code', 'N'),
 	('901', 'Excel Download/Export', 'Maximum rows that can be exported when downloading Excel file or Export at List', 'N'),
 	('903', 'checkOssNameUrl', 'Managing information to find OSS information from Download Location', 'N'),
 	('904', 'check License Text Server Info', '', 'N'),
@@ -1818,7 +1819,6 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('924', 'Compliance Status Detail Setting', 'System Detail Setting Code', 'Y'),
 	('926', 'System Detail Setting', 'System Detail Setting Code', 'Y'),
 	('927', 'Notice Info', '', 'Y'),
-	('930', 'External Service Setting', 'System Detail Setting Code', 'Y'),
 	('990', 'System initialize flag', '', 'Y');
 /*!40000 ALTER TABLE `T2_CODE` ENABLE KEYS */;
 
@@ -2270,6 +2270,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('702', '100', 'contents', '', '', 1, 'Y'),
 	('704', '001', 'English', '', 'en_US', 1, 'Y'),
 	('704', '002', '한국어', '', 'ko_KR', 2, 'Y'),
+	('705', '100', 'Github Token', '', 'github token', 1, 'Y'),
 	('901', '100', 'MaxRowCount', '', '5000', 1, 'Y'),
 	('903', '001', 'github.com', '', 'github url', 1, 'Y'),
 	('903', '002', 'www.npmjs.com/package/', '', 'npm url', 2, 'Y'),
@@ -2342,7 +2343,6 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('927', '100', 'HTML', '', 'Y', 1, 'Y'),
 	('927', '101', 'TEXT', '', 'Y', 2, 'Y'),
 	('927', '102', 'SPDX', '', 'Y', 3, 'Y'),
-	('930', '100', 'Github Token', '', 'github token', 1, 'Y'),
 	('990', '100', 'N', '', 'NVD Data Feed initialize flag', 1, 'Y');
 /*!40000 ALTER TABLE `T2_CODE_DTL` ENABLE KEYS */;
 
