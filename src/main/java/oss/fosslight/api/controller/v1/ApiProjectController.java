@@ -392,6 +392,7 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
 			if(searchFlag) {
+				apiProjectService.registBom(prjId, "Y");
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				fileInfo = fileService.selectFileInfo(downloadId);
 			}
@@ -1069,15 +1070,19 @@ public class ApiProjectController extends CoTopComponent {
 		return responseService.getSingleResult(resultMap);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@PostMapping(value = {Url.API.FOSSLIGHT_API_PACKAGE_UPLOAD})
-	public void ossReportAndroid(
+	public CommonResult ossReportAndroid(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile){
+    		@ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
+    		@ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag){
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token); // token이 정상적인 값인지 확인 
 		Map<String, Object> paramMap = new HashMap<>();
@@ -1089,14 +1094,21 @@ public class ApiProjectController extends CoTopComponent {
 		
 		boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 		String errorMsg = "";
+		String afterFileSeq = "";
+		boolean uploadFlag = false;
 		
 		if(searchFlag) {
-			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
-			UploadFile packageFileBean = apiFileService.uploadFile(packageFile, filePath); // packagingFile 등록
 			Map<String, Object> result = apiProjectService.selectVerificationCheck(prjId);
-			
 			String useYn = (String) result.get("useYn");
 			String packageFileSeq = (String) result.get("packageFileSeq").toString();
+						
+			if(CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "Up to 3 packaging files can be uploaded.");
+			}
+			
+			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
+			UploadFile packageFileBean = apiFileService.uploadFile(packageFile, filePath); // packagingFile 등록
+			afterFileSeq = packageFileBean.getRegistSeq();
 			
 			if(CoConstDef.FLAG_YES.equals(useYn) && CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT >= Integer.parseInt(packageFileSeq)) {
 				// packaging File comment
@@ -1115,11 +1127,10 @@ public class ApiProjectController extends CoTopComponent {
 				commentService.registComment(commHisBean);
 				
 				errorMsg = null; // 정상적으로 처리됨.
+				uploadFlag = true;
 			} else {
 				if(!CoConstDef.FLAG_YES.equals(useYn)) {
 					errorMsg = "delete project"; // 삭제된 project
-				}else if(CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
-					errorMsg = "package File overflow"; // 이미 packaging file이 3개가 등록이 된 상태.
 				}
 			}
 		} else {
@@ -1141,5 +1152,68 @@ public class ApiProjectController extends CoTopComponent {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+		
+		// after upload complete, verify
+		if ("Y".equals(verifyFlag) && uploadFlag) {
+			try {
+				Map<String, Object> file = new HashMap<>();
+				
+				List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
+				Map<String, Object> map = new HashMap<String, Object>();
+				Map<String, Object> resMap = null;
+				
+				List<String> fileSeqs = apiProjectService.getPackageFileList(prjId);
+								
+				map.put("prjId", prjId);
+				map.put("fileSeqs", fileSeqs);
+				
+				String packagingComment = apiProjectService.setClearFiles(map);
+				map.put("packagingComment", packagingComment);
+				
+				Map<String, Object> project = new HashMap<>();
+				project.put("prjId", prjId);
+				
+				List<Map<String, Object>> list = apiProjectService.getVerifyOssList(project);
+				list = apiProjectService.serMergeGridData(list);
+				
+				List<String> filePaths = new ArrayList<String>();
+				List<String> componentsList = new ArrayList<String>();
+				
+				for (Map<String, Object> ossComponents : list) {
+					componentsList.add(Integer.toString((int) ossComponents.get("componentId")));
+					filePaths.add((String) ossComponents.get("filePath"));
+				}
+				
+				map.put("gridFilePaths", filePaths);
+				map.put("gridComponentIds", componentsList);
+				
+				boolean isChangedPackageFile = apiProjectService.getChangedPackageFile(prjId, fileSeqs);
+				int seq = 1;
+				
+				map.put("packagingFileIdx", seq);
+				map.put("isChangedPackageFile", isChangedPackageFile);
+				
+				for (String fileSeq : fileSeqs) {
+					map.put("fileSeq", fileSeq);
+					map.put("packagingFileIdx", seq++);
+					map.put("isChangedPackageFile", isChangedPackageFile);
+					result.add(apiProjectService.processVerification(map, file, project));
+				}
+				
+				resMap = result.get(0);
+				
+				if(fileSeqs.size() > 1){
+					resMap.put("verifyValid", result.get(result.size()-1).get("verifyValid"));
+					resMap.put("fileCounts", result.get(result.size()-1).get("fileCounts"));
+				}
+				
+				apiProjectService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));
+				apiProjectService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
+			}catch(Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+		
+		return responseService.getSingleResult(resultMap);
 	}
 }

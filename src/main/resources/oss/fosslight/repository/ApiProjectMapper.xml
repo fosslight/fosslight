@@ -450,12 +450,643 @@
 		ORDER BY LICENSE_TYPE_IDX, OSS_NAME, OSS_VERSION DESC, LICENSE_NAME, MERGE_ORDER
 	</select>
 	
-	<select id="selectBomLicense" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+	<select id="selectBomLicense" parameterType="String" resultType="hashMap">
+		<!-- 
 		SELECT
 			*
 		FROM
 			OSS_COMPONENTS_LICENSE
 		WHERE COMPONENT_ID = #{componentId}
 		  AND IFNULL(EXCLUDE_YN, 'N') != 'Y'
+		-->  
+		SELECT COMPONENT_LICENSE_ID as componentLicenseId
+			 , COMPONENT_ID as componentId
+			 , LICENSE_ID as licenseId
+			 , LICENSE_NAME as licenseName
+			 , LICENSE_TEXT as licenseText
+			 , COPYRIGHT_TEXT as copyrightText
+			 , EXCLUDE_YN as excludeYn
+		FROM
+			OSS_COMPONENTS_LICENSE
+		WHERE COMPONENT_ID = #{componentId}
+		  AND IFNULL(EXCLUDE_YN, 'N') != 'Y'
 	</select>
+	
+	<select id="getLicenseInfoInit" resultType="hashMap">
+		<!-- 
+		SELECT 
+				T1.LICENSE_ID
+				, T1.LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS LICENSE_NICKNAME_STR
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1
+			WHERE T1.USE_YN = 'Y'
+		-->	
+		SELECT 
+				T1.LICENSE_ID as licenseId
+				, T1.LICENSE_NAME as licenseName
+				, T1.LICENSE_NAME AS licenseNameTemp
+				, T1.LICENSE_TYPE as licenseType
+				, T1.OBLIGATION_DISCLOSING_SRC_YN as obligationDisclosingSrcYn
+				, T1.OBLIGATION_NOTIFICATION_YN as obligationNotificationYn
+				, T1.OBLIGATION_NEEDS_CHECK_YN as obligationNeedsCheckYn
+				, T1.SHORT_IDENTIFIER as shortIdentifier
+				, T1.WEBPAGE as webpage
+				, T1.DESCRIPTION as description
+				, T1.LICENSE_TEXT as licenseText
+				, T1.ATTRIBUTION as attribution
+				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS licenseNicknameStr
+				, T1.RESTRICTION as restriction
+			FROM LICENSE_MASTER T1
+			WHERE T1.USE_YN = 'Y'
+	</select>
+	
+	<select id="getLicenseInfoInitNick" resultType="hashMap">
+		<!-- 
+		SELECT 
+				T1.LICENSE_ID
+				, T2.LICENSE_NICKNAME AS LICENSE_NAME
+				, T1.LICENSE_NAME AS LICENSE_NAME_TEMP
+				, T1.LICENSE_TYPE
+				, T1.OBLIGATION_DISCLOSING_SRC_YN
+				, T1.OBLIGATION_NOTIFICATION_YN
+				, T1.OBLIGATION_NEEDS_CHECK_YN
+				, T1.SHORT_IDENTIFIER
+				, T1.WEBPAGE
+				, T1.DESCRIPTION
+				, T1.LICENSE_TEXT
+				, T1.ATTRIBUTION 
+				, T1.RESTRICTION
+			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+			WHERE T1.USE_YN = 'Y'
+		-->	
+		SELECT 
+				T1.LICENSE_ID as licenseId
+				, T2.LICENSE_NICKNAME AS licenseName
+				, T1.LICENSE_NAME AS licenseNameTemp
+				, T1.LICENSE_TYPE as licenseType
+				, T1.OBLIGATION_DISCLOSING_SRC_YN as obligationDisclosingSrcYn
+				, T1.OBLIGATION_NOTIFICATION_YN as obligationNotificationYn
+				, T1.OBLIGATION_NEEDS_CHECK_YN as obligationNeedsCheckYn
+				, T1.SHORT_IDENTIFIER as shortIdentifier
+				, T1.WEBPAGE as webpage
+				, T1.DESCRIPTION as description
+				, T1.LICENSE_TEXT as licenseText
+				, T1.ATTRIBUTION as attribution
+				, T1.RESTRICTION as restriction
+			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+			WHERE T1.USE_YN = 'Y'
+	</select>
+	
+	<select id="selectVerifyOssList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.CamelMap">
+	/* ApiProjectMapper.selectVerifyOssList */	
+		SELECT
+			T2.COMPONENT_ID
+			,T2.COMPONENT_IDX
+			,T2.OSS_ID
+			,T2.OSS_NAME
+			,T2.OSS_VERSION
+			,T2.DOWNLOAD_LOCATION
+			,T2.HOMEPAGE
+			,T2.REF_COMPONENT_ID
+			,T2.REFERENCE_ID
+			,CASE
+				WHEN T2.REFERENCE_DIV = '10' THEN '3rd' 
+				WHEN T2.REFERENCE_DIV = '11' THEN 'SRC' 
+				WHEN T2.REFERENCE_DIV = '12' THEN 'BAT' 
+				WHEN T2.REFERENCE_DIV = '15' THEN 'BIN' 
+				WHEN T2.REFERENCE_DIV = '14' THEN 'BIN(Android)' 
+			END AS REFERENCE_DIV
+			, GROUP_CONCAT(T3.LICENSE_NAME ORDER BY T3.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME 
+			, T2.FILE_PATH
+			, T2.VERIFY_FILE_COUNT
+		FROM (
+				SELECT 
+					A1.COMPONENT_ID
+					,A1.COMPONENT_IDX
+					,A1.OSS_ID
+					,A1.OSS_NAME
+					,A1.OSS_VERSION
+					,A1.DOWNLOAD_LOCATION
+					,A1.REFERENCE_ID	
+					,A1.HOMEPAGE
+					,A1.FILE_PATH
+					,A1.VERIFY_FILE_COUNT
+					,A1.REF_COMPONENT_ID
+					,(SELECT REFERENCE_DIV FROM OSS_COMPONENTS A2 WHERE A2.COMPONENT_ID = A1.REF_COMPONENT_ID) AS REFERENCE_DIV
+				FROM OSS_COMPONENTS A1 
+				WHERE 
+					A1.REFERENCE_ID = #{prjId}
+					AND A1.REFERENCE_DIV='50' 
+					AND A1.MERGE_PRE_DIV IS NULL 
+					AND A1.OBLIGATION_TYPE = '11'
+		) T2
+		INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
+		GROUP BY COMPONENT_ID
+		ORDER BY COMPONENT_ID
+	</select>
+	
+	<select id="selectVerificationFile" resultType="oss.fosslight.domain.CamelMap" parameterType="String">
+		SELECT T1.*
+			 , DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+			 , IF(T2.REF_PRJ_ID IS NULL, 'N', 'Y') AS REUSE_FLAG
+			 , T2.REF_PRJ_ID
+		  FROM T2_FILE T1
+		  LEFT JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		   AND T1.DEL_YN = 'N'
+		 WHERE T1.FILE_SEQ = #{packageFileId}
+	</select>
+	
+	<update id="updatePackagingReuseMap" parameterType="hashMap">
+		UPDATE T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		   AND T1.DEL_YN = 'N'
+		   SET T1.DEL_YN = 'Y'
+		     , T2.DEL_YN = 'Y'
+		 WHERE T2.PRJ_ID = #{prjId}
+		   AND T2.PACKAGING_FILE_ID != #{packageFileId}
+	</update>
+	
+	<update id="updateVerifyFileCount"  parameterType="hashMap">
+		UPDATE OSS_COMPONENTS 
+	   	   SET VERIFY_FILE_COUNT = #{verifyFileCount}
+	 	 WHERE COMPONENT_ID = #{componentId}
+	</update>
+	
+	<update id="updateVerifyFilePath" parameterType="hashMap">
+		UPDATE OSS_COMPONENTS 
+		   SET FILE_PATH = #{filePath}
+		 WHERE COMPONENT_ID = #{componentId}
+	</update>
+	
+	<update id="updatePackageFile2" parameterType="hashMap">
+		UPDATE PROJECT_MASTER 
+	   	   SET PACKAGE_FILE_ID = #{packageFileId}
+	     <if test='statusVerifyYn != null and statusVerifyYn != ""'>
+	     	 , STATUS_VERIFY_YN = #{statusVerifyYn} 
+	     </if>
+		 WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<select id="checkPackagingFileId" parameterType="String" resultType="int" >
+		SELECT COUNT(*)
+		  FROM PROJECT_MASTER
+		 WHERE PRJ_ID = #{prjId}
+		   AND PACKAGE_FILE_ID = #{packageFileId}
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId2)">
+		   AND PACKAGE_FILE_ID2 = #{packageFileId2}
+		 </if>
+		  <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
+		   AND PACKAGE_FILE_ID3 = #{packageFileId3}
+		 </if>
+		   AND STATUS_VERIFY_YN = 'Y'
+	</select>
+	
+	<select id="selectPackageFileList" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT PACKAGE_FILE_ID, PACKAGE_FILE_ID2, PACKAGE_FILE_ID3
+		  FROM PROJECT_MASTER
+		 WHERE PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectComponentId" parameterType="hashMap" resultType="String">
+		SELECT COMPONENT_ID
+		  FROM OSS_COMPONENTS
+		 WHERE REFERENCE_ID = #{referenceId}
+		   AND REFERENCE_DIV = #{referenceDiv}
+	</select>
+	
+	<delete id="deleteOssComponentsLicense" parameterType="String">
+		DELETE FROM OSS_COMPONENTS_LICENSE
+		 WHERE COMPONENT_ID = #{componentId} 	
+	</delete>
+	
+	<delete id="deleteOssComponents" parameterType="hashMap">
+		DELETE FROM OSS_COMPONENTS 
+		 WHERE REFERENCE_ID = #{referenceId}
+		 AND REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
+	<insert id="registBomComponents" parameterType="hashMap"  useGeneratedKeys="true" keyProperty="componentId">
+		INSERT INTO
+			OSS_COMPONENTS
+			(
+			REFERENCE_ID
+			, REFERENCE_DIV
+			, COMPONENT_IDX
+			<if test="ossId != null">
+			, OSS_ID
+			</if>
+			, OSS_NAME
+			, OSS_VERSION
+			, DOWNLOAD_LOCATION
+			, HOMEPAGE
+			, FILE_PATH
+			, EXCLUDE_YN
+			, COPYRIGHT
+			<if test="binaryName != null">
+			, BINARY_NAME
+			</if>
+			<if test="binarySize != null">
+			, BINARY_SIZE
+			</if>
+			<if test="binaryNotice != null">
+			, BINARY_NOTICE
+			</if>
+			<if test="customBinaryYn != null">
+			, CUSTOM_BINARY_YN
+			</if>
+			<if test="mergePreDiv != null">
+			, MERGE_PRE_DIV
+			</if>
+			<if test="obligationType != null">
+			, OBLIGATION_TYPE
+			</if>
+			<if test="refComponentId != null">
+			, REF_COMPONENT_ID
+			</if>
+			, REF_DIV
+			, PRE_OBLIGATION_TYPE
+			, ADMIN_CHECK_YN
+			)
+			VALUES
+			(
+			#{referenceId}
+			, #{referenceDiv}
+			, (SELECT IFNULL(MAX(OC.COMPONENT_IDX), 0) + 1 FROM OSS_COMPONENTS OC WHERE OC.REFERENCE_ID=#{referenceId} AND OC.REFERENCE_DIV=#{referenceDiv})		
+			<if test="ossId != null">
+			, (CASE WHEN #{ossId} = '' THEN NULL ELSE #{ossId} END)
+			</if>
+			, #{ossName}
+			, REPLACE(#{ossVersion}, 'N/A','')
+			, #{downloadLocation}
+			, #{homepage}
+			, #{filePath}
+			, #{excludeYn}
+			, #{copyrightText}
+			<if test="binaryName != null">
+			, #{binaryName}
+			</if>
+			<if test="binarySize != null">
+			, #{binarySize}
+			</if>
+			<if test="binaryNotice != null">
+			, #{binaryNotice}
+			</if>
+			<if test="customBinaryYn != null">
+			, #{customBinaryYn}
+			</if>
+			<if test="mergePreDiv != null">
+			, #{mergePreDiv}
+			</if>
+			<if test="obligationType != null">
+			, #{obligationType}
+			</if>
+			<if test="refComponentId != null">
+			, #{refComponentId}
+			</if>
+			<choose>
+				<when test="refDiv != null">
+				, #{refDiv}
+				</when>
+				<otherwise>
+				, (SELECT OCP.REFERENCE_DIV FROM OSS_COMPONENTS OCP WHERE OCP.COMPONENT_ID = #{refComponentId})
+				</otherwise>
+			</choose>
+			, #{preObligationType}
+			, #{adminCheckYn}
+			)
+	</insert>
+	
+	<insert id="registComponentLicense" parameterType="hashMap"  useGeneratedKeys="true" keyProperty="componentLicenseId">
+		INSERT INTO
+			OSS_COMPONENTS_LICENSE
+			(
+			COMPONENT_ID
+			, LICENSE_ID
+			, LICENSE_NAME
+			, LICENSE_TEXT
+			, COPYRIGHT_TEXT
+			, EXCLUDE_YN
+			)
+			VALUES
+			(
+			#{componentId}
+			, #{licenseId}
+			, TRIM(#{licenseName})
+			, #{licenseText}
+			, #{copyrightText}
+			, #{excludeYn}
+			)
+	</insert>
+	
+	<select id="selectProjectMaster" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper.selectProjectMaster */
+		SELECT A.PRJ_ID 
+			, A.PRJ_NAME 
+			, A.PRJ_VERSION 
+			, A.DISTRIBUTION_TYPE  
+			, A.NETWORK_SERVER_TYPE
+			, CASE WHEN B.CONTENTS IS NULL THEN A.COMMENT ELSE B.CONTENTS END AS COMMENT
+			, B.COMM_ID AS COMMENT_IDX
+			, A.OS_TYPE
+			, A.OS_TYPE_ETC 
+			, A.USE_CUSTOM_NOTICE_YN
+			, A.IDENTIFICATION_STATUS 
+			, A.VERIFICATION_STATUS 
+			, A.DESTRIBUTION_STATUS 
+			, A.IDENTIFICATION_SUB_STATUS_PARTNER 
+			, A.IDENTIFICATION_SUB_STATUS_SRC 
+			, A.IDENTIFICATION_SUB_STATUS_BAT
+			, A.IDENTIFICATION_SUB_STATUS_BIN
+			, A.IDENTIFICATION_SUB_STATUS_ANDROID  
+			, A.COMPLETE_YN 
+			, A.DROP_YN
+			, A.REVIEWER 
+			, A.USE_YN 
+			, A.COPY_PRJ_ID
+			, A.WITHOUT_VERIFY_YN
+			
+			/* 다운로드 허용 플래그 */
+			<![CDATA[
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x02, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_TEXT_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x04, 'Y', 'N') AS ALLOW_DOWNLOAD_SIMPLE_HTML_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x08, 'Y', 'N') AS ALLOW_DOWNLOAD_SIMPLE_TEXT_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x10, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_SHEET_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x20, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_RDF_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x40, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_TAG_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x80, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_JSON_YN
+			 , IF(A.ALLOW_DOWNLOAD_BIT_FLAG & 0x100, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_YAML_YN
+			 ]]>
+			
+			/** DISTRIBUTION **/
+			, A.DISTRIBUTE_MASTER_CATEGORY
+	        , A.DISTRIBUTE_NAME 
+	        , A.DISTRIBUTE_SOFTWARE_TYPE 
+	        , A.DISTRIBUTE_TARGET
+	        , A.DISTRIBUTE_DEPLOY_YN 
+	        , A.DISTRIBUTE_DEPLOY_TIME 
+	        , A.DISTRIBUTE_OSD_KEY
+			
+			/** FILE_ID **/
+			, A.SRC_CSV_FILE_ID
+			, A.SRC_ANDROID_CSV_FILE_ID
+			, A.SRC_ANDROID_NOTICE_FILE_ID
+			, A.SRC_ANDROID_NOTICE_XML_ID
+			, A.SRC_ANDROID_RESULT_FILE_ID
+			, A.PACKAGE_FILE_ID
+			, A.PACKAGE_FILE_ID2
+			, A.PACKAGE_FILE_ID3
+			, A.NOTICE_FILE_ID
+			, A.ZIP_FILE_ID
+			, A.BIN_CSV_FILE_ID
+			, A.BIN_BINARY_FILE_ID
+			
+			, A.README_YN
+			, A.README_CONTENT
+			, A.README_FILE_NAME
+			, A.VERIFY_FILE_CONTENT
+			, A.EXCEPT_FILE_CONTENT
+			, A.CREATOR 
+			, A.CREATED_DATE
+			, A.MODIFIER 
+			, A.MODIFIED_DATE 
+            , C.USER_NAME PRJ_USER_NAME
+            , R.USER_NAME REVIEWER_NAME
+            , D.CD_DTL_NM PRJ_DIVISION_NAME
+            , A.PUBLIC_YN
+            , A.COMM_ID
+            , A.STATUS_REQUEST_YN
+            , A.STATUS_VERIFY_YN
+            , A.CHANGED_NOTICE_YN
+            , CASE 
+					WHEN A.COMPLETE_YN = 'Y' AND A.STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+					WHEN A.DROP_YN = 'Y' AND A.STATUS_REQUEST_YN = 'N' THEN 'DROP' 
+					WHEN A.IDENTIFICATION_STATUS = 'REV' OR A.VERIFICATION_STATUS = 'REV' THEN 'REV' 
+					WHEN A.IDENTIFICATION_STATUS = 'REQ' OR A.VERIFICATION_STATUS = 'REQ' OR A.STATUS_REQUEST_YN = 'Y' THEN 'REQ'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'NA' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					ELSE 'PROG' 
+				END STATUS
+		   , A.PRIORITY
+		FROM
+			PROJECT_MASTER A 
+			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
+		    LEFT OUTER JOIN T2_USERS C
+		                    ON A.CREATOR = C.USER_ID
+		                   
+            LEFT OUTER JOIN T2_USERS R
+                            ON A.REVIEWER = R.USER_ID
+                            
+		    LEFT OUTER JOIN T2_CODE_DTL D
+		                    ON C.DIVISION = D.CD_DTL_NO
+						   AND D.CD_NO = '200'
+						   AND D.USE_YN = 'Y'
+		 WHERE A.PRJ_ID = #{prjId} 
+	</select>
+	
+	<select id="selectProjectMaster2" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		SELECT T1.*,
+			   T2.NOTICE_TYPE,
+			   T2.NOTICE_TYPE_ETC,
+			 
+			 /* 다운로드 허용 플래그 */
+			 <![CDATA[
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x01, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_HTML_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x02, 'Y', 'N') AS ALLOW_DOWNLOAD_NOTICE_TEXT_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x04, 'Y', 'N') AS ALLOW_DOWNLOAD_SIMPLE_HTML_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x08, 'Y', 'N') AS ALLOW_DOWNLOAD_SIMPLE_TEXT_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x10, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_SHEET_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x20, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_RDF_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x40, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_TAG_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x80, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_JSON_YN,
+			 IF(T1.ALLOW_DOWNLOAD_BIT_FLAG & 0x100, 'Y', 'N') AS ALLOW_DOWNLOAD_SPDX_YAML_YN
+			 ]]>
+		  FROM PROJECT_MASTER T1
+		  LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		 WHERE T1.USE_YN = 'Y'
+		   AND T1.PRJ_ID = #{prjId}
+	</select>
+	
+	<update id="updateIdentifcationProgress" parameterType="hashMap">
+		UPDATE PROJECT_MASTER SET IDENTIFICATION_STATUS = #{identificationStatus} WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<select id="selectMergeBomList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			<choose>
+				<when test='bomWithAndroidFlag != null and bomWithAndroidFlag != ""'>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS groupby, </when>
+				<when test='noticeFlag != null and noticeFlag != ""'>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS groupby, </when>
+				<when test='merge != null and merge == "N"'>CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS groupby, </when>
+				<otherwise>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS groupby, </otherwise>
+			</choose>
+			
+			CASE WHEN RTN.OSS_NAME = '-' THEN RTN.COMPONENT_ID ELSE CONCAT(RTN.OSS_NAME,RTN.OSS_VERSION,RTN.LICENSE_NAME) END AS groupingColumn,
+			RTN.COMPONENT_ID as componentId,
+			 CASE WHEN RTN.REFERENCE_DIV = '14' THEN RTN.COMPONENT_ID ELSE RTN.REF_COMPONENT_ID END AS refComponentId,
+			 RTN.REFERENCE_ID as referenceId,
+			 RTN.REFERENCE_DIV as referenceDiv,
+			 RTN.COMPONENT_IDX as componentIdx,
+			 CASE WHEN RTN.REFERENCE_DIV = '14' THEN RTN.COMPONENT_IDX 
+			 ELSE (SELECT COMPONENT_IDX FROM OSS_COMPONENTS OC1 WHERE OC1.COMPONENT_ID = RTN.REF_COMPONENT_ID)
+			 END AS refComponentIdx,
+			RTN.REF_DIV as refDiv,
+			RTN.OSS_ID as ossId, 
+			RTN.OSS_NAME as ossName, 
+			RTN.OSS_VERSION as ossVersion, 
+			RTN.DOWNLOAD_LOCATION as downloadLocation, 
+			RTN.HOMEPAGE as homepage,
+			RTN.BINARY_NAME as binaryName, 
+			RTN.BINARY_SIZE as binaySize, 
+			RTN.BINARY_NOTICE as binaryNotice, 
+			RTN.CUSTOM_BINARY_YN as customBinaryYn, 
+			RTN.EXCLUDE_YN as excludeYn, 
+			RTN.MERGE_PRE_DIV as mergePreDiv, 
+			RTN.BAT_STRING_MATCH_PERCENTAGE as batStringMatchPercentage, 
+			RTN.BAT_PERCENTAGE as batPercentage, 
+			RTN.BAT_SCORE as batScore,
+			<choose>
+				<when test='saveBomFlag != null and saveBomFlag == "Y"'>RTN.FILE_PATH as filePath,</when>
+				<otherwise>GROUP_CONCAT(IF(IFNULL(RTN.FILE_PATH, '') = '', NULL, RTN.FILE_PATH) SEPARATOR '\r\n') AS filePath,</otherwise>
+			</choose>
+			<choose>
+				<when test='merge != null and merge == "N"'>RTN.OBLIGATION_TYPE as obligationType,</when>
+				<otherwise>
+					CASE 
+						WHEN IFNULL(RTN.OBLIGATION_TYPE, '') = '' AND IFNULL(RTN.OSS_ID, '') <![CDATA[<>]]> '' THEN ( SELECT B1.OBLIGATION_TYPE FROM OSS_MASTER B1 WHERE RTN.OSS_ID = B1.OSS_ID) 
+						ELSE  RTN.OBLIGATION_TYPE END AS obligationType, 
+				</otherwise>
+			</choose>
+			RTN.PRE_OBLIGATION_TYPE as preObligationType,
+			RTN.ADMIN_CHECK_YN as adminCheckYn,
+			CASE 
+					WHEN RTN.REFERENCE_DIV = '11' THEN 1 
+					WHEN RTN.REFERENCE_DIV = '15' THEN 2 
+					WHEN RTN.REFERENCE_DIV = '10' THEN 3 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV IS NULL THEN 11 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '11' THEN 12 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '15' THEN 13 
+					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
+					ELSE 99 END AS mergeOrder, 
+			RTN.LICENSE_ID as licenseId, 
+			RTN.LICENSE_NAME as licenseName, 
+			RTN.COPYRIGHT AS copyrightText, 
+			IFNULL(RTN.VULN_YN, 'N') AS vulnYn, 
+			IFNULL(RTN.CVSS_SCORE, 0) AS cvssScore, 
+			RTN.CVE_ID as cveId, 
+			RTN.LICENSE_TYPE_IDX as licenseTypeIdx, 
+			RTN.CVSS_SCORE_MAX as cvssScoreMax, 
+			RTN.LICENSE_TYPE as licenseType
+		FROM  (
+			SELECT 
+				A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
+				, A1.DOWNLOAD_LOCATION, A1.HOMEPAGE, A1.FILE_PATH, A1.BINARY_NOTICE, A1.BINARY_NAME, A1.BINARY_SIZE, A1.CUSTOM_BINARY_YN, A1.EXCLUDE_YN, A1.MERGE_PRE_DIV
+				, A1.BAT_STRING_MATCH_PERCENTAGE, A1.BAT_PERCENTAGE, A1.BAT_SCORE, A1.PRE_OBLIGATION_TYPE, A1.OBLIGATION_TYPE, A1.ADMIN_CHECK_YN, (CASE WHEN PRJ.IDENTIFICATION_STATUS = 'CONF' AND A1.OSS_NAME <![CDATA[<>]]> '-' AND A1.ADMIN_CHECK_YN = 'N' THEN A4.COPYRIGHT ELSE A1.COPYRIGHT END) AS COPYRIGHT
+				, GROUP_CONCAT(A2.LICENSE_ID ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_ID
+				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
+				, IFNULL(NVD.CVSS_SCORE, 0) AS CVSS_SCORE, IFNULL(NVD.VULN_YN, 'N') AS VULN_YN, NVD.CVE_ID 
+				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
+				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
+				, (SELECT CONCAT(CVSS_SCORE, '@', MAX(CVE_ID))
+				     FROM NVD_DATA_SCORE_V3 WHERE PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME)
+				      AND CVSS_SCORE = (SELECT MAX(CVSS_SCORE)
+				      					  FROM NVD_DATA_SCORE_V3
+				      					 WHERE PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME))) AS CVSS_SCORE_MAX
+				, A3.LICENSE_TYPE 
+			FROM OSS_COMPONENTS A1 
+				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
+				INNER JOIN OSS_COMPONENTS_LICENSE A2 
+					ON A1.COMPONENT_ID = A2.COMPONENT_ID 
+						AND  A2.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+				LEFT OUTER JOIN LICENSE_MASTER A3 ON A2.LICENSE_ID = A3.LICENSE_ID AND A3.USE_YN = 'Y'
+				LEFT OUTER JOIN OSS_MASTER A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
+				LEFT OUTER JOIN (SELECT PRODUCT
+									  , VERSION
+									  , CVSS_SCORE
+									  , CVE_ID
+									  , 'Y' AS VULN_YN 
+								   FROM NVD_DATA_SCORE_V3
+								  WHERE PRODUCT != '-') NVD 
+                    ON NVD.PRODUCT = IFNULL(A4.OSS_NAME, A1.OSS_NAME)
+                       AND NVD.VERSION = IF(IFNULL(A1.OSS_VERSION, '') = '', '-', A1.OSS_VERSION)
+			 	WHERE A1.REFERENCE_ID = #{referenceId}
+					<if test='noticeFlag != null and noticeFlag == "Y"'>
+						AND A1.OBLIGATION_TYPE IN ('10', '11')
+			        </if>
+					<if test='merge != null and merge == "N"'>
+						<choose>
+							<when test='bomWithAndroidFlag != null and bomWithAndroidFlag == "Y"'>
+								AND A1.REFERENCE_DIV IN ('13', '14')
+								AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N'
+							</when>
+							<otherwise>AND A1.REFERENCE_DIV IN ('13')</otherwise>
+						</choose>
+			        </if>
+			        <if test='merge != null and merge == "Y"'>
+					AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N' 
+					AND A1.REFERENCE_DIV IN ('10','11','15') 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_PARTNER = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '10' ELSE TRUE END) 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_SRC = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '11' ELSE TRUE END) 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_BIN = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '15' ELSE TRUE END)
+					</if>
+			GROUP BY A1.COMPONENT_ID
+		) RTN
+		
+		WHERE 1=1
+		<if test="filterCondition != null">
+			${filterCondition}
+		</if>
+		
+		GROUP BY GROUPBY
+		ORDER BY licenseTypeIdx, ossName, ossVersion DESC, licenseName, mergeOrder
+	</select>
+	
+	<select id="getRoleOutLicense" resultType="hashMap">
+		SELECT T1.LICENSE_NAME as licenseName
+		     , T1.LICENSE_ID as licenseId
+		  FROM LICENSE_MASTER T1
+		 WHERE T1.USE_YN = 'Y' AND T1.LICENSE_TYPE = 'NA'
+		 UNION ALL
+		SELECT T2.LICENSE_NICKNAME AS licenseName
+		     , T1.LICENSE_ID as licenseId 
+		  FROM LICENSE_MASTER T1 
+ 	INNER JOIN LICENSE_NICKNAME T2 
+		    ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		 WHERE T1.USE_YN = 'Y' 
+		   AND T1.LICENSE_TYPE = 'NA'
+	</select>
+		
+	<update id="updateReadmeContent" parameterType="hashMap">
+		UPDATE 
+			PROJECT_MASTER
+		SET 
+			README_CONTENT 	= #{readmeContent}
+			, README_FILE_NAME 	= #{readmeFileName}
+			, README_YN		= #{readmeYn}
+		WHERE
+			PRJ_ID			= #{prjId}
+	</update>
+	
+	<update id="updateVerifyContents" parameterType="hashMap">
+		UPDATE
+			PROJECT_MASTER
+		SET
+			EXCEPT_FILE_CONTENT = #{exceptFileContent},
+			VERIFY_FILE_CONTENT = #{verifyFileContent}
+		WHERE
+			PRJ_ID	= #{prjId}
+	</update>
 </mapper>

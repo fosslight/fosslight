@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.ApiFileMapper">
+	<select id="getFileInfo" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+	 SELECT FILE_SEQ,
+		    FILE_ID,
+		    ORIG_NM,
+		    LOGI_NM,
+		    LOGI_THUMB_NM,
+		    LOGI_PATH,
+		    LOGI_THUMB_PATH,
+		    EXT,
+		    SIZE,
+		    REG_DT,
+		    REG_ID,
+		    CONTENT_TYPE,
+		    DATE_FORMAT(REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+	   FROM T2_FILE
+	  WHERE FILE_SEQ=#{fileSeq}
+		AND DEL_YN='N'
+	</select>
+	
+	<select id="getPackgingReuseCntToList" resultType="oss.fosslight.domain.CamelMap">
+		SELECT A.* 
+		  FROM (SELECT LOGI_NM 
+		  			 , LOGI_PATH
+		  			 , SUM(IF(DEL_YN = 'Y', 0, 1)) AS REUSE_CNT 
+				  FROM T2_FILE
+				 WHERE LOGI_NM IN (SELECT LOGI_NM
+									 FROM T2_FILE
+									WHERE FILE_SEQ IN (SELECT REF_PACKAGING_FILE_ID
+											 			 FROM PACKAGING_REUSE_MAP 
+														 WHERE PRJ_ID = #{prjId}
+														   AND HIDDEN_FLAG = 'N'
+														 GROUP BY REF_PACKAGING_FILE_ID))
+				 GROUP BY LOGI_NM) A
+		 WHERE A.REUSE_CNT = 0
+	</select>
+	
+	<select id="getPackgingReuseCnt" resultType="int">
+		SELECT COUNT(*) AS CNT 
+		  FROM T2_FILE 
+		 WHERE LOGI_NM IN (SELECT LOGI_NM 
+		 					 FROM T2_FILE 
+							WHERE FILE_SEQ IN (SELECT PACKAGING_FILE_ID 
+								  				 FROM PACKAGING_REUSE_MAP 
+												WHERE DEL_YN = 'N'))
+		   AND DEL_YN = 'N'
+		   AND LOGI_NM = #{logiNm}
+	</select>
+	
+	<select id="selectFileInfo" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+	SELECT
+		T1.*
+		, DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+	FROM
+		T2_FILE T1
+	WHERE
+		T1.FilE_SEQ = #{fileSeq}
+	</select>
+	
+	<select id="getReusePackagingInfo" resultType="oss.fosslight.domain.CamelMap">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.REF_PACKAGING_FILE_ID 
+		 WHERE T2.DEL_YN = 'N'
+		 GROUP BY T1.ORIG_NM
+	</select>
+	
+	<select id="selectPackagingFileInfo" parameterType="java.lang.String" resultType="oss.fosslight.domain.CamelMap">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PROJECT_MASTER T2
+		    ON T1.FILE_SEQ = T2.PACKAGE_FILE_ID
+		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID2
+		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID3
+		 WHERE T2.PRJ_ID = #{prjId}
+	</select>
+	
+	<update id="updateFileDelYnKessan" parameterType="hashMap" >
+	    UPDATE
+			T2_FILE
+		SET
+			DEL_YN = 'Y'
+		WHERE
+			FILE_SEQ = #{fileSeq}
+			AND GUBN = #{gubn}
+	</update>
+	
+	<update id="updateReuseChkFileDelYnByFilePathNm" parameterType="hashMap">
+	    UPDATE T2_FILE T1
+		  LEFT JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
+		   SET T1.DEL_YN = 'Y'
+		 WHERE T2.PACKAGING_FILE_ID IS NULL
+		   AND T1.LOGI_NM = #{logiNm}
+		   AND T1.LOGI_PATH = #{logiPath}
+	</update>
+	
+	<update id="updateFileDelYnByFilePathNm" parameterType="hashMap">
+	    UPDATE T2_FILE
+		   SET DEL_YN = 'Y'
+		 WHERE LOGI_NM = #{logiNm}
+		   AND LOGI_PATH = #{logiPath}
+	</update>
+	
+	<update id="setReusePackagingFileHidden"  parameterType="String">
+		UPDATE T2_FILE T1
+		 INNER JOIN PACKAGING_REUSE_MAP T2
+		    ON T1.FILE_SEQ = T2.REF_PACKAGING_FILE_ID
+		   SET T2.HIDDEN_FLAG = 'Y'
+		 WHERE T1.LOGI_NM = #{logiNm}
+		   AND T1.LOGI_PATH = #{logiPath} 
+		   AND T2.REF_PRJ_ID = #{refPrjId}
+	</update>
+</mapper>

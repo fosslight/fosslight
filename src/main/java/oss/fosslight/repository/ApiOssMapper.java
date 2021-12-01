@@ -5,6 +5,7 @@
 
 package oss.fosslight.repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,5 +21,11 @@ public interface ApiOssMapper {
 	
 	List<Map<String, Object>> getLicenseInfo(String licenseName);
 	
-	List<String> selectOssNicknameList(String ossName); 
+	List<String> selectOssNicknameList(String ossName);
+
+	List<HashMap<String, Object>> getOssInfoAll();
+
+	List<HashMap<String, Object>> getOssInfoAllWithNick();
+
+	List<HashMap<String, Object>> getOssAllNickNameList(); 
 }

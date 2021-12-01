@@ -183,6 +183,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
 				}			
 				
+				List<T2File> deleteFileList = new ArrayList<>();
+				
 				// packaging File comment
 				try {
 					Project project = projectMapper.selectProjectMaster(prjParam);
@@ -200,6 +202,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
+							deleteFileList.add(fileInfo);
 						}
 						
 						if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
@@ -229,6 +232,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				verificationMapper.updatePackagingReuseMap(prjParam);
 				verificationMapper.updatePackageFile(prjParam);
+				
+				// delete physical file
+				for(T2File delFile : deleteFileList){
+					fileService.deletePhysicalFile(delFile, "VERIFY");
+				}
 				
 				if(CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
