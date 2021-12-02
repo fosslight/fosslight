@@ -212,9 +212,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					T2File delFile = new T2File();
 					delFile.setFileSeq(fileSeq);
 					delFile.setGubn("A");
-					
-					fileMapper.updateFileDelYnKessan(delFile);
+
 					fileService.deletePhysicalFile(delFile, "PARTNER");
+					fileMapper.updateFileDelYnKessan(delFile);
 				}
 			}
 		}
