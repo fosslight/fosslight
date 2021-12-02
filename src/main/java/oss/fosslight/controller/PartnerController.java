@@ -168,6 +168,16 @@ public class PartnerController extends CoTopComponent{
 		ossFile.setFileSeq(partnerMaster.getOssFileId());
 		ossFile = fileMapper.getFileInfo(ossFile);
 		
+		String binaryFileId = partnerMaster.getBinaryFileId();
+		T2File binaryFile = new T2File();
+		
+		if(!isEmpty(binaryFileId)){
+			binaryFile.setFileSeq(binaryFileId);
+			binaryFile = fileMapper.getFileInfo(binaryFile);
+			
+			model.addAttribute("binaryFile", binaryFile);
+		}
+		
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
 		comHisBean.setReferenceId(partnerMaster.getPartnerId());

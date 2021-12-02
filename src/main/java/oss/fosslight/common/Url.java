@@ -422,6 +422,10 @@ public final class Url {
 		
 		public static final String FILTERED_LIST = PATH + "/getFilteredList";
 		public static final String CHECK_STATUS = PATH + "/checkStatus/{partnerId}";
+		
+		public static final String NOTICE_TEXT = PATH + "/noticeText";
+		
+		public static final String SAVE_BINARY_DB = PATH + "/saveBinaryDB";
 	}
 	
 	public static final class USER {
