@@ -1239,8 +1239,9 @@ public class OssController extends CoTopComponent{
 		}
 		
 		if(result.size() > 0) {
-			result = autoFillOssInfoService.checkOssLicense(result);
-			resMap.put("list", result);
+			Map<String, Object> data = autoFillOssInfoService.checkOssLicense(result);
+			resMap.put("list", data.get("checkedData"));
+			resMap.put("error", data.get("error"));
 		}
 		
 		return makeJsonResponseHeader(resMap);

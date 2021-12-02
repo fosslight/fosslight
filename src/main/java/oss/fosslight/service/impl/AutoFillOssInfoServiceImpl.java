@@ -10,18 +10,18 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import oss.fosslight.CoTopComponent;
@@ -36,8 +36,6 @@ import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.AutoFillOssInfoService;
 import oss.fosslight.service.CommentService;
-import oss.fosslight.util.CryptUtil;
-import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -126,8 +124,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	}
 
 	@Override
-	public List<ProjectIdentification> checkOssLicense(List<ProjectIdentification> ossList){
+	public Map<String, Object> checkOssLicense(List<ProjectIdentification> ossList){
+		Map<String, Object> resMap = new HashMap<>();
 		List<ProjectIdentification> result = new ArrayList<>();
+		List<String> errors = new ArrayList<>();
 
 		// oss name,과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
 		ossList = ossList.stream()
@@ -140,6 +140,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					return uniqueOss;
 				})
 				.collect(Collectors.toList());
+
+		// external api health check
+		boolean isGitHubApiHealth = false;
+		boolean isClearlyDefinedApiHealth = false;
+
+		try {
+			isGitHubApiHealth = isGitHubApiHealth();
+		} catch (HttpServerErrorException e) {
+			errors.add(e.getStatusText());
+		}
+
+		try {
+			isClearlyDefinedApiHealth = isClearlyDefinedApiHealth();
+		} catch (HttpServerErrorException e) {
+			errors.add(e.getStatusText());
+		}
 
 		for(ProjectIdentification oss : ossList) {
 			List<ProjectIdentification> prjOssLicenses;
@@ -202,12 +218,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
 
-			if(dependencyType.equals(DependencyType.UNSUPPORTED)) {
+			if(dependencyType.equals(DependencyType.UNSUPPORTED) || !isExternalServiceEnable()) {
 				continue;
 			}
 
 			// Search Priority 4-1. Github API : empty oss version and download location
-			if(ossVersion.isEmpty() && ExternalLicenseServiceType.GITHUB.hasDependencyType(dependencyType)) {
+			if(ossVersion.isEmpty() && ExternalLicenseServiceType.GITHUB.hasDependencyType(dependencyType) && isGitHubApiHealth) {
 				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String owner = "", repo = "";
 
@@ -231,7 +247,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			// Search Priority 4-2. Clearly Defined : oss version and download location
-			if(!ossVersion.isEmpty() && ExternalLicenseServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType)) {
+			if(!ossVersion.isEmpty() && ExternalLicenseServiceType.CLEARLY_DEFINED.hasDependencyType(dependencyType) && isClearlyDefinedApiHealth) {
 				Matcher matcher = dependencyType.getPattern().matcher(downloadLocation);
 				String type = dependencyType.getType();
 				String provider = dependencyType.getProvider();
@@ -304,7 +320,13 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			p.setComponentIdList(componentIds);
 		}
 
-		return sortedData;
+		resMap.put("checkedData", sortedData);
+
+		if(errors.size() > 0) {
+			resMap.put("error", getMessage("external.service.connect.fail", new Object[]{errors}));
+		}
+
+		return resMap;
 	}
 
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
@@ -337,6 +359,50 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 	private Boolean isEachOssVersionDiff(List<ProjectIdentification> prjOssMasters) {
 		return prjOssMasters.stream().allMatch(oss -> oss.getVersionDiffFlag().equals("Y"));
+	}
+
+	private Boolean isExternalServiceEnable() {
+		return CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_EXTERNAL_SERVICE_USED_FLAG).equals("Y");
+	}
+
+	private boolean isGitHubApiHealth() throws HttpServerErrorException {
+		try {
+			requestGithubLicense("https://api.github.com/").block();
+		} catch(HttpServerErrorException e) {
+			String message = "GitHub ";
+			if(e.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+				message += getMessage("api.token.invalid");
+				throw new HttpServerErrorException(e.getStatusCode(), message);
+			}
+			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+				message += getMessage("api.server.connect.limit");
+				throw new HttpServerErrorException(e.getStatusCode(), message);
+			}
+			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+				message += getMessage("api.server.connect.fail");
+				throw new HttpServerErrorException(e.getStatusCode(), message);
+			}
+		}
+		return true;
+	}
+
+	private boolean isClearlyDefinedApiHealth() throws HttpServerErrorException {
+		Map<String, Object> res = new HashMap<>();
+
+		try {
+			res = (Map<String, Object>) requestClearlyDefinedLicense("https://api.clearlydefined.io/").block();
+		} catch(HttpServerErrorException e) {
+			String message = "ClearlyDefined ";
+			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
+				message += getMessage("api.server.connect.limit");
+				throw new HttpServerErrorException(e.getStatusCode(), message);
+			}
+			if (e.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+				message += getMessage("api.server.connect.fail");
+				throw new HttpServerErrorException(e.getStatusCode(), message);
+			}
+		}
+		return res.get("status").equals("OK");
 	}
 
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters) {
@@ -381,8 +447,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return webClient.get()
 			.uri(location)
 			.header("Authorization", "token " + githubToken)
-			.retrieve()
-			.bodyToMono(Object.class);
+			.exchange()
+			.flatMap(response -> {
+				HttpStatus statusCode = response.statusCode();
+				if(statusCode.is4xxClientError()) {
+					return Mono.error(new HttpServerErrorException(statusCode));
+				}
+				return Mono.just(response);
+			})
+			.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
 	@Override
@@ -397,8 +470,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	public Mono<Object> requestClearlyDefinedLicense(String location) {
 		return webClient.get()
 				.uri(location)
-				.retrieve()
-				.bodyToMono(Object.class);
+                .exchange()
+				.flatMap(response -> {
+					HttpStatus statusCode = response.statusCode();
+					if (statusCode.is4xxClientError()) {
+						return Mono.error(new HttpServerErrorException(statusCode));
+					}
+					return Mono.just(response);
+				})
+				.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
 	@Transactional
