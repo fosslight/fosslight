@@ -51,6 +51,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	/** The oss file id. */
 	private String ossFileId;
 	
+	private String binaryFileId;
+	
 	/** The related DocumentFile file. */
 	private List<T2File> documentsFile; // Related documents 파일 객체
 	
@@ -182,6 +184,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	private String ossVersion;
 	
 	private String ossNameMergeFlag;
+	
+	private String ignoreBinaryDbFlag = "N";
 	
 	/*
 	 * Gets the partner id.
@@ -361,6 +365,24 @@ public class PartnerMaster extends ComBean implements Serializable{
 	 */
 	public void setOssFileId(String ossFileId) {
 		this.ossFileId = ossFileId;
+	}
+	
+	/**
+	 * Gets the binary file id.
+	 *
+	 * @return the binary file id
+	 */
+	public String getBinaryFileId() {
+		return binaryFileId;
+	}
+	
+	/**
+	 * Sets the binary file id.
+	 *
+	 * @param binaryFileId the new binary file id
+	 */
+	public void setBinaryFileId(String binaryFileId) {
+		this.binaryFileId = binaryFileId;
 	}
 	
 	/**
@@ -1118,5 +1140,13 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setOssNameMergeFlag(String ossNameMergeFlag) {
 		this.ossNameMergeFlag = ossNameMergeFlag;
+	}
+	
+	public String getIgnoreBinaryDbFlag() {
+		return ignoreBinaryDbFlag;
+	}
+
+	public void setIgnoreBinaryDbFlag(String ignoreBinaryDbFlag) {
+		this.ignoreBinaryDbFlag = ignoreBinaryDbFlag;
 	}
 }

@@ -93,6 +93,7 @@
 					 , t1.COMMENT
 					 , t1.CONFIRMATION_FILE_ID
 					 , t1.OSS_FILE_ID
+					 , t1.BINARY_FILE_ID
 					 , t1.REVIEWER
 					 , t1.USE_YN
 					 , t2.USER_NAME AS CREATOR
@@ -139,6 +140,7 @@
 			   <if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
 				  LEFT JOIN (SELECT PARTNER_ID, GROUP_CONCAT(PRJ_ID ORDER BY PRJ_ID ASC) AS PRJ_ID FROM PROJECT_PARTNER_MAP GROUP BY PARTNER_ID) t9 ON t1.PARTNER_ID = t9.PARTNER_ID
 			   </if>
+				  LEFT JOIN T2_FILE t10 ON t10.FILE_SEQ = t1.BINARY_FILE_ID
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
@@ -408,6 +410,7 @@
 			, DESCRIPTION
 			, CONFIRMATION_FILE_ID
 			, OSS_FILE_ID
+			, BINARY_FILE_ID
 			, DOCUMENTS_FILE_ID
 			, CREATOR
 			, MODIFIER
@@ -435,6 +438,12 @@
 			, #{ossFileId}
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
+			, NULL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryFileId)">
+			, #{binaryFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(binaryFileId)">
 			, NULL
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
@@ -465,6 +474,12 @@
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossFileId)">
 			, OSS_FILE_ID = NULL
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryFileId)">
+			, BINARY_FILE_ID = #{binaryFileId}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(binaryFileId)">
+			, BINARY_FILE_ID = NULL
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(documentsFileId)">
 			, DOCUMENTS_FILE_ID =  #{documentsFileId}
@@ -732,6 +747,7 @@
 		, t3.CD_DTL_NM AS DIVISION
 		, (SELECT A1.ORIG_NM FROM T2_FILE A1 WHERE A1.FILE_SEQ = t1.CONFIRMATION_FILE_ID) as CONFIRMATION_FILE_ID 
 		, (SELECT A2.ORIG_NM FROM T2_FILE A2 WHERE A2.FILE_SEQ = t1.OSS_FILE_ID) as OSS_FILE_ID 
+		, (SELECT A3.ORIG_NM FROM T2_FILE A3 WHERE A3.FILE_SEQ = t1.BINARY_FILE_ID) as BINARY_FILE_ID
 	FROM 
 		PARTNER_MASTER t1
 		LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
@@ -787,6 +803,7 @@
 		, t1.COMMENT
 		, t1.CONFIRMATION_FILE_ID
 		, t1.OSS_FILE_ID
+		, t1.BINARY_FILE_ID
 		, t1.REVIEWER
 		, t1.USE_YN
 		, t1.CREATOR
@@ -884,6 +901,7 @@
 		, t1.COMMENT
 		, t1.CONFIRMATION_FILE_ID
 		, t1.OSS_FILE_ID
+		, t1.BINARY_FILE_ID
 		, t1.REVIEWER
 		, t1.USE_YN
 		, t2.USER_NAME AS CREATOR
@@ -1375,6 +1393,7 @@
 		, t1.COMMENT
 		, t1.CONFIRMATION_FILE_ID
 		, t1.OSS_FILE_ID
+		, t1.BINARY_FILE_ID
 		, t1.REVIEWER
 		, t1.USE_YN
 		, t1.CREATOR
@@ -1462,6 +1481,7 @@
 		, t1.COMMENT
 		, t1.CONFIRMATION_FILE_ID
 		, t1.OSS_FILE_ID
+		, t1.BINARY_FILE_ID
 		, t1.REVIEWER
 		, t1.USE_YN
 		, t2.USER_NAME AS CREATOR
@@ -1706,4 +1726,115 @@
 		  FROM OSS_ANALYSIS_STATUS
 		 WHERE PRJ_ID = #{partnerId}
 	 </select>
+	 
+	 <select id="findBinAutoIdentificationWithBinaryText" parameterType="String" resultType="oss.fosslight.domain.OssComponents">
+		SELECT 
+			T1.COMPONENT_ID, T1.BINARY_NAME, T1.OSS_NAME, T1.OSS_VERSION, T1.FILE_PATH, T1.EXCLUDE_YN, T1.BINARY_NOTICE, T1.CUSTOM_BINARY_YN, T1.REFERENCE_ID, T1.REFERENCE_DIV
+		FROM OSS_COMPONENTS T1
+			INNER JOIN OSS_COMPONENTS_LICENSE T2 
+				ON T1.COMPONENT_ID = T2.COMPONENT_ID 
+					AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
+					AND IFNULL(T2.LICENSE_NAME, '') = ''
+		WHERE 
+			T1.REFERENCE_ID = #{partnerId} 
+			AND T1.REFERENCE_DIV = '20' 
+			AND IFNULL(T1.EXCLUDE_YN, 'N') = 'N' 
+			AND IFNULL(T1.BINARY_NAME, '') <![CDATA[<>]]> ''
+			AND IFNULL(T1.OSS_NAME, '') = ''
+	</select>
+	
+	<insert id="insertBinaryOssComponents" parameterType="oss.fosslight.domain.ProjectIdentification"  useGeneratedKeys="true" keyProperty="componentId">
+		INSERT INTO
+			OSS_COMPONENTS
+			(
+			REFERENCE_ID
+			, REFERENCE_DIV
+			, COMPONENT_IDX
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
+			, OSS_ID
+			</if>
+			, OSS_NAME
+			, OSS_VERSION
+			, DOWNLOAD_LOCATION
+			, HOMEPAGE
+			, FILE_PATH
+			, EXCLUDE_YN
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+			, COPYRIGHT
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			, BINARY_NAME
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
+			, BINARY_SIZE
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
+			, BINARY_NOTICE
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
+			, CUSTOM_BINARY_YN
+			</if>
+			, REF_PARTNER_ID
+			, REPORT_FILE_ID
+			, PRE_OBLIGATION_TYPE
+			, ADMIN_CHECK_YN
+			)
+			VALUES
+			(
+			#{referenceId}
+			, #{referenceDiv}
+			, (CASE WHEN IFNULL(#{componentIdx}, '') = '' THEN (SELECT IFNULL(MAX(COMPONENT_IDX), 0) + 1 FROM OSS_COMPONENTS OC WHERE REFERENCE_ID=#{referenceId} AND REFERENCE_DIV=#{referenceDiv}) ELSE #{componentIdx} END)
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
+			, (CASE WHEN #{ossId} = '' THEN NULL ELSE #{ossId} END)
+			</if>
+			, #{ossName}
+			, REPLACE(#{ossVersion}, 'N/A','')
+			, #{downloadLocation}
+			, #{homepage}
+			, #{filePath}
+			, #{excludeYn}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+			, #{copyright}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
+			, #{binaryName}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binarySize)">
+			, #{binarySize}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryNotice)">
+			, #{binaryNotice}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(customBinaryYn)">
+			, #{customBinaryYn}
+			</if>
+			, #{refPartnerId}
+			, #{reportFileId}
+			, #{preObligationType}
+			, #{adminCheckYn}
+			)
+	</insert>
+	
+	<update id="updateOssList" parameterType="oss.fosslight.domain.ProjectIdentification" useGeneratedKeys="true" keyProperty="componentId">
+	/* ProjectMapper.updateSrcOssList */
+		UPDATE 
+			OSS_COMPONENTS 
+		SET OSS_ID = (SELECT (CASE WHEN CONCAT(OSS_ID) = '' THEN NULL ELSE OSS_ID END) FROM OSS_MASTER WHERE OSS_NAME = TRIM(#{ossName}) AND OSS_VERSION = TRIM(REPLACE(#{ossVersion}, 'N/A','')) AND USE_YN = 'Y')
+			, OSS_NAME = TRIM(#{ossName})
+			, OSS_VERSION = TRIM(REPLACE(#{ossVersion}, 'N/A',''))
+			, DOWNLOAD_LOCATION = #{downloadLocation}
+			, HOMEPAGE = #{homepage}
+			, FILE_PATH = #{filePath}
+			, EXCLUDE_YN = #{excludeYn}
+			, BINARY_NAME = #{binaryName}
+			, BINARY_NOTICE = #{binaryNotice}
+			, CUSTOM_BINARY_YN = #{customBinaryYn}
+			, COPYRIGHT = #{copyrightText}
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
+			, OBLIGATION_TYPE = #{obligationType}
+			</if>
+			, COMMENTS = #{comments}
+		WHERE
+			COMPONENT_ID = #{componentId}
+	</update>
 </mapper>

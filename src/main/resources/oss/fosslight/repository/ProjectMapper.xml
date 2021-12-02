@@ -2450,7 +2450,10 @@
 			</choose>
 			IFNULL(M.HOMEPAGE, '') AS HOMEPAGE,
 			IFNULL(M.FILE_PATH, '') AS FILE_PATH,
-			IFNULL(M.BINARY_NAME, '') AS BINARY_NAME,
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('20', referenceDiv)">IFNULL(M.BINARY_NAME, M.FILE_PATH) AS BINARY_NAME,</when>
+				<otherwise>IFNULL(M.BINARY_NAME, '') AS BINARY_NAME,</otherwise>
+			</choose>
 			IFNULL(M.BINARY_SIZE, '') AS BINARY_SIZE,
 			IFNULL(M.BINARY_NOTICE, '') AS BINARY_NOTICE,
 			IFNULL(M.CUSTOM_BINARY_YN, 'N') AS CUSTOM_BINARY_YN,
