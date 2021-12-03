@@ -53,12 +53,19 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 		ArrayList<T2CodeDtl> codeDetailList = codeMapper.selectCodeDetailList(vo);
 		
 		if(codeDetailList.size() > 0){
-			for(int i=0; i<codeDetailList.size(); i++){
-				codeDetailList.get(i).setCdDtlNoOrign(codeDetailList.get(i).getCdDtlNo());
+			for (T2CodeDtl t2CodeDtl : codeDetailList) {
+				if (isGithubTokenCodeDtl(t2CodeDtl)) {
+					t2CodeDtl.setCdDtlExp("");
+				}
+				t2CodeDtl.setCdDtlNoOrign(t2CodeDtl.getCdDtlNo());
 			}
 		}
 			
 		return codeDetailList;
+	}
+
+	private boolean isGithubTokenCodeDtl(T2CodeDtl t2CodeDtl) {
+		return isExternalServiceCodeNo(t2CodeDtl.getCdNo()) && isGithubTokenCodeDtlNo(t2CodeDtl.getCdDtlNo());
 	}
 
 	/**
@@ -124,17 +131,50 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 				}
 			}
 		}
-		
-		// 1. 코드 상세 전체 삭제
-		T2Code codeVo = new T2Code();
-		codeVo.setCdNo(cdNo);
-		
-		codeMapper.deleteCodeDetailAll(codeVo);
-		
-		// 2. 전체 상세 코드 재등록(추가 / 변경 / 삭제)
-		for (T2CodeDtl vo : dtlList) {
-			codeMapper.insertCodeDetail(vo);
+
+		if(isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
+			// 1. 기존 github token값 보관
+			T2CodeDtl githubTokenDtl = codeMapper.getCodeDetail(cdNo, CoConstDef.CD_DTL_GITHUB_TOKEN);
+
+			// 2. 코드 상세 전체 삭제
+			T2Code codeVo = new T2Code();
+			codeVo.setCdNo(cdNo);
+
+			codeMapper.deleteCodeDetailAll(codeVo);
+
+			// 3. 전체 상세 코드 재등록(추가 / 변경 / 삭제)
+			for (T2CodeDtl codeDtl : dtlList) {
+				if(isGithubTokenCodeDtlNo(codeDtl.getCdDtlNo()) && codeDtl.getCdDtlExp().isEmpty()) {
+					codeMapper.insertCodeDetail(githubTokenDtl);
+				} else {
+					codeMapper.insertCodeDetail(codeDtl);
+				}
+			}
+		} else {
+			// 1. 코드 상세 전체 삭제
+			T2Code codeVo = new T2Code();
+			codeVo.setCdNo(cdNo);
+
+			codeMapper.deleteCodeDetailAll(codeVo);
+
+			// 2. 전체 상세 코드 재등록(추가 / 변경 / 삭제)
+			for (T2CodeDtl vo : dtlList) {
+				codeMapper.insertCodeDetail(vo);
+			}
 		}
+	}
+
+	private boolean isGithubTokenCodeDtlNo(String cdDtlNo) {
+		return cdDtlNo.equals(CoConstDef.CD_DTL_GITHUB_TOKEN);
+	}
+
+	private boolean isExternalServiceCodeNo(String cdNo) {
+		return cdNo.equals(CoConstDef.CD_EXTERNAL_SERVICE_SETTING);
+	}
+
+	private boolean hasGithubTokenCodeDtl(List<T2CodeDtl> dtlList) {
+		return dtlList.stream()
+				.anyMatch(codeDtl -> codeDtl.getCdDtlNo().equals(CoConstDef.CD_DTL_GITHUB_TOKEN));
 	}
 
 	@Override
