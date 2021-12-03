@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.20 (03/12/2021)
+## Changes
+## 🚀 Features
+
+- Change the creator and modifier from ID to name in OSS list, License … @acafela (#295)
+
+## 🐛 Hotfixes
+
+- Fix the bug where data is not output when sending mail @yugeeklab (#313)
+
+---
+
 ## v1.2.19 (03/12/2021)
 ## Changes
 ## 🚀 Features
