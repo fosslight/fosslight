@@ -10,8 +10,8 @@ var CTX_PATH = "${ctxPath}";
 <link rel="stylesheet" type="text/css" href="/css/uploadFile/uploadfile.css" />
 <link rel="stylesheet" type="text/css" href="/css/jquery.qtip.css" />
 
-<script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="/js/jquery-migrate-1.2.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="/js/jquery-migrate-1.4.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/js/jqgrid4.7/js/i18n/grid.locale-en.js"></script>
 <script type="text/javascript" src="/js/uploadFile/jquery.uploadfile.min.js"></script>

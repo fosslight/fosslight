@@ -6,8 +6,8 @@ var CTX_PATH = "${ctxPath}";
 <%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/common.css?${cssVersion}" />
-<script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="/js/jquery-migrate-1.2.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="/js/jquery-migrate-1.4.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
 
 <script type="text/javascript" src="/js/jquery.form.min.js"></script>
