@@ -47,6 +47,15 @@ public interface CodeMapper {
 	public void saveConfiguration(T2Code code);
 
 	/**
+	 * Get the Detail Code.
+	 *
+	 * @param cdNo the cd no
+	 * @param cdDtlNo the cd dtl no
+	 * @return the code dtl T2CodeDtl object
+	 */
+	public T2CodeDtl getCodeDetail(@Param("cdNo") String cdNo, @Param("cdDtlNo") String cdDtlNo);
+
+	/**
 	 * Gets the Detail Code Name.
 	 *
 	 * @param cdNo the cd no

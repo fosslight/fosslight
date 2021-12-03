@@ -57,13 +57,13 @@
 		WHERE CD_NO = #{cdNo}
 		ORDER BY CD_ORDER
 	</select>
-	<!-- 
-	<select id="selectCodeDetail" parameterType="oss.fosslight.domain.T2CodeDtl" resultType="oss.fosslight.domain.T2CodeDtl">
+
+	<select id="getCodeDetail" resultType="oss.fosslight.domain.T2CodeDtl">
 		SELECT 
 			CD_NO
 			,CD_SUB_NO
 			,CD_DTL_NO
-			,CD_DTL_NO AS gridId
+			,CD_DTL_NO
 			,CD_DTL_NM
 			,CD_DTL_EXP
 			,CD_ORDER
@@ -71,10 +71,8 @@
 		FROM T2_CODE_DTL
 		WHERE CD_NO = #{cdNo}
 		  AND CD_DTL_NO = #{cdDtlNo}
-		ORDER BY CD_ORDER
 	</select>
-	 -->
-	
+
 	<insert id="insertCode" parameterType="oss.fosslight.domain.T2Code">
 		INSERT
 		INTO T2_CODE

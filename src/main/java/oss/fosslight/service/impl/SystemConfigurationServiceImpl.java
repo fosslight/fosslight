@@ -155,8 +155,10 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 			tokenAuthList.stream().map(c -> {
 				switch (c.getCdDtlNo()) {
 					case CoConstDef.CD_DTL_GITHUB_TOKEN:
-						c.setCdDtlExp((String) tokenDetailMap.get(CoConstDef.CD_DTL_GITHUB_TOKEN));
-
+						String token = (String) tokenDetailMap.get(CoConstDef.CD_DTL_GITHUB_TOKEN);
+						if(!token.isEmpty()) {
+							c.setCdDtlExp(token);
+						}
 						break;
 				}
 
