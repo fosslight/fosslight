@@ -324,6 +324,10 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .evidenceIcon.existdb {background-color:#9B59B6;background-position:-28px -1px;}
 .evidenceIcon.clearlydefined {background-color:#0064B5;background-position:-52px -1px}
 
+.iconDeliveryForm {display:inline-block;width:16px;height:16px;line-height:1000%;font-size:0;overflow:hidden;border-radius:20px;background: url("../images/img_icon_delivery_form.png?v=20180612") no-repeat;}
+.iconDeliveryForm.source {background-color:#9a58b5; background-position:-4px -4px}
+.iconDeliveryForm.binary {background-color:#c56272;background-position:-28px -4px;}
+
 .iconReport {display:inline-block;margin-left:3px;width:20px;height:20px;font-size:0;background: url("../images/report-icon-32.png") center top no-repeat;}
 
 /* 2017-06-07 */
