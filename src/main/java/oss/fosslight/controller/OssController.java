@@ -526,9 +526,6 @@ public class OssController extends CoTopComponent{
 		if(ossMailInfo.getOssNicknames() != null) {
 			ossMailInfo.setOssNickname(CommonFunction.arrayToString(ossMailInfo.getOssNicknames(), "<br>"));	
 		}
-		
-		// 삭제처리
-		ossService.deleteOssMaster(ossMaster);
 
 		CoCodeManager.getInstance().refreshOssInfo();
 		resCd="10";
@@ -554,6 +551,9 @@ public class OssController extends CoTopComponent{
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+
+		// 삭제처리
+		ossService.deleteOssMaster(ossMaster);
 		
 		resMap.put("resCd", resCd);
 		
