@@ -2503,7 +2503,7 @@ public class CoMailManager extends CoTopComponent {
 				bean.setLicenseName((String) dataMap.get("LICENSE_NAME"));
 				
 				String ossId = (String) dataMap.get("OSS_ID");
-				String ossLicenseIds = (String) dataMap.get("LICENSE_ID_LIST");
+				String ossLicenseIds = avoidNull((String) dataMap.get("LICENSE_ID_LIST"));
 				String copyrightStr = "";  // oss master의 copyright
 				String line = "<br>";
 				
