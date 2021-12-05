@@ -181,7 +181,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 			
 			// Search Priority 3. find by oss download location
-			prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss);
+			prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
+					.filter(CommonFunction.distinctByKeys(
+							ProjectIdentification::getOssName,
+							ProjectIdentification::getLicenseName
+					))
+					.collect(Collectors.toList());
 			checkedLicense = combineOssLicenses(prjOssLicenses);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense) && !isEachOssVersionDiff(prjOssLicenses)) {
