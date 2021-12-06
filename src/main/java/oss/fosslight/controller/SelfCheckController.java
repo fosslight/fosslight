@@ -146,23 +146,33 @@ public class SelfCheckController extends CoTopComponent {
 	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project = selfCheckService.getProjectDetail(project);
-
-		model.addAttribute("project", project);
-		model.addAttribute("detail", toJson(project));
-		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		
-		// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
-		if(CommonFunction.isAdmin()) {
-			List<T2Users> userList = userService.selectAllUsers();
+		try {
+			project = selfCheckService.getProjectDetail(project);
 			
-			if(userList != null) {
-				model.addAttribute("userWithDivisionList", userList);
+			if(CoConstDef.FLAG_YES.equals(project.getUseYn())) {
+				model.addAttribute("project", project);
+				model.addAttribute("detail", toJson(project));
+				model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+				model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+				model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+				model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+				
+				// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
+				if(CommonFunction.isAdmin()) {
+					List<T2Users> userList = userService.selectAllUsers();
+					
+					if(userList != null) {
+						model.addAttribute("userWithDivisionList", userList);
+					}
+				}
+			} else {
+				model.addAttribute("message", "Reqeusted URL is for a deleted Self-Check Project. Please contact the creator or watcher of the Self-Check Project.");
 			}
+		} catch (Exception e) {
+			model.addAttribute("message", "Reqeusted URL is for a deleted Self-Check Project. Please contact the creator or watcher of the Self-Check Project.");
 		}
+		
 		
 		return SELF_CHECK.VIEW_JSP;
 	}
