@@ -170,7 +170,7 @@ public class SelfCheckController extends CoTopComponent {
 				model.addAttribute("message", "Reqeusted URL is for a deleted Self-Check Project. Please contact the creator or watcher of the Self-Check Project.");
 			}
 		} catch (Exception e) {
-			model.addAttribute("message", "Reqeusted URL is for a deleted Self-Check Project. Please contact the creator or watcher of the Self-Check Project.");
+			model.addAttribute("message", "Reqeusted URL contains Self-Check Project ID that doesn't exist. Please check the Self-Check Project ID again.");
 		}
 		
 		

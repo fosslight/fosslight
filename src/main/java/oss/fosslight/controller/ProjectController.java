@@ -404,7 +404,7 @@ public class ProjectController extends CoTopComponent {
 				model.addAttribute("message", "Reqeusted URL is for a deleted Project. Please contact the creator or watcher of the project.");
 			}
 		} catch (Exception e) {
-			model.addAttribute("message", "Reqeusted URL is for a deleted Project. Please contact the creator or watcher of the project.");
+			model.addAttribute("message", "Reqeusted URL contains Project ID that doesn't exist. Please check the Project ID again.");
 		}
 		
 		return PROJECT.VIEW_JSP;
