@@ -1222,7 +1222,7 @@
 			, #{licenseId}
 			, TRIM(#{licenseName})
 			, #{copyrightText}
-			, 'N'
+			, #{excludeYn}
 			)
 	</insert>
 	
@@ -2029,7 +2029,7 @@
 			, #{licenseId}
 			, #{licenseName}
 			, #{copyrightText}
-			, 'N'
+			, #{excludeYn}
 			)
 	</insert>
 	
@@ -2698,15 +2698,13 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
-					, EXCLUDE_YN
 					)
 			SELECT
 					#{componentId}
 					, LICENSE_ID
 					, LICENSE_NAME
 					, LICENSE_TEXT
-					, COPYRIGHT_TEXT
-					, 'N' AS EXCLUDE_YN	
+					, COPYRIGHT_TEXT	
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 
@@ -2903,7 +2901,7 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
-					, 'N' AS EXCLUDE_YN
+					, EXCLUDE_YN
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 
