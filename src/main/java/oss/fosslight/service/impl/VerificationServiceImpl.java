@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1163,7 +1165,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// SPDX
 		String spdxSheetFileId = null;
 		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
-			spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+			Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
+			String dataStr = toJson(data);
+			spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			if(!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
@@ -1180,7 +1184,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
 			if(isEmpty(spdxSheetFileId)) {
-				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
+				String dataStr = toJson(data);
+				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 			
 			if(!isEmpty(spdxSheetFileId)) {
@@ -1222,7 +1228,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
 			if(isEmpty(spdxSheetFileId)) {
-				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
+				String dataStr = toJson(data);
+				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 			
 			if(!isEmpty(spdxSheetFileId)) {
@@ -1260,6 +1268,94 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
 				project.setSpdxTagFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
 				
+				makeZipFile = true;
+			}
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+			if(isEmpty(spdxSheetFileId)) {
+				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
+				String dataStr = toJson(data);
+				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
+			}
+
+			if(!isEmpty(spdxSheetFileId)) {
+				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
+				String sheetFullPath = spdxFileInfo.getLogiPath();
+
+				if(!sheetFullPath.endsWith("/")) {
+					sheetFullPath += "/";
+				}
+
+				sheetFullPath += spdxFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(spdxFileInfo.getLogiNm())+".json";
+				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".json";
+				String tagFullPath = spdxFileInfo.getLogiPath();
+
+				if(!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+
+				tagFullPath += targetFileName;
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
+				File spdxJsonFile = new File(tagFullPath);
+
+				if(spdxJsonFile.exists() && spdxJsonFile.length() <= 0) {
+					if(!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+
+					spdxComment += getMessage("spdx.json.failure");
+				}
+
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setSpdxJsonFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+
+				makeZipFile = true;
+			}
+		}
+
+		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+			if(isEmpty(spdxSheetFileId)) {
+				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
+				String dataStr = toJson(data);
+				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
+			}
+
+			if(!isEmpty(spdxSheetFileId)) {
+				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
+				String sheetFullPath = spdxFileInfo.getLogiPath();
+
+				if(!sheetFullPath.endsWith("/")) {
+					sheetFullPath += "/";
+				}
+
+				sheetFullPath += spdxFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(spdxFileInfo.getLogiNm())+".yaml";
+				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".yaml";
+				String tagFullPath = spdxFileInfo.getLogiPath();
+
+				if(!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+
+				tagFullPath += targetFileName;
+				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
+				File spdxYamlFile = new File(tagFullPath);
+
+				if(spdxYamlFile.exists() && spdxYamlFile.length() <= 0) {
+					if(!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+
+					spdxComment += getMessage("spdx.yaml.failure");
+				}
+
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setSpdxYamlFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+
 				makeZipFile = true;
 			}
 		}
