@@ -1222,7 +1222,7 @@
 			, #{licenseId}
 			, TRIM(#{licenseName})
 			, #{copyrightText}
-			, 'N'
+			, #{excludeYn}
 			)
 	</insert>
 	
@@ -2029,7 +2029,7 @@
 			, #{licenseId}
 			, #{licenseName}
 			, #{copyrightText}
-			, 'N'
+			, #{excludeYn}
 			)
 	</insert>
 	
@@ -2451,7 +2451,7 @@
 			IFNULL(M.HOMEPAGE, '') AS HOMEPAGE,
 			IFNULL(M.FILE_PATH, '') AS FILE_PATH,
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals('20', referenceDiv)">IFNULL(M.BINARY_NAME, M.FILE_PATH) AS BINARY_NAME,</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('20', referenceDiv)">IF(M.BINARY_NAME IS NOT NULL AND M.BINARY_NAME != '', M.BINARY_NAME, M.FILE_PATH) AS BINARY_NAME,</when>
 				<otherwise>IFNULL(M.BINARY_NAME, '') AS BINARY_NAME,</otherwise>
 			</choose>
 			IFNULL(M.BINARY_SIZE, '') AS BINARY_SIZE,
@@ -2513,6 +2513,7 @@
 		, T1.DOWNLOAD_LOCATION
 		, T1.HOMEPAGE
 		, T1.FILE_PATH
+		, IF(T1.BINARY_NAME IS NOT NULL AND T1.BINARY_NAME != '', T1.BINARY_NAME, T1.FILE_PATH) AS BINARY_NAME
 		, T1.REF_PARTNER_ID
 		, (SELECT PARTNER_NAME FROM PARTNER_MASTER WHERE PARTNER_ID = IFNULL(T1.REF_PARTNER_ID, T1.REFERENCE_ID)) AS REF_PARTNER_NAME
 		, T1.REF_PRJ_ID
@@ -2549,6 +2550,7 @@
 		, T1.DOWNLOAD_LOCATION
 		, T1.HOMEPAGE
 		, T1.FILE_PATH
+		, IF(T1.BINARY_NAME IS NOT NULL AND T1.BINARY_NAME != '', T1.BINARY_NAME, T1.FILE_PATH) AS BINARY_NAME
 		, T1.REF_PARTNER_ID
 		, (SELECT PARTNER_NAME FROM PARTNER_MASTER WHERE PARTNER_ID = IFNULL(T1.REF_PARTNER_ID, T1.REFERENCE_ID)) AS REF_PARTNER_NAME
 		, T1.REF_PRJ_ID
@@ -2696,15 +2698,13 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
-					, EXCLUDE_YN
 					)
 			SELECT
 					#{componentId}
 					, LICENSE_ID
 					, LICENSE_NAME
 					, LICENSE_TEXT
-					, COPYRIGHT_TEXT
-					, 'N' AS EXCLUDE_YN	
+					, COPYRIGHT_TEXT	
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 
@@ -2901,7 +2901,7 @@
 					, LICENSE_NAME
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
-					, 'N' AS EXCLUDE_YN
+					, EXCLUDE_YN
 			FROM 
 				OSS_COMPONENTS_LICENSE
 			WHERE 

@@ -1875,10 +1875,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 						}
 
-						bean.setDownloadLocation(downloadlocationUrl);
-						bean.setCheckName(checkName);
-						if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
-
+						if(!isEmpty(checkName)) {
+							bean.setDownloadLocation(downloadlocationUrl);
+							bean.setCheckName(checkName);
+							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
+						}
 					}
 				} else if(semicolonFlag) {
 					String downloadlocationUrl = bean.getDownloadLocation().split(";")[0];

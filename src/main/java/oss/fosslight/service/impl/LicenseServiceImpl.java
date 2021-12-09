@@ -238,7 +238,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			log.info("OSDD license update result : " + avoidNull(result));
 		}
 		
-		if(bean.getRestriction().contains(CoConstDef.CD_LICENSE_NETWORK_RESTRICTION)){
+		if(avoidNull(bean.getRestriction()).contains(CoConstDef.CD_LICENSE_NETWORK_RESTRICTION)){
 			registNetworkServerLicense(bean.getLicenseId(), "DEL");
 		}
 	}

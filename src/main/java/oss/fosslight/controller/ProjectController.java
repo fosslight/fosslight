@@ -376,26 +376,35 @@ public class ProjectController extends CoTopComponent {
 	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project = projectService.getProjectDetail(project);
 		
-		CommentsHistory comHisBean = new CommentsHistory();
-		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
-		comHisBean.setReferenceId(project.getPrjId());
-		
-		project.setUserComment(commentService.getUserComment(comHisBean));
-
-		model.addAttribute("project", project);
-		model.addAttribute("detail", toJson(project));
-		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		
-		if (CommonFunction.isAdmin()) {
-			List<T2Users> userList = userService.selectAllUsers();
+		try {
+			project = projectService.getProjectDetail(project);
 			
-			if (userList != null) {
-				model.addAttribute("userWithDivisionList", userList);
+			if(CoConstDef.FLAG_YES.equals(project.getUseYn())) {
+				CommentsHistory comHisBean = new CommentsHistory();
+				comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+				comHisBean.setReferenceId(prjId);
+				
+				project.setUserComment(commentService.getUserComment(comHisBean));
+
+				model.addAttribute("project", project);
+				model.addAttribute("detail", toJson(project));
+				model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+				model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+				model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+				
+				if (CommonFunction.isAdmin()) {
+					List<T2Users> userList = userService.selectAllUsers();
+					
+					if (userList != null) {
+						model.addAttribute("userWithDivisionList", userList);
+					}
+				}
+			} else {
+				model.addAttribute("message", "Reqeusted URL is for a deleted Project. Please contact the creator or watcher of the project.");
 			}
+		} catch (Exception e) {
+			model.addAttribute("message", "Reqeusted URL contains Project ID that doesn't exist. Please check the Project ID again.");
 		}
 		
 		return PROJECT.VIEW_JSP;
