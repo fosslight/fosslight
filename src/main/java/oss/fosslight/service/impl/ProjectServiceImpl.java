@@ -2757,6 +2757,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			projectMapper.updateProjectMaster(project);
+			
+			if(!isEmpty(project.getVerificationStatus())) {
+				verificationService.updateProjectAllowDownloadBitFlag(project);
+			}
 		}
 		
 		resultMap.put("mailType", mailType);

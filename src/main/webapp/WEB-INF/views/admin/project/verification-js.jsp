@@ -1289,7 +1289,7 @@
 			curIdenStatus = status;
 			$(".commentBtn.open").trigger( "click" );
 			$.ajax({
-				url : '<c:url value="${suffixUrl}/project/updateProjectStatus"/>',
+				url : '<c:url value="/project/updateProjectStatus"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -1396,7 +1396,7 @@
 			var customError;
 			
 			if(flag == 'save') {
-				customUrl      = '<c:url value="${suffixUrl}/project/verification/saveAjax"/>';
+				customUrl      = '<c:url value="/project/verification/saveAjax"/>';
 				customDataType = "json";
 				customSucess   = fn.onRegistSuccess;
 				customError	   = function(data){
