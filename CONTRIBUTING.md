@@ -9,12 +9,7 @@ Hi! I'm really appreciate that you'd like to contribute to this project. Your he
 3. Make your change and make sure it works properly.
 4. Commit your changes to a branch, making sure to sign-off thos changes for the [Developer Certificate of Origin](#Developer-Certificate-of-Origin).
 5. Push to your fork and submit a pull request.
-6. When you write to PR template, you can add labels based on your type of changes.
-   - ![bug fix](https://img.shields.io/badge/-bug%20fix-B60205) : Bug fix
-   - ![enhancement](https://img.shields.io/badge/-enhancement-1D76DB) : New feature
-   - ![documentation](https://img.shields.io/badge/-documentation-0E8A16) : Documentation update
-   - ![chore](https://img.shields.io/badge/-chore-0E8A16) : Refactoring, Maintenance
-7. Please wait for your pull request to be reviewed and merged!
+6. Please wait for your pull request to be reviewed and merged!
 
 Here are a few things you can do that will increase the likelihood of your pull request being accepted:
 
