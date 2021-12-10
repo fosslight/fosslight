@@ -2580,47 +2580,53 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	}
 	
 	private static String getSelfCheckListExcelPost(String search, String type) throws Exception{
-		Workbook wb = null;
+		Workbook returnWb = null;
 		Sheet sheet = null;
 		FileInputStream inFile=null;
 		
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/selfCheckList.xlsx"));
-			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
-			sheet = wb.getSheetAt(0);
-			wb.setSheetName(0, "selfCheckList");
-			
-			Type collectionType2 = new TypeToken<Project>(){}.getType();
-			Project project = (Project) fromJson(search, collectionType2);
-			List<Project> selfCheckList = selfCheckMapper.getSelfCheckList(project);
-			List<String[]> rows = new ArrayList<>();
-			
-			for(int i = 0; i < selfCheckList.size(); i++){
-				Project param = selfCheckList.get(i);
+			try (
+				Workbook wb = new XSSFWorkbook(inFile);
+			) {
+				sheet = wb.getSheetAt(0);
+				wb.setSheetName(0, "selfCheckList");
 				
-				String[] rowParam = {
-					param.getPrjId()
-					, param.getPrjName()
-					, param.getPrjVersion()
-//					, CoConstDef.COMMON_SELECTED_ETC.equals(avoidNull(param.getOsType(), CoConstDef.COMMON_SELECTED_ETC)) ? param.getOsTypeEtc() : CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, param.getOsType())
-//					, param.getDistributionType()
-					, param.getCvssScore()
-					, (isEmpty(param.getBomCnt()) ? "0" : param.getBomCnt()) + "(" + (isEmpty(param.getDiscloseCnt()) ? "0" : param.getDiscloseCnt()) + ")"
-//					, param.getDivision()
-					, param.getCreator()
-					, CommonFunction.formatDate(param.getCreatedDate())
-				};
+				Type collectionType2 = new TypeToken<Project>(){}.getType();
+				Project project = (Project) fromJson(search, collectionType2);
+				List<Project> selfCheckList = selfCheckMapper.getSelfCheckList(project);
+				List<String[]> rows = new ArrayList<>();
 				
-				rows.add(rowParam);
+				for(int i = 0; i < selfCheckList.size(); i++){
+					Project param = selfCheckList.get(i);
+					
+					String[] rowParam = {
+						param.getPrjId()
+						, param.getPrjName()
+						, param.getPrjVersion()
+	//					, CoConstDef.COMMON_SELECTED_ETC.equals(avoidNull(param.getOsType(), CoConstDef.COMMON_SELECTED_ETC)) ? param.getOsTypeEtc() : CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, param.getOsType())
+	//					, param.getDistributionType()
+						, param.getCvssScore()
+						, (isEmpty(param.getBomCnt()) ? "0" : param.getBomCnt()) + "(" + (isEmpty(param.getDiscloseCnt()) ? "0" : param.getDiscloseCnt()) + ")"
+	//					, param.getDivision()
+						, param.getCreator()
+						, CommonFunction.formatDate(param.getCreatedDate())
+					};
+					
+					rows.add(rowParam);
+				}
+				
+				//시트 만들기
+				makeSheet(sheet, rows);
+				returnWb = wb;
+			} catch (IOException e) {
+				log.error(e.getMessage());
 			}
-			
-			//시트 만들기
-			makeSheet(sheet, rows);
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
 		}
 		
-		return makeExcelFileId(wb,"selfCheckList");
+		return makeExcelFileId(returnWb,"selfCheckList");
 	}
 	
 	private static String getSelftReportExcelPost (String prjId) throws IOException, InvalidFormatException {

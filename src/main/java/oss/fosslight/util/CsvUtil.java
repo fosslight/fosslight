@@ -30,6 +30,8 @@ public class CsvUtil extends CoTopComponent {
 	private static FileService fileService 		= (FileService) 		getWebappContext().getBean(FileService.class);
 
 	public static Workbook csvFileToExcelWorkbook(File file, String readType) throws IOException{
+		Workbook returnWb = null;
+		
 		CSVParser parser = new CSVParserBuilder()
 				.withSeparator('\t')
 				.build();
@@ -37,25 +39,29 @@ public class CsvUtil extends CoTopComponent {
 		CSVReader csvReader = new CSVReaderBuilder(new FileReader(file))
 				.withCSVParser(parser)
 				.build();
+	
+		try (
+			Workbook wb = new HSSFWorkbook();
+		) {
+			Sheet sheet = wb.createSheet(readType);
 
-		Workbook wb = new HSSFWorkbook();
-		Sheet sheet = wb.createSheet(readType);
-
-		int rowIdx = 0;
-
-		String [] nextLine;
-		while ((nextLine = csvReader.readNext()) != null) {
-			int cellIdx = 0;
-			Row row = sheet.createRow(rowIdx);
-
-			for(String token : nextLine) {
-				Cell cell = row.createCell(cellIdx); cellIdx++;
-				cell.setCellValue(token);
+			int rowIdx = 0;
+	
+			String [] nextLine;
+			while ((nextLine = csvReader.readNext()) != null) {
+				int cellIdx = 0;
+				Row row = sheet.createRow(rowIdx);
+	
+				for(String token : nextLine) {
+					Cell cell = row.createCell(cellIdx); cellIdx++;
+					cell.setCellValue(token);
+				}
+	
+				rowIdx++;
 			}
-
-			rowIdx++;
+			returnWb = wb;
 		}
 
-		return wb;
+		return returnWb;
 	}
 }
