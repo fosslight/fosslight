@@ -124,6 +124,24 @@
 			
 			return display;
 		},
+		// Grid vulnerability cell display
+		displayVulnerability : function(cellvalue, options, rowObject){
+			var display = "";
+
+			if(parseInt(cellvalue) >= 9.0 ) {
+				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			} else if(parseInt(cellvalue) >= 7.0 ) {
+				display="<span class=\"iconSet vulHigh\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			} else if(parseInt(cellvalue) >= 4.0) {
+				display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			} else if(parseInt(cellvalue) > 0) {
+				display="<span class=\"iconSet vulLow\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			} else {
+				display="<span style=\"font-size:0;\"></span>";
+			}
+
+			return display;
+		},
 		reviewerChg : function(){
 			var partnerId = (this.id).replace(/[^0-9]/g,'');
 			var reviewer = Object.keys(userIdList)[Object.keys(userIdList)
@@ -172,6 +190,23 @@
 					break;
 				case "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}":
 					display = "<span class=\"iconSt progress\">Progress</span>";
+					break;
+			}
+			return display;
+		},
+		displayDeliveryForm: function (cellvalue, options, rowObject) {
+			var display = "";
+
+			switch (cellvalue) {
+				case "${ct:getConstDef('CD_DTL_PARTNER_DELIVERY_FORM_SRC')}":
+					display = "<span class=\"iconDeliveryForm source\">"
+						+ "${ct:getCodeString(ct:getConstDef('CD_PARTNER_DELIVERY_FORM'), ct:getConstDef('CD_DTL_PARTNER_DELIVERY_FORM_SRC'))}"
+						+ "</span>";
+					break;
+				case "${ct:getConstDef('CD_DTL_PARTNER_DELIVERY_FORM_BIN')}":
+					display = "<span class=\"iconDeliveryForm binary\">"
+						+ "${ct:getCodeString(ct:getConstDef('CD_PARTNER_DELIVERY_FORM'), ct:getConstDef('CD_DTL_PARTNER_DELIVERY_FORM_BIN'))}"
+						+ "</span>";
 					break;
 			}
 			return display;
@@ -225,16 +260,18 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				},
-				colNames: ['ID','3rd Party Name','Software Name','Software<br/>Version', 'Status', 'Delivery Form','Description', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
+				colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description', 'Division', 'CVE ID', 'Vulnera<br/>bility', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
 				colModel: [
 					{name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true},
 					{name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true},
 					{name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true},
-					{name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true},
+					{name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true},
 					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true},
-					{name: 'deliveryForm', index: 'deliveryForm', width: 100, align: 'center', sortable : true},
+					{name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true},
 					{name: 'description', index: 'description', width: 100, align: 'left', sortable : true},
 					{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
+					{name: 'cveId', index: 'cveId', hidden:true},
+					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false, hidden:true},
 					{name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true},
 					{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
 					{name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
@@ -269,7 +306,7 @@
 						}
 						, sortable : true
 					},
-					{name: 'comment', index: 'comment', width: 100, align: 'left', formatter:fn.displayComment, sortable : true},
+					{name: 'comment', index: 'comment', width: 100, align: 'left', formatter:fn.displayComment, sortable : true, hidden:true},
 					{name: 'fileName', index: 'fileName', width: 70, align: 'left', hidden:true}
 				],
 				onSelectRow: function(id){},
@@ -299,6 +336,23 @@
 					totalRow = data.records;
 					data = data.rows;
 
+					var target = $("#list");
+					var arr = target.jqGrid('getDataIDs');
+					var rowid;
+
+					for(var idx in arr) {
+						rowid = arr[idx];
+
+						//prjName prjVersion 데이터 join
+						var swNmVer = data[idx].softwareName;
+
+						if(data[idx].softwareVersion != ""){
+							swNmVer += " (ver "+data[idx].softwareVersion+")";
+						}
+
+						$("#list").jqGrid("setCell",rowid,"softwareName",swNmVer,"");
+					}
+
 					if(totalRow == 0){
 						var startDate = $("#createdDate1").val()||0;
 						var endDate = $("#createdDate2").val()||0;
@@ -325,13 +379,6 @@
 							if(data[i].status.indexOf("CONF") != -1){
 								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Confirm');
 							}							
-						}
-						if(data[i].deliveryForm){
-							if(data[i].deliveryForm == 'SRC') {
-								$("#list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'source form');
-							} else if(data[i].deliveryForm == 'BIN') {
-								$("#list").jqGrid("setCell", data[i].partnerId, "deliveryForm",'binary form');
-							}
 						}
 					}
 					if(!gridTooltip.existTooltip){

@@ -112,6 +112,9 @@ dependencies {
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
 
 	implementation group: 'org.spdx', name: 'tools-java', version: '1.0.3'
+	implementation (group: 'org.spdx', name: 'spdx-rdf-store', version: '1.0.2') {
+		force = true
+	}
 
 	implementation group: 'com.navercorp.lucy', name: 'lucy-xss', version: '1.6.3'
 

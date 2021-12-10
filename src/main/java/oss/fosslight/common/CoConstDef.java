@@ -327,6 +327,8 @@ public class CoConstDef {
 	
 	/** 3RD 파티 delivery form - 209 */
 	public static final String CD_PARTNER_DELIVERY_FORM = "209";
+	public static final String CD_DTL_PARTNER_DELIVERY_FORM_SRC = "SRC";
+	public static final String CD_DTL_PARTNER_DELIVERY_FORM_BIN = "BIN";
 	/** OSS Component DIVISION CODE */
 	public static final String CD_COMPONENT_DIVISION = "210";
 	public static final String CD_DTL_COMPONENT_ID_PARTNER = "10";
