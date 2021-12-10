@@ -1166,6 +1166,10 @@ public class CommonFunction extends CoTopComponent {
 					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase())) {
 						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}else {
+						if("SELF".equals(readType.toUpperCase()) && isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
+							gridBean.setFilePath(gridBean.getBinaryName());
+						}
+						
 						key = gridBean.getFilePath() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}
 					
