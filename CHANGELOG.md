@@ -1,5 +1,27 @@
 # Changelog
 
+## v1.2.21 (10/12/2021)
+## 🚀 Features
+
+- Fix OSS Notices to include SPDX (json) and SPDX (yaml) @riyenas0925 (#320)
+
+## 🐛 Hotfixes
+
+- Fix the bug where the notice file format is unchecked whenever the status is changed @FOSSLight-dev (#329)
+- Fix the license duplication bug in Check License @riyenas0925 (#318)
+
+## 🔧 Maintenance
+
+- Add test to github action for PR @yugeeklab (#301)
+- Remove the label setting for PR from the guide @soimkim (#327)
+- Change 3rd Party List Columns @soimkim (#325)
+- Update 3rd party list UI @riyenas0925 (#315)
+- Change SPDX dependecy version @riyenas0925 (#323)
+- Exception handling when accessing a deleted project @FOSSLight-dev (#322)
+- Change token to invisible @riyenas0925 (#312)
+
+---
+
 ## v1.2.20 (03/12/2021)
 ## Changes
 ## 🚀 Features
