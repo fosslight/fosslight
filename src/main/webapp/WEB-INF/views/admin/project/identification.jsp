@@ -519,7 +519,8 @@
                     	</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn" style="width: 115px;" />
-                   		</c:if>
+                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn" style="width: 100px;" />
+                    	</c:if>
                     </span>
                     <span class="right">
                         <input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
@@ -753,6 +754,7 @@
                     	<c:if test="${project.dropYn ne 'Y'}">
 	                    	<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
 	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn" style="width: 115px;" />
+	                    	<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn" style="width: 100px;" />
                     	</c:if>
                     </span>
                     <span class="right">
