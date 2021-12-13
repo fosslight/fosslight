@@ -46,6 +46,9 @@
 						success : function(resultData){
 							ossValidMsg = resultData.validMap;
 							ossDiffMsg = resultData.diffMap;
+							ossErrorMsg = resultData.error;
+
+							grid_fn.displayErrorMsg(ossErrorMsg);
 							
 							$('#ossList').jqGrid({
 									datatype: 'local',
@@ -229,8 +232,6 @@
 						var checkedEvidenceType = rowObject["checkedEvidenceType"];
 						var display = "";
 
-						console.log(checkedEvidenceType);
-
 						if(cellvalue != "" && cellvalue != undefined) {
 							if(checkedEvidenceType == "CD") {
 								display = "<div class=\"tcenter\"><a class=\"evidenceIcon clearlydefined\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
@@ -242,6 +243,11 @@
 						}
 
 						return display;
+					},
+					displayErrorMsg : function(data) {
+						if(data != undefined && data != "") {
+							$("#errorMsg").html(data);
+						}
 					},
 					getCheckedRow : function(processType){
 						var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
@@ -266,6 +272,16 @@
 				<div class="jqGridSet" style="overflow: auto; width: 98%; height: 500px;">
 					<div align="left" style="padding-bottom: 20px;">
 						<b><spring:message code="msg.project.check.license" /></b>
+						<c:choose>
+							<c:when test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_SERVICE_USED_FLAG')) eq 'N'}">
+								</br>
+								<b style="color:blue"><spring:message code="external.service.disable" /></b>
+							</c:when>
+							<c:otherwise>
+								</br>
+								<b id="errorMsg" style="color:blue"></b>
+							</c:otherwise>
+						</c:choose>
 					</div>
 					<table id="ossList"><tr><td></td></tr></table>
 					<div align="left" style="padding-top: 10px;">
