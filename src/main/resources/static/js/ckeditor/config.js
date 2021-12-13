@@ -35,4 +35,14 @@ CKEDITOR.editorConfig = function( config ) {
 
 	// Simplify the dialog windows.
 	config.removeDialogTabs = 'image:advanced;link:advanced';
+	config.extraPlugins = 'autogrow';
+	config.autoGrow_minHeight = 150;
+	config.autoGrow_maxHeight = 150;
+	config.autoGrow_bottomSpace = 50;
+
+	config.uploadUrl  = '/imageupload/upload2';
+	config.filebrowserUploadUrl = '/imageupload/upload';
+	config.image_previewText = 'In publishing and graphic design, lorem ipsum is placeholder text (filler text) commonly used to demonstrate the graphic elements of a document or visual presentation';
+	config.pasteFromWordRemoveFontStyles = false; 
+	config.pasteFromWordRemoveStyles = false;
 };

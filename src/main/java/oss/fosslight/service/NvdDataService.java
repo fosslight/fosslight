@@ -143,9 +143,11 @@ public class NvdDataService {
 			nvdDataMapper.deleteNvdDataTempV3();
 			
 			int cnt = nvdDataMapper.getProducVerCnt();
+			List<Map<String, Object>> itemList = null;
+			List<Map<String, Object>> params = null;
 			for(int idx = 0; idx < cnt; ) {
-				List<Map<String, Object>> itemList = nvdDataMapper.getProducVerList(idx, 1000);
-				List<Map<String, Object>> params = new ArrayList<>();
+				itemList = nvdDataMapper.getProducVerList(idx, 1000);
+				params = new ArrayList<>();
 				for(Map<String, Object> item : itemList) {
 					params.add(nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION")));
 				}
@@ -201,22 +203,25 @@ public class NvdDataService {
 		
 		if(map.containsKey("CVE_Items")) {
 			List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
+			Map<String, Object> cveInfo = null;
+			Map<String, Object> comapare = null;
+			List<Map<String, String>> ossList = null;
+			List<Map<String, Object>> cpe_match_all = null;
 			for(Map<String, Object> cveItem : cveItems) {
 				
-				Map<String, Object> cveInfo = cveDatajsonReader(cveItem);
+				cveInfo = cveDatajsonReader(cveItem);
 				if(cveInfo == null || cveInfo.isEmpty()) {
 					continue;
 				}
 				
 				String cveId = (String) cveInfo.get("cveId");
-				Map<String, Object> comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
-				
-				List<Map<String, String>> ossList = null;
+				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
 				
 				ossList = new ArrayList<>();
 				// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
 				// 적용대상 cpe match list
-				List<Map<String, Object>> cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
+				List<String> matchNames = null;
+				cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
 				for (Map<String, Object> cpe_match_data : cpe_match_all) {
 					// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 					// Version Range 조건 취득
@@ -240,7 +245,7 @@ public class NvdDataService {
 								(String) cpe_match_data.get("versionEndExcluding"));
 					}
 
-					List<String> matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
+					matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
 
 					// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
 					if (matchNames == null) {
