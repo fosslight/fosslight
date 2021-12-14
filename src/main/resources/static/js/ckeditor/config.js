@@ -37,7 +37,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.removeDialogTabs = 'image:advanced;link:advanced';
 	config.extraPlugins = 'autogrow';
 	config.autoGrow_minHeight = 150;
-	config.autoGrow_maxHeight = 150;
+	config.autoGrow_maxHeight = 350;
 	config.autoGrow_bottomSpace = 50;
 
 	config.uploadUrl  = '/imageupload/upload2';
