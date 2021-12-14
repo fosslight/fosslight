@@ -1063,7 +1063,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			$('#list').jqGrid('delRowData',id);
 		},
 		binaryTab : function(){
-			createTabInFrame('BAT List', '#/bat/list');
+			window.open('https://github.com/fosslight/fosslight_binary_scanner', '_blank');
 		},
 		selectDivision : function(){
 			var division = $('#userDivision').val();
