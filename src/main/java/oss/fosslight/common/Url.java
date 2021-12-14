@@ -203,6 +203,9 @@ public final class Url {
 		public static final String OSS_SYNC_DETAILS_VIEW_AJAX_JSP = TILES_AJAX_ROOT + PATH + "/ossSyncDetailview";
 		public static final String OSS_SYNC_UPDATE = PATH + "/ossSyncUpdate";
 		public static final String OSS_SYNC_LIST_VALIDATION = PATH + "/ossSyncListValidation";
+		
+		public static final String OSS_BULK_EDIT_POPUP = PATH + "/ossBulkEditPopup";
+		public static final String OSS_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/ossBulkEditPopup";
 	}
 	
 	public static final class PROJECT {
