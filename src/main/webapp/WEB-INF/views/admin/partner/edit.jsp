@@ -117,7 +117,7 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.deliveryForm" /></th>
 							<td class="dCase">
-								<p class="pd5">If you exist in binary form 3rd party software, You can check opensource information using the <a href="#none" onclick="fn.binaryTab()" class="txBlueIt">Binary Analysis</a></p>
+								<p class="pd5"><spring:message code="msg.partner.deliveryForm.notice" /></p>
 								<span class="selectSet w150">
 									<strong for="deliveryForm" title="selected value">Source Code Form</strong>
 									<select id="deliveryForm" name="deliveryForm">
