@@ -1934,4 +1934,16 @@ public class OssController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(false, "false");
 	}
+	
+	@GetMapping(value=OSS.OSS_BULK_EDIT_POPUP, produces = "text/html; charset=utf-8")
+	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res, 
+			@RequestParam(value="rowId", required=true)String rowId,
+			@RequestParam(value="target", required=true)String target,
+			Model model){
+		
+		model.addAttribute("rowId", rowId);
+		model.addAttribute("target", target);
+		
+		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+	}
 }
