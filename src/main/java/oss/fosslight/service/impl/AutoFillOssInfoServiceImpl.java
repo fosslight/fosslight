@@ -512,12 +512,14 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					if(updateCnt >= 1) {
 						String commentId = paramBean.getReferenceId();
 						String checkOssLicenseComment = "";
-						String changeOssLicenseInfo = "<p>"
-								+ paramBean.getOssName()
-								+ " (" + paramBean.getOssVersion() + ") "
-								+ paramBean.getDownloadLocation() + " "
-								+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense()
-								+ "</p>";
+						String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
+
+						if(!paramBean.getOssVersion().isEmpty()) {
+							changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
+						}
+
+						changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
+								+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
 						CommentsHistory commentInfo = null;
 
 						if(isEmpty(commentId)) {
