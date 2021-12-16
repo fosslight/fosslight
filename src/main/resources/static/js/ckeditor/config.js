@@ -45,4 +45,5 @@ CKEDITOR.editorConfig = function( config ) {
 	config.image_previewText = 'In publishing and graphic design, lorem ipsum is placeholder text (filler text) commonly used to demonstrate the graphic elements of a document or visual presentation';
 	config.pasteFromWordRemoveFontStyles = false; 
 	config.pasteFromWordRemoveStyles = false;
+	config.filebrowserUploadMethod = 'form';
 };

@@ -333,6 +333,7 @@
 				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_PROGRESS'))}":
 					display = "<span class=\"iconSt draft\">"+ cellvalue +"</span>";
 					break;
+					
 				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_REQUEST'))}":
 					display = "<span class=\"iconSt request\">Request</span>";
 					break;
@@ -344,7 +345,12 @@
 				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}":
 					display = "<span class=\"iconSt complete\">"+cellvalue+"</span>";
 					break;
+
+				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}":
+					display = "<span class=\"iconSt drop\">"+cellvalue+"</span>";	
+					break;
 			}
+			
 			
 			return display;
 		},
@@ -389,12 +395,12 @@
 	var gridTooltip = {
 		typeCodes : [],
 		tooltipCont : "<div class=\"tooltipData\">"
-	                   +"<dl><dt><span class=\"iconSt draft\">Progress</span>Progress</dt></dl><br>"
-	                   +"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
-	                   +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
-	                   +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
-	                   +"<dl><dt><span class=\"iconSt delay\">Delay</span>Delay</dt></dl><br>"
-	                   +"</div>",
+			           +"<dl><dt><span class=\"iconSt draft\">Progress</span>Progress</dt></dl><br>"
+			           +"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
+			           +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
+			           +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
+			           +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
+			           +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
 		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
