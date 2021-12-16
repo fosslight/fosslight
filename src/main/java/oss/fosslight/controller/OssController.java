@@ -527,7 +527,6 @@ public class OssController extends CoTopComponent{
 			ossMailInfo.setOssNickname(CommonFunction.arrayToString(ossMailInfo.getOssNicknames(), "<br>"));	
 		}
 
-		CoCodeManager.getInstance().refreshOssInfo();
 		resCd="10";
 		
 		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
@@ -554,6 +553,7 @@ public class OssController extends CoTopComponent{
 
 		// 삭제처리
 		ossService.deleteOssMaster(ossMaster);
+		CoCodeManager.getInstance().refreshOssInfo();
 		
 		resMap.put("resCd", resCd);
 		
