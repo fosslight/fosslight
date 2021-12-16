@@ -110,10 +110,10 @@
 										
 										if(result.length == idArry.length){
 											if(!failFlag){
-												var successMsg = 'Successfully changed OSS name into OSS table';
+												var successMsg = '<spring:message code="msg.project.check.oss.name.success" />';
 												
 												<c:if test="${projectInfo.targetName eq 'identification'}">
-												successMsg += '.<br>(It moves to the tab you entered first.)';
+												successMsg += '<br>(<spring:message code="msg.project.entered.first.tab" />)';
 												</c:if>
 												
 												alertify.success(successMsg, 5); // 5sec동안 message 출력

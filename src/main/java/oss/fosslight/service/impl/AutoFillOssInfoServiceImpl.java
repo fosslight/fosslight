@@ -516,6 +516,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 						if(!paramBean.getOssVersion().isEmpty()) {
 							changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
+						} else {
+							changeOssLicenseInfo += " ";
 						}
 
 						changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
@@ -523,7 +525,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						CommentsHistory commentInfo = null;
 
 						if(isEmpty(commentId)) {
-							checkOssLicenseComment  = "<p><b>The following Licenses were modified by Check License.</b></p>";
+							checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
 							checkOssLicenseComment += changeOssLicenseInfo;
 							CommentsHistory commHisBean = new CommentsHistory();
 							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
