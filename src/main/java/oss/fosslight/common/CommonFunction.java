@@ -1163,10 +1163,14 @@ public class CommonFunction extends CoTopComponent {
 				
 				for(ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
 					String key = "";
-					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase())) {
+					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
+						if(!isEmpty(gridBean.getFilePath()) && isEmpty(gridBean.getBinaryName())) {
+							gridBean.setBinaryName(gridBean.getFilePath());
+						}
+						
 						key = gridBean.getBinaryName() + "-" + gridBean.getOssName() + "-" + gridBean.getOssVersion() + "-" + gridBean.getLicenseName() + "-" + gridBean.getExcludeYn();
 					}else {
-						if("SELF".equals(readType.toUpperCase()) && isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
+						if(isEmpty(gridBean.getFilePath()) && !isEmpty(gridBean.getBinaryName())) {
 							gridBean.setFilePath(gridBean.getBinaryName());
 						}
 						
@@ -1218,7 +1222,7 @@ public class CommonFunction extends CoTopComponent {
 					String key4 = ossName + "-" + (licenseMaster != null ? licenseMaster.getLicenseType() : "");
 					String gridId = "";
 					
-					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase())) {
+					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
 						key2 = gridBean.getBinaryName() + "-" + ossName + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
 					}else {
 						key2 = gridBean.getFilePath() + "-" + ossName + "-" + gridBean.getOssVersion() + "-" + gridBean.getExcludeYn();
