@@ -5,6 +5,7 @@
 
 package oss.fosslight.controller;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.core.io.FileSystemResource;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -53,6 +57,14 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
+import oss.fosslight.service.VerificationService;
+import oss.fosslight.repository.VerificationMapper;
+import oss.fosslight.domain.File;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssNotice;
+import oss.fosslight.domain.CoMail;
+import oss.fosslight.domain.CoMailManager;
+import oss.fosslight.domain.History;
 
 @Controller
 public class SelfCheckController extends CoTopComponent {
@@ -63,7 +75,8 @@ public class SelfCheckController extends CoTopComponent {
 	@Autowired MailService mailService;
 	@Autowired T2UserService userService;
 	@Autowired SelfCheckService selfCheckService;
-	
+	@Autowired VerificationService verificationService;
+	@Autowired VerificationMapper verificationMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired CodeMapper codeMapper;
 	
@@ -583,4 +596,428 @@ public class SelfCheckController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(resultMap);
 	}
+
+	@GetMapping(value = SELF_CHECK.VERIFICATION_PAGE_ID, produces = "text/html; charset=utf-8")
+	public String list(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		Project projectMaster = selfCheckService.getProjectDetail(project);
+		
+		if(!StringUtil.isEmpty(projectMaster.getCreator())){
+			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+		comHisBean.setReferenceId(projectMaster.getPrjId());
+		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+		project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+
+		OssNotice _noticeInfo = selfCheckService.setCheckNotice(projectMaster);
+
+		if(_noticeInfo != null && CoConstDef.FLAG_NO.equals(projectMaster.getUseCustomNoticeYn())) {
+			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
+			model.addAttribute("ossNotice", _noticeInfo);
+		}
+
+		projectMaster.setPrjId(_noticeInfo.getPrjId());
+		projectMaster.setAllowDownloadNoticeHTMLYn("Y");
+		projectMaster.setAllowDownloadNoticeTextYn("N");
+		projectMaster.setAllowDownloadSimpleHTMLYn("N");
+		projectMaster.setAllowDownloadSimpleTextYn("N");
+		projectMaster.setAllowDownloadSPDXSheetYn("N");
+		projectMaster.setAllowDownloadSPDXRdfYn("N");
+		projectMaster.setAllowDownloadSPDXTagYn("N");
+		
+		//프로젝트 정보
+		model.addAttribute("project", projectMaster);
+		List<OssComponents> list = selfCheckService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
+		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
+		List<String> duplLicenseCheckList = new ArrayList<>(); // 중목제거용
+		
+		// 사용중인 라이선스에 user guide가 설정되어 있는 경우 체크
+		if(list != null && !list.isEmpty()) {
+			for(OssComponents bean : list) {
+				// multi license의 경우 콤마 구분으로 반환됨
+				if(!isEmpty(bean.getLicenseName())) {
+					LicenseMaster licenseBean;
+					for(String license : bean.getLicenseName().split(",", -1)) {
+						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
+						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
+								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())
+								&& CoConstDef.FLAG_YES.equals(licenseBean.getObligationDisclosingSrcYn())) {
+							userGuideLicenseList.add(licenseBean);
+							duplLicenseCheckList.add(licenseBean.getLicenseId());
+						}
+					}
+				}
+			}
+		}
+		
+		List<File> files = new ArrayList<File>();
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
+		
+		model.addAttribute("verify", toJson(selfCheckService.getVerificationOne(project)));
+		model.addAttribute("ossList", toJson(list));
+		model.addAttribute("files", files);
+		
+		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		
+		return SELF_CHECK.PAGE_JSP;
+	}
+
+	@GetMapping(value = SELF_CHECK.VERIFICATION_PAGE_DIV_ID, produces = "text/html; charset=utf-8")
+	public String list2(@PathVariable String prjId, @PathVariable String initDiv, HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		Project projectMaster = selfCheckService.getProjectDetail(project);
+		
+		if(!StringUtil.isEmpty(projectMaster.getCreator())){
+			projectMaster.setPrjDivision(selfCheckService.getDivision(projectMaster));
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+		comHisBean.setReferenceId(projectMaster.getPrjId());
+		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+		
+		//프로젝트 정보
+		model.addAttribute("project", projectMaster);
+		
+		OssNotice _noticeInfo = selfCheckService.setCheckNotice(projectMaster);
+				
+		if(_noticeInfo != null && CoConstDef.FLAG_NO.equals(projectMaster.getUseCustomNoticeYn())) {
+			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
+			model.addAttribute("ossNotice", _noticeInfo);
+		}
+		
+		List<OssComponents> list = selfCheckService.getVerifyOssList(projectMaster);
+		
+		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
+		// 중목제거용
+		List<String> duplLicenseCheckList = new ArrayList<>();
+		
+		// 사용중인 라이선스에 user guide가 설정되어 있는 경우 체크
+		if(list != null && !list.isEmpty()) {
+			for(OssComponents bean : list) {
+				// multi license의 경우 콤마 구분으로 반환됨
+				if(!isEmpty(bean.getLicenseName())) {
+					LicenseMaster licenseBean;
+					for(String license : bean.getLicenseName().split(",", -1)) {
+						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
+						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
+								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())) {
+							userGuideLicenseList.add(licenseBean);
+							duplLicenseCheckList.add(licenseBean.getLicenseId());
+						}
+					}
+					
+				}
+			}
+		}
+		
+		List<File> files = new ArrayList<File>();
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
+		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
+		
+		model.addAttribute("verify", toJson(selfCheckService.getVerificationOne(project)));
+		model.addAttribute("ossList", toJson(list));
+		model.addAttribute("files", files);
+		model.addAttribute("initDiv", initDiv);
+		
+		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
+		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
+		
+		return SELF_CHECK.PAGE_JSP;
+	}
+
+	@PostMapping(value = SELF_CHECK.VERIFICATION_NOTICE_AJAX)
+	public @ResponseBody ResponseEntity<Object>  getNoticeHtml(HttpServletRequest req,HttpServletResponse res, Model model,	//
+			@RequestParam(value="confirm", defaultValue="")String confirm, //
+			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(value="allowDownloadNoticeHTMLYn", defaultValue="")String allowDownloadNoticeHTMLYn, //
+			@RequestParam(value="allowDownloadNoticeTextYn", defaultValue="")String allowDownloadNoticeTextYn, //
+			@RequestParam(value="allowDownloadSimpleHTMLYn", defaultValue="")String allowDownloadSimpleHTMLYn, //
+			@RequestParam(value="allowDownloadSimpleTextYn", defaultValue="")String allowDownloadSimpleTextYn, //
+			@RequestParam(value="allowDownloadSPDXSheetYn", defaultValue="")String allowDownloadSPDXSheetYn, //
+			@RequestParam(value="allowDownloadSPDXRdfYn", defaultValue="")String allowDownloadSPDXRdfYn, //
+			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
+			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
+			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			OssNotice ossNotice	//
+			) throws IOException {
+		
+		String resultHtml = "";
+		
+		try {
+			ossNotice.setDomain(CommonFunction.getDomain(req)); // domain Setting
+			
+			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+			String noticeFileId = prjMasterInfo.getNoticeFileId();
+			
+			if("conf".equals(confirm)){
+				boolean ignoreMailSend = false;
+
+				String userComment = ossNotice.getUserComment();
+
+				//파일 만들기
+				if(isEmpty(noticeFileId) || !CoConstDef.FLAG_YES.equals(useCustomNoticeYn)) {
+					if(!selfCheckService.getNoticeHtmlFile(ossNotice)) {
+						return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
+					}
+				}
+				
+				// reject 이후에 다시 confirm 하는 경우 이전의 package 파일 삭제 처리 필요 여부를 위해
+				// source code obligation 체크를 한다.
+				boolean needResetPackageFile = false;
+				
+				{
+					Project projectMaster = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+					if(!isEmpty(projectMaster.getPackageFileId())) {
+						List<OssComponents> list = selfCheckService.getVerifyOssList(projectMaster);
+						needResetPackageFile = list.isEmpty();
+					}
+				}
+
+				Project prjInfo = null;
+				//프로젝트 상태 변경
+				Project project = new Project();
+				project.setPrjId(ossNotice.getPrjId());
+				//다운로드 허용 플래그
+				project.setAllowDownloadNoticeHTMLYn(allowDownloadNoticeHTMLYn);
+				project.setAllowDownloadNoticeTextYn(allowDownloadNoticeTextYn);
+				project.setAllowDownloadSimpleHTMLYn(allowDownloadSimpleHTMLYn);
+				project.setAllowDownloadSimpleTextYn(allowDownloadSimpleTextYn);
+				project.setAllowDownloadSPDXSheetYn(allowDownloadSPDXSheetYn);
+				project.setAllowDownloadSPDXRdfYn(allowDownloadSPDXRdfYn);
+				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
+				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
+				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
+				
+				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+				
+				// 프로젝트 기본정보의 distribution type이 verify까지만인 경우, distribute status를 N/A 처리한다.
+				{
+					prjInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+					
+					if("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase())
+							|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase()))
+							|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) // 배포사이트 사용안함으로 설정한 경우
+							) {
+						project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+						ignoreMailSend = true;
+					} else if(!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
+							&& CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA.equals(prjInfo.getDestributionStatus())) {
+						project.setResetDistributionStatus(CoConstDef.FLAG_YES);
+					}
+					
+					if(!isEmpty(prjInfo.getDestributionStatus()) 
+							&& CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(confirm.toUpperCase())) {
+						project.setChangedNoticeYn(CoConstDef.FLAG_YES);
+					}
+				}
+				project.setModifier(project.getLoginUserName());
+				
+				// 기존에 등록한 package file의 삭제
+				if(needResetPackageFile) {
+					project.setNeedPackageFileReset(CoConstDef.FLAG_YES);
+				}
+				
+				selfCheckService.updateStatusWithConfirm(project, ossNotice);
+				
+				try {
+					History h = new History();
+					h = selfCheckService.work(project);
+					h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+					project = (Project) h.gethData();
+					h.sethEtc(project.etcStr());
+					
+					historyService.storeData(h);
+				} catch (Exception e) {
+
+				}
+				
+				try {
+					CommentsHistory commHisBean = new CommentsHistory();
+					commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+					commHisBean.setReferenceId(project.getPrjId());
+					commHisBean.setContents(userComment);
+					commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
+					
+					commentService.registComment(commHisBean);
+				} catch (Exception e) {
+
+				}
+								
+				if(prjInfo != null && !CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag()) && !ignoreMailSend) {
+					try {
+						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF);
+						mailBean.setParamPrjId(ossNotice.getPrjId());
+						
+						if(!isEmpty(ossNotice.getUserComment())) {
+							mailBean.setComment(ossNotice.getUserComment());
+						}
+						
+						CoMailManager.getInstance().sendMail(mailBean);
+					} catch (Exception e) {
+
+					}
+				} else if(prjInfo != null) {
+					// android 또는 distributin과 관련 없는 경우, packaging이 완료되었음만 공지한다.
+					try {
+						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY);
+						mailBean.setParamPrjId(ossNotice.getPrjId());
+						
+						if(!isEmpty(ossNotice.getUserComment())) {
+							mailBean.setComment(ossNotice.getUserComment());
+						}
+						
+						CoMailManager.getInstance().sendMail(mailBean);
+					} catch (Exception e) {
+						
+					}
+				}
+				
+				// package file 이 존재하는 경우 파일명을 변경한다.
+				selfCheckService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
+			} else { // preview 인 경우
+				// 저장된 고지문구가 없을 경우
+				if(isEmpty(noticeFileId) || !CoConstDef.FLAG_YES.equals(useCustomNoticeYn)) {
+					resultHtml = selfCheckService.getNoticeHtml(ossNotice);
+				} else { // 저장된 고지문구가 있을 경우
+					T2File fileInfo = fileService.selectFileInfo(noticeFileId);
+					resultHtml = CommonFunction.getStringFromFile(fileInfo.getLogiPath() + "/" + fileInfo.getLogiNm());
+					// 파일을 못찾을 경우 예외처리
+					if(isEmpty(resultHtml)) {
+						resultHtml = selfCheckService.getNoticeHtml(ossNotice);
+					}
+				}
+			}			
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		return makeJsonResponseHeader(true, null, resultHtml);
+	}
+
+	@PostMapping(value = SELF_CHECK.VERIFICATION_MAKE_NOTICE_PREVIEW)
+	public @ResponseBody ResponseEntity<Object>  makeNoticePreview(OssNotice ossNotice, HttpServletRequest req,
+			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			HttpServletResponse res, Model model) throws IOException {
+
+		String downloadId = null;
+		ossNotice.setFileType("html");
+		
+		try {
+			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+			String noticeFileId = prjMasterInfo.getNoticeFileId();
+			
+			if(isEmpty(noticeFileId)) {
+				downloadId = selfCheckService.getNoticeHtmlFileForPreview(ossNotice);
+			} else {
+				downloadId = noticeFileId;
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader(downloadId);
+	}
+
+	@ResponseBody
+	@GetMapping(value = SELF_CHECK.VERIFICATION_DOWNLOAD_NOTICE_PREVIEW,  produces = {
+			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 
+			MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
+	public ResponseEntity<FileSystemResource> downloadNoticePreview (
+			HttpServletRequest req,
+			HttpServletResponse res, Model model) throws Exception{
+
+		T2File fileInfo = fileService.selectFileInfo(req.getParameter("id"));
+		
+		return noticeToResponseEntity(fileInfo.getLogiPath() + "/" + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+	}
+
+	@PostMapping(value = SELF_CHECK.VERIFICATION_MAKE_NOTICE_TEXT)
+	public @ResponseBody ResponseEntity<Object>  makeNoticeText(OssNotice ossNotice, HttpServletRequest req,
+			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			HttpServletResponse res, Model model) throws IOException {
+		
+		String downloadId = null;
+		ossNotice.setFileType("text");
+		
+		try {
+			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+			String noticeFileId = prjMasterInfo.getNoticeFileId();
+			
+			if(!isEmpty(prjMasterInfo.getNoticeTextFileId())) {
+				downloadId = prjMasterInfo.getNoticeTextFileId();
+			} else {
+				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader(downloadId);
+	}
+
+	@PostMapping(value = SELF_CHECK.VERIFICATION_MAKE_NOTICE_SIMPLE)
+	public @ResponseBody ResponseEntity<Object>  makeNoticeSimple(OssNotice ossNotice, HttpServletRequest req,
+			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			HttpServletResponse res, Model model) throws IOException {
+		
+		String downloadId = null;
+		ossNotice.setFileType("html");
+		ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES); // simple templete
+		ossNotice.setDomain(CommonFunction.getDomain(req)); // domain Setting
+		
+		try {
+			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+			String noticeFileId = prjMasterInfo.getNoticeFileId();
+			
+			if(!isEmpty(prjMasterInfo.getSimpleHtmlFileId())) {
+				downloadId = prjMasterInfo.getSimpleHtmlFileId();
+			} else {
+				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader(downloadId);
+	}
+
+	@PostMapping(value = SELF_CHECK.VERIFICATION_MAKE_NOTICE_TEXT_SIMPLE)
+	public @ResponseBody ResponseEntity<Object>  makeNoticeTextSimple(OssNotice ossNotice, HttpServletRequest req,
+			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			HttpServletResponse res, Model model) throws IOException {
+		
+		String downloadId = null;
+		ossNotice.setFileType("text");
+		ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES); // simple templete
+		
+		try {
+			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
+			String noticeFileId = prjMasterInfo.getNoticeFileId();
+			
+			if(!isEmpty(prjMasterInfo.getSimpleTextFileId())) {
+				downloadId = prjMasterInfo.getSimpleTextFileId();
+			} else {
+				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader(downloadId);
+	}
+
 }

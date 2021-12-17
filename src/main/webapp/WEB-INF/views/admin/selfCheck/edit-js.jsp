@@ -1004,7 +1004,15 @@
 					return false;
 				}
 			});
-		}
+		},
+		createNoticeTab : function () {
+            if(saveFlag) {
+                createTabInFrame('Notice', '#<c:url value="/selfCheck/verification/${project.prjId}"/>');
+            } else {
+                alertify.error('<spring:message code="msg.project.required.checkOssName" />', 0);
+                return false;
+            }
+        }
 	};
 
 	//SRC 그리드

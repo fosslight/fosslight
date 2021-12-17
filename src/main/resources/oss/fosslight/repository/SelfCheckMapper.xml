@@ -190,7 +190,7 @@
 	</select>
 	
 	<update id="updateReviewer" parameterType="oss.fosslight.domain.Project">
-		UPDATE PROJECT_MASTER 
+		UPDATE PRE_PROJECT_MASTER 
 		   SET REVIEWER = #{reviewer}
 		      ,MODIFIER = #{modifier}
 		 WHERE PRJ_ID = #{prjId}
@@ -254,7 +254,7 @@
 		       CONCAT(A.CATEGORY, A.SUBCATEGORY) AS CATEGORY
 		       , A.MODEL_NAME 
 		       , A.RELEASE_DATE
-		FROM   PROJECT_MODEL A
+		FROM   PRE_PROJECT_MODEL A
 		WHERE  PRJ_ID = #{prjId} 
 		ORDER BY CATEGORY, MODEL_NAME
 	</select>
@@ -1185,7 +1185,7 @@
 	<select id="selectProjectMaster2" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
 		SELECT
 			 *
-		  FROM PROJECT_MASTER
+		  FROM PRE_PROJECT_MASTER
 		 WHERE USE_YN = 'Y'
 		   AND PRJ_ID = #{prjId}
 	</select>
@@ -1215,14 +1215,14 @@
 	
 	<update id="updateProjectStatusWithComplete" parameterType="oss.fosslight.domain.Project">
 	/* ProjectMapper.updateProjectStatusWithComplete */
-		UPDATE PROJECT_MASTER T1 INNER JOIN (
+		UPDATE PRE_PROJECT_MASTER T1 INNER JOIN (
 			SELECT 
 				PM.PRJ_ID AS PRJ_ID,
 				CASE WHEN (
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_PARTNER, '') = '' 
 						AND IFNULL(
 							(SELECT COUNT(1)
-							FROM OSS_COMPONENTS OC
+							FROM PRE_OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '10' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_PARTNER END AS IDENTIFICATION_SUB_STATUS_PARTNER,
@@ -1230,7 +1230,7 @@
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, '') = '' 
 						AND IFNULL(
 							(SELECT COUNT(1)
-							FROM OSS_COMPONENTS OC
+							FROM PRE_OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '11' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_SRC END AS IDENTIFICATION_SUB_STATUS_SRC,
@@ -1238,7 +1238,7 @@
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_BAT, '') = '' 
 						AND IFNULL(
 							(SELECT COUNT(1)
-							FROM OSS_COMPONENTS OC
+							FROM PRE_OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '12' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_BAT END AS IDENTIFICATION_SUB_STATUS_BAT,
@@ -1246,7 +1246,7 @@
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_BIN, '') = '' 
 						AND IFNULL(
 							(SELECT COUNT(1)
-							FROM OSS_COMPONENTS OC
+							FROM PRE_OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '15' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_BIN END AS IDENTIFICATION_SUB_STATUS_BIN,
@@ -1254,11 +1254,11 @@
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_ANDROID, '') = '' 
 						AND IFNULL(
 							(SELECT COUNT(1)
-							FROM OSS_COMPONENTS OC
+							FROM PRE_OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '14' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_ANDROID END AS IDENTIFICATION_SUB_STATUS_ANDROID
-			FROM PROJECT_MASTER PM
+			FROM PRE_PROJECT_MASTER PM
 			WHERE PM.PRJ_ID = #{prjId}
 		) T2 ON T1.PRJ_ID = T2.PRJ_ID
 		SET T1.IDENTIFICATION_SUB_STATUS_PARTNER = T2.IDENTIFICATION_SUB_STATUS_PARTNER,
@@ -2029,7 +2029,7 @@
 	</select>
 	
 	<insert id="makeOssNotice" parameterType="oss.fosslight.domain.OssNotice">
-		INSERT INTO OSS_NOTICE(
+		INSERT INTO PRE_OSS_NOTICE(
 			PRJ_ID
 			, NOTICE_TYPE
 		)VALUES(
@@ -2039,6 +2039,8 @@
 			NOTICE_TYPE                =  #{noticeType}             
 	</insert>
 	<select id="getNoticeType" parameterType="String" resultType="String">SELECT NOTICE_TYPE FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}</select>
+	
+	<select id="getNoticeTypeReturnMap" parameterType="String" resultType="oss.fosslight.domain.CamelMap">SELECT NOTICE_TYPE, NOTICE_TYPE_ETC FROM PRE_OSS_NOTICE WHERE PRJ_ID = #{prjId}</select>
 	
 	<select id="getComponentListForLicenseCheck" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponentsLicense">
 		SELECT T1.COMPONENT_ID, T1.OSS_ID, T2.LICENSE_ID, T2.LICENSE_NAME 
@@ -2370,4 +2372,196 @@
 							  AND IFNULL(EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y')
 		GROUP BY PRODUCT
 	</select>
+
+	<select id="selectOssNoticeOne" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssNotice">
+		SELECT
+			*
+		FROM
+			PRE_OSS_NOTICE
+		WHERE
+			PRJ_ID = #{prjId}
+	</select>
+
+	<select id="selectVerifyOssList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
+
+		<!-- SELECT
+			T2.COMPONENT_ID
+			,T2.COMPONENT_IDX	/* 2018-08-06 choye 추가 (ETC) */
+			,T2.OSS_ID
+			,T2.OSS_NAME
+			,T2.OSS_VERSION
+			,T2.DOWNLOAD_LOCATION
+			,T2.HOMEPAGE
+			,T2.REF_COMPONENT_ID
+			,T2.REFERENCE_ID
+			,CASE
+				WHEN T2.REFERENCE_DIV = '10' THEN '3rd' 
+				WHEN T2.REFERENCE_DIV = '11' THEN 'SRC' 
+				WHEN T2.REFERENCE_DIV = '12' THEN 'BAT' 
+				WHEN T2.REFERENCE_DIV = '15' THEN 'BIN' 
+				WHEN T2.REFERENCE_DIV = '14' THEN 'BIN(Android)' 
+			END AS REFERENCE_DIV
+			, GROUP_CONCAT(T3.LICENSE_NAME ORDER BY T3.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME 
+			, T2.FILE_PATH
+			, T2.VERIFY_FILE_COUNT -->
+		<!-- 임시 -->
+		SELECT 
+			*
+		FROM PRE_OSS_COMPONENTS <!-- 임시 -->
+		<!-- FROM (
+				SELECT 
+					A1.COMPONENT_ID
+					,A1.COMPONENT_IDX	/* 2018-08-06 choye 추가 (ETC) */
+					,A1.OSS_ID
+					,A1.OSS_NAME
+					,A1.OSS_VERSION
+					,A1.DOWNLOAD_LOCATION
+					,A1.REFERENCE_ID	
+					,A1.HOMEPAGE
+					,A1.FILE_PATH
+					,A1.VERIFY_FILE_COUNT
+					,A1.REF_COMPONENT_ID
+					,(SELECT REFERENCE_DIV FROM OSS_COMPONENTS A2 WHERE A2.COMPONENT_ID = A1.REF_COMPONENT_ID) AS REFERENCE_DIV
+				FROM PRE_OSS_COMPONENTS A1 
+				WHERE 
+					A1.REFERENCE_ID = #{prjId}
+					AND A1.REFERENCE_DIV='50' 
+					AND A1.MERGE_PRE_DIV IS NULL 
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossNameMergeFlag)">
+					AND A1.OBLIGATION_TYPE = '11'
+				</if>
+		) T2 -->
+		<!-- INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
+		WHERE 1=1
+		<if test="@oss.fosslight.util.StringUtil@equals(networkServerType, 'Y')">
+		AND EXISTS (
+			SELECT 1 
+			FROM LICENSE_MASTER TSUB1 
+			WHERE 
+				TSUB1.USE_YN = 'Y' 
+				AND 
+					(
+						TSUB1.SHORT_IDENTIFIER REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
+						OR TSUB1.LICENSE_NAME REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
+					) 
+				AND T3.LICENSE_ID = TSUB1.LICENSE_ID
+			)
+		</if>
+		
+ 		GROUP BY COMPONENT_ID
+		ORDER BY COMPONENT_ID -->
+	</select>
+
+	<update id="updateNoticeFileInfo" parameterType="oss.fosslight.domain.Project">
+	UPDATE
+		PRE_PROJECT_MASTER
+	SET
+		NOTICE_FILE_ID = #{noticeFileId}
+		, MODIFIER = #{loginUserName}
+		, USE_CUSTOM_NOTICE_YN = #{useCustomNoticeYn}
+	WHERE
+		PRJ_ID = #{prjId}
+	</update>
+
+	<select id="selectVerificationNotice" parameterType="oss.fosslight.domain.OssNotice" resultType="oss.fosslight.domain.OssComponents">
+	/* from VerificationMapper.selectVerificationNotice */
+		SELECT 
+		 	T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION
+			, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION
+			, T2.DOWNLOAD_LOCATION
+			, T2.HOMEPAGE
+			, T2.OBLIGATION_TYPE
+			, T3.LICENSE_ID
+			, T5.LICENSE_TEXT
+ 			, IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER) AS LICENSE_NAME
+ 			, T5.ATTRIBUTION
+			, T5.LICENSE_TYPE
+		FROM PRE_PROJECT_MASTER T1 
+			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.OSS_NAME != '-'
+			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(CAST(T2.REFERENCE_ID AS VARCHAR(10)),"-",T2.REFERENCE_DIV,"-",CAST(T2.COMPONENT_IDX AS VARCHAR(10))) = T3.COMPONENT_ID
+			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
+		WHERE T1.PRJ_ID = #{prjId}
+		
+		<if test="@oss.fosslight.util.StringUtil@equals(networkServerFlag, 'Y')">
+		AND EXISTS (
+			SELECT 1 
+			FROM LICENSE_MASTER TSUB1 
+			WHERE 
+				TSUB1.USE_YN = 'Y' 
+				AND 
+					(
+						TSUB1.SHORT_IDENTIFIER REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
+						OR TSUB1.LICENSE_NAME REGEXP (SELECT GROUP_CONCAT(TRIM(CD_DTL_NM) SEPARATOR '|') FROM T2_CODE_DTL WHERE CD_NO = '122' AND USE_YN = 'Y')
+					) 
+				AND T3.LICENSE_ID = TSUB1.LICENSE_ID
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(refDivUnExists)">
+			AND IFNULL(T2.REF_DIV, '') <![CDATA[<>]]> #{refDivUnExists}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(refDiv)">
+			AND IFNULL(T2.REF_DIV, '') = #{refDiv}
+		</if>
+		ORDER BY OSS_NAME, LICENSE_NAME
+	</select>
+
+	<select id="selectVerificationNoticeClassAppend" parameterType="oss.fosslight.domain.OssNotice" resultType="oss.fosslight.domain.OssComponents">
+	/* from VerificationMapper.selectVerificationNoticeLicenseOnly */
+		SELECT 
+			T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION
+			, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION, T2.DOWNLOAD_LOCATION, T2.HOMEPAGE, T2.OBLIGATION_TYPE
+			, T5.LICENSE_ID
+			, T5.LICENSE_TEXT
+			, REGEXP_REPLACE(T3.COPYRIGHT_TEXT, '$\n', '') AS COPYRIGHT_TEXT, IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER) AS LICENSE_NAME
+			, T5.ATTRIBUTION
+			, T2.FILE_PATH
+			, T5.LICENSE_TYPE
+		FROM PRE_PROJECT_MASTER T1 
+			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10'
+			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(CAST(T2.REFERENCE_ID AS VARCHAR(10)),"-",T2.REFERENCE_DIV,"-",CAST(T2.COMPONENT_IDX AS VARCHAR(10))) = T3.COMPONENT_ID
+			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
+		WHERE T1.PRJ_ID = #{prjId}
+		<!-- ORDER BY LICENSE_NAME -->
+	</select>
+
+	<select id="getProjectBasicInfo" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+		SELECT * FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}
+	</select>
+
+	<update id="updateNoticeFileInfoEtc" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+			PRE_PROJECT_MASTER
+		SET
+			MODIFIER = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeTextFileId)">
+				, NOTICE_TEXT_FILE_ID = #{noticeTextFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(simpleHtmlFileId)">
+				, SIMPLE_HTML_FILE_ID = #{simpleHtmlFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(simpleTextFileId)">
+				, SIMPLE_TEXT_FILE_ID = #{simpleTextFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxSheetFileId)">
+				, SPDX_SHEET_FILE_ID = #{spdxSheetFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxRdfFileId)">
+				, SPDX_RDF_FILE_ID = #{spdxRdfFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxTagFileId)">
+				, SPDX_TAG_FILE_ID = #{spdxTagFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxJsonFileId)">
+				, SPDX_JSON_FILE_ID = #{spdxJsonFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxYamlFileId)">
+				, SPDX_YAML_FILE_ID = #{spdxYamlFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(zipFileId)">
+				, ZIP_FILE_ID = #{zipFileId}
+			</if>
+		WHERE
+			PRJ_ID = #{prjId} 
+	</update>
+
 </mapper>
