@@ -43,6 +43,79 @@
 			</when>
 		</choose>
     </sql>
+
+	<sql id="filters">
+		<foreach collection="filtersMap.rules" item="item">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('msgType', item.field)">
+					MSG_TYPE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('sndStatus', item.field)">
+					SND_STATUS
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('emlTitle', item.field)">
+					EML_TITLE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('creationDate', item.field)">
+					DATE_FORMAT(CREATION_DATE, '%Y-%m-%d')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('creationUserId', item.field)">
+					CREATION_USER_ID
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('errorMsg', item.field)">
+					ERROR_MSG
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('emlTo', item.field)">
+					EML_TO
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('emlCc', item.field)">
+					EML_CC
+				</when>
+			</choose>
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('eq', item.op)">
+					= #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ne', item.op)">
+					<![CDATA[<>]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('bw', item.op)">
+					LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('bn', item.op)">
+					NOT LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ew', item.op)">
+					LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('en', item.op)">
+					NOT LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('cn', item.op)">
+					LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('nc', item.op)">
+					NOT LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('lt', item.op)">
+					<![CDATA[<]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('le', item.op)">
+					<![CDATA[<=]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('gt', item.op)">
+					<![CDATA[>]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ge', item.op)">
+					<![CDATA[>=]]> #{item.data}
+				</when>
+				<otherwise>
+
+				</otherwise>
+			</choose>
+		</foreach>
+    </sql>
     
     <select id="selectSentMailTotalCount" parameterType="oss.fosslight.domain.CoMail" resultType="int">
     SELECT
@@ -51,7 +124,7 @@
     	EMAIL_SND_HIS
     WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
     </select>
 	<select id="selectSentMailList" parameterType="oss.fosslight.domain.CoMail" resultType="oss.fosslight.domain.CoMail">
@@ -60,7 +133,7 @@
 		FROM EMAIL_SND_HIS
 		WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>

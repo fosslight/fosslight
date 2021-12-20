@@ -79,6 +79,106 @@
 		</choose>
     </sql>
     
+	<sql id="filters">
+		<foreach collection="filtersMap.rules" item="item">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('actionId', item.field)">
+					ACTION_ID
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('actionType', item.field)">
+					ACTION_TYPE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('binaryName', item.field)">
+					FILE_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('filePath', item.field)">
+					PATH_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('sourcePath', item.field)">
+					SOURCE_PATH
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('checkSum', item.field)">
+					CHECK_SUM
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('tlsh', item.field)">
+					TLSH_CHECK_SUM
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ossName', item.field)">
+					OSS_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ossVersion', item.field)">
+					OSS_VERSION
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('license', item.field)">
+					LICENSE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('parentname', item.field)">
+					PARENT_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('platformname', item.field)">
+					PLATFORM_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('platformversion', item.field)">
+					PLATFORM_VERSION
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('updatedate', item.field)">
+					UPDATE_DATE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('createdDate', item.field)">
+					CREATED_DATE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('modifier', item.field)">
+					MODIFIER
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('comment', item.field)">
+					COMMENT
+				</when>
+			</choose>
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('eq', item.op)">
+					= #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ne', item.op)">
+					<![CDATA[<>]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('bw', item.op)">
+					LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('bn', item.op)">
+					NOT LIKE CONCAT(#{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ew', item.op)">
+					LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('en', item.op)">
+					NOT LIKE CONCAT('%', #{item.data})
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('cn', item.op)">
+					LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('nc', item.op)">
+					NOT LIKE CONCAT('%', #{item.data}, '%')
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('lt', item.op)">
+					<![CDATA[<]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('le', item.op)">
+					<![CDATA[<=]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('gt', item.op)">
+					<![CDATA[>]]> #{item.data}
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ge', item.op)">
+					<![CDATA[>=]]> #{item.data}
+				</when>
+				<otherwise>
+
+				</otherwise>
+			</choose>
+		</foreach>
+    </sql>
+
     <select id="selectBinaryDataHistoryTotalCount" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="int">
     SELECT
     	COUNT(1)
@@ -119,7 +219,7 @@
     		AND LICENSE LIKE CONCAT('%', #{license}, '%')
     	</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
     </select>
 	<select id="selectBinaryDataHistoryList" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="oss.fosslight.domain.BinaryAnalysisResult">
@@ -177,7 +277,7 @@
     		AND LICENSE LIKE CONCAT('%', #{license}, '%')
     	</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>
