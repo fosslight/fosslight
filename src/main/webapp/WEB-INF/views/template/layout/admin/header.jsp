@@ -18,7 +18,13 @@
 <!-- header -->
 <div id="header">
 	<div class="back">
-		<h1><img src="images/img_logo.png" alt="FOSSLight System"/></h1>
+		<div class="logo">
+			<img src="images/img_logo.png" alt="FOSSLight System"/>
+		</div>
+		<spring:eval expression="@environment.getProperty('project.version')" var="projectVersion"/>
+		<div class="version">
+			<strong><a style="color: #AC1E35;" href="https://github.com/fosslight/fosslight/releases/tag/v${projectVersion}" target='_blank'>v${projectVersion}</a></strong>
+		</div>
 		<div class="userLang">
 			<select id="selectLang">
 				<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_DEFAULT_LOCALE'))}" varStatus="status">
