@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'oss.fosslight'
-version = '1.0.0'
+version = '1.2.22'
 sourceCompatibility = '1.8'
 
 configurations {
@@ -30,6 +30,12 @@ repositories {
 
 test {
 	useJUnitPlatform()
+}
+
+processResources {
+    filesMatching('**/application.properties') {
+        expand(project.properties)
+    }
 }
 
 bootWar.enabled = true // (1)
