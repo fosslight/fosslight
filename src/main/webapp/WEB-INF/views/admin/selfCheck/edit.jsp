@@ -80,40 +80,46 @@
 						<dd>
 							<div class="basicCase">
 								<div class="uploadTit">
-									<span class="checkSet"><label for="2">Please select a file to upload</label></span>	
+									<span class="checkSet"><label for="2">Please select a file to upload</label></span>
 								</div>
-								<div class="uploadGroup">
-									<div class="uploadSet">
-										<span class="fileex_back">
-											<div id="srcCsvFile">+ Add file</div>
-										</span>
-										<div class="uploadList">
-											<ul class="csvFileArea">
-											<c:forEach var="csvFile" items="${project.csvFile }" varStatus="vs">
-												<c:if test="${csvFile.delYn == 'N'}">
-													<li>
-														<span>
-															<strong>
-																<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
-																<br>
-																${csvFile.createdDate}
-																<input type="hidden" value="${csvFile.fileSeq }"/>
-																<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')"/>
-															</strong>
-														</span>
-													</li>
-												</c:if>
-											</c:forEach>
-											</ul>
+								<div class="uploadSet">
+										<span><input type="radio" id="1" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="1" checked/><label for="1">Upload </label></span>
+										<div id="uploadGroup">
+											<div class="uploadSet">
+											<span class="fileex_back">
+												<div id="srcCsvFile">+ Add file</div>
+											</span>
+												<div class="uploadList">
+													<ul class="csvFileArea">
+														<c:forEach var="csvFile" items="${project.csvFile }" varStatus="vs">
+															<c:if test="${csvFile.delYn == 'N'}">
+																<li>
+															<span>
+																<strong>
+																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<br>
+																	${csvFile.createdDate}
+																	<input type="hidden" value="${csvFile.fileSeq }"/>
+																	<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')"/>
+																</strong>
+															</span>
+																</li>
+															</c:if>
+														</c:forEach>
+													</ul>
+												</div>
+											</div>
 										</div>
-									</div>
+										<br/>
+										<span><input type="radio" id="2" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="2" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_ANALYSIS_USED_FLAG')) eq 'N'}">disabled</c:if>/><label for="2">URL </label></span>
+										<div id="wgetUrl_${i}" style="width: 500px; display: none;"><input type="text" class="autoComConfParty" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
 								</div>
 							</div>
 						</dd>
 					</dl>
 				</form>
 		</fieldset>
-	
+
 		<div class="boxLine mt10" style="display:none;">
 			<div class="fileupload-progress">
 				<!-- The global progress bar -->
@@ -153,8 +159,8 @@
 		<!---->
 </c:if>
 	</div>
-	
-	
+
+
 </div>
 
 <div class="pop sheetSelectPop">

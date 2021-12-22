@@ -37,6 +37,9 @@
 		if($("#listKind > option").length == 1){
 			$(".listKindArea").hide();
 		}
+
+
+
 	});
 	
 	var fn_self ={
@@ -195,6 +198,7 @@
 			onError : function(data, status){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			},
+
 			bulkEdit : function(){
 		    	var gridList = $("#srcList");
 		        var targetGird = "srcList";
@@ -229,7 +233,26 @@
 		            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
 		            return false;
 		        }
-			}
+			},
+
+            changeSelectOption : function(target){
+                var name = $(target).attr("name");
+                var value = $("[name='"+name+"']:checked").val()
+                var key = name.split("_")[1];
+
+                switch(value){
+                    case "1":
+                        $('#uploadGroup').show();
+                        $('#wgetUrl_' + key).hide();
+                        break;
+                    case "2":
+                        $('#uploadGroup').hide();
+                        $('#wgetUrl_' + key).show();
+                        break;
+                    default:
+                        break;
+                }
+            }
 		}
 	
 	// 데이타
@@ -1047,7 +1070,25 @@
                 alertify.error('<spring:message code="msg.project.required.checkOssName" />', 0);
                 return false;
             }
-        }
+        },
+        uploadOSSByUrl : function() {
+
+            var wgetUrl = $("#sendWgetUrl").val();
+            var flScannerUrl = '${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_ANALYSIS_SETTING'))[0][3]}';
+            var adminToken = '${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_ANALYSIS_SETTING'))[1][3]}';
+
+            fetch(flScannerUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'pid='+'${project.prjId}'+'&link='+wgetUrl+'&email='+'${project.prjEmail}'+'&admin='+adminToken,
+            })
+            .finally(() => {
+                alertify.success('<spring:message code="msg.common.success" />');
+            });
+
+        },
 	};
 
 	//SRC 그리드

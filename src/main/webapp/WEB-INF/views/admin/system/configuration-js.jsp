@@ -95,6 +95,19 @@
 			} else {
 				params["externalServiceFlag"] = "N";
 			}
+
+            // External Analysis Setting
+            var externalAnalysisFlag = $("#externalAnalysisFlag").prop("checked");
+            if(externalAnalysisFlag){
+                params["externalAnalysisFlag"] = "Y";
+                var externalAnalysisDetail = {};
+                <c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_ANALYSIS_SETTING'))}" varStatus="status">
+                externalAnalysisDetail["${code[0]}"] = $("#externalAnalysis${code[0]}").val();
+                </c:forEach>
+                params["externalAnalysisDetail"] = externalAnalysisDetail;
+            } else {
+                params["externalAnalysisFlag"] = "N";
+            }
 			
 			// Menu Detail
 				// ㄴ DashBoard
