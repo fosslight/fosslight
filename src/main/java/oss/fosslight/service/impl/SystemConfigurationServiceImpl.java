@@ -55,6 +55,9 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		T2CodeDtl externalServiceAuth = new T2CodeDtl(CoConstDef.CD_EXTERNAL_SERVICE_SETTING);
 		List<T2CodeDtl> tokenAuthList = codeMapper.selectCodeDetailList(externalServiceAuth);
 
+		T2CodeDtl externalAnalysisAuth = new T2CodeDtl(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING);
+		List<T2CodeDtl> externalAnalysisAuthList = codeMapper.selectCodeDetailList(externalAnalysisAuth);
+
 		T2CodeDtl defaultTab = new T2CodeDtl(CoConstDef.CD_DEFAULT_TAB);
 		List<T2CodeDtl> defaultTabList = codeMapper.selectCodeDetailList(defaultTab);
 		
@@ -76,6 +79,12 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 					c.setCdDtlExp((String) configurationMap.get("externalServiceFlag"));
 
 					break;
+
+				case CoConstDef.CD_EXTERNAL_ANALYSIS_USED_FLAG:
+					c.setCdDtlExp((String) configurationMap.get("externalAnalysisFlag"));
+
+					break;
+
 			}
 			
 			return c;
@@ -167,6 +176,31 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 
 			codeService.setCodeDetails(tokenAuthList, CoConstDef.CD_EXTERNAL_SERVICE_SETTING);
 		}
+
+		// External Analysis detail setting
+		Map<String, Object> externalAnalysisDetailMap = (Map<String, Object>) configurationMap.get("externalAnalysisDetail");
+
+		if(externalAnalysisDetailMap != null) {
+			externalAnalysisAuthList.stream().map(c -> {
+				switch(c.getCdDtlNo()) {
+
+					case CoConstDef.CD_DTL_FL_SCANNER_URL:
+						c.setCdDtlExp((String) externalAnalysisDetailMap.get(CoConstDef.CD_DTL_FL_SCANNER_URL));
+
+						break;
+
+					case CoConstDef.CD_DTL_ADMIN_TOKEN:
+						c.setCdDtlExp((String) externalAnalysisDetailMap.get(CoConstDef.CD_DTL_ADMIN_TOKEN));
+
+						break;
+				}
+
+				return c;
+			}).collect(Collectors.toList());
+
+			codeService.setCodeDetails(externalAnalysisAuthList, CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING);
+		}
+
 		
 		// default tab Setting
 		defaultTabList.stream().map(c -> {

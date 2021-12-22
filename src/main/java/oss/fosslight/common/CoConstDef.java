@@ -101,7 +101,9 @@ public class CoConstDef {
 	public static final String CD_SMTP_USED_FLAG				= "911";
 //	public static final String CD_MENU_AUTH_FLAG				= "912";
 	public static final String CD_EXTERNAL_SERVICE_USED_FLAG	= "940";
-	
+	public static final String CD_EXTERNAL_ANALYSIS_USED_FLAG	= "950";
+
+
 	// Login Setting
 	public static final String CD_LOGIN_SETTING					= "910";
 	public static final String CD_LDAP_SERVER_URL 				= "100";
@@ -684,7 +686,12 @@ public class CoConstDef {
 	/** External Service Setting */
 	public static final String CD_EXTERNAL_SERVICE_SETTING						= "705";
 	public static final String CD_DTL_GITHUB_TOKEN  							= "100";
-	
+
+	/** External Analysis Setting */
+	public static final String CD_EXTERNAL_ANALYSIS_SETTING						= "706";
+	public static final String CD_DTL_FL_SCANNER_URL 							= "101";
+	public static final String CD_DTL_ADMIN_TOKEN								= "102";
+
 	// -------------- 서브메뉴 대표 코드
 	/** 대메뉴 */
 	public static final String CD_MENU_MAIN 									= "M001";

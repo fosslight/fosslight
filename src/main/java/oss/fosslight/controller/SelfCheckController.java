@@ -118,7 +118,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
-		
+
 		return SELF_CHECK.EDIT_JSP;
 	}
 	
@@ -131,6 +131,8 @@ public class SelfCheckController extends CoTopComponent {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		project = selfCheckService.getProjectDetail(project);
+		T2Users user = userService.getLoginUserInfo();
+		project.setPrjEmail(user.getEmail());
 
 		model.addAttribute("project", project);
 		model.addAttribute("detail", toJson(project));
