@@ -1766,6 +1766,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			try {
+				if(bean.getDownloadLocation().startsWith("git://")) bean.setDownloadLocation(bean.getDownloadLocation().replace("git://", "https://"));
 				boolean semicolonFlag = bean.getDownloadLocation().contains(";");
 				
 				for(String url : checkOssNameUrl) {
