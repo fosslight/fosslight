@@ -56,7 +56,7 @@
 		</div>
 		<div class="commentEditor" style="display:none; top:85px;">
 			<div class="cBtn">
-				<input type="button" value="Save & Send comment" class="btnCLight saveEditor" onclick="fn.editorDialog();"/>
+				<input type="button" value="Save & Send comment" class="btnCLight saveEditor" onclick="fn.sendEditor('WR');"/>
 				<input type="button" value="Save draft" class="btnCLight saveEditorDraft" />
 			</div>
 			<div class="grid-container" style="height:240px;">

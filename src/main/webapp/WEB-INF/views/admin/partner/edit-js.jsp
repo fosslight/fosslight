@@ -872,7 +872,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
 					} else {
 						$('.ajs-close').trigger("click");
-						alertify.success('<spring:message code="msg.common.success" />');
+						alertify.success('<spring:message code="msg.project.sent.comments.success" />');
 						resetEditor(CKEDITOR.instances.editor);
 						$(".commentBtn open").trigger( "click" );
 					}
