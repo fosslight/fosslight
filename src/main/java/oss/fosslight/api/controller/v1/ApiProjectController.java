@@ -373,7 +373,8 @@ public class ApiProjectController extends CoTopComponent {
 	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_BOM_EXPORT})
     public ResponseEntity<FileSystemResource> getPrjBomExport(
     		@RequestHeader String _token,
-    		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId){
+    		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+    		@ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String mergeSaveFlag){
 		
 		// 사용자 인증
 		String downloadId = "";
@@ -393,7 +394,9 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
 			if(searchFlag) {
-				apiProjectService.registBom(prjId, "Y");
+				if("Y".equals(mergeSaveFlag)) {
+					apiProjectService.registBom(prjId, mergeSaveFlag);
+				}
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				fileInfo = fileService.selectFileInfo(downloadId);
 			}

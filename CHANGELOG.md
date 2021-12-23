@@ -1,5 +1,34 @@
 # Changelog
 
+## v1.2.22 (17/12/2021)
+## Changes
+
+- Add multilingual support about delivery form @yugeeklab (#335)
+
+## 🚀 Features
+
+- Add OSS Notice issuance function to Self-Check @namkyu1999 (#288)
+- In Check OSS Name, make it possible to select from multiple OSS Names. @soimkim (#342)
+- Add External Service health check @riyenas0925 (#310)
+
+## 🐛 Hotfixes
+
+- Eliminate null pointer exception in OSS Controller @yugeeklab (#316)
+- Change the ckeditor config value related to file upload. @soimkim (#343)
+- Eliminate null pointer exception in CoMailManager @yugeeklab (#317)
+- Fix heap memory issue when registering CPE Data Feed (GC Limit) @soimkim (#332)
+- Apply autogrow to ckeditor @yugeeklab (#328)
+
+## 🔧 Maintenance
+
+- Support Check OSS Name, Check License multilingual @riyenas0925 (#344)
+- Do not print () if the OSS version is null when leaving a comment in the Check License. @riyenas0925 (#339)
+- Add a function to change the OSS table in bulk (incomplete) @soimkim (#338)
+- Change max height of editor @soimkim (#336)
+- Add Check License to Project tab (bin, android) @riyenas0925 (#324)
+
+---
+
 ## v1.2.21 (10/12/2021)
 ## 🚀 Features
 
@@ -14,7 +43,6 @@
 
 - Add test to github action for PR @yugeeklab (#301)
 - Remove the label setting for PR from the guide @soimkim (#327)
-- Change 3rd Party List Columns @soimkim (#325)
 - Update 3rd party list UI @riyenas0925 (#315)
 - Change SPDX dependecy version @riyenas0925 (#323)
 - Exception handling when accessing a deleted project @FOSSLight-dev (#322)
