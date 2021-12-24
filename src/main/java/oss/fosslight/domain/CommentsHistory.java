@@ -265,6 +265,15 @@ public class CommentsHistory extends ComBean implements Serializable{
 	}
 
 	/**
+	 * Gets the sch keyword list.
+	 *
+	 * @return the sch keyword list
+	 */
+	public String[] getSchKeywordList() {
+		return this.schKeyword.split(" ");
+	}
+
+	/**
 	 * Gets the expansion 1.
 	 *
 	 * @return the expansion 1
