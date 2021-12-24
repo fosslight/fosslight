@@ -552,7 +552,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED = "66"; // OSDD에서 DESCRIPTION이 삭제된 경우
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE = "67"; // OSDD에서 DESCRIPTION이 삭제된 경우
+	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE = "670";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT = "68";
+	
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
 	/** 3rd party reviewer changed */
