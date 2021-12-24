@@ -586,8 +586,7 @@ public class CoMailManager extends CoTopComponent {
 						
 					}
 				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(bean.getMsgType()) 
-						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())
-						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType())) {
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())) {
 
 					if(!isEmpty(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()))) {
 						String subTitle = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()));
@@ -603,7 +602,8 @@ public class CoMailManager extends CoTopComponent {
 						}
 						convertDataMap.put("contentsSubTitle", subTitle);
 					}
-				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_COMPLETE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())) {
+				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_COMPLETE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())) {
 					String subTitle = "";
 					
 					subTitle += "<br>" + bean.getParamExpansion1();
