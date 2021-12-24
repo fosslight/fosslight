@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.2.23 (24/12/2021)
+## 🚀 Features
+
+- Show FOSSLight version in sidebar @riyenas0925 (#352)
+
+## 🐛 Hotfixes
+
+- Fix mismatching error in Check License @riyenas0925 (#349)
+
+## 🔧 Maintenance
+
+- Delete ${sidx}, ${sord}, ${schKeywordSql} and ${filterCondition} for defending SQL Injection  @yugeeklab (#346)
+- Update distribution mailing condition. @FOSSLight-dev  (#359)
+- Check OSS Name > Change download location to git:// from https:// @FOSSLight-dev (#357)
+- Send comments to Creator, Watcher, and Reviewer by mail. @riyenas0925 (#355)
+- Add parameter for merging option to BOM export. @FOSSLight-dev (#350)
+
+---
+
 ## v1.2.22 (17/12/2021)
 ## Changes
 
@@ -8,22 +27,22 @@
 ## 🚀 Features
 
 - Add OSS Notice issuance function to Self-Check @namkyu1999 (#288)
-- In Check OSS Name, make it possible to select from multiple OSS Names. @soimkim (#342)
+- In Check OSS Name, make it possible to select from multiple OSS Names. @FOSSLight-dev  (#342)
 - Add External Service health check @riyenas0925 (#310)
 
 ## 🐛 Hotfixes
 
 - Eliminate null pointer exception in OSS Controller @yugeeklab (#316)
-- Change the ckeditor config value related to file upload. @soimkim (#343)
+- Change the ckeditor config value related to file upload. @FOSSLight-dev (#343)
 - Eliminate null pointer exception in CoMailManager @yugeeklab (#317)
-- Fix heap memory issue when registering CPE Data Feed (GC Limit) @soimkim (#332)
+- Fix heap memory issue when registering CPE Data Feed (GC Limit) @FOSSLight-dev (#332)
 - Apply autogrow to ckeditor @yugeeklab (#328)
 
 ## 🔧 Maintenance
 
 - Support Check OSS Name, Check License multilingual @riyenas0925 (#344)
 - Do not print () if the OSS version is null when leaving a comment in the Check License. @riyenas0925 (#339)
-- Add a function to change the OSS table in bulk (incomplete) @soimkim (#338)
+- Add a function to change the OSS table in bulk (incomplete) @FOSSLight-dev (#338)
 - Change max height of editor @soimkim (#336)
 - Add Check License to Project tab (bin, android) @riyenas0925 (#324)
 
