@@ -1747,6 +1747,41 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 			return returnFlag;
 
+		},
+	    bulkEdit : function(){
+	    	var gridList = $("#list");
+	        var targetGird = "list";
+
+	        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+	        var rowCheckedArr = [];
+	        for(var i=0; i<selarrrow.length; i++){
+				if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+					rowCheckedArr.push(selarrrow[i]);
+				}
+	        }
+
+	        if(rowCheckedArr.length > 0){
+	            fn_grid_com.totalGridSaveMode(targetGird);
+	            
+	            var bulkEditArr = gridList.jqGrid("getGridParam", "selarrrow");
+	            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=' + targetGird + '"/>';
+	            
+	            var _popup = null;
+
+	            if(_popup == null || _popup.closed){
+	                _popup = window.open(url, "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+	                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+	                    alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+	                }
+	            } else {
+	                _popup.close();
+	                _popup = window.open(url, "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+	            }
+	        }else{
+	            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
+	            return false;
+	        }
 		}
 	}
 	
@@ -1940,6 +1975,18 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
 						editoptions: {
 							dataInit: function (e) {
+									var licenseNameId = $(e).attr("id").split('_')[0];
+									var licenseNameTd = $(e).parent();
+
+									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '</div>';
+						
+									$(licenseNameTd).empty();
+									$(licenseNameTd).html(displayLicenseNameCell);
+									$('#'+licenseNameId+'_licenseNameDiv').append(e);
+								
 									// licenseName auto complete
 									$(e).autocomplete({
 										source: licenseNames
@@ -1960,16 +2007,16 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
-												mult = "<span class=\"btnMulti\">" + licenseNames[i].value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 												break;
 											}
 										}
 										
 										if(mult == null){
-											mult = "<span class=\"btnMulti\">" + e.value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 										}
 										
-										$('#'+rowid+'_licenseName').parent().append(mult);
+										$('#'+rowid+'_licenseNameBtn').append(mult);
 										$('#'+rowid+'_licenseName').val("");
 										
 										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
@@ -1981,17 +2028,17 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 											for(var i in licenseNames){
 												if("" != e.value && e.value == licenseNames[i].value){
 													var licenseIds = $('#'+rowid+'_licenseId').val();
-													mult = "<span class=\"btnMulti\">" + licenseNames[i].value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+													mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
 	
 													break;
 												}
 											}
 											
 											if(mult == null && "" != e.value){
-												mult = "<span class=\"btnMulti\">" + e.value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+												mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
 											}
 											
-											$('#'+rowid+'_licenseName').parent().append(mult);
+											$('#'+rowid+'_licenseNameBtn').append(mult);
 											$('#'+rowid+'_licenseName').val("");
 	
 											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
@@ -2036,6 +2083,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				cellEdit : true,
 				cellsubmit : 'clientArray',
 				ignoreCase: true,
+				multiselect: true,
 				onSortCol: function (index, columnIndex, sortOrder) {
 					isSort = true;
 				},
@@ -2069,6 +2117,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 							} else if(className.indexOf('ui-subgrid') !== -1){
 								rowIdx++;
 							}
+
+							// checkbox click event
+							$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
 						}
 						
 						// 한번에 처리
@@ -2089,12 +2140,25 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				onSelectRow: function(rowid,status,eventObject) {
 				},
 				beforeSelectRow: function(rowid, e) {
+					var $self = $(this), iCol, cm,
+				    $td = $(e.target).closest("tr.jqgrow>td"),
+				    $tr = $td.closest("tr.jqgrow"),
+				    p = $self.jqGrid("getGridParam");
+
+				    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+				       iCol = $.jgrid.getCellIndex($td[0]);
+				       cm = p.colModel[iCol];
+				       if (cm != null && cm.name === "cb") {
+				           // multiselect checkbox is clicked
+				           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				       }
+				    }
 					// 경고 클래스 설정
-					fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
-					return true;
+				    fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
+				    return false;
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
-					if(iCol=="2") {
+					if(iCol=="3") {
 						com_fn.exitCell(_mainLastsel, "list");
 						
 						fn_grid_com.showOssViewPage(partnerList, rowid, true, partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
@@ -2104,23 +2168,23 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 					if(iCol!="17") {
 						cleanErrMsg("list", rowid);
 						fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
-					}
-					
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-					
-					$('#'+rowid+'_licenseName').addClass('autoCom');
-					$('#'+rowid+'_licenseName').css({'width' : '60px'});
-					var result = $('#'+rowid+'_licenseName').val().split(",");
 
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<span class=\"btnMulti\">" + cur + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
-							$('#'+rowid+'_licenseName').parent().append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+						
+						$('#'+rowid+'_licenseName').addClass('autoCom');
+						$('#'+rowid+'_licenseName').css({'width' : '60px'});
+						var result = $('#'+rowid+'_licenseName').val().split(",");
+
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<span class=\"btnMulti\">" + cur + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+								$('#'+rowid+'_licenseName').parent().append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+					}
 				},
 				onPaging: function(action) {
 					cleanErrMsg("list");
@@ -2152,8 +2216,8 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 			partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
-													  , addfunc: function () { fn_grid_com.rowAdd('list',partnerList,"main", null, com_fn.getLicenseName);}
-													  , delfunc: function () { fn_grid_com.rowDel(partnerList,"main");}
+													  , addfunc: function () { fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
+													  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
 													  , cloneToTop:true
 			});
 			
@@ -2163,6 +2227,10 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 
 	var com_fn = {
 		deleteLicense : function(target){
+			$(target).parent().remove();
+		},
+		deleteLicenseRenewal : function(target){
+			$(target).parent().next().remove();
 			$(target).parent().remove();
 		},
 		getLicenseName : function(obj){
@@ -2183,7 +2251,127 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
 				grid.jqGrid('saveRow',_mainLastsel);
 			}
-		}
+		},
+		showLicenseInfo : function(obj){
+			var licenseName = $(obj).text();
+
+			$.ajax({
+				url : '<c:url value="/license/getLicenseId"/>',
+				type : 'POST',
+				data : {"licenseName" : licenseName},
+				dataType : 'json',
+				cache : false,
+				success : function(data){
+					var _frameId = data.licenseId + "_License";
+					var _frameTarget = "#<c:url value='/license/edit/" + data.licenseId + "'/>";
+					createTabInFrame(_frameId, _frameTarget);
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		bulkEditOssInfo : function(obj){
+			var editFlag = false;
+			try{
+				var ossArr = [];
+		        var rowId = obj["rowId"];
+		        var target = obj["target"];
+		        var param = $('#'+target).jqGrid('getGridParam','data');
+		        
+		        if(rowId.indexOf(",") > -1){
+		            ossArr = rowId.split(",");
+		            for(var idx in ossArr){
+		                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
+
+		                for (var i=0; i<param.length; i++){
+		                    if(param[i]["gridId"] == ossArr[idx]){
+		                        for(var key in obj){
+		                            if(key != "rowId" && key != "target"){
+		                            	param[i][key] = obj[key];
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        }else{
+		            com_fn.bulkEditSetCell(target, rowId, obj);
+
+		            for (var i=0; i<param.length; i++){
+		                if(param[i]["gridId"] == rowId){
+		                    for(var key in obj){
+		                        if(key != "rowId" && key != "target"){
+		                        	param[i][key] = obj[key];
+		                        }
+		                    }
+		                }
+		            }
+		        }
+
+		        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
+			}catch(e){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	    		editFlag = true;
+	    	}finally{
+	    		if(!editFlag){
+		    		alertify.success('<spring:message code="msg.common.success" />');
+	    		}
+	       	}
+	    },
+	    bulkEditSetCell : function (target, rowId, obj){
+	        for(var key in obj){
+	            if(key != "rowId" && key != "target"){
+	            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
+	            }
+	        }
+	    },
+	    bulkEditDelRow : function (target, rowId, flag){
+	    	var delFlag = false;
+			try{
+				var selrow = "";
+				var param = $("#"+target).jqGrid('getGridParam', 'data');
+				
+		    	if(rowId.indexOf(",") > -1){
+		    		selrow = rowId.split(",");
+		    		for (var i=0; i<selrow.length; i++){
+		    			$("#"+target).jqGrid('delRowData', selrow[i]);
+		    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
+		        	}
+		        }else{
+		        	$("#"+target).jqGrid('delRowData', rowId);
+		        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
+		        }
+
+		        if(flag == "main"){
+		        	$("#"+target).jqGrid('GridUnload');
+
+		        	partyMainData = param;
+		        	grid.init();
+
+		        	// total record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+		        }
+			}catch(e){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				delFlag = true;
+	    	}finally{
+	    		if(!delFlag){
+		    		alertify.success('<spring:message code="msg.common.success" />');
+	    		}
+	       	}
+	    },
+	    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
+	    	var reMakeArrObj=[];
+	    	var newIdx = 0;
+
+	    	for(var idx=0; idx < dataArray.length; ++idx) {
+				if(dataArray[idx].gridId != rowId) {
+					reMakeArrObj[newIdx++] = dataArray[idx];
+				}
+			}
+			
+			return reMakeArrObj;
+	    }
 	}
 //]]>
 </script>

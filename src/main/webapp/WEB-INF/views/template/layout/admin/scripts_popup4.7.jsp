@@ -1,5 +1,8 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script>
+var CTX_PATH = "${ctxPath}";
+</script>
 <%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
 <link rel="stylesheet" type="text/css" href="/css/jqgrid4.7/ui.jqgrid.css" />

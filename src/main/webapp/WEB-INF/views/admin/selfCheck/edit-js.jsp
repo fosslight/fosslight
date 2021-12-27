@@ -194,6 +194,41 @@
 			// 에러 콜백
 			onError : function(data, status){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			},
+			bulkEdit : function(){
+		    	var gridList = $("#srcList");
+		        var targetGird = "srcList";
+
+		        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+		        var rowCheckedArr = [];
+		        for(var i=0; i<selarrrow.length; i++){
+					if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+						rowCheckedArr.push(selarrrow[i]);
+					}
+		        }
+
+		        if(rowCheckedArr.length > 0){
+		            fn_grid_com.totalGridSaveMode(targetGird);
+		            
+		            var bulkEditArr = gridList.jqGrid("getGridParam", "selarrrow");
+		            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=selfCheck"/>';
+		            
+		            var _popup = null;
+		            
+		            if(_popup == null || _popup.closed){
+		                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+		                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+		                    alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+		                }
+		            } else {
+		                _popup.close();
+		                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
+		            }
+		        }else{
+		            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
+		            return false;
+		        }
 			}
 		}
 	
@@ -1104,6 +1139,18 @@
 	 				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
 	 					editoptions: {
 	 						dataInit: function (e) {
+	 								var licenseNameId = $(e).attr("id").split('_')[0];
+									var licenseNameTd = $(e).parent();
+
+									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '</div>';
+						
+									$(licenseNameTd).empty();
+									$(licenseNameTd).html(displayLicenseNameCell);
+									$('#'+licenseNameId+'_licenseNameDiv').append(e);
+								
 									// licenseName auto complete
 									$(e).autocomplete({
 										source: licenseNames
@@ -1125,17 +1172,17 @@
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
 
-												mult = "<span class=\"btnMulti\">" + licenseNames[i].value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 
 												break;
 											}
 										}
 										
 										if(mult == null){
-											mult = "<span class=\"btnMulti\">" + e.value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 										}
 										
-										$('#'+rowid+'_licenseName').parent().append(mult);
+										$('#'+rowid+'_licenseNameBtn').append(mult);
 										$('#'+rowid+'_licenseName').val("");
 										
 										
@@ -1149,14 +1196,14 @@
 												if("" != e.value && e.value == licenseNames[i].value){
 													var licenseIds = $('#'+rowid+'_licenseId').val();
 													
-													mult = "<span class=\"btnMulti\">" + licenseNames[i].value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+													mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
 
 													break;
 												}
 											}
 											
 											if(mult == null && "" != e.value){
-												mult = "<span class=\"btnMulti\">" + e.value + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+												mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
 											}
 											
 											$('#'+rowid+'_licenseName').parent().append(mult);
@@ -1275,6 +1322,7 @@
 				cellEdit : false,
 				cellsubmit : 'clientArray',
 				ignoreCase: true,
+				multiselect: true,
 			    onSortCol: function (index, columnIndex, sortOrder) {
 			    	isSort = true;
 			    },
@@ -1308,6 +1356,9 @@
 							} else if(className.indexOf('ui-subgrid') !== -1){
 								rowIdx++;
 							}
+
+							// checkbox click event
+							$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
 						}
 						
 						// 한번에 처리
@@ -1333,37 +1384,51 @@
 					}
 				},
 				beforeSelectRow: function(rowid, e) {
+					var $self = $(this), iCol, cm,
+				    $td = $(e.target).closest("tr.jqgrow>td"),
+				    $tr = $td.closest("tr.jqgrow"),
+				    p = $self.jqGrid("getGridParam");
+
+				    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+				       iCol = $.jgrid.getCellIndex($td[0]);
+				       cm = p.colModel[iCol];
+				       if (cm != null && cm.name === "cb") {
+				           // multiselect checkbox is clicked
+				           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				       }
+				    }
+				    
 					// 경고 클래스 설정
 					fn_grid_com.setWarningClass(srcList,rowid,["ossName","licenseName"]);
 					return true;
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
-					if(iCol=="1") {
+					if(iCol=="2") {
 						fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
 					}
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					// 체크 박스 영역 제외
-					if(iCol!="22") {
+					if(iCol!="25") {
 						cleanErrMsg("srcList", rowid);
 						fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+
+						$('#'+rowid+'_licenseName').addClass('autoCom');
+		 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+						var result = $('#'+rowid+'_licenseName').val().split(",");
+
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
 					}
-					
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-
-					$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '60px'});
-					var result = $('#'+rowid+'_licenseName').val().split(",");
-
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<span class=\"btnMulti\">" + cur + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
-							$('#'+rowid+'_licenseName').parent().append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
 				},
 				onPaging: function(action) {
 					cleanErrMsg("srcList");
@@ -1385,8 +1450,8 @@
 			
 			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAdd('srcList',srcList,"main", null, com_fn.getLicenseName);}
-													  , delfunc: function () { fn_grid_com.rowDel(srcList,"main");}
+													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
+													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
 													  , cloneToTop:true
 			});
 			
@@ -1409,6 +1474,10 @@
 		deleteLicense : function(target){
 			$(target).parent().remove();
 		},
+		deleteLicenseRenewal : function(target){
+			$(target).parent().next().remove();
+			$(target).parent().remove();
+		},
 		getLicenseName : function(obj){
 			return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
 			    if(cur.toUpperCase() != "X" && cur != ""){
@@ -1427,7 +1496,127 @@
 				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
 				grid.jqGrid('saveRow',_mainLastsel);
 			}
-		}
+		},
+		showLicenseInfo : function(obj){
+			var licenseName = $(obj).text();
+
+			$.ajax({
+				url : '<c:url value="/license/getLicenseId"/>',
+				type : 'POST',
+				data : {"licenseName" : licenseName},
+				dataType : 'json',
+				cache : false,
+				success : function(data){
+					var _frameId = data.licenseId + "_License";
+					var _frameTarget = "#<c:url value='/license/edit/" + data.licenseId + "'/>";
+					createTabInFrame(_frameId, _frameTarget);
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		bulkEditOssInfo : function(obj){
+			var editFlag = false;
+			try{
+				var ossArr = [];
+		        var rowId = obj["rowId"];
+		        var target = obj["target"];
+		        var param = $('#'+target).jqGrid('getGridParam','data');
+		        
+		        if(rowId.indexOf(",") > -1){
+		            ossArr = rowId.split(",");
+		            for(var idx in ossArr){
+		                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
+
+		                for (var i=0; i<param.length; i++){
+		                    if(param[i]["gridId"] == ossArr[idx]){
+		                        for(var key in obj){
+		                            if(key != "rowId" && key != "target"){
+		                            	param[i][key] = obj[key];
+		                            }
+		                        }
+		                    }
+		                }
+		            }
+		        }else{
+		            com_fn.bulkEditSetCell(target, rowId, obj);
+
+		            for (var i=0; i<param.length; i++){
+		                if(param[i]["gridId"] == rowId){
+		                    for(var key in obj){
+		                        if(key != "rowId" && key != "target"){
+		                        	param[i][key] = obj[key];
+		                        }
+		                    }
+		                }
+		            }
+		        }
+
+		        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
+			}catch(e){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	    		editFlag = true;
+	    	}finally{
+	    		if(!editFlag){
+		    		alertify.success('<spring:message code="msg.common.success" />');
+	    		}
+	       	}
+	    },
+	    bulkEditSetCell : function (target, rowId, obj){
+	        for(var key in obj){
+	            if(key != "rowId" && key != "target"){
+	            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
+	            }
+	        }
+	    },
+	    bulkEditDelRow : function (target, rowId, flag){
+	    	var delFlag = false;
+			try{
+				var selrow = "";
+				var param = $("#"+target).jqGrid('getGridParam', 'data');
+				
+		    	if(rowId.indexOf(",") > -1){
+		    		selrow = rowId.split(",");
+		    		for (var i=0; i<selrow.length; i++){
+		    			$("#"+target).jqGrid('delRowData', selrow[i]);
+		    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
+		        	}
+		        }else{
+		        	$("#"+target).jqGrid('delRowData', rowId);
+		        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
+		        }
+
+		        if(flag == "main"){
+		        	$("#"+target).jqGrid('GridUnload');
+
+		        	srcMainData = param;
+		        	src_grid.load();
+
+		        	// total record 표시
+					$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+		        }
+			}catch(e){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	        	delFlag = true;
+	    	}finally{
+	    		if(!delFlag){
+		    		alertify.success('<spring:message code="msg.common.success" />');
+	    		}
+	       	}
+	    },
+	    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
+	    	var reMakeArrObj=[];
+	    	var newIdx = 0;
+
+	    	for(var idx=0; idx < dataArray.length; ++idx) {
+				if(dataArray[idx].gridId != rowId) {
+					reMakeArrObj[newIdx++] = dataArray[idx];
+				}
+			}
+			
+			return reMakeArrObj;
+	    }
 	};
 //]]>
 </script>

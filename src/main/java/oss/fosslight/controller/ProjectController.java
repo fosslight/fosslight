@@ -1667,6 +1667,7 @@ public class ProjectController extends CoTopComponent {
 			resCd = "10";
 			resMap.put("isValid", String.valueOf(isValid));
 			resMap.put("resCd", resCd);
+			resMap.put("resultData", projectService.getProjectDetail(project).getIdentificationStatus());
 			
 			return makeJsonResponseHeader(resMap);
 		} catch (Exception e) {
@@ -1857,6 +1858,7 @@ public class ProjectController extends CoTopComponent {
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		resMap.put("resultData", projectService.getProjectDetail(project).getIdentificationStatus());
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1997,12 +1999,13 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 
+		Project prj = new Project();
+		prj.setPrjId(prjId);
+		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusAndroid)) {
-			Project project = new Project();
-			project.setIdentificationSubStatusAndroid(identificationSubStatusAndroid);
-			project.setPrjId(prjId);
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			projectService.updateSubStatus(project);
+			prj.setIdentificationSubStatusAndroid(identificationSubStatusAndroid);
+			prj.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			projectService.updateSubStatus(prj);
 		} else {
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
@@ -2126,6 +2129,7 @@ public class ProjectController extends CoTopComponent {
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		resMap.put("resultData", projectService.getProjectDetail(prj).getIdentificationStatus());
 		
 		return makeJsonResponseHeader(resMap);
 	}
