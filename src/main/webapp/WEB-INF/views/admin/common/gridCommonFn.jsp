@@ -508,6 +508,70 @@ var fn_grid_com = {
 				target.jqGrid("setSelection", _tempRandId);
 			}
 		},
+		// 행추가 메인 & 서브 (new)
+	 	rowAddNew : function(div, target, flag, rowid, callbackFunc){
+			if(flag == "main"){
+				// 서브 그리드 url 전송 설정(false 전송 안함)
+				subGridUrl = false;
+				
+				// 이전 로우 세이브
+				if(_mainLastsel != -1) {
+					var licenseName = callbackFunc(target.getRowData(_mainLastsel));
+					target.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+					fn_grid_com.saveCellData(target.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+					target.jqGrid('saveRow',_mainLastsel);
+				} else {
+					target.jqGrid('saveRow',_mainLastsel);
+				}
+				
+				// 로우 추가
+				var _tempRandId = $.jgrid.randId();
+				target.jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, licenseDiv:"S", excludeYn: "N", customBinaryYn: "Y"}, "last");
+				// 경고 클래스 설정
+				fn_grid_com.setWarningClass(target,_tempRandId,["ossName","licenseName"]);
+				// 추가된 로우 에디트 설정
+				fn_grid_com.setMainEditMode(target, _tempRandId);
+				
+
+				// 만약 client array에도 추가한다.
+				var dataArray = $("#"+div).jqGrid('getRowData', _tempRandId);
+				if("binAndroidList" == div) {
+					binAndroidMainData[binAndroidMainData.length-1] = dataArray;
+				} else if("srcList" == div) {
+					srcMainData[srcMainData.length-1] = dataArray;
+				} else if("binList" == div) {
+					binMainData[binMainData.length-1] = dataArray;
+				} else if("list" == div) {
+					partyMainData[partyMainData.length-1] = dataArray;
+				} else if("batList" == div) {
+					batMainData[batMainData.length-1] = dataArray;
+				}
+				
+				$.each(dataArray, function(_key, _val){
+					fn_grid_com.saveCellData(div,_tempRandId, _key, _val, null, null);
+				});
+				
+				target.jqGrid('editRow',_tempRandId);
+				target.jqGrid("setSelection", _tempRandId);
+
+				// 서브 그리드 확장 및 숨기기
+				$("#"+div+" #"+_tempRandId).find("td:first").removeClass("sgcollapsed").find("a").hide();
+				$("#"+div+" #"+_tempRandId).next().hide();
+				
+				// 라스트 셀 설정
+				_mainLastsel=_tempRandId;
+				
+				// 서브 그리드 url 전송 설정(true 전송)
+				subGridUrl = true;
+				
+				$('#'+_tempRandId+'_licenseName').addClass('autoCom');
+				$('#'+_tempRandId+'_licenseName').css({'width' : '60px'});
+
+				// OSS TABLE_ADD_checkbox attr, class edit
+				$("#"+_tempRandId).find('input[type=checkbox]').removeAttr("checked");
+				$("#"+_tempRandId).find("input[type=checkbox]").removeClass("cbox");
+			}
+		},
 		// 행삭제 메인 & 서브
 	 	rowDel : function(target, flag){
 	 		var selrow = target.jqGrid('getGridParam', "selrow" );
@@ -543,6 +607,106 @@ var fn_grid_com = {
 					fn_grid_com.deleteLocalDataAfterDelRow(target, selrow, flag);
 				} else {
 					alertify.error('<spring:message code="msg.common.cannot.registered.delete" />', 0);
+				}
+			}
+		},
+		// 행삭제 메인 & 서브 (new)
+	 	rowDelNew : function(target, flag){
+			$("#loading_wrap").show();
+			
+			setTimeout(function(){
+				try{
+					var selarrrow = target.jqGrid('getGridParam', "selarrrow");
+			 		
+					if(flag == "main"){
+			    	   	var targetDataObj = target.selector;
+			    	   	onAjaxLoadingHide = false;
+
+			    	   	var dataArray = target.jqGrid('getGridParam', 'data');
+						
+						for(var i=selarrrow.length-1; i>=0; i--){
+							var selrow = selarrrow[i];
+							dataArray = fn_grid_com.deleteLocalDataAfterDelRowData(dataArray, selrow);
+						}
+						//bat 일 경우
+						if(targetDataObj=="#batList" || targetDataObj=="#binAndroidList"){
+							if(target.jqGrid("getCell", selrow, "customBinaryYn") == "Y"){
+								for(var i=selarrrow.length-1; i >= 0; i--){
+									var selrow = selarrrow[i];
+									target.jqGrid('collapseSubGridRow', selrow);
+									target.jqGrid('delRowData', selrow);
+								}
+
+					    	   if("#binAndroidList" == targetDataObj) {
+									fn_grid_com.deleteLocalDataAfterDelRowNew(target, dataArray, flag);
+					    	   } else if("#batList" == targetDataObj) {
+									fn_grid_com.deleteLocalDataAfterDelRowNew(target, dataArray, flag);
+					    	   }
+							} else {
+								alertify.error('<spring:message code="msg.common.cannot.delete" />', 0);
+							}
+						} else {
+							for(var i=selarrrow.length-1; i >= 0; i--){
+								var selrow = selarrrow[i];
+								target.jqGrid('collapseSubGridRow', selrow);
+								target.jqGrid('delRowData', selrow);
+							}
+
+							fn_grid_com.deleteLocalDataAfterDelRowNew(target, dataArray, flag);
+						}
+					} 
+				}catch(e){
+					alertify.error('<spring:message code="msg.common.cannot.delete" />', 0);
+				}finally{
+					$("#loading_wrap").hide();
+				}
+			}, 300);
+		},
+		deleteLocalDataAfterDelRowData : function(dataArray, selrow) {
+			var reMakeArrObj=[];
+	    	var newIdx = 0;
+
+	    	for(var idx=0; idx < dataArray.length; idx++) {
+				if(dataArray[idx].gridId != selrow) {
+					reMakeArrObj[newIdx++] = dataArray[idx];
+				}
+			}
+			
+			return reMakeArrObj;
+		},
+		deleteLocalDataAfterDelRowNew : function(target, dataArray, flag) {
+			// client array에서 삭제
+			var targetDataObj = target.selector;
+	       	var reMakeArrObj=dataArray;		
+			
+			if(flag == "main"){
+				target.jqGrid('GridUnload');
+				
+				if("#binAndroidList" == targetDataObj) {
+					binAndroidMainData = reMakeArrObj;
+					binAndroid_grid.load();
+					// total record 표시
+					$("#binAndroidList_toppager_right, #binAndroidPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+binAndroidMainData.length+'</div>');
+				} else if("#srcList" == targetDataObj) {
+					srcMainData = reMakeArrObj;
+					src_grid.load();
+					// total record 표시
+	        		$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+				} else if("#binList" == targetDataObj) {
+					binMainData = reMakeArrObj;
+					bin_grid.load()
+					// total record 표시
+					$("#binList_toppager_right, #binPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+binMainData.length+'</div>');
+				} else if("#list" == targetDataObj) {
+					partyMainData = reMakeArrObj;
+					grid.init();
+					// total record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+				} else if("#batList" == targetDataObj) {
+					batMainData = reMakeArrObj;
+					bat_grid_list.load();
+					// total record 표시
+					$("#batList_toppager_right, #batPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+batMainData.length+'</div>');
 				}
 			}
 		},

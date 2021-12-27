@@ -49,7 +49,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.PROJECT;
-import oss.fosslight.common.XssFilter;
+import oss.fosslight.common.CustomXssFilter;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
@@ -187,7 +187,7 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) {
 		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
 		List<Project> list = projectService.getProjectNameList(project);
-		XssFilter.projectFilter(list);
+		CustomXssFilter.projectFilter(list);
 		return makeJsonResponseHeader(list);
 		
 	}
@@ -286,7 +286,7 @@ public class ProjectController extends CoTopComponent {
 		}
 
 		Map<String, Object> map = projectService.getProjectList(project);
-		XssFilter.projectFilter((List<Project>) map.get("rows"));
+		CustomXssFilter.projectFilter((List<Project>) map.get("rows"));
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -1667,6 +1667,7 @@ public class ProjectController extends CoTopComponent {
 			resCd = "10";
 			resMap.put("isValid", String.valueOf(isValid));
 			resMap.put("resCd", resCd);
+			resMap.put("resultData", projectService.getProjectDetail(project).getIdentificationStatus());
 			
 			return makeJsonResponseHeader(resMap);
 		} catch (Exception e) {
@@ -1857,6 +1858,7 @@ public class ProjectController extends CoTopComponent {
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		resMap.put("resultData", projectService.getProjectDetail(project).getIdentificationStatus());
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1997,12 +1999,13 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 
+		Project prj = new Project();
+		prj.setPrjId(prjId);
+		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusAndroid)) {
-			Project project = new Project();
-			project.setIdentificationSubStatusAndroid(identificationSubStatusAndroid);
-			project.setPrjId(prjId);
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			projectService.updateSubStatus(project);
+			prj.setIdentificationSubStatusAndroid(identificationSubStatusAndroid);
+			prj.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			projectService.updateSubStatus(prj);
 		} else {
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
@@ -2126,6 +2129,7 @@ public class ProjectController extends CoTopComponent {
 		resCd = "10";
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		resMap.put("resultData", projectService.getProjectDetail(prj).getIdentificationStatus());
 		
 		return makeJsonResponseHeader(resMap);
 	}

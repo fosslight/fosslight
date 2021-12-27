@@ -341,7 +341,8 @@
             </span>
             <span class="left">
 	            <c:if test="${not empty detail and detail.status ne 'REQ' and detail.status ne 'CONF' and (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
-	                <input id="partyDelete" type="button" value="Delete" class="btnColor red left" onclick="fn.delete()"/>
+	                <input id="partyDelete" type="button" value="Delete" class="btnColor red" onclick="fn.delete()"/>
+	                <input id="partyBulkEdit" type="button" value="Bulk Edit" class="btnColor red" onclick="fn.bulkEdit()"/>
 	            </c:if>
             </span>
         </div>
