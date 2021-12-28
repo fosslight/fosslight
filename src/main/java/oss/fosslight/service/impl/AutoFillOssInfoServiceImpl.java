@@ -491,7 +491,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			List<String> componentIds = paramBean.getComponentIdList();
 
 			switch(targetName.toUpperCase()) {
-				case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+				case CoConstDef.CD_CHECK_OSS_SELF:
 					for(String componentId : componentIds) {
 						String[] gridId = componentId.split("-");
 						paramBean.setGridId(gridId[0]+"-"+gridId[1]);
@@ -503,7 +503,56 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					}
 					
 					break;
-				case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+				case CoConstDef.CD_CHECK_OSS_PARTNER:
+					for(String componentId : componentIds) {
+						paramBean.setComponentId(componentId);
+						updateCnt += ossMapper.updateOssCheckLicenseByPartner(paramBean);
+					}
+
+					if(updateCnt >= 1) {
+						String commentId = paramBean.getRefPrjId();
+						String checkOssLicenseComment = "";
+						String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
+
+						if(!paramBean.getOssVersion().isEmpty()) {
+							changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
+						} else {
+							changeOssLicenseInfo += " ";
+						}
+
+						changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
+								+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
+						CommentsHistory commentInfo = null;
+
+						if(isEmpty(commentId)) {
+							checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
+							checkOssLicenseComment += changeOssLicenseInfo;
+							CommentsHistory commHisBean = new CommentsHistory();
+							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+							commHisBean.setReferenceId(paramBean.getReferenceId());
+							commHisBean.setContents(checkOssLicenseComment);
+							commentInfo = commentService.registComment(commHisBean, false);
+						} else {
+							commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+							if(commentInfo != null) {
+								if(!isEmpty(commentInfo.getContents())) {
+									checkOssLicenseComment  = commentInfo.getContents();
+									checkOssLicenseComment += changeOssLicenseInfo;
+									commentInfo.setContents(checkOssLicenseComment);
+
+									commentService.updateComment(commentInfo, false);
+								}
+							}
+						}
+
+						if(commentInfo != null) {
+							map.put("commentId", commentInfo.getCommId());
+						}
+					}
+
+					break;
+				case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
 					for(String componentId : componentIds) {
 						paramBean.setComponentId(componentId);
 						updateCnt += ossMapper.updateOssCheckLicense(paramBean);

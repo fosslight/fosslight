@@ -1759,7 +1759,25 @@
 		WHERE CONCAT(REFERENCE_ID, '-', REFERENCE_DIV) = #{gridId}
 		  AND OC.COMPONENT_IDX = #{componentId}
 	</update>
-	
+
+	<update id="updateOssCheckNameByPartner" parameterType="oss.fosslight.domain.ProjectIdentification">
+		UPDATE OSS_COMPONENTS
+		SET OSS_NAME = #{checkName}
+		WHERE REFERENCE_ID = #{referenceId}
+		  AND REFERENCE_DIV = #{referenceDiv}
+		  AND COMPONENT_ID = #{componentId}
+	</update>
+
+	<update id="updateOssCheckLicenseByPartner" parameterType="oss.fosslight.domain.ProjectIdentification">
+		UPDATE OSS_COMPONENTS_LICENSE OCL
+			INNER JOIN OSS_COMPONENTS OC
+		ON OCL.COMPONENT_ID = OC.COMPONENT_ID
+			SET OCL.LICENSE_NAME = #{checkLicense}
+		WHERE REFERENCE_ID = #{referenceId}
+		  AND REFERENCE_DIV = #{referenceDiv}
+		  AND OC.COMPONENT_ID = #{componentId}
+	</update>
+
 	<update id="updateOssCheckName" parameterType="oss.fosslight.domain.ProjectIdentification">
 		UPDATE OSS_COMPONENTS 
 		   SET OSS_NAME = #{checkName}
