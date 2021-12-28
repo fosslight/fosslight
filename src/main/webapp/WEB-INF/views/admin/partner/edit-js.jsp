@@ -18,6 +18,9 @@ var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
 var partnerData = ${empty detailJson ? '{}' : detailJson};
 var prjList = ${empty prjList ? '{}' : prjList};
 var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
+var _popupCheckOssName = null;
+var _popupCheckOssLicense = null;
+var saveFlag = false;
 
 	$(document).ready(function () {
 		'use strict';
@@ -790,7 +793,9 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 							reloadTabInframe('/partner/list');
 							
 							if(partnerId){
-								reloadTabInframe('/partner/edit/'+partnerId);			
+								fn.getPartyGridData();
+
+								saveFlag = true;
 							} else {
 								deleteTabInFrame('#/partner/edit');	
 								if(data.partnerId) {
@@ -1719,6 +1724,42 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
         		event.returnValue = false;
         	}
 		},
+		CheckOssViewPage : function(){
+			if(saveFlag) {
+				if(_popupCheckOssName != null){
+					_popupCheckOssName.close();
+				}
+				
+				_popupCheckOssName = window.open("/oss/checkOssName?prjId=${detail.partnerId}&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+				}
+			} else {
+				alertify.alert('<spring:message code="msg.project.required.checkOssName" />', function(){});
+
+				return false;
+			}
+			
+			
+		},
+		CheckOssLicenseViewPage : function(){
+			if(saveFlag) {
+				if(_popupCheckOssLicense != null){
+					_popupCheckOssLicense.close();
+				}
+				
+				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId=${detail.partnerId}&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+				}
+			} else {
+				alertify.alert('<spring:message code="msg.project.required.checkOssLicense" />', function(){});
+
+				return false;
+			}
+		},
 		checkStatus : function(){
 			var partnerId = $("input[name=partnerId]").val();
 			var returnFlag = false;
@@ -2216,7 +2257,7 @@ var sampleFile =  ${ct:getAllValuesJson(ct:getConstDef('CD_SAMPLE_FILE'))};
 			});
 			partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
-													  , addfunc: function () { fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
+													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
 													  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
 													  , cloneToTop:true
 			});

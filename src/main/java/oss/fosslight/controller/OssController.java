@@ -59,6 +59,7 @@ import oss.fosslight.service.AutoFillOssInfoService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.util.ExcelDownLoadUtil;
@@ -84,6 +85,7 @@ public class OssController extends CoTopComponent{
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired SelfCheckService selfCheckService;
 	@Autowired ProjectService projectService;
+	@Autowired PartnerService partnerService;
 	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_OSS_LIST";
@@ -1204,13 +1206,18 @@ public class OssController extends CoTopComponent{
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
-			case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+			case CoConstDef.CD_CHECK_OSS_SELF:
 				map = selfCheckService.getIdentificationGridList(paramBean);
 				
 				break;
-			case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
 				map = projectService.getIdentificationGridList(paramBean);
 				
+				break;
+
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+
 				break;
 		}		
 
@@ -1280,13 +1287,18 @@ public class OssController extends CoTopComponent{
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
-			case CoConstDef.CD_CHECK_OSS_NAME_SELF:
+			case CoConstDef.CD_CHECK_OSS_SELF:
 				map = selfCheckService.getIdentificationGridList(paramBean);
 				
 				break;
-			case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
 				map = projectService.getIdentificationGridList(paramBean);
 				
+				break;
+
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+	
 				break;
 		}		
 

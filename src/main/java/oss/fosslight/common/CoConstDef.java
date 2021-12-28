@@ -740,8 +740,9 @@ public class CoConstDef {
 	
 	public static final String CD_ANDROID_NOTICE_XML							= "20";
 	
-	public static final String CD_CHECK_OSS_NAME_SELF							= "SELF";
-	public static final String CD_CHECK_OSS_NAME_IDENTIFICATION					= "IDENTIFICATION";
+	public static final String CD_CHECK_OSS_SELF 								= "SELF";
+	public static final String CD_CHECK_OSS_IDENTIFICATION 						= "IDENTIFICATION";
+	public static final String CD_CHECK_OSS_PARTNER 							= "PARTNER";
 	
 	// Open API Token Proc
 	public static final String CD_TOKEN_CREATE_TYPE								= "CREATE";

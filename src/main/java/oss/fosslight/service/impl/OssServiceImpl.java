@@ -23,9 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
-import org.hibernate.mapping.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -43,7 +41,6 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
-import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
@@ -2049,7 +2046,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					List<String> componentIds = paramBean.getComponentIdList();
 					
 					switch(targetName.toUpperCase()) {
-						case CoConstDef.CD_CHECK_OSS_NAME_SELF:				
+						case CoConstDef.CD_CHECK_OSS_SELF:
 							for(String componentId : componentIds) {
 								String[] gridId = componentId.split("-");
 								paramBean.setGridId(gridId[0]+"-"+gridId[1]);
@@ -2058,8 +2055,51 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							}
 							
 							break;
-						case CoConstDef.CD_CHECK_OSS_NAME_IDENTIFICATION:
+						case CoConstDef.CD_CHECK_OSS_PARTNER:
+							for(String componentId : componentIds) {
+								paramBean.setComponentId(componentId);
+								updateCnt += ossMapper.updateOssCheckNameByPartner(paramBean);
+							}
 
+							if(updateCnt >= 1) {
+								String commentId = paramBean.getRefPrjId();
+								String checkOssNameComment = "";
+								String changeOssNameInfo = "<p>" + paramBean.getOssName() + " => " + paramBean.getCheckName() + "</p>";
+								CommentsHistory commentInfo = null;
+
+								if(isEmpty(commentId)) {
+									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
+									checkOssNameComment += "<p><b>Opensource Names</b></p>";
+									checkOssNameComment += changeOssNameInfo;
+									CommentsHistory commHisBean = new CommentsHistory();
+									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+									commHisBean.setReferenceId(paramBean.getReferenceId());
+									commHisBean.setContents(checkOssNameComment);
+									commentInfo = commentService.registComment(commHisBean, false);
+								} else {
+									commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+									if(commentInfo != null) {
+										commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
+
+										if(commentInfo != null) {
+											if(!isEmpty(commentInfo.getContents())) {
+												checkOssNameComment  = commentInfo.getContents();
+												checkOssNameComment += changeOssNameInfo;
+												commentInfo.setContents(checkOssNameComment);
+
+												commentService.updateComment(commentInfo, false);
+											}
+										}
+									}
+								}
+								if(commentInfo != null) {
+									map.put("commentId", commentInfo.getCommId());
+								}
+							}
+
+							break;
+						case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
 							for(String componentId : componentIds) {
 								paramBean.setComponentId(componentId);
 								updateCnt += ossMapper.updateOssCheckName(paramBean);

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.CoMail;
@@ -26,6 +27,8 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.OssLicense;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.PartnerWatcher;
 import oss.fosslight.domain.Project;
@@ -38,6 +41,7 @@ import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.StringUtil;
@@ -49,7 +53,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	// Service
 	@Autowired ProjectService projectService;
 	@Autowired FileService fileService;
-	
+	@Autowired OssService ossService;
+
 	// Mapper
 	@Autowired PartnerMapper partnerMapper;
 	@Autowired CommentMapper commentMapper;
@@ -717,5 +722,218 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		return resultMap;
 	}
 
+	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification) {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		List<ProjectIdentification> list = null;
+		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+		
+		boolean isLoadFromProject = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefPrjId());
+		
+		if(isLoadFromProject) {
+			identification.setReferenceId(identification.getRefPrjId());
+		}
+		
+		boolean isApplyFromBat = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefBatId());
+		
+		if(isApplyFromBat) {
+			identification.setReferenceId(identification.getRefBatId());
+		}
+			
+		HashMap<String, Object> subMap = new HashMap<String, Object>();
+			
+		list = projectMapper.selectIdentificationGridList(identification);
+		
+		if(list != null && !list.isEmpty()) {
 
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceDiv(identification.getReferenceDiv());
+			param.setReferenceId(identification.getReferenceId());
+			OssMaster ossParam = new OssMaster();
+			
+			// components license 정보를 한번에 가져온다
+			for(ProjectIdentification bean : list) {
+				param.addComponentIdList(bean.getComponentId());
+				
+				if(!isEmpty(bean.getOssId())) {
+					ossParam.addOssIdList(bean.getOssId());
+				}
+				
+				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
+				if(isEmpty(bean.getCveId()) 
+						&& isEmpty(bean.getOssVersion()) 
+						&& !isEmpty(bean.getCvssScoreMax())
+						&& !("-".equals(bean.getOssName()))){ 
+					String[] cvssScoreMax = bean.getCvssScoreMax().split("\\@");
+					bean.setCvssScore(cvssScoreMax[0]);
+					bean.setCveId(cvssScoreMax[1]);
+				}
+			}
+				
+			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
+			Map<String, OssMaster> componentOssInfoMap = null;
+			
+			if(ossParam.getOssIdList() != null && !ossParam.getOssIdList().isEmpty()) {
+				componentOssInfoMap = ossService.getBasicOssInfoListById(ossParam);
+			}
+				
+			List<ProjectIdentification> licenseList = projectMapper.identificationSubGrid(param);
+			
+			for(ProjectIdentification licenseBean : licenseList) {
+				for(ProjectIdentification bean : list) {
+					if(licenseBean.getComponentId().equals(bean.getComponentId())) {
+						// 수정가능 여부 초기설정
+						licenseBean.setEditable(CoConstDef.FLAG_YES);
+						bean.addComponentLicenseList(licenseBean);
+						break;
+					}
+				}
+			}
+
+			// license 정보 등록
+			for(ProjectIdentification bean : list) {
+				if(bean.getComponentLicenseList()!=null){
+					String licenseCopy = "";
+						
+					// multi dual 라이선스의 경우, main row에 표시되는 license 정보는 OSS List에 등록되어진 라이선스를 기준으로 표시한다.
+					// ossId가 없는 경우는 기본적으로 subGrid로 등록될 수 없다
+					// 이짓거리를 하는 두번째 이유는, subgrid 에서 사용자가 추가한 라이선스와 oss 에 등록되어 있는 라이선스를 구분하기 위함
+					if(componentOssInfoMap == null) {
+						componentOssInfoMap = new HashMap<>();
+					}
+					
+					OssMaster ossBean = componentOssInfoMap.get(bean.getOssId());
+						
+					if(ossBean != null
+							&& CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())
+							&& ossBean.getOssLicenses() != null && !ossBean.getOssLicenses().isEmpty()) {
+						for(OssLicense ossLicenseBean : ossBean.getOssLicenses()) {
+							if(!isEmpty(ossLicenseBean.getOssCopyright())) {
+								licenseCopy += (!isEmpty(licenseCopy) ? "\r\n" : "") + ossLicenseBean.getOssCopyright();
+							}
+								
+							//삭제 불가 처리
+							for(ProjectIdentification licenseBean : bean.getComponentLicenseList()) {
+								// license index 까지 비교하는 이유는
+								// multi dual 혼용인 경우, 동일한 라이선스가 두번 등록 될 수 있기 때문
+								if(ossLicenseBean.getLicenseId().equals(licenseBean.getLicenseId()) 
+										&& ossLicenseBean.getOssLicenseIdx().equals(licenseBean.getRnum())) {
+									licenseBean.setEditable(CoConstDef.FLAG_NO);
+									break;
+								}
+							}
+						}
+						
+						bean.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(bean.getComponentLicenseList(), ","));
+					} else {
+						// license text는 표시하지 않기 때문에 설정할 필요는 없음
+						for(ProjectIdentification licenseBean : bean.getComponentLicenseList()) {
+							if(!isEmpty(licenseBean.getCopyrightText())) {
+								licenseCopy += (!isEmpty(licenseCopy) ? "\r\n" : "") + licenseBean.getCopyrightText();
+							}
+						}
+						
+						bean.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(bean.getComponentLicenseList(), ","));
+					}
+					
+					bean.setLicenseNameExistsYn(CommonFunction.existsLicenseName(bean.getComponentLicenseList()) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+					bean.setLicenseUserGuideStr(CommonFunction.checkLicenseUserGuide(bean.getComponentLicenseList()));
+					bean.setLicenseUserGuideYn(isEmpty(bean.getLicenseUserGuideStr()) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES);
+					bean.setRestriction(CommonFunction.setLicenseRestrictionList(bean.getComponentLicenseList()));
+					
+					// subGrid의 Item 추출을 위해 별도의 map으로 구성한다.
+					// 부몬의 component_id를 key로 관리한다.
+					subMap.put(bean.getGridId(), bean.getComponentLicenseList());
+				}	
+			}
+			
+			// 다른 프로젝트에서 load한 경우 component id 초기화
+			if(isLoadFromProject || isApplyFromBat) {
+				subMap = new HashMap<>();
+
+				// refproject id + "p" + componentid 로 component_id를 재생성 하고, 
+				// license 의 경우 재성생한 component_id + 기존 license grid_id의 component_license_id 부분을 결합
+				for(ProjectIdentification bean : list) {
+					if(isLoadFromProject) {
+						bean.setRefPrjId(identification.getRefPrjId());
+					} else if(isApplyFromBat) {
+						bean.setRefBatId(identification.getRefBatId());
+					}
+						
+					String _compId = CoConstDef.GRID_NEWROW_DEFAULT_PREFIX;
+					
+					if(isLoadFromProject) {
+						_compId += identification.getRefPrjId();
+					} else if (isApplyFromBat) {
+						_compId += identification.getRefBatId();
+					}
+					
+					_compId += "p" + bean.getComponentId();
+					
+					bean.setComponentId("");
+					bean.setGridId(_compId);
+
+					if(bean.getComponentLicenseList()!=null){
+						for(ProjectIdentification licenseBean : bean.getComponentLicenseList()) {
+							licenseBean.setComponentId("");
+							licenseBean.setGridId(_compId + "-"+ licenseBean.getComponentLicenseId());
+						}
+					}
+					
+					subMap.put(bean.getGridId(), bean.getComponentLicenseList());
+				}
+			}
+		}
+			
+		// 편집중인 data 가 존재할 경우 append 한다.
+		{
+			if(identification.getMainDataGridList() != null) {
+				for(ProjectIdentification bean : identification.getMainDataGridList()) {
+					//멀티라이센스일 경우
+					if(CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())){
+						for (List<ProjectIdentification> comLicenseList : identification.getSubDataGridList()) {
+							for (ProjectIdentification comLicense : comLicenseList) {
+								if(bean.getComponentId().equals(comLicense.getComponentId())){
+									bean.addComponentLicenseList(comLicense);
+								}
+							}
+						}
+					} else { //싱글라이센스일경우
+						ProjectIdentification license = new ProjectIdentification();
+						license.setComponentId(bean.getComponentId());
+						license.setLicenseId(bean.getLicenseId());
+						license.setLicenseName(bean.getLicenseName());
+						license.setLicenseText(bean.getLicenseText());
+						license.setCopyrightText(bean.getCopyrightText());
+						license.setExcludeYn(bean.getExcludeYn());
+						bean.addComponentLicenseList(license);
+					}
+				}
+
+				for(ProjectIdentification bean : identification.getMainDataGridList()) {
+					list.add(0, bean);
+					subMap.put(bean.getGridId(), bean.getComponentLicenseList());
+				}
+			}
+		}
+			
+		// exclude row의 재정렬 (가장 마지막으로)
+		List<ProjectIdentification> newSortList = new ArrayList<>();
+		List<ProjectIdentification> excludeList = new ArrayList<>();
+		
+		for(ProjectIdentification bean : list) {
+			if(CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+				excludeList.add(bean);
+			} else {
+				newSortList.add(bean);
+			}
+		}
+			
+		newSortList.addAll(excludeList);
+		list = newSortList;
+		
+		map.put("subData", subMap);
+		map.put("mainData", list);
+
+		return map;
+	}
 }

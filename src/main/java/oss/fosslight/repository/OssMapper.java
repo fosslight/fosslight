@@ -175,7 +175,11 @@ public interface OssMapper {
 	int updateOssCheckNameBySelfCheck(ProjectIdentification bean);
 
 	int updateOssCheckLicenseBySelfCheck(ProjectIdentification bean);
-	
+
+	int updateOssCheckNameByPartner(ProjectIdentification bean);
+
+	int updateOssCheckLicenseByPartner(ProjectIdentification bean);
+
 	int updateOssCheckName(ProjectIdentification bean);
 
 	int updateOssCheckLicense(ProjectIdentification bean);
