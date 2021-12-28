@@ -334,8 +334,8 @@
 	                        <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','11')" class="btnColor red" style="width: 145px;" />
                     	</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
-                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn" style="width: 115px;" />
-                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn" style="width: 100px;" />
+                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
+                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
                     		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('SRC')" class="btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
@@ -519,8 +519,8 @@
 	                       <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','15')" class="btnColor red" style="width: 145px;" />
                     	</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
-                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn" style="width: 115px;" />
-                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn" style="width: 100px;" />
+                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
+                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
                     		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BIN')" class="btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
@@ -755,8 +755,8 @@
                     	</c:if>
                     	<c:if test="${project.dropYn ne 'Y'}">
 	                    	<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
-	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn" style="width: 115px;" />
-	                    	<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn" style="width: 100px;" />
+	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 115px;" />
+	                    	<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 100px;" />
 	                    	<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BINANDROID')" class="btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
