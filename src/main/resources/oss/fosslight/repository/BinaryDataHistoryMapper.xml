@@ -7,8 +7,8 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-		ORDER BY
-		<choose>
+		ORDER BY ${sidx} ${sord}
+<!--  	<choose>
 			<when test="@oss.fosslight.util.StringUtil@equals('ACTION_ID', sidx)">
 				ACTION_ID
 			</when>
@@ -41,25 +41,25 @@
 			</when>
 			<when test="@oss.fosslight.util.StringUtil@equals('LICENSE', sidx)">
 				LICENSE
-			</when>
+			</when> -->
 			<!--TODO : Change it to snake_case-->
-			<when test="@oss.fosslight.util.StringUtil@equals('PARENTNAME', sidx)">
+<!-- 		<when test="@oss.fosslight.util.StringUtil@equals('PARENTNAME', sidx)">
 				PARENT_NAME
-			</when>
+			</when> -->
 			<!--TODO : Change it to snake_case-->
-			<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMNAME', sidx)">
+<!--		<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMNAME', sidx)">
 				PLATFORM_NAME
-			</when>
+			</when> -->
 			<!--TODO : Change it to snake_case-->
-			<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMVERSION', sidx)">
+<!--			<when test="@oss.fosslight.util.StringUtil@equals('PLATFORMVERSION', sidx)">
 				PLATFORM_VERSION
-			</when>
+			</when> -->
 			<!--TODO : Change it to snake_case-->
-			<when test="@oss.fosslight.util.StringUtil@equals('UPDATEDATE', sidx)">
+<!--			<when test="@oss.fosslight.util.StringUtil@equals('UPDATEDATE', sidx)">
 				UPDATE_DATE
-			</when>
+			</when> -->
 			<!--TODO : Change it to snake_case-->
-			<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
+<!--		<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
 				CREATED_DATE
 			</when>
 			<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sidx)">
@@ -76,7 +76,7 @@
 			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
 				DESC
 			</when>
-		</choose>
+		</choose> -->
     </sql>
     
 	<sql id="filters">
@@ -219,7 +219,7 @@
     		AND LICENSE LIKE CONCAT('%', #{license}, '%')
     	</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			<include refid="filters"/>
+			${filterCondition}
 		</if>
     </select>
 	<select id="selectBinaryDataHistoryList" parameterType="oss.fosslight.domain.BinaryAnalysisResult" resultType="oss.fosslight.domain.BinaryAnalysisResult">
@@ -277,7 +277,7 @@
     		AND LICENSE LIKE CONCAT('%', #{license}, '%')
     	</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			<include refid="filters"/>
+			${filterCondition}
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>

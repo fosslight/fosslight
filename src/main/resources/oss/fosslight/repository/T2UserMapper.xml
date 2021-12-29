@@ -45,16 +45,10 @@
         <choose>
             <when test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortField) and !@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortOrder) ">
                 <if test="@oss.fosslight.util.StringUtil@equals('userId', sortField)">
-                ORDER BY USER_ID
+                ORDER BY USER_ID ${sortOrder}
                 </if>
                 <if test="@oss.fosslight.util.StringUtil@equals('userName', sortField)">
-                ORDER BY USER_NAME
-                </if>
-                <if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
-                ASC
-                </if>
-                <if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
-                DESC
+                ORDER BY USER_NAME ${sortOrder}
                 </if>
             </when>
             <otherwise>

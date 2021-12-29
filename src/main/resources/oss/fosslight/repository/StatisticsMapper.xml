@@ -60,14 +60,14 @@
 							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
+					  	   STAT.CATEGORY = <![CDATA['${user}']]>
 					  </foreach>
 					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
 	  			  </if>
@@ -281,14 +281,14 @@
 			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
 	  			  </foreach>
 	  			  	 , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
+				  	   STAT.CATEGORY = <![CDATA['${user}']]>
 				  </foreach>
 				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
 					 	 LIMIT ${diffMonthCnt}) A
@@ -341,14 +341,14 @@
 			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
 	  			  </foreach>
 	  			     , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
+				  	   STAT.CATEGORY = <![CDATA['${user}']]>
 				  </foreach>
 				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
 					 	 LIMIT ${diffMonthCnt}) A
@@ -409,14 +409,14 @@
 							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
+					  	   STAT.CATEGORY = <![CDATA['${user}']]>
 					  </foreach>
 					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
 	  			  </if>
@@ -503,7 +503,7 @@
 		     , COUNT(1) AS COLUMN_CNT
 		  FROM STATISTICS_MOSTUSED
 		 WHERE CHART_TYPE = #{chartType}
-		   AND DATE_FORMAT(CREATED_DATE, '%Y%m%d') BETWEEN ${startDate} AND ${endDate}
+		   AND DATE_FORMAT(CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
 		   AND DIV_NO = #{divisionNo}
 		 </if>

@@ -12,24 +12,16 @@
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY PRJ_ID desc</when>
     		<when test="@oss.fosslight.util.StringUtil@equals('OS_TYPE_ETC', sidx)">
-    		ORDER BY CASE WHEN OS_TYPE = '999' THEN OS_TYPE_ETC ELSE (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '213' AND SORTCD.CD_DTL_NO = OS_TYPE) END
+    		ORDER BY CASE WHEN OS_TYPE = '999' THEN OS_TYPE_ETC ELSE (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '213' AND SORTCD.CD_DTL_NO = OS_TYPE) END ${sord}
     		</when>
     		<when test="@oss.fosslight.util.StringUtil@equals('DESTRIBUTION_NAME', sidx)">
-    		ORDER BY (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '207' AND SORTCD.CD_DTL_NO = DISTRIBUTION_TYPE)
+    		ORDER BY (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '207' AND SORTCD.CD_DTL_NO = DISTRIBUTION_TYPE) ${sord}
     		</when>
     		<when test="@oss.fosslight.util.StringUtil@equals('DIVISION', sidx)">
-    		ORDER BY (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '200' AND SORTCD.CD_DTL_NO = DIVISION)
+    		ORDER BY (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '200' AND SORTCD.CD_DTL_NO = DIVISION) ${sord}
     		</when>
-    		<otherwise>ORDER BY ${sidx}</otherwise>
+    		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
     	</choose>
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
-				ASC
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
-				DESC
-			</when>
-		</choose>
     </sql>
     	
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">

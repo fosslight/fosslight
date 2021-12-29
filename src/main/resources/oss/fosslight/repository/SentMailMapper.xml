@@ -7,6 +7,8 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
+    	ORDER BY ${sidx} ${sord}
+    <!-- 
         ORDER BY
 		<choose>
 			<when test="@oss.fosslight.util.StringUtil@equals('MSG_TYPE', sidx)">
@@ -41,7 +43,7 @@
 			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
 				DESC
 			</when>
-		</choose>
+		</choose>-->
     </sql>
 
 	<sql id="filters">
@@ -124,7 +126,7 @@
     	EMAIL_SND_HIS
     WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			<include refid="filters"/>
+			${filterCondition}
 		</if>
     </select>
 	<select id="selectSentMailList" parameterType="oss.fosslight.domain.CoMail" resultType="oss.fosslight.domain.CoMail">
@@ -133,7 +135,7 @@
 		FROM EMAIL_SND_HIS
 		WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			<include refid="filters"/>
+			${filterCondition}
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>
