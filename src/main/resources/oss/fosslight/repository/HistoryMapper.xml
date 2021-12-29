@@ -87,7 +87,9 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
 			AND MODIFIED_DATE <![CDATA[<=]]> #{endDate}
 		</if>
-		<if test="sortField eq 'idx'">
+		<bind name="field" value="@oss.fosslight.util.StringUtil@convertToUnderScore(sortField)"/>
+		ORDER BY ${field} ${sortOrder}
+<!-- 	<if test="sortField eq 'idx'">
 			ORDER BY IDX
 		</if>
 		<if test="sortField eq 'hTitle'">
@@ -110,7 +112,7 @@
 		</if>
 		<if test="sortOrder eq 'desc'">
 			DESC
-		</if>
+		</if> -->
 		<include refid="limitPage"/>
 	</select>
 	
