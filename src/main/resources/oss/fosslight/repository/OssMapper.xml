@@ -1340,7 +1340,7 @@
 									WHERE M21.OSS_ID = #{ossId}) M2
 							) T2 
 								ON T1.PRODUCT = T2.OSS_NAME
-									AND T1.VERSION = T2.OSS_VERSION
+									AND T1.VERSION = IFNULL(T2.OSS_VERSION, '-')
 		ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
 	</select>
 	<select id="getOssChangeForUserList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Project">		
