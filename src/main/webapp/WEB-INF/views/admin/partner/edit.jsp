@@ -336,7 +336,7 @@
                 </c:if>
                 <c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />
-                    <input type="button" value="Check License" onclick="fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn" style="width: 100px;" />
+                    <input type="button" value="Check License" onclick="fn.CheckOssLicenseViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 100px;" />
                     <input id="partyReset" type="button" value="Reset" class="btnColor" onclick="fn.reset()"/>
                     <input id="partySave" type="button" value="Save" onclick="fn.save()" class="btnColor red" />
                 </c:if>
@@ -360,7 +360,7 @@
 				</c:if>
 				<c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
 					<input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />
-					<input type="button" value="Check License" onclick="fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn" style="width: 100px;" />
+					<input type="button" value="Check License" onclick="fn.CheckOssLicenseViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 100px;" />
 					<input id="partyReset" type="button" value="Reset" class="btnColor" onclick="fn.reset()"/>
 					<input id="partySave" type="button" value="Save" onclick="fn.save()" class="btnColor red" />
 				</c:if>
