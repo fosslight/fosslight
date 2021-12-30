@@ -233,9 +233,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 
 				String requestUri = ExternalLicenseServiceType.githubLicenseRequestUri(owner, repo);
-				checkedLicense = requestGithubLicenseApi(requestUri);
+				checkedLicense = avoidNull(requestGithubLicenseApi(requestUri));
 
-				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE") && !checkedLicense.isEmpty()) {
 					String evidence = getMessage("check.evidence.github.downloadLocation");
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);
@@ -265,9 +265,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 
 				String requestUri = ExternalLicenseServiceType.clearlyDefinedLicenseRequestUri(type, provider, namespace, name, revision);
-				checkedLicense = requestClearlyDefinedLicenseApi(requestUri);
+				checkedLicense = avoidNull(requestClearlyDefinedLicenseApi(requestUri));
 
-				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE")) {
+				if(!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE") && !checkedLicense.isEmpty()) {
 					String evidence = getMessage("check.evidence.clearlyDefined.downloadLocationAndVersion");
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);

@@ -15,7 +15,8 @@
     	</if>
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> OSS_ID desc</when>
-    		<otherwise>
+    		<otherwise> ${sidx} ${sord}</otherwise>
+<!--   		<otherwise>
 				<choose>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID',sidx)">
 						OSS_ID
@@ -71,7 +72,7 @@
 						DESC
 					</when>
 				</choose>
-			</otherwise>
+			</otherwise> -->
     	</choose>
     </sql>
     

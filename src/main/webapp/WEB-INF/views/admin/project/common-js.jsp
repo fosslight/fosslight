@@ -358,7 +358,7 @@ var com_fn = {
 		var btn_Save = $(".idenSave");
 		var btn_Analysis = $(".idenAnalysis");
 		var btn_Analysis_Result = $(".idenAnalysisResult");
-		var btn_checkossname = $(".checkOssName");
+		var btn_check = $(".btnCheck");
 		var btn_supplement_Notice = $(".supplementNotice");
 		
 		if(role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
@@ -366,61 +366,63 @@ var com_fn = {
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "REV":
 					btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
 					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_check.hide();
 
 					break;
 			}
 		} else if('${project.viewOnlyFlag}' == 'Y'){
 			btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
 		} else { // 일반 사용자 일 경우
 			switch(status){
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
 
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
 
 					break;
 				case "REV":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
 
 					break;
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();
 					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_check.hide();
 
 					break;
 			}

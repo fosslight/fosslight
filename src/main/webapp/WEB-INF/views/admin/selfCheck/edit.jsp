@@ -129,8 +129,8 @@
                 <input type="hidden" value="OSS Notice" onclick="src_fn.createNoticeTab()" class="btnColor red btnExpor srcBtn"  style="width: 80px;" />
                 <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
                 <input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
-                <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
-                <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
+                <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn btnCheck" style="width: 115px;" />
+                <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn btnCheck" style="width: 100px;" />
                 <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
                 <input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
             </span>
@@ -146,8 +146,8 @@
 				<input type="hidden" value="OSS Notice" onclick="createTabInFrame('Notice','#/selfCheck/verification/'+'${project.prjId}')" class="btnColor red btnNotice srcBtn"/>
 				<input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
 				<input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
-				<input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
-                <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
+        <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn btnCheck" style="width: 115px;" />
+        <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn btnCheck" style="width: 100px;" />
 				<input id="srcReset" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
 				<input id="srcSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
 			</span>
