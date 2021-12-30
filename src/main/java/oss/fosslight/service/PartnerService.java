@@ -59,5 +59,5 @@ public interface PartnerService extends HistoryConfig{
 	
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
 
-
+	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification);
 }

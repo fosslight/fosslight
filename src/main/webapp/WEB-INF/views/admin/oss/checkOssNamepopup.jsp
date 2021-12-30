@@ -83,6 +83,11 @@
 								rowdata["referenceId"] = commentId;
 								rowdata["referenceDiv"] = referenceDiv.split("-")[0];
 								</c:if>
+								<c:if test="${projectInfo.targetName eq 'partner'}">
+								rowdata["referenceId"] = rowdata["referenceId"];
+								rowdata["refPrjId"] = commentId;
+								rowdata["referenceDiv"] = referenceDiv;
+								</c:if>
 								
 								$.ajax({
 									url : '/oss/saveOssCheckName/${projectInfo.targetName}',
@@ -104,7 +109,7 @@
 										}
 										
 										result.push(resultData);
-										<c:if test="${projectInfo.targetName eq 'identification'}">
+										<c:if test="${projectInfo.targetName eq 'identification' || projectInfo.targetName eq 'partner'}">
 										commentId = resultData.commentId;
 										</c:if>
 										
@@ -112,7 +117,7 @@
 											if(!failFlag){
 												var successMsg = '<spring:message code="msg.project.check.oss.name.success" />';
 												
-												<c:if test="${projectInfo.targetName eq 'identification'}">
+												<c:if test="${projectInfo.targetName eq 'identification' || projectInfo.targetName eq 'partner'}">
 												successMsg += '<br>(<spring:message code="msg.project.entered.first.tab" />)';
 												</c:if>
 												
