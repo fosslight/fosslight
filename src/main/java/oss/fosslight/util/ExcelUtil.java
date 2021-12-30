@@ -1123,7 +1123,7 @@ public class ExcelUtil extends CoTopComponent {
     					// 		comment += " / " + licenseComment;
     					// 	}
     					// }
-    					// bean.setComments(commentCol < 0 ? "" : comment);
+    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
 
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
