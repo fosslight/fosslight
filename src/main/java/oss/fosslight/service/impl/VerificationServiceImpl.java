@@ -1903,13 +1903,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		Set<String> noticeKeyList = noticeInfo.keySet();
 		if(hideOssVersionFlag) {
+			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
+			Set<String> noticeKeyList = noticeInfo.keySet();
+			
 			for(String key : noticeKeyList) {
-				if(srcInfo.containsKey(key)) {
-					noticeInfo.remove(key);
+				if(!srcInfo.containsKey(key)) {
+					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
 				}
 			}
+			
+			noticeInfo = hideOssVersionMergeNoticeInfo;
 		}
 		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
