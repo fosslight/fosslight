@@ -1108,22 +1108,22 @@ public class ExcelUtil extends CoTopComponent {
     						bean.setCopyrightText(copyrightText);
     					}
 
-    					String licenseConcluded = getCellData(row.getCell(licenseCol));
-    					String licenseComment = getCellData(row.getCell(commentCol));
-    					String comment = "";
+    					// String licenseConcluded = getCellData(row.getCell(licenseCol));
+    					// String licenseComment = getCellData(row.getCell(commentCol));
+    					// String comment = "";
 
-    					if(!licenseConcluded.isEmpty()) {
-    						comment += licenseConcluded;
-    					}
+    					// if(!licenseConcluded.isEmpty()) {
+    					// 	comment += licenseConcluded;
+    					// }
 
-    					if(!licenseComment.isEmpty()) {
-    						if(licenseConcluded.isEmpty()) {
-    							comment += licenseComment;
-    						} else {
-    							comment += " / " + licenseComment;
-    						}
-    					}
-    					bean.setComments(commentCol < 0 ? "" : comment);
+    					// if(!licenseComment.isEmpty()) {
+    					// 	if(licenseConcluded.isEmpty()) {
+    					// 		comment += licenseComment;
+    					// 	} else {
+    					// 		comment += " / " + licenseComment;
+    					// 	}
+    					// }
+    					// bean.setComments(commentCol < 0 ? "" : comment);
 
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
