@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -1725,11 +1726,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<OssComponents> ossComponentList = verificationMapper.selectVerificationNotice(ossNotice);
 		
 		// TYPE별 구분
-		Map<String, OssComponents> noticeInfo = new LinkedHashMap<>();
-		Map<String, OssComponents> srcInfo = new LinkedHashMap<>();
-		Map<String, OssComponentsLicense> licenseInfo = new LinkedHashMap<>();
-		Map<String, List<String>> componentCopyright = new LinkedHashMap<>();
-		Map<String, List<String>> componentAttribution = new LinkedHashMap<>();
+		Map<String, OssComponents> noticeInfo = new HashMap<>();
+		Map<String, OssComponents> srcInfo = new HashMap<>();
+		Map<String, OssComponentsLicense> licenseInfo = new HashMap<>();
+		Map<String, List<String>> componentCopyright = new HashMap<>();
+		Map<String, List<String>> componentAttribution = new HashMap<>();
 		
 		OssComponents ossComponent;
 		
@@ -1742,12 +1743,38 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				componentKey += dashSeq++;
 			}
 			
+			// type
+			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+			// 2017.05.16 add by yuns start
+			// obligation을 특정할 수 없는 oss도 bom에 merge 되도록 수정하면서, identification confirm시 refDiv가 '50'(고지대상)에 obligation을 특정할 수 없는 oss도 포함되어 등록되어
+			// confirm 처리에서 obligation이 고지의무가 있거나 소스코드 공개의무가 있는 경우만 '50'으로 copy되도록 수정하였으나, 여기서 한번도 필터링함
+			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
+			
+			if(!isDisclosure && !isNotice) {
+				continue;
+			}
+			
+			// 2017.07.05
+			// Accompanied with source code 의 경우
+			// 소스공개여부와 상관없이 모두 소스공개가 필요한 oss table에 표시
+			if(CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
+				isDisclosure = true;
+			}
+			
+			// 2017.05.16 add by yuns end
+			boolean addDisclosure = isDisclosure && srcInfo.containsKey(componentKey);
+			boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
+			
+			
+			if(addDisclosure) {
+				ossComponent = srcInfo.get(componentKey);
+			} else if(addNotice) {
+				ossComponent = noticeInfo.get(componentKey);
+			} else {
+				ossComponent = bean;
+			}
+			
 			if(hideOssVersionFlag) {
-				if(srcInfo.containsKey(componentKey)) {
-					ossComponent = srcInfo.get(componentKey);
-				} else {
-					ossComponent = bean;
-				}
 				
 				List<String> copyrightList = componentCopyright.containsKey(componentKey) 
 						? (List<String>) componentCopyright.get(componentKey) 
@@ -1802,47 +1829,24 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				ossComponent.setOssAttribution(String.join("\r\n", attributionList));
 				componentAttribution.put(componentKey, attributionList);
 				
-				if(srcInfo.containsKey(componentKey)) {
-					srcInfo.replace(componentKey, ossComponent);
+				if(isDisclosure) {
+					if(addDisclosure) {
+						srcInfo.replace(componentKey, ossComponent);
+					} else {
+						srcInfo.put(componentKey, ossComponent);
+					}
 				} else {
-					srcInfo.put(componentKey, ossComponent);
+					if(addNotice) {
+						noticeInfo.replace(componentKey, ossComponent);
+					} else {
+						noticeInfo.put(componentKey, ossComponent);
+					}
 				}
 				
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(license.getLicenseName(), license);
 				}
 			} else {
-				
-				// type
-				boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
-				// 2017.05.16 add by yuns start
-				// obligation을 특정할 수 없는 oss도 bom에 merge 되도록 수정하면서, identification confirm시 refDiv가 '50'(고지대상)에 obligation을 특정할 수 없는 oss도 포함되어 등록되어
-				// confirm 처리에서 obligation이 고지의무가 있거나 소스코드 공개의무가 있는 경우만 '50'으로 copy되도록 수정하였으나, 여기서 한번도 필터링함
-				boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
-				
-				if(!isDisclosure && !isNotice) {
-					continue;
-				}
-				
-				// 2017.07.05
-				// Accompanied with source code 의 경우
-				// 소스공개여부와 상관없이 모두 소스공개가 필요한 oss table에 표시
-				if(CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
-					isDisclosure = true;
-				}
-				
-				// 2017.05.16 add by yuns end
-				boolean addDisclosure = isDisclosure && srcInfo.containsKey(componentKey);
-				boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
-				
-				
-				if(addDisclosure) {
-					ossComponent = srcInfo.get(componentKey);
-				} else if(addNotice) {
-					ossComponent = noticeInfo.get(componentKey);
-				} else {
-					ossComponent = bean;
-				}
 				
 				// 라이선스 정보 생성
 				OssComponentsLicense license = new OssComponentsLicense();
@@ -1894,6 +1898,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(license.getLicenseName(), license);
+				}
+			}
+		}
+		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		Set<String> noticeKeyList = noticeInfo.keySet();
+		if(hideOssVersionFlag) {
+			for(String key : noticeKeyList) {
+				if(srcInfo.containsKey(key)) {
+					noticeInfo.remove(key);
 				}
 			}
 		}
