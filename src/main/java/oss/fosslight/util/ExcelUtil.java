@@ -1122,8 +1122,8 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setReportKey(getCellData(row.getCell(noCol)));
     				}
 
-    				if(isSPDXSpreadsheet(sheet)) {
-    					String licenseConcluded = getCellData(row.getCell(licenseCol));
+    				String licenseConcluded = getCellData(row.getCell(licenseCol));
+    				if(isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
     					String licenseComment = getCellData(row.getCell(commentCol));
     					String comment = "";
 
