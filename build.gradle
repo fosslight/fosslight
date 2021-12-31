@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'oss.fosslight'
-version = '1.2.23'
+version = '1.2.24'
 sourceCompatibility = '1.8'
 
 configurations {
