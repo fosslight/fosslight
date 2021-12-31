@@ -1107,24 +1107,6 @@ public class ExcelUtil extends CoTopComponent {
     					} else {
     						bean.setCopyrightText(copyrightText);
     					}
-
-    					// String licenseConcluded = getCellData(row.getCell(licenseCol));
-    					// String licenseComment = getCellData(row.getCell(commentCol));
-    					// String comment = "";
-
-    					// if(!licenseConcluded.isEmpty()) {
-    					// 	comment += licenseConcluded;
-    					// }
-
-    					// if(!licenseComment.isEmpty()) {
-    					// 	if(licenseConcluded.isEmpty()) {
-    					// 		comment += licenseComment;
-    					// 	} else {
-    					// 		comment += " / " + licenseComment;
-    					// 	}
-    					// }
-    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
-
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     				}
@@ -1139,14 +1121,35 @@ public class ExcelUtil extends CoTopComponent {
     				if(readNoCol) {
     					bean.setReportKey(getCellData(row.getCell(noCol)));
     				}
-    				
+
+    				if(isSPDXSpreadsheet(sheet)) {
+    					String licenseConcluded = getCellData(row.getCell(licenseCol));
+    					String licenseComment = getCellData(row.getCell(commentCol));
+    					String comment = "";
+
+    					if(!licenseConcluded.isEmpty()) {
+    						comment += licenseConcluded;
+    					}
+
+    					if(!licenseComment.isEmpty()) {
+    						if(licenseConcluded.isEmpty()) {
+    							comment += licenseComment;
+    						} else {
+    							comment += " / " + licenseComment;
+    						}
+    					}
+
+    					bean.setComments(commentCol < 0 ? "" : comment);
+    				} else {
+    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
+    				}
+    
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
     				String licenseName = getCellData(row.getCell(licenseCol));
-    				if(sheet.getSheetName().equals("Package Info") || sheet.getSheetName().equals("Per File Info")){
+    				if(isSPDXSpreadsheet(sheet)){
     					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
-    				}
-    				else if (licenseName.contains(",")) {
+    				} else if (licenseName.contains(",")) {
     					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
     				}
     				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
@@ -1237,6 +1240,10 @@ public class ExcelUtil extends CoTopComponent {
 		}
 		
 		return errMsg;
+	}
+
+	private static boolean isSPDXSpreadsheet(Sheet sheet) {
+		return sheet.getSheetName().equals("Package Info") || sheet.getSheetName().equals("Per File Info");
 	}
 
 	private static boolean hasSameLicense(OssComponents ossComponents, OssComponentsLicense subBean) {
