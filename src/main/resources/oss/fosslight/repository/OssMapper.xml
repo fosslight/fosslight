@@ -1328,13 +1328,19 @@
 	<select id="getOssVulnerabilityList" parameterType="oss.fosslight.domain.Vulnerability" resultType="oss.fosslight.domain.Vulnerability">
 		SELECT T1.* FROM NVD_DATA_SCORE_V3 T1
 							INNER JOIN (
-								SELECT M1.OSS_ID, M1.OSS_NAME, M1.OSS_VERSION 
+								SELECT M1.OSS_ID, M1.OSS_NAME,
+										CASE WHEN M1.OSS_VERSION IS NULL THEN '-'
+											 WHEN M1.OSS_VERSION = '' THEN '-'
+											 ELSE M1.OSS_VERSION END OSS_VERSION
 								FROM OSS_MASTER M1 
 								WHERE M1.OSS_ID = #{ossId}
 								UNION
 								SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
 								FROM (
-									SELECT M21.OSS_ID, M22.OSS_NICKNAME, M21.OSS_VERSION 
+									SELECT M21.OSS_ID, M22.OSS_NICKNAME,
+											CASE WHEN M21.OSS_VERSION IS NULL THEN '-'
+												 WHEN M21.OSS_VERSION = '' THEN '-'
+											 	 ELSE M21.OSS_VERSION END OSS_VERSION
 									FROM OSS_MASTER M21 
 										INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
 									WHERE M21.OSS_ID = #{ossId}) M2

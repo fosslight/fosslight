@@ -9,6 +9,7 @@
 		'use strict';
 		
 		sentList.load();
+		sentList.setUrl();
 	});
 	
 	// 함수
@@ -29,7 +30,7 @@
 	var sentList = {
 		load: function(){
 			$("#list").jqGrid({
-				url: '/system/sentMail/listAjax'
+				url: ''
 				, datatype: 'json'
 				, jsonReader: {
 					repeatitems: false,
@@ -85,7 +86,10 @@
 			
             $("#list").jqGrid('navGrid',"#pager",{edit:false,add:false,del:false,search:false,refresh:false});
        		$("#list").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-       	}
+       	},
+       	setUrl: function(){
+       		$("#list").jqGrid('setGridParam', {url: '<c:url value="/system/sentMail/listAjax"/>'});
+        }
 	};
 //]]>
 </script>
