@@ -1,5 +1,32 @@
 # Changelog
 
+## v1.2.24 (31/12/2021)
+## 🚀 Features
+
+- Added function to generate OSS List through github link in Self-Check @namkyu1999 (#353)
+- Add Check OSS Name and Check License function in 3rd party @riyenas0925 (#364)
+- Add the Bulk Edit funtion @FOSSLight-dev (#361)
+
+## 🐛 Hotfixes
+
+- Update redistribution and vulnerability discovered mailing sql @FOSSLight-dev (#369)
+- Fix the bug that occurs when checking hide version in OSS notice @FOSSLight-dev (#368)
+- Fix Vulnerability, Sent mail list not searchable bug @FOSSLight-dev (#365)
+- Fix infinite loading bug when clicking Check License @riyenas0925 (#362)
+- Fix xss filter for License List with &amp; @yugeeklab (#356)
+
+## 🔧 Maintenance
+
+- Add display in comments only when License is OR, AND @riyenas0925 (#376)
+- Add comment output when loading SPDX @riyenas0925 (#373)
+- Delete License output when loading SPDX @riyenas0925 (#372)
+- Fix License and Comment output when loading SPDX @riyenas0925 (#371)
+- Add Check License function in Self-Check page @riyenas0925 (#367)
+- License and Comment output when loading SPDX @riyenas0925 (#358)
+- Hide the Check License, Check OSS Name buttons with the same conditions as the Save button. @Zeusjonass (#354)
+
+---
+
 ## v1.2.23 (24/12/2021)
 ## 🚀 Features
 
