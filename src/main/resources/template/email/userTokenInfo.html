@@ -5,7 +5,7 @@
 		<style>
 			.marker{background-color: Yellow;}
 		</style>
-		<title>FOSSLight System</title>
+		<title>FOSSLight Hub</title>
 	</head>
 	<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
@@ -18,7 +18,7 @@
 					<table cellspacing="0" cellpadding="0" border="0">
 						<tr> 
 							<td colspan="3" height="25" style="background:#c00c3f">
-								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight System Notification</h1>
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
 							</td>
 						</tr>
 						<tr>
@@ -29,7 +29,7 @@
 							#end
 								<pre>
 #if( $mailType == "800" )							
-FOSSLight System-Access Token was issued as follows.
+FOSSLight Hub-Access Token was issued as follows.
 
 #if( $token )
 $token
@@ -43,7 +43,7 @@ Expired date : $expireDate
 $tokenInfo
 #end
 #if( $mailType == "801" )
-The access token of FOSSLight System has been deleted.
+The access token of FOSSLight Hub has been deleted.
 
 $tokenInfo
 #end

@@ -5,7 +5,7 @@
 <!-- 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"> -->
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<title>FOSSLight System</title>
+		<title>FOSSLight Hub</title>
 		<%@ include file="/WEB-INF/constants.jsp"%>
 <%-- Add script --%>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">

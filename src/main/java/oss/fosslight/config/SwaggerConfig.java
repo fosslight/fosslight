@@ -37,7 +37,7 @@ public class SwaggerConfig {
     
     private ApiInfo swaggerInfo() {
         return new ApiInfoBuilder()
-        		.title("FOSSLight System Open API")
+        		.title("FOSSLight Hub Open API")
                 .description("") // 시스템설졍이 필요한 경우 기입
                 .version("1")
                 .build();

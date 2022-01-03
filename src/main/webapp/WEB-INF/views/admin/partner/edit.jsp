@@ -468,7 +468,7 @@
 		<div class="grid-container">
 			<div class="grid-width-100">
 				<div id="editor3">
-					<h1>Hello FOSSLight System</h1>
+					<h1>Hello FOSSLight Hub</h1>
 				</div>
 			</div>
 		</div>
