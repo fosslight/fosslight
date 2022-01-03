@@ -3209,7 +3209,7 @@ public class CoMailManager extends CoTopComponent {
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(coMail.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(coMail.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(coMail.getMsgType()) ) {
-				InternetAddress from = new InternetAddress(mailFrom, "FOSSLight System" + " (FOSSLight)", "UTF-8");
+				InternetAddress from = new InternetAddress(mailFrom, "FOSSLight Hub" + " (FOSSLight)", "UTF-8");
 				helper.setFrom(from);
 			}
 			else if(!isEmpty(userId) && !isEmpty(userName)) {

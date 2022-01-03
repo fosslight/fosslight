@@ -19,7 +19,7 @@
 <div id="header">
 	<div class="back">
 		<div class="logo">
-			<img src="images/img_logo.png" alt="FOSSLight System"/>
+			<img src="images/img_logo.png" alt="FOSSLight Hub"/>
 		</div>
 		<spring:eval expression="@environment.getProperty('project.version')" var="projectVersion"/>
 		<div class="version">

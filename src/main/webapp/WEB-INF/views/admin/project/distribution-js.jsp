@@ -166,7 +166,7 @@
 					}
 					
 					alertify.distributionDeleteConfirm('<spring:message code="msg.distribute.confirm.reset" />',function(){
-						// FOSSLight System만 삭제
+						// FOSSLight Hub만 삭제
 						fn.rejectDistribution();
 					}).set('labels', {ok:'Delete FOSSLight Only'}); 
 				} else {

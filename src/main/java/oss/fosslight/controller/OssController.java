@@ -287,7 +287,7 @@ public class OssController extends CoTopComponent{
 		boolean projectListFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
 		
 		if(projectListFlag) {
-			// 성능이슈로 이전 son system의 프로젝트 조회와 신규 FOSSLight System 프로젝트 조회를 union 하지 않고 각각 조회한다.
+			// 성능이슈로 이전 son system의 프로젝트 조회와 신규 FOSSLight Hub 프로젝트 조회를 union 하지 않고 각각 조회한다.
 			List<OssComponents> components = projectMapper.selectOssRefPrjList1(ossMaster);
 			
 			// 참조 partner 목록 조회

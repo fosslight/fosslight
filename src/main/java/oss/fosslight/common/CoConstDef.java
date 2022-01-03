@@ -120,7 +120,7 @@ public class CoConstDef {
 	public static final String CD_SMTP_SERVICE_USERNAME			= "400";
 	public static final String CD_SMTP_SERVICE_PASSWORD			= "401";
 	
-	// FOSSLight System Menu Info
+	// FOSSLight Hub Menu Info
 	public static final String CD_MENU_DASHBOARD				= "001";
 	public static final String CD_MENU_STATISTICS				= "002";
 	public static final String CD_MENU_PROJECT_LIST				= "004";

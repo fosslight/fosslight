@@ -1503,10 +1503,10 @@
 	var gridTooltip = {
 			typeCodes : [],
 			tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
-		                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight System.</span></dt></dl><br>"
-		                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight System.</span></dt></dl><br>"
-		                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight System.</span></dt></dl><br>"
-		                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight System.</span></dt></dl>"
+		                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
+		                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
+		                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
+		                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
 		                   +"</div>",
 			existTooltip : false
 	};

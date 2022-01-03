@@ -2116,7 +2116,7 @@ $(document).ready(function (){
 	      // language resources 
 	      glossary:{
 	          // dialogs default title
-	          title:'FOSSLight System',
+	          title:'FOSSLight Hub',
 	          // ok button text
 	          ok: 'OK',
 	          // cancel button text
