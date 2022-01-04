@@ -1894,8 +1894,8 @@ var saveFlag = false;
 			partnerList.jqGrid({
 				datatype: 'local',
 				data : partyMainData,
-				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','Download Location'
-						   ,'Homepage','LicenseId','License','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
+				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+						   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -1958,56 +1958,6 @@ var saveFlag = false;
 									$(e).on( "autocompletechange", function() {
 										var rowid = (e.id).split('_')[0];
 										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									});
-								}
-						}
-					},
-					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
-						editoptions: {
-							dataInit:
-								function (e) { 
-									$(e).on("change", function() {
-										var rowid = (e.id).split('_')[0];
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-											$("#"+rowid+"_downloadLocation").val(value);
-										}
-										
-										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									}).on("blur", function() {
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-											$("#"+e.id).val(value);
-										}
-									});
-								}
-						}
-					},
-					{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
-						editoptions: {
-							dataInit:
-								function (e) { 
-									$(e).on("change", function() {
-										var rowid = (e.id).split('_')[0];
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-											$("#"+rowid+"_homepage").val(value);
-										}
-										
-										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									}).on("blur", function() {
-										var value = e.value;
-										
-										if(value.charAt(value.length-1) == "/"){
-											value = value.slice(0, -1); // 마지막 문자열 제거
-											$("#"+e.id).val(value);
-										}
 									});
 								}
 						}
@@ -2094,6 +2044,56 @@ var saveFlag = false;
 											$('#'+rowid+'_licenseName').val("");
 	
 											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										}
+									});
+								}
+						}
+					},
+					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_downloadLocation").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					},
+					{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_homepage").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
 										}
 									});
 								}
