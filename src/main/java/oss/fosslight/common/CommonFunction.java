@@ -1165,19 +1165,29 @@ public class CommonFunction extends CoTopComponent {
 					// UploadReport licenseName deduplication 
 					if(gridBean.getLicenseName().contains(",")) {
 						List<String> deduplicationList = new ArrayList<String>();
-						String deduplicationLicenseName = "";
 						
 						String[] licenseNameListTrim = Arrays.stream(gridBean.getLicenseName().split(",")).map(String::trim).toArray(String[]::new);
 						deduplicationList = Arrays.asList(licenseNameListTrim);
 						deduplicationList = deduplicationList.stream().distinct().collect(Collectors.toList());
 						
 						for(int i=0; i<deduplicationList.size(); i++) {
-							deduplicationLicenseName += deduplicationList.get(i).trim();
-							if(i<deduplicationList.size()-1) {
-								deduplicationLicenseName += ",";
+							String licenseName = deduplicationList.get(i).trim();
+							if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+								LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+								if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+									for(String s : licenseMaster.getLicenseNicknameList()) {
+										if(licenseName.equalsIgnoreCase(s)) {
+											deduplicationList.remove(i);
+											String disp = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+											if(!deduplicationList.contains(disp)) {
+												deduplicationList.add(disp);
+											}
+										}
+									}
+								}
 							}
 						}
-						gridBean.setLicenseName(deduplicationLicenseName);
+						gridBean.setLicenseName(String.join(",", deduplicationList));
 					}
 					
 					String key = "";

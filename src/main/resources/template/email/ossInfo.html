@@ -52,9 +52,9 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
 										<td style="padding:5px;">$!oss_basic_info.ossVersion #if($!oss_basic_info.ossVersion != '') / #end 
-										#if($!oss_basic_info.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
-										#if($!oss_basic_info.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
-										#if($!oss_basic_info.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
+										#if($oss_basic_info.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
+										#if($oss_basic_info.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
+										#if($oss_basic_info.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
 										</td>
 									</tr>
 									<tr>
@@ -77,7 +77,7 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
 										<td style="padding:5px;">$!oss_basic_info.copyright</td>
 									</tr>
-									#if($oss_basic_info.multiLicenseFlag == "M")
+									#if($oss_basic_info.ossType.contains("M"))
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 										<td>

@@ -55,14 +55,14 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
 										<td style="padding:5px;">$!before.ossVersion #if($before.ossVersion != '' && $before.ossType != '') / #end
-									#if($!before.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
-									#if($!before.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
-									#if($!before.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
+									#if($before.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
+									#if($before.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
+									#if($before.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
 										</td>
 										<td style="padding:5px;">$!after.ossVersion #if($after.ossVersion != '' && $after.ossType != '') / #end
-									#if($!after.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
-									#if($!after.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
-									#if($!after.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
+									#if($after.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
+									#if($after.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
+									#if($after.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
 										</td>
 									</tr>
 									<tr>
@@ -80,11 +80,11 @@
 										<td style="padding:5px;">$!before.copyright</td>
 										<td style="padding:5px;">$!after.copyright</td>
 									</tr>
-									#if($before.multiLicenseFlag == "M" || $after.multiLicenseFlag == "M")
+									#if($before.ossType.contains("M") || $after.ossType.contains("M"))
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 										<td>
-											#if($before.multiLicenseFlag == "M")
+											#if($before.ossType.contains("M"))
 											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 												#foreach( $ossLicense in $before.ossLicenses )
 												<tr>
@@ -97,7 +97,7 @@
 											#end
 										</td>
 										<td>
-											#if($after.multiLicenseFlag == "M")
+											#if($after.ossType.contains("M"))
 											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 												#foreach( $ossLicense in $after.ossLicenses )
 												<tr>
