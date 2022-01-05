@@ -1162,6 +1162,24 @@ public class CommonFunction extends CoTopComponent {
 				Map<String, ProjectIdentification> sortMap = new TreeMap<String, ProjectIdentification>();
 				
 				for(ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
+					// UploadReport licenseName deduplication 
+					if(gridBean.getLicenseName().contains(",")) {
+						List<String> deduplicationList = new ArrayList<String>();
+						String deduplicationLicenseName = "";
+						
+						String[] licenseNameListTrim = Arrays.stream(gridBean.getLicenseName().split(",")).map(String::trim).toArray(String[]::new);
+						deduplicationList = Arrays.asList(licenseNameListTrim);
+						deduplicationList = deduplicationList.stream().distinct().collect(Collectors.toList());
+						
+						for(int i=0; i<deduplicationList.size(); i++) {
+							deduplicationLicenseName += deduplicationList.get(i).trim();
+							if(i<deduplicationList.size()-1) {
+								deduplicationLicenseName += ",";
+							}
+						}
+						gridBean.setLicenseName(deduplicationLicenseName);
+					}
+					
 					String key = "";
 					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
 						if(!isEmpty(gridBean.getFilePath()) && isEmpty(gridBean.getBinaryName())) {

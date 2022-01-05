@@ -1894,8 +1894,8 @@ var saveFlag = false;
 			partnerList.jqGrid({
 				datatype: 'local',
 				data : partyMainData,
-				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','Download Location'
-						   ,'Homepage','LicenseId','License','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
+				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+						   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -1962,6 +1962,93 @@ var saveFlag = false;
 								}
 						}
 					},
+					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+						editoptions: {
+							dataInit: function (e) {
+									var licenseNameId = $(e).attr("id").split('_')[0];
+									var licenseNameTd = $(e).parent();
+
+									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '</div>';
+						
+									$(licenseNameTd).empty();
+									$(licenseNameTd).html(displayLicenseNameCell);
+									$('#'+licenseNameId+'_licenseNameDiv').append(e);
+								
+									// licenseName auto complete
+									$(e).autocomplete({
+										source: licenseNames
+										, minLength: 0
+										, open: function() { $(this).attr('state', 'open'); }
+										, close: function () { $(this).attr('state', 'closed'); }
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									});
+									
+									// set license data
+									$(e).on( "autocompletechange", function() {
+										var rowid = (e.id).split('_')[0];
+										var mult = null;
+										var multText = null;
+										
+										for(var i in licenseNames){
+											if("" != e.value && e.value == licenseNames[i].value){
+												var licenseIds = $('#'+rowid+'_licenseId').val();
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+												multText = licenseNames[i].value;
+												break;
+											}
+										}
+										
+										if(mult == null){
+											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+											multText = e.value;
+										}
+										
+										var licenseNameBtnText = $('#'+rowid+'_licenseNameBtn').text();
+										if (multText != null && licenseNameBtnText.indexOf(multText) < 0){
+											$('#'+rowid+'_licenseNameBtn').append(mult);
+										}
+										$('#'+rowid+'_licenseName').val("");
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("keypress", function(evt){
+										if(evt.keyCode == 13){
+											var rowid = (e.id).split('_')[0];
+											var mult = null;
+											var multText = null;
+											
+											for(var i in licenseNames){
+												if("" != e.value && e.value == licenseNames[i].value){
+													var licenseIds = $('#'+rowid+'_licenseId').val();
+													mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
+													multText = licenseNames[i].value;
+													break;
+												}
+											}
+											
+											if(mult == null && "" != e.value){
+												mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
+												multText = e.value;
+											}
+											
+											var licenseNameBtnText = $('#'+rowid+'_licenseNameBtn').text();
+											if (multText != null && licenseNameBtnText.indexOf(multText) < 0){
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+											$('#'+rowid+'_licenseName').val("");
+	
+											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										}
+									});
+								}
+						}
+					},
 					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
 						editoptions: {
 							dataInit:
@@ -2007,82 +2094,6 @@ var saveFlag = false;
 										if(value.charAt(value.length-1) == "/"){
 											value = value.slice(0, -1); // 마지막 문자열 제거
 											$("#"+e.id).val(value);
-										}
-									});
-								}
-						}
-					},
-					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
-					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
-						editoptions: {
-							dataInit: function (e) {
-									var licenseNameId = $(e).attr("id").split('_')[0];
-									var licenseNameTd = $(e).parent();
-
-									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
-									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
-									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
-									displayLicenseNameCell += '</div>';
-						
-									$(licenseNameTd).empty();
-									$(licenseNameTd).html(displayLicenseNameCell);
-									$('#'+licenseNameId+'_licenseNameDiv').append(e);
-								
-									// licenseName auto complete
-									$(e).autocomplete({
-										source: licenseNames
-										, minLength: 0
-										, open: function() { $(this).attr('state', 'open'); }
-										, close: function () { $(this).attr('state', 'closed'); }
-									}).focus(function() {
-										if ($(this).attr('state') != 'open') {
-											$(this).autocomplete("search");
-										}
-									});
-									
-									// set license data
-									$(e).on( "autocompletechange", function() {
-										var rowid = (e.id).split('_')[0];
-										var mult = null;
-										
-										for(var i in licenseNames){
-											if("" != e.value && e.value == licenseNames[i].value){
-												var licenseIds = $('#'+rowid+'_licenseId').val();
-												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
-												break;
-											}
-										}
-										
-										if(mult == null){
-											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
-										}
-										
-										$('#'+rowid+'_licenseNameBtn').append(mult);
-										$('#'+rowid+'_licenseName').val("");
-										
-										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
-									}).on("keypress", function(evt){
-										if(evt.keyCode == 13){
-											var rowid = (e.id).split('_')[0];
-											var mult = null;
-											
-											for(var i in licenseNames){
-												if("" != e.value && e.value == licenseNames[i].value){
-													var licenseIds = $('#'+rowid+'_licenseId').val();
-													mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
-	
-													break;
-												}
-											}
-											
-											if(mult == null && "" != e.value){
-												mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
-											}
-											
-											$('#'+rowid+'_licenseNameBtn').append(mult);
-											$('#'+rowid+'_licenseName').val("");
-	
-											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
 										}
 									});
 								}
