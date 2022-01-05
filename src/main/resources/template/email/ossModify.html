@@ -80,11 +80,11 @@
 										<td style="padding:5px;">$!before.copyright</td>
 										<td style="padding:5px;">$!after.copyright</td>
 									</tr>
-									#if($before.ossType.contains("M") || $after.ossType.contains("M"))
+									#if(($before.ossType.contains("M") || $before.ossType.contains("D")) || ($after.ossType.contains("M") || $after.ossType.contains("D")))
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 										<td>
-											#if($before.ossType.contains("M"))
+											#if($before.ossType.contains("M") || $before.ossType.contains("D"))
 											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 												#foreach( $ossLicense in $before.ossLicenses )
 												<tr>
@@ -97,7 +97,7 @@
 											#end
 										</td>
 										<td>
-											#if($after.ossType.contains("M"))
+											#if($after.ossType.contains("M") || $after.ossType.contains("D"))
 											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 												#foreach( $ossLicense in $after.ossLicenses )
 												<tr>
