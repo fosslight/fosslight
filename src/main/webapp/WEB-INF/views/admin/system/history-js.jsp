@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript">
 	/*global $ */
 	/*jslint browser: true, nomen: true */
@@ -38,7 +39,7 @@
 	var list = {
 		load : function(){
 			$("#list").jqGrid({
-				url:"/system/history/listAjax",
+				url: '<c:url value="/system/history/listAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -72,7 +73,7 @@
 				loadComplete: function() {},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);
-					createTabInFrame('History', '#/system/history/edit/'+rowData['idx']);
+					createTabInFrame('History', '#<c:url value="/system/history/edit/'+rowData['idx']+'"/>');
 				}			
 			});
 		}

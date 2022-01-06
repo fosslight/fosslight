@@ -43,7 +43,7 @@
 					</c:if>
 					
 					$.ajax({
-						url : '/oss/getCheckOssNameAjax/${projectInfo.targetName}',
+						url : '<c:url value="/oss/getCheckOssNameAjax/${projectInfo.targetName}"/>',
 						dataType : 'json',
 						cache : false,
 						data : params,
@@ -90,7 +90,7 @@
 								</c:if>
 								
 								$.ajax({
-									url : '/oss/saveOssCheckName/${projectInfo.targetName}',
+									url : '<c:url value="/oss/saveOssCheckName/${projectInfo.targetName}"/>',
 									type : 'POST',
 									data : JSON.stringify(rowdata),
 									dataType : 'json',
@@ -162,7 +162,7 @@
 								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
 								
 								$.ajax({
-									url : '/oss/saveOssNickname',
+									url : '<c:url value="/oss/saveOssNickname"/>',
 									type : 'POST',
 									data : JSON.stringify(rowdata),
 									dataType : 'json',
@@ -208,7 +208,7 @@
 					if(ossName!=""){
 						onAjaxLoadingHide = true;
 						$.ajax({
-							url : '/oss/checkExistsOssByname',
+							url : '<c:url value="/oss/checkExistsOssByname"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -220,7 +220,7 @@
 									var _encUrl = "ossName="+Ctrl_fn.replaceGetParamChar(ossName);
 									
 									if(_popup == null || _popup.closed) {
-										_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+										_popup = window.open("<c:url value='/oss/osspopup?"+_encUrl+"'/>", "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 										if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 											alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -228,7 +228,7 @@
 									} else {
 										_popup.close();
 										
-										_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+										_popup = window.open("<c:url value='/oss/osspopup?"+_encUrl+"'/>", "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 									}
 								}
 							},
@@ -426,7 +426,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="/images/loading.gif" alt="loading" />
+			<img src="${ctxPath}/images/loading.gif" alt="loading" />
 		</div>
 		<div id="wrap" style="padding-top: 20px;">
 			<div  align="center" >

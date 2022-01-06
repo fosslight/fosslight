@@ -223,7 +223,7 @@
 				var data = config_fn.makeParams();
 				
 				$.ajax({
-					url : '/system/configuration/saveAjax',
+					url : '<c:url value="/system/configuration/saveAjax"/>',
 					type : 'POST',
 					data : JSON.stringify({config : data}),
 					dataType : 'json',

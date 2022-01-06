@@ -206,7 +206,7 @@ var com_evt = {
 			if(idx != "") {
 				changeTabInFrame(idx);
 			} else {
-				createTabInFrame(prjId+'_Project', '#/project/edit/'+prjId);
+				createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 			}
 		});
 
@@ -217,7 +217,7 @@ var com_evt = {
 			if(idx != "") {
 				changeTabInFrame(idx);
 			} else {
-				createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+				createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 			}
 		});
 		
@@ -228,7 +228,7 @@ var com_evt = {
 			if(idx != "") {
 				changeTabInFrame(idx);
 			} else {
-				createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+				createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 			}
 		});
 
@@ -539,7 +539,7 @@ var com_fn = {
 		var param = {referenceId : '${project.prjId}', referenceDiv :'11', contents : editorVal};
 
 		$.ajax({
-			url : '/project/saveComment',
+			url : '<c:url value="/project/saveComment"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -570,7 +570,7 @@ var com_fn = {
 		var param = {referenceId : '${project.prjId}', referenceDiv :'10', contents : editorVal, mailSendType : type, expansion1 : activeTabText};
 		
 		$.ajax({
-			url : '/project/sendComment',
+			url : '<c:url value="/project/sendComment"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -792,7 +792,7 @@ var com_fn = {
 			}
 			
 			$.ajax({
-				url : '/project/getCheckChangeData',
+				url : '<c:url value="/project/getCheckChangeData"/>',
 				type : 'POST',
 				data : JSON.stringify(finalData),
 				dataType : 'json',
@@ -925,7 +925,7 @@ var com_fn = {
 		loading.show();
 		
 		$.ajax({
-			url : '/project/updateProjectStatus',
+			url : '<c:url value="/project/updateProjectStatus"/>',
 			type : 'POST',
 			data : JSON.stringify(data),
 			dataType : 'json',
@@ -990,36 +990,36 @@ var com_fn = {
 				} else {
 					resetEditor(CKEDITOR.instances.editor);
 					var prjId = ${project.prjId};
-					reloadTabInframe('/project/list');
+					reloadTabInframe('<c:url value="/project/list"/>');
 					
 					if(data.validMsg == "goPackaging") {
 						alertify.alert('<spring:message code="msg.project.autoredirect.packaging" />', function() {
-							deleteTabInFrame('#/project/identification/'+prjId);
-							createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+							deleteTabInFrame('#<c:url value="/project/identification/'+prjId+'"/>');
+							createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 						});
 					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
 							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/3');
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/3"/>');
 							} else {
-								createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/4');
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
 							}
 						});
 					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
-							deleteTabInFrame('#/project/identification/'+prjId);	
+							deleteTabInFrame('#<c:url value="/project/identification/'+prjId+'"/>');	
 						});	
 					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
 							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/3');
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/3"/>');
 							} else {
-								createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/4');
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
 							}
 						});
 					} else if(status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
-							deleteTabInFrame('#/project/identification/'+prjId);	
+							deleteTabInFrame('#<c:url value="/project/identification/'+prjId+'"/>');	
 						});
 					} else {
 						com_fn.btnCtl(userRole, status);
@@ -1141,7 +1141,7 @@ var com_fn = {
 			_popupCheckOssName.close();
 		}
 		
-		_popupCheckOssName = window.open("/oss/checkOssName?prjId=${project.prjId}&referenceDiv="+referenceDiv+"-${initDiv}&targetName=identification", "Check OSS Name", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+		_popupCheckOssName = window.open('<c:url value="/oss/checkOssName?prjId=${project.prjId}&referenceDiv='+referenceDiv+'-${initDiv}&targetName=identification"/>', 'Check OSS Name', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 		if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});

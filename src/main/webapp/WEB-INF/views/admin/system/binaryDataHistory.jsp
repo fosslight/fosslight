@@ -50,7 +50,7 @@
 					</dd>
 				</dl>
 				<input id="search" type="button" value="Search" class="btnColor search" />
-				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 				<input type="hidden" id="filters" name="filters"/>
 			</form>
 		</fieldset>

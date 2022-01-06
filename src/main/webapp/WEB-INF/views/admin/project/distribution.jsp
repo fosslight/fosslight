@@ -19,7 +19,7 @@
 				</li>
 				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
 			</ul>
-			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="/images/user-guide.png" /></a>
+			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 		</div>
 		<!---->
 		<div class="projdecTab">

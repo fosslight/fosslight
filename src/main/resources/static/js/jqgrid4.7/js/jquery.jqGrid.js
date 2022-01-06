@@ -1093,7 +1093,7 @@ $.fn.jqGrid = function( pin ) {
 		$(gv).attr("id","gview_"+this.id).appendTo(eg);
 		$("<div class='ui-widget-overlay jqgrid-overlay' id='lui_"+this.id+"'></div>").insertBefore(gv);
 		//$("<div class='loading ui-state-default ui-state-active' id='load_"+this.id+"'>"+this.p.loadtext+"</div>").insertBefore(gv);
-		$("<div class='loading' id='load_"+this.id+"'>"+"<img src='/images/loading.gif' alt='loading' />"+"</div>").insertBefore(gv);
+		$("<div class='loading' id='load_"+this.id+"'>"+"<img src='"+CTX_PATH+"/images/loading.gif' alt='loading' />"+"</div>").insertBefore(gv);
 		$(this).attr({cellspacing:"0",cellpadding:"0",border:"0","role":"presentation","aria-multiselectable":!!this.p.multiselect,"aria-labelledby":"gbox_"+this.id});
 		var sortkeys = ["shiftKey","altKey","ctrlKey"],
 		intNum = function(val,defval) {
@@ -12890,7 +12890,7 @@ hs=function(w,t,c){return w.each(function(){var s=this._jqm;$(t).each(function()
 		if(!$.fmatter.isEmpty(cellval)) {
 			//createTabInFrame(rowData['ossId']+'_Opensource', '#/oss/edit/'+rowData['ossId']);
 			var _frameId = opts.rowId + "_Opensource";
-			var _frameTarget = "#/oss/edit/" + opts.rowId;
+			var _frameTarget = "#"+CTX_PATH+"/oss/edit/" + opts.rowId;
 			return "<a "+target+" class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellval + "</a>";
 		}
 		return $.fn.fmatter.defaultFormat(cellval,opts);
@@ -12905,7 +12905,7 @@ hs=function(w,t,c){return w.each(function(){var s=this._jqm;$(t).each(function()
 		if(!$.fmatter.isEmpty(cellval)) {
 			//createTabInFrame(rowData['licenseId']+'_License', '#/license/edit/'+rowData['licenseId']);
 			var _frameId = opts.rowId + "_License";
-			var _frameTarget = "#/license/edit/" + opts.rowId;
+			var _frameTarget = "#"+CTX_PATH+"/license/edit/" + opts.rowId;
 			return "<a "+target+" class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellval + "</a>";
 		}
 		return $.fn.fmatter.defaultFormat(cellval,opts);
@@ -12920,7 +12920,7 @@ hs=function(w,t,c){return w.each(function(){var s=this._jqm;$(t).each(function()
 		if(!$.fmatter.isEmpty(cellval)) {
 			//createTabInFrame(rowData['ossId']+'_Opensource', '#/oss/edit/'+rowData['ossId']);
 			var _frameId = "Vulnerability";
-			var _frameTarget = "#/vulnerability/list";
+			var _frameTarget = "#"+CTX_PATH+"/vulnerability/list";
 			var _valParam = cellval;
 			if(rowObject.version) {
 				_valParam += "|" + rowObject.version;

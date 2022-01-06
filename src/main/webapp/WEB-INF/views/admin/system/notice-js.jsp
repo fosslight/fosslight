@@ -72,7 +72,7 @@
 	};
 	
 	var updateDialogAdd = {
-            url:"notice/saveAjax"
+			url:'<c:url value="/system/notice/saveAjax"/>'
                 , closeAfterAdd: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -118,7 +118,7 @@
 	};
 	
 	var updateDialogEdit = {
-            url:"notice/saveAjax"
+			url:'<c:url value="/system/notice/saveAjax"/>'
                 , closeAfterEdit: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -164,7 +164,7 @@
 	};
 	
 	var updateDialogDel = {
-            url:"notice/saveAjax"
+			url:'<c:url value="/system/notice/saveAjax"/>'
                 , closeAfterDel: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -198,7 +198,7 @@
 			noticeList.lastEditRowId = "";
 			
 			$("#list").jqGrid({
-				url: '/system/notice/listAjax'
+				url: '<c:url value="/system/notice/listAjax"/>'
 				, datatype: 'json'
 				, jsonReader: {
 					repeatitems: false,

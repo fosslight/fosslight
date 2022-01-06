@@ -88,7 +88,7 @@
 		getUserIdList : function(reviewerFlag, type){
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getUserIdList",
+				url: '<c:url value="/project/getUserIdList"/>',
 				data: {reviewerFlag : reviewerFlag},
 				success : function(data){
 					if(data != null){
@@ -435,17 +435,20 @@
 		// Grid vulnerability cell display
 		displayVulnerability : function(cellvalue, options, rowObject){
 			var display = "";
+			var _url = '<c:url value="/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
 			
 			if(parseInt(cellvalue) >= 9.0 ) {
-				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) >= 7.0 ) {
-				display="<span class=\"iconSet vulHigh\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) >= 4.0) {
-				display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) > 0) {
-				display="<span class=\"iconSet vulLow\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
-			} else {
+				display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 				display="<span style=\"font-size:0;\"></span>";
+			} else {
+				display=cellvalue;
 			}
 			
 			return display;
@@ -463,15 +466,15 @@
 		},
 		// Grid identification display event
 		mvIdentification : function(prjId, initDiv){
-			createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/'+initDiv);
+			createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/'+initDiv+'"/>');
 		},
 		// Grid veritification display event
 		mvVerification : function(prjId){
-			createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+			createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 		},
 		// Grid distribution display event
 		mvDistribution : function(prjId){
-			createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+			createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 		},
 		// Grid reviewer change event
 		reviewerChg : function(){
@@ -484,7 +487,7 @@
 			var data = {"prjId" : prjId, "reviewer" : reviewer};
 			
 			$.ajax({
-				url : '/project/updateReviewer',
+				url : '<c:url value="/project/updateReviewer"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -507,7 +510,7 @@
 				
 				$.ajax({
 					   type: "POST",
-					   url: '/exceldownload/getExcelPost',
+					   url: '<c:url value="/exceldownload/getExcelPost"/>',
 					   data: JSON.stringify({"type":"project", "parameter":JSON.stringify(data)}),
 						dataType : 'json',
 						cache : false,
@@ -534,7 +537,7 @@
 			
 			$.ajax({
 				type: "POST",
-				url: '/exceldownload/getExcelPost',
+				url: '<c:url value="/exceldownload/getExcelPost"/>',
 				data: JSON.stringify({"type":"report", "parameter":prjId}),
 				dataType : 'json',
 				cache : false,
@@ -639,7 +642,7 @@
 			if(fn.checkProjectCnt()){
 				var prjId = $("#list").getGridParam("selrow");
 				
-				createTabInFrame(prjId+'copy_Project', '#/project/copy/'+prjId);
+				createTabInFrame(prjId+'copy_Project', '#<c:url value="/project/copy/'+prjId+'"/>');
 			}
 		},
 		showChangeStatus : function(paramObj){
@@ -840,14 +843,14 @@
 			var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
 			
 			$.ajax({
-				url : _url,
+				url : '<c:url value="'+_url+'"/>',
 				type : 'POST',
 				data : '',
 				dataType : 'json',
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					reloadTabInframe('/project/list');
+					reloadTabInframe('<c:url value="/project/list"/>');
 				},
 				error: function(data){
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -856,7 +859,7 @@
 		},
 		updateProjectStatus : function(data, callbackFunc){
 			$.ajax({
-				url : '/project/updateProjectStatus',
+				url : '<c:url value="/project/updateProjectStatus"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -878,7 +881,7 @@
 			data["dropYn"] = "Y";
 			
 			$.ajax({
-				url : '<c:url value="${suffixUrl}/project/updateProjectStatus"/>',
+				url : '<c:url value="/project/updateProjectStatus"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -934,7 +937,7 @@
 			fn.commentsSave(param);
 		}, commentsSave : function(data){
 			$.ajax({
-				url : '<c:url value="${suffixUrl}/project/commentsSave"/>',
+				url : '<c:url value="/project/commentsSave"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,
@@ -960,7 +963,7 @@
 	var list = {
 		load : function(){
 			$("#list").jqGrid({
-				url:"/project/listAjax",
+				url:'<c:url value="/project/listAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -1160,7 +1163,7 @@
 							fn.mvDistribution(rowData['prjId']);
 						}
 					} else if(iCol != 0 && iCol != 5 && iCol != 14) {
-						createTabInFrame(rowData['prjId']+'_Project','#/project/edit/'+rowData['prjId']);
+						createTabInFrame(rowData['prjId']+'_Project', '#<c:url value="/project/edit/'+rowData['prjId']+'"/>');
 					}
 				},
 				postData: refreshParam

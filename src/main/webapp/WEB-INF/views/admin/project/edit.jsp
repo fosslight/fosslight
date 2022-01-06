@@ -74,8 +74,8 @@
 									<input name="prjName" type="text" class="autoComProjectNm w100P"/>
 									<span class="retxt">This field is required.</span>
 								</div>
-								<c:if test="${empty project.prjId}"><a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:38px; left:1060px; display:none;"><img alt="" src="/images/user-guide.png" /></a></c:if>
-								<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:2px; left:1035px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+								<c:if test="${empty project.prjId}"><a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:38px; left:1060px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a></c:if>
+								<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:2px; left:1035px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 							</td>
 						</tr>
 						<tr>

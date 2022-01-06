@@ -96,7 +96,7 @@
 																<li>
 															<span>
 																<strong>
-																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<a href="<c:url value="/download/${csvFile.fileSeq }/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
 																	<br>
 																	${csvFile.createdDate}
 																	<input type="hidden" value="${csvFile.fileSeq }"/>

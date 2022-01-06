@@ -43,7 +43,7 @@
 	var list = {
 		getJobsList : function(){
 			$("#jobsList").jqGrid({
-				url:"/dashboard/jobsListAjax",
+				url:'<c:url value="/dashboard/jobsListAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -86,19 +86,19 @@
 					
 					if(iCol==3 && rowData['prjDivision']=='PRJ') {
 						if(rowData['vStage']=="I"){
-							createTabInFrame(rowData['prjId']+'_Identify', '#/project/identification/'+rowData['prjId']+'/4');
+							createTabInFrame(rowData['prjId']+'_Identify', '#<c:url value="/project/identification/'+rowData['prjId']+'/4"/>');
 						}else if(rowData['vStage']=="P"){
-							createTabInFrame(rowData['prjId']+'_Packaging', '#/project/verification/'+rowData['prjId']);
+							createTabInFrame(rowData['prjId']+'_Packaging', '#<c:url value="/project/verification/'+rowData['prjId']+'"/>');
 						}else if(rowData['vStage']=="D"){
-							createTabInFrame(rowData['prjId']+'_Distribute', '#/project/distribution/'+rowData['prjId']);
+							createTabInFrame(rowData['prjId']+'_Distribute', '#<c:url value="/project/distribution/'+rowData['prjId']+'"/>');
 						}else if(rowData['vStage']=="B"){
-							createTabInFrame(rowData['prjId']+'_Project', '#/project/edit/'+rowData['prjId']);
+							createTabInFrame(rowData['prjId']+'_Project', '#<c:url value="/project/edit/'+rowData['prjId']+'"/>');
 						}
 					} else {
 						if(rowData['prjDivision']=='3RD'){
-							createTabInFrame(rowData['prjId']+'_3rdParty', '#/partner/edit/'+rowData['prjId']);
+							createTabInFrame(rowData['prjId']+'_3rdParty', '#<c:url value="/partner/edit/'+rowData['prjId']+'"/>');
 						}else{
-							createTabInFrame(rowData['prjId']+'_Project','#/project/edit/'+rowData['prjId']);
+							createTabInFrame(rowData['prjId']+'_Project', '#<c:url value="/project/edit/'+rowData['prjId']+'"/>');
 						}
 					}
 				}
@@ -136,7 +136,7 @@
 		
 		getCommentsList : function(){
             $("#commentsList").jqGrid({
-                url:"/dashboard/commentsListAjax",
+            	url:'<c:url value="/dashboard/commentsListAjax"/>',
                 datatype: 'json',
                 jsonReader:{
                     repeatitems: false,
@@ -176,14 +176,15 @@
 					if(iCol==0 || iCol==1) {
 						var rowData = $("#commentsList").jqGrid('getRowData',rowid);
 						if(rowData['referenceDiv']=='20'){
-							createTabInFrame(rowData['referenceId']+'_3rdParty', '#/partner/edit/'+rowData['referenceId']);
+							createTabInFrame(rowData['referenceId']+'_3rdParty', '#<c:url value="/partner/edit/'+rowData['referenceId']+'"/>');
 						}else{
-							createTabInFrame(rowData['referenceId']+'_Project','#/project/edit/'+rowData['referenceId']);
+							createTabInFrame(rowData['referenceId']+'_Project','#<c:url value="/project/edit/'+rowData['referenceId']+'"/>');
 						}
 					} else {
 						var rowData = $("#commentsList").jqGrid('getRowData',rowid);
+						
 						if(rowData['referenceDiv']=='20'){
-		    	            openCommentHistory('<c:url value="/comment/popup/3rd/'+rowData['referenceId']+'"/>');
+							openCommentHistory('<c:url value="/comment/popup/3rd/'+rowData['referenceId']+'"/>');
 						}else{
 		    	            openCommentHistory('<c:url value="/comment/popup/prj/'+rowData['referenceId']+'"/>');
 						}
@@ -208,7 +209,7 @@
             
         getOssList : function(){
             $("#ossList").jqGrid({
-                url:"/dashboard/ossListAjax",
+            	url:'<c:url value="/dashboard/ossListAjax"/>',
                 datatype: 'json',
                 jsonReader:{
                     repeatitems: false,
@@ -244,7 +245,7 @@
                 ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#ossList").jqGrid('getRowData',rowid);
 					
-					createTabInFrame(rowData['ossId']+'_Opensource', '#/oss/edit/'+rowData['ossId']);
+					createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
                 }
             });
             
@@ -267,7 +268,7 @@
                 
         getLicenseList : function(){
             $("#licenseList").jqGrid({
-                url:"/dashboard/licenseListAjax",
+            	url:'<c:url value="/dashboard/licenseListAjax"/>',
                 datatype: 'json',
                 jsonReader:{
                     repeatitems: false,
@@ -307,7 +308,7 @@
                 ondblClickRow: function(rowid,iRow,iCol,e) {
                 	if(iCol!=4){
 						var rowData = $("#licenseList").jqGrid('getRowData',rowid);
-						createTabInFrame(rowData['licenseId']+'_License', '#/license/edit/'+rowData['licenseId']);
+						createTabInFrame(rowData['licenseId']+'_License', '#<c:url value="${suffixUrl}/license/edit/'+rowData['licenseId']+'"/>');
                 	}
                 }
             });
@@ -424,7 +425,7 @@
 	
 	reLode = function(gridId){
 		$.ajax({
-			url : '/dashboard/' + gridId + 'Ajax',
+			url : '<c:url value="/dashboard/' + gridId + 'Ajax"/>',
 			dataType : 'json',
 			cache : false,
 			data : {page:1, rows:10},
@@ -466,7 +467,7 @@
 	//2018-08-17 choye 추가
 	function readSubmit(){
 	    $.ajax({
-			url : '/dashboard/readConfirmAll',
+	    	url : '<c:url value="/dashboard/readConfirmAll"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,

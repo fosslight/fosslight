@@ -58,7 +58,7 @@
 						postData.restrictions = "";
 					}
 					
-					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'/license/listAjax' }).trigger('reloadGrid');
+					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/license/listAjax"/>' }).trigger('reloadGrid');
 				}
 			});
 			
@@ -89,7 +89,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"license", "parameter":JSON.stringify(data)}),
 					dataType : 'json',
 					cache : false,
@@ -223,7 +223,7 @@
 						
 						$.ajax({
 							type: 'GET',
-							url: "/system/processGuide/getProcessGuide",
+							url: '<c:url value="/system/processGuide/getProcessGuide"/>',
 							data: {"id":"License_List_License_Type"},
 							success : function(data){
 								if(data.processGuide){
@@ -245,7 +245,7 @@
 						// Restriction 툴팁 추가
 						$.ajax({
 							type: 'GET',
-							url: "/system/processGuide/getProcessGuide",
+							url: '<c:url value="/system/processGuide/getProcessGuide"/>',
 							data: {"id":"License_List_Restriction"},
 							success : function(data){
 								if(data.processGuide){
@@ -272,7 +272,7 @@
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);
-					createTabInFrame(rowData['licenseId']+'_License', '#/license/edit/'+rowData['licenseId']);
+					createTabInFrame(rowData['licenseId']+'_License', '#<c:url value="/license/edit/'+rowData['licenseId']+'"/>');
 				}
 			});
 		}

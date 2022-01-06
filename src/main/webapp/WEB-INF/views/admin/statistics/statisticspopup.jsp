@@ -39,7 +39,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/divisionProjectChart',
+							url:'<c:url value="/statistics/divisionProjectChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -80,7 +80,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/mostUsedChart',
+							url:'<c:url value="/statistics/mostUsedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -109,7 +109,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/mostUsedChart',
+							url:'<c:url value="/statistics/mostUsedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -137,7 +137,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/updatedChart',
+							url:'<c:url value="/statistics/updatedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -175,7 +175,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/updatedChart',
+							url:'<c:url value="/statistics/updatedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -213,7 +213,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/trdPartyRelatedChart',
+							url:'<c:url value="/statistics/trdPartyRelatedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -251,7 +251,7 @@
 						params["isRawData"] = "Y";
 						
 						$.ajax({
-							url : '/statistics/userRelatedChart',
+							url:'<c:url value="/statistics/userRelatedChart"/>',
 							type : 'GET',
 							dataType : 'json',
 							cache : false,
@@ -335,7 +335,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="/images/loading.gif" alt="loading" />
+			<img src="${ctxPath}/images/loading.gif" alt="loading" />
 		</div>
 		<div id="wrap" style="padding-top: 10px;">
 			<div  align="center" >

@@ -51,7 +51,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"3rdModel", "parameter":JSON.stringify(data)}),
 					dataType : 'json',
 					cache : false,
@@ -80,7 +80,7 @@
 	var partnerList = {
 		load: function(){
 			$("#list").jqGrid({
-				url: '/compliance/listAjax'
+				url: '<c:url value="/compliance/listAjax"/>'
 				, datatype: 'json'
 				, jsonReader: {
 					repeatitems: false,

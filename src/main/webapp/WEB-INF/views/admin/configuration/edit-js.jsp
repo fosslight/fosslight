@@ -60,7 +60,7 @@
 	var fn = {
 		updateDefaultLocale : function (){
 			$("#localeConfigurationForm").ajaxForm({
-				url :'/configuration/saveDefaultLocaleAjax',
+				url :'<c:url value="/configuration/saveDefaultLocaleAjax"/>',
 				type : 'POST',
 				dataType:"json",
 				cache : false,
@@ -70,7 +70,7 @@
 		},
 		updateSubmit : function(){
 		    $("#ConfigurationForm").ajaxForm({
-	            url :'/configuration/saveAjax',
+		    	url :'<c:url value="/configuration/saveAjax"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -98,7 +98,7 @@
 			if(fn.checkPassword(password)){
 				$.ajax({
 					type: 'POST',
-					url: '/system/user/changePassword',
+					url :'<c:url value="/system/user/changePassword"/>',
 					data: JSON.stringify({'password': password}),
 					contentType : 'application/json',
 			        success: fn.onUpdateSuccess,

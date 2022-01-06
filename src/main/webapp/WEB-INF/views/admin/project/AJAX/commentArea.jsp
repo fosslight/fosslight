@@ -14,7 +14,7 @@
 				
 				var _editor = CKEDITOR.replace(this.id, 
 						{
-							customConfig:'/js/customEditorConf_Comment.js'
+					customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
 						});
 			}
 

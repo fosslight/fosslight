@@ -16,7 +16,7 @@
 				
 				window.setTimeout(function(){
 					var postData = Ctrl_fn.makeParam();
-					$("#ossList").jqGrid('setGridParam', {postData:postData, page : 0, url:'/oss/getAnalysisResultList'}).trigger('reloadGrid');
+					$("#ossList").jqGrid('setGridParam', {postData:postData, page : 0, url:'<c:url value="/oss/getAnalysisResultList"/>'}).trigger('reloadGrid');
 				}, 1000);
 			} else {
 				Ctrl_fn.loadAnalysisListGrid();
@@ -307,7 +307,7 @@
 								var param = {"dataString":JSON.stringify(postData), "groupId":groupId};
 							
 							    $.ajax({
-									url : '/oss/setSessionAnalysisResultData',
+							    	url : '<c:url value="/oss/setSessionAnalysisResultData"/>',
 									dataType : 'json',
 									type:'POST',
 									cache : false,
@@ -315,7 +315,7 @@
 									contentType : 'application/json',
 									success : function(resultData){
 										if(resultData){
-											_popupAnalysisDetailData = window.open("/oss/getAnalysisResultDetail/"+groupId, "OSS Auto Analysis Result Detail", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+											_popupAnalysisDetailData = window.open('<c:url value="/oss/getAnalysisResultDetail/'+groupId+'"/>', "OSS Auto Analysis Result Detail"+groupId, "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
 
 											if(!_popupAnalysisDetailData || _popupAnalysisDetailData.closed || typeof _popupAnalysisDetailData.closed=='undefined') {
 												alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -350,7 +350,7 @@
 				$('#loading_wrap_popup').show();
 
 				$.ajax({
-					url : '/oss/getAutoAnalysisList',
+					url : '<c:url value="/oss/getAutoAnalysisList"/>',
 					dataType : 'json',
 					cache : false,
 					data : Ctrl_fn.makeParam(),
@@ -487,7 +487,7 @@
 					    hasChecked = true;
 					    
 						$.ajax({
-							url : "/oss/saveOssAnalysisList/popup", 
+							url : '<c:url value="/oss/saveOssAnalysisList/popup"/>', 
 							type : 'POST',
 							dataType : 'json',
 							cache : false,
@@ -516,7 +516,7 @@
 			startAnalysis : function(){
 				$('#loading_wrap_popup').show();
 				$.ajax({
-					url : "/oss/startAnalysis", 
+					url : '<c:url value="/oss/startAnalysis"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -601,7 +601,7 @@
 							);
 							
 						    $.ajax({
-								url : '/oss/saveOssAnalysisData',
+						    	url : '<c:url value="${suffixUrl}/oss/saveOssAnalysisData"/>',
 								type : 'POST',
 								data : JSON.stringify(rowdata),
 								dataType : 'json',
@@ -682,7 +682,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="/images/loading.gif" alt="loading" />
+			<img src="${ctxPath}/images/loading.gif" alt="loading" />
 		</div>
 		<div id="wrap" style="padding-top: 15px;">
 			<div  align="center" >

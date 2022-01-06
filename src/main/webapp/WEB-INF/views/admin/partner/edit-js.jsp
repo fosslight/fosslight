@@ -179,7 +179,7 @@ var saveFlag = false;
 				var param = { referenceId : $('input[name=partnerId]').val(), referenceDiv :'21', contents : editorVal };
 				
 				$.ajax({
-					url : '/partner/saveComment',
+					url : '<c:url value="/partner/saveComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -207,7 +207,7 @@ var saveFlag = false;
 			</c:forEach>
 			
 			$('#confirmationFile').uploadFile({
-				url : '/partner/ossFile',
+				url : '<c:url value="/partner/ossFile"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -225,9 +225,10 @@ var saveFlag = false;
 						result = result[0][0];
 						if(result && result.uploadSucc) {
 							var appendHtml = '<span style="margin-left:20px;">'+result.createdDate+'</span>';
+							var _url = '<c:url value="/download/'+result.registSeq+'/'+result.fileName+'"/>';
 
 							$('.confirmationUpload').children().remove();
-							$('.confirmationUpload').append('<a href="/download/'+result.registSeq+'/'+result.fileName+'">'+result.originalFilename+'</a>'+appendHtml);
+							$('.confirmationUpload').append('<a href="'+_url+'">'+result.originalFilename+'</a>'+appendHtml);
 							$('.confirmationUpload').append(' <span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteConfirmationFile(this)" style="vertical-align:super;"/></span>');
 							$('.confirmationUpload').append('<input type="hidden" name="confirmationFileId" value="'+result.registSeq+'"/>');
 						} else {
@@ -250,7 +251,7 @@ var saveFlag = false;
 			</c:forEach>
 			
 			$('#ossFile').uploadFile({
-				url : '/partner/ossFile?excel=Y',
+				url : '<c:url value="/partner/ossFile?excel=Y"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -276,9 +277,10 @@ var saveFlag = false;
 
 							if(result && result_.uploadSucc) {
 								var appendHtml = '<span style="margin-left:20px;">'+result[0][0].createdDate+'</span>';
+								var _url = '<c:url value="/download/'+result[0][0].registSeq+'/'+result[0][0].fileName+'"/>';
 
 								$('.ossUpload').children().remove();
-								$('.ossUpload').append('<a href="/download/'+result[0][0].registSeq+'/'+result[0][0].fileName+'">'+result[0][0].originalFilename+'</a>'+appendHtml);
+								$('.ossUpload').append('<a href="'+_url+'">'+result[0][0].originalFilename+'</a>'+appendHtml);
 								$('.ossUpload').append(' <span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteOssFile(this)" style="vertical-align:super;"/></span>');
 								$('.ossUpload').append('<input type="hidden" name="ossFileId" value="'+result[0][0].registSeq+'"/>');
 
@@ -344,7 +346,7 @@ var saveFlag = false;
 			});
 			
 			$('#documentsFile').uploadFile({
-				url : '/partner/documentsFile',
+				url : '<c:url value="/partner/documentsFile"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -368,7 +370,8 @@ var saveFlag = false;
 						
 						if(result && result.uploadSucc) {
 							var appendHtml = '<span style="margin-left:20px;">'+result.createdDate+'</span>';
-							$('.documentsFileArea').append('<li><a href="/download/'+result.registSeq+'/'+result.fileName+'">'+result.originalFilename+'</a>'+appendHtml+'<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteDocumentsFile(this)" style="vertical-align:super;margin-left: 5px;"/></span><input type="hidden" value="'+result.registSeq+'"/></li>');
+							var _url = '<c:url value="/download/'+result.registSeq+'/'+result.fileName+'"/>';
+							$('.documentsFileArea').append('<li><a href="'+_url+'">'+result.originalFilename+'</a>'+appendHtml+'<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteDocumentsFile(this)" style="vertical-align:super;margin-left: 5px;"/></span><input type="hidden" value="'+result.registSeq+'"/></li>');
 							$("#documentsFileId").val(result.registFileId);
 							
 							if($(".documentsFileArea > li").length >= 5) {
@@ -407,7 +410,7 @@ var saveFlag = false;
 				
 				$.ajax({
 					type: "POST",
-					url: '/system/user/checkEmail', 
+					url: '<c:url value="/system/user/checkEmail"/>', 
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -441,7 +444,7 @@ var saveFlag = false;
 			});
 			
 			$('#partnerForm').ajaxForm({
-				url : '/partner/saveAjax',
+				url : '<c:url value="/partner/saveAjax"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,
@@ -456,7 +459,7 @@ var saveFlag = false;
 					var param = {partnerId : '${detail.partnerId}', publicYn : ($("[name='publicYn']:checked").val())};
 					
 					$.ajax({
-						url : '/partner/updatePublicYn',
+						url : '<c:url value="/partner/updatePublicYn"/>',
 						type : 'POST',
 						data : JSON.stringify(param),
 						dataType : 'json',
@@ -559,7 +562,7 @@ var saveFlag = false;
 		// party 그리드 데이터
 		getPartyGridData : function(){
 			$.ajax({
-				url : '/project/identificationGrid/${detail.partnerId}/20',
+				url : '<c:url value="/project/identificationGrid/${detail.partnerId}/20"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -636,7 +639,7 @@ var saveFlag = false;
 						var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
 						
 						$.ajax({
-							url : '/project/nickNameValid/20',
+							url : '<c:url value="/project/nickNameValid/20"/>',
 							type : 'POST',
 							data : JSON.stringify(postData),
 							dataType : 'json',
@@ -663,7 +666,7 @@ var saveFlag = false;
 			if(obj.validMsg && obj.validMsg.length != 0){
 				alertify.alert(obj.validMsg, function () {
 					$.ajax({
-						url : '/partner/saveAjax',
+						url : '<c:url value="/partner/saveAjax"/>',
 						type : 'POST',
 						data : JSON.stringify(postData),
 						dataType : 'json',
@@ -677,7 +680,7 @@ var saveFlag = false;
 				});
 			} else {
 				$.ajax({
-					url : '/partner/saveAjax',
+					url : '<c:url value="/partner/saveAjax"/>',
 					type : 'POST',
 					data : JSON.stringify(postData),
 					dataType : 'json',
@@ -756,7 +759,7 @@ var saveFlag = false;
 						
 						isStatusChangeFlag = false;
 						$.ajax({
-							url : '/partner/changeStatus',
+							url : '<c:url value="${suffixUrl}/partner/changeStatus"/>',
 							type : 'POST',
 							data : param,
 							dataType : 'json',
@@ -777,9 +780,9 @@ var saveFlag = false;
 									
 									alertify.error('<spring:message code="msg.common.valid" />', 0);
 								} else {
-									reloadTabInframe('/partner/list');
+									reloadTabInframe('<c:url value="/partner/list"/>');
 									if('${detail.partnerId}' != ''){
-										reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+										reloadTabInframe('<c:url value="/partner/edit/${detail.partnerId}"/>');
 									}
 								}
 							},
@@ -790,16 +793,16 @@ var saveFlag = false;
 					} else {
 						var partnerId = $('input[name=partnerId]').val();
 						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							reloadTabInframe('/partner/list');
+							reloadTabInframe('<c:url value="/partner/list"/>');
 							
 							if(partnerId){
 								fn.getPartyGridData();
 
 								saveFlag = true;
 							} else {
-								deleteTabInFrame('#/partner/edit');	
+								deleteTabInFrame('#<c:url value="/partner/edit"/>');	
 								if(data.partnerId) {
-									createTabInFrame(data.partnerId+'_3rdParty', '#/partner/edit/'+data.partnerId);
+									createTabInFrame(data.partnerId+'_3rdParty', '#<c:url value="/partner/edit/'+data.partnerId+'"/>');
 								}
 							}
 						});
@@ -817,7 +820,7 @@ var saveFlag = false;
 			if(!confirm('<spring:message code="msg.partner.confirm"/>')) return;
 			var commId = $(obj).next().val();
 			$.ajax({
-				url : '/partner/deleteComment',
+				url : '<c:url value="/partner/deleteComment"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,
@@ -867,7 +870,7 @@ var saveFlag = false;
 			var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal, mailSendType : type};
 			
 			$.ajax({
-				url : '/partner/sendComment',
+				url : '<c:url value="/partner/sendComment"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,
@@ -906,7 +909,7 @@ var saveFlag = false;
 				var param = {commId : modifyCommentId, referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal};
 
 				$.ajax({
-					url : '/partner/saveComment',
+					url : '<c:url value="/partner/saveComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -929,7 +932,7 @@ var saveFlag = false;
 								var param = {commId : commentIdx, referenceId : $('input[name=partnerId]').val(), referenceDiv :'13', contents : editorVal};
 
 								$.ajax({
-									url : '/partner/saveComment',
+									url : '<c:url value="/partner/saveComment"/>',
 									type : 'POST',
 									dataType : 'json',
 									cache : false,
@@ -990,19 +993,19 @@ var saveFlag = false;
 					} else {
 						var partnerId = $('input[name=partnerId]').val();
 						$.ajax({
-							url : '/partner/delAjax',
+							url : '<c:url value="/partner/delAjax"/>',
 							type : 'POST',
 							dataType : 'json',
 							cache : false,
 							data : {'partnerId' : partnerId, userComment : CKEDITOR.instances['editor2'].getData()},
 							success: function(data){
 								if(partnerId) {
-									deleteTabInFrame('#/partner/edit/'+partnerId);			
+									deleteTabInFrame('#<c:url value="/partner/edit/'+partnerId+'"/>');			
 								} else {
-									deleteTabInFrame('#/partner/edit');			
+									deleteTabInFrame('#<c:url value="/partner/edit"/>');
 								}
 								
-								reloadTabInframe('/partner/list');
+								reloadTabInframe('<c:url value="/partner/list"/>');
 							},
 							error: function(){
 								alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -1080,7 +1083,7 @@ var saveFlag = false;
 			$('#userName').attr('disabled', false);
 			
 			$.ajax({
-				url : '/partner/getUserList',
+				url : '<c:url value="/partner/getUserList"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -1125,16 +1128,16 @@ var saveFlag = false;
 						var param = {status : 'PROG', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor2'].getData()};
 
 						$.ajax({
-							url : '/partner/changeStatus',
+							url : '<c:url value="/partner/changeStatus"/>',
 							type : 'POST',
 							data : param,
 							dataType : 'json',
 							cache : false,
 							success : function(data){
-								reloadTabInframe('/partner/list');
+								reloadTabInframe('<c:url value="/partner/list"/>');
 								
 								if('${detail.partnerId}' != ''){
-									reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+									reloadTabInframe('<c:url value="/partner/edit/${detail.partnerId}"/>');
 								}
 							},
 							error : function(){
@@ -1160,16 +1163,16 @@ var saveFlag = false;
 			if (fn.checkStatus()){
 				var param = {status : 'REV', partnerId : '${detail.partnerId}'};
 				$.ajax({
-					url : '/partner/changeStatus',
+					url : '<c:url value="/partner/changeStatus"/>',
 					type : 'POST',
 					data : param,
 					dataType : 'json',
 					cache : false,
 					success : function(data){
-						reloadTabInframe('/partner/list');
+						reloadTabInframe('<c:url value="/partner/list"/>');
 						
 						if('${detail.partnerId}' != ''){
-							reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+							reloadTabInframe('<c:url value="/partner/edit/${detail.partnerId}"/>');	
 						}
 					},
 					error : function(){
@@ -1202,7 +1205,7 @@ var saveFlag = false;
 				}
 				var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor'].getData()};
 				$.ajax({
-					url : '/partner/changeStatus',
+					url : '<c:url value="${suffixUrl}/partner/changeStatus"/>',
 					type : 'POST',
 					data : param,
 					dataType : 'json',
@@ -1213,10 +1216,10 @@ var saveFlag = false;
 							
 							alertify.error('<spring:message code="msg.common.valid" />', 0);
 						} else {
-							reloadTabInframe('/partner/list');
+							reloadTabInframe('<c:url value="/partner/list"/>');
 							
 							if('${detail.partnerId}' != ''){
-								reloadTabInframe('/partner/edit/'+'${detail.partnerId}');	
+								reloadTabInframe('<c:url value="/partner/edit/${detail.partnerId}"/>');	
 							}
 						}
 						
@@ -1289,7 +1292,7 @@ var saveFlag = false;
 		},
 		exeLoadReportData : function(finalData){
 			$.ajax({
-				url : '/project/getSheetData',
+				url : '<c:url value="${suffixUrl}/project/getSheetData"/>',
 				type : 'POST',
 				data : JSON.stringify(finalData),
 				dataType : 'json',
@@ -1400,7 +1403,7 @@ var saveFlag = false;
 			var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
 			
 			$.ajax({
-				url : '/partner/addWatcher',
+				url : '<c:url value="/partner/addWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -1432,7 +1435,7 @@ var saveFlag = false;
 			var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
 
 			$.ajax({
-				url : '/partner/removeWatcher',
+				url : '<c:url value="/partner/removeWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -1452,7 +1455,7 @@ var saveFlag = false;
 			obj["partnerId"] = partnerId;
 			
 			$.ajax({
-				url : '/partner/copyWatcher',
+				url : '<c:url value="/partner/copyWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(obj),
 				dataType : 'json',
@@ -1554,9 +1557,7 @@ var saveFlag = false;
 						break;
 					}
 				}
-				
-				location.href = logiPath;
-				//window.location =  '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
+				location.href = '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
 			} else {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
@@ -1564,7 +1565,7 @@ var saveFlag = false;
 		downloadExcel : function() {
 			$.ajax({
 				type: "POST",
-				url: '/exceldownload/getExcelPost',
+				url: '<c:url value="/exceldownload/getExcelPost"/>',
 				data: JSON.stringify({"type":"partnerCheckList", "parameter":'${detail.partnerId}'}),
 				dataType : 'json',
 				cache : false,
@@ -1846,7 +1847,7 @@ var saveFlag = false;
 		},
 		getCommentList : function(){
 			$.ajax({
-				url : '/partner/getCommentList',
+				url : '<c:url value="/partner/getCommentList"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,

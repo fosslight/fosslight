@@ -13,7 +13,7 @@
 			var ossList = [];
 
 			$.ajax({
-				url : '/oss/getOssListByName',
+				url : '<c:url value="/oss/getOssListByName"/>',
 				dataType : 'json',
 				cache : false,
 				data : {ossName : _ossName},
@@ -35,7 +35,7 @@
 						],
 						onSelectRow: function(id){
 							$.ajax({
-								url : '/oss/ossDetailViewAjax',
+								url : '<c:url value="/oss/ossDetailViewAjax"/>',
 								dataType : 'html',
 								cache : false,
 								data : {ossId : id},

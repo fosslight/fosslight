@@ -87,14 +87,14 @@
 				</dl>
 				<input name="act" type="hidden" value="search"/> 
 				<input type="submit" id="search" value="Search" class="btnColor search" />
-				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 			</form>
 		</fieldset>
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#<c:url value="/partner/edit"/>')" />
 			</span>
 		</div>
 		<!---->
@@ -106,7 +106,7 @@
 		<div class="btnLayout">
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#/partner/edit')" />
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#<c:url value="/partner/edit"/>')" />
 			</span>
 		</div>
 		<!---->

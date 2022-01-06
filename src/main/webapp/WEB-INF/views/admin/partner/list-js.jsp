@@ -93,7 +93,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"3rd", "parameter":JSON.stringify(data)}),
 					dataType : 'json',
 					cache : false,
@@ -152,7 +152,7 @@
 			var data = {"partnerId" : partnerId, "reviewer" : reviewer};
 			
 			$.ajax({
-				url : '/partner/updateReviewer',
+				url : '<c:url value="/partner/updateReviewer"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -218,7 +218,7 @@
 		getUserIdList : function(reviewerFlag, type){
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getUserIdList",
+				url: '<c:url value="/project/getUserIdList"/>',
 				data: {reviewerFlag : reviewerFlag},
 				success : function(data){
 					temp = data.split(";").reduce(function(obj, cur){
@@ -250,7 +250,7 @@
 			lastIdNo: '',			//서버에서 가져온 마지막 ID
 			load : function(){
 			$('#list').jqGrid({
-				url: '/partner/listAjax',
+				url: '<c:url value="/partner/listAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -392,7 +392,7 @@
 					}
 				},
 				ondblClickRow: function(rowid,iRow,iCol,e) {
-					createTabInFrame(rowid+'_3rdParty', '#/partner/edit/'+rowid);
+					createTabInFrame(rowid+'_3rdParty', '#<c:url value="/partner/edit/'+rowid+'"/>');
 				},
 				postData : refreshParam
 			})

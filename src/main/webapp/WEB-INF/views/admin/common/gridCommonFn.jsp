@@ -20,7 +20,7 @@ var fn_grid_com = {
 			onAjaxLoadingHide = true;
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getOssNames",
+				url: '<c:url value="/project/getOssNames"/>',
 				data: data,
 				headers: {
 					'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ var fn_grid_com = {
 			
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getOssVersions",
+				url: '<c:url value="/project/getOssVersions"/>',
 				async: false,
 				data: {ossName : ossName },
 				headers: {
@@ -77,7 +77,7 @@ var fn_grid_com = {
 			onAjaxLoadingHide = true;
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getOssIdLicenses",
+				url: '<c:url value="/project/getOssIdLicenses"/>',
 				async: false,
 				data: {
 						ossName : ossName,
@@ -228,15 +228,16 @@ var fn_grid_com = {
 		// vulnerability 포메터
 		displayVulnerability : function(cellvalue, options, rowObject){
 			var display = "";
+			var _url = '<c:url value="/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
 			
 			if(parseInt(cellvalue) >= 9.0 ) {
-				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) >= 7.0 ) {
-				display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) >= 4.0) {
-				display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) > 0) {
-				display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+cellvalue+"</span>";
+				display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 				display="<span style=\"font-size:0;\"></span>";
 			} else {
@@ -249,7 +250,8 @@ var fn_grid_com = {
 			var display = "";
 			
 			if(cellvalue == "Y" && rowObject.ossName && "-" != rowObject.ossName && rowObject.batStringMatchPercentage != "Binary DB matched") {
-				display="<a class='iconReport' href='/download/batGuiReport/"+rowObject.referenceId+"/"+rowObject.batChecksum+"'>"+rowObject.batChecksum+"</a>";
+				var url = '<c:url value="/download/batGuiReport/' + rowObject.referenceId + '/' + rowObject.batChecksum + '"/>';
+				display="<a class='iconReport' href='"+url+"'>"+rowObject.batChecksum+"</a>";
 			}
 			
 			return display;
@@ -841,7 +843,7 @@ var fn_grid_com = {
 			if(ossName!=""){
 				onAjaxLoadingHide = true;
 				$.ajax({
-					url : '/project/getOssIdCheck',
+					url : '<c:url value="/project/getOssIdCheck"/>',
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -857,7 +859,7 @@ var fn_grid_com = {
 						
 						// ossId 있을경우 상세 페이지 이동
 						if(_ossId != "" && _ossId != undefined){
-							createTabInFrame(_ossId+'_Opensource', '#/oss/edit/'+_ossId);	
+							createTabInFrame(_ossId+'_Opensource', '#<c:url value="/oss/edit/'+_ossId+'"/>');
 						}else{
 							if('${sessUserInfo.authority}' == 'ROLE_ADMIN'){
 								onAjaxLoadingHide = true;
@@ -865,7 +867,7 @@ var fn_grid_com = {
 								var ossData = {ossName:row['ossName'], ossVersion:row['ossVersion'], downloadLocation:row['downloadLocation'],homepage:row['homepage'], licenseName:row['licenseName'], licenseText:row['licenseText'], copyright:row['copyrightText']};
 
 								$.ajax({
-									url : '/oss/saveSessionOssInfo',
+									url : '<c:url value="/oss/saveSessionOssInfo"/>',
 									type : 'POST',
 									dataType : 'json',
 									cache : false,
@@ -873,13 +875,13 @@ var fn_grid_com = {
 									success : function(data){
 										if(data.isValid == 'true') {
 											if(data.validMsg && data.validMsg != "") {
-												_popupOss = window.open("/oss/copy/"+data.validMsg+"?ossVersion="+row['ossVersion'], "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+												_popupOss = window.open('<c:url value="/oss/copy/'+data.validMsg+'?ossVersion='+row['ossVersion']+'"/>', '', 'width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 												if(!_popupOss || _popupOss.closed || typeof _popupOss.closed=='undefined') {
 													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 												}
 											} else {
-												_popupOss = window.open("/oss/edit", "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+												_popupOss = window.open("<c:url value="/oss/edit"/>", "", "width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 												if(!_popupOss || _popupOss.closed || typeof _popupOss.closed=='undefined') {
 													alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -938,7 +940,7 @@ var fn_grid_com = {
 			if(ossName!=""){
 				onAjaxLoadingHide = true;
 				$.ajax({
-					url : '/oss/checkExistsOssByname',
+					url : '<c:url value="/oss/checkExistsOssByname"/>',
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -950,14 +952,14 @@ var fn_grid_com = {
 							var _encUrl = "ossName="+fn_grid_com.replaceGetParamChar(ossName)+"&ossVersion="+fn_grid_com.replaceGetParamChar(ossVersion);
 
 							if(_popup == null || _popup.closed){
-								_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/oss/osspopup?"+_encUrl+"'/>", "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
-								_popup = window.open("/oss/osspopup?"+_encUrl, "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/oss/osspopup?"+_encUrl+"'/>", "ossViewPopup_"+ossName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 							}
 						}
 					},
@@ -990,7 +992,7 @@ var fn_grid_com = {
 			if(filename!=""){
 				onAjaxLoadingHide = true;
 				$.ajax({
-					url : '/system/bat/existBinaryName',
+					url : '<c:url value="/system/bat/existBinaryName"/>',
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -1002,13 +1004,13 @@ var fn_grid_com = {
 							var _encUrl = "filename="+fn_grid_com.replaceGetParamChar(filename);
 							
 							if(_popup == null || _popup.closed) {
-								_popup = window.open("/system/bat/binarypopup?"+_encUrl, "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/system/bat/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
-								_popup = window.open("/system/bat/binarypopup?"+_encUrl, "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/system/bat/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
 							}
 						}
 					},
@@ -1219,7 +1221,7 @@ var fn_grid_com = {
 	 	ossBulkReg : function(_prjId, _refDiv){
 			
 			if(_prjId && _refDiv){
-				_popupBulkOssRef = window.open("/oss/ossBulkReg?prjId="+_prjId+"&referenceDiv="+_refDiv, "ossBulkRegPopup", "width=1500, height=800, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+				_popupBulkOssRef = window.open("<c:url value='/oss/ossBulkReg?prjId="+_prjId+"&referenceDiv="+_refDiv+"'/>", "ossBulkRegPopup", "width=1500, height=800, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 				if(!_popupBulkOssRef || _popupBulkOssRef.closed || typeof _popupBulkOssRef.closed=='undefined') {
 					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -1228,7 +1230,7 @@ var fn_grid_com = {
 		},
 		checkLicenseTextValidation : function(_prjId, _type){
 			$.ajax({
-				url : '/checkLicenseText/valid',
+				url : '<c:url value="/checkLicenseText/valid" />',
 				cache : false,
 				async: false,
 				data : JSON.stringify({ "prjId" : _prjId , "regType" : _type}),
@@ -1261,7 +1263,7 @@ var fn_grid_com = {
 		},
 		checkLicenseText : function(_prjId){
 			$.ajax({
-				url : '/checkLicenseText/start',
+				url : '<c:url value="/checkLicenseText/start" />',
 				cache : false,
 				async: false,
 				data : JSON.stringify({ "prjId" : _prjId }),
@@ -1279,7 +1281,7 @@ var fn_grid_com = {
 						
 						location.href = _url;
 						alertify.alert(resultData.returnMsg, function(){});
-						createTabInFrame(_prjId+'_Identify', '#/project/identification/'+_prjId+'/1');
+						createTabInFrame(_prjId+'_Identify', '#<c:url value="/project/identification/'+_prjId+'/1"/>');
 					}else{
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
 					}
@@ -1302,14 +1304,14 @@ var src_fn_com = {
 		target.jqGrid('editRow',rowid);
 
 		if(_popup == null || _popup.closed) {
-			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+			_popup = window.open('<c:url value="/selfCheck/licensepopup?licenseName='+licenseName+'"/>', "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 
 			if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 			}
 		} else {
 			_popup.close();
-			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+			_popup = window.open('<c:url value="/selfCheck/licensepopup?licenseName='+licenseName+'"/>', "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
 		}
 
 	},

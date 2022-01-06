@@ -35,7 +35,7 @@
 				</c:if>
 			</c:forEach>
 			$('#modelListFile').uploadFile({
-				url:'/compliance/readModelList',
+				url:'<c:url value="/compliance/readModelList"/>',
 				multiple:false,
 				dragDrop:true,
 				allowedTypes:accept4,
@@ -269,7 +269,7 @@
 		getModelListAjax : function(obj){
 			$.ajax({
 				type: "POST",
-   				url: '/compliance/modelListAjax',
+				url: '<c:url value="/compliance/modelListAjax"/>',
    				data: JSON.stringify(obj),
 				dataType : 'json',
 				cache : false,
@@ -337,7 +337,7 @@
 			
 				$.ajax({
 					type: "POST",
-	   				url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 	   				data: JSON.stringify({"type":"modelStatus", "parameter":JSON.stringify(data)}),
 					dataType : 'json',
 					cache : false,

@@ -35,7 +35,7 @@
 		var fn_commemt = {
 			getCommentList : function(){
 				$.ajax({
-					url : '/comment/getCommentList',
+					url : '<c:url value="/comment/getCommentList"/>',
 					type : 'GET',
 					dataType : 'html',
 					cache : false,
@@ -51,7 +51,7 @@
 			deleteComment : function(_commId){
 				if(!confirm("Are you sure you want to delete this comment?")) return;
 				$.ajax({
-					url : '/comment/deleteComment',
+					url : '<c:url value="/comment/deleteComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -91,7 +91,7 @@
 					var param = {commId : _commId, contents : _editor.getData(), referenceDiv: _referenceDiv, referenceId: _referenceId};
 					
 					$.ajax({
-						url : '/comment/updateComment',
+						url : '<c:url value="/comment/updateComment"/>',
 						type : 'POST',
 						dataType : 'json',
 						cache : false,
@@ -122,13 +122,13 @@
 				if($('#comm_editor_'+_commId).html().length > 0) {
 					CKEDITOR.replace('comm_editor_'+_commId, 
 							{
-								customConfig:'/js/customEditorConf_Comment.js'
+						customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
 							});
 				}
 			},
 			getMoreCommentList : function(){
 				$.ajax({
-					url : '/comment/getMoreCommentList',
+					url : '<c:url value="/comment/getMoreCommentList"/>',
 					type : 'GET',
 					dataType : 'html',
 					cache : false,

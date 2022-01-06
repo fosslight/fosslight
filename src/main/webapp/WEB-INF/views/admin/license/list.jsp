@@ -96,7 +96,7 @@
 				</c:if>
 				<input name="act" type="hidden" value="search"/>
 				<input id="search" type="submit" value="Search" class="btnColor search" />
-				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 			</form>
 		</fieldset>
 		<!---->
@@ -104,7 +104,7 @@
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<c:if test="${ct:isAdmin()}">
-					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#/license/edit')" />
+					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#<c:url value="/license/edit"/>')" />
 				</c:if>
 			</span>
 		</div>
@@ -118,7 +118,7 @@
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<c:if test="${ct:isAdmin()}">
-					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#/license/edit')" />
+					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#<c:url value="/license/edit"/>')" />
 				</c:if>
 			</span>
 		</div>

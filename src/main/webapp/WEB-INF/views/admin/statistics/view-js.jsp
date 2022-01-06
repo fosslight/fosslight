@@ -47,7 +47,7 @@ var common_fn = {
 
 		$("div[id$=Chart]").on("click", function(){
 			var id = $(this).attr("id");			
-			var url = "/statistics/statisticspopup?" + chart_fn.makeUrl(id);
+			var url = '<c:url value="/statistics/statisticspopup?'+chart_fn.makeUrl(id)+'"/>';
 			
 			if(_popup == null || _popup.closed){
 				_popup = window.open(url, "statisticsPopup_"+id, "width=900, height=700, toolbar=no, location=no, left=100, top=100, resizable=no");
@@ -156,7 +156,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/divisionProjectChart',
+				url : '<c:url value="/statistics/divisionProjectChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -201,7 +201,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/mostUsedChart',
+				url : '<c:url value="/statistics/mostUsedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -241,7 +241,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/mostUsedChart',
+				url : '<c:url value="/statistics/mostUsedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -280,7 +280,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/updatedChart',
+				url : '<c:url value="/statistics/updatedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -323,7 +323,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/updatedChart',
+				url : '<c:url value="/statistics/updatedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -365,7 +365,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/trdPartyRelatedChart',
+				url : '<c:url value="/statistics/trdPartyRelatedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -406,7 +406,7 @@ var chart_fn = {
 			params["isRawData"] = "N";
 			
 			$.ajax({
-				url : '/statistics/userRelatedChart',
+				url : '<c:url value="/statistics/userRelatedChart"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -488,7 +488,7 @@ var chart_fn = {
 			var params = chart_fn.makeParams();
 			
 			$.ajax({
-				url : '/exceldownload/getChartExcel',
+				url : '<c:url value="/exceldownload/getChartExcel"/>',
 				type: "GET",
 				dataType : 'json',
 				data : {"params" : params},

@@ -75,7 +75,8 @@
 				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
 
 				if("Y" != rowData.oldSystemFlag) {
-					createTabInFrame(rowData['prjId']+'_Project','#/project/edit/'+rowData['prjId']);
+					var url = '#<c:url value="/project/edit/'+rowData['prjId']+'"/>';
+					createTabInFrame(rowData['prjId']+'_Project', url);
 				}
 			},
 			loadComplete: function(data) {
@@ -136,7 +137,7 @@
 
 		//Look at the project list.
 		$('#listMore').on('click',function(){
-			createTabInFrameWithCondition('Project List', '#/project/list', 'OSSLISTMORE', '${ossId}');
+			createTabInFrameWithCondition('Project List', '#<c:url value="/project/list"/>', 'OSSLISTMORE', '${ossId}');
 		});
 	});
 	
@@ -581,6 +582,7 @@
 			 // row로 들어오는 데이터가 텍스트인지 element인지 확인.
 			var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
 			var ossLicenseComb, licenseName;
+			var url = '#<c:url value="${suffixUrl}/license/edit/'+row.licenseId+'"/>';
 			
 			ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + getId(olc)).val() : olc;
 			licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + getId(lnm)).val() : lnm;
@@ -589,7 +591,7 @@
 				markTxt += ' <span> '+ossLicenseComb+' </span> ';
 			}
 			
-			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","#/license/edit/'+row.licenseId+'")>'+licenseName+'</a>';
+			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
 		});
 		
 		var andTxts = markTxt.split('<span> OR </span>');
@@ -707,7 +709,7 @@
 
     	if(licenseName && licenseName != "") {
     		$.ajax({
-    			url : '/license/getLicenseText',
+    			url : '<c:url value="/license/getLicenseText"/>',
     			type : 'GET',
     			dataType : 'json',
     			cache : false,

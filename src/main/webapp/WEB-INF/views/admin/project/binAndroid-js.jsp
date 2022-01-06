@@ -110,7 +110,7 @@ var binAndroid_evt = {
 		</c:forEach>
 		
 		$('#androidCsvFile').uploadFile({
-			url:'/project/androidFile?fileType=csv',
+			url:'<c:url value="/project/androidFile?fileType=csv"/>',
 			multiple:false,
 			dragDrop:true,
 			fileName:"myfile",
@@ -175,7 +175,7 @@ var binAndroid_evt = {
 		</c:forEach>
 		
 		$('#androidNoticeFile').uploadFile({
-			url:'/project/androidFile?fileType=notice',
+			url:'<c:url value="/project/androidFile?fileType=notice"/>',
 			multiple:false,
 			dragDrop:true,
 			allowedTypes:accept3,
@@ -242,7 +242,7 @@ var binAndroid_evt = {
 		</c:forEach>
 		
 		$('#androidResultFile').uploadFile({
-			url:'/project/androidFile?fileType=result',
+			url:'<c:url value="/project/androidFile?fileType=result"/>',
 			multiple:false,
 			dragDrop:true,
 			allowedTypes:accept4,
@@ -320,7 +320,7 @@ var binAndroid_fn = {
 	// src 그리드 데이터
 	getBinAndroidGridData : function(param){
 		$.ajax({
-			url : '/project/identificationGrid/${project.prjId}/14',
+			url : '<c:url value="/project/identificationGrid/${project.prjId}/14"/>',
 			dataType : 'json',
 			cache : false,
 			data : (param) ? param : {referenceId : '${project.prjId}'},
@@ -405,7 +405,7 @@ var binAndroid_fn = {
 	// 저장
 	exeSave : function(finalData){
 		$.ajax({
-			url : '/project/saveBinAndroid',
+			url : '<c:url value="/project/saveBinAndroid"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -462,7 +462,7 @@ var binAndroid_fn = {
 	// 프로젝트 검색
 	setParamProject1 : function(){
 		return {
-			url: '/project/identificationProject/14',
+			url: '<c:url value="/project/identificationProject/14"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -596,7 +596,7 @@ var binAndroid_fn = {
 		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
 		
 		$.ajax({
-			url : '/project/nickNameValid/14',
+			url : '<c:url value="/project/nickNameValid/14"/>',
 			type : 'POST',
 			data : JSON.stringify(postData),
 			dataType : 'json',
@@ -730,7 +730,7 @@ var binAndroid_fn = {
 	downloadExcel : function(){
 		$.ajax({
 			type: "POST",
-			url: '/exceldownload/getExcelPost',
+			url: '<c:url value="/exceldownload/getExcelPost"/>',
 			data: JSON.stringify({"type":"binAndroid", "parameter":'${project.prjId}'}),
 			dataType : 'json',
 			cache : false,
@@ -808,7 +808,7 @@ var binAndroid_fn = {
 	// load report data
 	exeLoadReportData : function(finalData) {
 		$.ajax({
-			url : '/project/getSheetData',
+			url : '<c:url value="${suffixUrl}/project/getSheetData"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -842,7 +842,7 @@ var binAndroid_fn = {
 	// load report data
 	exeLoadBuildImageReportData : function(finalData){
 		$.ajax({
-			url : '/project/androidApply',
+			url : '<c:url value="${suffixUrl}/project/androidApply"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -934,7 +934,7 @@ var binAndroid_fn = {
 		}
 		
 		$.ajax({
-			url : '/project/androidSheetName',
+			url : '<c:url value="/project/androidSheetName"/>',
 			type : 'POST',
 			data : JSON.stringify(applyData),
 			dataType : 'json',
@@ -975,7 +975,7 @@ var binAndroid_fn = {
 	//file Info 가져오기
 	getFileInfo : function(param){
 		$.ajax({
-			url : '/project/getFileInfo',
+			url : '<c:url value="/project/getFileInfo"/>',
 			dataType : 'json',
 			cache : false,
 			data : param,
@@ -988,9 +988,11 @@ var binAndroid_fn = {
 						var csvFileId = fileData.androidCsvFile;
 						var noticeFileId = fileData.androidNoticeFile;
 						var resultFileId = fileData.androidResultFile;
+						var _url ="";
 						
 						if(csvFileId.length > 0){
-							$('.androidCsvFileArea').html('<li><span><strong><a href="/download/'+csvFileId[0].fileSeq+'/'+csvFileId[0].logiNm+'">'+csvFileId[0].origNm+'</a></strong><input type="hidden" value="'+csvFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'2\')"/></span></li>');
+							_url = '<c:url value="/download/'+csvFileId[0].fileSeq+'/'+csvFileId[0].logiNm+'"/>';
+							$('.androidCsvFileArea').html('<li><span><strong><a href="'+_url+'">'+csvFileId[0].origNm+'</a></strong><input type="hidden" value="'+csvFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'2\')"/></span></li>');
 
 							if($('.androidCsvFileArea').find('li').length == 0){
 								$('#androidCsvFile').show();
@@ -1002,7 +1004,8 @@ var binAndroid_fn = {
 						}
 						
 						if(noticeFileId.length > 0){
-							$('.androidNoticeFileArea').html('<li><span><strong><a href="/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm+'">'+noticeFileId[0].origNm+'</a></strong><input type="hidden" value="'+noticeFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'5\')"/></span></li>');
+							_url = '<c:url value="/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm+'"/>';
+							$('.androidNoticeFileArea').html('<li><span><strong><a href="'+_url+'">'+noticeFileId[0].origNm+'</a></strong><input type="hidden" value="'+noticeFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'5\')"/></span></li>');
 
 							if($('.androidNoticeFileArea').find('li').length == 0){
 								$('#androidNoticeFile').show();
@@ -1014,7 +1017,8 @@ var binAndroid_fn = {
 						}
 						
 						if(resultFileId.length > 0){
-							$('.androidResultFileArea').html('<li><span><strong><a href="/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm+'">'+resultFileId[0].origNm+'</a></strong><input type="hidden" value="'+resultFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'6\')"/></span></li>');
+							_url = '<c:url value="/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm+'"/>';
+							$('.androidResultFileArea').html('<li><span><strong><a href="'+_url+'">'+resultFileId[0].origNm+'</a></strong><input type="hidden" value="'+resultFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'6\')"/></span></li>');
 
 							if($('.androidResultFileArea').find('li').length == 0){
 								$('#androidResultFile').show();
@@ -1039,7 +1043,7 @@ var binAndroid_fn = {
 		postData.referenceId = id;
 		
         $.ajax({
-            url : '/project/identificationProjectSearch/14',
+        	url : '<c:url value="/project/identificationProjectSearch/14"/>',
             type : 'GET',
             dataType : 'json',
             data : postData,
@@ -1172,7 +1176,7 @@ var binAndroid_fn = {
         var param = {referenceId : '${project.prjId}', zipFlag : type.toUpperCase()};
         
 		$.ajax({
-			url : '/project/getSupplementNoticeFile',
+			url : '<c:url value="/project/getSupplementNoticeFile"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -1631,7 +1635,7 @@ function initAndroidDummyFileUpload() {
 	</c:forEach>
 	
 	$('#androidNoticeFileDummy').uploadFile({
-		url:'/project/androidFile?fileType=notice',
+		url:'<c:url value="/project/androidFile?fileType=notice"/>',
 		multiple:false,
 		dragDrop:true,
 		allowedTypes:accept3,
@@ -1666,7 +1670,7 @@ function initAndroidDummyFileUpload() {
 	});
 
 	$('#androidResultFileDummy').uploadFile({
-		url:'/project/androidFile?fileType=result',
+		url:'<c:url value="/project/androidFile?fileType=result"/>',
 		multiple:false,
 		dragDrop:true,
 		allowedTypes:accept4,

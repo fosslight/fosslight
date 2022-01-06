@@ -99,7 +99,7 @@ var src_evt = {
 		
 		//파일업로드
 		$('#srcCsvFile').uploadFile({
-			url:'/project/csvFile',
+			url:'<c:url value="/project/csvFile"/>',
 			multiple:false,
 			dragDrop:true,
 			fileName:'myfile',
@@ -182,7 +182,7 @@ var src_fn = {
 	// src 그리드 데이터
 	getSrcGridData : function(param){
 		$.ajax({
-			url : '/selfCheck/ossGrid/${project.prjId}/11',
+			url : '<c:url value="/selfCheck/ossGrid/${project.prjId}/11"/>',
 			dataType : 'json',
 			cache : false,
 			data : (param) ? param : {referenceId : '${project.prjId}'},
@@ -272,7 +272,7 @@ var src_fn = {
 	// 저장
 	exeSave : function(finalData){
 		$.ajax({
-			url : '/selfCheck/saveSrc',
+			url : '<c:url value="/selfCheck/saveSrc"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -316,7 +316,7 @@ var src_fn = {
 		var postData = {"mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData), "prjId" : prjId};
 		
 		$.ajax({
-			url : '/project/nickNameValid/11',
+			url : '<c:url value="/project/nickNameValid/11"/>',
 			type : 'POST',
 			data : JSON.stringify(postData),
 			dataType : 'json',
@@ -332,8 +332,8 @@ var src_fn = {
 	},
 	makeFileTag : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
-
-		$('.csvFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
+		var _url = '<c:url value="/download/'+obj.registSeq+'/'+obj.fileName+'"/>';
+		$('.csvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
 	},
 	
 	deleteCsv : function(obj, type){
@@ -349,7 +349,7 @@ var src_fn = {
 	downloadExcel : function(){
 		$.ajax({
 			type: "POST",
-			url: '/exceldownload/getExcelPost',
+			url: '<c:url value="/exceldownload/getExcelPost"/>',
 			data: JSON.stringify({"type":"selfReport", "parameter":'${project.prjId}'}),
 			dataType : 'json',
 			cache : false,
@@ -421,7 +421,7 @@ var src_fn = {
 	// load report data
 	exeLoadReportData : function(finalData){
 		$.ajax({
-			url : '/project/getSheetData',
+			url : '<c:url value="/project/getSheetData"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -514,7 +514,7 @@ var src_fn = {
 		var Data = {"csvDelFileIds" : JSON.stringify(FileSeq)};
 
 		$.ajax({
-			url : '/project/calcelFileDelSrc',
+			url : '<c:url value="/project/calcelFileDelSrc"/>',
 			type : 'POST',
 			data : JSON.stringify(Data),
 			dataType : 'json',
@@ -568,7 +568,7 @@ var src_fn = {
 		return display;
 	},
 	mvEdit : function(){
-		createTabInFrame(${project.prjId}+'_Edit', '#/selfCheck/edit/'+${project.prjId});
+		createTabInFrame(${project.prjId}+'_Edit', '#<c:url value="/selfCheck/edit/'+${project.prjId}"/>');
 	},
 	// License 상세 페이지 이동
  	showLicenseViewPage : function(gridNm, rowid){
@@ -579,14 +579,14 @@ var src_fn = {
 		target.jqGrid('editRow',rowid);
 		
 		if(_popup == null || _popup.closed) {
-			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+			_popup = window.open('<c:url value="/selfCheck/licensepopup?licenseName='+licenseName+'"/>', 'licenseViewPopup_'+licenseName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
 
 			if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 			}
 		} else {
 			_popup.close();
-			_popup = window.open("/selfCheck/licensepopup?licenseName="+licenseName, "licenseViewPopup_"+licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+			_popup = window.open('<c:url value="/selfCheck/licensepopup?licenseName='+licenseName+'"/>', 'licenseViewPopup_'+licenseName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
 		}
 		
 	},
@@ -607,7 +607,7 @@ var src_fn = {
 			var title =  "ossViewPopup_"+ossName;
 			
 			$.ajax({
-				url : '/oss/checkExistsOssByname',
+				url : '<c:url value="/oss/checkExistsOssByname"/>',
 				type : 'GET',
 				dataType : 'json',
 				cache : false,
@@ -616,14 +616,14 @@ var src_fn = {
 				success : function(data){
 					if(data.isValid == 'true') {
 						if(_popup == null || _popup.closed) {
-							_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, title, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
 
 							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 								alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 							}
 						} else {
 							_popup.close();
-							_popup = window.open("/oss/osspopup?ossName="+ossName+"&ossVersion="+ossVersion, title, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
 						}
 					}
 				},
