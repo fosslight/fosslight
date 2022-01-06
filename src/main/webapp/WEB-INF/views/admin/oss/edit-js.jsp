@@ -1510,6 +1510,7 @@
 	
 	// OSS 삭제
 	function deleteOssByOne(){
+		loading.show();
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
 		var editorVal = CKEDITOR.instances['editor'].getData();
@@ -1527,6 +1528,7 @@
             dataType:"json",
             cache : false,
 	        success : function(json){
+	        	loading.hide();
 				if(json.resCd == '10'){
 					alertify.alert('<spring:message code="msg.common.success" />',function(){
 						deleteTabInFrame('#<c:url value="/oss/edit/'+ossId+'"/>');
@@ -1537,6 +1539,7 @@
 				}
 	        },
             error : function(){
+            	loading.hide();
             	alertify.error('<spring:message code="msg.common.valid2" />', 0);
             }
 		});
