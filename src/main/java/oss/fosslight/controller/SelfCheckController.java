@@ -363,7 +363,7 @@ public class SelfCheckController extends CoTopComponent {
 		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
 		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
-		
+		ossComponents = CommonFunction.removeDuplicateLicense(ossComponents);
 		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
 		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusSrc)) {

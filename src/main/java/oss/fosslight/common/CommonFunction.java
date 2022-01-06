@@ -1162,34 +1162,6 @@ public class CommonFunction extends CoTopComponent {
 				Map<String, ProjectIdentification> sortMap = new TreeMap<String, ProjectIdentification>();
 				
 				for(ProjectIdentification gridBean : _list) { // 중복제거 및 정렬
-					// UploadReport licenseName deduplication 
-					if(gridBean.getLicenseName().contains(",")) {
-						List<String> deduplicationList = new ArrayList<String>();
-						
-						String[] licenseNameListTrim = Arrays.stream(gridBean.getLicenseName().split(",")).map(String::trim).toArray(String[]::new);
-						deduplicationList = Arrays.asList(licenseNameListTrim);
-						deduplicationList = deduplicationList.stream().distinct().collect(Collectors.toList());
-						
-						for(int i=0; i<deduplicationList.size(); i++) {
-							String licenseName = deduplicationList.get(i).trim();
-							if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
-								LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
-								if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
-									for(String s : licenseMaster.getLicenseNicknameList()) {
-										if(licenseName.equalsIgnoreCase(s)) {
-											deduplicationList.remove(i);
-											String disp = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
-											if(!deduplicationList.contains(disp)) {
-												deduplicationList.add(disp);
-											}
-										}
-									}
-								}
-							}
-						}
-						gridBean.setLicenseName(String.join(",", deduplicationList));
-					}
-					
 					String key = "";
 					if("BIN".equals(readType.toUpperCase()) || "BINANDROID".equals(readType.toUpperCase()) || "PARTNER".equals(readType.toUpperCase())) {
 						if(!isEmpty(gridBean.getFilePath()) && isEmpty(gridBean.getBinaryName())) {
@@ -4098,5 +4070,52 @@ public class CommonFunction extends CoTopComponent {
 		}
 		return cveId.replaceAll("((cve|CVE)-[0-9]{4}-[0-9]{4,})",
 				"<a href='https://nvd.nist.gov/vuln/detail/$1' target='_blank'>$1<a/>");
+	}
+
+	public static List<ProjectIdentification> removeDuplicateLicense(List<ProjectIdentification> ossComponents) {
+		for (ProjectIdentification pri : ossComponents) {
+			List<String> licenseNameList = Arrays.asList(pri.getLicenseName().split(","));
+			List<String> licenseNameNicknameCheckList = new ArrayList<>();
+			List<String> duplicateList = new ArrayList<>();
+			List<Integer> indexList = new ArrayList<>();
+			
+			for(int j=0; j<licenseNameList.size(); j++) {
+                String licenseName = licenseNameList.get(j).trim();
+                if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+                	LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+                    if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+                    	boolean flag = false;
+                    	for(String s : licenseMaster.getLicenseNicknameList()) {
+                    		if(licenseName.equalsIgnoreCase(s)) {
+                    			String disp = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+                    			licenseNameNicknameCheckList.add(disp);
+                    			flag = true;
+                    			break;
+                    		}
+                    	}
+                    	
+                    	if(!flag) {
+                    		licenseNameNicknameCheckList.add(licenseName);
+                    	}
+                    }
+                }
+			}
+			
+			for(int i=0; i<licenseNameNicknameCheckList.size(); i++) {
+				if(!duplicateList.contains(licenseNameNicknameCheckList.get(i))) {
+					duplicateList.add(licenseNameNicknameCheckList.get(i));
+					indexList.add(i);
+				}
+			}
+			
+			duplicateList = new ArrayList<>();
+			for(int i=0; i<indexList.size(); i++) {
+				duplicateList.add(licenseNameList.get(indexList.get(i)));
+			}
+			
+			pri.setLicenseName(String.join(",", duplicateList));
+		}	
+		
+		return ossComponents;
 	}
 }
