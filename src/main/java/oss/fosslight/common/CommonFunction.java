@@ -4074,46 +4074,50 @@ public class CommonFunction extends CoTopComponent {
 
 	public static List<ProjectIdentification> removeDuplicateLicense(List<ProjectIdentification> ossComponents) {
 		for (ProjectIdentification pri : ossComponents) {
-			List<String> licenseNameList = Arrays.asList(pri.getLicenseName().split(","));
-			List<String> licenseNameNicknameCheckList = new ArrayList<>();
-			List<String> duplicateList = new ArrayList<>();
-			List<Integer> indexList = new ArrayList<>();
-			
-			for(int j=0; j<licenseNameList.size(); j++) {
-                String licenseName = licenseNameList.get(j).trim();
-                if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
-                	LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
-                    if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
-                    	boolean flag = false;
-                    	for(String s : licenseMaster.getLicenseNicknameList()) {
-                    		if(licenseName.equalsIgnoreCase(s)) {
-                    			String disp = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
-                    			licenseNameNicknameCheckList.add(disp);
-                    			flag = true;
-                    			break;
-                    		}
-                    	}
-                    	
-                    	if(!flag) {
-                    		licenseNameNicknameCheckList.add(licenseName);
-                    	}
-                    }
-                }
-			}
-			
-			for(int i=0; i<licenseNameNicknameCheckList.size(); i++) {
-				if(!duplicateList.contains(licenseNameNicknameCheckList.get(i))) {
-					duplicateList.add(licenseNameNicknameCheckList.get(i));
-					indexList.add(i);
+			if(pri.getLicenseName().contains(",")) {
+				List<String> licenseNameList = Arrays.asList(pri.getLicenseName().split(","));
+				List<String> licenseNameNicknameCheckList = new ArrayList<>();
+				List<String> duplicateList = new ArrayList<>();
+				List<Integer> indexList = new ArrayList<>();
+				
+				for(int j=0; j<licenseNameList.size(); j++) {
+	                String licenseName = licenseNameList.get(j).trim();
+	                if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseName.toUpperCase())) {
+	                	LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(licenseName.toUpperCase());
+	                    if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+	                    	boolean flag = false;
+	                    	for(String s : licenseMaster.getLicenseNicknameList()) {
+	                    		if(licenseName.equalsIgnoreCase(s)) {
+	                    			String disp = avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp());
+	                    			licenseNameNicknameCheckList.add(disp);
+	                    			flag = true;
+	                    			break;
+	                    		}
+	                    	}
+	                    	
+	                    	if(!flag) {
+	                    		licenseNameNicknameCheckList.add(licenseName);
+	                    	}
+	                    }else {
+	                    	licenseNameNicknameCheckList.add(licenseName);
+	                    }
+	                }
 				}
+				
+				for(int i=0; i<licenseNameNicknameCheckList.size(); i++) {
+					if(!duplicateList.contains(licenseNameNicknameCheckList.get(i))) {
+						duplicateList.add(licenseNameNicknameCheckList.get(i));
+						indexList.add(i);
+					}
+				}
+				
+				duplicateList = new ArrayList<>();
+				for(int i=0; i<indexList.size(); i++) {
+					duplicateList.add(licenseNameList.get(indexList.get(i)));
+				}
+				
+				pri.setLicenseName(String.join(",", duplicateList));
 			}
-			
-			duplicateList = new ArrayList<>();
-			for(int i=0; i<indexList.size(); i++) {
-				duplicateList.add(licenseNameList.get(indexList.get(i)));
-			}
-			
-			pri.setLicenseName(String.join(",", duplicateList));
 		}	
 		
 		return ossComponents;
