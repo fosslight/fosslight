@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.25 (07/01/2022)
+## Changes
+## 🔧 Maintenance
+
+- Remove license duplication in a cell @FOSSLight-dev (#381)
+- Change message from System to Hub @FOSSLight-dev (#378)
+- Support variable context path.  @FOSSLight-dev  (#382)
+- Show progress bar when deleting OSS.  @FOSSLight-dev  (#382)
+- Deduplicate Licenses in one cell.  @FOSSLight-dev  (#382)
+---
+
 ## v1.2.24 (31/12/2021)
 ## 🚀 Features
 
