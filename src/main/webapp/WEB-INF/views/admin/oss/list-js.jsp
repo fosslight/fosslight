@@ -43,7 +43,7 @@
 					list.load();
 					initYn = false;
 				} else {
-					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'/oss/listAjax'}).trigger('reloadGrid');
+					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/oss/listAjax"/>'}).trigger('reloadGrid');
 				}
 			});
 			
@@ -82,7 +82,7 @@
 				$('input[name=parameter]').val(JSON.stringify(data));
 			
 				$("#ossSearch").ajaxForm({
-		            url :'/exceldownload/getExcelPostOss',
+					url :'<c:url value="/exceldownload/getExcelPostOss"/>',
 		            type : 'POST',
 		            dataType:"json",
 		            cache : false,
@@ -306,7 +306,7 @@
 						
 						$.ajax({
 							type: 'GET',
-							url: "/system/processGuide/getProcessGuide",
+							url: '<c:url value="/system/processGuide/getProcessGuide"/>',
 							data: {"id":"OSS_LIST_License_Type"},
 							success : function(data){
 								if(data.processGuide){
@@ -326,7 +326,7 @@
 						
 						$.ajax({
 							type: 'GET',
-							url: "/system/processGuide/getProcessGuide",
+							url: '<c:url value="/system/processGuide/getProcessGuide"/>',
 							data: {"id":"OSS_List_Vulnerability"},
 							success : function(data){
 								if(data.processGuide){
@@ -374,7 +374,7 @@
 					if(iCol!=0){
 						var rowData = $("#list").jqGrid('getRowData',rowid);
 						
-						createTabInFrame(rowData['ossId']+'_Opensource', '#/oss/edit/'+rowData['ossId']);
+						createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
 					}
 				},
 				postData: serializeObjectHelper()

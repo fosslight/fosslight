@@ -4,6 +4,6 @@
 <tiles:insertAttribute name="edit-js" />
 <div id="loading_wrap" class="loading" style="display:none;">
 	<div class="loadingBlind"></div>
-	<img src="/images/loading.gif" alt="loading" />
+	<img src="${ctxPath}/images/loading.gif" alt="loading" />
 </div>
 <tiles:insertAttribute name="tabs" />

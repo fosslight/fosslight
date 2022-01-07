@@ -123,7 +123,7 @@ var bom_fn = {
 		};
 		
 		$.ajax({
-			url : '/project/saveBom',
+			url : '<c:url value="/project/saveBom"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -173,7 +173,7 @@ var bom_fn = {
 	downloadExcel : function(){
 		$.ajax({
 			type: "POST",
-			url: '/exceldownload/getExcelPost',
+			url: '<c:url value="/exceldownload/getExcelPost"/>',
 			data: JSON.stringify({"type":"bom", "parameter":'${project.prjId}'}),
 			dataType : 'json',
 			cache : false,
@@ -493,7 +493,7 @@ var bom_fn = {
 		}
 
 		if(status.toUpperCase().indexOf("LOAD") > -1){ // status : success & load
-			_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+			_popupOssAutoAnalysis = window.open('<c:url value="/oss/ossAutoAnalysis?prjId=${project.prjId}"/>', 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -529,14 +529,14 @@ var bom_fn = {
 			};
 			
 			$.ajax({
-				url : '/oss/saveOssAnalysisList/view',
+				url : '<c:url value="/oss/saveOssAnalysisList/view"/>',
 				dataType : 'json',
 				type : 'POST',
 				cache : false,
 				data : JSON.stringify(data),
 				contentType : 'application/json',
 				success : function(data){
-					_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+					_popupOssAutoAnalysis = window.open('<c:url value="/oss/ossAutoAnalysis?prjId=${project.prjId}"/>', 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 					if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 						alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -550,7 +550,7 @@ var bom_fn = {
 	},
 	showAnalysisResult : function(){
 		if (com_fn.checkStatus()){
-			_popupOssAutoAnalysis = window.open("/oss/ossAutoAnalysis?prjId=${project.prjId}&ossAnalysisStatus=result", "OSS Auto Analysis", "width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes");
+			_popupOssAutoAnalysis = window.open('<c:url value="/oss/ossAutoAnalysis?prjId=${project.prjId}&ossAnalysisStatus=result"/>', 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 				alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
@@ -566,7 +566,7 @@ var bom_data = {
 			var data = param || {referenceId : '${project.prjId}', merge : 'N'};
 				
 			$.ajax({
-				url : '/project/identificationGrid/${project.prjId}/13',
+				url : '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/13"/>',
 				dataType : 'json',
 				type : 'GET',
 				cache : false,

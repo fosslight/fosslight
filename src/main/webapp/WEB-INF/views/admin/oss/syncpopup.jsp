@@ -239,7 +239,7 @@
 		<div id="wrap" style="padding-top: 10px;">
 			<div id="loading_wrap_popup" class="loading" style="display:none;">
 				<div class="loadingBlind"></div>
-				<img src="<c:url value="/images/loading.gif"/>" alt="loading" />
+				<img src="${ctxPath}/images/loading.gif" alt="loading" />
 			</div>
 			<div class="statisticsLayout">
 				<input type="hidden" name="syncRefOssId"/>

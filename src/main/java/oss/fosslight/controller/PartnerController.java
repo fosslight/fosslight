@@ -434,7 +434,7 @@ public class PartnerController extends CoTopComponent{
 		// ossVersion N/A => "" 치환 / 3rd Party > e2fsprogs를 Row에 추가 시 Save 불가
 		// ossVersion N/A => "" replace / 3rd Party > cannot save when adding e2fsprogs to row
 		ossComponents = CommonFunction.replaceOssVersionNA((List<ProjectIdentification>) fromJson(mainGrid, collectionType));
-		
+		ossComponents = CommonFunction.removeDuplicateLicense(ossComponents);
 		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
 		
 		ossComponentsLicense = CommonFunction.mergeGridAndSession(

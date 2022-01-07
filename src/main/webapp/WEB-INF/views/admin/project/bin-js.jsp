@@ -79,7 +79,7 @@ var bin_evt = {
 		
 		//파일업로드
 		$('#binCsvFile').uploadFile({
-			url:'/project/binCsvFile',
+			url:'<c:url value="/project/binCsvFile"/>',
 			multiple:false,
 			dragDrop:true,
 			fileName:'myfile',
@@ -168,7 +168,7 @@ var bin_evt = {
 		</c:forEach>
 		
 		$('#binBinaryFile').uploadFile({
-			url:'/project/binCsvFile?fileType=text',
+			url:'<c:url value="/project/binCsvFile?fileType=text"/>',
 			multiple:false,
 			dragDrop:true,
 			allowedTypes:accept4,
@@ -262,9 +262,11 @@ var binInfoMsgData;
 var bin_fn = {
 	// src 그리드 데이터
 	getBinGridData : function(param, type){
-		var url = "append".indexOf(type) > -1  ? '/project/identificationMergedGrid/${project.prjId}/15' : '/project/identificationGrid/${project.prjId}/15'
-		  , type = "append".indexOf(type) > -1  ? 'POST' : 'GET'
-		  , data = param || { referenceId : '${project.prjId}', typeFlag : 'N' };
+		var url = "append".indexOf(type) > -1  
+					? '<c:url value="${suffixUrl}/project/identificationMergedGrid/${project.prjId}/15"/>' 
+					: '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/15"/>'
+			, type = "append".indexOf(type) > -1  ? 'POST' : 'GET'
+			, data = param || { referenceId : '${project.prjId}', typeFlag : 'N' };
 		
 		$.ajax({
 			url : url,
@@ -337,7 +339,7 @@ var bin_fn = {
 	// 저장
 	exeSave : function(finalData){
 		$.ajax({
-			url : '/project/saveBin',
+			url : '<c:url value="${suffixUrl}/project/saveBin"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -401,7 +403,7 @@ var bin_fn = {
 	// 프로젝트 검색
 	setParamProject1 : function(){
 		return {
-			url: '/project/identificationProject/15',
+			url: '<c:url value="/project/identificationProject/15"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -485,7 +487,7 @@ var bin_fn = {
 	},			
 	setParamProject3 : function(){
 		return {
- 			url: '/project/getAddList',
+			url: '<c:url value="/project/getAddList"/>',
 			datatype: 'json',
 			postData : {prjId : '${project.prjId}', referenceDiv : '15'},
 			jsonReader:{
@@ -537,7 +539,7 @@ var bin_fn = {
 		var postData = {"mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData), "prjId" : prjId};
 		
 		$.ajax({
-			url : '/project/nickNameValid/15',
+			url : '<c:url value="/project/nickNameValid/15"/>',
 			type : 'POST',
 			data : JSON.stringify(postData),
 			dataType : 'json',
@@ -627,7 +629,7 @@ var bin_fn = {
 	downloadExcel : function(){
 		$.ajax({
 			type: "POST",
-			url: '/exceldownload/getExcelPost',
+			url: '<c:url value="/exceldownload/getExcelPost"/>',
 			data: JSON.stringify({"type":"bin", "parameter":'${project.prjId}'}),
 			dataType : 'json',
 			cache : false,
@@ -740,7 +742,7 @@ var bin_fn = {
 	// load report data
 	exeLoadReportData : function(finalData){
 		$.ajax({
-			url : '/project/getSheetData',
+			url : '<c:url value="${suffixUrl}/project/getSheetData"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -809,7 +811,7 @@ var bin_fn = {
 		postData.referenceId = id;
 		
         $.ajax({
-            url : '/project/identificationProjectSearch/15',
+        	url : '<c:url value="/project/identificationProjectSearch/15"/>',
             type : 'GET',
             dataType : 'json',
             data : postData,

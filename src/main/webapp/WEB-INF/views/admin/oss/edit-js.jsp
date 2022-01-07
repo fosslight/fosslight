@@ -321,7 +321,7 @@
 			$("#copy").on('click',function(){
 				activeDeleteTabInFrame();
 				var ossId = $('input[name=ossId]').val();
-				createTabInFrame('copy_'+ossId+'_Opensource', '#/oss/copy/'+ossId);
+				createTabInFrame('copy_'+ossId+'_Opensource', '#<c:url value="/oss/copy/'+ossId+'"/>');
 			});
 			
 			//라이센스 삭제
@@ -343,7 +343,7 @@
 						
 						if(validationDataSet()){
 							$("#ossForm").ajaxForm({
-					            url :'/oss/validation',
+								url :'<c:url value="/oss/validation"/>',
 					            type : 'POST',
 					            dataType:"json",
 					            cache : false,
@@ -392,7 +392,7 @@
 	 					};
 		 				
 	 					$.ajax({
-	 						url :'/oss/delAjax',
+	 						url :'<c:url value="/oss/delAjax"/>',
 	 			            type : 'POST',
 	 			            data : sendData,
 	 			            dataType:"json",
@@ -431,7 +431,7 @@
 				};
 				
 				$.ajax({
-					url :'/oss/delOssWithVersionMeregeAjax',
+					url :'<c:url value="/oss/delOssWithVersionMeregeAjax"/>',
 		            type : 'POST',
 		            data : sendData,
 		            dataType:"json",
@@ -440,9 +440,8 @@
 						var ossId = $('input[name=ossId]').val();
 						if(json.resCd == '10'){
 							alertify.alert('<spring:message code="msg.common.success" />',function(){
-								deleteTabInFrame('#/oss/edit/'+ossId);
-								//createTabInFrame(newOssId+'_Opensource', '#/oss/edit/'+newOssId);
-								reloadTabInframe('/oss/list');
+								deleteTabInFrame('#<c:url value="/oss/edit/'+ossId+'"/>');
+								reloadTabInframe('<c:url value="/oss/list"/>');
 								$('.mergeOssCheckPop').hide();
 								$('#blind_wrap').hide();
 							});
@@ -460,14 +459,12 @@
 			
 			//프로젝트 리스트 더보기
 			$('#listMore').on('click',function(){
-				//createTabInFrame('Project List', '#/project/list?ossId='+data.detail.ossId);
-				createTabInFrameWithCondition('Project List', '#/project/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrameWithCondition('Project List', '#<c:url value="/project/list"/>', 'OSSLISTMORE', $("input[name=ossId]").val());
 			});
 
 			//프로젝트 리스트 더보기
 			$('#listMore3rd').on('click',function(){
-				//createTabInFrame('Project List', '#/project/list?ossId='+data.detail.ossId);
-				createTabInFrameWithCondition('3rd Party List', '#/partner/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrameWithCondition('3rd Party List', '#<c:url value="/partner/list"/>', 'OSSLISTMORE', $("input[name=ossId]").val());
 			});
 			
 			if('${ossId}' == ''){ // OSS 신규등록 시 URL 링크 중복 체크
@@ -1359,7 +1356,8 @@
 		rows.forEach(function(row, index, ref){
 			 // row로 들어오는 데이터가 텍스트인지 element인지 확인.
 			var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
-			var ossLicenseComb, licenseName;	
+			var ossLicenseComb, licenseName;
+			var url = '#<c:url value="/license/edit/'+row.licenseId+'"/>';
 
 			ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + $(olc).attr("id")).val() : olc;
 			licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + $(lnm).attr("id")).val() : lnm;
@@ -1369,7 +1367,7 @@
 				markTxt += ' <span> '+ossLicenseComb+' </span> ';
 			}
 			
-			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","#/license/edit/'+row.licenseId+'")>'+licenseName+'</a>';
+			markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
 		});
 		
 		var andTxts = markTxt.split('<span> OR </span>');
@@ -1474,7 +1472,7 @@
 	function registSubmit(){
 		if(validationDataSet()){
 			$("#ossForm").ajaxForm({
-	            url :'/oss/validation',
+				url :'<c:url value="/oss/validation"/>',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -1489,7 +1487,7 @@
 		var ossId = $('input[name=ossId]').val();
 		
 		$.ajax({
-			url : '/oss/checkExistOssConf',
+			url : '<c:url value="/oss/checkExistOssConf"/>',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,
@@ -1512,6 +1510,7 @@
 	
 	// OSS 삭제
 	function deleteOssByOne(){
+		loading.show();
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
 		var editorVal = CKEDITOR.instances['editor'].getData();
@@ -1523,22 +1522,24 @@
 			};
 			
 		$.ajax({
-			url :'/oss/delAjax',
+			url :'<c:url value="/oss/delAjax"/>',
             type : 'POST',
             data : sendData,
             dataType:"json",
             cache : false,
 	        success : function(json){
+	        	loading.hide();
 				if(json.resCd == '10'){
 					alertify.alert('<spring:message code="msg.common.success" />',function(){
-						deleteTabInFrame('#/oss/edit/'+ossId);
-						reloadTabInframe('/oss/list');
+						deleteTabInFrame('#<c:url value="/oss/edit/'+ossId+'"/>');
+						reloadTabInframe('<c:url value="/oss/list"/>');
 					});
 				}else{
 					alertify.error('<spring:message code="msg.common.valid" />', 0);
 				}
 	        },
             error : function(){
+            	loading.hide();
             	alertify.error('<spring:message code="msg.common.valid2" />', 0);
             }
 		});
@@ -1552,7 +1553,7 @@
 			var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
 
 			$.ajax({
-				url : '/oss/checkVdiff',
+				url : '<c:url value="/oss/checkVdiff"/>',
 				type : 'POST',
 				data : JSON.stringify(postData),
 				dataType : 'json',
@@ -1757,7 +1758,7 @@
 		var editorVal = CKEDITOR.instances.editor.getData();
 		$('input[name=comment]').val(editorVal);
 		$("#ossForm").ajaxForm({
-            url :'/oss/saveAjax',
+			url :'<c:url value="/oss/saveAjax"/>',
             type : 'POST',
             dataType:"json",
             cache : false,
@@ -1775,8 +1776,8 @@
 					// 현재 창이 팝업인 경우
 					self.opener = null;self.close();
 				} else {
-					deleteTabInFrame('#/oss/edit/'+json.ossId);
-					reloadTabInframe('/oss/list');
+					deleteTabInFrame('#<c:url value="/oss/edit/'+json.ossId+'"/>');
+					reloadTabInframe('<c:url value="/oss/list"/>');
 				}
 			});
 		}else{
@@ -1834,7 +1835,7 @@
 		if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
 		var commId = $(obj).next().val();
 		$.ajax({
-			url : '/oss/deleteComment',
+			url : '<c:url value="/oss/deleteComment"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -1862,7 +1863,7 @@ function modifyComment(obj){
 		var register = '${sessUserInfo.userId}';
 		var param = {commId : modifyCommentId, referenceId : data.detail.ossId, referenceDiv :'40', contents : editorVal};
 		$.ajax({
-			url : '/oss/saveComment',
+			url : '<c:url value="/oss/saveComment"/>',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -1921,7 +1922,7 @@ function showLicenseText(_licenseName) {
 
 	if(licenseName && licenseName != "") {
 		$.ajax({
-			url : '/license/getLicenseText',
+			url : '<c:url value="/license/getLicenseText"/>',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,
@@ -1952,7 +1953,7 @@ function mergeOssForDelete(newOssId) {
 		//$("#div_mergeOssCheckPop_change").text(${ossId} + " => ");
 		
 		$('#_ossMergeCheckList').jqGrid({
-			url:"/oss/ossMergeCheckList/${ossId}/"+newOssId,
+			url:'<c:url value="/oss/ossMergeCheckList/${ossId}/'+newOssId+'"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -1992,10 +1993,10 @@ function mergeOssForDelete(newOssId) {
 				
 				// 자기자신이 아닌 경우만
 				if('Duplicated' == row['mergeStr'] && row['delOssId'] && row['delOssId'] != '${ossId}') {
-					createTabInFrame(row['delOssId']+'_Opensource', '#/oss/edit/'+row['delOssId']);
+					createTabInFrame(row['delOssId']+'_Opensource', '#<c:url value="/oss/edit/'+row['delOssId']+'"/>');
 				}
 				else if(row['ossId'] != '${ossId}') {
-					createTabInFrame(row['ossId']+'_Opensource', '#/oss/edit/'+row['ossId']);
+					createTabInFrame(row['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+row['ossId']+'"/>');
 				}
 
 			}
@@ -2006,7 +2007,7 @@ function mergeOssForDelete(newOssId) {
 var fn_commemt = {
     getCommentList : function(){
         $.ajax({
-            url : '/comment/getCommentList',
+        	url : '<c:url value="/comment/getDivCommentList"/>',
             type : 'GET',
             dataType : 'html',
             cache : false,
@@ -2026,7 +2027,7 @@ var fn_commemt = {
     deleteComment : function(_commId){
         if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
         $.ajax({
-            url : '/comment/deleteComment',
+        	url : '<c:url value="/comment/deleteComment"/>',
             type : 'POST',
             dataType : 'json',
             cache : false,
@@ -2062,7 +2063,7 @@ var fn_commemt = {
             var _referenceId = $('input[name=ossId]').val();
             var param = {commId : _commId, contents : _editor.getData(), referenceDiv: '40', referenceId: _referenceId};
             $.ajax({
-                url : '/comment/updateComment',
+            	url : '<c:url value="/comment/updateComment"/>',
                 type : 'POST',
                 dataType : 'json',
                 cache : false,
@@ -2091,7 +2092,7 @@ var fn_commemt = {
         if($('#comm_editor_'+_commId).html().length > 0) {
             CKEDITOR.replace('comm_editor_'+_commId, 
                     {
-                        customConfig:'/js/customEditorConf_Comment.js'
+            	customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
                     });
         }
     }
@@ -2109,7 +2110,7 @@ var fn = {
     	$("input[name=validationType]").val('DOWNLOADLOCATION');
     	$("[name='downloadLocation']").val(value);
 		$("#ossForm").ajaxForm({
-            url :'/oss/urlDuplicateValidation',
+			url :'<c:url value="/oss/urlDuplicateValidation"/>',
             type : 'POST',
             dataType:"json",
             cache : false,
@@ -2136,7 +2137,7 @@ var fn = {
 		
 		$("input[name=validationType]").val('DOWNLOADLOCATIONS');
 		$("#ossForm").ajaxForm({
-            url :'/oss/urlDuplicateValidation',
+			url :'<c:url value="/oss/urlDuplicateValidation"/>',
             type : 'POST',
             dataType:"json",
             cache : false,
@@ -2177,7 +2178,7 @@ var fn = {
 		$("input[name=validationType]").val('HOMEPAGE');
 		
 		$("#ossForm").ajaxForm({
-            url :'/oss/urlDuplicateValidation',
+			url :'<c:url value="/oss/urlDuplicateValidation"/>',
             type : 'POST',
             dataType:"json",
             cache : false,

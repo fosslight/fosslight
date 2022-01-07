@@ -38,7 +38,8 @@
 			loading.show();
 			
 			alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){
-				deleteTabInFrame('#/project/edit/'+'${project.prjId}');
+				var _url = '#<c:url value="/project/edit/${project.prjId}"/>';
+				deleteTabInFrame(_url);
 			});
 		}
 		
@@ -182,7 +183,7 @@
 			</c:forEach>
 			
 			$('#modelFile').uploadFile({
-				url : '/project/modelFile',
+				url : '<c:url value="/project/modelFile"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -216,7 +217,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/4');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
 				}
 			});
 			$("#packagingTab").click(function(){
@@ -226,7 +227,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+					createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 				}
 			});
 			$("#distributionTab").click(function(){
@@ -236,7 +237,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+					createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 				}
 			});
 			$("#editTab").click(function(){
@@ -246,7 +247,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Project', '#/project/edit/'+prjId);
+					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 				}
 			});
 
@@ -415,7 +416,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"model", "parameter":JSON.stringify(data), "extParam" : $('input[name=distributeTarget]:checked').val()}),
 					dataType : 'json',
 					cache : false,
@@ -436,7 +437,7 @@
 					$("#userComment").val(CKEDITOR.instances.editor.getData());
 					
 					$("#distributionForm").ajaxForm({
- 						url : '/project/distribution/distribute/reset',
+						url : '<c:url value="/project/distribution/distribute/reset"/>',
  						type : 'POST',
  						dataType: "json",
  						cache : false,
@@ -448,7 +449,7 @@
 				$("#userComment").val(CKEDITOR.instances.editor.getData());
 				
 				$("#distributionForm").ajaxForm({
-						url : '/project/distribution/distribute/resetWithOSDD',
+					url : '<c:url value="/project/distribution/distribute/resetWithOSDD"/>',
 						type : 'POST',
 						dataType: "json",
 						cache : false,
@@ -467,7 +468,7 @@
 				
 				// model only의 경우 batch job으로 수행하지 않고 실시간 연동한다.
 				$("#distributionForm").ajaxForm({
-					url : '/project/distribution/distribute/immediatelyOnly',
+					url : '<c:url value="/project/distribution/distribute/immediatelyOnly"/>',
 					type : 'POST',
 					dataType: "json",
 					cache : false,
@@ -523,7 +524,7 @@
 				
 				//batch 취소
 				$("#distributionForm").ajaxForm({
-					url : '/project/distribution/distribute/cancel',
+					url : '<c:url value="/project/distribution/distribute/cancel"/>',
 					type : 'POST',
 					dataType: "json",
 					cache : false,
@@ -543,7 +544,7 @@
 				var param = {referenceId : '${project.prjId}', referenceDiv :'14', contents : editorVal, mailSendType : type};
 				
 				$.ajax({
-					url : '/project/sendComment',
+					url : '<c:url value="/project/sendComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -571,7 +572,7 @@
 				var param = {referenceId : '${project.prjId}', referenceDiv :'15', contents : editorVal};
 				
 				$.ajax({
-					url : '/project/saveComment',
+					url : '<c:url value="/project/saveComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -674,7 +675,7 @@
 			
 			if(fn_data.distribution.noticeFileInfo != undefined) {
 				var noticeFile = fn_data.distribution.noticeFileInfo;
-				var _encUrl = "/download/"+noticeFile.fileSeq+"/"+noticeFile.logiNm;
+				var _encUrl = '<c:url value="/download/'+noticeFile.fileSeq+'/'+noticeFile.logiNm+'"/>';
 				
 				$('.licenseFile').append($('<a href="'+_encUrl+'" class="urlLink">'+noticeFile.origNm+'</a>'));
 				$('input[name=licenseFileName]').val(noticeFile.origNm);
@@ -687,7 +688,8 @@
 			
 			if(fn_data.distribution.packageFileInfo) {
 				var packageFile = fn_data.distribution.packageFileInfo;
-								packageInfo += '<a href="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'" class="urlLink left">'+packageFile.origNm+'</a>';
+				var _url = '<c:url value="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'"/>';
+				packageInfo += '<a href="'+_url+'" class="urlLink left">'+packageFile.origNm+'</a>';
 
 							if(isStatusDone){
 								packageInfo += '&nbsp;<input type="button" value="Delete" class="smallDelete" onclick="package_fn.uploadPackagingFile(1)">';
@@ -706,8 +708,9 @@
 							packageInfo += '<span>';
 							
 			if(fn_data.distribution.packageFileInfo2) {
-				var packageFile = fn_data.distribution.packageFileInfo2;				
-								packageInfo += '<a href="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'" class="urlLink left">'+packageFile.origNm+'</a>';
+				var packageFile = fn_data.distribution.packageFileInfo2;
+				var _url = '<c:url value="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'"/>';
+				packageInfo += '<a href="'+_url+'" class="urlLink left">'+packageFile.origNm+'</a>';
 							
 							if(isStatusDone){
 								packageInfo += '&nbsp;<input type="button" value="Delete" class="smallDelete" onclick="package_fn.uploadPackagingFile(2)">';
@@ -729,7 +732,8 @@
 			
 			if(fn_data.distribution.packageFileInfo3) {
 				var packageFile = fn_data.distribution.packageFileInfo3;
-								packageInfo += '<a href="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'" class="urlLink left">'+packageFile.origNm+'</a>';
+				var _url = '<c:url value="/download/'+packageFile.fileSeq+'/'+packageFile.logiNm+'"/>';
+				packageInfo += '<a href="'+_url+'" class="urlLink left">'+packageFile.origNm+'</a>';
 							
 							if(isStatusDone){
 								packageInfo += '&nbsp;<input type="button" value="Delete" class="smallDelete" onclick="package_fn.uploadPackagingFile(3)">';
@@ -756,7 +760,7 @@
 		},
 		getModelGridData : function(param){
 			$.ajax({
-				url:"/project/modellistAjax",
+				url:'<c:url value="/project/modellistAjax"/>',
 				dataType : 'json',
 				cache : false,
 				data : (param) ? param : {prjId : $('input[name=prjId]').val()},
@@ -992,7 +996,7 @@
 			type: 'GET',
 			data: {code:cd},
 			async:false,
-			url: "/project/getCategoryCode",
+			url: '<c:url value="/project/getCategoryCode"/>',
 			success : function(json){
 				if(json != null){
 					$("#category").append(json);
@@ -1021,7 +1025,7 @@
 			data: {code:cd},
 			async:false,
 			dataType:'json',
-			url: "/project/getCategoryCodeToJson",
+			url: '<c:url value="/project/getCategoryCodeToJson"/>',
 			success : function(json){
 				if(json != null){
 					var str = '';
@@ -1054,7 +1058,7 @@
 		$('input[name=prjDeleteModelJson]').val(JSON.stringify(delRows));
 		
 		$("#distributionForm").ajaxForm({
-			url : '/project/distribution/saveAjax',
+			url : '<c:url value="/project/distribution/saveAjax"/>',
 			type : 'POST',
 			dataType: "json",
 			cache : false,
@@ -1119,7 +1123,7 @@
 		}
 		
 		$("#distributionForm").ajaxForm({
-			url : '/project/distribution/availableCheck',
+			url : '<c:url value="/project/distribution/availableCheck"/>',
 			type : 'POST',
 			dataType: "json",
 			cache : false,
@@ -1434,8 +1438,8 @@
 			alertify.alert(json.resMsg, function() {
 				this.close();
 
-				reloadTabInframe('/project/list');
-				reloadTabInframe('/project/distribution/'+'${project.prjId}');
+				reloadTabInframe('<c:url value="/project/list"/>');
+				reloadTabInframe('<c:url value="/project/distribution/${project.prjId}"/>');
 
 				return false;
 			});
@@ -1460,9 +1464,9 @@
 		var prjId = $('input[name=prjId]').val();
 			alertify.alert('<spring:message code="msg.common.success" />', function(){
 				if(prjId) {
-					deleteTabInFrame('#/project/edit/'+prjId);			
+					deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');			
 				} else {
-					deleteTabInFrame('#/project/edit');			
+					deleteTabInFrame('#<c:url value="/project/edit"/>');			
 				}
 				
 				reloadTabInframe();
@@ -1498,7 +1502,7 @@
 	function distribute() {
 		//즉시 Batch 실행
 		$("#distributionForm").ajaxForm({
-			url : '/project/distribution/distribute/immediately',
+			url : '<c:url value="/project/distribution/distribute/immediately"/>',
 			type : 'POST',
 			dataType: "json",
 			cache : false,
@@ -1600,7 +1604,7 @@
 			}
 			
 			$.ajax({
-				url : '/project/distribution/verify',
+				url : '<c:url value="/project/distribution/verify"/>',
 				type : 'POST',					
 				dataType : 'json',
 				contentType : 'application/json',
@@ -1676,7 +1680,7 @@
 			var packagingFileName = $("[name='openSourceFileName"+ (seq == 1 ? "" : seq) + "']").val();
 			
 			$('#uploadFile'+seq).uploadFile({
-				url : '/project/distribution/registFile?prjId=${project.prjId}&fileIdx='+seq+'&packagingFileName='+packagingFileName,
+				url : '<c:url value="/project/distribution/registFile?prjId=${project.prjId}&fileIdx='+seq+'&packagingFileName='+packagingFileName+'"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -1684,9 +1688,10 @@
 					var result = jQuery.parseJSON(data);
 					
 					result.forEach(function(item){
+						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
 						var appendHtml  = '<li>';
 								appendHtml += '<span>';
-									appendHtml += '<a href="/download/'+item[0].registSeq+'/'+item[0].fileName+'" class="urlLink left">'+item[0].originalFilename+'</a>';
+								appendHtml += '<a href="'+_url+'" class="urlLink left">'+item[0].originalFilename+'</a>';
 									appendHtml += '&nbsp;<input type="button" value="Delete" class="smallDelete" onclick="package_fn.uploadPackagingFile('+seq+')">&nbsp;Updated';
 								appendHtml += '</span>';
 							appendHtml += '</li>';

@@ -1528,7 +1528,7 @@
 			var param = {referenceId : '${project.prjId}', referenceDiv :'12', contents : editorVal, mailSendType : type};
 			
 			$.ajax({
-				url : '/project/sendComment',
+				url : '<c:url value="/project/sendComment"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,
@@ -1556,7 +1556,7 @@
 			var register = '${sessUserInfo.userId}';
 			var param = {referenceId : '${project.prjId}', referenceDiv :'13', contents : editorVal};
 			$.ajax({
-				url : '/project/saveComment',
+				url : '<c:url value="/project/saveComment"/>',
 				type : 'POST',
 				dataType : 'json',
 				cache : false,

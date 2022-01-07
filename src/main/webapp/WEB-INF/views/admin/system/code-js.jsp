@@ -211,7 +211,7 @@
 			
 				$.ajax({
 					type: 'GET',
-					url: "code/listAjax",
+					url:'<c:url value="/system/code/listAjax"/>',
 					data: data
 				}).success(function (data, status, headers, config) {
 					codeList.load(data.codeList);
@@ -227,7 +227,7 @@
 			
 			$.ajax({
 					type: 'POST',
-					url: "code/detail/listAjax",
+					url:'<c:url value="/system/code/detail/listAjax"/>',
 					data: data
 				}).success(function (data, status, headers, config) {
 					codeDetailList.nowCodeNo = rowid;	// 코드상세 신규추가 시 필요한 상위 코드번호 설정
@@ -240,7 +240,7 @@
 		setCode: function(data){
 			$.ajax({
 				type: 'POST',
-				url: "code/saveAjax",
+				url:'<c:url value="/system/code/saveAjax"/>',
 				data: data,
 				headers: {
 					'Content-Type': 'application/json'
@@ -258,7 +258,7 @@
 			
 			$.ajax({
 				type: 'POST',
-				url: "code/detail/saveAjax",
+				url:'<c:url value="/system/code/detail/saveAjax"/>',
 				data: dataToSend,
 				dataType: "json",
 				contentType: "application/json; charset=utf-8"
@@ -278,7 +278,7 @@
 	};
 	
 	var updateDialogAdd = {
-            url:"code/saveAjax"
+            	url:'<c:url value="/system/code/saveAjax"/>'
                 , closeAfterAdd: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -311,7 +311,7 @@
 	};
 	
 	var updateDialogEdit = {
-            url:"code/saveAjax"
+            url:'<c:url value="/system/code/saveAjax"/>'
                 , closeAfterEdit: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -344,7 +344,7 @@
 	};
 	
 	var updateDialogDel = {
-            url:"code/saveAjax"
+            url:'<c:url value="/system/code/saveAjax"/>'
                 , closeAfterDel: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -384,7 +384,7 @@
 				codeList.lastEditRowId = "";
 				
 				$("#list").jqGrid({
-					url: '/system/code/listAjax'
+					url: '<c:url value="/system/code/listAjax"/>'
 					, datatype: 'json'
 					, jsonReader: {
 						repeatitems: false,

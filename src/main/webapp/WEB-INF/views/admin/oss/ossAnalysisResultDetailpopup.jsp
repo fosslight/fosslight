@@ -193,7 +193,7 @@
 				var param = {"groupId" : common_data.groupId};
 				
 				$.ajax({
-					url : '/oss/getSessionAnalysisResultData',
+					url : '<c:url value="/oss/getSessionAnalysisResultData"/>',
 					dataType : 'json',
 					type:'POST',
 					cache : false,
@@ -312,7 +312,7 @@
 				});
 
 				$(ossForm).ajaxForm({
-		            url :'/oss/validation',
+					url :'<c:url value="/oss/validation"/>',
 		            type : 'POST',
 		            dataType:"json",
 		            cache : false,
@@ -444,7 +444,7 @@
 				$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
 				
 				$("#ossForm"+seq).ajaxForm({
-		            url :'/oss/urlDuplicateValidation',
+					url :'<c:url value="/oss/urlDuplicateValidation"/>',
 		            type : 'POST',
 		            dataType:"json",
 		            cache : false,
@@ -486,7 +486,7 @@
 				$("input[name=validationType]").val('HOMEPAGE');
 				
 				$("#ossForm"+seq).ajaxForm({
-		            url :'/oss/urlDuplicateValidation',
+					url :'<c:url value="/oss/urlDuplicateValidation"/>',
 		            type : 'POST',
 		            dataType:"json",
 		            cache : false,
@@ -524,7 +524,7 @@
         			var postData = {'ossId' : $('#ossForm'+seq+' input[name=ossId]').val(), 'ossName' : $('#ossForm'+seq+' input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
         			
         			$.ajax({
-        				url : '/oss/checkVdiff',
+        				url : '<c:url value="/oss/checkVdiff"/>',
         				type : 'POST',
         				data : JSON.stringify(postData),
         				dataType : 'json',
@@ -548,7 +548,7 @@
         		$('#_licenseChoice'+seq).jqGrid('resetSelection');
         		
         		$("#ossForm"+seq).ajaxForm({
-                    url :'/oss/saveAjax',
+                    url : '<c:url value="/oss/saveAjax"/>',
                     type : 'POST',
                     dataType:"json",
                     cache : false,
@@ -613,7 +613,7 @@
 				var postData = {'componentId' : common_data.groupId, 'referenceOssId' : ossId};
 				
         		$.ajax({
-    				url : '/oss/updateAnalysisComplete',
+        			url : '<c:url value="/oss/updateAnalysisComplete"/>',
     				type : 'POST',
     				data : JSON.stringify(postData),
     				dataType : 'json',
@@ -1489,7 +1489,7 @@
 
 				if(licenseName && licenseName != "") {
 					$.ajax({
-						url : '/license/getLicenseText',
+						url : '<c:url value="/license/getLicenseText"/>',
 						type : 'GET',
 						dataType : 'json',
 						cache : false,
@@ -1593,7 +1593,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="/images/loading.gif" alt="loading" />
+			<img src="${ctxPath}/images/loading.gif" alt="loading" />
 		</div>
 		<div id="wrap" style="padding: 15px 0px;">
 			<div class="groupSet">

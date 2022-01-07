@@ -60,7 +60,7 @@
 		getUserIdList : function(){
 			return $.ajax({
 				type: 'GET',
-				url: "/project/getUserIdList",
+				url: '<c:url value="/project/getUserIdList"/>',
 				data: {},
 				success : function(data){
 					if(data != null){
@@ -122,7 +122,7 @@
 			
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type" : "selfCheckList", "parameter" : data}),
 					dataType : 'json',
 					cache : false,
@@ -145,7 +145,7 @@
 			
 			$.ajax({
 				type: "POST",
-				url: '/exceldownload/getExcelPost',
+				url: '<c:url value="/exceldownload/getExcelPost"/>',
 				data: JSON.stringify({"type":"selfReport", "parameter":prjId}),
 				dataType : 'json',
 				cache : false,
@@ -178,7 +178,7 @@
 	var list = {
 		load : function(){
 			$("#list").jqGrid({
-				url:"/selfCheck/listAjax",
+				url:'<c:url value="/selfCheck/listAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -246,7 +246,7 @@
 					var rowData = $("#list").jqGrid('getRowData',rowid);
 					var isAdmin = ${ct:isAdmin()};
 					
-					createTabInFrame(rowData['prjId']+'_selfCheck','#/selfCheck/edit/'+rowData['prjId']);
+					createTabInFrame(rowData['prjId']+'_selfCheck', '#<c:url value="/selfCheck/edit/'+rowData['prjId']+'"/>');
 				},
 				postData : {ossId : '${ossId}'}
 			});

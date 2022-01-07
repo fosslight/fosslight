@@ -153,7 +153,7 @@
 									</span>
 								</c:if>
 								<c:if test="${not empty confirmationFile}">
-									<a href="/download/${confirmationFile.fileSeq }/${confirmationFile.logiNm}">${confirmationFile.origNm }</a><span style="margin-left:20px;">${confirmationFile.createdDate}</span>
+									<a href="<c:url value="/download/${confirmationFile.fileSeq }/${confirmationFile.logiNm}"/>">${confirmationFile.origNm }</a><span style="margin-left:20px;">${confirmationFile.createdDate}</span>
 									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteConfirmationFile(this)" style="vertical-align:super;" <c:if test="${isCommited}">style="display:none;"</c:if>/></span>
 									</c:if>
@@ -174,7 +174,7 @@
 									</span>
 								</c:if>
 								<c:if test="${not empty ossFile}">
-									<a href="/download/${ossFile.fileSeq }/${ossFile.logiNm}">${ossFile.origNm }</a><span style="margin-left:20px;">${ossFile.createdDate}</span>
+									<a href="<c:url value="/download/${ossFile.fileSeq }/${ossFile.logiNm}"/>">${ossFile.origNm }</a><span style="margin-left:20px;">${ossFile.createdDate}</span>
 									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<span><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteOssFile(this)" style="vertical-align:super;"/></span>
 									</c:if>
@@ -196,7 +196,7 @@
 							<c:forEach var="documentsFile" items="${detail.documentsFile }" varStatus="vs">
 								<c:if test="${documentsFile.delYn == 'N'}">
 									<li>
-										<a href="/download/${documentsFile.fileSeq}/${documentsFile.logiNm}">${documentsFile.origNm }</a>
+										<a href="<c:url value="/download/${documentsFile.fileSeq}/${documentsFile.logiNm}"/>">${documentsFile.origNm }</a>
 										<span style="margin-left:20px;">${documentsFile.createdDate}</span>
 										<span>
 											<input type="button" value="Delete" class="smallDelete" onclick="fn.deleteDocumentsFile(this)" style="vertical-align:super;margin-left: 5px;<c:if test="${isCommited}">display:none;</c:if>"/>

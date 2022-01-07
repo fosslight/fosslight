@@ -79,7 +79,7 @@ var party_evt = {
 	},
 	getPartGridData : function(param){
 		$.ajax({
-			url : '/project/identificationThird',
+			url : '<c:url value="/project/identificationThird"/>',
 			dataType : 'json',
 			cache : false,
 			data : (param) ? param : {referenceId : '${project.prjId}'},
@@ -170,7 +170,7 @@ var party_evt = {
 		}
 		
 		$.ajax({
-			url : '/project/3rdOss',
+			url : '<c:url value="/project/3rdOss"/>',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,
@@ -221,7 +221,7 @@ var party_evt = {
 		var reference = data[0].referenceId;
 		
 		$.ajax({
-			url : '/project/partnerOssFromProject',
+			url : '<c:url value="/project/partnerOssFromProject"/>',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,
@@ -291,7 +291,7 @@ var party_evt = {
 					}
 					
 					$.ajax({
-						url : '/project/save3rd',
+						url : '<c:url value="/project/save3rd"/>',
 						type : 'POST',
 						dataType : 'json',
 						cache : false,
@@ -323,7 +323,7 @@ var party_evt = {
 	},
 	setParamParty1 : function(){
 		return {
-			url: '/project/getPartnerList',
+			url: '<c:url value="/project/getPartnerList"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -379,7 +379,7 @@ var party_evt = {
 	},
 	setParamParty2 : function(){
 		return {
-			url: '/project/3rdOss',
+			url: '<c:url value="/project/3rdOss"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -419,7 +419,7 @@ var party_evt = {
 	},
 	setParamProject1 : function(){
 		return {
-			url: '/project/identificationProject/10',
+			url: '<c:url value="/project/identificationProject/10"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -508,7 +508,7 @@ var party_evt = {
 	},
 	setParamParty3 : function(){
 		return {
-			url: '/project/get3rdMap',
+			url: '<c:url value="/project/get3rdMap"/>',
 			datatype: 'json',
 			postData : {prjId : '${project.prjId}'},
 			jsonReader:{
@@ -571,7 +571,7 @@ var party_evt = {
 					var _userRole = $('#_3rdAddList').jqGrid('getCell',rowid,'userRole');
 					
 					if(_partnerId && _userRole != "N") {
-						createTabInFrame(_partnerId+'_3rdParty', '#/partner/edit/'+_partnerId);
+						createTabInFrame(_partnerId+'_3rdParty', '#<c:url value="/partner/edit/'+_partnerId+'"/>');
 					}
 				}
 			}
@@ -584,7 +584,7 @@ var party_evt = {
 		postData.referenceId = id;
 
 	    $.ajax({
-            url : '/project/identificationProjectSearch/10',
+	    	url : '<c:url value="/project/identificationProjectSearch/10"/>',
             type : 'GET',
             dataType : 'json',
             data : postData,
@@ -604,7 +604,7 @@ var party_evt = {
     	var data = jQuery("#_list-2").jqGrid("getRowData");
 		var reference = data[0].referenceId;
 		$.ajax({
-			url : '/project/projectToAddList',
+			url : '<c:url value="/project/projectToAddList"/>',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,

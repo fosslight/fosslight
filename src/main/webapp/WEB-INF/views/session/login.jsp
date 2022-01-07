@@ -8,20 +8,20 @@
 		<title>FOSSLight Hub</title>
 		<%@ include file="/WEB-INF/constants.jsp"%>
 <%-- Add script --%>
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css">
-<link rel="stylesheet" type="text/css" href="/css/common.css?${cssVersion}" />
-<script type="text/javascript" src="/js/jquery-1.11.0.min.js"></script>
-<script type="text/javascript" src="/js/jquery-migrate-1.2.1.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${ctxPath}/css/jquery-ui.css">
+<link rel="stylesheet" type="text/css" href="${ctxPath}/css/common.css?${cssVersion}" />
+<script type="text/javascript" src="${ctxPath}/js/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="${ctxPath}/js/jquery-migrate-1.2.1.min.js"></script>
+<script type="text/javascript" src="${ctxPath}/js/jquery-ui.min.js"></script>
 
-<script type="text/javascript" src="/js/jquery.form.min.js"></script>
-<script type="text/javascript" src="/js/basic.js?${jsVersion}"></script>
+<script type="text/javascript" src="${ctxPath}/js/jquery.form.min.js"></script>
+<script type="text/javascript" src="${ctxPath}/js/basic.js?${jsVersion}"></script>
 
 <!-- alertify -->
-<script type="text/javascript" src="/js/alertifyjs/alertify.min.js"></script>
+<script type="text/javascript" src="${ctxPath}/js/alertifyjs/alertify.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="/js/alertifyjs/css/alertify.min.css" />
-<link rel="stylesheet" type="text/css" href="/js/alertifyjs/css/themes/default.min.css" />
+<link rel="stylesheet" type="text/css" href="${ctxPath}/js/alertifyjs/css/alertify.min.css" />
+<link rel="stylesheet" type="text/css" href="${ctxPath}/js/alertifyjs/css/themes/default.min.css" />
 		<script>
 			if (top.location!= self.location) {
 			   top.location = self.location.href;
@@ -135,7 +135,7 @@
 			
 			function registSubmit(){
 			    $("#registForm").ajaxForm({
-                    url :'/system/user/saveAjax',
+			    	url :'<c:url value="/system/user/saveAjax"/>',
                     type : 'POST',
                     dataType:"json",
                     cache : false,
@@ -150,7 +150,7 @@
 				var formData = $("#loginForm").serialize();
 				
 				$.ajax({
-					url : "/session/login-proc",
+					url : '<c:url value="/session/login-proc"/>',
 					type : "POST",
 					data : formData,
 					cache : false,
@@ -170,7 +170,7 @@
                     
                     showErrMsg();
                 } else {
-					location.href = "/index?lang=" + json.response.locale;
+                	location.href = '<c:url value="/index?lang=' + json.response.locale + '"/>';
 
                     return; 
                 }
@@ -282,7 +282,7 @@
 					<fieldset>
 						<div>
 							<h1><img src="../images/img_login_logo1.png" alt="FOSSLIGHT" /></h1>
-							<form name="loginForm" id="loginForm" action="/session/login-proc">
+							<form name="loginForm" id="loginForm" action="<c:url value="/session/login-proc"/>">
 								<dl>
 									<dt><label for="accountInput">ID</label></dt>
 									<dd class="required">

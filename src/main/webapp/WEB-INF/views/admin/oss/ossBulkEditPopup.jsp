@@ -284,7 +284,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="<c:url value="/images/loading.gif"/>" alt="loading" />
+			<img src="<c:url value="${ctxPath}/images/loading.gif"/>" alt="loading" />
 		</div>
 		<div id="wrap" style="padding-top: 10px;">
 			<span style="text-align:center;"><h1 style="font-size:16px;">Bulk Edit OSS Attributes</h1></span>

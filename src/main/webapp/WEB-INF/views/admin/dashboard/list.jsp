@@ -42,7 +42,7 @@
 			<div class="grdrow mt10">
 				<c:if test="${projectFlag || partnerFlag}">
 					<div class="grdcol">
-						<h4><span style="font-size: 14px;">Opened Jobs</span>&nbsp;&nbsp;<img alt="reload" src="/images/reload_arrow.png" onclick="reLode('jobsList');" height="22px" width="22px"  style="cursor:pointer; position: relative; top: 5px;" /><c:if test="${ct:isAdmin()}"><a style="float:right; position: relative; top: 5px;"><input type="checkbox" id="reviewerOnly" />&nbsp;Reviewing Projects Only</a></c:if></h4>
+						<h4><span style="font-size: 14px;">Opened Jobs</span>&nbsp;&nbsp;<img alt="reload" src="${ctxPath}/images/reload_arrow.png" onclick="reLode('jobsList');" height="22px" width="22px"  style="cursor:pointer; position: relative; top: 5px;" /><c:if test="${ct:isAdmin()}"><a style="float:right; position: relative; top: 5px;"><input type="checkbox" id="reviewerOnly" />&nbsp;Reviewing Projects Only</a></c:if></h4>
 						<div class="jqGridSet2 mt5">
 				            <table id="jobsList"><tr><td></td></tr></table>
 				            <div id="jobsPager"></div>
@@ -50,7 +50,7 @@
 					</div>
 					<div class="grdcol">
 						<!-- 2018-08-17 choye 변경 -->
-						<h4><span style="font-size: 14px;">Recent Comments</span>&nbsp;&nbsp;<img alt="reload" src="/images/reload_arrow.png" onclick="reLode('commentsList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /><span style="float:right;position: relative; top: 5px;"><a><input type="checkbox" id="readYnFilter" />&nbsp;Show Unread Comments Only</a> <input class="btnColor purple btnConfirmedHistory" style="width: 130px; height: 18px;" type="button" value="Mark All as Read"></span></h4>
+						<h4><span style="font-size: 14px;">Recent Comments</span>&nbsp;&nbsp;<img alt="reload" src="${ctxPath}/images/reload_arrow.png" onclick="reLode('commentsList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /><span style="float:right;position: relative; top: 5px;"><a><input type="checkbox" id="readYnFilter" />&nbsp;Show Unread Comments Only</a> <input class="btnColor purple btnConfirmedHistory" style="width: 130px; height: 18px;" type="button" value="Mark All as Read"></span></h4>
 						<div class="jqGridSet2 mt5">
 				            <table id="commentsList"><tr><td></td></tr></table>
 				            <div id="commentsPager"></div>
@@ -60,14 +60,14 @@
 			</div>
 			<div class="grdrow mt10">
 				<div class="grdcol">
-					<h4><span style="font-size: 14px;">Updated OSS</span>&nbsp;&nbsp;<img alt="reload" src="/images/reload_arrow.png" onclick="reLode('ossList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /></h4>
+					<h4><span style="font-size: 14px;">Updated OSS</span>&nbsp;&nbsp;<img alt="reload" src="${ctxPath}/images/reload_arrow.png" onclick="reLode('ossList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /></h4>
 					<div class="jqGridSet2 mt5">
 			            <table id="ossList"><tr><td></td></tr></table>
 			            <div id="ossPager"></div>
 					</div>
 				</div>
 				<div class="grdcol">
-					<h4><span style="font-size: 14px;">Updated License</span>&nbsp;&nbsp;<img alt="reload" src="/images/reload_arrow.png" onclick="reLode('licenseList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /></h4>
+					<h4><span style="font-size: 14px;">Updated License</span>&nbsp;&nbsp;<img alt="reload" src="${ctxPath}/images/reload_arrow.png" onclick="reLode('licenseList');" height="22px" width="22px"  style="cursor:pointer;position: relative;top: 5px;" /></h4>
 					<div class="jqGridSet2 mt5">
 			            <table id="licenseList"><tr><td></td></tr></table>
 			            <div id="licensePager"></div>

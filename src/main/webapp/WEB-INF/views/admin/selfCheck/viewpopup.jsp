@@ -85,7 +85,7 @@
 				alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.license" />', function(){ window.open("about:blank", "_self").close(); });
 			} else {
 				$.ajax({
-					url : '/selfCheck/getLicenseData',
+					url:'<c:url value="/selfCheck/getLicenseData"/>',
 					dataType : 'json',
 					cache : false,
 					data : {licenseName : '${licenseInfo.licenseName}'},

@@ -272,7 +272,7 @@
 			</c:forEach> 
 			
 			$('#modelFile').uploadFile({
-				url : '/project/modelFile',
+				url : '<c:url value="/project/modelFile"/>',
 				multiple:false,
 				dragDrop:true,
 				fileName:'myfile',
@@ -319,7 +319,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/system/user/checkEmail', 
+					url: '<c:url value="/system/user/checkEmail"/>', 
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -350,7 +350,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Identify', '#/project/identification/'+prjId+'/4');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
 				}
 			});
 			
@@ -361,7 +361,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Packaging', '#/project/verification/'+prjId);
+					createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
 				}
 			});
 			
@@ -372,7 +372,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+					createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 				}
 			});
 			
@@ -383,7 +383,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Project', '#/project/edit/'+prjId);
+					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 				}
 			});
 			
@@ -399,7 +399,7 @@
 					var param = {prjId : '${project.prjId}', publicYn : ($("[name='publicYn']:checked").val())};
 					
 					$.ajax({
-						url : '/project/updatePublicYn',
+						url : '<c:url value="/project/updatePublicYn"/>',
 						type : 'POST',
 						data : JSON.stringify(param),
 						dataType : 'json',
@@ -425,7 +425,7 @@
 					var param = {};
 					
 					$.ajax({
-						url : '/comment/getCommentInfo/'+commId,
+						url : '<c:url value="/comment/getCommentInfo/'+commId+'"/>',
 						type : 'GET',
 						dataType : 'json',
 						cache : false,
@@ -490,7 +490,7 @@
 			
 			activeDeleteTabInFrame();
 			
-			createTabInFrame(prjId+'copy_Project', '#/project/copy/'+prjId);
+			createTabInFrame(prjId+'copy_Project', '#<c:url value="/project/copy/'+prjId+'"/>');
 		},	
 		// 왓쳐 엘리먼트 그리기
 		addHtml : function(target, str, division, userId){
@@ -513,7 +513,7 @@
 			var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
 			
 			$.ajax({
-				url : '/project/addWatcher',
+				url : '<c:url value="/project/addWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -542,7 +542,7 @@
 			var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
 
 			$.ajax({
-				url : '/project/removeWatcher',
+				url : '<c:url value="/project/removeWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(data),
 				dataType : 'json',
@@ -562,7 +562,7 @@
 			obj["prjId"] = prjId;
 			
 			$.ajax({
-				url : '/project/copyWatcher',
+				url : '<c:url value="/project/copyWatcher"/>',
 				type : 'POST',
 				data : JSON.stringify(obj),
 				dataType : 'json',
@@ -676,7 +676,7 @@
 				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":CKEDITOR.instances.editor2.getData()};
 				
 				$.ajax({
-					url : '/project/updateProjectStatus',
+					url : '<c:url value="/project/updateProjectStatus"/>',
 					type : 'POST',
 					data : JSON.stringify(data),
 					dataType : 'json',
@@ -691,7 +691,7 @@
 				var data = {"prjId" : $('input[name=prjId]').val() , "dropYn" : "Y", "userComment":CKEDITOR.instances.editor2.getData()};
 				
 				$.ajax({
-					url : '/project/updateProjectStatus',
+					url : '<c:url value="/project/updateProjectStatus"/>',
 					type : 'POST',
 					data : JSON.stringify(data),
 					dataType : 'json',
@@ -707,7 +707,7 @@
 				params["userComment"] = "";
 
 				$.ajax({
-					url : "/project/distribution/distribute/cancel",
+					url : '<c:url value="/project/distribution/distribute/cancel"/>',
 					type : "POST",
 					dataType: "json",
 					cache : false,
@@ -734,7 +734,7 @@
 				params["userComment"] = "";
 				
 				$.ajax({
-					url : "/project/distribution/distribute/resetWithOSDD",
+					url : '<c:url value="/project/distribution/distribute/resetWithOSDD"/>',
 					type : "POST",
 					dataType: "json",
 					cache : false,
@@ -788,9 +788,9 @@
 				var URL = '';
 				
 				if(data.copy){
-					URL = '/project/saveAjax?copy=true';
+					URL = '<c:url value="/project/saveAjax?copy=true"/>';
 				} else {
-					URL = '/project/saveAjax?copy=false';
+					URL = '<c:url value="/project/saveAjax?copy=false"/>';
 				}
 				
 				//public 값 넣어주기
@@ -815,7 +815,7 @@
 				$('input[name=userComment]').val(editorVal);
 				
 				$("#projectForm").ajaxForm({
-					url :'/project/delAjax',
+					url :'<c:url value="/project/delAjax"/>',
 					type : 'POST',
 					dataType:"json",
 					cache : false,
@@ -829,7 +829,7 @@
 				$('input[name=prjModelJson]').val(JSON.stringify(rows));
 				
 				$("#projectForm").ajaxForm({
-					url : '/project/saveModelAjax',
+					url : '<c:url value="/project/saveModelAjax"/>',
 					type : 'POST',
 					dataType: "json",
 					cache : false,
@@ -854,18 +854,18 @@
 					
 					if(data.copy) {
 						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							reloadTabInframe('/project/list');
+							reloadTabInframe('<c:url value="/project/list"/>');
 							
-							deleteTabInFrame('#/project/copy/'+data.copy.prjId);
+							deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
 							
 							activeTabInFrameList("PROJECT");
 						});
 					} else {
 						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							reloadTabInframe('/project/list');
+							reloadTabInframe('<c:url value="/project/list"/>');
 							
 							if(prjId == '') {
-								deleteTabInFrame('#/project/edit');
+								deleteTabInFrame('#<c:url value="/project/edit"/>');
 								activeTabInFrameList("PROJECT");
 							} else {
 								var status = data.detail.destributionStatus;
@@ -877,15 +877,15 @@
 								
 								if(status == "DONE" && flag == "true") {
 									alertify.confirm('<spring:message code="msg.project.required.only" />', function () {
-											deleteTabInFrame('#/project/edit/'+prjId);
-											createTabInFrame(prjId+'_Distribute', '#/project/distribution/'+prjId);
+											deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
+											createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
 										}, function() {
-											deleteTabInFrame('#/project/edit/'+prjId);
+											deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
 											activeTabInFrameList("PROJECT");
 										}
 									);
 								} else {
-									deleteTabInFrame('#/project/edit/'+prjId);
+									deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
 									activeTabInFrameList("PROJECT");
 								}
 							}
@@ -899,18 +899,18 @@
 				var prjId = $('input[name=prjId]').val();
 				
 				if(json.resCd=='10') {
-					reloadTabInframe('/project/list');
+					reloadTabInframe('<c:url value="/project/list"/>');
 					
 					if(data.copy) {
 						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							deleteTabInFrame('#/project/copy/'+data.copy.prjId);
+							deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
 						});
 					} else {
 						alertify.alert('<spring:message code="msg.common.success" />', function(){
 							if(prjId){
-								deleteTabInFrame('#/project/edit/'+prjId);
+								deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
 							} else {
-								deleteTabInFrame('#/project/edit');
+								deleteTabInFrame('#<c:url value="/project/edit"/>');
 							}
 						});
 					}
@@ -931,7 +931,7 @@
 				}
 				$('#prjUserId').attr('disabled', false);
 				$.ajax({
-					url : '/partner/getUserList',
+					url : '<c:url value="/partner/getUserList"/>',
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -963,7 +963,7 @@
 				
 				$.ajax({
 					type: "POST",
-					url: '/exceldownload/getExcelPost',
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
 					data: JSON.stringify({"type":"model", "parameter":JSON.stringify(data), "extParam" : $('input[name=distributeTarget]:checked').val()}),
 					dataType : 'json',
 					cache : false,
@@ -1008,7 +1008,7 @@
 				var param = {referenceId : '${project.prjId}', referenceDiv :'19', contents : editorVal, mailSendType : type};
 				
 				$.ajax({
-					url : '/project/sendComment',
+					url : '<c:url value="/project/sendComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -1036,7 +1036,7 @@
 				var param = {referenceId : '${project.prjId}', referenceDiv :'09', contents : editorVal};
 				
 				$.ajax({
-					url : '/project/saveComment',
+					url : '<c:url value="/project/saveComment"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -1327,7 +1327,7 @@
 				/* 2018-07-19 choye 추가  */
 				if(data.commentsMode=="insert" || data.commentsMode=="update"){
 					$.ajax({
-						url : '/project/commentsSave',
+						url : '<c:url value="/project/commentsSave"/>',
 						type : 'POST',
 						dataType : 'json',
 						cache : false,
@@ -1337,8 +1337,8 @@
 								alertify.error('<spring:message code="msg.common.valid2" />', 0);
 							} else {
 								alertify.alert('<spring:message code="msg.common.success" />', function(){
-									reloadTabInframe('/project/list');
-									deleteTabInFrame('#/project/edit/'+'${project.prjId}');
+									reloadTabInframe('<c:url value="/project/list"/>');
+									deleteTabInFrame('#<c:url value="/project/edit/${project.prjId}"/>');
 									activeTabInFrameList("PROJECT");
 								});
 							}
@@ -1351,15 +1351,15 @@
 					//identification, packing reject
 					if(data.identificationStatus != null || data.verificationStatus != null) {
 						$.ajax({
-							url : '/project/updateProjectStatus',
+							url : '<c:url value="/project/updateProjectStatus"/>',
 							type : 'POST',
 							data : JSON.stringify(data),
 							dataType : 'json',
 							cache : false,
 							contentType : 'application/json',
 							success: function(data){
-								reloadTabInframe('/project/list');
-								deleteTabInFrame('#/project/edit/'+'${project.prjId}');
+								reloadTabInframe('<c:url value="/project/list"/>');
+								deleteTabInFrame('#<c:url value="/project/edit/${project.prjId}"/>');
 								activeTabInFrameList("PROJECT");
 							},
 							error : function(){
@@ -1368,7 +1368,7 @@
 						});
 					} else {
 						$.ajax({
-							url : '/project/commentsSave',
+							url : '<c:url value="/project/commentsSave"/>',
 							type : 'POST',
 							dataType : 'json',
 							cache : false,
@@ -1378,8 +1378,8 @@
 									alertify.error('<spring:message code="msg.common.valid2" />', 0);
 								} else {
 									alertify.alert('<spring:message code="msg.common.success" />', function(){
-										reloadTabInframe('/project/list');
-										deleteTabInFrame('#/project/edit/'+'${project.prjId}');
+										reloadTabInframe('<c:url value="/project/list"/>');
+										deleteTabInFrame('#<c:url value="/project/edit/${project.prjId}"/>');
 										activeTabInFrameList("PROJECT");
 									});
 								}
@@ -1396,7 +1396,7 @@
 				var data = {"referenceId" : '${project.prjId}', "contents" : CKEDITOR.instances['editor4'].getData()};
 
 				$.ajax({
-					url : '/project/commentsIgnore',
+					url : '<c:url value="/project/commentsIgnore"/>',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,
@@ -1406,8 +1406,8 @@
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						} else {
 							alertify.alert('<spring:message code="msg.common.success" />', function(){
-								reloadTabInframe('/project/list');
-								deleteTabInFrame('#/project/edit/'+'${project.prjId}');
+								reloadTabInframe('<c:url value="/project/list"/>');
+								deleteTabInFrame('#<c:url value="/project/edit/${project.prjId}"/>');
 								activeTabInFrameList("PROJECT");
 							});
 						}
@@ -1624,7 +1624,7 @@
 		},
 		getModelGridData : function(param){
 			$.ajax({
-				url:"/project/modellistAjax",
+				url:'<c:url value="/project/modellistAjax"/>',
 				dataType : 'json',
 				cache : false,
 				data : (param) ? param : {prjId : $('input[name=prjId]').val()},
@@ -1811,7 +1811,7 @@
 			data: {code:cd},
 			async:false,
 			dataType:'json',
-			url: "/project/getCategoryCodeToJson",
+			url: '<c:url value="/project/getCategoryCodeToJson"/>',
 			success : function(json){
 				if(json != null){
 					var str = '';

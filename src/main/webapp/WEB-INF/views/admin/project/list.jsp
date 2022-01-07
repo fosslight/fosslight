@@ -123,7 +123,7 @@
 				</dl>
 				<input name="act" type="hidden" value="search"/>
 				<input id="search" type="submit" value="Search" class="btnColor search" />
-				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 			</form>
 		</fieldset>
 		<!---->
@@ -167,7 +167,7 @@
 			
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#/project/edit')" />
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
 			</span>
 		</div>
 		<!---->
@@ -186,7 +186,7 @@
 			<input type="button" value="Reject" class="btnReject btnColor left" />
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#/project/edit')" />
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
 			</span>
 		</div>
 		<!---->

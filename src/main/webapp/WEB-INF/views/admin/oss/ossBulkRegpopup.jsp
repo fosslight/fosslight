@@ -55,7 +55,7 @@
 			};
 			
 			$.ajax({
-				url : '/oss/getOssBulkRegAjax',
+				url : '<c:url value="/oss/getOssBulkRegAjax"/>',
 				dataType : 'json',
 				cache : false,
 				data : params,
@@ -196,7 +196,7 @@
 					    //params.push(rowdata); //배열에 맵처럼 담김
 					    $("#ossList #"+rowId+" td[aria-describedby='ossList_procStatus']").text("");
 					    $.ajax({
-							url : '/oss/saveOssBulkReg',
+					    	url : '<c:url value="/oss/saveOssBulkReg"/>',
 							type : 'POST',
 							data : JSON.stringify(rowdata),
 							dataType : 'json',
@@ -264,7 +264,7 @@
 	<body>
 		<div id="loading_wrap_popup" class="loading" style="display:none;">
 			<div class="loadingBlind"></div>
-			<img src="/images/loading.gif" alt="loading" />
+			<img src="${ctxPath}/images/loading.gif" alt="loading" />
 		</div>
 		<div id="wrap" style="padding-top: 20px;">
 			<div  align="center" >
