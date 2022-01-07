@@ -4101,6 +4101,8 @@ public class CommonFunction extends CoTopComponent {
 	                    }else {
 	                    	licenseNameNicknameCheckList.add(licenseName);
 	                    }
+	                }else {
+	                	licenseNameNicknameCheckList.add(licenseName);
 	                }
 				}
 				
