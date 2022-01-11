@@ -409,7 +409,10 @@ var fn_commemt = {
                 },
                 error : function(){
                     alertify.error('<spring:message code="msg.common.valid2" />', 0);
-                }
+                },
+                complete : function(){
+                	fn_commemt.getCommentList();
+	            }
             });
             
             return false;
