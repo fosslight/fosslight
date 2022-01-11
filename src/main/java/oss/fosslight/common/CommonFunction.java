@@ -3946,7 +3946,10 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static String getProperty(String key){
-		return appEnv.getProperty(key);
+		try {
+			return appEnv.getProperty(key);
+		} catch (IllegalArgumentException e) {}
+		return "";
 	}
 	
 	public static String emptyCheckProperty(String key) {
