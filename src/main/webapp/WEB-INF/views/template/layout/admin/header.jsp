@@ -21,7 +21,7 @@
 		<div class="logo">
 			<img src="${ctxPath}/images/img_logo.png" alt="FOSSLight Hub"/>
 		</div>
-		<%-- <spring:eval expression="@environment.getProperty('project.version')" var="projectVersion"/> --%>
+		<c:set var="projectVersion" value="${ct:getProperty('project.version')}"></c:set>
 		<div class="version">
 			<strong><a style="color: #AC1E35;" href="https://github.com/fosslight/fosslight/releases/tag/v${projectVersion}" target='_blank'>v${projectVersion}</a></strong>
 		</div>
