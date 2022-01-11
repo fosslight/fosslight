@@ -560,6 +560,8 @@ public class CommonFunction extends CoTopComponent {
 		List<Integer> permissiveListPSM = new ArrayList<>(); // 미사용
 		List<Integer> permissiveListWCP = new ArrayList<>(); // 미사용
 		List<Integer> permissiveListCP = new ArrayList<>(); // 미사용
+		List<Integer> permissiveListPF = new ArrayList<>();
+		List<Integer> permissiveListNA = new ArrayList<>();
 		String finalPermissive = null; // or 기준 가장 permissive 한 라이선스가 무었인지
 		
 		for(List<ProjectIdentification> andList : andCombLicenseList) {
@@ -582,10 +584,29 @@ public class CommonFunction extends CoTopComponent {
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
-					if(isEmpty(finalPermissive)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive)) {
 						finalPermissive = CoConstDef.CD_LICENSE_TYPE_CP;
 						selectedIdx = idx;
 						permissiveListCP.add(selectedIdx);
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_CP.equals(finalPermissive)) {
+						finalPermissive = CoConstDef.CD_LICENSE_TYPE_PF;
+						selectedIdx = idx;
+						permissiveListPF.add(selectedIdx);
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					if(isEmpty(finalPermissive)) {
+						finalPermissive = CoConstDef.CD_LICENSE_TYPE_NA;
+						selectedIdx = idx;
+						permissiveListNA.add(selectedIdx);
 					}
 					
 					break;
@@ -605,7 +626,12 @@ public class CommonFunction extends CoTopComponent {
 				if(hasSelected) {
 					bean.setExcludeYn(CoConstDef.FLAG_YES);
 				} else {
-					List<Integer> containsList = CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive) ? permissiveListPSM : CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive) ? permissiveListWCP : CoConstDef.CD_LICENSE_TYPE_CP.equals(finalPermissive) ? permissiveListCP : new ArrayList<>();
+					List<Integer> containsList = CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive) ? 
+							permissiveListPSM : CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive) ? 
+									permissiveListWCP : CoConstDef.CD_LICENSE_TYPE_CP.equals(finalPermissive) ? 
+											permissiveListCP : CoConstDef.CD_LICENSE_TYPE_PF.equals(finalPermissive) ? 
+													permissiveListPF : CoConstDef.CD_LICENSE_TYPE_NA.equals(finalPermissive) ? 
+															permissiveListNA : new ArrayList<>();
 
 					if(containsList.contains(idx)) {
 						bean.setExcludeYn(CoConstDef.FLAG_NO);
@@ -645,8 +671,23 @@ public class CommonFunction extends CoTopComponent {
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
-					if(isEmpty(rtnVal)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(rtnVal)) {
 						rtnVal = CoConstDef.CD_LICENSE_TYPE_CP;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_CP.equals(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_PF;
+					}
+					
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					if(isEmpty(rtnVal)) {
+						rtnVal = CoConstDef.CD_LICENSE_TYPE_NA;
 					}
 					
 					break;
