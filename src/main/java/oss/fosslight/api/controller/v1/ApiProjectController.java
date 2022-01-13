@@ -7,7 +7,6 @@ package oss.fosslight.api.controller.v1;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +128,7 @@ public class ApiProjectController extends CoTopComponent {
 //			paramMap.put("userRole", userInfo.getAuthority());
 			paramMap.put("creator", 	creator);
 			paramMap.put("userId", 		userInfo.getUserId());
-			paramMap.put("userRole", 	loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("division", 	division);
 			paramMap.put("modelName", 	modelName);
 			paramMap.put("status", 		status);
@@ -386,7 +385,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
 			paramMap.put("distributionType", "normal");
@@ -429,7 +428,7 @@ public class ApiProjectController extends CoTopComponent {
 			prjIdList.add(beforePrjId);
 			prjIdList.add(afterPrjId);
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("distributionType", "normal");
 			
@@ -477,7 +476,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -618,7 +617,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
@@ -873,7 +872,7 @@ public class ApiProjectController extends CoTopComponent {
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(prjId);
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "android");
@@ -1094,7 +1093,7 @@ public class ApiProjectController extends CoTopComponent {
 		List<String> prjIdList = new ArrayList<String>();
 		prjIdList.add(prjId);
 		paramMap.put("userId", userInfo.getUserId());
-		paramMap.put("userRole", loginUserRole());
+		paramMap.put("userRole", userRole(userInfo));
 		paramMap.put("prjId", prjIdList);
 		
 		boolean searchFlag = apiProjectService.existProjectCnt(paramMap);

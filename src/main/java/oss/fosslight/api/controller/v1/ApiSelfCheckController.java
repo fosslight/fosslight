@@ -5,12 +5,9 @@
 
 package oss.fosslight.api.controller.v1;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.gson.reflect.TypeToken;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -70,7 +65,6 @@ public class ApiSelfCheckController extends CoTopComponent {
 	
 	private final SelfCheckService selfCheckService;
 	
-	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
@@ -131,7 +125,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("userId", userInfo.getUserId());
-			paramMap.put("userRole", loginUserRole());
+			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjId);
 			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			

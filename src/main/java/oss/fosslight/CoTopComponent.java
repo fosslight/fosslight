@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,6 +47,8 @@ import com.google.gson.Gson;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.ComBean;
+import oss.fosslight.domain.T2Authorities;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoAdminValidator;
@@ -138,6 +141,18 @@ public class CoTopComponent {
     	
     	return result;
 	}
+    
+    protected static String userRole(T2Users userInfo) {
+    	String result = "anonymousUser";
+    	if(!isEmpty(userInfo.getAuthority())) {
+    		return userInfo.getAuthority();
+    	}
+    	List<T2Authorities> authList = userInfo.getAuthoritiesList();
+    	if(authList != null && !authList.isEmpty()) {
+    		result = authList.get(0).getAuthority();
+    	}
+    	return result;
+    }
     
     protected static boolean isLogin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
