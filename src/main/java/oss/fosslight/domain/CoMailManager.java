@@ -1898,7 +1898,10 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getLicenseType(), after.getLicenseType(), isModified);
 			after.setObligation(appendChangeStyle(before.getObligation(), after.getObligation()));
 			isModified = checkEquals(before.getObligation(), after.getObligation(), isModified);
-			after.setWebpageLinkFormat(appendChangeStyleLinkFormat(before.getWebpage(), after.getWebpage()));
+			String[] beforeWebPage = before.getWebpage().split(",");
+			String[] afterWebPage = after.getWebpage().split(",");
+			String resultWebPage = appendChangeStyleLinkFormatArray(beforeWebPage, afterWebPage, 0);
+			after.setWebpageLinkFormat(resultWebPage);
 			isModified = checkEquals(before.getWebpage(), after.getWebpage(), isModified);
 			after.setDescription(appendChangeStyleMultiLine(before.getDescription(), after.getDescription(), true));
 			isModified = checkEquals(before.getDescription(), after.getDescription(), isModified);
