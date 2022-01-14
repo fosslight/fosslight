@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.26 (14/01/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bugs related to Auto ID, mailing, and check license. @FOSSLight-dev  (#386)
+    - API > Fix the bug that the admin account does not have permission to the project.
+    - Auto ID > Fix the bug where the license is not automatically selected according to the license type priority for OSS with OR.
+    - Mailing (License) > Fix the bug where the email arrives as if it was fixed even if the license website was not modified.
+- Fix project version not displayed bug @FOSSLight-dev (#384)
+
+## 🔧 Maintenance
+
+- Fix the bug that the written License is not included in the Check License related to the Proprietary License @FOSSLight-dev (#385)
+    - License modification email > If there are multiple websites, separate them with line breaks.
+    - Check License > If the written license is a Proprietary License, even though there is a warning message of Declared, it is not included in the Check License.
+    - When distribution, add a notice when the release date is not set.
+    - Fix the bug that when registering or deleting a license, there are multiple websites, but only one is displayed in the email.
+- Update version to 1.2.26 @soimkim (#387)
+---
+
 ## v1.2.25 (07/01/2022)
 ## Changes
 ## 🔧 Maintenance
