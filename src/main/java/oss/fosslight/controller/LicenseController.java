@@ -316,7 +316,7 @@ public class LicenseController extends CoTopComponent{
 					beforeBean.setDescription(CommonFunction.lineReplaceToBR(beforeBean.getDescription()));
 					beforeBean.setLicenseText(CommonFunction.lineReplaceToBR(beforeBean.getLicenseText()));
 					beforeBean.setAttribution(CommonFunction.lineReplaceToBR(beforeBean.getAttribution()));
-					beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
+					if(beforeBean.getWebpages().length > 0) beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
 				}
 				
 				if(afterBean != null) {
@@ -327,7 +327,7 @@ public class LicenseController extends CoTopComponent{
 					afterBean.setDescription(CommonFunction.lineReplaceToBR(afterBean.getDescription()));
 					afterBean.setLicenseText(CommonFunction.lineReplaceToBR(afterBean.getLicenseText()));
 					afterBean.setAttribution(CommonFunction.lineReplaceToBR(afterBean.getAttribution()));
-					afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
+					if(afterBean.getWebpages().length > 0) afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
 				}
 				
 				mailBean.setCompareDataBefore(beforeBean);

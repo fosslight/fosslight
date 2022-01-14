@@ -6,7 +6,6 @@
 package oss.fosslight.api.controller.v1;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
@@ -25,13 +30,6 @@ import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.ApiPartnerService;
 import oss.fosslight.service.T2UserService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
 
 @Api(tags = {"2. 3rd Party"})
 @RequiredArgsConstructor
@@ -71,7 +69,7 @@ public class ApiPartnerController extends CoTopComponent {
 //			paramMap.put("userRole", userInfo.getAuthority());
 			paramMap.put("creator", 		creator);
 			paramMap.put("userId", 			userInfo.getUserId());
-			paramMap.put("userRole", 		loginUserRole());
+			paramMap.put("userRole", 		userRole(userInfo));
 			paramMap.put("division", 		division);
 			paramMap.put("status", 			status);
 			paramMap.put("partnerIdList", 	partnerIdList);
