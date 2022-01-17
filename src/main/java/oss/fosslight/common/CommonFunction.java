@@ -582,7 +582,8 @@ public class CommonFunction extends CoTopComponent {
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
-					if(!CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive)) {
 						finalPermissive = CoConstDef.CD_LICENSE_TYPE_CP;
 						selectedIdx = idx;
 						permissiveListCP.add(selectedIdx);
@@ -590,7 +591,9 @@ public class CommonFunction extends CoTopComponent {
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
-					if(!CoConstDef.CD_LICENSE_TYPE_CP.equals(finalPermissive)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(finalPermissive)
+							&& !CoConstDef.CD_LICENSE_TYPE_CP.equals(finalPermissive)) {
 						finalPermissive = CoConstDef.CD_LICENSE_TYPE_PF;
 						selectedIdx = idx;
 						permissiveListPF.add(selectedIdx);
@@ -666,13 +669,16 @@ public class CommonFunction extends CoTopComponent {
 					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
-					if(!CoConstDef.CD_LICENSE_TYPE_WCP.equals(rtnVal)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(rtnVal)) {
 						rtnVal = CoConstDef.CD_LICENSE_TYPE_CP;
 					}
 				
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
-					if(!CoConstDef.CD_LICENSE_TYPE_CP.equals(rtnVal)) {
+					if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_WCP.equals(rtnVal)
+							&& !CoConstDef.CD_LICENSE_TYPE_CP.equals(rtnVal)) {
 						rtnVal = CoConstDef.CD_LICENSE_TYPE_PF;
 					}
 					
