@@ -4604,7 +4604,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			int cnt = 0;
 			
 			for (int i=0; i<count; i++) {
-				if (splitOssNameVersion[i].replaceAll(" ", "").equals(ossNameVersion2)) {
+				if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
 					cnt++;
 				}
 			}

@@ -4,9 +4,9 @@
 		<meta charset="utf-8">
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
 		<style type='text/css'>
-			.notice_body table.gridtable {width:100%;color:#333333;border-width: 1px;border-color: #666666;border-collapse: collapse;}
-			.notice_body table.gridtable th {border-width: 1px;padding: 8px;height:25px;font-size:12px;border-style: solid;border-color: #666666;background-color: #dedede;}
-			.notice_body table.gridtable td {border-width: 1px;	padding: 8px;font-size:12px;border-style: solid;border-color: #666666;background-color: #ffffff;}
+			.notice_body table.gridtable {border:1px solid #666666;width:100%;color:#333333;border-collapse: separate;border-spacing:0;}
+			.notice_body table.gridtable th {border-bottom: 1px solid #666666;padding: 8px;height:25px;font-size:12px;background-color: #dedede;}
+			.notice_body table.gridtable td {padding: 8px;font-size:12px;background-color: #ffffff;}
 			.notice_body table.gridtable td p,
 			.notice_body table.gridtable td b {padding:0;font-size:12px;}
 			.notice_body table.texttable {color:#333333;border-width: 0px;}
@@ -23,6 +23,8 @@
 			.right {float:right;}
 			.notice_body .bdTop {margin-top:30px;padding-top:30px;border-top:1px solid #888;}
 			caption {display:none;}
+			th:not(:last-child),td:not(:last-child) {border-right: 1px solid #666666;}
+			tr:not(:last-child) td {border-bottom: 1px solid #666666;}
 			/*.bdTop b {font-style: italic;}*/
 		</style>
 	</head>

@@ -49,7 +49,7 @@
 	};
 	
 	var updateDialogEdit = {
-            url:"processGuide/saveAjax"
+            url:'/system/processGuide/saveAjax'
                 , closeAfterEdit: true
                 , reloadAfterSubmit: true
                 , modal: true
@@ -57,33 +57,50 @@
 			        return JSON.stringify(postdata);
 			    }
 			    , beforeShowForm: function(formid) {
-			        var appendHtml = '<div id="contentsEdit" style="width:500px; height:150px;">'+$("#contents", formid).val()+'</div>';
+			        var appendHtml = '<div id="contentsEdit" style="width:600px; height:255px;">'+$("#contents", formid).val()+'</div>';
         			$("#tr_contents", formid).show();
     				$("#contents", formid).hide();
 			        $("#tr_contents", formid).children().eq(1).append(appendHtml);
 
-				    var _editor = CKEDITOR.instances.contentsEdit;
-
-					if(_editor) {
-						_editor.destroy();
-					}
+			        if(CKEDITOR.instances.contentsEdit) {
+			    		var _editor = CKEDITOR.instances.contentsEdit;
+			    		if(_editor) {
+    						_editor.destroy();
+    					}
+			    	}
 					
 					CKEDITOR.replace('contentsEdit', {});
 			    }
 			    , onClose: function() {
-			    	$("#contentsEdit").remove();
+			    	if(CKEDITOR.instances.contentsEdit) {
+			    		var _editor = CKEDITOR.instances.contentsEdit;
+			    		if(_editor) {
+    						_editor.destroy();
+    					}
+			    	}
+
+			    	$("#tr_contents", "list").children().eq(1).remove();
 			    }
                 , afterSubmit: function(response, postdata) {
-                    if("false" == response.responseJSON.isValid) {
+                	if(CKEDITOR.instances.contentsEdit) {
+                		var _editor = CKEDITOR.instances.contentsEdit;
+    					if(_editor) {
+    						_editor.destroy();
+    					}
+                	}
+
+                	if("false" == response.responseJSON.isValid) {
                         alertify.error('<spring:message code="msg.common.valid" />', 0);
                         createValidMsg('FrmGrid_list', response.responseJSON);
-
+                        
                         return [false, '<spring:message code="msg.common.valid" />', ""]
                     } else {
                         alertify.success('<spring:message code="msg.common.success" />');
-
+                        
                         return [true,"",""]
                     }
+
+                	processGuideList.load();
                 }
                 , beforeSubmit: function(postdata, formid) {
                 	postdata.contents = CKEDITOR.instances.contentsEdit.getData();
