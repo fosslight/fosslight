@@ -715,11 +715,11 @@ public class ExcelUtil extends CoTopComponent {
 			}
 
 		} catch (ColumnNameDuplicateException e) {
-			log.error("There are duplicated header rows in the OSS Report. Please check it.<br/>" + e.getMessage());
+//			log.error("There are duplicated header rows in the OSS Report. Please check it.<br/>" + e.getMessage());
 			errMsgList.add("There are duplicated header rows in the OSS Report. Please check it.<br/>" + e.getMessage());
 			return false;
 		} catch (ColumnMissingException e) {
-			log.error(e.getMessage());
+//			log.warn(e.getMessage(), e);
 			errMsgList.add(e.getMessage());
 			return false;
 		} catch (Exception e) {
