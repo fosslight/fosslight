@@ -99,12 +99,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				con = new InitialDirContext(properties);
 				isAuthenticated = true;
 			}catch (NamingException e) {
-				log.error(e.getMessage());
+				log.warn("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
 			} finally {
 				if(con != null) {
 					try {
 						con.close();
-					} catch (NamingException e) {}
+					} catch (Exception e) {}
 				}
 			}
 		}
