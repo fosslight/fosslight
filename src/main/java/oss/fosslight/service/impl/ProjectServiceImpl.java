@@ -4041,7 +4041,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
 				} else if(CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(temp.getObligationType())
-						&& CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(rtnBean.getObligationType())){
+						&& ("").equals(avoidNull(rtnBean.getObligationType(), ""))){
 					rtnBean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
