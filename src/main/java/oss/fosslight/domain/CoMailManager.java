@@ -155,6 +155,11 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE_TYPE.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
 					) {
 				convertDataMap.put("contentsTitle", StringUtil.replace(makeMailSubject((isTest ? "[TEST]" : "") + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_TYPE, bean.getMsgType()), bean, true), "[FOSSLight]", ""));
 			} else {
@@ -1383,7 +1388,17 @@ public class CoMailManager extends CoTopComponent {
 				}
 				_s += licenseInfo.getLicenseName();
 			}
-			
+			if (isMailBodySubject
+					&& (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE_TYPE.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
+					)) {
+				String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
+				linkUrl += "/license/edit/" + bean.getParamLicenseId();
+				_s = "<a href='" + linkUrl + "' target='_blank'>" + _s + "</a>";
+			}
 			title = StringUtil.replace(title, "${License Name}", _s);
 		}
 		

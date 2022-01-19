@@ -236,7 +236,7 @@
 								<dd>
 									<div class="basicCase">
 										<div class="uploadTit">
-											<span class="checkSet"><label for="2">General Model</label></span>	
+											<span class="checkSet"><label for="2">FOSSLight Report</label></span>	
 										</div>
 										<div class="uploadGroup">
 											<div class="uploadSet">
