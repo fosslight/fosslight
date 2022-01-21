@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.27 (21/01/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix bugs related to Auto ID and BOM Obligation. @FOSSLight-dev (#391)
+- Fix bugs in BOM Compare and Auto ID @FOSSLight-dev (#389)
+- Delete the arrow from the left menu @FOSSLight-dev (#388)
+
+## 🔧 Maintenance
+
+- Add a default value for server domain @FOSSLight-dev (#392)
+- Add a shortcut link when sending a license email @soimkim (#390)
+- Delete the arrow from the left menu @FOSSLight-dev (#388)
+
+---
+
 ## v1.2.26 (14/01/2022)
 ## Changes
 ## 🐛 Hotfixes
@@ -573,8 +589,3 @@
 ## v1.0.1 (27/05/2021)
 ## Changes
 * Set up automated deployment.
-
----
-
-## v1.0 (30/04/2021)
-Release FOSSLight v1.0 🎉
