@@ -108,4 +108,6 @@ public interface OssService extends HistoryConfig{
 	void syncOssMaster(OssMaster syncBean, boolean declaredLicenseCheckFlag, boolean detectedLicenseCheckFlag, boolean downloadLocationCheckFlag);
 
 	OssMaster makeEmailSendFormat(OssMaster beforeBean);
+
+	void updateVersionDiff(OssMaster ossMaster);
 }

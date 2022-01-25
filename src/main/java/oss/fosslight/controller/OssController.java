@@ -428,6 +428,7 @@ public class OssController extends CoTopComponent{
 			if(!isNew){
 				beforeBean = ossService.getOssInfo(ossId, true);
 				result = ossService.registOssMaster(ossMaster);
+				ossService.updateVersionDiff(ossMaster); // process v-diff
 				CoCodeManager.getInstance().refreshOssInfo();
 				h = ossService.work(ossMaster);
 				action = CoConstDef.ACTION_CODE_UPDATE;
@@ -454,6 +455,7 @@ public class OssController extends CoTopComponent{
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
 				
 				result = ossService.registOssMaster(ossMaster);
+				ossService.updateVersionDiff(ossMaster); // process v-diff
 				CoCodeManager.getInstance().refreshOssInfo();
 				ossId = result;
 				
@@ -555,6 +557,7 @@ public class OssController extends CoTopComponent{
 
 		// 삭제처리
 		ossService.deleteOssMaster(ossMaster);
+		ossService.updateVersionDiff(ossMaster); // process v-diff
 		CoCodeManager.getInstance().refreshOssInfo();
 		
 		resMap.put("resCd", resCd);
@@ -1131,6 +1134,7 @@ public class OssController extends CoTopComponent{
 		ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()) );
 		ossMaster.setAddNicknameYn(CoConstDef.FLAG_YES); //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
 		String resultOssId = ossService.registOssMaster(ossMaster);
+		ossService.updateVersionDiff(ossMaster); // process v-diff
 		CoCodeManager.getInstance().refreshOssInfo();
 		
 		History h = ossService.work(ossMaster);
@@ -1690,6 +1694,7 @@ public class OssController extends CoTopComponent{
 		
 		try {
 			resultOssId = ossService.registOssMaster(resultData); // oss 정보 등록
+			ossService.updateVersionDiff(resultData); // process v-diff
 			
 			analysisBean.setComponentId(analysisBean.getGroupId());
 			analysisBean.setReferenceOssId(resultOssId);
