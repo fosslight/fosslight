@@ -2610,7 +2610,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if(CoConstDef.FLAG_YES.equals(project.getCompleteYn())) {
 				_tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED));
-				userComment = _tempComment + "<br />" + avoidNull(userComment);
+				userComment =  avoidNull(userComment) + "<br />" + _tempComment;
 			}
 			
 			// complete log 추가
@@ -2624,7 +2624,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			updateProjectMaster(project);
 			
 			String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED));
-				userComment = _tempComment + "<br />" + avoidNull(userComment);
+				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			
 			// complete log 추가
 			commentDiv = CoConstDef.CD_DTL_COMMENT_PROJECT_HIS;
