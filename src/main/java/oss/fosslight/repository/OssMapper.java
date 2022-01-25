@@ -223,4 +223,6 @@ public interface OssMapper {
 	void deleteOssLicenseDeclaredSync(OssMaster ossMaster);
 
 	void deleteOssLicenseDetectedSync(OssMaster ossMaster);
+
+	void updateOssComponents(OssMaster ossMaster);
 }

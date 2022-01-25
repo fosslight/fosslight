@@ -429,7 +429,13 @@ public class OssController extends CoTopComponent{
 				beforeBean = ossService.getOssInfo(ossId, true);
 				result = ossService.registOssMaster(ossMaster);
 				ossService.updateVersionDiff(ossMaster); // process v-diff
+				
+				if("Y".equals(ossMaster.getDifferentOssVersionMergeFlag())) {
+					ossService.updateOssNameVersionDiff(ossMaster);
+				}
+				
 				CoCodeManager.getInstance().refreshOssInfo();
+				
 				h = ossService.work(ossMaster);
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = ossService.getOssInfo(ossId, true);
@@ -462,7 +468,7 @@ public class OssController extends CoTopComponent{
 				h = ossService.work(ossMaster);
 				action = CoConstDef.ACTION_CODE_INSERT;
 			}
-
+			
 			h.sethAction(action);
 			historyService.storeData(h);
 			
@@ -1962,5 +1968,18 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("target", target);
 		
 		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+	}
+	
+	@PostMapping(value = OSS.CHECK_OSS_VERSION_DIFF)
+	public @ResponseBody ResponseEntity<Object> checkOssVersionDiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res,
+			Model model) {
+		OssMaster om = new OssMaster();
+		om.setOssId((String) map.get("ossId"));
+		om.setOssName((String) map.get("ossName"));
+		
+		HashMap<String, Object> resMap = new HashMap<>();
+		resMap.put("vFlag", ossService.checkOssVersionDiff(om));
+		
+		return makeJsonResponseHeader(resMap);
 	}
 }

@@ -206,6 +206,8 @@ public final class Url {
 		
 		public static final String OSS_BULK_EDIT_POPUP = PATH + "/ossBulkEditPopup";
 		public static final String OSS_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/ossBulkEditPopup";
+		
+		public static final String CHECK_OSS_VERSION_DIFF = PATH + "/checkOssVersionDiff";
 	}
 	
 	public static final class PROJECT {
