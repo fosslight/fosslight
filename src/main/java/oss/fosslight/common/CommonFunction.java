@@ -1981,16 +1981,27 @@ public class CommonFunction extends CoTopComponent {
 		
 		if(!isEmpty(CoCodeManager.CD_ROLE_OUT_LICENSE)) {
 			for(String license : avoidNull(licenseName).split(",")) {
-				result = false;
-				
 				for(String s : CoCodeManager.CD_ROLE_OUT_LICENSE.split("\\|")) {
 					if(s.trim().equalsIgnoreCase(license)) {
 						result = true;
-						
 						break;
 					}
 				}
 			}
+		}
+		
+		// license type이 NA가 아닌 라이선스가 포함되어 있거나, Unconfirmed license인 경우 false
+		if(result) {
+			for(String license : avoidNull(licenseName).split(",")) {
+				if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.toUpperCase())) {
+					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
+					if(!"NA".equalsIgnoreCase(licenseMaster.getLicenseType())) {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}	
 		}
 		
 		return result;
