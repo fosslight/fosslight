@@ -2708,11 +2708,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Transactional
 	@Override
-	public void updateOssNameVersionDiff(OssMaster ossMaster) {
+	public Map<String, List<OssMaster>> updateOssNameVersionDiff(OssMaster ossMaster) {
 		String beforeOssName = ossMaster.getOssName();
 		String afterOssName = ossMaster.getMergeOssName();
 		
+		Map<String, List<OssMaster>> ossNameVersionDiffMergeObject = new HashMap<>();
+		
 		if(!beforeOssName.equals(afterOssName)) {
+			List<OssMaster> beforeOssNameVersionBeanList = new ArrayList<OssMaster>();
+			List<OssMaster> afterOssNameVersionBeanList = new ArrayList<OssMaster>();
+			List<String> beforeOssNameVersionOssIdList = new ArrayList<String>();
+			OssMaster beforeOssNameVersionBean = null;
+			OssMaster afterOssNameVersionBean = null;
+			
 			List<String> beforeOssNameList = new ArrayList<>();
 			beforeOssNameList.add(beforeOssName);
 			String[] beforeOssNames = new String[beforeOssNameList.size()];
@@ -2721,6 +2729,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
 			
 			for(OssMaster om : beforeOssMap.values()) {
+				beforeOssNameVersionOssIdList.add(om.getOssId());
+				beforeOssNameVersionBean = getOssInfo(om.getOssId(), true);
+				beforeOssNameVersionBeanList.add(beforeOssNameVersionBean);
+				
 				om.setOssName(afterOssName);
 				ossMapper.changeOssNameByDelete(om);
 			}
@@ -2750,6 +2762,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMapper.deleteOssNickname(ossMaster);
 				}
 			}
+			
+			CoCodeManager.getInstance().refreshOssInfo();
+			
+			for(String ossId : beforeOssNameVersionOssIdList) {
+				afterOssNameVersionBean = getOssInfo(ossId, true);
+				afterOssNameVersionBeanList.add(afterOssNameVersionBean);
+			}
+
+			ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
+			ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
 			
 			// oss_components > admin check except
 			ossMaster.setOssName(beforeOssName);
@@ -2821,5 +2843,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 			}
 		}
+		
+		return ossNameVersionDiffMergeObject;
 	}
 }
