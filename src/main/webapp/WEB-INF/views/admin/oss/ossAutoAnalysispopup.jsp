@@ -625,32 +625,34 @@
 					        			    $("#"+rowId + " > td > [type='checkbox']").attr("checked", false);
 											
 					        			    if(resultData.validMsg.toUpperCase() == "FAIL"){
-						        			    var resultValidMap = resultData.resultData.validMapResult;
-						        			    var resultDiffMap = resultData.resultData.diffMapResult;
+					        			    	if(typeof resultData.resultData.validMapResult !== "undefined" && typeof resultData.resultData.diffMapResult !== "undefined"){
+					        			    		var resultValidMap = resultData.resultData.validMapResult;
+							        			    var resultDiffMap = resultData.resultData.diffMapResult;
 
-						        			    if(resultValidMap) {
-						        			    	$.each(resultValidMap,function(key,value) {
-						        			    		if("isValid" != key && "validMsg" != key && "resultData" != key && "externalData" != key && "externalData2" != key && "externalData3" != key) {
-							        			    		var errRow = $("#"+rowId+" > td[aria-describedby='ossList_" + key+"']");
+							        			    if(resultValidMap) {
+							        			    	$.each(resultValidMap,function(key,value) {
+							        			    		if("isValid" != key && "validMsg" != key && "resultData" != key && "externalData" != key && "externalData2" != key && "externalData3" != key) {
+								        			    		var errRow = $("#"+rowId+" > td[aria-describedby='ossList_" + key+"']");
 
-							        			    		if(errRow) {
-							        			    			errRow.append('<div class=\"ossList_'+rowId+' retxt\">'+ value +'</div>');
+								        			    		if(errRow) {
+								        			    			errRow.append('<div class=\"ossList_'+rowId+' retxt\">'+ value +'</div>');
+								        			    		}
 							        			    		}
-						        			    		}
-						        			    	});
-						        			    }
+							        			    	});
+							        			    }
 
-						        			    if(resultDiffMap){
-						        			    	$.each(resultDiffMap,function(key,value) {
-						        			    		if("isValid" != key && "validMsg" != key && "resultData" != key && "externalData" != key && "externalData2" != key && "externalData3" != key) {
-						        			    			var diffRow = $("#"+rowId+" > td[aria-describedby='ossList_" + key+"']");
-						        			    			
-						        			    			if(diffRow) {
-						        			    				diffRow.append('<div class=\"ossList_'+rowId+' retxtb\">'+ value +'</div>');
-						        			    			}
-						        			    		}
-						        			    	});
-						        			    }
+							        			    if(resultDiffMap){
+							        			    	$.each(resultDiffMap,function(key,value) {
+							        			    		if("isValid" != key && "validMsg" != key && "resultData" != key && "externalData" != key && "externalData2" != key && "externalData3" != key) {
+							        			    			var diffRow = $("#"+rowId+" > td[aria-describedby='ossList_" + key+"']");
+							        			    			
+							        			    			if(diffRow) {
+							        			    				diffRow.append('<div class=\"ossList_'+rowId+' retxtb\">'+ value +'</div>');
+							        			    			}
+							        			    		}
+							        			    	});
+							        			    }
+					        			    	}
 						        			}
 										} catch(e) {
 											$('#ossList').jqGrid('setCell', rowId, 'result', "Failed");
