@@ -110,4 +110,8 @@ public interface OssService extends HistoryConfig{
 	OssMaster makeEmailSendFormat(OssMaster beforeBean);
 
 	void updateVersionDiff(OssMaster ossMaster);
+
+	String checkOssVersionDiff(OssMaster ossMaster);
+
+	Map<String, List<OssMaster>> updateOssNameVersionDiff(OssMaster ossMaster);
 }

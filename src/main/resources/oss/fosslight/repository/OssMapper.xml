@@ -2033,7 +2033,10 @@
 						WHERE T1.PARTNER_ID = SUB1.REFERENCE_ID
 						  AND SUB1.REFERENCE_DIV = '20'
 						  AND SUB1.OSS_NAME = #{ossName}
-						  AND SUB1.OSS_VERSION = #{ossVersion})
+						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+						  AND SUB1.OSS_VERSION = #{ossVersion}
+						  </if>
+						  )
 	</select>
 
 	<select id="getOssNameMergeProjectList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Project">
@@ -2046,7 +2049,10 @@
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
 						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
-						  AND SUB1.OSS_VERSION = #{ossVersion})
+						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+						  AND SUB1.OSS_VERSION = #{ossVersion}
+						  </if>
+						  )
 	</select>
 
 	<update id="mergeOssName" parameterType="oss.fosslight.domain.OssMaster">
@@ -2061,10 +2067,10 @@
     		</if>
     		, T1.OSS_NAME = #{mergeOssName}
     		, T1.OSS_VERSION = #{mergeOssVersion}
-    	WHERE
+    	WHERE T1.ADMIN_CHECK_YN	!= 'Y'
     		<choose>
     			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-    				T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
+    				AND T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
     				AND T1.REFERENCE_DIV IN ('20')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
@@ -2075,7 +2081,7 @@
     				</if>
     			</when>
     			<otherwise>
-    				T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
+    				AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
     				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
@@ -2115,4 +2121,21 @@
 		  FROM OSS_LICENSE_DETECTED ODT
 		 WHERE ODT.OSS_ID = #{ossId}
     </delete>
+    
+    <update id="updateOssComponents" parameterType="oss.fosslight.domain.OssMaster">
+        UPDATE OSS_COMPONENTS T1
+           SET T1.OSS_NAME			= #{mergeOssName}
+         WHERE T1.OSS_NAME			= #{ossName}
+		<choose>
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+           AND T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
+           AND T1.REFERENCE_DIV IN ('20')
+    		</when>
+    		<otherwise>
+           AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
+           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    		</otherwise>
+    	</choose>
+           AND T1.ADMIN_CHECK_YN	!= 'Y'
+    </update>
 </mapper>

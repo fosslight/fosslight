@@ -1197,22 +1197,22 @@ public class ExcelUtil extends CoTopComponent {
     				bean.setExcludeYn(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
     
     				// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌
-    				if(!isEmpty(bean.getHomepage()) 
-    						&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
-    								|| bean.getHomepage().toLowerCase().startsWith("https://") 
-    								|| bean.getHomepage().toLowerCase().startsWith("ftp://"))
-    						&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
-    					bean.setHomepage("http://" + bean.getHomepage());
-    				}
-    				
-    				if(!isEmpty(bean.getDownloadLocation()) 
-    						&& !(bean.getDownloadLocation().toLowerCase().startsWith("http://") 
-    								|| bean.getDownloadLocation().toLowerCase().startsWith("https://")  
-    								|| bean.getDownloadLocation().toLowerCase().startsWith("ftp://")
-    							) 
-    						&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
-    					bean.setDownloadLocation("http://" + bean.getDownloadLocation());
-    				}
+//    				if(!isEmpty(bean.getHomepage()) 
+//    						&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
+//    								|| bean.getHomepage().toLowerCase().startsWith("https://") 
+//    								|| bean.getHomepage().toLowerCase().startsWith("ftp://"))
+//    						&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
+//    					bean.setHomepage("http://" + bean.getHomepage());
+//    				}
+//    				
+//    				if(!isEmpty(bean.getDownloadLocation()) 
+//    						&& !(bean.getDownloadLocation().toLowerCase().startsWith("http://") 
+//    								|| bean.getDownloadLocation().toLowerCase().startsWith("https://")  
+//    								|| bean.getDownloadLocation().toLowerCase().startsWith("ftp://")
+//    							) 
+//    						&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
+//    					bean.setDownloadLocation("http://" + bean.getDownloadLocation());
+//    				}
     				
     				// 이슈 처리로 인해 주석처리함. OSS Name, OSS Version을 작성하지 않은 OSS Info는 상단 OSS Info와 merge하지 않음.
 					bean.addOssComponentsLicense(subBean);
@@ -1535,19 +1535,19 @@ public class ExcelUtil extends CoTopComponent {
     
     
     			// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌(* download location의 경우 git으로 시작 시 http://를 붙이지 않음.)
-    			if(!isEmpty(bean.getHomepage()) 
-    					&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
-    							|| bean.getHomepage().toLowerCase().startsWith("https://"))
-    					&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
-    				bean.setHomepage("http://" + bean.getHomepage());
-    			}
-    			
-    			if(!isEmpty(bean.getDownloadLocation()) 
-    					&& !(bean.getDownloadLocation().toLowerCase().startsWith("http://") 
-    							|| bean.getDownloadLocation().toLowerCase().startsWith("https://"))
-    					&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
-    				bean.setDownloadLocation("http://" + bean.getDownloadLocation());
-    			}
+//    			if(!isEmpty(bean.getHomepage()) 
+//    					&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
+//    							|| bean.getHomepage().toLowerCase().startsWith("https://"))
+//    					&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
+//    				bean.setHomepage("http://" + bean.getHomepage());
+//    			}
+//    			
+//    			if(!isEmpty(bean.getDownloadLocation()) 
+//    					&& !(bean.getDownloadLocation().toLowerCase().startsWith("http://") 
+//    							|| bean.getDownloadLocation().toLowerCase().startsWith("https://"))
+//    					&& !bean.getDownloadLocation().toLowerCase().startsWith("git://")) {
+//    				bean.setDownloadLocation("http://" + bean.getDownloadLocation());
+//    			}
     			
 				bean.addOssComponentsLicense(subBean);
 				list.add(bean);

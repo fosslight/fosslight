@@ -198,7 +198,16 @@ var fn_grid_com = {
 			var url ="";
 
 			if(cellvalue != null){
-				url = "<a href=\""+cellvalue+"\" class=\"urlLink\" target=\"_blank\">"+cellvalue+"</a>";
+				var httpVal = cellvalue;
+				if( !(
+						cellvalue.toLowerCase().startsWith("http://") 
+						|| cellvalue.toLowerCase().startsWith("https://") 
+						|| cellvalue.toLowerCase().startsWith("ftp://") 
+						|| cellvalue.toLowerCase().startsWith("git://") 
+					) ) {
+					httpVal = "http://" + cellvalue;
+				}
+				url = "<a href=\""+httpVal+"\" class=\"urlLink\" target=\"_blank\">"+cellvalue+"</a>";
 			}
 			
 			return url;
