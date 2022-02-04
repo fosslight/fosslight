@@ -225,4 +225,6 @@ public interface OssMapper {
 	void deleteOssLicenseDetectedSync(OssMaster ossMaster);
 
 	void updateOssComponents(OssMaster ossMaster);
+
+	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 }

@@ -114,4 +114,6 @@ public interface OssService extends HistoryConfig{
 	String checkOssVersionDiff(OssMaster ossMaster);
 
 	Map<String, List<OssMaster>> updateOssNameVersionDiff(OssMaster ossMaster);
+
+	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 }
