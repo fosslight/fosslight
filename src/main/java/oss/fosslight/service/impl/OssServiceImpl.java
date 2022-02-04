@@ -2088,6 +2088,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				throw new Exception(ossMaster.getOssName() + " -> NickName field is required.");
 			}
 			
+			List<String> ossNameList = new ArrayList<>();
+			ossNameList.add(paramBean.getOssName());
+			String[] ossNames = new String[ossNameList.size()];
+			ossMaster.setOssNames(ossNameList.toArray(ossNames));
+			
+			Map<String, OssMaster> ossMap = getBasicOssInfoList(ossMaster);
+			
+			if(ossMap == null || ossMap.isEmpty()) {}else {
+				throw new Exception(paramBean.getOssName() + " -> OSS Name registered in OSS list.");
+			}
+			
 			int insertCnt = ossMapper.insertOssNickname(ossMaster);
 			
 			if(insertCnt == 1) {
@@ -2685,17 +2696,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public String checkOssVersionDiff(OssMaster ossMaster) {
 		boolean ossVersion_Flag = false;
-		OssMaster om = ossMapper.checkExistsOssname(ossMaster);
+		boolean isNew = StringUtil.isEmpty(ossMaster.getOssId());
 		
-		if(om == null) {
-			List<String> afterOssNameList = new ArrayList<>();
-			afterOssNameList.add(ossMaster.getOssName().trim());
-			String[] afterOssNames = new String[afterOssNameList.size()];
-			ossMaster.setOssNames(afterOssNameList.toArray(afterOssNames));
+		if(!isNew) {
+			OssMaster beforeOss = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId());
+			
+			List<String> ossNameList = new ArrayList<>();
+			ossNameList.add(beforeOss.getOssName().trim());
+			String[] ossNames = new String[ossNameList.size()];
+			beforeOss.setOssNames(ossNameList.toArray(ossNames));
+			
+			Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(beforeOss);
+			
+			ossNameList = new ArrayList<>();
+			ossNameList.add(ossMaster.getOssName().trim());
+			ossNames = new String[ossNameList.size()];
+			ossMaster.setOssNames(ossNameList.toArray(ossNames));
 			
 			Map<String, OssMaster> afterOssMap = getBasicOssInfoList(ossMaster);
 									
-			if(afterOssMap == null || afterOssMap.isEmpty()) {
+			if((afterOssMap == null || afterOssMap.isEmpty()) && beforeOssMap.size() > 1) {
 				ossVersion_Flag = true;
 			}
 			
