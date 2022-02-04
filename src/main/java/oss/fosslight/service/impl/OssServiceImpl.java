@@ -2699,14 +2699,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isNew = StringUtil.isEmpty(ossMaster.getOssId());
 		
 		if(!isNew) {
-			List<String> afterOssNameList = new ArrayList<>();
-			afterOssNameList.add(ossMaster.getOssName().trim());
-			String[] afterOssNames = new String[afterOssNameList.size()];
-			ossMaster.setOssNames(afterOssNameList.toArray(afterOssNames));
+			OssMaster beforeOss = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId());
+			
+			List<String> ossNameList = new ArrayList<>();
+			ossNameList.add(beforeOss.getOssName().trim());
+			String[] ossNames = new String[ossNameList.size()];
+			beforeOss.setOssNames(ossNameList.toArray(ossNames));
+			
+			Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(beforeOss);
+			
+			ossNameList = new ArrayList<>();
+			ossNameList.add(ossMaster.getOssName().trim());
+			ossNames = new String[ossNameList.size()];
+			ossMaster.setOssNames(ossNameList.toArray(ossNames));
 			
 			Map<String, OssMaster> afterOssMap = getBasicOssInfoList(ossMaster);
 									
-			if(afterOssMap == null || afterOssMap.isEmpty()) {
+			if((afterOssMap == null || afterOssMap.isEmpty()) && beforeOssMap.size() > 1) {
 				ossVersion_Flag = true;
 			}
 			
