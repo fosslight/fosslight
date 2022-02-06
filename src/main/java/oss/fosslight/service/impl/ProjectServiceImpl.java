@@ -697,6 +697,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 
 						bean.setBatStrPlus(batPercentageStr);
+						
+						// Change bat grid result percentage (UI) Number only
+						if(!isEmpty(bean.getBatStringMatchPercentage())) {
+							bean.setBatStringMatchPercentageFloat(bean.getBatStringMatchPercentage().replace("%", "").trim());
+						}
+						
 					}
 					
 					// License Restriction 저장
