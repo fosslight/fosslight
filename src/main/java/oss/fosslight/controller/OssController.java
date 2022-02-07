@@ -202,7 +202,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocation", avoidNull(bean.getDownloadLocation()));
 			model.addAttribute("homepage", avoidNull(bean.getHomepage()));
 			
-			if(bean.getLicenseName() != null && bean.getLicenseName().contains(",")) {
+			if(!isEmpty(avoidNull(bean.getLicenseName()))) {
 				List<OssLicense> licenseList = new ArrayList<OssLicense>();
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				int idx = 1;
@@ -233,8 +233,6 @@ public class OssController extends CoTopComponent{
 				
 				map.put("rows", licenseList);
 				model.addAttribute("list", toJson(map));
-			} else {
-				model.addAttribute("licenseName", avoidNull(bean.getLicenseName()));
 			}
 			
 			model.addAttribute("copyright", avoidNull(bean.getCopyright()));
