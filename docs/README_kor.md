@@ -43,7 +43,7 @@ FOSSLight는 Open Source Compliance Process를 효율적으로 수행하는 데 
 Demo 사이트를 방문하셔서 FOSSLight을 직접 이용해 보시기 바랍니다!
 
 ## Contributing
-FOSSLight은 이슈 수정뿐만 아니라 신규 기능 추가와 같은 기여 활동을 언제나 환영합니다. 기여하는 방법에 대해서는 [CONTRIBUTING](CONTRIBUTING.md) 가이드를 참조하시기 바랍니다.
+FOSSLight은 이슈 수정뿐만 아니라 신규 기능 추가와 같은 기여 활동을 언제나 환영합니다. 기여하는 방법에 대해서는 [CONTRIBUTING](https://github.com/fosslight/fosslight/blob/main/CONTRIBUTING.md) 가이드를 참조하시기 바랍니다.
 
 ## License
 Copyright (c) 2021 LG Electronics  
