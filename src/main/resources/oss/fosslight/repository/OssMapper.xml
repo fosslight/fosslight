@@ -2138,4 +2138,15 @@
     	</choose>
            AND T1.ADMIN_CHECK_YN	!= 'Y'
     </update>
+    
+    <select id="getSaveSesstionOssInfoByName" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT T1.OSS_ID
+		     , T1.DOWNLOAD_LOCATION
+		     , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+		  FROM OSS_MASTER T1 
+		  LEFT OUTER JOIN OSS_NICKNAME T2 ON T1.OSS_NAME = T2.OSS_NAME
+		 WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR T2.OSS_NICKNAME = #{ossName}) 
+		   AND T1.OSS_VERSION = #{ossVersion}
+		 ORDER BY CREATED_DATE DESC, OSS_VERSION DESC LIMIT 1;
+	</select>
 </mapper>

@@ -2866,4 +2866,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return ossNameVersionDiffMergeObject;
 	}
+
+	@Override
+	public OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster) {
+		return ossMapper.getSaveSesstionOssInfoByName(ossMaster);
+	}
 }

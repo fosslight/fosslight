@@ -133,6 +133,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	/** The bat string match percentage. */
 	private String batStringMatchPercentage;
+
+	/** The bat string match percentage float. */
+	private String batStringMatchPercentageFloat;
 	
 	/** The bat percentage. */
 	private String batPercentage;
@@ -1123,6 +1126,16 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 */
 	public void setBatStringMatchPercentage(String batStringMatchPercentage) {
 		this.batStringMatchPercentage = batStringMatchPercentage;
+	}
+	
+	
+
+	public String getBatStringMatchPercentageFloat() {
+		return batStringMatchPercentageFloat;
+	}
+
+	public void setBatStringMatchPercentageFloat(String batStringMatchPercentageFloat) {
+		this.batStringMatchPercentageFloat = batStringMatchPercentageFloat;
 	}
 
 	/**

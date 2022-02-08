@@ -91,11 +91,12 @@ var src_evt = {
 			allowedTypes:accept1,
 			sequential:true,
 			sequentialCount:1,
-			dynamicFormData: function(){
+/*			dynamicFormData: function(){
 				var data ={ "registFileId" :$('#srcCsvFileId').val(), "tabNm" : "SRC"}
 				
 				return data;
-			},
+			},*/
+			formData:{"registFileId" : $('#srcCsvFileId').val(), "tabNm" : "SRC"},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
 				

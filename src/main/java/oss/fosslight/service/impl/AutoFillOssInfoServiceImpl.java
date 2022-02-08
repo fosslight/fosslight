@@ -461,9 +461,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				HttpStatus statusCode = response.statusCode();
 				if(statusCode.is4xxClientError()) {
 					return Mono.error(new HttpServerErrorException(statusCode));
+				}else if (statusCode.is5xxServerError()) {
+					return Mono.error(new HttpServerErrorException(statusCode));
 				}
 				return Mono.just(response);
 			})
+			.retry(1)
 			.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
@@ -484,9 +487,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					HttpStatus statusCode = response.statusCode();
 					if (statusCode.is4xxClientError()) {
 						return Mono.error(new HttpServerErrorException(statusCode));
+					}else if (statusCode.is5xxServerError()) {
+						return Mono.error(new HttpServerErrorException(statusCode));
 					}
 					return Mono.just(response);
 				})
+				.retry(1)
 				.flatMap(response -> response.bodyToMono(Object.class));
 	}
 

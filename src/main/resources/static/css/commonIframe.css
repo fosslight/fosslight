@@ -503,6 +503,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .editSearchUp dl.fideCase dd label {display:inline-block;padding:0 15px 0 0;width:115px;text-align:right;font-size:13px;color:#454545;}
 .editSearchUp dl.fideCase dd input {width:766px;}
 
+.uploadSet .fileex_fontcolor {color:#ff5a00;}
 .uploadSet .fileex_back {float:left;}
 .uploadSet .uploadList {float:left;display:inline-block;padding:0 0 0 21px;}
 .uploadSet .uploadList li {padding:3px 0;}
