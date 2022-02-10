@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
@@ -224,7 +225,9 @@ public interface OssMapper {
 
 	void deleteOssLicenseDetectedSync(OssMaster ossMaster);
 
-	void updateOssComponents(OssMaster ossMaster);
+	int updateOssComponents(OssMaster ossMaster);
 
 	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
+
+	List<OssComponents> getConfirmOssComponentsList(OssMaster ossMaster);
 }

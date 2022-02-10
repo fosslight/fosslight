@@ -41,6 +41,7 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
@@ -2789,45 +2790,61 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				afterOssNameVersionBean = getOssInfo(ossId, true);
 				afterOssNameVersionBeanList.add(afterOssNameVersionBean);
 			}
-
+			
+			beforeOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+			afterOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+			
 			ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
 			ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
 			
-			// oss_components > admin check except
 			ossMaster.setOssName(beforeOssName);
-			ossMaster.setMergeOssName(afterOssName);
 			ossMaster.setOssVersion(null);
 			
 			// 3rdParty == 'CONF'
 			List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
 
 			if (confirmPartnerList.size() > 0) {
+				ossMaster.setMergeOssName(afterOssName);
 				ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				ossMapper.updateOssComponents(ossMaster);
 				
 				for (PartnerMaster pm : confirmPartnerList) {
-					String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-							"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-							"	<tbody>\r\n" +
-							"		<tr>\r\n" +
-							"		    <th>OSS Name(OSS Version)</th>\r\n" +
-							"                    <th>OSS Name(OSS Version)</th>\r\n" +
-							"		</tr>\r\n" +
-							"                <tr>\r\n" +
-							"                    <td style=\"text-align:center;\">"+ beforeOssName + "</td>\r\n" +
-							"                    <td style=\"text-align:center;\">"+ afterOssName + "</td>\r\n" +
-							"                </tr>\r\n" +
-							"	</tbody>\r\n" +
-							"</table>";
+					ossMaster.setPrjId(pm.getPartnerId());
 					
-					// partner Comment Regist
-					CommentsHistory historyBean = new CommentsHistory();
-					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
-					historyBean.setReferenceId(pm.getPartnerId());
-					historyBean.setStatus("OSS Name Changed");
-					historyBean.setContents(contents);
+					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
+					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					
+					int updateSuccess = 0;
+					for (OssComponents oc : confirmOssComponentsList) {
+						ossMaster.setOssVersion(oc.getOssVersion());
+						updateSuccess = ossMapper.updateOssComponents(ossMaster);
+						
+						if(updateSuccess > 0) {
+							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
+									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
+									"	<tbody>\r\n" +
+									"		<tr>\r\n" +
+									"		    <th>OSS Name(OSS Version)</th>\r\n" +
+									"                    <th>OSS Name(OSS Version)</th>\r\n" +
+									"		</tr>\r\n" +
+									"                <tr>\r\n" +
+									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
+									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
+									"                </tr>\r\n" +
+									"	</tbody>\r\n" +
+									"</table>";
+							
+							// partner Comment Regist
+							CommentsHistory historyBean = new CommentsHistory();
+							historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+							historyBean.setReferenceId(pm.getPartnerId());
+							historyBean.setStatus("OSS Name Changed");
+							historyBean.setContents(contents);
 
-					commentService.registComment(historyBean);
+							commentService.registComment(historyBean);
+						}
+						
+						updateSuccess = 0;
+					}
 				}
 			}
 			
@@ -2835,31 +2852,46 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			List<Project> confirmProjectList = ossMapper.getOssNameMergeProjectList(ossMaster);
 
 			if (confirmProjectList.size() > 0) {
-				ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				ossMapper.updateOssComponents(ossMaster);
-
+				ossMaster.setMergeOssName(afterOssName);
+				ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				
 				for (Project prj : confirmProjectList) {
-					String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-							"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-							"	<tbody>\r\n" +
-							"		<tr>\r\n" +
-							"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-							"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-							"		</tr>\r\n" +
-							"                <tr>\r\n" +
-							"                    <td style=\"text-align:center;\">"+ beforeOssName + "</td>\r\n" +
-							"                    <td style=\"text-align:center;\">"+ afterOssName + "</td>\r\n" +
-							"                </tr>\r\n" +
-							"	</tbody>\r\n" +
-							"</table>";
+					ossMaster.setPrjId(prj.getPrjId());
 					
-					// Project > Identification comment regist
-					CommentsHistory historyBean = new CommentsHistory();
-					historyBean.setReferenceId(prj.getPrjId());
-					historyBean.setStatus("OSS Name Changed");
-					historyBean.setContents(contents);
-					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-					commentService.registComment(historyBean);
+					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
+					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					
+					int updateSuccess = 0;
+					for (OssComponents oc : confirmOssComponentsList) {
+						ossMaster.setOssVersion(oc.getOssVersion());
+						updateSuccess = ossMapper.updateOssComponents(ossMaster);
+						
+						if(updateSuccess > 0) {
+							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
+									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
+									"	<tbody>\r\n" +
+									"		<tr>\r\n" +
+									"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+									"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+									"		</tr>\r\n" +
+									"                <tr>\r\n" +
+									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                </tr>\r\n" +
+									"	</tbody>\r\n" +
+									"</table>";
+							
+							// Project > Identification comment regist
+							CommentsHistory historyBean = new CommentsHistory();
+							historyBean.setReferenceId(prj.getPrjId());
+							historyBean.setStatus("OSS Name Changed");
+							historyBean.setContents(contents);
+							historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+							commentService.registComment(historyBean);
+						}
+						
+						updateSuccess = 0;
+					}
 				}
 			}
 		}
