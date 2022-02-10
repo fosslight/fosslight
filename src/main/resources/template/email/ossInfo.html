@@ -51,15 +51,15 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<td style="padding:5px;">$!oss_basic_info.ossVersion #if($!oss_basic_info.ossVersion != '') / #end 
+										<td style="padding:5px;">$!oss_basic_info.ossVersion #if($!oss_basic_info.ossVersion != '') #end 
 										#if($oss_basic_info.ossType.contains("M")) <span class="iconSet multi">Multi</span> #end
 										#if($oss_basic_info.ossType.contains("D")) <span class="iconSet dual">Dual</span> #end
 										#if($oss_basic_info.ossType.contains("V")) <span class="iconSet vdif">v-Diff</span> #end
 										</td>
 									</tr>
 									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name / Type</th>
-										<td style="padding:5px;">$!oss_basic_info.licenseName / $!oss_basic_info.licenseType</td>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
+										<td style="padding:5px;">$!oss_basic_info.licenseName ($!oss_basic_info.licenseType)</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
