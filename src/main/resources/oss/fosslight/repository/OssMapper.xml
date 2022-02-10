@@ -2125,14 +2125,14 @@
     <update id="updateOssComponents" parameterType="oss.fosslight.domain.OssMaster">
         UPDATE OSS_COMPONENTS T1
            SET T1.OSS_NAME			= #{mergeOssName}
-         WHERE T1.OSS_NAME			= #{ossName}
+         WHERE T1.REFERENCE_ID 		= #{prjId}
+           AND T1.OSS_NAME			= #{ossName}
+           AND T1.OSS_VERSION		= #{ossVersion}
 		<choose>
     		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-           AND T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
            AND T1.REFERENCE_DIV IN ('20')
     		</when>
     		<otherwise>
-           AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
            AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
     		</otherwise>
     	</choose>
@@ -2148,5 +2148,21 @@
 		 WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR T2.OSS_NICKNAME = #{ossName}) 
 		   AND T1.OSS_VERSION = #{ossVersion}
 		 ORDER BY CREATED_DATE DESC, OSS_VERSION DESC LIMIT 1;
+	</select>
+	
+	<select id="getConfirmOssComponentsList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssComponents">
+		SELECT *
+		  FROM OSS_COMPONENTS OC
+		 WHERE OC.ADMIN_CHECK_YN != 'Y'
+		   AND OC.REFERENCE_ID = #{prjId}
+		 <choose>
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+		   		AND OC.REFERENCE_DIV IN ('20')
+    		</when>
+    		<otherwise>
+    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    		</otherwise>
+    	</choose>
+    	  AND OC.OSS_NAME = #{ossName}
 	</select>
 </mapper>
