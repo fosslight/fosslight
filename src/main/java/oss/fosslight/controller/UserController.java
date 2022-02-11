@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.USER;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
@@ -38,7 +39,10 @@ import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.StringUtil;
+import oss.fosslight.validation.T2BasicValidator;
 import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoAdminValidator;
 
 @Controller
 @Slf4j
@@ -214,6 +218,43 @@ public class UserController extends CoTopComponent {
 		}
 		
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value=USER.UPDATE_USERNAME_DIVISION)
+	public  @ResponseBody ResponseEntity<Object> updateUserNameDivision(
+			@RequestBody Map<String, String> params
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model) throws Exception{
+		T2Users userInfo = new T2Users();
+		try {
+			params.put("USER_NAME", params.get("userName").trim());
+			params.put("DIVISION", params.get("division").trim());
+			if(params.get("password") != null) {
+				params.put("PASSWORD", params.get("password").trim());
+			}
+			T2CoAdminValidator validator = new T2CoAdminValidator();
+			T2CoValidationResult vr = validator.validate(params);
+			if(!vr.isValid()) {
+				return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+			}
+			userInfo.setUserId(loginUserName());
+			userInfo.setModifier(loginUserName());
+			userInfo.setUserName(params.get("USER_NAME"));
+			userInfo.setDivision(params.get("DIVISION"));
+			
+			String passwd = params.get("PASSWORD");
+			if(!StringUtil.isEmpty(passwd)) {
+				userInfo.setPassword(encodePassword(passwd)); // password encoding	
+			}
+			
+			userService.updateUserNameDivision(userInfo);
+			
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
+		}
+		return makeJsonResponseHeader();
 	}
 	
 	@PostMapping(value=USER.TOKEN_PROC)

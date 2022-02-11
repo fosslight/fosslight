@@ -580,4 +580,9 @@ public class T2UserServiceImpl implements T2UserService {
 		return userMapper.existUserIdOrEmail(userId) > 0;
 	}
 
+	@Override
+	public int updateUserNameDivision(T2Users userInfo) {
+		return userMapper.updateUserNameDivision(userInfo);
+	}
+
 }

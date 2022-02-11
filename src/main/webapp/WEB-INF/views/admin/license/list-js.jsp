@@ -31,6 +31,12 @@
 	//이벤트 객체
 	var evt = {
 		init : function(){
+
+			$('select[name=licenseType]').val('${searchBean.licenseType}').trigger('change');
+			$('select[name=obligationType]').val('${searchBean.obligationType}').trigger('change');
+			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
+			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
+			
 			$('#search').on('click',function(e){
 				initParam = $('#licenseSearch').serializeObject();
 				
@@ -49,8 +55,6 @@
 					list.load();
 					initYn = false;
 				} else {
-					var postData = $('#licenseSearch').serializeObject();
-					
 					if(postData.restrictions != null) {
 						postData.restrictions = JSON.stringify(postData.restrictions);
 						postData.restrictions = postData.restrictions.replace(/\"|\[|\]/gi, "");
@@ -62,16 +66,10 @@
 				}
 			});
 			
-			$('select[name=licenseType]').val('${searchBean.licenseType}').trigger('change');
-			$('select[name=obligationType]').val('${searchBean.obligationType}').trigger('change');
-			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
-			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
-			
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);
 			});
-			
-			$("#licenseNameAllSearchFlag").on("click", function(e){
+			$("#licenseNameAllSearchFlag").on("change", function(e){
 				$("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 		}
