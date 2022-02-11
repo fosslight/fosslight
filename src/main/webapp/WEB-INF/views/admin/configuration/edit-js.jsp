@@ -84,7 +84,7 @@
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
-		        success: fn.onUpdateSuccess2,
+		        success: fn.onUpdateSuccess,
 	            error : fn.onError
 		    }).submit();
 		},
@@ -104,16 +104,6 @@
 		    }).submit();
 		},
 		onUpdateSuccess : function(json, status){
-			loading.hide();
-			if(json.resCd == '10'){
-				alertify.alert('<spring:message code="msg.common.success" />', function(){
-					top.location.reload();
-				}); 
-			}else{
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
-			}
-		},
-		onUpdateSuccess2 : function(json, status){
 			loading.hide();
 			if(json.resCd == '10'){
 				alertify.success('<spring:message code="msg.common.success" />');
