@@ -401,13 +401,12 @@ public class CoCode {
      * @param s the s
      * @return the string
      */
-    public String createCommonCheckboxString(String val, String name, Boolean NAExceptionFlag){
+    public String createCommonCheckboxString(String status, String name, Boolean NAExceptionFlag){
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
         NAExceptionFlag = StringUtils.isEmpty(NAExceptionFlag) ? true : NAExceptionFlag; // default 시 true로 setting
         
         if(!StringUtils.isEmpty(name)) {
-        	List<String> values = Arrays.asList(val.split(","));
 	        for(int k = codeDtls.size(); j < k; j++){
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 	           
@@ -419,7 +418,7 @@ public class CoCode {
 	            if(!NAExceptionFlag && codedtl.cdDtlNo.equals("NA")) // default로 NA도 생성 false값 입력시 예외처리
 	            	continue;
 	            
-	            stringbuffer.append("    <input name='").append(name).append("' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((values.contains(codedtl.cdDtlNo)) ? "checked='checked'":""); 
+	            stringbuffer.append("    <input name='").append(name).append("' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((status.indexOf(codedtl.cdDtlNo)>-1)?"checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	        }
         }

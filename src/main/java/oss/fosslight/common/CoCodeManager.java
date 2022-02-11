@@ -655,11 +655,11 @@ public class CoCodeManager extends CoTopComponent {
         }
     }
     
-    public static String genCommonCheckbox(String s, String name, String val, Boolean NAExceptionFlag) {
+    public static String genCommonCheckbox(String s, String name, Boolean NAExceptionFlag) {
     	CoCode code = getCodeInstance(s);
 		
     	if(!StringUtils.isEmpty(code)) {
-    		return code.createCommonCheckboxString(val, name, NAExceptionFlag);
+    		return code.createCommonCheckboxString(s, name, NAExceptionFlag);
     	} else {
     		return null;
     	}

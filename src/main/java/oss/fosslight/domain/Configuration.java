@@ -22,10 +22,6 @@ public class Configuration extends ComBean implements Serializable {
 	/** The Default Locale. */
 	private String defaultLocale;
 	
-	/** The default search type. */
-	private String defaultSearchType;
-	
-	
 	/**
 	 * Gets the Default Tab.
 	 *
@@ -38,7 +34,7 @@ public class Configuration extends ComBean implements Serializable {
 	/**
 	 * Sets the Default Tab.
 	 *
-	 * @param defaultTab the new default tab
+	 * @param Default Tab the new Default Tab
 	 */
 	public void setDefaultTab(String defaultTab) {
 		this.defaultTab = defaultTab;
@@ -56,29 +52,10 @@ public class Configuration extends ComBean implements Serializable {
 	/**
 	 * Sets the Default Locale.
 	 *
-	 * @param defaultLocale the new default locale
+	 * @param Default Locale the new Default Locale
 	 */
 	public void setDefaultLocale(String defaultLocale) {
 		this.defaultLocale = defaultLocale;
 	}
-
-	/**
-	 * Gets the default search type.
-	 *
-	 * @return the default search type
-	 */
-	public String getDefaultSearchType() {
-		return defaultSearchType;
-	}
-
-	/**
-	 * Sets the default search type.
-	 *
-	 * @param defaultSearchType the new default search type
-	 */
-	public void setDefaultSearchType(String defaultSearchType) {
-		this.defaultSearchType = defaultSearchType;
-	}
-	
 	
 }

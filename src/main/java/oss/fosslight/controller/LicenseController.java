@@ -39,7 +39,6 @@ import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
-import oss.fosslight.service.SearchService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoLicenseValidator;
@@ -50,7 +49,6 @@ public class LicenseController extends CoTopComponent{
 	@Autowired LicenseService licenseService;
 	@Autowired HistoryService historyService;
 	@Autowired CommentService commentService;
-	@Autowired SearchService searchService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_LICENSE_LIST";
 	
@@ -60,10 +58,8 @@ public class LicenseController extends CoTopComponent{
 		
 		if(!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 			deleteSession(SESSION_KEY_SEARCH);
-			searchBean = searchService.getLicenseSearchFilter(loginUserName());
-			if(searchBean == null) {
-				searchBean = new LicenseMaster();
-			}
+			
+			searchBean = new LicenseMaster();
 		} else if(getSessionObject(SESSION_KEY_SEARCH) != null) {
 			searchBean = (LicenseMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}

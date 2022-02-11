@@ -214,7 +214,7 @@
     	<description>코드값을 받아 check 박스를 만들어준다.(공통)</description>
     	<name>genCommonCheckbox</name>
     	<function-class>oss.fosslight.common.CoCodeManager</function-class>
-    	<function-signature>java.lang.String genCommonCheckbox(java.lang.String, java.lang.String, java.lang.String, java.lang.Boolean)</function-signature>
+    	<function-signature>java.lang.String genCommonCheckbox(java.lang.String, java.lang.String, java.lang.Boolean)</function-signature>
     </function>
     <function>
     	<description>코드값을 받아 select 박스를 만들어준다.</description>

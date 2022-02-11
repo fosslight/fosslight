@@ -5,7 +5,6 @@
 package oss.fosslight.repository;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface SearchMapper {
@@ -16,11 +15,8 @@ public interface SearchMapper {
 
     String selectLicenseSearchFilter(String userId);
 
-    String selectSearchFilter(@Param(value = "type") String type, @Param(value = "userId") String userId);
+    String selectSearchFilter(String type, String userId);
 
-    void upsertSearchFilter(@Param(value = "jsonfilter") String jsonfilter, @Param(value = "userId") String userId, @Param(value = "type") String type);
-
-	String selectPartnerSearchFilter(String userId);
-	String selectSelfCheckSearchFilter(String userId);
+    void upsertSearchFilter(String jsonfilter, String userId, String type);
 
 }

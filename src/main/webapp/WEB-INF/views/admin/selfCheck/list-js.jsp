@@ -8,7 +8,6 @@
 	var userList;
 	var userIdList;
 	var totalRow = 0;
-	var refreshParam = {};
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
 	
 	$(document).ready(function () {
@@ -37,12 +36,6 @@
 	//OSS 쪽에서 프로젝트 검색을 위한 데이터
 	var evt = {
 		init : function(){
-
-			refreshParam = $('#projectSearch').serializeObject();
-			
-			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
-			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
-			
 			$('#search').on('click',function(e){
 				e.preventDefault();
 				
@@ -52,6 +45,9 @@
 
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
+			
+			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
+			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
 			
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);
@@ -252,7 +248,7 @@
 					
 					createTabInFrame(rowData['prjId']+'_selfCheck', '#<c:url value="/selfCheck/edit/'+rowData['prjId']+'"/>');
 				},
-				postData : refreshParam
+				postData : {ossId : '${ossId}'}
 			});
 		}
 	};

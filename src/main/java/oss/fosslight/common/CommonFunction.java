@@ -2691,14 +2691,9 @@ public class CommonFunction extends CoTopComponent {
 		
 		if(validMessageMap != null) {
 			for(String key : validMessageMap.keySet()) {
-				if("isValid".equalsIgnoreCase(key)) {
-					continue;
-				}
-				String msg = removeLineSeparator(validMessageMap.get(key));
 				if(key.indexOf(".") > -1) {
+					String msg = removeLineSeparator(validMessageMap.get(key));
 					rtnStr += "<br />" + key.substring(key.indexOf(".") +1, key.length()) + " : " + msg;
-				} else {
-					rtnStr += "<br />" + key + " : " + msg;
 				}
 			}
 		}

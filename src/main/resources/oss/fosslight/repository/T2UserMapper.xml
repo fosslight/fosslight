@@ -369,17 +369,4 @@
     						  ON PM.CREATOR = T2.USER_ID
     					   WHERE T2.USER_ID = #{userId})
 	</update>
-	
-	<update id="updateUserNameDivision" parameterType="oss.fosslight.domain.T2Users">
-        UPDATE 
-        	T2_USERS 
-        SET USER_NAME = #{userName}
-        	, DIVISION = #{division}
-        <if test="!@oss.fosslight.util.StringUtil@isEmpty(password)">
-            , PASSWORD = #{password}
-        </if>
-	         , MODIFIER = #{modifier}
-        WHERE 
-        	USER_ID = #{userId}
-    </update>
 </mapper>

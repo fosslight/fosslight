@@ -52,7 +52,6 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.SearchService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
@@ -80,7 +79,6 @@ public class SelfCheckController extends CoTopComponent {
 	@Autowired VerificationMapper verificationMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired CodeMapper codeMapper;
-	@Autowired SearchService searchService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_SELFCHECK_LIST";
 	
@@ -100,11 +98,7 @@ public class SelfCheckController extends CoTopComponent {
 		
 		if(!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 			deleteSession(SESSION_KEY_SEARCH);
-			
-			searchBean = searchService.getSelfCheckSearchFilter(loginUserName());
-			if(searchBean == null) {
-				searchBean = new Project();
-			}
+			searchBean = new Project();
 		} else if(getSessionObject(SESSION_KEY_SEARCH) != null) {
 			searchBean = (Project) getSessionObject(SESSION_KEY_SEARCH);
 		}

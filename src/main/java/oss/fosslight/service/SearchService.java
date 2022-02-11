@@ -4,14 +4,8 @@
  */
 package oss.fosslight.service;
 
-import java.util.Map;
-
 import oss.fosslight.config.HistoryConfig;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 
 public interface SearchService extends HistoryConfig {
 
@@ -38,7 +32,5 @@ public interface SearchService extends HistoryConfig {
     PartnerMaster getPartnerSearchFilter(String userId);
 
     Object getSearchFilter(String type, String userId);
-
-	void saveSearchFilter(Map<String, Object> params, String userId);
 
 }

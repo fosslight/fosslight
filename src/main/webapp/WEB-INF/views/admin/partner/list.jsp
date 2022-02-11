@@ -39,13 +39,13 @@
 					<dd style="width:100%;">
 						<label style="width:100px;">Status</label>
 						<span class='checkSet'>
-						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", searchBean.status, false)}
+						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", false)}
             			</span>
 					</dd>
 					<dd class="">
 						<label style="width:100px;">Created Date</label>
-						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8" autocomplete="off"/> ~ 
-						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8" autocomplete="off"/> 			
+						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8"/> ~ 
+						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8"/> 			
 					</dd>
 					<dd class="centerAign">
 						<label>Creator</label>

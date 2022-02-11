@@ -58,5 +58,4 @@ public interface T2UserService extends UserDetailsService {
 	public boolean checkPassword(String rawPassword, T2Users bean);
 	
 	public boolean existUserIdOrEmail(String userId);
-	public int updateUserNameDivision(T2Users userInfo);
 }

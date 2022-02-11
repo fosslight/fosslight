@@ -61,7 +61,6 @@ import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.SearchService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
@@ -88,7 +87,6 @@ public class OssController extends CoTopComponent{
 	@Autowired ProjectService projectService;
 	@Autowired PartnerService partnerService;
 	@Autowired AutoFillOssInfoService autoFillOssInfoService;
-	@Autowired SearchService searchService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_OSS_LIST";
 	
@@ -98,10 +96,8 @@ public class OssController extends CoTopComponent{
 		
 		if(!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 			deleteSession(SESSION_KEY_SEARCH);
-			searchBean = searchService.getOssSearchFilter(loginUserName());
-			if(searchBean == null) {
-				searchBean = new OssMaster();
-			}
+			
+			searchBean = new OssMaster();
 		} else if(getSessionObject(SESSION_KEY_SEARCH) != null) {
 			searchBean = (OssMaster) getSessionObject(SESSION_KEY_SEARCH);
 			
@@ -173,6 +169,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		Map<String, Object> map = null;
+		ossMaster.setSearchFlag(CoConstDef.FLAG_YES);
 		ossMaster.setSearchFlag(CoConstDef.FLAG_YES); // 화면 검색일 경우 "Y" export시 "N"
 		
 		try {
