@@ -33,6 +33,9 @@
 	//event object
 	var evt = {
 		init : function(){
+
+			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
+			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
 			
 			$('#search').on('click',function(e){
 				e.preventDefault();
@@ -47,22 +50,19 @@
 				}
 			});
 			
-			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
-			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
-			
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);
 			});
 
-			$("#ossNameAllSearchFlag").on("click", function(e){
+			$("#ossNameAllSearchFlag").on("change", function(e){
 				$("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 
-			$("#licenseNameAllSearchFlag").on("click", function(e){
+			$("#licenseNameAllSearchFlag").on("change", function(e){
 				$("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 
-			$("#deactivateFlag").on("click", function(){
+			$("#deactivateFlag").on("change", function(){
 				$("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 		}

@@ -65,4 +65,6 @@ public interface T2UserMapper {
 	public int existUserIdOrEmail(String userId);
 
 	public void updateStatisticsMostUsedInfo(T2Users t2Users);
+
+	public int updateUserNameDivision(T2Users userInfo);
 }

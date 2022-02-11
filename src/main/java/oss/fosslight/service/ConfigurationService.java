@@ -5,9 +5,11 @@
 
 package oss.fosslight.service;
 
+import java.util.HashMap;
+
 import oss.fosslight.domain.Configuration;
 
 public interface ConfigurationService {
-	public void updateDefaultTab(Configuration configuration);
-	public void updateDefaultLocale(Configuration configuration);
+	public void updateDefaultSetting(Configuration configuration);
+//	public void updateDefaultLocale(Configuration configuration);
 }

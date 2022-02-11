@@ -14,8 +14,8 @@
 					<dd>
 						<label>OSS Name</label>
 						<input name="ossName" type="text" class="autoComOss" value="${searchBean.ossName}" style="width:230px"/>
-						<input type="checkbox"id="ossNameAllSearchFlag"/><span>&nbsp;Exact Match</span>
-						<input type="hidden" name="ossNameAllSearchFlag" value=""/>
+						<input type="checkbox"id="ossNameAllSearchFlag" ${searchBean.ossNameAllSearchFlag eq 'Y' ? 'checked="checked"' : ''} /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="ossNameAllSearchFlag" value="${searchBean.ossNameAllSearchFlag}"/>
 					</dd>
 					<dd class="textArea">
 						<label>Copyright Text</label>
@@ -24,8 +24,8 @@
 					<dd>
 						<label>License Name</label>
 						<input name="licenseName" type="text" class="autoComLicense" value="${searchBean.licenseName}" style="width:230px"/>
-						<input type="checkbox" id="licenseNameAllSearchFlag"/><span>&nbsp;Exact Match</span>
-						<input type="hidden" name="licenseNameAllSearchFlag" value=""/>
+						<input type="checkbox" id="licenseNameAllSearchFlag" ${searchBean.licenseNameAllSearchFlag eq 'Y' ? 'checked="checked"' : ''} /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="licenseNameAllSearchFlag" value="${searchBean.licenseNameAllSearchFlag}"/>
 					</dd>
 					<dd>
 						<label>Description</label>
@@ -37,8 +37,8 @@
 					</dd>
 					<dd>
 						<label>Deactivate</label>
-						<input type="checkbox" id="deactivateFlag" value="${searchBean.deactivateFlag}" style="margin:0 5px;"/>
-						<input type="hidden" name="deactivateFlag" value=""/>
+						<input type="checkbox" id="deactivateFlag" ${searchBean.deactivateFlag eq 'Y' ? 'checked="checked"' : ''} style="margin:0 5px;"/>
+						<input type="hidden" name="deactivateFlag" value="${searchBean.deactivateFlag}"/>
 					</dd>
 				</dl>
 				<c:if test="${ct:isAdmin()}">
@@ -57,8 +57,8 @@
 					</dd>
 					<dd>
 						<label>Created Date</label>
-						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.cStartDate}" maxlength="8"/> ~ 
-						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.cEndDate}" maxlength="8"/> 
+						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.cStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.cEndDate}" maxlength="8" autocomplete="off"/> 
 					</dd>
 					<dd>
 						<label>Modifier</label>
@@ -72,8 +72,8 @@
 					</dd>
 					<dd>
 						<label>Modified Date</label>
-						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8"/> ~ 
-						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8"/> 
+						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8" autocomplete="off"/> 
 					</dd>
 					<dt style="width:20px;"></dt>
 					<dd style="padding-top: 6px;">

@@ -142,6 +142,7 @@
 		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
 		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
 	</definition>
+	<definition name="tiles/ajax/configuration/searchConditionArea" 	template="/WEB-INF/views/admin/configuration/AJAX/searchConditionArea.jsp"></definition>
 	<!-- 실서버 임시 index 페이지 -->
 	<definition name="tiles/main/index" extends="tiles/layout/template"/>
 </tiles-definitions>

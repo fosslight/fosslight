@@ -12,8 +12,8 @@
 					<dd>
 						<label>License Name</label>
 						<input type="text" name="licenseName" class="autoComLicense" value="${searchBean.licenseName}" style="width:230px"/>
-						<input type="checkbox" id="licenseNameAllSearchFlag" value="Y"/><span>&nbsp;Exact Match</span>
-						<input type="hidden" name="licenseNameAllSearchFlag" value="" />
+						<input type="checkbox" id="licenseNameAllSearchFlag" value="Y" ${searchBean.licenseNameAllSearchFlag eq 'Y' ? 'checked="checked"' : ''} /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="licenseNameAllSearchFlag" value="${searchBean.licenseNameAllSearchFlag}" />
 					</dd>
 					<dd class="textArea">
 						<label>License Text</label>
@@ -73,8 +73,8 @@
 					</dd>
 					<dd>
 						<label>Created Date</label>
-						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.cStartDate}" maxlength="8"/> ~ 
-						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.cEndDate}" maxlength="8"/> 
+						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.cStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.cEndDate}" maxlength="8" autocomplete="off"/> 
 					</dd>
 					<dd>
 						<label>Modifier</label>
@@ -89,8 +89,8 @@
 					</dd>
 					<dd>
 						<label>Modified Date</label>
-						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8"/> ~ 
-						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8"/> 
+						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8" autocomplete="off"/> 
 					</dd>
 				</dl>
 				</c:if>
