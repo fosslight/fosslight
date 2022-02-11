@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.29 (11/02/2022)
+## 🚀 Features
+
+- Add personal list search condition to setting @FOSSLight-dev (#405)
+
+## 🐛 Hotfixes
+
+- Fix the bug where the license was not displayed on the OSS details page @FOSSLight-dev (#398)
+- Fix bug where OSS Rename popup appears for new OSS @FOSSLight-dev (#397)
+
+## 🔧 Maintenance
+
+- Make the Favicon background transparent @soimkim (#406)
+- Match OSS not deactivated in Check License @soimkim (#402)
+- Change the format of OSS mail @soimkim (#401)
+- Add a message stating that a Notice file is required @FOSSLight-dev (#400)
+- Update FOSSLight icon @soimkim (#399)
+
+---
+
 ## v1.2.28 (28/01/2022)
 ## 🐛 Hotfixes
 
@@ -574,24 +594,3 @@
 - Change 3rd Party List - Searching UI @soimkim (#14)
 - Add a spring boot badge to README @soimkim (#12)
 - Add Description of ID and Password for Demo site @fu7mu4 (#10)
-
----
-
-## v1.1.0 (22/07/2021)
-## Changes
-## 🚀 Features
-
-- Improve project-related functions @FOSSLight-dev (#6)
-- Created Dockerfile and docker-compose.yml @sameer1046 (#3)
-
-## 🐛 Hotfixes
-
-- Improve project-related functions @FOSSLight-dev (#6)
-- Move DB related files to db directory @soimkim (#5)
-
-## 🔧 Maintenance
-
-- Add action for PR @soimkim (#9)
-- Move DB related files to db directory @soimkim (#5)
-- Update docker files @soimkim (#4)
-- Remove unnecessary files @soimkim (#1)
