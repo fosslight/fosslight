@@ -68,6 +68,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.SearchService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.ExcelUtil;
@@ -102,6 +103,7 @@ public class ProjectController extends CoTopComponent {
 	@Autowired CodeMapper codeMapper;
 	
 	@Autowired ResponseService responseService;
+	@Autowired SearchService searchService;
 	
 	/** The env. */
 	@Resource
@@ -159,7 +161,10 @@ public class ProjectController extends CoTopComponent {
 			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 				deleteSession(SESSION_KEY_SEARCH);
 				
-				searchBean = new Project();
+				searchBean = searchService.getProjectSearchFilter(loginUserName());
+				if(searchBean == null) {
+					searchBean = new Project();
+				}
 			} else if (getSessionObject(SESSION_KEY_SEARCH) != null) {
 				searchBean = (Project) getSessionObject(SESSION_KEY_SEARCH);
 			}

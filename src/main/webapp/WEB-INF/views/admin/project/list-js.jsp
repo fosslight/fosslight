@@ -54,6 +54,10 @@
 	//OSS 쪽에서 프로젝트 검색을 위한 데이터
 	var evt = {
 		init : function(){
+			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
+			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
+			$('select[name=networkServerType]').val('${searchBean.networkServerType}').trigger('change');
+			$('select[name=priority]').val('${searchBean.priority}').trigger('change');
 			
 			refreshParam = fn.setGridParam();
 			
@@ -73,9 +77,6 @@
 			$('#popChangeStatus').on('click', function(){
 				fn.changeStatusProc();
 			});
-			
-			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
-			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
 			
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);
