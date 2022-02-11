@@ -34,7 +34,7 @@
 		</div>
 		<div class="userLogout">
 			<input type="hidden" id="defaultTabAnchorArr" value="${sessUserInfo.defaultTabAnchor}" />
-			<span class="configurationSpan"><a href="#<c:url value="/configuration/edit"/>" class="add-tab" title="default tab">${sessUserInfo.userName}</a></span>
+			<span class="configurationSpan"><a href="#<c:url value="/configuration/edit"/>" class="add-tab" title="default tab"><img src="${ctxPath}/images/settings.png" alt="FOSSLight Hub" width="10" height="10" />&nbsp;&nbsp;${sessUserInfo.userName}</a></span>
 			<span class="userLogoutSpan"><a href="<c:url value="/session/logout-proc"/>" class="userLogoutA">Logout</a></span>
 			<p style="margin-top: 20px;"><marquee behavior="scroll" direction="left">${ct:getCodeExpString(ct:getConstDef('CD_MARQUEE'), ct:getConstDef('CD_DTL_CONTENTS'))}</marquee></p>
 		</div>

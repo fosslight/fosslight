@@ -42,6 +42,10 @@
 	//event
 	var evt = {
 		init : function(){
+
+			$('select[name=division]').val('${searchBean.division}').trigger('change');
+			$('select[name=status]').val('${searchBean.status}').trigger('change');
+			
 			refreshParam = $('#3rdSearch').serializeObject();
 			
 			$('#search').on('click',function(e){
@@ -64,9 +68,6 @@
 				
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
-			
-			$('select[name=division]').val('${searchBean.division}').trigger('change');
-			$('select[name=status]').val('${searchBean.status}').trigger('change');
 			
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);

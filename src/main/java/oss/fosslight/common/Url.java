@@ -452,6 +452,7 @@ public final class Url {
 		public static final String AUTOCOMPLETE_CREATOR_DIVISION_AJAX = PATH + "/autoCompleteCreatorDivisionAjax";
 		
 		public static final String CHANGE_PASSWORD = PATH + "/changePassword";
+		public static final String UPDATE_USERNAME_DIVISION = PATH + "/updateUserNameAndDivision";
 		
 		public static final String TOKEN_PROC = PATH + "/tokenProc/{procType}";
 	}
@@ -590,7 +591,11 @@ public final class Url {
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
-		public static final String SAVE_DEFAULT_LOCALE_AJAX = PATH + "/saveDefaultLocaleAjax";
+
+		public static final String VIEW_SEARCH_CONDITION_AJAX = PATH + "/loadDefaultSearchCondition";
+		public static final String VIEW_SEARCH_CONDITION_JSP = TILES_AJAX_ROOT + PATH + "/searchConditionArea";
+		
+		public static final String UPDATE_SEARCH_CONDITION_AJAX = PATH + "/updateDefaultSearchCondition";
 	}
 	
 	public static final class SENT_MAIL {

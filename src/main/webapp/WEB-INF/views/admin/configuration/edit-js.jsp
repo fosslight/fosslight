@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script>
-	var defaultLocale = '${sessUserInfo.defaultLocale}';
+	//var defaultLocale = '${sessUserInfo.defaultLocale}';
 	var defaultTab = '${sessUserInfo.defaultTab}';
 	$(document).ready(function(){
 		'use strict';
@@ -18,12 +18,8 @@
 					$("#defaultTab"+val).attr('checked', true);
 				});
 			}
-
-			if(!defaultLocale) {
-				$("#selectLang").val("1").prop("selected", true);
-			} else {
-				$("#selectLang").val(defaultLocale).prop("selected", true);
-			}
+			$('#ConfigurationForm select[name="defaultLocale"]').trigger('change');
+			$('#userInfoArea select[name="division"]').trigger('change');
 		},
 	};
 	
@@ -44,29 +40,58 @@
 					}
 				});
 			});
-
-			$("#saveDefaultLocale").on('click',function(){
-				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-					if (e) {
-						fn.updateDefaultLocale();
-					} else {
-						return false;
-					}
-				});
-			});
 		}			
 	};
 
 	var fn = {
-		updateDefaultLocale : function (){
-			$("#localeConfigurationForm").ajaxForm({
-				url :'<c:url value="/configuration/saveDefaultLocaleAjax"/>',
-				type : 'POST',
-				dataType:"json",
-				cache : false,
-				success: fn.onUpdateSuccess,
-				error : fn.onError
-			}).submit();
+		loadSearchCondition: function(){
+			var searchAreaFlag = $("#defaultSearch option:selected").val();
+			$("#searchConditionArea").fadeOut(300);
+			$("#searchConditionBtnArea").fadeOut(300);
+			
+			if(searchAreaFlag != "") {
+				$.ajax({
+					url : '<c:url value="/configuration/loadDefaultSearchCondition"/>',
+					dataType : 'html',
+					cache : false,
+					data : {'defaultSearchType' : searchAreaFlag},
+					success : function(detailResult){
+						$("#searchConditionArea").html(detailResult);
+						$("#searchConditionArea").fadeIn(300);
+						$("#searchConditionBtnArea").fadeIn(300);
+					},
+					error : function(request,status,error){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						$("#defaultSearch").val("");
+					}
+				});
+				
+			}
+			
+		},
+		updateSearchCondition: function(){
+			// multiple checkbox values to comma separate
+			var chkElArr = ["restrictions", "statuses", "status"];
+			$.each(chkElArr, function(index, item){ 
+				var selectEl = $('#searchConditionForm input[name="'+item+'"]');
+				if(selectEl.length > 0) {
+					fn.appendFormCheckboxValuesEl(item);
+				}
+			});
+			
+		    $("#searchConditionForm").ajaxForm({
+		    	url : '<c:url value="/configuration/updateDefaultSearchCondition"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success: fn.onUpdateSuccess2,
+	            error : fn.onError
+		    }).submit();
+		},
+		appendFormCheckboxValuesEl(target) {
+			$('#searchConditionForm input[name="chk_'+target+'"]').remove();
+			var addEl = '<input type="hidden" name="chk_'+target+'" value="'+ $('input[name="'+target+'"]:checked').map(function () {return this.value;}).get().join(",") +'" />';
+			$("#searchConditionForm").append(addEl);
 		},
 		updateSubmit : function(){
 		    $("#ConfigurationForm").ajaxForm({
@@ -88,28 +113,46 @@
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		},
+		onUpdateSuccess2 : function(json, status){
+			loading.hide();
+			if(json.resCd == '10'){
+				alertify.success('<spring:message code="msg.common.success" />');
+			}else{
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		},
 		onError : function(data, status){
 			alertify.error('<spring:message code="msg.common.valid2" />', 0);
 	    },
 	    changePassword : function(){
 			var params = {};
 			var password = $("#password").val();
-
-			if(fn.checkPassword(password)){
-				$.ajax({
-					type: 'POST',
-					url :'<c:url value="/system/user/changePassword"/>',
-					data: JSON.stringify({'password': password}),
-					contentType : 'application/json',
-			        success: fn.onUpdateSuccess,
-		            error : fn.onError
-				});
-			}
-		},
-	    checkPassword : function(password){		    
-			// TODO - Password에대해 기준이 정해지면 추가할 예정
-			
-		    return true;
+			var userName = $('#userInfoArea input[name="userName"]').val();
+			var division = $('#userInfoArea select[name="division"] option:selected').val();
+			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+				if (e) {
+					$.ajax({
+						type: 'POST',
+						url :'<c:url value="/system/user/updateUserNameAndDivision"/>',
+						data: JSON.stringify({'userName':userName, 'division':division, 'password': password}),
+						contentType : 'application/json',
+						success: function (data) {
+							if("true" != data.isValid) {
+								if(data.validMsg) {
+									alertify.alert(data.validMsg);
+								} else {
+									alertify.error('<spring:message code="msg.common.valid2" />', 0);
+								}
+							} else {
+								alertify.success('<spring:message code="msg.common.success" />');
+							}
+						},
+			            error : fn.onError
+					});
+				} else {
+					return false;
+				}
+			});
 		}
 	};
 	

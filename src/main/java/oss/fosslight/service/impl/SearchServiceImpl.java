@@ -4,18 +4,27 @@
  */
 package oss.fosslight.service.impl;
 
-import com.google.gson.Gson;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
+
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.domain.*;
-import oss.fosslight.repository.*;
+import oss.fosslight.common.SearchType;
+import oss.fosslight.domain.History;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.PartnerMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.SearchMapper;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.common.SearchType;
 
 
 
@@ -106,7 +115,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 
     @Override
     public Project getSelfCheckSearchFilter(String userId) {
-        String filterString = searchMapper.selectProjectSearchFilter(userId);
+        String filterString = searchMapper.selectSelfCheckSearchFilter(userId);
         if(filterString == null) {
             return null;
         }
@@ -132,7 +141,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 
     @Override
     public PartnerMaster getPartnerSearchFilter(String userId) {
-        String filterString = searchMapper.selectProjectSearchFilter(userId);
+        String filterString = searchMapper.selectPartnerSearchFilter(userId);
         if(filterString == null) {
             return null;
         }
@@ -175,10 +184,20 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
         }
         return new Gson().fromJson(jsonString, resultClass);
     }
+    
+	@Override
+	public void saveSearchFilter(Map<String, Object> params, String userId) {
+		String type = (String)params.get("defaultSearchType");
+		params.remove("defaultSearchType");
+		
+		String stringjson = new Gson().toJson(params);
+		searchMapper.upsertSearchFilter(stringjson, userId, SearchType.valueOf(type).getName());
+	}
 
 
     @Override
     public History work(Object param) {
         return null;
     }
+
 }
