@@ -1840,8 +1840,12 @@
 			dataType : 'json',
 			cache : false,
 			data : {'commId' : commId},
-			success : function(){},
-			error : function(){}
+			success : function(){
+				fn_commemt.getCommentList();
+			},
+			error : function(){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
 		});
 	}
 function modifyComment(obj){
@@ -1883,6 +1887,8 @@ function modifyComment(obj){
 				}
 				$('.commModifyPop').hide();
 				$('#blind_wrap').hide();
+
+				fn_commemt.getCommentList();
 			},
 			error : function(){}
 		});
@@ -2009,15 +2015,35 @@ var fn_commemt = {
         $.ajax({
         	url : '<c:url value="/comment/getDivCommentList"/>',
             type : 'GET',
-            dataType : 'html',
+            dataType : 'json',
             cache : false,
             data : {
                 referenceId : $('input[name=ossId]').val(),
-                referenceDiv : 'oss'
+                referenceDiv : '40'
             },
             success : function(data){
-                $('#commentListArea').html(data);
-                $('#commentListArea').css('height', 'auto');
+            	$('#commentListArea').children().remove();
+				
+            	if(data.length != 0) {
+					for(var i = 0; i < data.length; i++) {
+						var commId = data[i].commId;
+						$('#commentListArea').append(commentTemp.html());
+						var temp = $('dl[name=commentClone]');
+						
+						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
+							temp.find('.nameArea').text(data[i].creator);
+						} else {
+							temp.find('.nameArea').text(data[i].status).append("</br>"+data[i].creator);
+						}
+						
+						temp.find('.dateArea').text(data[i].createdDate);
+						temp.find('.commentContentsArea').html(data[i].contents);
+						temp.find('input[name=commId]').val(commId);
+						temp.removeAttr('name');
+					}	
+				} else {
+					$('#commentListArea').append('<p class="noneTxt">No comments were registered.</p>');
+				}
             },
             error : function(xhr, ajaxOptions, thrownError){
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
