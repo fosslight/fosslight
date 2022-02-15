@@ -255,8 +255,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		sb = new StringBuilder(); // 초기화
 		
-		for(OssMaster location : ossDownloadLocation) {
-			sb.append(location.getDownloadLocation()).append(",");
+		if(ossDownloadLocation != null && !ossDownloadLocation.isEmpty()) {
+			for(OssMaster location : ossDownloadLocation) {
+				sb.append(location.getDownloadLocation()).append(",");
+			}
+		}else {
+			sb.append(ossMaster.getDownloadLocation());
 		}
 		
 		String[] ossDownloadLocations = new String(sb).split("[,]");
@@ -1706,7 +1710,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 							break;
 						case 1: // npm
-							p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+							p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
 							
 							break;
 						case 2: // pypi
