@@ -756,6 +756,7 @@
 			list = data.copyData.ossLicenses;
 			$('#copy').hide();
 			$('#delete').hide();
+			$('input[name=ossCopyFlag]').val("Y");
 		}else{
 			list = data.list.rows;
 		}
