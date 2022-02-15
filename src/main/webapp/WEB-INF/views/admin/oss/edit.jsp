@@ -15,6 +15,7 @@
 				<input type="hidden" name="downloadLocation"/>
 				<input type="hidden" name="licenseId" value=""/>
 				<input type="hidden" name="deactivateFlag" value="N"/>
+				<input type="hidden" name="ossCopyFlag" value="N"/>
 				<!-- Main Table [S] -->
 				<table class="dCase">
 					<colgroup>

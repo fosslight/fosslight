@@ -3573,6 +3573,10 @@ public class CommonFunction extends CoTopComponent {
 							
 							newestOssInfo.setOssNickname(newestMergeNickName);
 							totalAnalysis.setOssNickname(newestMergeNickName);
+							
+							askalono.setOssNickname(newestMergeNickName);
+							scancode.setOssNickname(newestMergeNickName);
+							userData.setOssNickname(newestMergeNickName);
 						} else {
 							totalNewestOssInfo = ossService.getNewestOssInfo(totalAnalysis); // 사용자 정보의 ossName기준 최신 등록정보
 
@@ -3583,6 +3587,10 @@ public class CommonFunction extends CoTopComponent {
 							
 							totalNewestOssInfo.setOssNickname(totalNewestMergeNickName);
 							totalAnalysis.setOssNickname(totalNewestMergeNickName);
+							
+							askalono.setOssNickname(totalNewestMergeNickName);
+							scancode.setOssNickname(totalNewestMergeNickName);
+							userData.setOssNickname(totalNewestMergeNickName);
 						}
 					} catch (Exception newestException) {
 						log.error(newestException.getMessage());
@@ -3615,6 +3623,10 @@ public class CommonFunction extends CoTopComponent {
 						
 						totalNewestOssInfo.setOssNickname(totalNewestMergeNickName);
 						totalAnalysis.setOssNickname(totalNewestMergeNickName);
+						
+						askalono.setOssNickname(totalNewestMergeNickName);
+						scancode.setOssNickname(totalNewestMergeNickName);
+						userData.setOssNickname(totalNewestMergeNickName);
 					}
 					
 					askalono.setGridId(""+gridSeq++);
