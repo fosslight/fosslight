@@ -32,9 +32,9 @@
 					</tr>
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 						<tr>
-							<th class="dCase">Password</th>
+							<th class="dCase"><span class="radioSet"><input type="checkbox" id="passwordEnabled" /><label for="single">Password</label></span></th>
 							<td class="dCase">
-								<input type="password" name="password" id="password" value="" style="width: 200px;"/>
+								<input type="password" name="password" id="password" value="" style="width: 200px;" disabled="disabled" />
 							</td>
 						</tr>
 					</c:if>

@@ -40,6 +40,12 @@
 					}
 				});
 			});
+			
+			$("#passwordEnabled").on('change', function(){
+				var isChecked = $('#passwordEnabled').is(":checked");
+				$("#password").attr("disabled", !isChecked);
+				$("#password").val('');
+			});
 		}			
 	};
 
