@@ -46,6 +46,8 @@ public class NvdDataService {
 	private final String NVD_META_URL = "https://nvd.nist.gov/feeds/json/cpematch/1.0/";
 	private final String NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/";
 	
+	private final int BATCH_SIZE = 500;
+	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
@@ -146,14 +148,14 @@ public class NvdDataService {
 			List<Map<String, Object>> itemList = null;
 			List<Map<String, Object>> params = null;
 			for(int idx = 0; idx < cnt; ) {
-				itemList = nvdDataMapper.getProducVerList(idx, 1000);
+				itemList = nvdDataMapper.getProducVerList(idx, BATCH_SIZE);
 				params = new ArrayList<>();
 				for(Map<String, Object> item : itemList) {
 					params.add(nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION")));
 				}
 				nvdDataMapper.insertNvdDataListTempV3(params);
 				
-				idx = idx+1000;
+				idx = idx+BATCH_SIZE;
 			}
 
 			nvdDataMapper.deleteNvdDataScoreV3();
@@ -277,7 +279,7 @@ public class NvdDataService {
 						List<Map<String, String>> insertDataList = new ArrayList<>();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
-							if( (insertDataList.size() % 1000) == 0 ) {
+							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
 								insertDataList = new ArrayList<>();
 							}
@@ -302,7 +304,7 @@ public class NvdDataService {
 						List<Map<String, String>> insertDataList = new ArrayList<>();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
-							if( (insertDataList.size() % 1000) == 0 ) {
+							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
 								insertDataList = new ArrayList<>();
 							}
@@ -320,7 +322,7 @@ public class NvdDataService {
 						List<Map<String, String>> insertDataList = new ArrayList<>();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
-							if( (insertDataList.size() % 1000) == 0 ) {
+							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
 								insertDataList = new ArrayList<>();
 							}
@@ -519,7 +521,6 @@ public class NvdDataService {
 	@SuppressWarnings("unchecked")
 	public String nvdMetaDataSyncJob() throws JsonParseException, JsonMappingException, IOException {
 		String resCd = "00";
-		int batchSize = 100;
 
 		// 1. Wait Job 데이터 조회
 		HashMap<String, Object> param = new HashMap<String, Object>();
@@ -606,7 +607,7 @@ public class NvdDataService {
 										cpe_name.put("cpeSeq", seq);
 										cpe_name.put("idx", nameIdx);
 										cpeNameList.add(cpe_name);
-										if(cpeNameList.size() >= 1000) {
+										if(cpeNameList.size() >= BATCH_SIZE) {
 											mapper.insertBulkCpeMatchNameData(cpeNameList);
 											cpeNameList = new ArrayList<>();
 										}
@@ -620,7 +621,7 @@ public class NvdDataService {
 								}
 								
 
-							if(seq % batchSize == 0 || seq == totSize) {
+							if(seq % BATCH_SIZE == 0 || seq == totSize) {
 								List<BatchResult> batResults = sqlSession.flushStatements();
 								batResults.clear();
 							}
