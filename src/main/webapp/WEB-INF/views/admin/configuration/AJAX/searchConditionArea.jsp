@@ -174,6 +174,12 @@ $(document).ready(function() {
 								</select>
 							</span>
 						</dd>
+						<c:if test="${!ct:isAdmin()}">
+							<dd class="">
+								<label class="vmiddle" style="width: 50%;">View My Projects Only</label>
+								<input type="checkbox" name="publicYn" value="N" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' } />
+							</dd>
+						</c:if>
 					</dl>
 				</c:when>
 				<c:when test="${defaultSearchType eq 'THIRD_PARTY'}">
@@ -225,6 +231,12 @@ $(document).ready(function() {
 							<label>Reviewer</label>
 							<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
 						</dd>
+						<c:if test="${!ct:isAdmin()}">
+							<dd class="lastAign" >
+								<label style="width:150px;">View My 3rd Parties Only</label>
+								<input type="checkbox" name="publicYn" value="N" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' } />
+							</dd>
+						</c:if>
 					</dl>
 				</c:when>
 

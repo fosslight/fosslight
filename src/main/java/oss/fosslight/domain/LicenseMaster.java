@@ -140,6 +140,8 @@ public class LicenseMaster extends ComBean implements Serializable {
 	/** sort order **/
 	private String sOrder;
 	
+	private String defaultSearchFlag;
+	
 	/**
 	 * Instantiates a new license master.
 	 */
@@ -840,4 +842,13 @@ public class LicenseMaster extends ComBean implements Serializable {
 	public void setsOrder(String sOrder) {
 		this.sOrder = sOrder;
 	}
+
+	public String getDefaultSearchFlag() {
+		return defaultSearchFlag;
+	}
+
+	public void setDefaultSearchFlag(String defaultSearchFlag) {
+		this.defaultSearchFlag = defaultSearchFlag;
+	}
+	
 }

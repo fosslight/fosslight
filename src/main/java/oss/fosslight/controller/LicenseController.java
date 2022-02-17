@@ -85,6 +85,11 @@ public class LicenseController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
+		
+		if("Y".equals(req.getParameter("ignoreSearchFlag"))) {
+			return makeJsonResponseHeader(new HashMap<String, Object>());
+		}
+		
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");

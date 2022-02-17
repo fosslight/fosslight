@@ -190,12 +190,34 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 		String type = (String)params.get("defaultSearchType");
 		params.remove("defaultSearchType");
 		
+		switch (SearchType.valueOf(type)) {
+		case LICENSE:
+		case OSS:
+			params.put("defaultSearchFlag", hasSearchCondition(params));
+			break;
+
+		default:
+			break;
+		}
+		
 		String stringjson = new Gson().toJson(params);
 		searchMapper.upsertSearchFilter(stringjson, userId, SearchType.valueOf(type).getName());
 	}
 
 
-    @Override
+    private String hasSearchCondition(Map<String, Object> params) {
+    	for(Object obj : params.values()) {
+    		if(obj instanceof String) {
+    			if(!StringUtil.isEmpty((String)obj)) {
+    				return "Y";
+    			}
+    		}
+    	}
+		return "N";
+	}
+
+
+	@Override
     public History work(Object param) {
         return null;
     }

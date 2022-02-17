@@ -56,9 +56,9 @@
 						<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
 					</dd>
 					<c:if test="${!ct:isAdmin()}">
-					<dd class="" >
-						<label style="width:100px;">View My 3rd Parties Only</label>
-						<input type="checkbox" id="checkbox3" name="publicYn" checked="checked"/>
+					<dd class="lastAign" >
+						<label style="width:150px;">View My 3rd Parties Only</label>
+						<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
 					</dd>
 					</c:if>
 				</dl>

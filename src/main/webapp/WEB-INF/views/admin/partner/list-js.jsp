@@ -46,25 +46,11 @@
 			$('select[name=division]').val('${searchBean.division}').trigger('change');
 			$('select[name=status]').val('${searchBean.status}').trigger('change');
 			
-			refreshParam = $('#3rdSearch').serializeObject();
+			refreshParam = fn.setGridParam();
 			
 			$('#search').on('click',function(e){
 				e.preventDefault();
-				var postData=$('#3rdSearch').serializeObject();
-				
-				//public 값 넣어주기
-				if($('#checkbox3').is(':checked')){
-					postData.publicYn = 'N';
-				}else{
-					postData.publicYn = 'Y';
-				}
-				
-				if(postData.status) {
-					postData.status = JSON.stringify(postData.status);
-					postData.status = postData.status.replace(/\"|\[|\]/gi, "");
-				}else{
-					postData.status = "";
-				}
+				var postData = fn.setGridParam();
 				
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
@@ -212,6 +198,25 @@
 			}
 			return display;
 		},
+		setGridParam: function() {
+			var paramData=$('#3rdSearch').serializeObject();
+			
+			//public 값 넣어주기
+			if($('#checkbox3').is(':checked')){
+				paramData.publicYn = 'N';
+			}else{
+				paramData.publicYn = 'Y';
+			}
+			
+			if(paramData.status) {
+				paramData.status = JSON.stringify(paramData.status);
+				paramData.status = paramData.status.replace(/\"|\[|\]/gi, "");
+			}else{
+				paramData.status = "";
+			}
+			
+			return paramData;
+		}
 	}
 	
 	//http

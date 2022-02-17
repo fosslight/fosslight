@@ -144,6 +144,15 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
+		
+		Map<String, Object> map = null;
+		
+		if("Y".equals(req.getParameter("ignoreSearchFlag"))) {
+			map = new HashMap<>();
+			map.put("rows", new ArrayList<>());
+			return makeJsonResponseHeader(map);
+		}
+		
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
@@ -172,7 +181,6 @@ public class OssController extends CoTopComponent{
 			ossMaster = (OssMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}
 		
-		Map<String, Object> map = null;
 		ossMaster.setSearchFlag(CoConstDef.FLAG_YES); // 화면 검색일 경우 "Y" export시 "N"
 		
 		try {
