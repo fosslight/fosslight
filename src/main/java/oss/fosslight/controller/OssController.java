@@ -915,7 +915,11 @@ public class OssController extends CoTopComponent{
 		OssMaster orgMaster = null;
 		
 		if(!isEmpty(ossMaster.getOssName())) {
-			orgMaster = ossService.getSaveSesstionOssInfoByName(ossMaster);
+			if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+				orgMaster = ossService.getLastModifiedOssInfoByName(ossMaster);
+			}else {
+				orgMaster = ossService.getSaveSesstionOssInfoByName(ossMaster);
+			}
 		}
 		
 		if(orgMaster != null && !isEmpty(orgMaster.getOssId())) {
