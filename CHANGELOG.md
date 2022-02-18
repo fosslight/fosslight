@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.30 (18/02/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix a bug that is not searched by restriction in the License List @FOSSLight-dev (#409)
+
+## 🔧 Maintenance
+
+- Fix the bug where the License List is not filtered by restriction @FOSSLight-dev (#410)
+- Separate the handling of npm's @group name from Check OSS Name @FOSSLight-dev (#408)
+- Modify the written offer in notice template. @dd-jy (#407)
+
+---
+
 ## v1.2.29 (11/02/2022)
 ## 🚀 Features
 
@@ -576,21 +590,3 @@
 - Update .gitignore to ignore personal data folders @namkyu1999 (#31)
 - Change db settings for running with Docker @soimkim (#24)
 - Run PR action for all branches @soimkim (#23)
-
----
-
-## v1.2.0 (30/07/2021)
-## Changes
-## 🚀 Features
-
-- Add Declared/Detected License to OSS @soimkim (#14)
-
-## 🐛 Hotfixes
-
-- Fix a bug - Vulnerability score of Self-Check List @soimkim (#14)
-
-## 🔧 Maintenance
-
-- Change 3rd Party List - Searching UI @soimkim (#14)
-- Add a spring boot badge to README @soimkim (#12)
-- Add Description of ID and Password for Demo site @fu7mu4 (#10)
