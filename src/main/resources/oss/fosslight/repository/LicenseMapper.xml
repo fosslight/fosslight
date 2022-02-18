@@ -103,13 +103,7 @@
 		<if test="arrRestriction != null">
 			AND
 			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
-				T1.RESTRICTION LIKE CONCAT('%',#{item},'%')
-			</foreach>
-		</if>
-		<if test="notIncludeArrRestriction != null">
-			AND
-			<foreach collection="notIncludeArrRestriction" item="item" open="(" close=")" separator="AND">
-				T1.RESTRICTION NOT LIKE CONCAT('%',#{item},'%')
+				FIND_IN_SET(#{item}, T1.RESTRICTION)
 			</foreach>
 		</if>
    	</select>
@@ -226,13 +220,7 @@
 		<if test="arrRestriction != null">
 			AND
 			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
-				T1.RESTRICTION LIKE CONCAT('%',#{item},'%')
-			</foreach>
-		</if>
-		<if test="notIncludeArrRestriction != null">
-			AND
-			<foreach collection="notIncludeArrRestriction" item="item" open="(" close=")" separator="AND">
-				T1.RESTRICTION NOT LIKE CONCAT('%',#{item},'%')
+				FIND_IN_SET(#{item}, T1.RESTRICTION)
 			</foreach>
 		</if>
 		<if test="sortField eq 'licenseId'">

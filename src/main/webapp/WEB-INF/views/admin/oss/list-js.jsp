@@ -3,9 +3,8 @@
 <script type="text/javascript">
 	/*global $ */
 	/*jslint browser: true, nomen: true */
-	
+	var initParam = {};
 	var groupBuffer='';
-	var initYn = true;
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
 	
@@ -14,7 +13,6 @@
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt value setting
 		evt.init();
 		data.init();
-		initYn = false;
 		
 		showHelpLink("OSS_List_Main");
 	});
@@ -37,17 +35,20 @@
 			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
 			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
 			
+			initParam = serializeObjectHelper();
+			
+			var defaultSearchFlag = "${searchBean.defaultSearchFlag}";
+			if(defaultSearchFlag != 'Y') {
+				// just make grid ui
+				initParam.ignoreSearchFlag = "Y";
+			}
+			
 			$('#search').on('click',function(e){
 				e.preventDefault();
 				
 				var postData = serializeObjectHelper();
+				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 				
-				if(initYn) {
-					list.load();
-					initYn = false;
-				} else {
-					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/oss/listAjax"/>'}).trigger('reloadGrid');
-				}
 			});
 			
 			$(".cal").on("keyup", function(e){
@@ -145,6 +146,7 @@
 		oldRowNum:20,
 		load : function(){
 			$("#list").jqGrid({
+				url:'<c:url value="/oss/listAjax"/>',
 				datatype: 'json',
 				jsonReader:{
 					repeatitems: false,
@@ -377,7 +379,7 @@
 						createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
 					}
 				},
-				postData: serializeObjectHelper()
+				postData: initParam
 			});
 		}
 	};

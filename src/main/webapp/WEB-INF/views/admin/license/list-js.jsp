@@ -4,7 +4,6 @@
 <script type="text/javascript">
 	/*global $ */
 	/*jslint browser: true, nomen: true */
-	var initYn = true;
 	var initParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
@@ -13,8 +12,6 @@
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
 		evt.init();
 		data.init();
-		initYn = false;
-		
 		showHelpLink("License_List_Main");
 	});
 	
@@ -37,33 +34,17 @@
 			$('select[name=creator]').val('${searchBean.creator}').trigger('change');
 			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
 			
+			initParam = fn.setGridParam();
+			var defaultSearchFlag = "${searchBean.defaultSearchFlag}";
+			if(defaultSearchFlag != 'Y') {
+				// just make grid ui
+				initParam.ignoreSearchFlag = "Y";
+			}
+			
 			$('#search').on('click',function(e){
-				initParam = $('#licenseSearch').serializeObject();
-				
-				if(initParam.restrictions != null){
-					initParam.restrictions = JSON.stringify(initParam.restrictions);
-					initParam.restrictions = initParam.restrictions.replace(/\"|\[|\]/gi, "");
-				} else {
-					initParam.restrictions = "";
-				}
-				
 				e.preventDefault();
-				
-				var postData=$('#licenseSearch').serializeObject();
-				
-				if(initYn) {
-					list.load();
-					initYn = false;
-				} else {
-					if(postData.restrictions != null) {
-						postData.restrictions = JSON.stringify(postData.restrictions);
-						postData.restrictions = postData.restrictions.replace(/\"|\[|\]/gi, "");
-					} else {
-						postData.restrictions = "";
-					}
-					
-					$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/license/listAjax"/>' }).trigger('reloadGrid');
-				}
+				var postData=fn.setGridParam();
+				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
 			
 			$(".cal").on("keyup", function(e){
@@ -147,12 +128,25 @@
 			}
 			
 			return flag;
+		},
+		setGridParam : function() {
+			var paramData=$('#licenseSearch').serializeObject();
+			
+			if(paramData.restrictions != null){
+				paramData.restrictions = JSON.stringify(paramData.restrictions);
+				paramData.restrictions = paramData.restrictions.replace(/\"|\[|\]/gi, "");
+			} else {
+				paramData.restrictions = "";
+			}
+			
+			return paramData;
 		}
 	};
 	
 	var list = {
 		load : function(){
 			$("#list").jqGrid({
+				url:'<c:url value="/license/listAjax"/>',
 				datatype: 'json',
 				postData : initParam,
 				jsonReader:{

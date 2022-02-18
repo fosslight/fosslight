@@ -82,9 +82,9 @@
 						</span>
 					</dd>
 					<c:if test="${!ct:isAdmin()}">
-					<dd class="centerAign">
-						<label class="vmiddle">View My Projects Only</label>
-						<input type="checkbox" id="checkbox3" name="publicYn" checked="checked"/>
+					<dd class="">
+						<label class="vmiddle" style="width: 50%;">View My Projects Only</label>
+						<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
 					</dd>
 					</c:if>
 				</dl>

@@ -2696,7 +2696,7 @@ public class CommonFunction extends CoTopComponent {
 				}
 				String msg = removeLineSeparator(validMessageMap.get(key));
 				if(key.indexOf(".") > -1) {
-					rtnStr += "<br />" + key.substring(key.indexOf(".") +1, key.length()) + " : " + msg;
+					rtnStr += "<br />" + key.substring(0, key.indexOf(".")) + " : " + msg;
 				} else {
 					rtnStr += "<br />" + key + " : " + msg;
 				}

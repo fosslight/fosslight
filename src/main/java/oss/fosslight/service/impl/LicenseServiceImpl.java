@@ -110,29 +110,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				String[] arrRestrictions = restrictions.split(",");
 				
 				licenseMaster.setArrRestriction(arrRestrictions);
-				
-				if(restrictions.contains("1")) {
-					String notIncludeStr = "";
-					if(!restrictions.contains("10")) {
-						notIncludeStr += "10,";
-					}
-					if(!restrictions.contains("11")) {
-						notIncludeStr += "11,";
-					}
-					if(!restrictions.contains("12")) {
-						notIncludeStr += "12,";
-					}
-					if(!("").equals(notIncludeStr)) {
-						notIncludeStr = notIncludeStr.substring(0, notIncludeStr.length()-1);
-						String[] notIncludeArrRestriction = notIncludeStr.split(",");
-						licenseMaster.setNotIncludeArrRestriction(notIncludeArrRestriction);
-					}
-				}else if(!restrictions.contains("1") && restrictions.contains("2")) {
-					if(!restrictions.contains("12")) {
-						String[] notIncludeArrRestriction = {"12"};
-						licenseMaster.setNotIncludeArrRestriction(notIncludeArrRestriction);
-					}
-				}
 			}
 		}
 		

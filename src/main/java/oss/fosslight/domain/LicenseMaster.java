@@ -140,7 +140,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	/** sort order **/
 	private String sOrder;
 	
-	private String[] notIncludeArrRestriction;
+	private String defaultSearchFlag;
 	
 	/**
 	 * Instantiates a new license master.
@@ -843,11 +843,12 @@ public class LicenseMaster extends ComBean implements Serializable {
 		this.sOrder = sOrder;
 	}
 
-	public String[] getNotIncludeArrRestriction() {
-		return notIncludeArrRestriction;
+	public String getDefaultSearchFlag() {
+		return defaultSearchFlag;
 	}
 
-	public void setNotIncludeArrRestriction(String[] notIncludeArrRestriction) {
-		this.notIncludeArrRestriction = notIncludeArrRestriction;
+	public void setDefaultSearchFlag(String defaultSearchFlag) {
+		this.defaultSearchFlag = defaultSearchFlag;
 	}
+	
 }
