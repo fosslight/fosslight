@@ -47,6 +47,7 @@
 				e.preventDefault();
 				
 				var postData = serializeObjectHelper();
+				postData.ignoreSearchFlag = "N";
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 				
 			});

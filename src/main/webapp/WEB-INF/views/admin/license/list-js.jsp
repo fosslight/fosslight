@@ -44,6 +44,7 @@
 			$('#search').on('click',function(e){
 				e.preventDefault();
 				var postData=fn.setGridParam();
+				postData.ignoreSearchFlag = "N";
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
 			
