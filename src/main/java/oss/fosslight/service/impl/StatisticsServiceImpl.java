@@ -406,7 +406,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> list = statisticsMapper.getUserRelatedChartData(statistics);
 		List<String> titleList = new ArrayList<String>();
 		titleList.add("Total");
-		titleList.add("Activor");
+		titleList.add("Activator");
 		
 		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
 			for(Statistics stat : list) {

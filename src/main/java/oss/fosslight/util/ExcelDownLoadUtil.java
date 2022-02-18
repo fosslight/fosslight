@@ -2921,7 +2921,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							params.add("NO");  // seq
 							params.add("Division"); // Division
 							params.add("Total"); // Total Cnt
-							params.add("Activor"); // Activor Cnt
+							params.add("Activator"); // Activator Cnt
 							
 							rows.add(params.toArray(new String[params.size()]));
 							
