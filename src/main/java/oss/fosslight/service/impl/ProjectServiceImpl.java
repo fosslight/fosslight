@@ -2606,6 +2606,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				// do nothing
 				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY;
 			} else {
+				String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF));
+				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF;
 			}
 		} else if (!isEmpty(project.getCompleteYn())) {

@@ -1134,12 +1134,12 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		lastResult.put("isAdd", flag);
-		
-		if(!isEmpty(project.getUserComment()) && !isEmpty(project.getPrjId())) {
+		String userComment = project.getUserComment();
+		if(!isEmpty(userComment) && !isEmpty(project.getPrjId())) {
 			CommentsHistory commentsHistory = new CommentsHistory();
 			commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
 			commentsHistory.setReferenceId(project.getPrjId());
-			commentsHistory.setContents(project.getUserComment());
+			commentsHistory.setContents(userComment);
 			
 			commentService.registComment(commentsHistory);
 		}
@@ -1151,7 +1151,12 @@ public class ProjectController extends CoTopComponent {
 				mailBean.setParamPrjId(project.getPrjId());
 				mailBean.setCompareDataBefore(beforeBean);
 				mailBean.setCompareDataAfter(afterBean);
-				mailBean.setComment(project.getUserComment());
+
+				if ("true".equals(copy)) {
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED));
+					userComment = avoidNull(userComment) + "<br />" + _tempComment;
+				}
+				mailBean.setComment(userComment);
 				
 				CoMailManager.getInstance().sendMail(mailBean);
 				
@@ -1178,7 +1183,10 @@ public class ProjectController extends CoTopComponent {
 			try {
 				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
 				mailBean.setParamPrjId(project.getPrjId());
-				mailBean.setComment(project.getUserComment());
+
+				String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
+				userComment = avoidNull(userComment) + "<br />" + _tempComment;
+				mailBean.setComment(userComment);
 				
 				CoMailManager.getInstance().sendMail(mailBean);
 			} catch (Exception e) {
