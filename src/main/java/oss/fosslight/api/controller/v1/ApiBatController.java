@@ -32,11 +32,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 
-@Api(tags = {"6. Binary"})
+@Api(tags = {"7. Binary"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
-@Profile(value = {"osc-dev","osc-prod"})
+@Profile(value = {"stage","prod"})
 public class ApiBatController extends CoTopComponent {
 	
 	private final ResponseService responseService;
