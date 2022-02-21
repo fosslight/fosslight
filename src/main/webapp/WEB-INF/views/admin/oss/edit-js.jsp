@@ -2013,43 +2013,47 @@ function mergeOssForDelete(newOssId) {
 
 var fn_commemt = {
     getCommentList : function(){
-        $.ajax({
-        	url : '<c:url value="/comment/getDivCommentList"/>',
-            type : 'GET',
-            dataType : 'json',
-            cache : false,
-            data : {
-                referenceId : $('input[name=ossId]').val(),
-                referenceDiv : '40'
-            },
-            success : function(data){
-            	$('#commentListArea').children().remove();
-				
-            	if(data.length != 0) {
-					for(var i = 0; i < data.length; i++) {
-						var commId = data[i].commId;
-						$('#commentListArea').append(commentTemp.html());
-						var temp = $('dl[name=commentClone]');
-						
-						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
-							temp.find('.nameArea').text(data[i].creator);
-						} else {
-							temp.find('.nameArea').text(data[i].status).append("</br>"+data[i].creator);
-						}
-						
-						temp.find('.dateArea').text(data[i].createdDate);
-						temp.find('.commentContentsArea').html(data[i].contents);
-						temp.find('input[name=commId]').val(commId);
-						temp.removeAttr('name');
-					}	
-				} else {
-					$('#commentListArea').append('<p class="noneTxt">No comments were registered.</p>');
-				}
-            },
-            error : function(xhr, ajaxOptions, thrownError){
-                alertify.error('<spring:message code="msg.common.valid2" />', 0);
-            }
-        });
+    	if(data.copyData){
+    		$('.commentList').remove();
+        }else{
+        	$.ajax({
+            	url : '<c:url value="/comment/getDivCommentList"/>',
+                type : 'GET',
+                dataType : 'json',
+                cache : false,
+                data : {
+                    referenceId : $('input[name=ossId]').val(),
+                    referenceDiv : '40'
+                },
+                success : function(data){
+                	$('#commentListArea').children().remove();
+    				
+                	if(data.length != 0) {
+    					for(var i = 0; i < data.length; i++) {
+    						var commId = data[i].commId;
+    						$('#commentListArea').append(commentTemp.html());
+    						var temp = $('dl[name=commentClone]');
+    						
+    						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
+    							temp.find('.nameArea').text(data[i].creator);
+    						} else {
+    							temp.find('.nameArea').text(data[i].status).append("</br>"+data[i].creator);
+    						}
+    						
+    						temp.find('.dateArea').text(data[i].createdDate);
+    						temp.find('.commentContentsArea').html(data[i].contents);
+    						temp.find('input[name=commId]').val(commId);
+    						temp.removeAttr('name');
+    					}	
+    				} else {
+    					$('#commentListArea').append('<p class="noneTxt">No comments were registered.</p>');
+    				}
+                },
+                error : function(xhr, ajaxOptions, thrownError){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+        }
     },
     deleteComment : function(_commId){
         if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;

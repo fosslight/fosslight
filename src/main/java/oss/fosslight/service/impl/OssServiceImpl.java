@@ -1772,7 +1772,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										
 										break;
 									case 1: // npm
-										checkName = "npm:" + ossNameMatcher.group(3);
+										checkName = "npm:" + ossNameMatcher.group(3) + "/" + ossNameMatcher.group(4);
 										
 										break;
 									case 2: // pypi
