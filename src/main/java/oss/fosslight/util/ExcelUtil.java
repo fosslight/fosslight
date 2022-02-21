@@ -1851,10 +1851,10 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						
 						if(!CoConstDef.FLAG_YES.equals(param.getDelYn())) {
-							if(!duplicateModel.contains(param.getModelName())) {
+							if(!duplicateModel.contains(key)) {
 								param.setGridId(prjId + CoConstDef.FLAG_NO + ++rowindex);
 								resultModel.add(param);
-								duplicateModel.add(param.getModelName());
+								duplicateModel.add(key);
 							}
 						} else {
 							param.setGridId(prjId + CoConstDef.FLAG_YES + ++rowindex);
