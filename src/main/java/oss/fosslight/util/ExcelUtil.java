@@ -1719,6 +1719,7 @@ public class ExcelUtil extends CoTopComponent {
 		
 		// osdd에 존재하는 model만 체크한다.
 		Map<String, Project> osddModelInfo = new HashMap<>();
+		List<Project> deDuplicateModelList = new ArrayList<Project>();
 		
 		if(modelList != null) {
 			for(Project bean : modelList) {
@@ -1861,13 +1862,36 @@ public class ExcelUtil extends CoTopComponent {
 							resultModelDelete.add(param);
 						}
 					}
+					
+					if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
+						deDuplicateModelList = modelList
+													.stream()
+													.filter(before -> 
+														resultModel
+															.stream()
+															.filter(after -> 
+																	(before.getCategory() + "|" + before.getModelName()).equalsIgnoreCase(after.getCategory() + "|" + after.getModelName())
+																	).collect(Collectors.toList()).size() == 0
+															).collect(Collectors.toList());
+						
+						deDuplicateModelList.addAll(resultModel);
+					}
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
+				} finally {
+					try {
+						wb.close();
+					} catch (Exception e) {}
 				}
 			}
 		}
 		
-		result.put("currentModelList", resultModel);
+		if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
+			result.put("currentModelList", deDuplicateModelList);
+		}else {
+			result.put("currentModelList", resultModel);
+		}
+		
 		result.put("delModelList", resultModelDelete);
 		
 		return result;
