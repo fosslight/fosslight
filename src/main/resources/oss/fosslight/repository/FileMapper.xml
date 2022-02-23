@@ -63,6 +63,25 @@
 		AND DEL_YN='N'
 	</select>
 	
+	<select id="getFileInfo2" parameterType="oss.fosslight.domain.T2File" resultType="oss.fosslight.domain.T2File">
+	 SELECT FILE_SEQ,
+		    FILE_ID,
+		    ORIG_NM,
+		    LOGI_NM,
+		    LOGI_THUMB_NM,
+		    LOGI_PATH,
+		    LOGI_THUMB_PATH,
+		    EXT,
+		    SIZE,
+		    REG_DT,
+		    REG_ID,
+		    CONTENT_TYPE,
+		    DATE_FORMAT(REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+	   FROM T2_FILE
+	  WHERE FILE_SEQ=#{fileSeq}
+		AND DEL_YN='Y'
+	</select>
+	
 	<select id="getFileInfoList" parameterType="java.lang.String" resultType="oss.fosslight.domain.T2File">
 	    SELECT FILE_SEQ,
 		    FILE_ID,

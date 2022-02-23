@@ -1662,9 +1662,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}				
 			}
 			
-			if(project.getCsvAddFileSeq() != null) {
-				for (int i = 0; i < project.getCsvAddFileSeq().size(); i++) {
-					projectMapper.updateFileBySeq(project.getCsvAddFileSeq().get(i));
+			if(project.getCsvFileSeq() != null) {
+				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
+					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
 				}				
 			}
 		}

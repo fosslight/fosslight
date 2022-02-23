@@ -609,9 +609,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}		
 				
 			}
-			if(project.getCsvAddFileSeq() != null) {
-				for (int i = 0; i < project.getCsvAddFileSeq().size(); i++) {
-					selfCheckMapper.updateFileBySeq(project.getCsvAddFileSeq().get(i));
+			if(project.getCsvFileSeq() != null) {
+				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
+					selfCheckMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
 				}				
 			}
 		}

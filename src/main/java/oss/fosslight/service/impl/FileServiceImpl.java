@@ -1101,17 +1101,21 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		if(flag.equals("VERIFY")) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		}else {
-			T2File T2file = fileMapper.getFileInfo(file);
+			T2File T2file = fileMapper.getFileInfo2(file);
 			filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
 		}
-				
-		File LogiFile = new File(filePath);
-		if(LogiFile.exists()){
-			if(!LogiFile.delete()){
-				log.info("Failed to delete the file.");
-			}
-		}else{
-			log.info("Failed to find the file.");
+		
+		try {
+			FileOutputStream to = new FileOutputStream(filePath);
+			to.flush();
+   	 		to.close();
+   	 		
+   	 		File LogiFile = new File(filePath);	
+   	 		if(LogiFile.exists()){
+   	 			LogiFile.delete();
+   	 		}
+		} catch(Exception e) {
+			log.info(e.getMessage(), e);
 		}
 	}
 }

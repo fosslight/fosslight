@@ -66,4 +66,6 @@ public interface FileMapper {
 										 , @Param("logiNm") String logiNm);
 	
 	public List<T2File> getBinAndroidFileList(@Param("prjId") String prjId, @Param("ossReportId") String ossReportId);
+
+	public T2File getFileInfo2(T2File file);
 }
