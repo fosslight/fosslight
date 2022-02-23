@@ -1710,7 +1710,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 							break;
 						case 1: // npm
-							p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+							if(downloadlocationUrl.contains("/package/@")) {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+							}else {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+							}
 							
 							break;
 						case 2: // pypi
@@ -1772,7 +1776,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										
 										break;
 									case 1: // npm
-										checkName = "npm:" + ossNameMatcher.group(3) + "/" + ossNameMatcher.group(4);
+										checkName = "npm:" + ossNameMatcher.group(3);
+										if(checkName.contains(":@")) {
+											checkName += "/" + ossNameMatcher.group(4);
+										}
 										
 										break;
 									case 2: // pypi

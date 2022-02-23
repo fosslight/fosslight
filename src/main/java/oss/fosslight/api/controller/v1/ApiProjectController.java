@@ -342,6 +342,8 @@ public class ApiProjectController extends CoTopComponent {
 					try {
 						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
 						mailBean.setParamPrjId(resultPrjId);
+						String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
+						comment = avoidNull(comment) + "<br />" + _tempComment;
 						mailBean.setComment(comment);
 						mailBean.setLoginUserName(userInfo.getUserId());
 						mailBean.setLoginUserRole(userInfo.getAuthority());
