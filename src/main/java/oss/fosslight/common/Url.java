@@ -153,9 +153,12 @@ public final class Url {
 		public static final String OSS_LIST_BY_NAME = PATH + "/getOssListByName";
 		
 		public static final String OSS_BULK_REG = PATH + "/ossBulkReg";
-		public static final String OSS_BULK_REG_JSP = TILES_ROOT + PATH + "/ossBulkRegpopup";
-		
-		public static final String OSS_BULK_REG_AJAX = PATH + "/getOssBulkRegAjax";
+		public static final String OSS_BULK_REG_JSP = TILES_ROOT + PATH + "/ossBulkReg";
+		public static final String BULK_REG_AJAX = PATH+"/bulkRegAjax";
+		//public static final String OSS_BULK_REG_AJAX = PATH + "/bulkRegAjax";
+		public static final String OSS_BULK_REG_AJAX = PATH + "/bulkRegAjax";
+		public static final String CSV_FILE = PATH + "/csvFile";
+		//public static final String OSS_BULK_REG_AJAX = PATH + "/getOssBulkRegAjax";
 		public static final String SAVE_OSS_BULK_REG = PATH + "/saveOssBulkReg";
 		
 		public static final String OSS_POPUP = PATH + "/osspopup";

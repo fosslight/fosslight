@@ -75,11 +75,14 @@
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
     </definition>
     <!-- OSS 일괄등록 팝업 -->
-    <definition name="tiles/admin/oss/ossBulkRegpopup"    template="/WEB-INF/views/admin/oss/ossBulkRegpopup.jsp">
-        <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
-        <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
-    </definition>
-    
+<!--    <definition name="tiles/admin/oss/ossBulkRegpopup"    template="/WEB-INF/views/admin/oss/ossBulkRegpopup.jsp">-->
+<!--        <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />-->
+<!--        <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />-->
+<!--    </definition>-->
+	<definition name="tiles/admin/oss/ossBulkReg"    template="/WEB-INF/views/admin/oss/ossBulkReg.jsp">
+		<put-attribute name="scripts"              value="/WEB-INF/views/template/layout/admin/scripts_ifr4.7.jsp" />
+		<put-attribute name="ossBulkReg-js"       value="/WEB-INF/views/admin/oss/ossBulkReg-js.jsp" />
+	</definition>
 	<definition name="tiles/ajax/oss/ossDetailview" 	template="/WEB-INF/views/admin/oss/AJAX/ossDetailview.jsp">
 		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
 		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
