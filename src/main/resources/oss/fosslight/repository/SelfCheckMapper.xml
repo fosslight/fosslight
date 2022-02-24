@@ -36,7 +36,7 @@
 					, T1.OS_TYPE
 					, T1.OS_TYPE_ETC
 					, IFNULL(T1.SRC_CSV_FILE_ID, '') SRC_CSV_FILE_ID
-					, IFNULL((SELECT DIVISION FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS DIVISION
+					, T1.DIVISION
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR
 					, T1.CREATED_DATE
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER
@@ -60,10 +60,10 @@
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						SELECT 1 
 						  FROM PRE_PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
 			</if>
@@ -122,7 +122,7 @@
 					, T1.OS_TYPE
 					, T1.OS_TYPE_ETC
 					, IFNULL(T1.SRC_CSV_FILE_ID, '') SRC_CSV_FILE_ID
-					, IFNULL((SELECT DIVISION FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS DIVISION
+					, T1.DIVISION
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR
 					, T1.CREATED_DATE
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER
@@ -138,10 +138,10 @@
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						SELECT 1 
 						  FROM PRE_PROJECT_WATCHER A1 
-						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
 			</if>
@@ -232,11 +232,13 @@
 			, A.CREATED_DATE
 			, A.MODIFIER 
 			, A.MODIFIED_DATE 
-            , C.USER_NAME PRJ_USER_NAME
-            , D.CD_DTL_NM PRJ_DIVISION_NAME
+            , (SELECT USER_NAME FROM T2_USERS WHERE USER_ID = A.CREATOR) AS PRJ_USER_NAME
+            , (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = A.DIVISION) AS PRJ_DIVISION_NAME
 		FROM
 			PRE_PROJECT_MASTER A 
 			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
+			
+		                   <!-- 
 		    LEFT OUTER JOIN T2_USERS C
 		                    ON A.CREATOR = C.USER_ID
 		                   AND C.USE_YN = 'Y'
@@ -244,6 +246,7 @@
 		                    ON C.DIVISION = D.CD_DTL_NO
 						   AND D.CD_NO = '200'
 						   AND D.USE_YN = 'Y'
+						    -->
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 		 WHERE A.PRJ_ID = #{prjId}
 		 </if>
@@ -291,6 +294,7 @@
 			, OS_TYPE_ETC
 			, CREATOR
 			, MODIFIER
+			, DIVISION
 		)
 		VALUES
 		(
@@ -305,6 +309,7 @@
 			, #{osTypeEtc}
 			, #{loginUserName}
 			, #{loginUserName}
+			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 			PRJ_ID                            = #{prjId} ,
@@ -316,8 +321,12 @@
 			, OS_TYPE                     = #{osType}
 			, OS_TYPE_ETC                 = #{osTypeEtc}
 			, MODIFIER                    = #{loginUserName}
+			, DIVISION                    = #{division}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+			, DIVISION                    = #{division}
 			</if>
 	</insert>
 	
@@ -674,10 +683,10 @@
 			AND (
 				T1.CREATOR = #{creator} 
 					OR EXISTS (
-					SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+					SELECT 1 
 					FROM PROJECT_WATCHER A1
-						INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{creator}
-					WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all') 
+						<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{creator} -->
+					WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) )) 
 				)
 			)
 		</if>
@@ -692,10 +701,10 @@
 			AND (
 				T1.CREATOR = #{creator} 
 					OR EXISTS (
-					SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+					SELECT 1 
 					FROM PROJECT_WATCHER A1
-						INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{creator}
-					WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all') 
+						<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{creator} -->
+					WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) )) 
 				)
 			)
 		</if>
@@ -885,8 +894,8 @@
 						OR EXISTS (
 						SELECT 1 
 						FROM PROJECT_WATCHER A1
-							INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+							<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
 			</if>
@@ -959,11 +968,13 @@
 		       ,A.CREATED_DATE
 		       ,A.MODIFIER 
 		       ,A.MODIFIED_DATE
-		       ,B.DIVISION 
+		       ,A.DIVISION 
 		FROM   PROJECT_MASTER A 
+		<!-- 
 		       LEFT OUTER JOIN T2_USERS B 
 		                    ON A.CREATOR = B.USER_ID 
 		                   AND B.USE_YN = 'Y'
+		                    -->
 		WHERE  A.USE_YN = 'Y'
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND A.PRJ_ID = #{prjId}
@@ -1006,7 +1017,7 @@
 		                          AND MODEL_NAME LIKE CONCAT('%',#{modelName},'%'))
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND ( B.DIVISION = #{prjDivision} )
+				AND ( A.DIVISION = #{prjDivision} )
 			</if>
 			<if test="sortField eq 'prjId'">
 				<if test="sortOrder eq 'asc'">
@@ -1042,10 +1053,10 @@
 			</if>
 			<if test="sortField eq 'division'">
 				<if test="sortOrder eq 'asc'">
-					ORDER BY B.DIVISION ASC
+					ORDER BY A.DIVISION ASC
 				</if>
 				<if test="sortOrder eq 'desc'">
-					ORDER BY B.DIVISION DESC
+					ORDER BY A.DIVISION DESC
 				</if>
 			</if>
 			<if test="sortField eq 'creator'">
@@ -2232,8 +2243,8 @@
 	   							AND (A.CREATOR = #{loginUserName}
 			  				    	 OR EXISTS (SELECT 1 
 												  FROM PROJECT_WATCHER A1 
-												 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-												 WHERE A1.PRJ_ID = A.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+												 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+												 WHERE A1.PRJ_ID = A.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 												)
 			  						 OR A.PUBLIC_YN = 'Y')
 			  				)
@@ -2254,8 +2265,8 @@
 									AND (A.CREATOR = #{loginUserName}
 				  				   		 OR EXISTS (SELECT 1 
 											 		  FROM PARTNER_WATCHER A1 
-													 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-													 WHERE A1.PARTNER_ID = A.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+													 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+													 WHERE A1.PARTNER_ID = A.PARTNER_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 												   )
 								  		 OR A.PUBLIC_YN = 'Y')
 								 )
@@ -2285,10 +2296,13 @@
 				 	  FROM T2_CODE_DTL 
 				 	 WHERE CD_NO = '207' 
 				 	   AND CD_DTL_NO = T1.DISTRIBUTION_TYPE) AS DISTRIBUTION_TYPE
+				 	   <!-- 
 				 , (SELECT CD_DTL_NM 
 				 	  FROM T2_CODE_DTL 
 				 	 WHERE CD_NO = '200' 
 				 	   AND CD_DTL_NO = IFNULL((SELECT DIVISION FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR)) AS DIVISION
+				 	    -->
+				 , (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = T1.DIVISION) AS DIVISION
 				 , T1.CVSS_SCORE
 				 , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 				 , T1.CREATED_DATE
@@ -2309,10 +2323,10 @@
 						   	  <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 								  AND (
 									  T1.CREATOR = #{loginUserName} 
-										  OR EXISTS ( SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+										  OR EXISTS ( SELECT 1 
 													     FROM PRE_PROJECT_WATCHER A1 
-													    INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} 
-													    WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = A2.DIVISION))
+													    <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} --> 
+													    WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 													 ) 
 										  )
 									  

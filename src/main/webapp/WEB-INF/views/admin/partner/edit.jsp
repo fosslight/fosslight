@@ -304,6 +304,20 @@
 								</div>
 							</td>
 						</tr>
+						<tr>
+							<th class="dCase txStr"><spring:message code="msg.common.field.division" /></th>
+							<td class="dCase">
+								<div class="pb5">
+									<span class="selectSet w150">
+										<strong for="division" title="Watcher part selected value">Select Division</strong>
+										<select id="division" name="division" >
+											<option value=""></option>
+											${ct:genOptionSelected(ct:getConstDef('CD_USER_DIVISION'), detail.division)}
+										</select>
+									</span>
+								</div>
+							</td>
+						</tr>
 					</c:if>
 						<c:if test="${not empty detail.partnerId}">
                         <tr>

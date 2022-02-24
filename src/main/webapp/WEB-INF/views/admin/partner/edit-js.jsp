@@ -121,6 +121,7 @@ var saveFlag = false;
 			$('dl[name=commentClone]').remove();
 			
 			$('select[name=userDivision]').trigger('change');
+			$('select[name=division]').trigger('change');
 			
 			//와쳐 추가 버튼
 			$('#addWatcher').on('click', function(){

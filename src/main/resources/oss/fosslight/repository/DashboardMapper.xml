@@ -65,10 +65,10 @@
 				AND (
 					T1.CREATOR = #{loginUserName}
 					OR EXISTS (
-						SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+						SELECT 1
 						FROM PROJECT_WATCHER A1
-							INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+							<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
 	            </when>
@@ -106,10 +106,10 @@
 					AND (
 						T1.CREATOR = #{loginUserName}
 						OR EXISTS (
-							SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+							SELECT 1 
 							FROM PARTNER_WATCHER A1
-								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 						)
 					)
 		            </when>
@@ -142,10 +142,10 @@
 					AND (
 						T1.CREATOR = #{loginUserName}
 						OR EXISTS (
-							SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+							SELECT 1 
 							FROM PROJECT_WATCHER A1
-								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-							WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+							WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 						)
 					)
 		            </when>
@@ -173,10 +173,10 @@
 					AND (
 						T1.CREATOR = #{loginUserName}
 						OR EXISTS (
-							SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+							SELECT 1 
 							FROM PARTNER_WATCHER A1
-								INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = A2.USER_ID OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 						)
 					)
 		            </when>
@@ -252,10 +252,10 @@
 										AND (
 											A1.CREATOR = #{loginUserName}
 											OR EXISTS (
-												SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+												SELECT 1 
 												FROM PROJECT_WATCHER A1
-													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 											)
 										)
 				            		)
@@ -267,10 +267,10 @@
 										AND (
 											A1.CREATOR = #{loginUserName}
 											OR EXISTS (
-												SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+												SELECT 1 
 												FROM PARTNER_WATCHER A1
-													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 											)
 										)
 				            		)
@@ -374,10 +374,10 @@
 										AND (
 											A1.CREATOR = #{loginUserName}
 											OR EXISTS (
-												SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+												SELECT 1 
 												FROM PROJECT_WATCHER A1
-													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 											)
 										)
 				            		)
@@ -389,10 +389,10 @@
 										AND (
 											A1.CREATOR = #{loginUserName}
 											OR EXISTS (
-												SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+												SELECT 1 
 												FROM PARTNER_WATCHER A1
-													INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 											)
 										)
 				            		)
@@ -555,10 +555,10 @@
 									AND (
 										A1.CREATOR = #{loginUserName}
 										OR EXISTS (
-											SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+											SELECT 1 
 											FROM PROJECT_WATCHER A1
-												INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-											WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+												<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+											WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 										)
 									)
 			            		)
@@ -570,10 +570,10 @@
 									AND (
 										A1.CREATOR = #{loginUserName}
 										OR EXISTS (
-											SELECT A1.PARTNER_ID, A1.DIVISION, A2.USER_ID 
+											SELECT 1 
 											FROM PARTNER_WATCHER A1
-												INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
-											WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = A2.USER_ID OR A1.USER_ID = 'all')
+												<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+											WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 										)
 									)
 			            		)
