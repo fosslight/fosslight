@@ -1406,6 +1406,29 @@
 			PRJ_ID = #{prjId}
 	</update>
 	
+	<update id="updateFileId2" parameterType="oss.fosslight.domain.Project">
+		UPDATE PROJECT_MASTER 
+		<set>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcCsvFileFlag)">
+			SRC_CSV_FILE_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', binCsvFileFlag)">
+			BIN_CSV_FILE_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', binBinaryFileFlag)">
+			BIN_BINARY_FILE_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidCsvFileFlag)">
+			SRC_ANDROID_CSV_FILE_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidNoticeFileFlag)">
+			SRC_ANDROID_NOTICE_FILE_ID = null
+			</if>
+		</set>
+		WHERE 
+			PRJ_ID = #{prjId}
+	</update>
+	
 	<select id="selectCsvFile" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.T2File">
 		SELECT
 			T1.*
@@ -1417,7 +1440,8 @@
 	</select>
 	
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
-		DELETE FROM T2_FILE 
+		UPDATE T2_FILE 
+			SET DEL_YN = 'Y'
 		 WHERE FILE_SEQ = #{fileSeq} 	
 	</delete>
 	

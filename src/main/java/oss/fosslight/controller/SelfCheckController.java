@@ -410,7 +410,7 @@ public class SelfCheckController extends CoTopComponent {
 			project.setPrjId(prjId);
 			project.setSrcCsvFileId(csvFileId);
 			project.setCsvFile(delFile);
-			project.setCsvAddFileSeq(addFile);
+			project.setCsvFileSeq(addFile);
 			project.setIdentificationSubStatusSrc(identificationSubStatusSrc);
 			
 			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);

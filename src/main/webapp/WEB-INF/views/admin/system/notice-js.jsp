@@ -81,22 +81,38 @@
 			    }
 			    , beforeShowForm: function(formid) {
 			        $("#tr_seq", formid).css("display", "none");
-			        var appendHtml = '<div id="noticeEdit" style="width:500px; height:150px;"></div>';
+			        var appendHtml = '<div id="noticeEdit" style="width:600px; height:225px;"></div>';
         			$("#tr_notice", formid).show();
     				$("#notice", formid).hide();
 			        $("#tr_notice", formid).children().eq(1).append(appendHtml);
-			        var _editor = CKEDITOR.instances.noticeEdit;
-			        
-					if(_editor) {
-						_editor.destroy();
-					}
+
+			        if(CKEDITOR.instances.noticeEdit) {
+			    		var _editor = CKEDITOR.instances.noticeEdit;
+			    		if(_editor) {
+    						_editor.destroy();
+    					}
+			    	}
 					
 					CKEDITOR.replace('noticeEdit', {});
 			    }
 			    , onClose: function() {
-			    	$("#noticeEdit").remove();
+			    	if(CKEDITOR.instances.noticeEdit) {
+			    		var _editor = CKEDITOR.instances.noticeEdit;
+			    		if(_editor) {
+			    			_editor.destroy();
+			    		}
+			    	}
+
+			    	$("#tr_contents", "list").children().eq(1).remove();
 			    }
                 , afterSubmit: function(response, postdata) {
+                	if(CKEDITOR.instances.noticeEdit) {
+                		var _editor = CKEDITOR.instances.noticeEdit;
+    					if(_editor) {
+    						_editor.destroy();
+    					}
+                	}
+                    
                     if("false" == response.responseJSON.isValid) {
                         alertify.error('<spring:message code="msg.common.valid" />', 0);
                         createValidMsg('FrmGrid_list', response.responseJSON);
@@ -107,6 +123,8 @@
 
                         return [true,"",""]
                     }
+
+                    noticeList.load();
                 }
                 , beforeSubmit: function(postdata, formid) {
                 	postdata.notice = CKEDITOR.instances.noticeEdit.getData();
@@ -126,22 +144,38 @@
 			        return JSON.stringify(postdata);
 			    }
 			    , beforeShowForm: function(formid) {
-			        var appendHtml = '<div id="noticeEdit" style="width:500px; height:150px;">'+$("#notice", formid).val()+'</div>';
+			        var appendHtml = '<div id="noticeEdit" style="width:600px; height:225px;">'+$("#notice", formid).val()+'</div>';
         			$("#tr_notice", formid).show();
     				$("#notice", formid).hide();
 			        $("#tr_notice", formid).children().eq(1).append(appendHtml);
-			        var _editor = CKEDITOR.instances.noticeEdit;
 
-					if(_editor) {
-						_editor.destroy();
-					}
+			        if(CKEDITOR.instances.noticeEdit) {
+			    		var _editor = CKEDITOR.instances.noticeEdit;
+			    		if(_editor) {
+    						_editor.destroy();
+    					}
+			    	}
 					
 					CKEDITOR.replace('noticeEdit', {});
 			    }
 			    , onClose: function() {
-			    	$("#noticeEdit").remove();
+			    	if(CKEDITOR.instances.noticeEdit) {
+			    		var _editor = CKEDITOR.instances.noticeEdit;
+			    		if(_editor) {
+			    			_editor.destroy();
+			    		}
+			    	}
+
+			    	$("#tr_contents", "list").children().eq(1).remove();
 			    }
                 , afterSubmit: function(response, postdata) {
+                	if(CKEDITOR.instances.noticeEdit) {
+                		var _editor = CKEDITOR.instances.noticeEdit;
+    					if(_editor) {
+    						_editor.destroy();
+    					}
+                	}
+                    
                     if("false" == response.responseJSON.isValid) {
                         alertify.error('<spring:message code="msg.common.valid" />', 0);
                         createValidMsg('FrmGrid_list', response.responseJSON);
@@ -152,6 +186,8 @@
 
                         return [true,"",""]
                     }
+
+                    noticeList.load();
                 }
                 , beforeSubmit: function(postdata, formid) {
                 	postdata.notice = CKEDITOR.instances.noticeEdit.getData();

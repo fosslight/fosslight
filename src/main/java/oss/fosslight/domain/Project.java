@@ -327,6 +327,16 @@ public class Project extends ComBean implements Serializable {
 	private String ossReportFlag;
 	
 	private String ossNameMergeFlag;
+	
+	private String srcCsvFileFlag = "N";
+	
+	private String binCsvFileFlag = "N";
+	
+	private String binBinaryFileFlag = "N";
+	
+	private String srcAndroidCsvFileFlag = "N";
+	
+	private String srcAndroidNoticeFileFlag = "N";
 
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -2745,7 +2755,7 @@ public class Project extends ComBean implements Serializable {
 	 *
 	 * @return the csv add file seq
 	 */
-	public List<T2File> getCsvAddFileSeq() {
+	public List<T2File> getCsvFileSeq() {
 		return csvFileSeq;
 	}
 
@@ -2754,7 +2764,7 @@ public class Project extends ComBean implements Serializable {
 	 *
 	 * @param csvFileSeq the new csv add file seq
 	 */
-	public void setCsvAddFileSeq(List<T2File> csvFileSeq) {
+	public void setCsvFileSeq(List<T2File> csvFileSeq) {
 		this.csvFileSeq = csvFileSeq;
 	}
 
@@ -4074,5 +4084,45 @@ public class Project extends ComBean implements Serializable {
 
 	public void setOssNameMergeFlag(String ossNameMergeFlag) {
 		this.ossNameMergeFlag = ossNameMergeFlag;
+	}
+
+	public String getSrcCsvFileFlag() {
+		return srcCsvFileFlag;
+	}
+
+	public void setSrcCsvFileFlag(String srcCsvFileFlag) {
+		this.srcCsvFileFlag = srcCsvFileFlag;
+	}
+
+	public String getBinCsvFileFlag() {
+		return binCsvFileFlag;
+	}
+
+	public void setBinCsvFileFlag(String binCsvFileFlag) {
+		this.binCsvFileFlag = binCsvFileFlag;
+	}
+
+	public String getBinBinaryFileFlag() {
+		return binBinaryFileFlag;
+	}
+
+	public void setBinBinaryFileFlag(String binBinaryFileFlag) {
+		this.binBinaryFileFlag = binBinaryFileFlag;
+	}
+
+	public String getSrcAndroidCsvFileFlag() {
+		return srcAndroidCsvFileFlag;
+	}
+
+	public void setSrcAndroidCsvFileFlag(String srcAndroidCsvFileFlag) {
+		this.srcAndroidCsvFileFlag = srcAndroidCsvFileFlag;
+	}
+
+	public String getSrcAndroidNoticeFileFlag() {
+		return srcAndroidNoticeFileFlag;
+	}
+
+	public void setSrcAndroidNoticeFileFlag(String srcAndroidNoticeFileFlag) {
+		this.srcAndroidNoticeFileFlag = srcAndroidNoticeFileFlag;
 	}
 }
