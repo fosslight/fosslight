@@ -68,7 +68,7 @@ var saveFlag = false;
 			}
 		});
 		
-		if(userRole == "ROLE_ADMIN" && '${detail.partnerId}' != ""){
+		if('${detail.partnerId}' != ""){
 			$("input[name=creatorNm]").val('${detail.creatorName }');
 		}
 		

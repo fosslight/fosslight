@@ -293,12 +293,13 @@
 							</td>
 						</tr>
 						</c:if>
-						<c:if test="${ct:isAdmin() and not empty project.prjId and 'Y' ne project.copyFlag}">
+
+						<c:if test="${not empty project.prjId and 'Y' ne project.copyFlag}">
 						<tr>
 							<th class="dCase  txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision" value=""/>
+									<input type="text" name="creatorNm" class="autoComCreatorDivision" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
 									<span class="retxt">This field is required.</span>
 									<input type="hidden" name="creator" <c:if test="${not empty project }">value='${project.creator}'</c:if>/>
 								</div>
@@ -310,7 +311,7 @@
 								<div class="pb5">
 									<span class="selectSet w150">
 										<strong for="division" title="Watcher part selected value">Select Division</strong>
-										<select id="division" name="division" >
+										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
 											<option value=""></option>
 											${ct:genOptionSelected(ct:getConstDef('CD_USER_DIVISION'), project.division)}
 										</select>
@@ -318,8 +319,6 @@
 								</div>
 							</td>
 						</tr>
-						</c:if>
-						<c:if test="${not empty project.prjId and 'Y' ne project.copyFlag}">
                         <tr>
                             <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">

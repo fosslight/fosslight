@@ -24,7 +24,7 @@
 		data.init();
 		evt.init();
 		
-		if(userRole == "ROLE_ADMIN" && '${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
+		if('${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
 			$("input[name=creatorNm]").val('${project.prjUserName}');
 		}
 		
