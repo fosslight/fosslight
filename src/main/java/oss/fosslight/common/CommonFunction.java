@@ -29,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -3696,13 +3697,41 @@ public class CommonFunction extends CoTopComponent {
 
 	public static ArrayList<Object> checkCsvFileLimit(List<UploadFile> list) {
 		ArrayList<Object> result = new ArrayList<Object>();
-
+		boolean nextCheck = false;
+		
 		for(UploadFile f : list) {
 			if(f.getSize() > CoConstDef.CD_CSV_UPLOAD_FILE_SIZE_LIMIT && f.getFileExt().contains("csv")){
 				result.add("FILE_SIZE_LIMIT_OVER");
 				result.add("The file exceeded 5MB.<br>Please delete the blank row or unnecessary data, and then upload it.");
-
+				nextCheck = true;
 				break;
+			}
+			
+			if(!nextCheck) {
+				boolean tabGubnBoolean = false;
+				String commaData = "";
+				Scanner sc = null;
+				
+				try {
+					sc = new Scanner(new FileInputStream(new File(f.getFilePath() + "/" + f.getFileName())));
+					while(sc.hasNext()) {
+						String readLine = sc.nextLine();
+						if(!isEmpty(readLine) && !readLine.contains("\t")) {
+							tabGubnBoolean = true;
+							break;
+						}
+					}
+				} catch (Exception e) {
+					log.info(e.getMessage(), e);
+				} finally {
+					sc.close();
+					
+					if(tabGubnBoolean) {
+						result.add("TAB_GUBN_ERROR");
+						result.add(commaData);
+						break;
+					}
+				}
 			}
 		}
 
