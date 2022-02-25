@@ -1619,53 +1619,61 @@
 		loading.hide();
 		
 		if(json.isValid == 'false') {
-			if(json.validMsg == "hasDelNick") {
-				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
-				
-				// nick name 필드 초기화
-				if($("div.multiTxtSet > div").length > 1) {
-					$("div.multiTxtSet > div:not(:nth-child(1))").remove();
+			if(typeof json.validMsg === "undefined"){
+				if(json.ossName == "Formatting error"){
+					alertify.error('<spring:message code="msg.common.valid"/>', 0);
+					// 커스텀 에러 메세지 
+					ossGridValidMsg(json, "_licenseChoice");
 				}
-				
-				for(var k in json.resultData.addNickArr) {
-					$(data.clone).appendTo('.multiTxtSet');
-					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
-				}
-				
-				$('.smallDelete').on('click', function(){
-					$(this).parent().remove();
-				});
-				
-				var _alertMsg = '<spring:message code="msg.oss.nickname.exists"/>';
-				if(json.resultData.delNickArr) {
-					_alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
-					for(var k in json.resultData.delNickArr) {
-						_alertMsg += '<br/>' + json.resultData.delNickArr[k];
+			}else{
+				if(json.validMsg == "hasDelNick") {
+					// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
+					
+					// nick name 필드 초기화
+					if($("div.multiTxtSet > div").length > 1) {
+						$("div.multiTxtSet > div:not(:nth-child(1))").remove();
 					}
-					_alertMsg += '</span>';
-				}
-				
-				alertify.alert(_alertMsg, function(){});
-			} else if(json.resultData) {
-				var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
-					_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
-				alertify.alert(_alertMsg, function(){});
+					
+					for(var k in json.resultData.addNickArr) {
+						$(data.clone).appendTo('.multiTxtSet');
+						$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
+					}
+					
+					$('.smallDelete').on('click', function(){
+						$(this).parent().remove();
+					});
+					
+					var _alertMsg = '<spring:message code="msg.oss.nickname.exists"/>';
+					if(json.resultData.delNickArr) {
+						_alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
+						for(var k in json.resultData.delNickArr) {
+							_alertMsg += '<br/>' + json.resultData.delNickArr[k];
+						}
+						_alertMsg += '</span>';
+					}
+					
+					alertify.alert(_alertMsg, function(){});
+				} else if(json.resultData) {
+					var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
+						_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
+					alertify.alert(_alertMsg, function(){});
 
-				for(var k in json.resultData) {
-					$(data.clone).appendTo('.multiTxtSet');
-					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
+					for(var k in json.resultData) {
+						$(data.clone).appendTo('.multiTxtSet');
+						$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
+					}
+					
+					$('.smallDelete').on('click', function(){
+						$(this).parent().remove();
+					});
+				} else if(json.validMsg == "deactivate"){
+					alertify.error('<spring:message code="msg.oss.deactivated"/>', 0);
+				} else {
+					//alertify.error('<spring:message code="msg.common.valid"/>', 0);
+					alertify.error('<spring:message code="msg.oss.duplicated"/>', 0);
+					// 커스텀 에러 메세지 
+					ossGridValidMsg(json, "_licenseChoice");
 				}
-				
-				$('.smallDelete').on('click', function(){
-					$(this).parent().remove();
-				});
-			} else if(json.validMsg == "deactivate"){
-				alertify.error('<spring:message code="msg.oss.deactivated"/>', 0);
-			} else {
-				//alertify.error('<spring:message code="msg.common.valid"/>', 0);
-				alertify.error('<spring:message code="msg.oss.duplicated"/>', 0);
-				// 커스텀 에러 메세지 
-				ossGridValidMsg(json, "_licenseChoice");
 			}
 		} else if(json.isValid == 'true') {
 			var v_flag = checkVdiff();
