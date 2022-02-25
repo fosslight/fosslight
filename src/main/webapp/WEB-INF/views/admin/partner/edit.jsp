@@ -293,19 +293,31 @@
 						</td>
 					</tr>
 					</c:if>
-					<c:if test="${ct:isAdmin() and not empty detail.partnerId}">
+						<c:if test="${not empty detail.partnerId}">
 						<tr>
 							<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision" value=""/>
+									<input type="text" name="creatorNm" class="autoComCreatorDivision" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
 									<input type="hidden" name="creator" <c:if test="${not empty detail }">value='${detail.creator}'</c:if>/>
 									<span class="retxt">This field is required.</span>
 								</div>
 							</td>
 						</tr>
-					</c:if>
-						<c:if test="${not empty detail.partnerId}">
+						<tr>
+							<th class="dCase txStr"><spring:message code="msg.common.field.division" /></th>
+							<td class="dCase">
+								<div class="pb5">
+									<span class="selectSet w150">
+										<strong for="division" title="Watcher part selected value">Select Division</strong>
+										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
+											<option value=""></option>
+											${ct:genOptionSelected(ct:getConstDef('CD_USER_DIVISION'), detail.division)}
+										</select>
+									</span>
+								</div>
+							</td>
+						</tr>
                         <tr>
                             <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">

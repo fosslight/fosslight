@@ -1978,6 +1978,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			noticeList.add(bean);
 		}
+		
+		Collections.sort(noticeList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
 		List<OssComponents> srcList = new ArrayList<>();
 		
 		for(OssComponents bean : srcInfo.values()) {
@@ -2002,6 +2010,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			srcList.add(bean);
 		}
+		
+		Collections.sort(srcList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
 		
 		List<OssComponentsLicense> licenseList = new ArrayList<>();
 		List<OssComponentsLicense> licenseListUrls = new ArrayList<>(); //simple version용
@@ -2044,7 +2059,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				attributionList.add(bean);
 			}
 		}
-
+		
 		TreeMap<String, String> ossAttributionTreeMap = new TreeMap<>( ossAttributionMap );
 		ossAttributionList.addAll(ossAttributionTreeMap.values());
 		

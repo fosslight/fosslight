@@ -24,7 +24,7 @@
 		data.init();
 		evt.init();
 		
-		if(userRole == "ROLE_ADMIN" && '${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
+		if('${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
 			$("input[name=creatorNm]").val('${project.prjUserName}');
 		}
 		
@@ -1466,6 +1466,7 @@
 				$('input[name=prjName]').val(data.detail.prjName.trim());
 				$('input[name=prjVersion]').val(data.detail.prjVersion.trim());
 				$('select[name=osType]').val(data.detail.osType).trigger('change');
+				$('select[name=division]').trigger('change');
 				$("[name='distributionType']:checked").trigger("click");
 				$("[name='noticeType'][value|='"+data.detail.noticeType+"']").trigger("click");
 				

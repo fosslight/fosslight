@@ -77,7 +77,7 @@
 					     WHERE CD_NO = '200'
 					       AND USE_YN = 'Y') A
 			<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
-				  LEFT JOIN (SELECT T2.CD_DTL_NM
+				  LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 				  				  , CASE 
 										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
 										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
@@ -89,6 +89,7 @@
 										ELSE 'PROG' 
 								  	END CATEGORY 
 							   FROM PROJECT_MASTER PM
+							   <!-- 
 							  INNER JOIN T2_USERS T1
 								 ON PM.CREATOR = T1.USER_ID
 							  INNER JOIN (SELECT CD_DTL_NO
@@ -97,14 +98,16 @@
 										   WHERE CD_NO = '200'
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
+								  -->
 							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
-				 LEFT JOIN (SELECT T2.CD_DTL_NM
+				 LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 							     , ADMIN.USER_NAME AS CATEGORY
 						      FROM PROJECT_MASTER PM
+						      <!-- 
 						      LEFT JOIN T2_USERS T1
 							    ON PM.CREATOR = T1.USER_ID
 						      LEFT JOIN (SELECT CD_DTL_NO
@@ -113,6 +116,7 @@
 									      WHERE CD_NO = '200'
 									        AND USE_YN = 'Y') T2
 							    ON T1.DIVISION = T2.CD_DTL_NO
+							 -->    
 						      LEFT JOIN (SELECT 'unassigned' AS USER_ID, null AS USER_NAME
 						      		      UNION ALL
 						      			 SELECT USR.USER_ID
@@ -126,11 +130,12 @@
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
-				LEFT JOIN (SELECT T2.CD_DTL_NM
+				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 						        , (SELECT SUBSTRING_INDEX(CD_DTL_NM, '(', 1) AS CD_DTL_NM 
 									 FROM T2_CODE_DTL 
 									WHERE CD_NO = '207' AND CD_DTL_NO = PM.DISTRIBUTION_TYPE) AS CATEGORY
 							 FROM PROJECT_MASTER PM
+							 <!-- 
 						    INNER JOIN T2_USERS T1
 							   ON PM.CREATOR = T1.USER_ID
 						    INNER JOIN (SELECT CD_DTL_NO
@@ -139,15 +144,17 @@
 										 WHERE CD_NO = '200'
 										   AND USE_YN = 'Y') T2
 							   ON T1.DIVISION = T2.CD_DTL_NO
+							    -->
 							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
 							) STAT
 		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('NET', categoryType)">
-				LEFT JOIN (SELECT T2.CD_DTL_NM
+				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 						        , CASE WHEN NETWORK_SERVER_TYPE = 'Y' THEN 'Network Service' ELSE 'Others' END CATEGORY
 							 FROM PROJECT_MASTER PM
+							 <!-- 
 						    INNER JOIN T2_USERS T1
 							   ON PM.CREATOR = T1.USER_ID
 						    INNER JOIN (SELECT CD_DTL_NO
@@ -156,6 +163,7 @@
 										 WHERE CD_NO = '200'
 										   AND USE_YN = 'Y') T2
 							   ON T1.DIVISION = T2.CD_DTL_NO
+							    -->
 							WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
 							) STAT
 		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
@@ -184,6 +192,7 @@
 		     	   		   AND T1.EXCLUDE_YN = 'N') OC
 			     INNER JOIN PROJECT_MASTER PM
 				    ON OC.REFERENCE_ID = PM.PRJ_ID
+				    <!-- 
 				 INNER JOIN T2_USERS T1
 				    ON PM.CREATOR = T1.USER_ID
 				 INNER JOIN (SELECT CD_DTL_NO
@@ -192,7 +201,8 @@
 							  WHERE CD_NO = '200'
 							    AND USE_YN = 'Y') T2
 					ON T1.DIVISION = T2.CD_DTL_NO
-				 WHERE T2.CD_DTL_NO = #{divisionNo}
+					 -->
+				 WHERE PM.DIVISION= #{divisionNo}
 				 GROUP BY OC.REFERENCE_ID, OC.OSS_NAME
 				</if>
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
@@ -237,6 +247,7 @@
 				   									, 'OTHER PROPRIETARY LICENSE')
 			     INNER JOIN PROJECT_MASTER PM
 				    ON OC.REFERENCE_ID = PM.PRJ_ID
+				    <!-- 
 				 INNER JOIN T2_USERS T1
 				    ON PM.CREATOR = T1.USER_ID
 				 INNER JOIN (SELECT CD_DTL_NO
@@ -245,7 +256,8 @@
 							  WHERE CD_NO = '200'
 							    AND USE_YN = 'Y') T2
 					ON T1.DIVISION = T2.CD_DTL_NO
-				 WHERE T2.CD_DTL_NO = #{divisionNo}
+					 -->
+				 WHERE PM.DIVISION = #{divisionNo}
 				 GROUP BY REFERENCE_ID, LICENSE_NAME
 				</if>
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
@@ -302,6 +314,7 @@
 				  				</otherwise>
 				  			</choose>
 							   FROM OSS_MASTER OM
+							   
 							  INNER JOIN T2_USERS T1
 							     ON OM.MODIFIER = T1.USER_ID
 							  INNER JOIN (SELECT CD_DTL_NO
@@ -310,6 +323,7 @@
 									       WHERE CD_NO = '200'
 									         AND USE_YN = 'Y') T2
 							     ON T1.DIVISION = T2.CD_DTL_NO
+							     
 							  INNER JOIN (SELECT USR.USER_ID
 							  				   , USR.USER_NAME
 										   	FROM T2_USERS USR
@@ -426,9 +440,11 @@
 					     WHERE CD_NO = '200'
 					       AND USE_YN = 'Y') A
 			<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
-				  LEFT JOIN (SELECT T2.CD_DTL_NM
+				  LEFT JOIN (SELECT 
+				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 								  , PM.STATUS AS CATEGORY 
 							   FROM PARTNER_MASTER PM
+							   <!-- 
 							  INNER JOIN T2_USERS T1
 								 ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
 							  INNER JOIN (SELECT CD_DTL_NO
@@ -437,14 +453,17 @@
 										   WHERE CD_NO = '200'
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
+								  -->
 							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
-				 LEFT JOIN (SELECT T2.CD_DTL_NM
+				 LEFT JOIN (SELECT 
+								(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
 								 , ADMIN.USER_NAME AS CATEGORY 
 							  FROM PARTNER_MASTER PM
+							  <!-- 
 							 INNER JOIN T2_USERS T1
 								ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
 							 INNER JOIN (SELECT CD_DTL_NO
@@ -453,6 +472,7 @@
 										  WHERE CD_NO = '200'
 										    AND USE_YN = 'Y') T2
 								ON T1.DIVISION = T2.CD_DTL_NO
+								 -->
 						      LEFT JOIN (SELECT 'unassigned' AS USER_ID, null AS USER_NAME
 						      		      UNION ALL
 						     			 SELECT USR.USER_ID
@@ -491,7 +511,7 @@
 						 ON USR.USER_ID = PM.CREATOR AND PM.USE_YN = 'Y'
 					  INNER JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200' AND USE_YN = 'Y') DIVISION
 					     ON USR.DIVISION = DIVISION.CD_DTL_NO
-						AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+						WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
 					  GROUP BY USR.USER_ID) STAT
 		    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 GROUP BY A.CD_DTL_NM

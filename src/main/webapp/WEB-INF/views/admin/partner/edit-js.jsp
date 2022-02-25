@@ -68,7 +68,7 @@ var saveFlag = false;
 			}
 		});
 		
-		if(userRole == "ROLE_ADMIN" && '${detail.partnerId}' != ""){
+		if('${detail.partnerId}' != ""){
 			$("input[name=creatorNm]").val('${detail.creatorName }');
 		}
 		
@@ -121,6 +121,7 @@ var saveFlag = false;
 			$('dl[name=commentClone]').remove();
 			
 			$('select[name=userDivision]').trigger('change');
+			$('select[name=division]').trigger('change');
 			
 			//와쳐 추가 버튼
 			$('#addWatcher').on('click', function(){
