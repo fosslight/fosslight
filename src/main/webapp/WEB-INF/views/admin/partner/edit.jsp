@@ -75,6 +75,7 @@
 		<!---->
 		<div class="projectContents">
 			<div class="tbws1 w1025" style="margin-top:20px;">
+			<c:set var="confirmStatusDisabled"><c:if test="${detail.status eq 'CONF'}">disabled="disabled"</c:if></c:set>
 			<form id="partnerForm">
 				<input type="hidden" id="partnerId" name="partnerId" value="${detail.partnerId }"/>
 				<input type="hidden" id="status" name="status"
@@ -94,7 +95,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.name" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" id="partnerName" name="partnerName" class="autoComParty w100P" value='' />
+									<input type="text" id="partnerName" name="partnerName" class="autoComParty w100P" value='' ${confirmStatusDisabled}/>
 									<div class="retxt"></div>
 								</div>
 							</td>
@@ -103,15 +104,14 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.softwareName" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" id="softwareName" name="softwareName" class="autoComSwNm w100P" value=''/>
+									<input type="text" id="softwareName" name="softwareName" class="autoComSwNm w100P" value='' ${confirmStatusDisabled}/>
 									<div class="retxt">This field is required.</div>
 								</div>
 							</td>
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.3rdParty.softwareVersion" /></th>
-							<td class="dCase"><input type="text" id="softwareVersion" name="softwareVersion"
-							<c:if test="${not empty detail }">value="${detail.softwareVersion }"</c:if>/>
+							<td class="dCase"><input type="text" id="softwareVersion" name="softwareVersion" value="${not empty detail ? detail.softwareVersion : ''}" ${confirmStatusDisabled} />
 							<div class="retxt" style="display:none;">This field is required.</div></td>
 						</tr>
 						<tr>
@@ -120,7 +120,7 @@
 								<p class="pd5"><spring:message code="msg.partner.deliveryForm.notice" /></p>
 								<span class="selectSet w150">
 									<strong for="deliveryForm" title="selected value">Source Code Form</strong>
-									<select id="deliveryForm" name="deliveryForm">
+									<select id="deliveryForm" name="deliveryForm" ${confirmStatusDisabled}>
 										${ct:genOption(ct:getConstDef("CD_PARTNER_DELIVERY_FORM"))}
 									</select>
 								</span>
@@ -132,8 +132,8 @@
 							<td class="dCase">
 								<span>View : </span>
 								<span class="radioSet">
-									<input type="radio" name="publicYn" value="Y" id="permissionRadio1" ${(not empty detail && detail.publicYn ne 'N') || empty detail ? 'checked="checked"' : ''} /><label for="permissionRadio1">EveryOne</label>
-									<input type="radio" name="publicYn" value="N" id="permissionRadio2" ${not empty detail && detail.publicYn eq 'N' ? 'checked="checked"' : ''} /><label for="permissionRadio2">Creator & Watcher</label>
+									<input type="radio" name="publicYn" value="Y" id="permissionRadio1" ${(not empty detail && detail.publicYn ne 'N') || empty detail ? 'checked="checked"' : ''} ${confirmStatusDisabled} /><label for="permissionRadio1">EveryOne</label>
+									<input type="radio" name="publicYn" value="N" id="permissionRadio2" ${not empty detail && detail.publicYn eq 'N' ? 'checked="checked"' : ''} ${confirmStatusDisabled} /><label for="permissionRadio2">Creator & Watcher</label>
 								</span><br>
 								<span>Edit : Creator & Watcher only</span>
 							</td>
@@ -141,7 +141,7 @@
 						</c:if>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.description" /></th>
-							<td class="dCase"><textarea class="w100P h150" id="description" name="description"><c:if test="${not empty detail }">${detail.description }</c:if></textarea></td>
+							<td class="dCase"><textarea class="w100P h150" id="description" name="description" ${confirmStatusDisabled}><c:if test="${not empty detail }">${detail.description }</c:if></textarea></td>
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.Agreement" /><br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
@@ -298,7 +298,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
+									<input type="text" name="creatorNm" class="autoComCreatorDivision" value="" ${(ct:isAdmin() and detail.status ne 'CONF') ? '' : 'disabled="disabled"'} />
 									<input type="hidden" name="creator" <c:if test="${not empty detail }">value='${detail.creator}'</c:if>/>
 									<span class="retxt">This field is required.</span>
 								</div>

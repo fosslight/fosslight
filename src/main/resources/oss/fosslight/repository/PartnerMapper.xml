@@ -1841,4 +1841,10 @@
 		WHERE
 			COMPONENT_ID = #{componentId}
 	</update>
+	
+	<update id="updateDivision">
+		UPDATE PARTNER_MASTER
+		SET DIVISION = #{division}
+		WHERE PARTNER_ID = #{partnerId}
+	</update>
 </mapper>

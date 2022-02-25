@@ -574,6 +574,25 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value=PARTNER.CHANGE_DIVISION_AJAX)
+	public @ResponseBody ResponseEntity<Object> saveBasicInfoOnConfirmAjax(
+			@RequestBody HashMap<String, Object> map
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		
+		String partnerId = (String)map.get("partnerId");
+		String division = (String)map.get("division");
+		try {
+			partnerService.updateDivision(partnerId, division);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader();
+	}
+	
 	@PostMapping(value=PARTNER.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(
 			@ModelAttribute PartnerMaster partnerMaster

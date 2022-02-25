@@ -1252,6 +1252,10 @@ public class CoMailManager extends CoTopComponent {
 		if(!isEmpty(convBean.getPriority())) {
 			convBean.setPriority(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, convBean.getPriority()));
 		}
+		
+		if(!isEmpty(convBean.getDivision())) {
+			convBean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, convBean.getDivision()));
+		}
 
 		return convBean;
 	}
@@ -1989,6 +1993,7 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getNoticeType(), after.getNoticeType(), isModified);
 			isModified = checkEquals(before.getNetworkServerType(), after.getNetworkServerType(), isModified);
 			isModified = checkEquals(before.getPriority(), after.getPriority(), isModified);
+			isModified = checkEquals(before.getDivision(), after.getDivision(), isModified);
 			
 			after.setPrjName(appendChangeStyle(before.getPrjName(), after.getPrjName()));
 			after.setPrjVersion(appendChangeStyle(before.getPrjVersion(), after.getPrjVersion()));
@@ -2000,6 +2005,7 @@ public class CoMailManager extends CoTopComponent {
 			after.setNoticeType(appendChangeStyle(before.getNoticeType(), after.getNoticeType()));
 			after.setNetworkServerType(appendChangeStyle(before.getNetworkServerType(), after.getNetworkServerType()));
 			after.setPriority(appendChangeStyle(before.getPriority(), after.getPriority()));
+			after.setDivision(appendChangeStyle(before.getDivision(), after.getDivision()));
 			
 
 			if(before.getModelList().size() > 0 || after.getModelList().size() > 0) {
@@ -2642,6 +2648,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setReviewer(makeUserNameFormatWithDivision((String) dataMap.get("REVIEWER")));
 			bean.setCreator(makeUserNameFormatWithDivision((String) dataMap.get("CREATOR")));
 			bean.setCreatedDate(CommonFunction.formatDate((String) dataMap.get("CREATED_DATE")));
+			bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, (String) dataMap.get("DIVISION")));
 			break;
 		}
 		return bean;
@@ -2799,6 +2806,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setNoticeType(avoidNull((String) dataMap.get("NOTICE_TYPE")));
 			bean.setNoticeTypeEtc(avoidNull((String) dataMap.get("NOTICE_TYPE_ETC")));
 			bean.setPriority(avoidNull((String) dataMap.get("PRIORITY")));
+			bean.setDivision(avoidNull((String) dataMap.get("DIVISION")));
 			
 			packageFileName = (String) dataMap.get("PACKAGE_FILE_ID");
 			packageFileName2 = (String) dataMap.get("PACKAGE_FILE_ID2");
@@ -2868,6 +2876,10 @@ public class CoMailManager extends CoTopComponent {
 			
 			if(!isEmpty(bean.getPriority())) {
 				bean.setPriority(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, bean.getPriority()));
+			}
+			
+			if(!isEmpty(bean.getDivision())) {
+				bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 			}
 						
 		}
@@ -3296,7 +3308,7 @@ public class CoMailManager extends CoTopComponent {
 			}
 			
 			// Email Send
-			mailSender.send(message);
+//			mailSender.send(message);
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료
 			mailManagerMapper.updateSendStatus(coMail);

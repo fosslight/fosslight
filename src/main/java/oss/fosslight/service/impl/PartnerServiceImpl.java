@@ -936,4 +936,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 
 		return map;
 	}
+
+	@Override
+	public int updateDivision(String partnerId, String division) {
+		return partnerMapper.updateDivision(partnerId, division);
+	}
 }
