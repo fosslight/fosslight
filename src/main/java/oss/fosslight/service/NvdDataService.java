@@ -46,7 +46,7 @@ public class NvdDataService {
 	private final String NVD_META_URL = "https://nvd.nist.gov/feeds/json/cpematch/1.0/";
 	private final String NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/";
 	
-	private final int BATCH_SIZE = 500;
+	private final int BATCH_SIZE = 200;
 	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
@@ -505,7 +505,7 @@ public class NvdDataService {
 			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
 		} catch (Exception e) {
 			log.warn(e.getMessage(), e);
-			Thread.sleep(3000);
+			Thread.sleep(1000 * 30);
 			log.info("Retry downloading the NVD data file. FILE_NAME : " + FILE_NAME);
 			if(Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
 				try {
@@ -667,7 +667,7 @@ public class NvdDataService {
 					metaInfo.put(k, v);
 				}
 			}else{
-				log.warn("connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode());
+				log.warn("connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
 			}
 		} finally {
 			if(s != null) {
