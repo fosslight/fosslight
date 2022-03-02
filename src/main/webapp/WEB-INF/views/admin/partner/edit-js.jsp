@@ -123,6 +123,10 @@ var saveFlag = false;
 			$('select[name=userDivision]').trigger('change');
 			$('select[name=division]').trigger('change');
 			
+			$('select[name=division]').on("change", function(){
+				fn.changeDivision()
+			});
+			
 			//와쳐 추가 버튼
 			$('#addWatcher').on('click', function(){
 				/* division 정보 */
@@ -595,6 +599,30 @@ var saveFlag = false;
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
+		},
+		changeDivision : function() {
+			var divisionCd = $("#division option:selected").val();
+			if("" != divisionCd) {
+				var postData = { "partnerId" : '${detail.partnerId}', "division" : divisionCd};
+				$.ajax({
+					url : '<c:url value="/partner/changeDivisionAjax"/>',
+					type : 'POST',
+					data : JSON.stringify(postData),
+					dataType : 'json',
+					contentType : 'application/json',
+					cache : false,
+					success: function(data) {
+						if(data.isValid == "false") {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);	
+						} else {
+							alertify.success('<spring:message code="msg.common.success" />');	
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
 		},
 		save : function(){
 			if (fn.checkStatus()){

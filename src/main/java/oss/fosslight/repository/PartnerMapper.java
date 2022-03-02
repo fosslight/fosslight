@@ -144,4 +144,6 @@ public interface PartnerMapper {
 	void insertBinaryOssComponents(ProjectIdentification projectIdentification);
 	
 	void updateOssList(ProjectIdentification projectIdentification);
+
+	public int updateDivision(@Param("partnerId") String partnerId, @Param("division") String division);
 }
