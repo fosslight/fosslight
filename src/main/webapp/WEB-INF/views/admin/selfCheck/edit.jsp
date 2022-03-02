@@ -112,7 +112,7 @@
 										</div>
 										<br/>
 										<span><input type="radio" id="2" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="2" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_ANALYSIS_USED_FLAG')) eq 'N'}">disabled</c:if>/><label for="2">URL </label></span>
-										<div id="wgetUrl_${i}" style="width: 500px; display: none;"><input type="text" class="autoComConfParty" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
+										<div id="wgetUrl_${i}" style="width: 500px; display: none;"><input type="text" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
 								</div>
 							</div>
 						</dd>
