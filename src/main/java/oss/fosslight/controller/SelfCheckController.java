@@ -279,7 +279,7 @@ public class SelfCheckController extends CoTopComponent {
 						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
 			} else {
 				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), null, null, null, true, true));
+						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), null, vr.getDiffMessageMap(), null, true, true));
 			}
 			
 			if(!vr.isDiff()){

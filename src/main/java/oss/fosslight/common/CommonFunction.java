@@ -1464,7 +1464,8 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(hideObligation) {
 						if(hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
-							hideObligationIdList.put(_key, validMap.get(errKey));
+//							hideObligationIdList.put(_key, validMap.get(errKey));
+							hideObligationIdList.put(_key, getMessage("msg.project.obligation.unclear"));
 						}
 					}
 				}
@@ -1480,7 +1481,8 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(hideObligation) {
 						if(hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
-							hideObligationIdList.put(_key, validDiffMap.get(errKey));
+//							hideObligationIdList.put(_key, validDiffMap.get(errKey));
+							hideObligationIdList.put(_key, getMessage("msg.project.obligation.unclear"));
 						}
 					}
 					
@@ -1505,7 +1507,8 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(hideObligation) {
 						if(hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
-							hideObligationIdList.put(_key, validInfoMap.get(errKey));
+//							hideObligationIdList.put(_key, validInfoMap.get(errKey));
+							hideObligationIdList.put(_key, getMessage("msg.project.obligation.unclear"));
 						}
 					}
 					
@@ -1551,7 +1554,7 @@ public class CommonFunction extends CoTopComponent {
 		String currentGroup = "";
 		for(ProjectIdentification bean : list) {
 			
-			// self check의 겨웅에 한함
+			// self check case only
 			if(hideObligation) {
 				if(hideObligationIdList.containsKey(bean.getGridId())) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
