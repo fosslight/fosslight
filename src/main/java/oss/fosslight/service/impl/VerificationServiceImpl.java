@@ -2333,7 +2333,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			commHisBean.setReferenceId(prjId); 
 			commHisBean.setContents(packagingComment);
 			
-			commentService.registComment(commHisBean);
+			commentService.registComment(commHisBean, false);
 		}
 	}
 	
