@@ -1075,20 +1075,32 @@
         uploadOSSByUrl : function() {
 
             var wgetUrl = $("#sendWgetUrl").val();
-            var flScannerUrl = '${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_ANALYSIS_SETTING'))[0][3]}';
-            var adminToken = '${ct:getCodeValues(ct:getConstDef('CD_EXTERNAL_ANALYSIS_SETTING'))[1][3]}';
-
-            fetch(flScannerUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'pid='+'${project.prjId}'+'&link='+wgetUrl+'&email='+'${project.prjEmail}'+'&admin='+adminToken,
-            })
-            .finally(() => {
-                alertify.success('<spring:message code="msg.common.success" />');
-            });
-
+            
+            if(wgetUrl == "") {
+				alertify.alert('URL is empty');
+				return false;
+            }
+        	
+			$.ajax({
+				url : '<c:url value="/external/request-fl-scan"/>',
+				type : 'POST',
+				data : {'prjId' : '${project.prjId}', 'wgetUrl' : wgetUrl},
+				dataType : 'json',
+				cache : false,
+				success : function(data){
+					if(data.success) {
+						alertify.success('<spring:message code="msg.common.success" />');						
+					} else {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						if(data.msg) {
+							alertify.alert(data.msg);
+						}
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
         },
 	};
 

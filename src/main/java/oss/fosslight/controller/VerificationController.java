@@ -267,9 +267,12 @@ public class VerificationController extends CoTopComponent {
 		Map<String, Object> resMap = null;
 		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
 		
+		List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
+		String prjId = (String) map.get("prjId");
+		
 		try {
-			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
-			String prjId = (String) map.get("prjId");
+			
+			log.info("start verify prjId:" + prjId + ", fileSeqs:" + fileSeqs.toString());
 			
 			String packagingComment = fileService.setClearFiles(map);
 			map.put("packagingComment", packagingComment);
@@ -294,11 +297,11 @@ public class VerificationController extends CoTopComponent {
 			verificationService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));
 			verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("failed to verify project id:" + prjId, e);
 			
 			resMap = new HashMap<String, Object>();
 			resMap.put("resCd", "99");
-			resMap.put("resMsg", "Error : " + e.getMessage());
+			resMap.put("resMsg", "Error : " + ( (StringUtil.isEmpty(e.getMessage()) || "null".equalsIgnoreCase(e.getMessage())) ? getMessage("msg.common.valid2") : e.getMessage()));
 		}
 		
 		return toJson(resMap);
@@ -440,7 +443,7 @@ public class VerificationController extends CoTopComponent {
 					commHisBean.setContents(userComment);
 					commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
 					
-					commentService.registComment(commHisBean);
+					commentService.registComment(commHisBean, false);
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}

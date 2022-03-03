@@ -228,7 +228,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					commHisBean.setReferenceId(prjId);
 					commHisBean.setContents(deleteComment+uploadComment);
 					
-					commentService.registComment(commHisBean);
+					commentService.registComment(commHisBean, false);
 				} catch (Exception e) {
 					log.error(e.getMessage());
 				}
@@ -1053,7 +1053,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 				commHisBean.setReferenceId(prjId); commHisBean.setContents(packagingComment);
 				  
-				commentService.registComment(commHisBean);
+				commentService.registComment(commHisBean, false);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2333,7 +2333,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			commHisBean.setReferenceId(prjId); 
 			commHisBean.setContents(packagingComment);
 			
-			commentService.registComment(commHisBean);
+			commentService.registComment(commHisBean, false);
 		}
 	}
 	
