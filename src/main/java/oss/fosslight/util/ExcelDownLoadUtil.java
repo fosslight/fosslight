@@ -1019,7 +1019,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			for(int i = 0; i < projectList.size(); i++){
 				Project param = projectList.get(i);
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
-				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId());
+				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
 				String nvdMaxScore = "";
 				
 				if(nvdMaxScoreInfo != null) {

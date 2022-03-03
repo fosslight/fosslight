@@ -173,7 +173,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
-						OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId());
+						OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						
 						if(nvdMaxScoreInfo != null) {
 							bean.setCveId(nvdMaxScoreInfo.getCveId());

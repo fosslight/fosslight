@@ -109,6 +109,19 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			list = partnerMapper.selectPartnerList(partnerMaster);
 		}
 		
+		if(list != null) {
+			for(PartnerMaster bean : list) {
+				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				
+				if(nvdMaxScoreInfo != null) {
+					bean.setCveId(nvdMaxScoreInfo.getCveId());
+					bean.setCvssScore(nvdMaxScoreInfo.getCvssScore());
+					bean.setVulnYn(nvdMaxScoreInfo.getVulnYn());
+				}
+			}			
+		}
+
+		
 		map.put("page", partnerMaster.getCurPage());
 		map.put("total", partnerMaster.getTotBlockSize());
 		map.put("records", records);
