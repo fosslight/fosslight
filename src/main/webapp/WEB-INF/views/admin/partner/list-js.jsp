@@ -266,7 +266,8 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				},
-				colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description', 'Division', 'CVE ID', 'Vulnera<br/>bility', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
+				colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
+					, 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
 				colModel: [
 					{name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true},
 					{name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true},
@@ -275,9 +276,9 @@
 					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true},
 					{name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true},
 					{name: 'description', index: 'description', width: 100, align: 'left', sortable : true},
-					{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
 					{name: 'cveId', index: 'cveId', hidden:true},
-					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false, hidden:true},
+					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
+					{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
 					{name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true},
 					{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
 					{name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},

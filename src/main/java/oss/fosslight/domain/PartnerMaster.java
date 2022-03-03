@@ -187,6 +187,15 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String ignoreBinaryDbFlag = "N";
 	
+	/** The vuln yn. */
+	private String vulnYn;
+	
+	/** The cvss score. */
+	private String cvssScore;
+	
+	/** The cve id. */
+	private String cveId;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1149,4 +1158,29 @@ public class PartnerMaster extends ComBean implements Serializable{
 	public void setIgnoreBinaryDbFlag(String ignoreBinaryDbFlag) {
 		this.ignoreBinaryDbFlag = ignoreBinaryDbFlag;
 	}
+
+	public String getVulnYn() {
+		return vulnYn;
+	}
+
+	public void setVulnYn(String vulnYn) {
+		this.vulnYn = vulnYn;
+	}
+
+	public String getCvssScore() {
+		return cvssScore;
+	}
+
+	public void setCvssScore(String cvssScore) {
+		this.cvssScore = cvssScore;
+	}
+
+	public String getCveId() {
+		return cveId;
+	}
+
+	public void setCveId(String cveId) {
+		this.cveId = cveId;
+	}
+	
 }

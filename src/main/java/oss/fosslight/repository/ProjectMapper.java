@@ -295,7 +295,7 @@ public interface ProjectMapper {
 	
 	int existsAddList(Project project);
 
-	OssMaster findIdentificationMaxNvdInfo(String prjId);
+	OssMaster findIdentificationMaxNvdInfo(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
 
 	int selectOssComponentMaxIdx(Project project);
 	

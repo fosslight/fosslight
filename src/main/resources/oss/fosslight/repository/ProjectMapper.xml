@@ -3717,7 +3717,7 @@
 		   AND REFERENCE_DIV = #{referenceDiv}
 	</select>
 	
-	<select id="findIdentificationMaxNvdInfo" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
+	<select id="findIdentificationMaxNvdInfo" resultType="oss.fosslight.domain.OssMaster">
 		SELECT NVD.CVSS_SCORE AS CVSS_SCORE
 			 , NVD.CVE_ID AS CVE_ID
 			 , IFNULL(NVD.VULN_YN, 'N') AS VULN_YN
@@ -3731,7 +3731,12 @@
   		  	ON NVD.PRODUCT = OC.OSS_NAME 
   		   AND NVD.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) 
   		 WHERE OC.REFERENCE_ID = #{prjId}
+  		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		 	AND OC.REFERENCE_DIV = #{commponentDiv}
+  		 </if>
+  		 <if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
   		   AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 </if>
   		   AND OC.EXCLUDE_YN = 'N'
 		   AND OC.OSS_NAME IS NOT NULL
 		   AND OC.OSS_NAME != '-'
