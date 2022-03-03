@@ -305,8 +305,9 @@ var saveFlag = false;
 									for(var i = 0; i < result[1].length; i++){
 										var num = i+1;
 										var checkedTxt = "";
+										var sheetName = result[1][i].name.toUpperCase().trim();
 
-										if(result[1][i].name.toUpperCase().trim() == "OSS LIST"){
+										if(sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST"){
 											checkedTxt = "checked";
 										}
 										
