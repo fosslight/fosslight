@@ -18,6 +18,30 @@
 
 ---
 
+## v1.2.32 (04/03/2022)
+## Changes
+## 🔧 Maintenance
+
+- Add vulnerability Score to 3rd party list @FOSSLight-dev (#421)
+- Change self-check unclear obligation message @FOSSLight-dev (#420)
+- Add division info to project/3rd Party mail @FOSSLight-dev (#419)
+
+---
+
+## v1.2.31 (01/01/1970)
+## Changes
+## 🐛 Hotfixes
+
+- Fix the Unconfirmed Version OSS registration bug @soimkim (#412)
+
+## 🔧 Maintenance
+
+- Check Oss Name > npm > registered OSS Name @soimkim (#415)
+- Add a comment to the Project mail @soimkim (#414)
+- Add default comments to the Project mails @soimkim (#413)
+
+---
+
 ## v1.2.30 (18/02/2022)
 ## Changes
 ## 🐛 Hotfixes
@@ -531,47 +555,3 @@
 - Modify pop-up phrases that occur when you press the reopen button @suhwan-cheon (#97)
 - Rename 'Excel Download' Button to 'Export' @sw-develop (#104)
 - Drop button requires comment @soimkim (#105)
-
----
-
-## v1.2.3 (27/08/2021)
-## Changes
-## 🚀 Features
-
-- Add a new function to synchronize from OSS information @FOSSLight-dev (#93)
-
-## 🐛 Hotfixes
-
-- Add a new function to synchronize from OSS information @FOSSLight-dev (#93)
-
-## 🔧 Maintenance
-
-- Modify 'Request Review' button(Delete icon and rename to 'Request') @ubermen5che (#91)
-- Fix header column names of Vulnerability Log table @kimtaehyun98 (#87)
-- Fix typo 'SourceCode' in Self-Check @hyewoncc (#83)
-- Add label:improvement to also appear as child of Feature in release draft @riyenas0925 (#81)
-- Modify github action to deploy 30 seconds after release @soimkim (#76)
-
----
-
-## v1.2.2 (20/08/2021)
-## Changes
-## 🚀 Features
-
-- Add deactivate function to OSS @FOSSLight-dev (#72)
-- Add a function to check details detected license. @ubermen5che (#69)
-- Add CVE link to vulnerability discovered mail body (#64) @acafela (#66)
-- Add License Type option for OSS List search @hyewoncc (#62)
-
-## 🐛 Hotfixes
-
-- Add deactivate function to OSS @FOSSLight-dev (#72)
-- Fix a bug for type check error. @ubermen5che (#61)
-
-## 🔧 Maintenance
-
-- Fix toggle button color to match others @hyewoncc (#73)
-- Change Admin can Restart/Complete with no comment @kimtaehyun98 (#63)
-- Update message.properties @k2heart (#65)
-- Deploy the latest release to demo.fosslight.org @soimkim (#68)
-- Add auto-updating CHANGELOG.md on develop branch @riyenas0925 (#58)
