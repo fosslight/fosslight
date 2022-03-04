@@ -58,6 +58,22 @@ public class T2CoValidationResult {
         }
     }
     
+    public Map<String, String> getWarningCodeMap(){
+        if(diffMap == null){
+            return new HashMap<String, String>();
+        }else{
+            return diffMap;
+        }
+    }
+    
+    public Map<String, String> getInfoCodeMap(){
+        if(infoMap == null){
+            return new HashMap<String, String>();
+        }else{
+            return infoMap;
+        }
+    }
+    
     public void setDataMap(Map<String,String> map){
         dataMap = map;
     }
