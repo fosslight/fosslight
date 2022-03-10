@@ -607,7 +607,7 @@ public class NvdDataService {
 										cpe_name.put("cpeSeq", seq);
 										cpe_name.put("idx", nameIdx);
 										cpeNameList.add(cpe_name);
-										if(cpeNameList.size() >= BATCH_SIZE) {
+										if(cpeNameList.size() >= 50) {
 											mapper.insertBulkCpeMatchNameData(cpeNameList);
 											cpeNameList = new ArrayList<>();
 										}

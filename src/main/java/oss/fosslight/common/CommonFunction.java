@@ -1461,13 +1461,14 @@ public class CommonFunction extends CoTopComponent {
 						_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
 						errorMap.put(_key, _list);
 					}
-					
+					/*
 					if(hideObligation) {
 						if(hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
 //							hideObligationIdList.put(_key, validMap.get(errKey));
 							hideObligationIdList.put(_key, getMessage("msg.project.obligation.unclear"));
 						}
 					}
+					*/
 				}
 			}			
 		}
@@ -1478,13 +1479,14 @@ public class CommonFunction extends CoTopComponent {
 			for(String errKey : validDiffMap.keySet()) {
 				if(errKey.indexOf(".") > -1) {
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
-					
+					/*
 					if(hideObligation) {
 						if(hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
 //							hideObligationIdList.put(_key, validDiffMap.get(errKey));
 							hideObligationIdList.put(_key, getMessage("msg.project.obligation.unclear"));
 						}
 					}
+					*/
 					
 					if(warningMap.containsKey(_key)) {
 						List<String> _list = warningMap.get(_key);
@@ -4227,5 +4229,46 @@ public class CommonFunction extends CoTopComponent {
 		}	
 		
 		return ossComponents;
+	}
+
+	/**
+	 * Set Unclear Obligation Flag (Self-Check)
+	 * @param list
+	 * @param warningCodeMap 
+	 * @param errorCodeMap 
+	 * @return
+	 */
+	public static List<ProjectIdentification> identificationUnclearObligationCheck(List<ProjectIdentification> list, Map<String, String> errorCodeMap, Map<String, String> warningCodeMap) {
+		List<String> UNCLEAR_OBLIGATION_CODE_LIST = Arrays.asList(new String[] {
+				"LICENSE_NAME.REQUIRED" ,"LICENSE_NAME.UNCONFIRMED", "LICENSE_NAME.INCLUDE_MULTI_OPERATE", "LICENSE_NAME.NOLICENSE", "LICENSE_NAME.INCLUDE_DUAL_OPERATE"
+				, "OSS_NAME.REQUIRED", "OSS_NAME.UNCONFIRMED", "OSS_VERSION.UNCONFIRMED"
+		}) ;
+		
+		List<String> unclearObligationList = new ArrayList<>();
+		
+		if(errorCodeMap != null) {
+			for(String key : errorCodeMap.keySet()) {
+				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_LIST.contains(errorCodeMap.get(key))) {
+					unclearObligationList.add(key.substring(key.indexOf(".") + 1, key.length()));
+				}
+			}
+		}
+		if(warningCodeMap != null) {
+			for(String key : warningCodeMap.keySet()) {
+				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_LIST.contains(warningCodeMap.get(key))) {
+					unclearObligationList.add(key.substring(key.indexOf(".") + 1, key.length()));
+				}
+			}
+		}
+		
+		if(list != null) {
+			for(ProjectIdentification bean : list) {
+				if(unclearObligationList.contains(bean.getGridId())) {
+					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
+					bean.setObligationMsg(getMessage("msg.project.obligation.unclear"));
+				}
+			}
+		}
+		return list;
 	}
 }

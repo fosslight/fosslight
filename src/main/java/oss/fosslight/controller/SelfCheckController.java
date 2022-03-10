@@ -272,14 +272,17 @@ public class SelfCheckController extends CoTopComponent {
 			
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
+			// set self check obligation message
+			List<ProjectIdentification> mainDataList = CommonFunction.identificationUnclearObligationCheck((List<ProjectIdentification>) map.get("mainData"), vr.getErrorCodeMap(), vr.getWarningCodeMap());
+			
 			if (!vr.isValid()) {
 				Map<String, String> validMap = vr.getValidMessageMap();
 				map.put("validData", validMap);
 				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
+						.identificationSortByValidInfo(mainDataList, validMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true));
 			} else {
 				map.replace("mainData", CommonFunction
-						.identificationSortByValidInfo((List<ProjectIdentification>) map.get("mainData"), null, vr.getDiffMessageMap(), null, true, true));
+						.identificationSortByValidInfo(mainDataList, null, null, null, true, true));
 			}
 			
 			if(!vr.isDiff()){
