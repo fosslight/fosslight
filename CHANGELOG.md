@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.2.34 (01/01/1970)
+## Changes
+## 🔧 Maintenance
+
+- Update version to 1.2.33 @soimkim (#423)
+
+---
+
 ## v1.2.33 (11/03/2022)
 ## Changes
 ## 🔧 Maintenance
@@ -526,26 +534,3 @@
 
 - Delete "Need check" in the Obligation Type from the search box in the License List @Lee-JaeHyuk (#101)
 - Translate some korean comments to english @wkdalsgh192 (#60)
-
----
-
-## v1.2.4 (03/09/2021)
-## Changes
-## 🚀 Features
-
-- 3rd party / project status check func & oss sync func @FOSSLight-dev (#113)
-- Add Docker mailserver in docker-compose @epicarts (#112)
-- Add license information display when clicking the Restriction icon @riyenas0925 (#71)
-- Expose a save button for a creator, watcher, and admin @astrod (#88)
-
-## 🐛 Hotfixes
-
-- 3rd party/project status check function @FOSSLight-dev (#115)
-- 3rd party / project status check func & oss sync func @FOSSLight-dev (#113)
-
-## 🔧 Maintenance
-
-- Fix hide 'Check OSS Name' button from unrelated users @hyewoncc (#110)
-- Modify pop-up phrases that occur when you press the reopen button @suhwan-cheon (#97)
-- Rename 'Excel Download' Button to 'Export' @sw-develop (#104)
-- Drop button requires comment @soimkim (#105)
