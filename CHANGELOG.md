@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.33 (11/03/2022)
+## Changes
+## 🔧 Maintenance
+
+- Change the condition Obligation: unclear in self-check. @FOSSLight-dev (#422)
+
+---
+
+## v1.2.32 (04/03/2022)
+## Changes
+## 🔧 Maintenance
+
+- Add vulnerability Score to 3rd party list @FOSSLight-dev (#421)
+- Change self-check unclear obligation message @FOSSLight-dev (#420)
+- Add division info to project/3rd Party mail @FOSSLight-dev (#419)
+
+---
+
 ## v1.2.31 (25/02/2022)
 ## Changes
 ## 🚀 Features
@@ -14,30 +32,6 @@
 ## 🔧 Maintenance
 
 - Check Oss Name > npm > registered OSS Name @FOSSLight-dev (#415)
-- Add default comments to the Project mails @soimkim (#413)
-
----
-
-## v1.2.32 (04/03/2022)
-## Changes
-## 🔧 Maintenance
-
-- Add vulnerability Score to 3rd party list @FOSSLight-dev (#421)
-- Change self-check unclear obligation message @FOSSLight-dev (#420)
-- Add division info to project/3rd Party mail @FOSSLight-dev (#419)
-
----
-
-## v1.2.31 (01/01/1970)
-## Changes
-## 🐛 Hotfixes
-
-- Fix the Unconfirmed Version OSS registration bug @soimkim (#412)
-
-## 🔧 Maintenance
-
-- Check Oss Name > npm > registered OSS Name @soimkim (#415)
-- Add a comment to the Project mail @soimkim (#414)
 - Add default comments to the Project mails @soimkim (#413)
 
 ---
