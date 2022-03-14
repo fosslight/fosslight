@@ -426,4 +426,13 @@
 		   AND T2.PACKAGING_FILE_ID != #{packageFileId3}
 		 </if>
 	</update>
+	
+	<select id="checkOssNickName2" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponents">
+		SELECT T2.OSS_ID, T2.OSS_NAME, T1.OSS_NICKNAME 
+		FROM OSS_NICKNAME T1 
+		INNER JOIN OSS_MASTER T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.USE_YN = 'Y'
+		WHERE OSS_NICKNAME = #{ossName}
+		ORDER BY T2.OSS_ID DESC
+		LIMIT 1
+ 	</select>
 </mapper>
