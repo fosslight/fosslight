@@ -41,7 +41,7 @@ public class CoConstDef {
 			STATIC_RES[6]+"/**",
 			STATIC_RES[7]+"/**",
 			STATIC_RES[8]+"/**",
-			"/favicon.ico"
+			"/favicon.ico","/robots.txt"
 	};
 
 	/** 정적 리소스 기본 패키지 classpath */
