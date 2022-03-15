@@ -32,7 +32,7 @@
 		<div class="grdrow mt10">
      			<ul>
 					<c:forEach var="code" items="${ct:getAllValues(ct:getConstDef('CD_DASHBOARD_DETAIL'))}" varStatus="status">
-						<li><strong>${code[4]}</strong></li>
+						<li>${code[4]}</li>
 					</c:forEach>
 				</ul>
 		</div>
