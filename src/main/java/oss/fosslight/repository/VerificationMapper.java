@@ -64,4 +64,6 @@ public interface VerificationMapper {
 							, @Param("refPrjId") String refPrjId, @Param("refFileSeq") String refFileSeq);
 	
 	int updatePackagingReuseMap(Project project);
+
+	OssComponents checkOssNickName2(OssComponents bean);
 }

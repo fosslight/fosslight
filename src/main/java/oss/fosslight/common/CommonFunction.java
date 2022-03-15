@@ -4263,12 +4263,33 @@ public class CommonFunction extends CoTopComponent {
 		
 		if(list != null) {
 			for(ProjectIdentification bean : list) {
-				if(unclearObligationList.contains(bean.getGridId())) {
+				if("-".equals(bean.getOssName()) && isEmpty(bean.getObligationType()) && !checkIncludeUnconfirmedLicense(bean.getComponentLicenseList())) {
+					String obligationType = CommonFunction.getObligationTypeWithSelectedLicense(bean);
+					if(!isEmpty(obligationType)) {
+						bean.setObligationType(obligationType);
+						continue;
+					}
+				}
+				
+				// Check unconfirmed license, the actual message is (Declared : ~~), so check again registered license.
+				if(unclearObligationList.contains(bean.getGridId())
+						|| (!isEmpty(bean.getObligationType()) && checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()))) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
 					bean.setObligationMsg(getMessage("msg.project.obligation.unclear"));
 				}
 			}
 		}
 		return list;
+	}
+
+	private static boolean checkIncludeUnconfirmedLicense(List<ProjectIdentification> licenseList) {
+		if(licenseList != null) {
+			for(ProjectIdentification bean : licenseList) {
+				if(!isEmpty(bean.getLicenseName()) && !CoCodeManager.LICENSE_INFO_UPPER.containsKey(bean.getLicenseName().toUpperCase())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
