@@ -436,12 +436,8 @@ public class OssController extends CoTopComponent{
 			History h = new History();
 			
 			if(("Y").equals(ossMaster.getOssCopyFlag())) {
-				OssMaster copyCheckOss = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId());
-				if(ossMaster.getOssName().equals(copyCheckOss.getOssName())
-						&& !ossMaster.getOssVersion().equals(copyCheckOss.getOssVersion())) {
-					ossMaster.setOssId(null);
-					isNew = true;
-				}
+				ossMaster.setOssId(null);
+				isNew = true;
 			}
 			
 			// OSS 수정
