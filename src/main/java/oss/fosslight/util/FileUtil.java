@@ -435,7 +435,7 @@ public class FileUtil {
 			}
 			
 			if(Files.exists(zipPath)) {
-				Files.move(zipPath, movePath.resolve(zipPath.getFileName() + "_" + CommonFunction.getCurrentDateTime()));
+				Files.move(zipPath, movePath.resolve(zipPath.getFileName() + "_" + CommonFunction.getCurrentDateTime("yyyyMMddHHmmss")));
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
