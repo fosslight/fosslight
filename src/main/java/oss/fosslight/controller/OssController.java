@@ -436,12 +436,8 @@ public class OssController extends CoTopComponent{
 			History h = new History();
 			
 			if(("Y").equals(ossMaster.getOssCopyFlag())) {
-				OssMaster copyCheckOss = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId());
-				if(ossMaster.getOssName().equals(copyCheckOss.getOssName())
-						&& !ossMaster.getOssVersion().equals(copyCheckOss.getOssVersion())) {
-					ossMaster.setOssId(null);
-					isNew = true;
-				}
+				ossMaster.setOssId(null);
+				isNew = true;
 			}
 			
 			// OSS 수정
@@ -679,10 +675,8 @@ public class OssController extends CoTopComponent{
 		if(isEmpty(ossMaster.getOssId())) {
 			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
 			
-			if(checkOssInfo != null) {
-				if(CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
-					return makeJsonResponseHeader(false, "deactivate");
-				}
+			if(checkOssInfo != null && CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+				return makeJsonResponseHeader(false, "deactivate");
 			} else {
 				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
 				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
