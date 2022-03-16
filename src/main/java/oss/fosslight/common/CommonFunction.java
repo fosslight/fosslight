@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -4273,13 +4274,55 @@ public class CommonFunction extends CoTopComponent {
 				
 				// Check unconfirmed license, the actual message is (Declared : ~~), so check again registered license.
 				if(unclearObligationList.contains(bean.getGridId())
-						|| (!isEmpty(bean.getObligationType()) && checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()))) {
+						|| (!isEmpty(bean.getObligationType()) && (checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()) || checkIncludeNotDeclaredLicense(bean.getOssName(), bean.getOssVersion(), bean.getComponentLicenseList())))) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
 					bean.setObligationMsg(getMessage("msg.project.obligation.unclear"));
 				}
 			}
 		}
 		return list;
+	}
+
+	private static boolean checkIncludeNotDeclaredLicense(String ossName, String ossVer,
+			List<ProjectIdentification> licenseList) {
+		
+		List<String> licenseNameList = getAllAvailableLicenseUpperCaseName(ossName, ossVer);
+		for(ProjectIdentification license : licenseList) {
+			System.out.println(license.getLicenseName());
+			if(!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
+				System.out.println();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static List<String> getAllAvailableLicenseUpperCaseName(String ossName, String ossVer) {
+		String key = (avoidNull(ossName).trim() + "_" + avoidNull(ossVer).trim()).toUpperCase();
+		List<String> licenseNameList = new ArrayList<>();
+		if(CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+			OssMaster bean = CoCodeManager.OSS_INFO_UPPER.get(key);
+			for(OssLicense _temp : Optional.ofNullable(bean.getOssLicenses()).orElse(new ArrayList<>())) {
+				licenseNameList.add(_temp.getLicenseName().toUpperCase());
+				LicenseMaster _license = CoCodeManager.LICENSE_INFO_BY_ID.get(_temp.getLicenseId());
+				if(_license != null) {
+					for(String _nick : Optional.ofNullable(_license.getLicenseNicknameList()).orElse(new ArrayList<>())) {
+						licenseNameList.add(_nick.toUpperCase());
+					}
+				}
+			}
+			
+			for(String _temp : Optional.ofNullable(bean.getDetectedLicenses()).orElse(new ArrayList<>())) {
+				licenseNameList.add(_temp.toUpperCase());
+				LicenseMaster _license = CoCodeManager.LICENSE_INFO_UPPER.get(_temp.toUpperCase());
+				if(_license != null) {
+					for(String _nick : Optional.ofNullable(_license.getLicenseNicknameList()).orElse(new ArrayList<>())) {
+						licenseNameList.add(_nick.toUpperCase());
+					}
+				}
+			}
+		}
+		return licenseNameList;
 	}
 
 	private static boolean checkIncludeUnconfirmedLicense(List<ProjectIdentification> licenseList) {
@@ -4292,4 +4335,5 @@ public class CommonFunction extends CoTopComponent {
 		}
 		return false;
 	}
+	
 }
