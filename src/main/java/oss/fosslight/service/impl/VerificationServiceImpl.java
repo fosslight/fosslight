@@ -1737,8 +1737,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		for(OssComponents bean : ossComponentList) {
 			OssComponents oc = verificationMapper.checkOssNickName2(bean);
 			if(oc != null) {
-				if(isEmpty(bean.getCopyrightText())) {
-					bean.setCopyrightText(CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getCopyright());
+				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getCopyright();
+				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getHomepage();
+				
+				if(isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+					bean.setCopyrightText(copyright);
+				}
+				
+				if(isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+					bean.setHomepage(homepage);
 				}
 			}
 			
