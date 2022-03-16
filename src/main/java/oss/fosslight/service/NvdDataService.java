@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -207,8 +206,11 @@ public class NvdDataService {
 			List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
 			Map<String, Object> cveInfo = null;
 			Map<String, Object> comapare = null;
-			List<Map<String, String>> ossList = null;
+			List<Map<String, String>> ossList = new ArrayList<>();
+			List<Map<String, String>> insertDataList = new ArrayList<>();
+			
 			List<Map<String, Object>> cpe_match_all = null;
+			
 			for(Map<String, Object> cveItem : cveItems) {
 				
 				cveInfo = cveDatajsonReader(cveItem);
@@ -219,7 +221,8 @@ public class NvdDataService {
 				String cveId = (String) cveInfo.get("cveId");
 				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
 				
-				ossList = new ArrayList<>();
+				ossList.clear();
+				
 				// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
 				// 적용대상 cpe match list
 				List<String> matchNames = null;
@@ -276,17 +279,18 @@ public class NvdDataService {
 					nvdDataMapper.insertCveInfoV3(cveInfo);
 					
 					if(!ossList.isEmpty()) {
-						List<Map<String, String>> insertDataList = new ArrayList<>();
+						insertDataList.clear();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
 							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList = new ArrayList<>();
+								insertDataList.clear();
 							}
 						}
 						// 미등록 data가 존재하는 경우 나머지를 등록한다.
 						if( !insertDataList.isEmpty() ) {
 							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+							insertDataList.clear();
 						}
 					}
 					
@@ -301,17 +305,18 @@ public class NvdDataService {
 					// 변경 데이터 등록
 					nvdDataMapper.insertCveInfoV3(cveInfo);
 					if(!ossList.isEmpty()) {
-						List<Map<String, String>> insertDataList = new ArrayList<>();
+						insertDataList.clear();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
 							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList = new ArrayList<>();
+								insertDataList.clear();
 							}
 						}
 						// 미등록 data가 존재하는 경우 나머지를 등록한다.
 						if( !insertDataList.isEmpty() ) {
 							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+							insertDataList.clear();
 						}
 					}
 				} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
@@ -319,24 +324,24 @@ public class NvdDataService {
 					// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
 					
 					if(!ossList.isEmpty()) {
-						List<Map<String, String>> insertDataList = new ArrayList<>();
+						insertDataList.clear();
 						for(Map<String, String> item : ossList){
 							insertDataList.add(item);
 							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
 								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList = new ArrayList<>();
+								insertDataList.clear();
 							}
 						}
 						// 미등록 data가 존재하는 경우 나머지를 등록한다.
 						if( !insertDataList.isEmpty() ) {
 							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
+							insertDataList.clear();
 						}
 					}
 				}
 				updateFlag = true;
 			}
 		}
-		
 	
 		return updateFlag;
 	}
@@ -534,115 +539,121 @@ public class NvdDataService {
 		}
 		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
 		
-		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
 
-			NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
+		// 2. Json File -> DB Insert
+		for (Map<String, Object> wMetaMap : waitList) {
+			param.put("fileNm", wMetaMap.get("fileNm"));
+			param.put("modiDate", wMetaMap.get("modiDate"));
+			param.put("jobStatus", "G");
+			// JobStatus가 W인 대상이 작업이 들어갔다면 G로 변경을 하여 추후에 다시 loop 돌지 않도록 처리함.
+			nvdDataMapper.updateJobStatus(param);
 
-			// 2. Json File -> DB Insert
-			for (Map<String, Object> wMetaMap : waitList) {
-				param.put("fileNm", wMetaMap.get("fileNm"));
-				param.put("modiDate", wMetaMap.get("modiDate"));
-				param.put("jobStatus", "G");
-				// JobStatus가 W인 대상이 작업이 들어갔다면 G로 변경을 하여 추후에 다시 loop 돌지 않도록 처리함.
-				nvdDataMapper.updateJobStatus(param);
+			Map<String, Object> cpeMetaMap = new HashMap<>();
+			List<Map<String, Object>> cpeNameList = new ArrayList<>();
+			SqlSession sqlSession = null;
+			try {
+				sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+				NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
+				Map<String, Object> dataMap = new ObjectMapper().readValue(new File(
+						NVD_CVE_PATH + File.separator + ((String) wMetaMap.get("fileNm")).toLowerCase() + ".json"),
+						new TypeReference<Map<String, Object>>() {
+						});
 
-				try {
+				if (dataMap.containsKey("matches")) {
+					List<Map<String, Object>> matchItems = (List<Map<String, Object>>) dataMap.get("matches");
+					int seq = 1;
+					int totSize = matchItems.size();
+					
 
-					Map<String, Object> dataMap = new ObjectMapper().readValue(new File(
-							NVD_CVE_PATH + File.separator + ((String) wMetaMap.get("fileNm")).toLowerCase() + ".json"),
-							new TypeReference<Map<String, Object>>() {
-							});
+					// 조건이 변경되거나, 삭제되는 경우를 고려하여 전체 데이터를 삭제하고 다시 등록한다.
+					// truncate table
+					mapper.truncateCpeMatchNames();
+					mapper.truncateCpeMatch();
+//						sqlSession.flushStatements();
+					
+					for (Map<String, Object> matchItem : matchItems) {
 
-					if (dataMap.containsKey("matches")) {
-						List<Map<String, Object>> matchItems = (List<Map<String, Object>>) dataMap.get("matches");
-						int seq = 1;
-						int totSize = matchItems.size();
-//						List<Map<String, Object>> cpeMetaList = new ArrayList<>();
-						List<Map<String, Object>> cpeNameList = new ArrayList<>();
+						cpeMetaMap.clear();
+						cpeNameList.clear();
 						
+						// cpe23uri (key)
+						String cpe23Uri = (String) matchItem.get("cpe23Uri");
+						// version range conditions
+						String versionStartIncluding = null;
+						String versionEndIncluding = null;
+						String versionStartExcluding = null;
+						String versionEndExcluding = null;
 
-						// 조건이 변경되거나, 삭제되는 경우를 고려하여 전체 데이터를 삭제하고 다시 등록한다.
-						// truncate table
-						mapper.truncateCpeMatchNames();
-						mapper.truncateCpeMatch();
-						sqlSession.flushStatements();
-						
-						for (Map<String, Object> matchItem : matchItems) {
-							// cpe23uri (key)
-							String cpe23Uri = (String) matchItem.get("cpe23Uri");
-							// version range conditions
-							String versionStartIncluding = null;
-							String versionEndIncluding = null;
-							String versionStartExcluding = null;
-							String versionEndExcluding = null;
-
-							if (matchItem.containsKey("versionStartIncluding")) {
-								versionStartIncluding = (String) matchItem.get("versionStartIncluding");
-							}
-							if (matchItem.containsKey("versionEndIncluding")) {
-								versionEndIncluding = (String) matchItem.get("versionEndIncluding");
-							}
-							if (matchItem.containsKey("versionStartExcluding")) {
-								versionStartExcluding = (String) matchItem.get("versionStartExcluding");
-							}
-							if (matchItem.containsKey("versionEndExcluding")) {
-								versionEndExcluding = (String) matchItem.get("versionEndExcluding");
-							}
-
-							Map<String, Object> cpeMetaMap = new HashMap<>();
-							cpeMetaMap.put("cpeSeq", seq);
-							cpeMetaMap.put("cpe23Uri", cpe23Uri);
-							cpeMetaMap.put("versionStartIncluding", versionStartIncluding);
-							cpeMetaMap.put("versionEndIncluding", versionEndIncluding);
-							cpeMetaMap.put("versionStartExcluding", versionStartExcluding);
-							cpeMetaMap.put("versionEndExcluding", versionEndExcluding);
-
-//								cpeMetaList.add(cpeMetaMap);
-							mapper.insertCpeMatchData(cpeMetaMap);
-
-							// CPE Names
-								if(matchItem.containsKey("cpe_name")) {
-									int nameIdx = 0;
-									for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
-										cpe_name.put("cpeSeq", seq);
-										cpe_name.put("idx", nameIdx);
-										cpeNameList.add(cpe_name);
-										if(cpeNameList.size() >= 50) {
-											mapper.insertBulkCpeMatchNameData(cpeNameList);
-											cpeNameList = new ArrayList<>();
-										}
-										nameIdx++;
-									}
-								}
-								
-								if (!cpeNameList.isEmpty()) {
-									mapper.insertBulkCpeMatchNameData(cpeNameList);
-									cpeNameList = new ArrayList<>();
-								}
-								
-
-							if(seq % BATCH_SIZE == 0 || seq == totSize) {
-								List<BatchResult> batResults = sqlSession.flushStatements();
-								batResults.clear();
-							}
-
-							seq++;
+						if (matchItem.containsKey("versionStartIncluding")) {
+							versionStartIncluding = (String) matchItem.get("versionStartIncluding");
+						}
+						if (matchItem.containsKey("versionEndIncluding")) {
+							versionEndIncluding = (String) matchItem.get("versionEndIncluding");
+						}
+						if (matchItem.containsKey("versionStartExcluding")) {
+							versionStartExcluding = (String) matchItem.get("versionStartExcluding");
+						}
+						if (matchItem.containsKey("versionEndExcluding")) {
+							versionEndExcluding = (String) matchItem.get("versionEndExcluding");
 						}
 
+						cpeMetaMap.put("cpeSeq", seq);
+						cpeMetaMap.put("cpe23Uri", cpe23Uri);
+						cpeMetaMap.put("versionStartIncluding", versionStartIncluding);
+						cpeMetaMap.put("versionEndIncluding", versionEndIncluding);
+						cpeMetaMap.put("versionStartExcluding", versionStartExcluding);
+						cpeMetaMap.put("versionEndExcluding", versionEndExcluding);
+
+//								cpeMetaList.add(cpeMetaMap);
+						mapper.insertCpeMatchData(cpeMetaMap);
+
+						// CPE Names
+							if(matchItem.containsKey("cpe_name")) {
+								int nameIdx = 0;
+								for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
+									cpe_name.put("cpeSeq", seq);
+									cpe_name.put("idx", nameIdx);
+									cpeNameList.add(cpe_name);
+									if(cpeNameList.size() >= BATCH_SIZE) {
+										mapper.insertBulkCpeMatchNameData(cpeNameList);
+										cpeNameList.clear();
+									}
+									nameIdx++;
+								}
+							}
+							
+							if (!cpeNameList.isEmpty()) {
+								mapper.insertBulkCpeMatchNameData(cpeNameList);
+								cpeNameList.clear();
+							}
+							
+
+						if(seq % BATCH_SIZE == 0 || seq == totSize) {
+//								List<BatchResult> batResults = sqlSession.flushStatements();
+//								batResults.clear();
+							sqlSession.flushStatements();
+							sqlSession.clearCache();
+						}
+
+						seq++;
 					}
 
-					sqlSession.commit();
-
-				} catch (Exception e) {
-					log.error(e.getMessage());
-					sqlSession.rollback();
-				} finally {
-					sqlSession.close();
 				}
 
-				param.put("jobStatus", "C");
-				nvdDataMapper.updateJobStatus(param);
+				sqlSession.commit();
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				sqlSession.rollback();
+			} finally {
+				sqlSession.clearCache();
+				sqlSession.close();
 			}
+			
+			cpeMetaMap = null;
+			cpeNameList = null;
+
+			param.put("jobStatus", "C");
+			nvdDataMapper.updateJobStatus(param);
 		}
 		
 		return resCd;
