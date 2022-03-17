@@ -334,4 +334,8 @@ public interface ProjectMapper {
 	List<Project> selectPartnerRefPrjList(PartnerMaster partner);
 	
 	void updateFileId2(Project project);
+
+	void updateCopyConfirmStatusProjectStatus(Project project);
+
+	void updateConfirmCopyVerificationDestributionStatus(Project project);
 }

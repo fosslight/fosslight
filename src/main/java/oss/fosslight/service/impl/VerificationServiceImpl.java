@@ -1133,8 +1133,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	
 	@Override
 	@Transactional
-	public void updateStatusWithConfirm(Project project, OssNotice ossNotice) throws Exception {
-		updateProjectStatus(project);
+	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
+		if(copyConfirmFlag) {
+			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
+		}else {
+			updateProjectStatus(project);
+		}
 		
 		boolean makeZipFile = false;
 		String spdxComment = "";
@@ -2398,5 +2402,29 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		return bitFlag;
+	}
+	
+	@Override
+	public void registOssNoticeConfirmStatus(OssNotice ossNotice) {
+		try{
+			Project project = new Project();
+			project.setPrjId(ossNotice.getPrjId());
+			project = projectMapper.selectProjectMaster(project);
+			
+			// android project는 notice를 사용하지 않음.
+			if(!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {
+				if(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn())){
+					verificationMapper.insertOssNotice(ossNotice);
+				}else if(CoConstDef.FLAG_NO.equals(ossNotice.getEditNoticeYn())){
+					verificationMapper.updateOssNotice(ossNotice);
+				}
+			}
+			
+			if(isEmpty(project.getVerificationStatus())){
+				verificationMapper.updateVerificationStatusProgress(ossNotice);
+			}
+		}catch(Exception e){
+			log.error(e.getMessage(), e);
+		}
 	}
 }
