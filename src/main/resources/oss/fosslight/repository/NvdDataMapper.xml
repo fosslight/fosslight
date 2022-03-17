@@ -501,18 +501,18 @@
 	
 	<update id="truncateCpeMatch">TRUNCATE TABLE NVD_CPE_MATCH_NAMES</update>
 	<update id="truncateCpeMatchNames">TRUNCATE TABLE NVD_CPE_MATCH</update>
-	<insert id="insertBulkCpeMatchData">
+	<insert id="insertBulkCpeMatchData" flushCache="true">
 		INSERT
-		INTO NVD_CPE_MATCH (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
+		INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
 		VALUES
 		<foreach collection="list" item="item" index="index" separator=",">
 			(#{item.cpeSeq},#{item.cpe23Uri},#{item.versionStartIncluding},#{item.versionEndIncluding},#{item.versionStartExcluding},#{item.versionEndExcluding})
 		</foreach>
 	</insert>
 	
-	<insert id="insertBulkCpeMatchNameData">
+	<insert id="insertBulkCpeMatchNameData" flushCache="true">
 		INSERT
-		INTO NVD_CPE_MATCH_NAMES (SEQ, IDX, CPE23URI)
+		INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI)
 		VALUES
 		<foreach collection="list" item="item" index="index" separator=",">
 			(#{item.cpeSeq}, #{item.idx}, #{item.cpe23Uri})
@@ -521,12 +521,12 @@
 	
 	<insert id="insertCpeMatchData">
 		INSERT
-		INTO NVD_CPE_MATCH (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
+		INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
 		VALUES (#{cpeSeq},#{cpe23Uri},#{versionStartIncluding},#{versionEndIncluding},#{versionStartExcluding},#{versionEndExcluding})
 	</insert>
 	<insert id="insertCpeMatchNameData">
 		INSERT
-		INTO NVD_CPE_MATCH_NAMES (SEQ, IDX, CPE23URI)
+		INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI)
 		VALUES (#{cpeSeq}, #{idx}, #{cpe23Uri})
 	</insert>
 	
@@ -594,4 +594,11 @@
 		(#{item.PRODUCT}, #{item.VERSION}, #{item.CVE_ID}, #{item.CVSS_SCORE}, #{item.VULN_SUMMARY}, #{item.MODI_DATE})
 		</foreach>
 	</insert>
+	
+	<update id="createTableCpeMatchTemp">CREATE TABLE IF NOT EXISTS NVD_CPE_MATCH_TEMP LIKE NVD_CPE_MATCH</update>
+	<update id="createTableCpeMatchNameTemp">CREATE TABLE IF NOT EXISTS NVD_CPE_MATCH_NAMES_TEMP LIKE NVD_CPE_MATCH_NAMES</update>
+	<update id="truncateCpeMatchTemp">TRUNCATE TABLE NVD_CPE_MATCH_TEMP</update>
+	<update id="truncateCpeMatchNameTemp">TRUNCATE TABLE NVD_CPE_MATCH_NAMES_TEMP</update>
+	<insert id="copyNvdDataMatchFromTemp">INSERT INTO NVD_CPE_MATCH SELECT * FROM NVD_CPE_MATCH_TEMP</insert>
+	<insert id="copyNvdDataMatchNameFromTemp">INSERT INTO NVD_CPE_MATCH_NAMES SELECT * FROM NVD_CPE_MATCH_NAMES_TEMP</insert>
 </mapper>

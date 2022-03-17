@@ -52,4 +52,10 @@ public interface NvdDataMapper {
 	void insertCpeMatchNameData(Map<String, Object> params);
 	void resetCveDataV3();
 	void resetNvdDataV3();
+	void createTableCpeMatchTemp();
+	void createTableCpeMatchNameTemp();
+	void truncateCpeMatchTemp();
+	void truncateCpeMatchNameTemp();
+	void copyNvdDataMatchFromTemp();
+	void copyNvdDataMatchNameFromTemp();
 }
