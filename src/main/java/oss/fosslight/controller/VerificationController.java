@@ -422,7 +422,7 @@ public class VerificationController extends CoTopComponent {
 					project.setNeedPackageFileReset(CoConstDef.FLAG_YES);
 				}
 				
-				verificationService.updateStatusWithConfirm(project, ossNotice);
+				verificationService.updateStatusWithConfirm(project, ossNotice, false);
 				
 				try {
 					History h = new History();

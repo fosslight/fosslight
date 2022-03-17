@@ -56,7 +56,7 @@ public interface VerificationService {
 	
 	OssNotice selectOssNoticeOne(String prjId);
 	
-	void updateStatusWithConfirm(Project project, OssNotice ossNotice) throws Exception;
+	void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception;
 	
 	Map<String, Integer> setAddFileCount(Map<String, Integer> deCompResultMap, String url, int fileCnt) throws Exception;
 	
@@ -79,4 +79,6 @@ public interface VerificationService {
 	void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception;
 	
 	public void updateProjectAllowDownloadBitFlag(Project project);
+
+	void registOssNoticeConfirmStatus(OssNotice ossNotice);
 }

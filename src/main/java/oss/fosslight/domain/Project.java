@@ -337,7 +337,11 @@ public class Project extends ComBean implements Serializable {
 	private String srcAndroidCsvFileFlag = "N";
 	
 	private String srcAndroidNoticeFileFlag = "N";
-
+	
+	private String identificationStatusConfFlag = "N";
+	
+	private String verificationStatusConfFlag = "N";
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4124,5 +4128,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSrcAndroidNoticeFileFlag(String srcAndroidNoticeFileFlag) {
 		this.srcAndroidNoticeFileFlag = srcAndroidNoticeFileFlag;
+	}
+
+	public String getIdentificationStatusConfFlag() {
+		return identificationStatusConfFlag;
+	}
+
+	public void setIdentificationStatusConfFlag(String identificationStatusConfFlag) {
+		this.identificationStatusConfFlag = identificationStatusConfFlag;
+	}
+
+	public String getVerificationStatusConfFlag() {
+		return verificationStatusConfFlag;
+	}
+
+	public void setVerificationStatusConfFlag(String verificationStatusConfFlag) {
+		this.verificationStatusConfFlag = verificationStatusConfFlag;
 	}
 }

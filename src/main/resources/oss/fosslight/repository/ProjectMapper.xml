@@ -2080,6 +2080,9 @@
 			, REF_PARTNER_ID
 			, REPORT_FILE_ID
 			, PRE_OBLIGATION_TYPE
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationType)">
+			, OBLIGATION_TYPE
+			</if>
 			, ADMIN_CHECK_YN
 			)
 			VALUES
@@ -2114,6 +2117,9 @@
 			, #{refPartnerId}
 			, #{reportFileId}
 			, #{preObligationType}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(obligationType)">
+			, #{obligationType}
+			</if>
 			, #{adminCheckYn}
 			)
 	</insert>
@@ -4182,4 +4188,28 @@
 		 </if>
 		ORDER BY PM.MODIFIED_DATE DESC LIMIT 100
 	</select>
+	
+	<update id="updateCopyConfirmStatusProjectStatus" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+			PROJECT_MASTER
+		SET
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
+			IDENTIFICATION_STATUS = 'PROG'
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(verificationStatus)">
+			VERIFICATION_STATUS = 'PROG'
+		</if>	
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
+	
+	<update id="updateConfirmCopyVerificationDestributionStatus" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+			PROJECT_MASTER
+		SET
+			VERIFICATION_STATUS = #{verificationStatus}
+			, DESTRIBUTION_STATUS = #{destributionStatus}
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
 </mapper>
