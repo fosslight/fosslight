@@ -1,10 +1,22 @@
 # Changelog
 
-## v1.2.34 (01/01/1970)
-## Changes
+## v1.2.34 (18/03/2022)
+## 🚀 Features
+
+- Add a function to copy even the status when copying the project. @FOSSLight-dev (#429)
+
+## 🐛 Hotfixes
+
+- Fix a bug where Homepage could not be loaded for nickname when OSS Notice was issued. @FOSSLight-dev (#428)
+- Self-Check > Mark as obligation unclear for licenses that are not included in Declared or Detected licenses. @FOSSLight-dev (#426)
+- Fix the bug where OSS is renamed when copying and saving. @FOSSLight-dev (#425)
+- Fix the bug that Copyright is not displayed in OSS Notice @FOSSLight-dev (#424)
+
 ## 🔧 Maintenance
 
-- Update version to 1.2.33 @soimkim (#423)
+- Show 'list more' in Vulnerability in OSS details @FOSSLight-dev (#430)
+- Self-check > Mark Obligation unclear for deactivate. @FOSSLight-dev (#427)
+
 
 ---
 
