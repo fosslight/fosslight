@@ -314,9 +314,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("projectListFlag", projectListFlag);
 		
-		Vulnerability vulnParam = new Vulnerability();
-		vulnParam.setOssId(ossId);
-		List<Vulnerability> vulnInfoList = ossService.getOssVulnerabilityList(vulnParam);
+		List<Vulnerability> vulnInfoList = ossService.getOssVulnerabilityList2(ossMaster);
 		
 		if(vulnInfoList != null && !vulnInfoList.isEmpty()) {
 			if(vulnInfoList.get(0).getVersion().equals("-") && vulnInfoList.size() >= 2) {
