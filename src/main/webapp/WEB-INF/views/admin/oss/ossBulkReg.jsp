@@ -6,9 +6,12 @@
 <div id="wrapIframe">
     <body>
     <div>
-        <span class="fileex_back">
-            <div id="csvFile">+ Add file</div>
-        </span>
+         <span class="fileex_back">
+                <div id="csvFile">+ Add file</div>
+         </span>
+         <div>
+            <a href="javascript:void(0);" class="sampleDown" onclick="fn.downloadBulkSample()"><span>Sample</span></a>
+         </div>
     </div>
     <div class="jqGridSet">
         <table id="list"><tr><td></td></tr></table>
