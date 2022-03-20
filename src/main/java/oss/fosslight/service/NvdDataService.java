@@ -43,7 +43,7 @@ public class NvdDataService {
 	private final String NVD_META_URL = "https://nvd.nist.gov/feeds/json/cpematch/1.0/";
 	private final String NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/";
 	
-	private final int BATCH_SIZE = 500;
+	private final int BATCH_SIZE = 1000;
 	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
@@ -650,6 +650,9 @@ public class NvdDataService {
 					nvdDataMapper.copyNvdDataMatchNameFromTemp();
 				}
 
+				nvdDataMapper.truncateCpeMatchTemp();
+				nvdDataMapper.truncateCpeMatchNameTemp();
+				
 				param.put("jobStatus", "C");
 				nvdDataMapper.updateJobStatus(param);
 				

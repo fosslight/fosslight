@@ -230,4 +230,6 @@ public interface OssMapper {
 	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 
 	List<OssComponents> getConfirmOssComponentsList(OssMaster ossMaster);
+
+	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
 }

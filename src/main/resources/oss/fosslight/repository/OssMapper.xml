@@ -2165,4 +2165,32 @@
     	</choose>
     	  AND OC.OSS_NAME = #{ossName}
 	</select>
+	
+	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT DATA.PRODUCT
+					 , DATA.VERSION
+					 , CVE.CVSS_SCORE
+					 , CVE.CVE_ID
+					 , CVE.VULN_SUMMARY
+					 , CVE.MODI_DATE
+				  FROM (
+				  		SELECT PRODUCT
+				 			 , VERSION
+				 			 , CVE_ID
+				  		  FROM NVD_DATA_V3
+				  		 WHERE (
+				  		 		PRODUCT = #{ossName}
+				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+					  			    <foreach item="item" index="index" collection="ossNicknames">
+										OR PRODUCT = #{item}
+									</foreach>
+								</if>
+				 				)
+				 		   AND VERSION = #{ossVersion}
+				 	   ) DATA
+				 INNER JOIN NVD_CVE_V3 CVE
+				    ON DATA.CVE_ID = CVE.CVE_ID
+		ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
+		LIMIT 5
+	</select>
 </mapper>

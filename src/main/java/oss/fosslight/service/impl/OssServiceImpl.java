@@ -55,6 +55,7 @@ import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
+import oss.fosslight.repository.VulnerabilityMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.OssService;
@@ -81,6 +82,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired FileMapper fileMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired PartnerMapper partnerMapper;
+	@Autowired VulnerabilityMapper vulnerabilityMapper;
 	
 	@Override
 	public Map<String,Object> getOssMasterList(OssMaster ossMaster) {
@@ -2913,5 +2915,44 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster) {
 		return ossMapper.getSaveSesstionOssInfoByName(ossMaster);
+	}
+
+	@Override
+	public List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster) {
+		if("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
+			ossMaster.setOssVersion("-");
+		}
+		
+		List<Vulnerability> list = null;
+		String[] nicknameList = null;
+		
+		try {
+			nicknameList = getOssNickNameListByOssName(ossMaster.getOssName());
+			ossMaster.setOssNicknames(nicknameList);
+			list = ossMapper.getOssVulnerabilityList2(ossMaster);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		
+		list = checkVulnData(list, nicknameList);
+		
+		return list;
+	}
+
+	private List<Vulnerability> checkVulnData(List<Vulnerability> list, String[] nicknameList) {
+		List<Vulnerability> result = new ArrayList<Vulnerability>();
+		
+		for(Vulnerability bean : list) {
+			bean.setOssNameAllSearchFlag(CoConstDef.FLAG_YES);
+			if(nicknameList != null) {
+				bean.setOssNicknames(nicknameList);
+			}
+			int vulnCnt = vulnerabilityMapper.checkVulnDataCnt(bean);
+			if(vulnCnt > 0) {
+				result.add(bean);
+			}
+		}
+		
+		return result;
 	}
 }
