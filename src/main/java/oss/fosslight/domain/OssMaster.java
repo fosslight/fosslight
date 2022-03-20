@@ -288,6 +288,8 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String defaultSearchFlag;
 
+
+	private List<String> declaredLicenses;
 	/**
 	 * Instantiates a new oss master.
 	 */
@@ -1959,5 +1961,32 @@ public class OssMaster extends ComBean implements Serializable{
 	public void setDefaultSearchFlag(String defaultSearchFlag) {
 		this.defaultSearchFlag = defaultSearchFlag;
 	}
-	
+
+	public List<String> getDeclaredLicenses() {
+		return declaredLicenses == null
+				? new ArrayList<>()
+				: declaredLicenses;
+	}
+
+	public String getDeclaredLicense() {
+		return declaredLicenses == null ? "" : String.join(",", declaredLicenses);
+	}
+
+	public void addDeclaredLicense(String s) {
+		if(this.declaredLicenses == null) {
+			this.declaredLicenses = new ArrayList<>();
+		}
+		this.declaredLicenses.add(s);
+	}
+
+	public void setDeclaredLicense(String declaredLicense) {
+		String[] list = declaredLicense.split(",");
+
+		this.declaredLicenses = null; // clear
+		for(String s : list) {
+			if(!isEmpty(s)) {
+				this.addDeclaredLicense(s.trim());
+			}
+		}
+	}
 }

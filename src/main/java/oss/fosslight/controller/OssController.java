@@ -6,11 +6,7 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -34,35 +30,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoCodeManager;
-import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.CustomXssFilter;
+import oss.fosslight.common.*;
 import oss.fosslight.common.Url.OSS;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssAnalysis;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
-import oss.fosslight.service.AutoFillOssInfoService;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.HistoryService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.PartnerService;
-import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.SearchService;
-import oss.fosslight.service.SelfCheckService;
+import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
@@ -89,6 +65,7 @@ public class OssController extends CoTopComponent{
 	@Autowired PartnerService partnerService;
 	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 	@Autowired SearchService searchService;
+	@Autowired LicenseService licenseService;
 	
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_OSS_LIST";
 	
@@ -202,7 +179,7 @@ public class OssController extends CoTopComponent{
 		CustomXssFilter.ossMasterFilter(list);
 		return makeJsonResponseHeader(list);
 	}
-	
+
 	@GetMapping(value={OSS.EDIT}, produces = "text/html; charset=utf-8")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		if(getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null)) != null) {
@@ -350,12 +327,10 @@ public class OssController extends CoTopComponent{
 	public @ResponseBody ResponseEntity<Object> getPopupList(@PathVariable String ossId, OssMaster ossMaster, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
-		
 		ossMaster.setCurPage(page);
 		ossMaster.setPageListSize(rows);
 		
 		Map<String, Object> map = null;
-		
 		try{
 			map = ossService.getOssPopupList(ossMaster);
 		}catch(Exception e){
@@ -407,7 +382,6 @@ public class OssController extends CoTopComponent{
 		String resCd = "00";
 		String result = null;
 		HashMap<String, Object> resMap = new HashMap<>();
-		
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
@@ -957,147 +931,246 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resultMap);
 	}
 	
-	@GetMapping(value=OSS.OSS_BULK_REG, produces = "text/html; charset=utf-8")
-	public String ossBulkRegPage(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
-		// oss list (oss name으로만)
-		model.addAttribute("projectInfo", bean);
-		
+//	@GetMapping(value=OSS.OSS_BULK_REG, produces = "text/html; charset=utf-8")
+//	public String ossBulkRegPage(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+//		// oss list (oss name으로만)
+//		model.addAttribute("projectInfo", bean);
+//
+//		return OSS.OSS_BULK_REG_JSP;
+//	}
+	//	@GetMapping(value = OSS.OSS_BULK_REG_AJAX, produces = "text/html; charset=utf-8")
+//	public @ResponseBody ResponseEntity<Object> getOssBulkRegAjax(
+//			HttpServletRequest req,
+//			HttpServletResponse res,
+//			@ModelAttribute ProjectIdentification paramBean,
+//			Model model) {
+//
+//		Map<String, OssMaster> resultMap = new HashMap<>();
+//		Map<String, OssMaster> resultMapVer = new HashMap<>();
+//		List<String> dupCheckList = new ArrayList<>();
+//
+//		// 일괄등록 대상 Identification의 모든 components 정보를 취득한다.
+//		paramBean.setBulkRegistYn(CoConstDef.FLAG_YES);
+//		List<ProjectIdentification> componentList = projectMapper.selectIdentificationGridList(paramBean);
+//		int gridIdSeq = 0;
+//
+//		if(componentList != null) {
+//			// 미등록 OSS List 정보를 추출한다.
+//			for(ProjectIdentification bean : componentList) {
+//				if(isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) {
+//					continue;
+//				}
+//
+//				String chkKey = (bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
+//
+//				// 중복체크
+//				if(dupCheckList.contains(chkKey)) {
+//					continue;
+//				}
+//
+//				// exclude 제외
+//				if(CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+//					continue;
+//				}
+//
+//				if(!CoCodeManager.OSS_INFO_UPPER.containsKey(chkKey)) {
+//					// licnese 정보 취득
+//					ProjectIdentification licenseParam = new ProjectIdentification();
+//					licenseParam.setComponentId(bean.getComponentId());
+//					List<ProjectIdentification> licenseList = projectMapper.identificationSubGrid(licenseParam);
+//
+//					String licenseName = CommonFunction.makeLicenseExpressionIdentify(licenseList);
+//
+//					if(CommonFunction.isIgnoreLicense(licenseName)){
+//						continue;
+//					}
+//
+//					// OSS Master 형으로 변경
+//					OssMaster ossBean = new OssMaster();
+//					ossBean.setOssName(bean.getOssName().trim());
+//					ossBean.setOssVersion(avoidNull(bean.getOssVersion()).trim());
+//					ossBean.setLicenseName(licenseName);
+//					ossBean.setDownloadLocation(bean.getDownloadLocation());
+//					ossBean.setHomepage(bean.getHomepage());
+//					ossBean.setCopyright(bean.getCopyrightText());
+//
+//					// OSS Name이 등록되어 있는 경우, NickName을 치환한다.
+//					if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
+//						ossBean.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossBean.getOssName().toUpperCase()));
+//
+//						// 등록되어 있는 oss name인 경우 마지막으로 생성한 oss를 기준으로 사용자 입력정보를 무시하고 DB에 등록된 정보를 설정한다.
+//						OssMaster lastCreatedOssBean = ossService.getLastModifiedOssInfoByName(ossBean);
+//						if(lastCreatedOssBean != null && !isEmpty(lastCreatedOssBean.getOssId())) {
+//							OssMaster masterBean = CoCodeManager.OSS_INFO_BY_ID.get(lastCreatedOssBean.getOssId());
+//							ossBean.setLicenseName(CommonFunction.makeLicenseExpression(masterBean.getOssLicenses()));
+//							String downloadLocation = StringUtil.isEmpty(lastCreatedOssBean.getDownloadLocationGroup()) ? lastCreatedOssBean.getDownloadLocation() : lastCreatedOssBean.getDownloadLocationGroup();
+//							ossBean.setDownloadLocation(downloadLocation);
+//							ossBean.setHomepage(masterBean.getHomepage());
+//							ossBean.setCopyright(masterBean.getCopyright());
+//							ossBean.setSummaryDescription(masterBean.getSummaryDescription()); // OSS bulk registration > Summary Description란 추가
+//
+//							// nickname 정보를 설정한다.
+//							if(masterBean.getOssNicknames() != null) {
+//								ossBean.setOssNickname(CommonFunction.arrayToString(masterBean.getOssNicknames(), ","));
+//							}
+//						}
+//
+//						ossBean.setRegType("VER");
+//					} else {
+//						ossBean.setRegType("OSS");
+//					}
+//
+//					ossBean.setGridId("jqg_" + gridIdSeq++);
+//
+//					// default 정렬
+//					if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
+//						resultMapVer.put(chkKey, ossBean);
+//					} else {
+//						resultMap.put(chkKey, ossBean);
+//					}
+//
+//					dupCheckList.add(chkKey);
+//
+//					// nick name 을 정식명칭으로 변경한 case도 중복체크에 포함한다.
+//					String chkKey2 = (bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
+//
+//					if(!chkKey.equals(chkKey2)) {
+//						dupCheckList.add(chkKey2);
+//					}
+//				}
+//			}
+//		}
+//
+//		List<OssMaster> list = null;
+//
+//		if(!resultMap.isEmpty()) {
+//			list = new ArrayList<>(resultMap.values()) ;
+//		}
+//
+//		if(!resultMapVer.isEmpty()) {
+//			if(list == null) {
+//				list = new ArrayList<>(resultMapVer.values()) ;
+//			} else {
+//				list.addAll(new ArrayList<>(resultMapVer.values()));
+//			}
+//		}
+//
+//		if(list == null) {
+//			list = new ArrayList<>();
+//		}
+//
+//		T2CoOssValidator validator = new T2CoOssValidator();
+//		validator.setAppendix("ossList", list);
+//		validator.setVALIDATION_TYPE(validator.VALID_OSSLIST_BULK);
+//		T2CoValidationResult vr = validator.validate(new HashMap<>());
+//		Map<String, String> validMapResult = vr.getValidMessageMap();
+//		Map<String, String> diffMapResult = vr.getDiffMessageMap();
+//
+//		HashMap<String, Object> resMap = new HashMap<>();
+//		resMap.put("ossList", list);
+//		resMap.put("validMapResult", validMapResult);
+//		resMap.put("diffMapResult", diffMapResult);
+//
+//		return makeJsonResponseHeader(resMap);
+//	}
+
+	@GetMapping(value = OSS.OSS_BULK_REG, produces = "text/html; charset=utf-8")
+	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model) {
+
 		return OSS.OSS_BULK_REG_JSP;
 	}
-	
-	@GetMapping(value = OSS.OSS_BULK_REG_AJAX, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> getOssBulkRegAjax(
-			HttpServletRequest req, 
-			HttpServletResponse res,
-			@ModelAttribute ProjectIdentification paramBean, 
-			Model model) {
-		
-		Map<String, OssMaster> resultMap = new HashMap<>();
-		Map<String, OssMaster> resultMapVer = new HashMap<>();
-		List<String> dupCheckList = new ArrayList<>();
 
-		// 일괄등록 대상 Identification의 모든 components 정보를 취득한다.
-		paramBean.setBulkRegistYn(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> componentList = projectMapper.selectIdentificationGridList(paramBean);
-		int gridIdSeq = 0;
-		
-		if(componentList != null) {
-			// 미등록 OSS List 정보를 추출한다.
-			for(ProjectIdentification bean : componentList) {
-				if(isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) {
-					continue;
-				}
-				
-				String chkKey = (bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
-				
-				// 중복체크
-				if(dupCheckList.contains(chkKey)) {
-					continue;
-				}
-				
-				// exclude 제외
-				if(CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-					continue;
-				}
-				
-				if(!CoCodeManager.OSS_INFO_UPPER.containsKey(chkKey)) {
-					// licnese 정보 취득
-					ProjectIdentification licenseParam = new ProjectIdentification();
-					licenseParam.setComponentId(bean.getComponentId());
-					List<ProjectIdentification> licenseList = projectMapper.identificationSubGrid(licenseParam);
-					
-					String licenseName = CommonFunction.makeLicenseExpressionIdentify(licenseList);
-					
-					if(CommonFunction.isIgnoreLicense(licenseName)){
-						continue;
-					}
-					
-					// OSS Master 형으로 변경
-					OssMaster ossBean = new OssMaster();
-					ossBean.setOssName(bean.getOssName().trim());
-					ossBean.setOssVersion(avoidNull(bean.getOssVersion()).trim());
-					ossBean.setLicenseName(licenseName);
-					ossBean.setDownloadLocation(bean.getDownloadLocation());
-					ossBean.setHomepage(bean.getHomepage());
-					ossBean.setCopyright(bean.getCopyrightText());
-					
-					// OSS Name이 등록되어 있는 경우, NickName을 치환한다.
-					if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
-						ossBean.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossBean.getOssName().toUpperCase()));
-						
-						// 등록되어 있는 oss name인 경우 마지막으로 생성한 oss를 기준으로 사용자 입력정보를 무시하고 DB에 등록된 정보를 설정한다.
-						OssMaster lastCreatedOssBean = ossService.getLastModifiedOssInfoByName(ossBean);
-						if(lastCreatedOssBean != null && !isEmpty(lastCreatedOssBean.getOssId())) {
-							OssMaster masterBean = CoCodeManager.OSS_INFO_BY_ID.get(lastCreatedOssBean.getOssId());
-							ossBean.setLicenseName(CommonFunction.makeLicenseExpression(masterBean.getOssLicenses()));
-							String downloadLocation = StringUtil.isEmpty(lastCreatedOssBean.getDownloadLocationGroup()) ? lastCreatedOssBean.getDownloadLocation() : lastCreatedOssBean.getDownloadLocationGroup();
-							ossBean.setDownloadLocation(downloadLocation);
-							ossBean.setHomepage(masterBean.getHomepage());
-							ossBean.setCopyright(masterBean.getCopyright());
-							ossBean.setSummaryDescription(masterBean.getSummaryDescription()); // OSS bulk registration > Summary Description란 추가
-							
-							// nickname 정보를 설정한다.
-							if(masterBean.getOssNicknames() != null) {
-								ossBean.setOssNickname(CommonFunction.arrayToString(masterBean.getOssNicknames(), ","));
-							}
-						}
-						
-						ossBean.setRegType("VER");
-					} else {
-						ossBean.setRegType("OSS");
-					}
-					
-					ossBean.setGridId("jqg_" + gridIdSeq++);
-					
-					// default 정렬
-					if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
-						resultMapVer.put(chkKey, ossBean);
-					} else {
-						resultMap.put(chkKey, ossBean);
-					}
+	@PostMapping(value= OSS.BULK_REG_AJAX)
+	public @ResponseBody ResponseEntity<Object> saveAjaxJson(
+			@RequestBody List<OssMaster> ossMasters
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model) {
+		List<Map<String, String>> ossNameMapList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
 
-					dupCheckList.add(chkKey);
-					
-					// nick name 을 정식명칭으로 변경한 case도 중복체크에 포함한다.
-					String chkKey2 = (bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
-					
-					if(!chkKey.equals(chkKey2)) {
-						dupCheckList.add(chkKey2);
-					}
+		//When the ossMaster List delivered from the client is empty (if the upload button is pressed without uploading the file)
+		if (ossMasters.isEmpty()){
+			resMap.put("res", false);
+			return makeJsonResponseHeader(resMap);
+		}
+
+		List<OssMaster> notSavedOss = new ArrayList<>();
+		boolean isDup, licenseCheck;
+		for (OssMaster oss : ossMasters) {
+			isDup = false;
+			licenseCheck=false;
+			LicenseMaster licenseMaster;
+			List<String> declaredLicenses = oss.getDeclaredLicenses();
+			boolean[] check = new boolean[declaredLicenses.size()+1];
+			List<OssLicense> ossLicenses = new ArrayList<>();
+			int licenseCount = 1;
+			if(declaredLicenses==null) continue;
+			for (String licenseName : declaredLicenses) {
+				licenseMaster =new LicenseMaster();
+				licenseMaster.setLicenseName(licenseName);
+				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
+				if(existsLicense==null){
+					licenseCheck=true;
+					break;
 				}
+				check[licenseCount-1]=true;
+				OssLicense convert =new OssLicense();
+				convert.setLicenseId(existsLicense.getLicenseId());
+				convert.setLicenseName(existsLicense.getLicenseName());
+				if(licenseCount>1) convert.setOssLicenseComb("AND");
+				else convert.setOssLicenseComb("");
+				convert.setLicenseNameEx(existsLicense.getLicenseNameTemp());
+				convert.setLicenseType(existsLicense.getLicenseType());
+				if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNeedsCheckYn())) {
+					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
+				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationDisclosingSrcYn())) {
+					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNotificationYn())) {
+					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+				}else{
+					convert.setObligation("");
+				}
+				convert.setObligationChecks(existsLicense.getObligationChecks());
+				ossLicenses.add(convert);
+				licenseCount++;
+			}
+			if(licenseCheck) {
+				log.error("declared license has error");
+				continue;
+			}
+			for(int i=0; i<ossLicenses.size();i++){
+				OssLicense ossLicense = ossLicenses.get(i);
+				if(!check[i])continue;
+				if(licenseCount <=2) ossLicense.setLicenseType("S");
+				else ossLicense.setLicenseType("M");
+			}
+			oss.setOssLicenses(ossLicenses);
+			oss.setAttribution("");
+			oss.setDeactivateFlag("N");
+			if(licenseCount >2) oss.setLicenseDiv("M");
+			else oss.setLicenseDiv("S");
+			// check if there is an oss that has a same name & version
+			OssMaster search = ossService.checkExistsOss(oss);
+			if(search != null ) {
+				isDup =true;
+				log.info("duplicate here");
+			}
+			// if oss not duplicated save
+			if(!isDup){
+				notSavedOss.add(oss);
+				log.info("duplicate not here");
 			}
 		}
-		
-		List<OssMaster> list = null;
-		
-		if(!resultMap.isEmpty()) {
-			list = new ArrayList<>(resultMap.values()) ;
+		for (OssMaster oss : notSavedOss){
+			ossService.registOssMaster(oss);
+			Map<String, String> ossNameMap = new HashMap<>();
+			ossNameMap.put("ossName", oss.getOssName());
+			log.info("ossName ={}", oss.getOssName());
+			ossNameMapList.add(ossNameMap);
 		}
-		
-		if(!resultMapVer.isEmpty()) {
-			if(list == null) {
-				list = new ArrayList<>(resultMapVer.values()) ;
-			} else {
-				list.addAll(new ArrayList<>(resultMapVer.values()));
-			}
-		}
-		
-		if(list == null) {
-			list = new ArrayList<>();
-		}
-
-		T2CoOssValidator validator = new T2CoOssValidator();
-		validator.setAppendix("ossList", list);
-		validator.setVALIDATION_TYPE(validator.VALID_OSSLIST_BULK);
-		T2CoValidationResult vr = validator.validate(new HashMap<>());
-		Map<String, String> validMapResult = vr.getValidMessageMap();
-		Map<String, String> diffMapResult = vr.getDiffMessageMap();
-		
-		HashMap<String, Object> resMap = new HashMap<>();
-		resMap.put("ossList", list);
-		resMap.put("validMapResult", validMapResult);
-		resMap.put("diffMapResult", diffMapResult);
-		
+		resMap.put("res", true);
+		resMap.put("value", ossNameMapList);
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -2047,6 +2120,46 @@ public class OssController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("vFlag", ossService.checkOssVersionDiff(om));
 		
+		return makeJsonResponseHeader(resMap);
+	}
+
+	@ResponseBody
+	@PostMapping(value = OSS.CSV_FILE)
+	public ResponseEntity<Object> csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
+										  HttpServletResponse res, Model model) throws Exception {
+		List<Object> limitCheckFiles = new ArrayList<>();
+		List<UploadFile> list = new ArrayList<UploadFile>();
+		List<OssMaster> ossList = new ArrayList<>();
+		Iterator<String> fileNames = req.getFileNames();
+		List<Map<String, Object>> ossWithStatusList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
+
+		while (fileNames.hasNext()) {
+			UploadFile uploadFile = new UploadFile();
+			MultipartFile multipart = req.getFile(fileNames.next());
+			uploadFile.setSize(multipart.getSize());
+			list.add(uploadFile);
+		}
+
+		limitCheckFiles = CommonFunction.checkXlsxFileLimit(list);
+		resMap.put("limitCheck", limitCheckFiles);
+		ossList = ExcelUtil.readOssList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+
+		if (ossList != null) {
+			Map<String, Object> ossWithStatus;
+			for (int i = 0; i < ossList.size(); i++) {
+				ossWithStatus = new HashMap<>();
+				ossWithStatus.put("oss", ossList.get(i));
+				ossWithStatus.put("status", "Not loaded");
+				ossWithStatusList.add(ossWithStatus);
+			}
+		} else {
+			resMap.put("res", false);
+			return makeJsonResponseHeader(resMap);
+		}
+
+		resMap.put("res", true);
+		resMap.put("value", ossWithStatusList);
 		return makeJsonResponseHeader(resMap);
 	}
 }
