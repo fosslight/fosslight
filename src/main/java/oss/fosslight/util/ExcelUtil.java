@@ -2674,9 +2674,10 @@ public class ExcelUtil extends CoTopComponent {
 	public static List<OssMaster> readOssList(MultipartHttpServletRequest req, String excelLocalPath) throws InvalidFormatException, IOException {
 		Iterator<String> fileNames = req.getFileNames();
 		List<OssMaster> ossMasterList = new ArrayList<>();
-		String[] definedColData = new String[] {"OSS Name", "Nickname", "Version", "Declared License", "Detected License", "Copyright", "Home Page",
-				"Download URL", "Summary Description", "Attribution", "Comment"};
+		String[] definedColData = new String[] {"OSS NAME", "NICKNAME", "VERSION", "DECLARED LICENSE", "DETECTED LICENSE", "COPYRIGHT", "HOMEPAGE",
+				"DOWNLOAD URL", "SUMMARY DESCRIPTION", "ATTRIBUTION", "COMMENT"};
 		while (fileNames.hasNext()) {
+
 			MultipartFile multipart = req.getFile(fileNames.next());
 			String fileName = multipart.getOriginalFilename();
 			String[] fileNameArray = StringUtil.split(fileName, File.separator);
@@ -2705,6 +2706,7 @@ public class ExcelUtil extends CoTopComponent {
 					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
 					HSSFSheet sheet = wbHSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
+					rowLoop:
 					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						OssMaster ossMaster = new OssMaster();
 						if (rowIndex == 0) {
@@ -2718,15 +2720,15 @@ public class ExcelUtil extends CoTopComponent {
 							}
 							for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
 								String colData = firstRowColData.get(cIdx);
-								if (colData != null && definedColData[cIdx].equals(colData)){
+								if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
 									continue;
-								}
-								else {
+								} else {
 									flag = false;
 									break;
 								}
 							}
 							if (!flag){
+								log.info("The order and content of header columns must match.");
 								return null;
 							}
 							continue;
@@ -2738,56 +2740,47 @@ public class ExcelUtil extends CoTopComponent {
 								HSSFCell cell = row.getCell(colIndex);
 								String value = getCellData(cell);
 								if (colIndex == 0) {
-									if (value == null) {
-										log.info("OSS Name must not be null.");
-										if (ossMasterList.isEmpty()){
-											return null;
-										} else {
-											return ossMasterList;
-										}
+									if (value == null || value.trim().isEmpty()) {
+										log.debug("OSS Name must not be null.");
+										break rowLoop;
 									} else {
 										ossMaster.setOssName(value);
 									}
 								} else if (colIndex == 1) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String[] nicknames = StringUtil.delimitedStringToStringArray(value, "\n");
 									ossMaster.setOssNicknames(nicknames);
 								} else if (colIndex == 2) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setOssVersion(value);
 								} else if (colIndex == 3) {
-									if (value == null) {
-										log.info("OSS Declared License must not be null.");
-										if (ossMasterList.isEmpty()){
-											return null;
-										} else {
-											return ossMasterList;
-										}
+									if (value == null || value.trim().isEmpty()) {
+										log.debug("Declared License must not be null.");
+										break rowLoop;
 									}
 									ossMaster.setDeclaredLicense(value);
-
 								} else if (colIndex == 4) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setDetectedLicense(value);
 								} else if (colIndex == 5) {
-									if (value == null)continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setCopyright(value);
 								} else if (colIndex == 6) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 									ossMaster.setHomepage(homepage);
 								} else if (colIndex == 7) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 									ossMaster.setDownloadLocation(location);
 								} else if (colIndex == 8) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setSummaryDescription(value);
 								} else if (colIndex == 9) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setAttribution(value);
 								} else if (colIndex == 10) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setComment(value);
 								}
 							}
@@ -2802,12 +2795,12 @@ public class ExcelUtil extends CoTopComponent {
 					} catch (Exception e) {
 					}
 				}
-				return ossMasterList;
 			} else if ("xlsx".equals(extType) || "XLSX".equals(extType)) {
 				try {
 					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
 					XSSFSheet sheet = wbXSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
+					rowLoop:
 					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						OssMaster ossMaster = new OssMaster();
 						if (rowIndex == 0) {
@@ -2823,11 +2816,9 @@ public class ExcelUtil extends CoTopComponent {
 								XSSFCell cell = firstRow.getCell(colIndex);
 								firstRowColData.add(getCellData(cell));
 							}
-
-
 							for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
 								String colData = firstRowColData.get(cIdx);
-								if (colData != null && definedColData[cIdx].equals(colData))
+								if (colData != null && definedColData[cIdx].equals(colData.toUpperCase()))
 									continue;
 								else {
 									flag = false;
@@ -2835,9 +2826,9 @@ public class ExcelUtil extends CoTopComponent {
 								}
 							}
 							if (!flag) {
+								log.info("The order and content of header columns must match.");
 								return null;
 							}
-
 							continue;
 						} else {
 							XSSFRow row = sheet.getRow(rowIndex);
@@ -2847,26 +2838,22 @@ public class ExcelUtil extends CoTopComponent {
 								XSSFCell cell = row.getCell(colIndex);
 								String value = getCellData(cell);
 								if (colIndex == 0) {
-									if (value == null) {
-										log.info("Oss Name must not be null.");
-										if (ossMasterList.isEmpty()){
-											return null;
-										} else {
-											return ossMasterList;
-										}
+									if (value == null || value.trim().isEmpty()) {
+										log.debug("OSS Name must not be null.");
+										break rowLoop;
 									} else {
 										ossMaster.setOssName(value);
 									}
 								} else if (colIndex == 1) {
-									if(value==null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String[] nicknames = StringUtil.delimitedStringToStringArray(value, "\n");
 									ossMaster.setOssNicknames(nicknames);
 								} else if (colIndex == 2) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setOssVersion(value);
 								} else if (colIndex == 3) {
-									if (value == null) {
-										log.info("OSS Declared License must not be null.");
+									if (value == null || value.trim().isEmpty()) {
+										log.debug("Declared License must not be null.");
 										if (ossMasterList.isEmpty()){
 											return null;
 										} else {
@@ -2876,27 +2863,27 @@ public class ExcelUtil extends CoTopComponent {
 									ossMaster.setDeclaredLicense(value);
 
 								} else if (colIndex == 4) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setDetectedLicense(value);
 								} else if (colIndex == 5) {
-									if (value == null)continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setCopyright(value);
 								} else if (colIndex == 6) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 									ossMaster.setHomepage(homepage);
 								} else if (colIndex == 7) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 									ossMaster.setDownloadLocation(location);
 								} else if (colIndex == 8) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setSummaryDescription(value);
 								} else if (colIndex == 9) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setAttribution(value);
 								} else if (colIndex == 10) {
-									if (value == null) continue;
+									if (value == null || value.trim().isEmpty()) continue;
 									ossMaster.setComment(value);
 								}
 							}
@@ -2911,9 +2898,8 @@ public class ExcelUtil extends CoTopComponent {
 					} catch (Exception e2) {
 					}
 				}
-				return ossMasterList;
 			}
 		}
-		return null;
+		return ossMasterList;
 	}
 }
