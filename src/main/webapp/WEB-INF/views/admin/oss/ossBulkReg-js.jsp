@@ -82,8 +82,8 @@
         $("#list").jqGrid({
             datatype: "local",
             data : jsonData,
-            colNames:['id', 'Oss Name','Nick name','Version','Declared License','Detected License','Copyright',
-                'HomePage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
+            colNames:['id', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
+                'Homepage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
             colModel: [
                 { name: 'id', 	index: 'id', width: 75, key:true, hidden: true},
                 {name: 'ossName', index: 'ossName', width: 200, align: 'left'},
