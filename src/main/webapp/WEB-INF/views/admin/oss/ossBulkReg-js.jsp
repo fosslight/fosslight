@@ -20,6 +20,7 @@
         $('.ajax-file-upload-statusbar').fadeOut('slow');
         $('.ajax-file-upload-statusbar').remove();
     }
+
     function stubColData(){
         //데이터 추가
         for(var i=0; i<jsonData.length ; i++ ){
@@ -37,6 +38,7 @@
         }
         console.log(ossData);
     }
+
     function checkLoaded(){
         $("#list").jqGrid('clearGridData');
         for (var i=0; i < loadedInfo.length; i++){
@@ -50,6 +52,7 @@
         stubColData();
         $("#list").trigger('reloadGrid');
     }
+
     $(document).ready(function()
     {
         var target = $("#list");
@@ -147,4 +150,12 @@
             }
         });
     });
+    var fn = {
+        downloadBulkSample : function(type){
+			var logiPath = "/sample/FOSSLight-OSS-Bulk-Sample.xls";
+			var fileName = "FOSSLight-OSS-Bulk-Sample.xls";
+
+			location.href = '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
+		}
+	}
 </script>
