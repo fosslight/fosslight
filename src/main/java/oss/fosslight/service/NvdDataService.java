@@ -74,7 +74,7 @@ public class NvdDataService {
 				codeMapper.updateCodeDtlNm("990", "100", "N");
 
 				// delete all NVD Data and Max Score
-				resetNvdFeedData();
+//				resetNvdFeedData();
 				
 				// Put NVD Data feed from CPE2002 ~ current date year
 				initNvdDataFeed();
