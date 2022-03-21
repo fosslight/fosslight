@@ -2726,11 +2726,33 @@ public class ExcelUtil extends CoTopComponent {
 		return ossMaster;
 	}
 
+	public static boolean checkHeaderColumnValidate(Iterator<Cell> cellIterator) {
+		String[] definedColData = new String[] {"OSS NAME", "NICKNAME", "VERSION", "DECLARED LICENSE", "DETECTED LICENSE", "COPYRIGHT", "HOMEPAGE",
+				"DOWNLOAD URL", "SUMMARY DESCRIPTION", "ATTRIBUTION", "COMMENT"};
+		boolean allColumnsExist = true;
+
+		List<String> firstRowColData = new ArrayList<>();
+		while (cellIterator.hasNext()) {
+			Cell cell = (Cell) cellIterator.next();
+			firstRowColData.add(getCellData(cell));
+		}
+
+		for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
+			String colData = firstRowColData.get(cIdx);
+			if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
+				continue;
+			} else {
+				allColumnsExist = false;
+				break;
+			}
+		}
+		return allColumnsExist;
+	}
+
 	public static List<OssMaster> readOssList(MultipartHttpServletRequest req, String excelLocalPath) throws InvalidFormatException, IOException {
 		Iterator<String> fileNames = req.getFileNames();
 		List<OssMaster> ossMasterList = new ArrayList<>();
-		String[] definedColData = new String[] {"OSS NAME", "NICKNAME", "VERSION", "DECLARED LICENSE", "DETECTED LICENSE", "COPYRIGHT", "HOMEPAGE",
-				"DOWNLOAD URL", "SUMMARY DESCRIPTION", "ATTRIBUTION", "COMMENT"};
+
 		while (fileNames.hasNext()) {
 
 			MultipartFile multipart = req.getFile(fileNames.next());
@@ -2752,8 +2774,6 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			}
 
-			int rowIndex = 0;
-			int colIndex = 0;
 			if (count != 1) {
 				return null;
 			} else if ("xls".equals(extType) || "XLS".equals(extType)) {
@@ -2761,32 +2781,15 @@ public class ExcelUtil extends CoTopComponent {
 					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
 					HSSFSheet sheet = wbHSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
-					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+						HSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							boolean flag = true;
-							HSSFRow firstRow = sheet.getRow(rowIndex);
-							int maxCols = firstRow.getLastCellNum();
-							List<String> firstRowColData = new ArrayList<>();
-							for (colIndex = 0; colIndex < maxCols; colIndex++) {
-								HSSFCell cell = firstRow.getCell(colIndex);
-								firstRowColData.add(getCellData(cell));
-							}
-							for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
-								String colData = firstRowColData.get(cIdx);
-								if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
-									continue;
-								} else {
-									flag = false;
-									break;
-								}
-							}
-							if (!flag){
+							boolean validHeader = checkHeaderColumnValidate(row.cellIterator());
+							if (!validHeader){
 								log.info("The order and content of header columns must match.");
 								return null;
 							}
-							continue;
 						} else {
-							HSSFRow row = sheet.getRow(rowIndex);
 							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
 							if (ossMaster != null)
 								ossMasterList.add(ossMaster);
@@ -2805,36 +2808,15 @@ public class ExcelUtil extends CoTopComponent {
 					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
 					XSSFSheet sheet = wbXSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
-					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+						XSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							boolean flag = true;
-
-							XSSFRow firstRow = sheet.getRow(rowIndex);
-							int maxCols = firstRow.getLastCellNum();
-
-							List<String> firstRowColData = new ArrayList<>();
-							//Check if the first row has column data suitable for ossMaster DAO
-
-							for (colIndex = 0; colIndex < maxCols; colIndex++) {
-								XSSFCell cell = firstRow.getCell(colIndex);
-								firstRowColData.add(getCellData(cell));
-							}
-							for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
-								String colData = firstRowColData.get(cIdx);
-								if (colData != null && definedColData[cIdx].equals(colData.toUpperCase()))
-									continue;
-								else {
-									flag = false;
-									break;
-								}
-							}
-							if (!flag) {
+							boolean validHeader = checkHeaderColumnValidate(row.cellIterator());
+							if (!validHeader) {
 								log.info("The order and content of header columns must match.");
 								return null;
 							}
-							continue;
 						} else {
-							XSSFRow row = sheet.getRow(rowIndex);
 							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
 							if (ossMaster != null)
 								ossMasterList.add(ossMaster);
