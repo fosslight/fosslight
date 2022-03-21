@@ -2356,7 +2356,7 @@ public class ExcelUtil extends CoTopComponent {
 		
 		return result;
 	}
-	
+
 	public static Map<String, Object> getAnalysisResultList(Map<String, Object> map) {
 		String analysisResultListPath = (String) map.get("analysisResultListPath");
 		Map<String, Object> readData = new HashMap<>();
@@ -2411,7 +2411,7 @@ public class ExcelUtil extends CoTopComponent {
 		
 		return readData;
 	}
-	
+
 	public static Map<String, Object> readAnalysisList(List<String[]>  csvDataList, List<OssAnalysis> analysisList) {		
 		int gridIdCol = -1;
 		int resultCol = -1;
@@ -2671,6 +2671,61 @@ public class ExcelUtil extends CoTopComponent {
 		return result;
 	}
 
+	public static OssMaster getOssDataByColumn(Iterator<Cell> cellIterator) {
+		OssMaster ossMaster = new OssMaster();
+		int colIndex = 0;
+		for (; cellIterator.hasNext(); colIndex++) {
+			Cell cell = (Cell) cellIterator.next();
+			String value = getCellData(cell);
+			if (colIndex == 0) {
+				if (value == null || value.trim().isEmpty()) {
+					log.debug("OSS Name must not be null.");
+					return null;
+				} else {
+					ossMaster.setOssName(value);
+				}
+			} else if (colIndex == 1) {
+				if (value == null || value.trim().isEmpty()) continue;
+				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
+				ossMaster.setOssNicknames(nicknames);
+			} else if (colIndex == 2) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setOssVersion(value);
+			} else if (colIndex == 3) {
+				if (value == null || value.trim().isEmpty()) {
+					log.debug("Declared License must not be null.");
+					return null;
+				}
+				ossMaster.setDeclaredLicense(value);
+			} else if (colIndex == 4) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setDetectedLicense(value);
+			} else if (colIndex == 5) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setCopyright(value);
+				ossMaster.setOssCopyright(value);
+			} else if (colIndex == 6) {
+				if (value == null || value.trim().isEmpty()) continue;
+				String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
+				ossMaster.setHomepage(homepage);
+			} else if (colIndex == 7) {
+				if (value == null || value.trim().isEmpty()) continue;
+				String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
+				ossMaster.setDownloadLocation(location);
+			} else if (colIndex == 8) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setSummaryDescription(value);
+			} else if (colIndex == 9) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setAttribution(value);
+			} else if (colIndex == 10) {
+				if (value == null || value.trim().isEmpty()) continue;
+				ossMaster.setComment(value);
+			}
+		}
+		return ossMaster;
+	}
+
 	public static List<OssMaster> readOssList(MultipartHttpServletRequest req, String excelLocalPath) throws InvalidFormatException, IOException {
 		Iterator<String> fileNames = req.getFileNames();
 		List<OssMaster> ossMasterList = new ArrayList<>();
@@ -2706,9 +2761,7 @@ public class ExcelUtil extends CoTopComponent {
 					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
 					HSSFSheet sheet = wbHSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
-					rowLoop:
 					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
-						OssMaster ossMaster = new OssMaster();
 						if (rowIndex == 0) {
 							boolean flag = true;
 							HSSFRow firstRow = sheet.getRow(rowIndex);
@@ -2732,60 +2785,12 @@ public class ExcelUtil extends CoTopComponent {
 								return null;
 							}
 							continue;
-						}
-						else {
+						} else {
 							HSSFRow row = sheet.getRow(rowIndex);
-							int maxCols = row.getLastCellNum();
-							for (colIndex = 0; colIndex < maxCols; colIndex++) {
-								HSSFCell cell = row.getCell(colIndex);
-								String value = getCellData(cell);
-								if (colIndex == 0) {
-									if (value == null || value.trim().isEmpty()) {
-										log.debug("OSS Name must not be null.");
-										break rowLoop;
-									} else {
-										ossMaster.setOssName(value);
-									}
-								} else if (colIndex == 1) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String[] nicknames = StringUtil.delimitedStringToStringArray(value, "\n");
-									ossMaster.setOssNicknames(nicknames);
-								} else if (colIndex == 2) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setOssVersion(value);
-								} else if (colIndex == 3) {
-									if (value == null || value.trim().isEmpty()) {
-										log.debug("Declared License must not be null.");
-										break rowLoop;
-									}
-									ossMaster.setDeclaredLicense(value);
-								} else if (colIndex == 4) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setDetectedLicense(value);
-								} else if (colIndex == 5) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setCopyright(value);
-								} else if (colIndex == 6) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
-									ossMaster.setHomepage(homepage);
-								} else if (colIndex == 7) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
-									ossMaster.setDownloadLocation(location);
-								} else if (colIndex == 8) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setSummaryDescription(value);
-								} else if (colIndex == 9) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setAttribution(value);
-								} else if (colIndex == 10) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setComment(value);
-								}
-							}
+							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
+							if (ossMaster != null)
+								ossMasterList.add(ossMaster);
 						}
-						ossMasterList.add(ossMaster);
 					}
 				} catch (IOException e) {
 					log.error(e.getMessage(), e);
@@ -2800,9 +2805,7 @@ public class ExcelUtil extends CoTopComponent {
 					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
 					XSSFSheet sheet = wbXSSF.getSheetAt(0);
 					int rowSize = sheet.getPhysicalNumberOfRows();
-					rowLoop:
 					for (rowIndex = 0; rowIndex < rowSize; rowIndex++) {
-						OssMaster ossMaster = new OssMaster();
 						if (rowIndex == 0) {
 							boolean flag = true;
 
@@ -2832,63 +2835,10 @@ public class ExcelUtil extends CoTopComponent {
 							continue;
 						} else {
 							XSSFRow row = sheet.getRow(rowIndex);
-							int maxcols = row.getLastCellNum();
-
-							for (colIndex = 0; colIndex < maxcols; colIndex++) {
-								XSSFCell cell = row.getCell(colIndex);
-								String value = getCellData(cell);
-								if (colIndex == 0) {
-									if (value == null || value.trim().isEmpty()) {
-										log.debug("OSS Name must not be null.");
-										break rowLoop;
-									} else {
-										ossMaster.setOssName(value);
-									}
-								} else if (colIndex == 1) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String[] nicknames = StringUtil.delimitedStringToStringArray(value, "\n");
-									ossMaster.setOssNicknames(nicknames);
-								} else if (colIndex == 2) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setOssVersion(value);
-								} else if (colIndex == 3) {
-									if (value == null || value.trim().isEmpty()) {
-										log.debug("Declared License must not be null.");
-										if (ossMasterList.isEmpty()){
-											return null;
-										} else {
-											return ossMasterList;
-										}
-									}
-									ossMaster.setDeclaredLicense(value);
-
-								} else if (colIndex == 4) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setDetectedLicense(value);
-								} else if (colIndex == 5) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setCopyright(value);
-								} else if (colIndex == 6) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
-									ossMaster.setHomepage(homepage);
-								} else if (colIndex == 7) {
-									if (value == null || value.trim().isEmpty()) continue;
-									String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
-									ossMaster.setDownloadLocation(location);
-								} else if (colIndex == 8) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setSummaryDescription(value);
-								} else if (colIndex == 9) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setAttribution(value);
-								} else if (colIndex == 10) {
-									if (value == null || value.trim().isEmpty()) continue;
-									ossMaster.setComment(value);
-								}
-							}
+							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
+							if (ossMaster != null)
+								ossMasterList.add(ossMaster);
 						}
-						ossMasterList.add(ossMaster);
 					}
 				} catch (IOException e) {
 					log.error(e.getMessage(), e);
