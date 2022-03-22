@@ -4158,7 +4158,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								LICENSEFileName = "LicenseRef-"+licenseBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
 							}
 							
-							FileUtil.writhFile(LicensesfilePath, LICENSEFileName+".txt", licenseBean.getLicenseText());
+							FileUtil.writeFile(LicensesfilePath, LICENSEFileName+".txt", licenseBean.getLicenseText());
 							ObligationNoticeLicenseList.add(licenseName);
 						}
 					}
@@ -4194,7 +4194,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					fileName = path;
 				}
 				
-				FileUtil.writhFile(binaryFilePath, fileName, contents);
+				FileUtil.writeFile(binaryFilePath, fileName, contents);
 			}
 		}
 		
@@ -4229,7 +4229,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		if(FileUtil.writhFile(filePath, fileName, contents)) {
+		if(FileUtil.writeFile(filePath, fileName, contents)) {
 			// 파일 등록
 			fileId = fileService.registFileDownload(filePath, fileName, fileName);
 		}

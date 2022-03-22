@@ -21,6 +21,10 @@
 	$(document).ready(function() {
 		'use strict';
 		initSample();
+
+		if($("#editor2").length > 0) {
+			initSample2();
+		}
 		
 		if('${project.prjId}' != "") {
 			fn_self.modeChange('${project.prjId}', 'v');
@@ -32,228 +36,808 @@
 		
 		if('${project.prjId}' != "") {
 			src_evt.init();
+			notice_evt.init();
 		}
 
 		if($("#listKind > option").length == 1){
 			$(".listKindArea").hide();
 		}
 
-
-
+		com_fn.tabInit();
+		fn.appendEditVisible($("#append"));
+		fn.initNotice();
 	});
 	
 	var fn_self ={
-			modeChange : function(prjId, type) {
-				if("v" == type) {
-					$.ajax({
-						url : '<c:url value="/selfCheck/selfCheckViewAjax"/>',
-						dataType : 'html',
-						cache : false,
-						data : {prjId : prjId},
-						success : function(detailResult){
-							$("#divViewMode").html(detailResult);
-							$("#divViewMode").show();
-							$("#divEditMode").hide();
-						},
-						error : function(request,status,error){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
-						}
-					});
-				} else if("c" == type) {
-					$("#divViewMode").show();
-					$("#divEditMode").hide();
-				} else {
-					$("#divViewMode").hide();
-					$("#divEditMode").show();
-				}
+		modeChange : function(prjId, type) {
+			if("v" == type) {
+				$.ajax({
+					url : '<c:url value="/selfCheck/selfCheckViewAjax"/>',
+					dataType : 'html',
+					cache : false,
+					data : {prjId : prjId},
+					success : function(detailResult){
+						$("#divViewMode").html(detailResult);
+						$("#divViewMode").show();
+						$("#divEditMode").hide();
+					},
+					error : function(request,status,error){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			} else if("c" == type) {
+				$("#divViewMode").show();
+				$("#divEditMode").hide();
+			} else {
+				$("#divViewMode").hide();
+				$("#divEditMode").show();
 			}
+		}
 	}
 	
 	// 이벤트
 	var evt = {
 		init : function(){
-				// 저장
-				$("#save").click(function(){
-					alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-						if (e) {
-							var prjName = $("[name='prjName']").val();
+			// 저장
+			$("#save").click(function(){
+				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+					if (e) {
+						var prjName = $("[name='prjName']").val();
 
-							if(/[^\s]+/.test(prjName)){
-								$(".prjName").hide();
-								fn.saveSubmit();
-							} else {
-								$(".prjName").show();
-							}
+						if(/[^\s]+/.test(prjName)){
+							$(".prjName").hide();
+							fn.saveSubmit();
 						} else {
-							return false;
+							$(".prjName").show();
 						}
-					});
+					} else {
+						return false;
+					}
 				});
-				
-				$("#cancel").click(function(){
-					fn_self.modeChange('${project.prjId}', 'v');
+			});
+			
+			$("#cancel").click(function(){
+				fn_self.modeChange('${project.prjId}', 'v');
+			});
+			
+			$(".selfCheckDelete").click(function(){
+				alertify.confirm('<spring:message code="msg.selfcheck.confirm.remove.project" />', function (e) {
+					if (e) {
+						fn.deleteSubmit();
+					} else {
+						return false;
+					}
 				});
-				
-				$(".selfCheckDelete").click(function(){
-					alertify.confirm('<spring:message code="msg.selfcheck.confirm.remove.project" />', function (e) {
-						if (e) {
-							fn.deleteSubmit();
-						} else {
-							return false;
-						}
-					});
+			});
+			
+			// 직접입력
+			$('#osType').change(function(){
+				$("#osType option:selected").each(function () {
+					$("#osTypeEtc").val('');
+					
+					if($(this).val()== '999') {
+						$("#osTypeEtc").attr("disabled",false);
+					} else {
+						$("#osTypeEtc").attr("disabled",true);
+					}
 				});
-				
-				// 직접입력
-				$('#osType').change(function(){
-					$("#osType option:selected").each(function () {
-						$("#osTypeEtc").val('');
-						
-						if($(this).val()== '999') {
-							$("#osTypeEtc").attr("disabled",false);
-						} else {
-							$("#osTypeEtc").attr("disabled",true);
-						}
-					});
+			});
+			
+			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
+				data.forEach(function(obj,index){
+					arr[index] = obj.userId+":"+obj.userName;
 				});
-				
-				commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
-					data.forEach(function(obj,index){
-						arr[index] = obj.userId+":"+obj.userName;
-					});
-				});
-			}
-		};
+			});
+		}
+	};
 	
 	var fn = {
-			// 그리드 삭제 버튼
-			setDelBtn : function(cellvalue, options, rowObject){
-				return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
-			},
-			// 그리드 삭제
-			exeDelete : function(rowId){
-				$("#_modelList").jqGrid('delRowData', rowId);
-			},
-			// 저장
-			saveSubmit : function(){
-				var editorVal = CKEDITOR.instances.editor.getData();
-				$('input[name=comment]').val(editorVal);
-				
-				$("#projectForm").ajaxForm({
-					url : '<c:url value="/selfCheck/saveAjax"/>',
-					type : 'POST',
-					dataType: "json",
-					cache : false,
-					success: fn.onRegistSuccess,
-					error : fn.onError
-				}).submit();
-			},
-			// 삭제
-			deleteSubmit : function(){
-				$("#projectForm").ajaxForm({
-					url :'<c:url value="/selfCheck/delAjax"/>',
-					type : 'POST',
-					dataType:"json",
-					cache : false,
-					success:fn.onDeleteSuccess,
-					error : fn.onError
-				}).submit();
-			},
-			// 성공 콜백
-			onRegistSuccess : function(json, status){
-				if(json.isValid == 'false') {
-					alertify.error('<spring:message code="msg.common.valid" />', 0);
-				} else {
-					var prjId = $('input[name=prjId]').val();
-					alertify.alert('<spring:message code="msg.common.success" />', function(){
-						reloadTabInframe('<c:url value="/selfCheck/list"/>');
-
-						if(prjId == '') {
-							deleteTabInFrame('#<c:url value="/selfCheck/edit"/>');
-						} else {
-							fn_self.modeChange(prjId, 'v');
-						}
-					});	
-				}
-			},
-			// 삭제 콜백
-			onDeleteSuccess : function(json, status){
+		// 그리드 삭제 버튼
+		setDelBtn : function(cellvalue, options, rowObject){
+			return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
+		},
+		// 그리드 삭제
+		exeDelete : function(rowId){
+			$("#_modelList").jqGrid('delRowData', rowId);
+		},
+		// 저장
+		saveSubmit : function(){
+			var editorVal = CKEDITOR.instances.editor.getData();
+			$('input[name=comment]').val(editorVal);
+			
+			$("#projectForm").ajaxForm({
+				url : '<c:url value="/selfCheck/saveAjax"/>',
+				type : 'POST',
+				dataType: "json",
+				cache : false,
+				success: fn.onRegistSuccess,
+				error : fn.onError
+			}).submit();
+		},
+		// 삭제
+		deleteSubmit : function(){
+			$("#projectForm").ajaxForm({
+				url :'<c:url value="/selfCheck/delAjax"/>',
+				type : 'POST',
+				dataType:"json",
+				cache : false,
+				success:fn.onDeleteSuccess,
+				error : fn.onError
+			}).submit();
+		},
+		// 성공 콜백
+		onRegistSuccess : function(json, status){
+			if(json.isValid == 'false') {
+				alertify.error('<spring:message code="msg.common.valid" />', 0);
+			} else {
 				var prjId = $('input[name=prjId]').val();
-				
-				if(json.resCd=='10'){
+				alertify.alert('<spring:message code="msg.common.success" />', function(){
 					reloadTabInframe('<c:url value="/selfCheck/list"/>');
 
-					alertify.alert('<spring:message code="msg.common.success" />', function(){
-						if(prjId) {
-							deleteTabInFrame('#<c:url value="/selfCheck/edit/'+prjId+'"/>');
-						} else {
-							deleteTabInFrame('#<c:url value="/selfCheck/edit"/>');
-						}
-					});
-				} else {
-					alertify.error('<spring:message code="msg.common.valid2" />', 0)
-				}
-			},
-			// 에러 콜백
-			onError : function(data, status){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
-			},
-
-			bulkEdit : function(){
-		    	var gridList = $("#srcList");
-		        var targetGird = "srcList";
-
-		        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
-		        var rowCheckedArr = [];
-		        for(var i=0; i<selarrrow.length; i++){
-					if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
-						rowCheckedArr.push(selarrrow[i]);
+					if(prjId == '') {
+						deleteTabInFrame('#<c:url value="/selfCheck/edit"/>');
+					} else {
+						fn_self.modeChange(prjId, 'v');
 					}
-		        }
+				});	
+			}
+		},
+		// 삭제 콜백
+		onDeleteSuccess : function(json, status){
+			var prjId = $('input[name=prjId]').val();
+			
+			if(json.resCd=='10'){
+				reloadTabInframe('<c:url value="/selfCheck/list"/>');
 
-		        if(rowCheckedArr.length > 0){
-		            fn_grid_com.totalGridSaveMode(targetGird);
-		            
-		            var bulkEditArr = gridList.jqGrid("getGridParam", "selarrrow");
-		            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=selfCheck"/>';
-		            
-		            var _popup = null;
-		            
-		            if(_popup == null || _popup.closed){
-		                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
+				alertify.alert('<spring:message code="msg.common.success" />', function(){
+					if(prjId) {
+						deleteTabInFrame('#<c:url value="/selfCheck/edit/'+prjId+'"/>');
+					} else {
+						deleteTabInFrame('#<c:url value="/selfCheck/edit"/>');
+					}
+				});
+			} else {
+				alertify.error('<spring:message code="msg.common.valid2" />', 0)
+			}
+		},
+		// 에러 콜백
+		onError : function(data, status){
+			alertify.error('<spring:message code="msg.common.valid2" />', 0);
+		},
+		shareUrl : function(){
+			var copyUrl = "";
+			var protocol = window.location.protocol;
+			var host =  window.location.host;
+			copyUrl = protocol + "//" + host + "/selfCheck/view/${project.prjId}";
+			$("#copyUrl").val(copyUrl);
+			
+			//launch it.
+			var btnHtm = '<b>Share Link</b><br>';
+			btnHtm += '<input type="text" value="'+copyUrl+'" style="width:460px;" disabled/><br><br>';
+			btnHtm += '<input type="button" value="Copy" class="btnCancel btnColor red right" style="height:30px;width:100px;"onclick="fn.copyUrl(this)"/>';
 
-		                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-		                    alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
-		                }
-		            } else {
-		                _popup.close();
-		                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
-		            }
-		        }else{
-		            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
-		            return false;
-		        }
-			},
+			if(!alertify.myAlert){
+				//define a new dialog
+				alertify.dialog('myAlert',function factory(){
+					return{
+						main:function(message){
+						this.message = message;
+					},
+					setup:function(){
+						return { 
+							focus: { element:0 }
+						};
+					},
+					prepare:function(){
+						this.setContent(this.message);
+					}
+				}});
+			}
+			
+			alertify.myAlert(btnHtm);
+		},
+		copyUrl : function(target){
+			var copyUrl = document.getElementById( 'copyUrl' );
+			copyUrl.select();
+	        document.execCommand( 'Copy' );
+	        
+			$('.ajs-close').trigger("click");
+			alertify.success('<spring:message code="msg.common.success" />');
+		},
+		openPreviewPop : function(data){
+			var result =jQuery.parseJSON(data);
+			
+			if(result.isValid == 'false') {
+	           	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			} else {
+				var noti = document.createElement('pre');
 
-            changeSelectOption : function(target){
-                var name = $(target).attr("name");
-                var value = $("[name='"+name+"']:checked").val()
-                var key = name.split("_")[1];
+				//custom style.
+				noti.style.maxHeight = "400px";
+				noti.style.overflowWrap = "break-word";
+				noti.style.margin = "-16px -16px -16px 0";
+				noti.style.paddingBottom = "24px";
+				noti.appendChild(document.createTextNode(result.resultData));
+				
+				alertify.alert().set({'resizable': true, 'startMaximized':true, 'message':result.resultData}).show();
+				alertify.alert().set({'resizable': false, 'startMaximized':false});
 
-                switch(value){
-                    case "1":
-                        $('#uploadGroup').show();
-                        $('#wgetUrl_' + key).hide();
-                        break;
-                    case "2":
-                        $('#uploadGroup').hide();
-                        $('#wgetUrl_' + key).show();
-                        break;
-                    default:
-                        break;
-                }
+				var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+				if($("#chkUseCustomNotice").prop("checked")){
+					fn.defaultNotice(false);
+				}else{
+					fn.defaultNotice(checkedFlag);
+				}
+			}
+		},
+		openNoticeEditPop : function(data){
+			var result =jQuery.parseJSON(data);
+
+			if(result.isValid == 'false') {
+	           	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			} else {
+				var contents = '<textarea cols="80" id="editor3" name="editor3" rows="10"></textarea>';
+				
+				alertify.confirm()
+						.set({'resizable': true, 'startMaximized':true})
+						.set('labels', {ok:'save'})
+						.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
+						.set('onshow', function(event){
+							CKEDITOR.replace( 'editor3', {
+						        fullPage: true,
+						        allowedContent: true,
+						        startupShowBorders: false,
+						        height: 620
+						    });
+							CKEDITOR.instances.editor3.setData(result.resultData);
+						})
+						.setContent(contents)
+						.show();
+				
+				fn.defaultNotice(false);
+			}
+		},
+		saveNoticeEditPop : function(){
+			$('#noticeHtml').val(CKEDITOR.instances.editor3.getData());
+			
+			$('#noticeForm').ajaxForm({
+				url : '/selfCheck/saveNoticeAjax',
+	            type : 'POST',
+	            dataType: 'json',
+	            cache : false,
+	            success: function(data){
+	            	loading.hide();
+	            	alertify.closeAll();
+	            	
+	            	if(data.isValid == 'false'){
+	            		alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            	}
+	            },
+	            error : function(data){
+	            	loading.hide();
+	            	alertify.closeAll();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            }
+			}).submit();
+		},
+		saveOrGetNotice : function(flag){
+			// 저장 : save, 프리뷰 : preview, 에디터 : editor
+			var customUrl;
+			var customDataType;
+			var customSucess;
+			var customError;
+			
+			if(flag == 'preview') {
+				customUrl      = '/selfCheck/noticeAjax';
+				customDataType = "text";
+				customSucess   = fn.openPreviewPop;
+				customError    = function(data){
+					if(!$("#companyName").prop("checked")) {
+						$("#editCompanyName").attr("disabled", true);
+					}
+					
+					if(!$("#ossDistributionSite").prop("checked")) {
+						$("#editOssDistributionSite").attr("disabled", true);
+					}
+					
+					if(!$("#email").prop("checked")) {
+						$("#editEmail").attr("disabled", true);
+					}
+					
+					loading.hide();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+				
+				$("#editCompanyName").attr("disabled", false);
+				$("#editOssDistributionSite").attr("disabled", false);
+				$("#editEmail").attr("disabled", false);
+			} else if(flag == 'previewOnly') {
+				customUrl      = '/selfCheck/noticeAjax';
+				customDataType = "text";
+				customSucess   = fn.openPreviewPop;
+				customError    = function(data){
+					if(!$("#companyName").prop("checked")) {
+						$("#editCompanyName").attr("disabled", true);
+					}
+					
+					if(!$("#ossDistributionSite").prop("checked")) {
+						$("#editOssDistributionSite").attr("disabled", true);
+					}
+					
+					if(!$("#email").prop("checked")) {
+						$("#editEmail").attr("disabled", true);
+					}
+					
+					loading.hide();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+				
+				$("#editCompanyName").attr("disabled", false);
+				$("#editOssDistributionSite").attr("disabled", false);
+				$("#editEmail").attr("disabled", false);
+				$("#previewOnly").val("Y");
+			} else if(flag == 'editor') {
+				customUrl      = '/selfCheck/noticeAjax';
+				customDataType = "text";
+				customSucess   = fn.openNoticeEditPop;
+				customError    = function(data){
+					if(!$("#companyName").prop("checked")) {
+						$("#editCompanyName").attr("disabled", true);
+					}
+					
+					if(!$("#ossDistributionSite").prop("checked")) {
+						$("#editOssDistributionSite").attr("disabled", true);
+					}
+					
+					if(!$("#email").prop("checked")) {
+						$("#editEmail").attr("disabled", true);
+					}
+					
+					loading.hide();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+				
+				$("#editCompanyName").attr("disabled", false);
+				$("#editOssDistributionSite").attr("disabled", false);
+				$("#editEmail").attr("disabled", false);
+			}
+			
+			if($("#append").prop("checked")){
+				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
+				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+			}
+			
+			$('#noticeForm').ajaxForm({
+				url :customUrl,
+	            type : 'POST',
+	            dataType:customDataType,
+	            cache : false,
+	            success: customSucess,
+	            error : customError
+			}).submit();
+		},
+		
+		downloadNotice : function(){
+			if($("#append").prop("checked")){
+				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
+				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+			$("#isSimpleNotice").val("N");
+			
+			$('#noticeForm').ajaxForm({
+				url :'/selfCheck/makeNoticePreview',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+	            success: function (data) {
+					   if("false" == data.isValid) {
+			            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					   } else {
+					       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+						   var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+					       fn.defaultNotice(checkedFlag);
+					   }
+				   },
+	            error : function(data){
+	            	loading.hide();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            }
+			}).submit();
+		},
+		
+		downloadNoticeText : function(){
+			if($("#append").prop("checked")){
+				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
+				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+			$("#isSimpleNotice").val("N");
+			
+			$('#noticeForm').ajaxForm({
+				url :'/selfCheck/makeNoticeText',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+	            success: function (data) {
+					   if("false" == data.isValid) {
+			            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					   } else {
+					       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+					       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+					       fn.defaultNotice(checkedFlag);
+					   }
+				   },
+	            error : function(data){
+	            	loading.hide();
+	            	
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            }
+			}).submit();
+		},
+		
+		downloadNoticeSimple : function(){
+			if($("#append").prop("checked")){
+				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
+				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+			$("#isSimpleNotice").val("Y");
+			
+			$('#noticeForm').ajaxForm({
+				url :'/selfCheck/makeNoticeSimple',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+	            success: function (data) {
+					   if("false" == data.isValid) {
+			            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					   } else {
+					       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+					       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+					       fn.defaultNotice(checkedFlag);
+					   }
+				   },
+	            error : function(data){
+	            	loading.hide();
+
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            }
+			}).submit();
+		},
+		
+		downloadNoticeTextSimple : function(){
+			if($("#append").prop("checked")){
+				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
+				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+			$("#isSimpleNotice").val("Y");
+			
+			$('#noticeForm').ajaxForm({
+				url :'/selfCheck/makeNoticeTextSimple',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+	            success: function (data) {
+					   if("false" == data.isValid) {
+			            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					   } else {
+					       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+					       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+					       fn.defaultNotice(checkedFlag);
+					   }
+				   },
+	            error : function(data){
+	            	loading.hide();
+	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+	            }
+			}).submit();
+		},
+		downloadSpdxSpreadSheetExcel : function(){
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSelfcheckSPDXPost',
+				data: JSON.stringify({"type":"spdx", "prjId":'${project.prjId}', "dataStr":dataStr}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		downloadSpdxRdf : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSelfcheckSPDXPost',
+				data: JSON.stringify({"type":"spdxRdf", "prjId":'${project.prjId}', "dataStr":dataStr}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		
+		downloadSpdxTag : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
+			$.ajax({
+				type: "POST",				   
+				url: '/spdxdownload/getSelfcheckSPDXPost',
+				data: JSON.stringify({"type":"spdxTag", "prjId":'${project.prjId}', "dataStr":dataStr}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		downloadSpdxJson : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSelfcheckSPDXPost',
+				data: JSON.stringify({"type":"spdxJson", "prjId":'${project.prjId}', "dataStr":dataStr}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			})
+		},
+		downloadSpdxYaml : function() {
+			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSelfcheckSPDXPost',
+				data: JSON.stringify({"type":"spdxYaml", "prjId":'${project.prjId}', "dataStr":dataStr}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					} else {
+						window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			})
+		},
+		appendEditVisible : function(target){
+			var checked = $(target).prop("checked");
+			
+			if(checked) {
+				$("#editAppend").show();
+			} else {
+				$("#editAppend").hide();
+			}
+		},
+		defaultNotice : function(checked, type){
+			if(checked){
+				$("#companyName").attr("disabled", !checked);
+				$("#ossDistributionSite").attr("disabled", !checked);
+				$("#email").attr("disabled", !checked);
+				$("#hideOssVersion").attr("disabled", !checked);
+				$("#append").attr("disabled", !checked);
+				
+				if($("#companyName").prop("checked")) {
+					$("#editCompanyName").attr("disabled", !checked);
+				} else {
+					$("#editCompanyName").attr("disabled", checked);
+				}
+				
+				if($("#ossDistributionSite").prop("checked")) {
+					$("#editOssDistributionSite").attr("disabled", !checked);
+				} else {
+					$("#editOssDistributionSite").attr("disabled", checked);
+				}
+				
+				if($("#email").prop("checked")) {
+					$("#editEmail").attr("disabled", !checked);
+				} else {
+					$("#editEmail").attr("disabled", checked);
+				}
+				
+				if(type != "init" && $("#append").prop("checked")) {
+					if(CKEDITOR.instances.editor2) {
+						CKEDITOR.instances.editor2.setReadOnly(false);
+					}
+				}
+			} else {
+				$("#companyName").attr("disabled",!checked);
+				$("#ossDistributionSite").attr("disabled",!checked);
+				$("#email").attr("disabled",!checked);
+				$("#hideOssVersion").attr("disabled",!checked);
+				$("#append").attr("disabled",!checked);
+				
+				$("#editCompanyName").attr("disabled", !checked);
+				$("#editOssDistributionSite").attr("disabled", !checked);
+				$("#editEmail").attr("disabled", !checked);
+				
+				if(type != "init" && $("#append").prop("checked")){
+					if(CKEDITOR.instances.editor2) {
+						CKEDITOR.instances.editor2.setReadOnly(true);
+					}
+				}
+			}
+		},
+		initNotice : function(){
+			window.setTimeout(function(){
+				var editNoticeYn = $("[name='btnEditOssNotice']:checked").val();
+				var editCompanyYn = $("#companyName").val();
+				var editDistributionSiteUrlYn = $("#ossDistributionSite").val();
+				var editEmailYn = $("#email").val();
+				var hideOssVersionYn = $("#hideOssVersion").val();
+				var editAppendedYn = $("#append").val();
+				
+				var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
+				var btn_Save = $("#save");
+				
+				if(userRole == "ROLE_ADMIN"){ // 관리자 권한 일 경우					
+					btn_Save.show();
+					fn.defaultNotice(checked, "init");	
+				} else { // 일반 사용자 일 경우
+					switch(curIdenStatus){
+						case "":
+						case "PROG":
+							btn_Save.show();
+							fn.defaultNotice(checked, "init");
+
+							break;
+						default:
+							btn_Save.hide();
+							$("[name='btnEditOssNotice']").attr("disabled", true)
+							fn.defaultNotice(false, "init");
+
+							break;
+					}
+				}
+				
+				if(editNoticeYn == "Y") {
+					$("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
+				}
+				
+				if(editCompanyYn == "Y") {
+					$("#companyName").trigger("click").attr("checked", true);
+				}
+				
+				if(editDistributionSiteUrlYn == "Y") {
+					$("#ossDistributionSite").trigger("click").attr("checked", true);
+				}
+				
+				if(editEmailYn == "Y") {
+					$("#email").trigger("click").attr("checked", true);
+				}
+				
+				if(hideOssVersionYn == "Y") {
+					$("#hideOssVersion").trigger("click").attr("checked", true);
+				}
+				
+				if(editAppendedYn == "Y"){
+					$("#append").trigger("click").attr("checked", true);
+
+					if(CKEDITOR.instances.editor2) {
+						CKEDITOR.instances.editor2.config.readOnly = false;
+					}
+				}
+			}, 1);
+		},
+		bulkEdit : function(){
+	    	var gridList = $("#srcList");
+	        var targetGird = "srcList";
+
+	        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+	        var rowCheckedArr = [];
+	        for(var i=0; i<selarrrow.length; i++){
+				if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+					rowCheckedArr.push(selarrrow[i]);
+				}
+	        }
+
+	        if(rowCheckedArr.length > 0){
+	            fn_grid_com.totalGridSaveMode(targetGird);
+	            
+	            var bulkEditArr = gridList.jqGrid("getGridParam", "selarrrow");
+	            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=selfCheck"/>';
+	            
+	            var _popup = null;
+	            
+	            if(_popup == null || _popup.closed){
+	                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+	                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+	                    alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+	                }
+	            } else {
+	                _popup.close();
+	                _popup = window.open(url, "bulkEditViewSelfPopup", "width=850, height=350, toolbar=no, location=no, left=100, top=100, resizable=yes");
+	            }
+	        }else{
+	            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
+	            return false;
+	        }
+		},
+
+        changeSelectOption : function(target){
+            var name = $(target).attr("name");
+            var value = $("[name='"+name+"']:checked").val()
+            var key = name.split("_")[1];
+
+            switch(value){
+                case "1":
+                    $('#uploadGroup').show();
+                    $('#wgetUrl_' + key).hide();
+                    break;
+                case "2":
+                    $('#uploadGroup').hide();
+                    $('#wgetUrl_' + key).show();
+                    break;
+                default:
+                    break;
             }
-		}
+        }
+	};
 	
 	// 데이타
 	var data = {
@@ -269,26 +853,6 @@
 		}
 	}
 	
-	//데이트피커
-	function pickdates(id){
-		jQuery("#"+id+"_releaseDate","#_modelList").datepicker({dateFormat:"yymmdd"});
-	}
-	
-	//ms-kwon
-	function checkDate(obj){
-		$this = $(obj);
-		var date = $this.val();
-		
-		if($.trim(date) != ""){
-			var regExp = /^(19[7-9][0-9]|20\d{2}).(0[0-9]|1[0-2]).(0[1-9]|[1-2][0-9]|3[0-1])$/;
-			
-			if(!regExp.test(date)){
-				$this.val("");
-				alert('<spring:message code="msg.project.confirm.wrong.input.date" />');
-			}
-		}
-	}
-
 	// SRC 이벤트
 	var src_evt = {
 		csvDelFileSeq : [],
@@ -440,7 +1004,7 @@
 		// src 그리드 데이터
 		getSrcGridData : function(param){
 			$.ajax({
-				url : '<c:url value="${suffixUrl}/selfCheck/ossGrid/${project.prjId}/10"/>',
+				url : '<c:url value="/selfCheck/ossGrid/${project.prjId}/10"/>',
 				dataType : 'json',
 				cache : false,
 				data : (param) ? param : {referenceId : '${project.prjId}'},
@@ -564,7 +1128,7 @@
 			var _url = '<c:url value="/download/'+obj.registSeq+'/'+obj.fileName+'"/>';
 			$('.csvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
 		},
-		deleteCsv : function(obj, type){
+		deleteCsv : function(obj, type) {
 			var Seq = $(obj).prev().val();
 			var object = {fileSeq : Seq};
 			
@@ -772,7 +1336,7 @@
 				seq = $('.binFileArea > li:last').find("input[type=hidden]").val();
 			}
 			
-			if(seq == ""){
+			if(seq == "") {
 				return;
 			}
 			
@@ -804,7 +1368,7 @@
 				}
 			});
 		},
-		displayNotify : function(cellvalue, options, rowObject){
+		displayNotify : function(cellvalue, options, rowObject) {
 			var display = "";
 			var obligationType = rowObject["obligationType"];
 			var obligationGrayFlag = rowObject["obligationGrayFlag"];
@@ -816,7 +1380,7 @@
 					_obligationMsg = "unknown obligation";
 				}
 
-				display= "<span class=\"iconSet help\">Obligation is unclear</span>";
+				display = "<span class=\"iconSet help\">Obligation is unclear</span>";
 
 			} else if(obligationType == 10){
 				display="<span class=\"iconSet ops\">Notice</span>";
@@ -826,7 +1390,7 @@
 			
 			return display;
 		},
-		displaySource : function(cellvalue, options, rowObject){
+		displaySource : function(cellvalue, options, rowObject) {
 			var display = "";
 			var obligationType = rowObject["obligationType"];
 			var obligationGrayFlag = rowObject["obligationGrayFlag"];
@@ -837,18 +1401,18 @@
 			
 			return display;
 		},
-		unDisplayNotify : function(cellvalue, options, rowObject){
+		unDisplayNotify : function(cellvalue, options, rowObject) {
 			var display = $("#"+options.rowId+"_notify").val();
 			
 			return display;
 		},
-		unDisplaySource : function(cellvalue, options, rowObject){
+		unDisplaySource : function(cellvalue, options, rowObject) {
 			var display = $("#"+options.rowId+"_source").val();
 
 			return display;
 		},		
 		// License 상세 페이지 이동
-	 	showVulnViewPage : function(_ossName, _ossVersion){
+	 	showVulnViewPage : function(_ossName, _ossVersion) {
 	 		if(_ossVersion == ""){
 	 			_ossVersion = "-";
 		 	}
@@ -867,7 +1431,7 @@
 				_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100");
 			}
 		},
-	 	showLicenseViewPage : function(gridNm, rowid){
+	 	showLicenseViewPage : function(gridNm, rowid) {
 	 		src_fn.exitCell(_mainLastsel);
 			cleanErrMsg("srcList", rowid);
 
@@ -889,7 +1453,7 @@
 			}
 		},
 		// 메인 그리드 OSS 등록/상세 페이지 이동
-	 	showOssViewPage : function(gridNm, rowid){
+	 	showOssViewPage : function(gridNm, rowid) {
 	 		src_fn.exitCell(_mainLastsel);
 			cleanErrMsg("srcList", rowid);
 			
@@ -902,7 +1466,7 @@
 				ossVersion = "";
 			}
 			
-			if(ossName != ""){
+			if(ossName != "") {
 				$.ajax({
 					url : '<c:url value="/oss/checkExistsOssByname"/>',
 					type : 'GET',
@@ -933,7 +1497,7 @@
 			}
 		},
 		checkOssIdByName : function(ossName) {},
-		displayGuide : function(cellvalue, options, rowObject){
+		displayGuide : function(cellvalue, options, rowObject) {
 			var licenseName = rowObject["licenseName"];
 			var licenseUserGuideYn = rowObject["licenseUserGuideYn"];
 			
@@ -945,14 +1509,14 @@
 			
 			return display;
 		},
-		popGuide : function(row_id){
+		popGuide : function(row_id) {
 			var _guide = $("#srcList").jqGrid('getCell', row_id, 'licenseUserGuideStr');
 
 			if(_guide) {
 				alertify.alert(_guide, function(){});
 			}
 		},
-		displayOssDetail : function(cellvalue, options, rowObject){
+		displayOssDetail : function(cellvalue, options, rowObject) {
 			var display = "";
 			var ossName = rowObject["ossName"];
 			var existsFlag = rowObject["ossNameExistsYn"];
@@ -968,7 +1532,7 @@
 			
 			return display;
 		},
-		displayLicenseDetail : function(cellvalue, options, rowObject){
+		displayLicenseDetail : function(cellvalue, options, rowObject) {
 			var display = "";
 			var licenseName = rowObject["licenseName"];
 			var existsFlag = rowObject["licenseNameExistsYn"];
@@ -984,7 +1548,7 @@
 			return display;
 		},
 		// vulnerability 
-		displayVulnerability : function(cellvalue, options, rowObject){
+		displayVulnerability : function(cellvalue, options, rowObject) {
 			var display = "";
 			var _score = rowObject.cvssScore;
 			
@@ -1004,7 +1568,7 @@
 
 			return display;
 		},
-		exitCell : function(_mainLastsel){
+		exitCell : function(_mainLastsel) {
 			if(_mainLastsel != -1){
 				var grid = $("#srcList");
 				var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
@@ -1014,9 +1578,9 @@
 				grid.jqGrid('saveRow',_mainLastsel);
 			}
 		},
-		CheckOssViewPage : function(){
+		CheckOssViewPage : function() {
 			if(saveFlag) {
-				if(_popupCheckOssName != null){
+				if(_popupCheckOssName != null) {
 					_popupCheckOssName.close();
 				}
 				
@@ -1033,9 +1597,9 @@
 			
 			
 		},
-		CheckOssLicenseViewPage : function(){
+		CheckOssLicenseViewPage : function() {
 			if(saveFlag) {
-				if(_popupCheckOssLicense != null){
+				if(_popupCheckOssLicense != null) {
 					_popupCheckOssLicense.close();
 				}
 				
@@ -1050,7 +1614,7 @@
 				return false;
 			}
 		},
-		saveAjax : function(){
+		saveAjax : function() {
 			com_fn.exitCell(_mainLastsel, "srcList");
 			
 			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
@@ -1106,7 +1670,7 @@
 
 	//SRC 그리드
 	var src_grid = {
-		load: function(){
+		load: function() {
 			var currentOssName = "";
 			var ondblClickRowBln = false;
 			var srcList = $("#srcList");
@@ -1534,6 +2098,39 @@
 	};
 
 	var com_fn = {
+		tabInit : function(){
+			var initDiv = '${initDiv}';
+			var tabContent = $(".tabContent");
+			var tabMenuA = $(".tabMenu a");
+			
+			tabContent.hide();
+			tabMenuA.click(function () {
+				com_fn.fnTabChange(this);
+			});
+			
+			var tabDefaultIdx = "0";
+			
+			tabMenuA.eq(tabDefaultIdx).click();
+		},
+		fnTabChange: function(target){
+			var tabContent = $(".tabContent");
+			var tabMenuA = $(".tabMenu a");
+			
+			$(".tabMenu a span").remove();
+			
+			tabMenuA.eq("0").text("oss List");
+			tabMenuA.eq("1").text("Notice");
+			
+			var tag = "<span>"+$(target).text()+"</span>";
+			
+			$(target).html(tag);
+			
+			tabContent.hide();
+			activeTabText = $(target).text();
+			activeTab = $(target).attr("rel");
+			
+			$("#" + activeTab).show();
+		},
 		deleteLicense : function(target){
 			$(target).parent().remove();
 		},
@@ -1541,7 +2138,7 @@
 			$(target).parent().next().remove();
 			$(target).parent().remove();
 		},
-		getLicenseName : function(obj){
+		getLicenseName : function(obj) {
 			return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
 			    if(cur.toUpperCase() != "X" && cur != ""){
 			        arr.push(cur);
@@ -1550,8 +2147,8 @@
 			    return arr;
 			}, []).join(",");
 		},
-		exitCell : function(_mainLastsel, target){
-			if(_mainLastsel != -1){
+		exitCell : function(_mainLastsel, target) {
+			if(_mainLastsel != -1) {
 				var grid = $("#" + target);
 				var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
 
@@ -1680,6 +2277,85 @@
 			
 			return reMakeArrObj;
 	    }
+	};
+
+	var notice_evt = {
+		init : function(){
+			$("#append").click(function(e){
+				var checked = $(this).prop("checked");
+				$("#editAppendedYn").val(checked ? "Y" : "N");
+				fn.appendEditVisible(this);
+				
+				if(CKEDITOR.instances.editor2) {
+					CKEDITOR.instances.editor2.setReadOnly(!checked);
+				}
+			});
+			
+			$("[name='btnEditOssNotice']").change(function(e){
+				var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
+				$("#editNoticeYn").val(checked ? "Y" : "N");
+				fn.defaultNotice(checked);
+			});
+			
+			$("#companyName").click(function(e){
+				var checked = $(this).prop("checked");
+				$("#editCompanyYn").val(checked ? "Y" : "N");
+				$("#editCompanyName").attr("disabled", !checked);
+			});
+			
+			$("#ossDistributionSite").click(function(e){
+				var checked = $(this).prop("checked");
+				$("#editDistributionSiteUrlYn").val(checked ? "Y" : "N");
+				$("#editOssDistributionSite").attr("disabled", !checked);
+			});
+			
+			$("#email").click(function(e){
+				var checked = $(this).prop("checked");
+				$("#editEmailYn").val(checked ? "Y" : "N");
+				$("#editEmail").attr("disabled", !checked);
+			});
+			
+			$("#hideOssVersion").click(function(e){
+				var checked = $(this).prop("checked");
+				$("#hideOssVersionYn").val(checked ? "Y" : "N");
+			});
+
+			// noticePreview 버튼 
+			$('#noticePreview').click(function(e){
+				e.preventDefault();
+				
+				fn.saveOrGetNotice('preview');
+			});
+
+			$('#packageDocDownload').click(function(e){
+				var type = $('#docType').val();
+				
+				if(type == 'noticeDownload') {
+					fn.downloadNotice();
+				} else if(type == 'noticeTextDownload') {
+					fn.downloadNoticeText();
+				} else if(type == 'noticeSimpleDownload') {
+					fn.downloadNoticeSimple();
+				} else if(type == 'noticeTextSimpleDownload') {
+					fn.downloadNoticeTextSimple();
+				} else if(type == 'spdxSpreadSheet') {
+					fn.downloadSpdxSpreadSheetExcel();
+				} else if(type == 'spdxRdf') {
+					fn.downloadSpdxRdf();
+				} else if(type == 'spdxTag') {
+					fn.downloadSpdxTag();
+				} else if(type == 'spdxJson') {
+					fn.downloadSpdxJson();
+				} else if(type == 'spdxYaml') {
+					fn.downloadSpdxYaml();
+				}
+			});
+
+			$("#noticeSave").on("click", function(){
+				hideErrMsg();
+				fn.saveOrGetNotice('save');
+			});
+		}		
 	};
 //]]>
 </script>

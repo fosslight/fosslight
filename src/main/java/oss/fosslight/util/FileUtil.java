@@ -129,7 +129,7 @@ public class FileUtil {
 	}
 	
 	
-	public static boolean writhFile(String filePath, String fileName, String contents) {
+	public static boolean writeFile(String filePath, String fileName, String contents) {
 		BufferedWriter fw = null;
 		try {
 			File dir = new File(filePath);

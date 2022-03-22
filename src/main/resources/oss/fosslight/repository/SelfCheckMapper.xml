@@ -2492,7 +2492,7 @@
 			, T5.LICENSE_TYPE
 		FROM PRE_PROJECT_MASTER T1 
 			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.OSS_NAME != '-'
-			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(CAST(T2.REFERENCE_ID AS VARCHAR(10)),"-",T2.REFERENCE_DIV,"-",CAST(T2.COMPONENT_IDX AS VARCHAR(10))) = T3.COMPONENT_ID
+			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
 			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
 		
@@ -2532,7 +2532,7 @@
 			, T5.LICENSE_TYPE
 		FROM PRE_PROJECT_MASTER T1 
 			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10'
-			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(CAST(T2.REFERENCE_ID AS VARCHAR(10)),"-",T2.REFERENCE_DIV,"-",CAST(T2.COMPONENT_IDX AS VARCHAR(10))) = T3.COMPONENT_ID
+			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
 			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
 		<!-- ORDER BY LICENSE_NAME -->
@@ -2578,4 +2578,90 @@
 			PRJ_ID = #{prjId} 
 	</update>
 
+	
+	<insert id="insertOssNotice" parameterType="oss.fosslight.domain.OssNotice">
+		INSERT INTO PRE_OSS_NOTICE(
+			PRJ_ID
+			, NOTICE_TYPE
+			, COMPANY_NAME_FULL
+			, COMPANY_NAME_SHORT
+			, DISTRIBUTION_SITE_URL
+			, EMAIL
+			, APPENDED
+			, USE_COMPANY_NAME_TITLE
+			, DISTRIBUTED_OTHER_COMPANY
+			, MERGED_OTHER_OSS_NOTICE
+			, ACCOMPANIED_SOURCE_CODE
+			, OSS_DISTRIBUTION_SITE
+			, OSS_DISTRIBUTION_SITE_YN
+			, EDIT_NOTICE_YN
+			, EDIT_COMPANY_YN
+			, EDIT_DISTRIBUTION_SITE_URL_YN
+			, EDIT_EMAIL_YN
+			, HIDE_OSS_VERSION_YN
+			, EDIT_APPENDED_YN
+		)VALUES(
+			#{prjId}                  
+			, #{noticeType}             
+			, #{companyNameFull}        
+			, #{companyNameShort}       
+			, #{distributionSiteUrl}    
+			, #{email}                  
+			, #{appended}               
+			, #{useCompanyNameTitle}    
+			, #{distributedOtherCompany}
+			, #{mergedOtherOssNotice}   
+			, #{accompaniedSourceCode}
+			, #{ossDistributionSite}  
+			, #{ossDistributionSiteYn}
+			, #{editNoticeYn}
+			, #{editCompanyYn}
+			, #{editDistributionSiteUrlYn}
+			, #{editEmailYn}
+			, #{hideOssVersionYn}
+			, #{editAppendedYn} 		
+		) ON DUPLICATE KEY UPDATE
+			PRJ_ID                       	=  #{prjId}                    
+			, NOTICE_TYPE                	=  #{noticeType}            
+			, COMPANY_NAME_FULL          	=  #{companyNameFull}
+			, COMPANY_NAME_SHORT         	=  #{companyNameShort}       
+			, DISTRIBUTION_SITE_URL      	=  #{distributionSiteUrl}    
+			, EMAIL                      	=  #{email}                  
+			, APPENDED                   	=  #{appended}               
+			, USE_COMPANY_NAME_TITLE     	=  #{useCompanyNameTitle}    
+			, DISTRIBUTED_OTHER_COMPANY  	=  #{distributedOtherCompany}
+			, MERGED_OTHER_OSS_NOTICE    	=  #{mergedOtherOssNotice}   
+			, ACCOMPANIED_SOURCE_CODE    	=  #{accompaniedSourceCode}  
+			, OSS_DISTRIBUTION_SITE    	 	=  #{ossDistributionSite}  
+			, OSS_DISTRIBUTION_SITE_YN   	=  #{ossDistributionSiteYn}
+			, EDIT_NOTICE_YN				= #{editNoticeYn}
+			, EDIT_COMPANY_YN				= #{editCompanyYn}
+			, EDIT_DISTRIBUTION_SITE_URL_YN	= #{editDistributionSiteUrlYn}
+			, EDIT_EMAIL_YN					= #{editEmailYn}
+			, HIDE_OSS_VERSION_YN			= #{hideOssVersionYn}
+			, EDIT_APPENDED_YN				= #{editAppendedYn}
+	</insert>
+	
+	<update id="updateOssNotice" parameterType="oss.fosslight.domain.OssNotice">
+		UPDATE PRE_OSS_NOTICE
+		   SET NOTICE_TYPE = #{noticeType}
+			 , COMPANY_NAME_FULL = NULL
+			 , COMPANY_NAME_SHORT = NULL
+			 , DISTRIBUTION_SITE_URL = NULL
+			 , EMAIL = NULL
+			 , APPENDED = NULL
+			 , USE_COMPANY_NAME_TITLE = NULL
+			 , DISTRIBUTED_OTHER_COMPANY = NULL
+			 , MERGED_OTHER_OSS_NOTICE = NULL
+			 , ACCOMPANIED_SOURCE_CODE = NULL
+			 , OSS_DISTRIBUTION_SITE = NULL
+			 , OSS_DISTRIBUTION_SITE_YN = NULL
+			 , EDIT_NOTICE_YN = 'N'
+			 , EDIT_COMPANY_YN = 'N'
+			 , EDIT_DISTRIBUTION_SITE_URL_YN = 'N'
+			 , EDIT_EMAIL_YN = 'N'
+			 , HIDE_OSS_VERSION_YN = 'N'
+			 , EDIT_APPENDED_YN = 'N'
+		 WHERE PRJ_ID = #{prjId}
+	</update>
 </mapper>

@@ -62,6 +62,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
@@ -1208,5 +1209,24 @@ public class PartnerController extends CoTopComponent{
 		resultMap.put("status", partnerMaster.getStatus());
 		
 		return makeJsonResponseHeader(resultMap);
+	}
+	
+	
+	@PostMapping(value=PARTNER.MAKE_YAML)
+	public @ResponseBody ResponseEntity<Object> makeYaml(
+			@RequestBody PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		String yamlFileId = "";
+		
+		try {
+			// partnerId / partnerName 필수 값.
+			yamlFileId = YamlUtil.makeYaml(CoConstDef.CD_DTL_COMPONENT_PARTNER, toJson(partnerMaster));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}		
+		
+		return makeJsonResponseHeader(yamlFileId);
 	}
 }

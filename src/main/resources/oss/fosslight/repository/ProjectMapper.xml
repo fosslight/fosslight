@@ -4159,8 +4159,7 @@
 				  	  		OSS_NAME IN (SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossName})
 				  	  		OR OSS_NAME = #{ossName}
 				  	  	)
-						AND OSS_VERSION = #{ossVersion} 
-						AND REF_DIV = #{referenceDiv}
+						AND OSS_VERSION = #{ossVersion}
 				 	)
 		   	   )
 		   AND ADMIN_CHECK_YN = 'Y'
