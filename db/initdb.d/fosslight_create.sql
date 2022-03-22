@@ -1854,6 +1854,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('704', 'Support Locale List', '', 'N'),
 	('705', 'External Service Setting', 'System Detail Setting Code', 'N'),
 	('706', 'External Analysis Setting', 'System Detail Setting Code', 'N'),
+	('801', 'Dashboard Notice', 'Dashboard Notice Contents', 'N'),
 	('901', 'Excel Download/Export', 'Maximum rows that can be exported when downloading Excel file or Export at List', 'N'),
 	('903', 'checkOssNameUrl', 'Managing information to find OSS information from Download Location', 'N'),
 	('904', 'check License Text Server Info', '', 'N'),

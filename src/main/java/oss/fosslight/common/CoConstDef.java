@@ -130,9 +130,9 @@ public class CoConstDef {
 	public static final String CD_MENU_COMPLIANCE_STATUS		= "010";
 	public static final String CD_MENU_EXTERNAL_LINK			= "011";
 	
-	// Dashboard Detail Setting
-	public static final String CD_DASHBOARD_DETAIL				= "914";
-	public static final String CD_DASHBOARD_NOTICE				= "100";
+	// Dashboard Notice
+	public static final String CD_DASHBOARD_DETAIL				= "801";
+//	public static final String CD_DASHBOARD_NOTICE				= "100";
 	
 	// Project List Detail Setting
 	public static final String CD_PROJECT_DETAIL				= "918";
