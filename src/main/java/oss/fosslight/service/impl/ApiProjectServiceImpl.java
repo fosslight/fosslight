@@ -1461,7 +1461,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			if(!isEmpty(exceptFileContent)) {
 				log.info("[API] VERIFY writhFile exceptFileContent file START -----------------");
 				
-				FileUtil.writhFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
+				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
 				
 				log.info("[API] VERIFY writhFile exceptFileContent file END -----------------");
 			}
@@ -1469,7 +1469,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			if(!isEmpty(verify_chk_list)) {
 				log.info("[API] VERIFY writhFile verify_chk_list file START -----------------");
 				
-				FileUtil.writhFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
+				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
 				
 				log.info("[API] VERIFY writhFile verify_chk_list file END -----------------");
 			}

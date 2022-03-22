@@ -2228,6 +2228,8 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('219', '7', 'appended', '', '', 7, 'Y'),
 	('219', '8', 'supplement notice.html template', '', '/template/notice/supplement_notice.html', 8, 'Y'),
 	('219', '9', 'supplement notice.txt template', '', '/template/notice/supplement_notice.txt', 9, 'Y'),
+	('219', '10', 'selfcheck template path', '', '/template/notice/selfcheck_notice.html', 10, 'Y'),
+	('219', '11', 'selfcheck template Text path', '', '/template/notice/selfcheck_notice.txt', 11, 'Y'),
 	('221', '10', 'Model', '', '', 1, 'Y'),
 	('221', '20', 'Software', '', '', 2, 'Y'),
 	('222', '1', '(', '', '', 1, 'Y'),

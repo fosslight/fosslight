@@ -271,4 +271,7 @@ public interface SelfCheckMapper {
 	
 	void updateNoticeFileInfoEtc(Project project);
 
+	int insertOssNotice(OssNotice ossNotice);
+	
+	int updateOssNotice(OssNotice ossNotice);
 }

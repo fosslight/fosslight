@@ -434,6 +434,8 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_DEFAULT_APPENDED = "7";
 	public static final String CD_DTL_SUPPLMENT_NOTICE_HTML_TEMPLATE = "8";
 	public static final String CD_DTL_SUPPLMENT_NOTICE_TXT_TEMPLATE = "9";
+	public static final String CD_DTL_SELFCHECK_NOTICE_DEFAULT_TEMPLATE = "10";
+	public static final String CD_DTL_SELFCHECK_NOTICE_TEXT_TEMPLATE = "11";
 	
 	public static final String CD_NOTICE_DEFAULT_SOFTWARE_TYPE = "221";
 	public static final String CD_DTL_NOTICE_DEFAULT_SOFTWARE_TYPE_MODEL = "10";
@@ -801,4 +803,11 @@ public class CoConstDef {
 	public static final String CD_LDAP_SEARCH_INFO								= "931";
 	public static final String CD_DTL_LDAP_SEARCH_ID							= "100";
 	public static final String CD_DTL_LDAP_SEARCH_PW							= "200";
+	
+	/* SPDX CODE */
+	public static final String CD_SPDX											= "spdx";
+	public static final String CD_SPDX_RPF										= "spdxRdf";
+	public static final String CD_SPDX_TAG										= "spdxTag";
+	public static final String CD_SPDX_JSON										= "spdxJson";
+	public static final String CD_SPDX_YAML										= "spdxYaml";
 }

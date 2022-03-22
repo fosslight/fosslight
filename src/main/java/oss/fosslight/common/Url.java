@@ -321,6 +321,8 @@ public final class Url {
 		public static final String PROJECT_STATUS = PATH + "/getProjectStatus";
 		public static final String PROJECT_BINARY_FILE = PATH + "/getProjectBinaryFile";
 		public static final String PROJECT_BINARY_DB_SAVE = PATH + "/binaryDBSave";
+		
+		public static final String MAKE_YAML = PATH + "/makeYaml/{code}";
 	}
 	
 	public static final class VERIFICATION {
@@ -435,6 +437,8 @@ public final class Url {
 		public static final String NOTICE_TEXT = PATH + "/noticeText";
 		
 		public static final String SAVE_BINARY_DB = PATH + "/saveBinaryDB";
+		
+		public static final String MAKE_YAML = PATH + "/makeYaml";
 	}
 	
 	public static final class USER {
@@ -513,17 +517,15 @@ public final class Url {
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String LICENSE_DATA = PATH + "/getLicenseData";
-
-		public static final String PAGE_JSP = TILES_ROOT + PATH + "/verification" + "";
-		public static final String VERIFICATION_PAGE_ID = PATH + "/verification/{prjId}";
-		public static final String VERIFICATION_PAGE_DIV_ID = PATH + "/verification/{initDiv}/{prjId}";
-		public static final String VERIFICATION_NOTICE_AJAX = PATH + "/verification/noticeAjax";
-		public static final String VERIFICATION_MAKE_NOTICE_PREVIEW = PATH + "/verification/makeNoticePreview";
-		public static final String VERIFICATION_DOWNLOAD_NOTICE_PREVIEW = PATH + "/verification/downloadNoticePreview";
-		public static final String VERIFICATION_MAKE_NOTICE_TEXT = PATH + "/verification/makeNoticeText";
-		public static final String VERIFICATION_MAKE_NOTICE_SIMPLE = PATH + "/verification/makeNoticeSimple";
-		public static final String VERIFICATION_MAKE_NOTICE_TEXT_SIMPLE = PATH + "/verification/makeNoticeTextSimple";
 		
+		public static final String NOTICE_AJAX = PATH + "/noticeAjax";
+		public static final String MAKE_NOTICE_PREVIEW = PATH + "/makeNoticePreview";
+		public static final String DOWNLOAD_NOTICE_PREVIEW = PATH + "/downloadNoticePreview";
+		public static final String MAKE_NOTICE_TEXT = PATH + "/makeNoticeText";
+		public static final String MAKE_NOTICE_SIMPLE = PATH + "/makeNoticeSimple";
+		public static final String MAKE_NOTICE_TEXT_SIMPLE = PATH + "/makeNoticeTextSimple";	
+			
+		public static final String MAKE_YAML = PATH + "/makeYaml";
 	}
 	
 	public static final class COMPLIANCE {
@@ -686,6 +688,7 @@ public final class Url {
 		public static final String PATH = "/spdxdownload";
 		
 		public static final String SPDX_POST = PATH + "/getSPDXPost";
+		public static final String SELFCHECK_SPDX_POST = PATH + "/getSelfcheckSPDXPost";
 		public static final String FILE = PATH + "/getFile";
 		
 	}

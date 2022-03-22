@@ -5,31 +5,34 @@
 
 package oss.fosslight.service.impl;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.io.File;
-import java.nio.file.Files;
+import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang.StringEscapeUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.BinaryMaster;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.History;
@@ -39,36 +42,25 @@ import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.UploadFile;
 import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.repository.T2UserMapper;
-import oss.fosslight.repository.CommentMapper;
+import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.VerificationService;
-import oss.fosslight.util.StringUtil;
-
-import org.apache.commons.io.FilenameUtils;
-import oss.fosslight.util.FileUtil;
-import oss.fosslight.util.ExcelDownLoadUtil;
-import oss.fosslight.util.SPDXUtil2;
-import org.jsoup.Jsoup;
-import org.apache.commons.lang.StringEscapeUtils;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.service.CommentService;
 import oss.fosslight.util.DateUtil;
-import org.jsoup.nodes.Document;
-import java.util.LinkedHashMap;
+import oss.fosslight.util.FileUtil;
+import oss.fosslight.util.StringUtil;
 
 
 @Service
@@ -90,7 +82,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Autowired CommentMapper commentMapper;
 	
 
-	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
+	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("selfcheck.notice.path", "/selfcheck/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	
 	@Override
@@ -828,215 +820,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	}
 	
 	@Override
-	public String getUserList() {
-		return null;
-	}
-
-	@Override
-	public String getCategoryCode(String code, String gubun) {
-		return null;
-	}
-
-	@Override
-	public List<ProjectIdentification> getOssNames(ProjectIdentification identification) {
-		return null;
-	}
-
-	@Override
-	public List<ProjectIdentification> getOssVersions(String ossName) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getOssIdLicenses(ProjectIdentification identification) {
-		return null;
-	}
-
-	@Override
-	public String getDivision(Project project) {
-		return null;
-	}
-
-	@Override
-	public List<Project> getProjectNameList(Project project) {
-		return null;
-	}
-
-	@Override
-	public List<Map<String, Object>> getCategoryCodeToJson(String code) {
-		return null;
-	}
-
-	@Override
-	public boolean existProjectData(Project project) {
-		return false;
-	}
-
-	@Override
-	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense) {
-		return null;
-	}
-
-	@Override
-	public List<Project> getProjectListExcel(Project project) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> identificationSubGrid(ProjectIdentification identification) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getPartnerList(PartnerMaster partnerMaster) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getIdentificationProject(Project project) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getPartnerOssList(OssComponents ossComponents) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getIdentificationProjectSearch(ProjectIdentification projectIdentification) {
-		return null;
-	}
-
-	@Override
-	public String getReviewerList() {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getIdentificationThird(OssComponents ossComponents) {
-		return null;
-	}
-
-	@Override
-	public List<Project> getProjectCreator() {
-		return null;
-	}
-
-	@Override
-	public List<Project> getProjectReviwer() {
-		return null;
-	}
-	
-	@Override
-	public Project selectProjectDetailExcel(String parameter) {
-		return null;
-	}
-
-	@Override
-	public List<ProjectIdentification> getProjectReportExcelList(ProjectIdentification identification) {
-		return null;
-	}
-
-	@Override
-	public List<Project> getProjectVersionList(Project project) {
-		return null;
-	}
-
-	@Override
-	public void registPackageFile(List<UploadFile> list, String prjId) {
-		
-	}
-
-	@Override
-	public HashMap<String, Object> applySrcAndroidModel(Project project) {
-		return null;
-	}
-
-	@Override
-	public void updateSubStatus(Project project) {
-		
-	}
-
-	@Override
-	public List<UploadFile> selectAndroidFileDetail(Project project) {
-		return null;
-	}
-
-	@Override
-	public LicenseMaster getLicenseMaster(LicenseMaster license) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> list, List<String> noticeBinaryList)
-			throws IOException {
-		return null;
-	}
-
-	@Override
-	public Map<String, Map<String, String>> getProjectDownloadExpandInfo(Project param) {
-		return null;
-	}
-
-	@Override
-	public boolean isPermissiveOnlyAndGeneralNotice(String prjId, boolean isAndroidModel) {
-		return false;
-	}
-
-	@Override
-	public void cancelFileDel(Project project) {}
-
-	@Override
-	public List<OssComponents> selectOssComponentsListByComponentIds(OssComponents param) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> registBatWithFileUploadByProject(MultipartHttpServletRequest req, T2File file,
-			BinaryMaster binary) {
-		return null;
-	}
-
-	@Override
-	public void updateProjectMaster(Project project) {}
-
-	@Override
-	public Map<String, Object> getFileInfo(ProjectIdentification identification) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> registBatWithFileUploadByProjectByUrl(HttpServletRequest request, T2File file,
-			BinaryMaster binary, Map<Object, Object> map) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> get3rdMapList(Project project) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getThirdPartyMap(String prjId) {
-		return null;
-	}
-
-	@Override
-	public void updateWithoutVerifyYn(OssNotice ossNotice) {}
-
-	@Override
 	public OssNotice setCheckNotice(Project project) {
 		OssNotice notice = new OssNotice();
 		
 		try {
 			String prjId = project.getPrjId();
-			notice = this.selectOssNoticeOne(prjId);
+			notice = selectOssNoticeOne(prjId);
 			
 			if(isEmpty(notice.getCompanyNameFull()) 
 					&& isEmpty(notice.getDistributionSiteUrl()) 
@@ -1173,111 +962,16 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 		contents = avoidNull(contents, getNoticeHtml(ossNotice));
 		
-		if("binAndroid".equals(contents)) {
-			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
-		} else {
-			return getNoticeVelocityTemplateFile(contents, prjInfo);	
-		}
+		return getNoticeVelocityTemplateFile(contents, prjInfo);
 	}
 
 	@Override
 	public String getNoticeHtml(OssNotice ossNotice) throws IOException {
-		Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());
-		String androidNoticeContents = getAndroidNotice(prjInfo);
-		
-		if(CoConstDef.FLAG_YES.equals(ossNotice.getPreviewOnly()) && !isEmpty(androidNoticeContents)) {
-			return androidNoticeContents;
-		} else {
-			if(!isEmpty(androidNoticeContents)) {
-				return "binAndroid"; 
-			} else {
-				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
-
-				// Convert Map to Apache Velocity Template
-				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
-			}
-		}
-	}
-
-	private String getAndroidNotice(Project prjInfo) throws IOException {
-		// distribution type이 Android 이면서
-		// Android Build Image이외의 OSS List가 포함된 경우는 병합
-		// android build image만 사용된 경우는 notice.html을 반환한다.
-		// 이슈로 인해 android project 기준이 변경이 되었으며 NoticeType이 20인 경우는 전부 Android Project형태를 띄고 있도록 변경이 되었음.
-		Map<String, Object> NoticeInfo = selfCheckMapper.getNoticeTypeReturnMap(prjInfo.getPrjId());
-		
-		if(prjInfo != null 
-				&& CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull((String) NoticeInfo.get("noticeType"), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL)) 
-				&& !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
-			T2File androidFile = fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId());
-			
-			return CommonFunction.getStringFromFile(androidFile.getLogiPath() + "/" + androidFile.getLogiNm());
-		}
-		
-		return null;
-	}
-
-	private boolean getAndroidNoticeVelocityTemplateFile(Project project) {
-		boolean procResult = true;
-		try {
-			// file path and name 설정
-			// 파일 path : <upload_home>/notice/
-			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
-			String filePath = NOTICE_PATH + "/" + project.getPrjId();
-			T2File baseFile = null;
-			String basePath = null;
-			
-			if(isEmpty(project.getSrcAndroidNoticeXmlId()) && !isEmpty(project.getSrcAndroidNoticeFileId())) {
-				baseFile = fileMapper.selectFileInfoById(project.getSrcAndroidNoticeFileId());
-				basePath = CommonFunction.emptyCheckProperty("upload.path", "/upload") + "/" + baseFile.getLogiNm();
-			} else {
-				baseFile = fileMapper.selectFileInfoById(project.getSrcAndroidNoticeXmlId());
-				basePath = baseFile.getLogiPath() + "/" + baseFile.getLogiNm();
-			}
-			
-			// 이전에 생성된 파일은 모두 삭제한다.
-			Path rootPath = Paths.get(filePath);
-			
-			if(rootPath.toFile().exists()) {
-				for(String _fName : rootPath.toFile().list()) {
-					Files.deleteIfExists(rootPath.resolve(_fName));
-					
-					T2File file = new T2File();
-					file.setLogiNm(_fName);
-					file.setLogiPath(filePath);
-					
-					int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
-					
-					if(returnSuccess > 0){
-						log.debug(filePath + "/" + _fName + " is delete success.");
-					}else{
-						log.debug(filePath + "/" + _fName + " is delete failed.");
-					}
-				}
-			}
-			
-			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
-			
-			if(oss.fosslight.util.FileUtil.copyFile(basePath, filePath, fileName)) {
-				// 파일 등록
-				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
-				
-				// project 정보 업데이트
-				Project projectParam = new Project();
-				projectParam.setPrjId(project.getPrjId());
-				projectParam.setNoticeFileId(FileSeq);
-				projectParam.setUseCustomNoticeYn(StringUtil.nvl(project.getUseCustomNoticeYn(),CoConstDef.FLAG_NO));
-				
-				selfCheckMapper.updateNoticeFileInfo(projectParam);
-			} else {
-				procResult = false;
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			procResult = false;
-		}
-		
-		return procResult;
+		Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());		
+		ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
+	
+		// Convert Map to Apache Velocity Template
+		return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));		
 	}
 
 	private boolean getNoticeVelocityTemplateFile(String contents, Project project) {
@@ -1309,9 +1003,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 			}			
 			
-			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
+			String fileName = CommonFunction.getNoticeFileName("Self-Check_"+project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
 			
-			if(oss.fosslight.util.FileUtil.writhFile(filePath, fileName, contents)) {
+			if(oss.fosslight.util.FileUtil.writeFile(filePath, fileName, contents)) {
 				// 파일 등록
 				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
 				
@@ -1334,357 +1028,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		return procResult;
 	}
 
-	@Override
-	@Transactional
-	public void updateStatusWithConfirm(Project project, OssNotice ossNotice) throws Exception {
-		updateProjectStatus(project);
-		
-		boolean makeZipFile = false;
-		String spdxComment = "";
-		
-		// html simple
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
-			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES);
-			ossNotice.setFileType("html");
-			project.setSimpleHtmlFileId(getNoticeTextFileForPreview(ossNotice, true));
-			makeZipFile = true;
-		}
-
-		// text
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
-			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_NO);
-			ossNotice.setFileType("text");
-			project.setNoticeTextFileId(getNoticeTextFileForPreview(ossNotice, true));
-			makeZipFile = true;
-		}
-		
-		// text simple
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
-			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES);
-			ossNotice.setFileType("text");
-			project.setSimpleTextFileId(getNoticeTextFileForPreview(ossNotice, true));
-			makeZipFile = true;
-		}
-		
-		// SPDX
-		String spdxSheetFileId = null;
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
-			spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
-			if(!isEmpty(spdxSheetFileId)) {
-				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
-				Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());
-				String fileName = "spdx_" + CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "");
-				fileName += "."+FilenameUtils.getExtension(spdxFileInfo.getOrigNm());
-				String filePath = NOTICE_PATH + "/" + prjInfo.getPrjId();
-				FileUtil.moveTo(spdxFileInfo.getLogiPath() + "/" + spdxFileInfo.getLogiNm(), filePath, fileName);
-				project.setSpdxSheetFileId(fileService.registFileDownload(filePath, fileName, fileName));
-				spdxSheetFileId = ossNotice.getSpdxSheetFileId();
-				makeZipFile = true;
-			}
-
-		}
-		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
-			if(isEmpty(spdxSheetFileId)) {
-				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
-			}
-			
-			if(!isEmpty(spdxSheetFileId)) {
-				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
-				String sheetFullPath = spdxFileInfo.getLogiPath();
-				
-				if(!sheetFullPath.endsWith("/")) {
-					sheetFullPath += "/";
-				}
-				
-				sheetFullPath += spdxFileInfo.getLogiNm();
-				String targetFileName = FilenameUtils.getBaseName(spdxFileInfo.getLogiNm())+".rdf";
-				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".rdf";
-				String tagFullPath = spdxFileInfo.getLogiPath();
-				
-				if(!tagFullPath.endsWith("/")) {
-					tagFullPath += "/";
-				}
-				
-				tagFullPath += targetFileName;
-				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
-				File spdxRdfFile = new File(tagFullPath);
-				
-				if(spdxRdfFile.exists() && spdxRdfFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
-						spdxComment += "<br>";
-					}
-					
-					spdxComment += getMessage("spdx.rdf.failure"); 
-				}
-				
-				String filePath = NOTICE_PATH + "/" + project.getPrjId();
-				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
-				project.setSpdxRdfFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
-				
-				makeZipFile = true;
-			}
-		}
-		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
-			if(isEmpty(spdxSheetFileId)) {
-				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", project.getPrjId(), EXPORT_TEMPLATE_PATH);
-			}
-			
-			if(!isEmpty(spdxSheetFileId)) {
-				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
-				
-				String sheetFullPath = spdxFileInfo.getLogiPath();
-				
-				if(!sheetFullPath.endsWith("/")) {
-					sheetFullPath += "/";
-				}
-				
-				sheetFullPath += spdxFileInfo.getLogiNm();
-				String targetFileName = FilenameUtils.getBaseName(spdxFileInfo.getLogiNm())+".tag";
-				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".tag";
-				String tagFullPath = spdxFileInfo.getLogiPath();
-				
-				if(!tagFullPath.endsWith("/")) {
-					tagFullPath += "/";
-				}
-				
-				tagFullPath += targetFileName;
-				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
-				
-				File spdxTafFile = new File(tagFullPath);
-				
-				if(spdxTafFile.exists() && spdxTafFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
-						spdxComment += "<br>";
-					}
-					
-					spdxComment += getMessage("spdx.tag.failure"); 
-				}
-				
-				String filePath = NOTICE_PATH + "/" + project.getPrjId();
-				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
-				project.setSpdxTagFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
-				
-				makeZipFile = true;
-			}
-		}
-		
-		// zip파일 생성
-		if(makeZipFile) {
-			String noticeRootDir = NOTICE_PATH;
-			ossNotice.setFileType(".zip");
-			Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());
-			String zipFileName = CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), ".zip");
-			FileUtil.zip(noticeRootDir + "/" + project.getPrjId(), noticeRootDir, zipFileName, "OSS Notice");
-			
-			String zipFileId = fileService.registFileDownload(noticeRootDir, zipFileName, zipFileName);
-			project.setZipFileId(zipFileId);
-		}
-		
-		selfCheckMapper.updateNoticeFileInfoEtc(project); // file info update
-		
-		if(!isEmpty(spdxComment)) { // spdx failure => comment regist
-			try {
-				CommentsHistory commHisBean = new CommentsHistory();
-				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				commHisBean.setReferenceId(project.getPrjId());
-				commHisBean.setContents(spdxComment);
-				commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
-				
-				commentService.registComment(commHisBean);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-	}
-
-	@Override
-	@Transactional
-	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
-	public void updateProjectStatus(Project project) {
-		CoMail mailBean = null;
-		//review 상태로 변경시 reviewer가 설정되어 있지 않은 경우, reviewer도 업데이트 한다.
-		if(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus())) {
-			Project param = new Project();
-			param.setPrjId(project.getPrjId());
-			param = selfCheckMapper.selectProjectMaster2(param);
-			
-			if(isEmpty(param.getReviewer())) {
-				param.setModifier(param.getLoginUserName());
-				param.setReviewer(param.getLoginUserName());
-				
-				selfCheckMapper.updateReviewer(param);
-				
-				mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_REVIEWER_ADD);
-				mailBean.setToIds(new String[] {param.getLoginUserName()});
-				mailBean.setParamPrjId(project.getPrjId());
-			}
-		}
-		
-		// 프로젝트 완료처리
-		if(CoConstDef.FLAG_YES.equals(project.getCompleteYn())) {
-			// Identification N/A 처리
-			// identification sub status
-			// distribution status
-			Project _param = new Project();
-			_param.setPrjId(project.getPrjId());
-			
-			selfCheckMapper.updateProjectStatusWithComplete(_param);
-		} else {
-			//다운로드 허용 플래그
-			project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
-			
-			// 프로젝트 상태 변경
-			selfCheckMapper.updateProjectMaster(project);
-		}
-		
-		if(mailBean != null) {
-			try {
-				CoMailManager.getInstance().sendMail(mailBean);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public History work(Object param) {
-		History h = new History();
-		
-		if(Project.class.equals(param.getClass())) {
-			Project vo = (Project) param;
-			Project prj = getProjectDetail(vo);
-			h.sethKey(prj.getPrjId());
-			h.sethTitle(prj.getPrjName());
-			h.sethType(CoConstDef.EVENT_CODE_PROJECT);
-			h.setModifier(prj.getLoginUserName());
-			h.setModifiedDate(prj.getModifiedDate());
-			h.sethComment("");
-			h.sethData(prj);
-		} else {
-			List<ProjectIdentification> vo = (List<ProjectIdentification>) param;
-			// List<ProjectIdentification> data = getBomListExcel(vo.get(0));
-			Project prj = new Project();
-			// prj.setPrjId(data.get(0).getReferenceId());
-			prj = getProjectDetail(prj);
-			
-			h.sethKey(prj.getPrjId());
-			h.sethTitle(prj.getPrjName());
-			h.sethType(CoConstDef.EVENT_CODE_BOM);
-			h.setModifier(prj.getLoginUserName());
-			h.setModifiedDate(prj.getModifiedDate());
-			h.sethComment("");
-			// h.sethData(data);
-		}
-		
-		return h;
-	}
-
-	@Override
-	public void changePackageFileNameDistributeFormat(String prjId) {
-		// 프로젝트 기본정보 취득
-		Project prjBean = new Project();
-		prjBean.setPrjId(prjId);
-		prjBean = selfCheckMapper.selectProjectMaster2(prjBean);
-		List<String> packageFileIds = new ArrayList<String>();
-		
-		if(!isEmpty(prjBean.getPackageFileId())) {
-			packageFileIds.add(prjBean.getPackageFileId());
-		}
-		
-		if(!isEmpty(prjBean.getPackageFileId2())) {
-			packageFileIds.add(prjBean.getPackageFileId2());
-		}
-		
-		if(!isEmpty(prjBean.getPackageFileId3())) {
-			packageFileIds.add(prjBean.getPackageFileId3());
-		}
-		
-		int fileSeq = 1;
-		
-		for(String packageFileId : packageFileIds){
-			T2File packageFileInfo = new T2File();
-			packageFileInfo.setFileSeq(packageFileId);
-			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
-			
-			if(packageFileInfo != null) {
-				String orgFileName = packageFileInfo.getOrigNm();
-				// Packaging > Confirm시 Packaging 파일명 변경 건
-				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : ""); 
-				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
-				
-				packageFileInfo.setOrigNm(chgFileName);
-				
-				fileMapper.upateOrgFileName(packageFileInfo);
-				
-				// 이력을 남긴다.
-				CommentsHistory commHisBean = new CommentsHistory();
-				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				commHisBean.setReferenceId(prjId);
-				commHisBean.setContents("Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\"  ");
-				
-				commentService.registComment(commHisBean);
-			}
-		}
-	}
-
-	// @Override
-	// public String getNoticeTextFileForPreview(OssNotice ossNotice, boolean isConfirm) throws IOException {
-	// 	Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());
-		
-	// 	return getNoticeVelocityTemplateFileForPreview(getNoticeHtml(ossNotice), prjInfo, ossNotice.getFileType(), ossNotice.getSimpleNoticeFlag(), isConfirm);	
-	// }
-
-	// private String getNoticeVelocityTemplateFileForPreview(String contents, Project project, String fileType, String simpleFlag, boolean isConfirm) throws IOException {
-	// 	String fileId = "";
-	// 	String filePath = "";
-	// 	String fileName = "";
-	// 	// Text 형식 OSS 고지문 생성 시 개행문자 변경
-	// 	// System.getProperty("line.separator") => "\n" => "\r\n" 변경 
-	// 	String line = "\r\n";
-		
-	// 	if(fileType == "text"){
-	// 		fileId = "";
-	// 		filePath = NOTICE_PATH + ( isConfirm ? "/" : "/preview/") + project.getPrjId();
-	// 		fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
-	// 		contents = contents.replace("\n", line).replace(",)", ")").replace("<br>", line).replace("&copy;", "©").replace("&quot;", "\"").replace("&lt;", "<").replace("&gt;", ">").replace("&#39;", "\'");
-	// 	} else {
-	// 		fileId = "";
-	// 		filePath = NOTICE_PATH + ( isConfirm ? "/" : "/preview/") + project.getPrjId();
-	// 		fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
-			
-	// 		// custom edit를 사용하고, packaging confirm 인 경우 이면서 simple인 경우
-	// 		// license text 부분만 다시 변경한다.
-	// 		if(isConfirm && CoConstDef.FLAG_YES.equals(simpleFlag) && CoConstDef.FLAG_YES.equals(project.getUseCustomNoticeYn())) {
-	// 			// 이미 생성된 고지문구 파일의 내용을 가져온다.
-	// 			T2File defaultNoticeFileInfo = fileService.selectFileInfo(project.getNoticeFileId());
-				
-	// 			if(defaultNoticeFileInfo != null) {
-	// 				File noticeFile = new File(defaultNoticeFileInfo.getLogiPath() + "/" + defaultNoticeFileInfo.getLogiNm());
-	// 				if(noticeFile.exists()) {
-	// 					Document doc = Jsoup.parse(noticeFile, "UTF8");
-	// 					Document doc2 = Jsoup.parse(contents);
-						
-	// 					doc.select("body > p.bdTop.license").remove();
-	// 					doc.select("body").append(doc2.select("body > p.bdTop.license").toString());
-	// 					doc.select("body").append(doc2.select("body > ul.bdTop2.license").toString());
-						
-	// 					contents = doc.toString();
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-
-	// 	if(FileUtil.writhFile(filePath, fileName, contents)) {
-	// 		// 파일 등록
-	// 		fileId = fileService.registFileDownload(filePath, fileName, fileName);
-	// 	}
-		
-	// 	return fileId;
-	// }
-
 	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice) {
 		Map<String, Object> model = new HashMap<String, Object>();
 		
@@ -1694,13 +1037,15 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		String prjId = "";
 		String distributeSite = "";
 		int dashSeq = 0;
-		String hideOssVersionYn = ossNotice.getHideOssVersionYn();
+		boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
 		
 		// NETWORK SERVER 여부를 체크한다.
 		
 		Project project = new Project();
 		project.setPrjId(ossNotice.getPrjId());
+		
 		project = selfCheckMapper.getProjectBasicInfo(project);
+		
 		if(project != null){
 			if(isEmpty(prjName)) {
 				prjName = project.getPrjName();
@@ -1718,16 +1063,20 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				distributeSite = project.getDistributeTarget();
 			}
 		}
+		
 		List<OssComponents> ossComponentList = selfCheckMapper.selectVerificationNotice(ossNotice);
+		
 		// TYPE별 구분
-		Map<String, OssComponents> noticeInfo = new LinkedHashMap<>();
-		Map<String, OssComponents> srcInfo = new LinkedHashMap<>();
-		Map<String, OssComponentsLicense> licenseInfo = new LinkedHashMap<>();
+		Map<String, OssComponents> noticeInfo = new HashMap<>();
+		Map<String, OssComponents> srcInfo = new HashMap<>();
+		Map<String, OssComponentsLicense> licenseInfo = new HashMap<>();
+		Map<String, List<String>> componentCopyright = new HashMap<>();
+		Map<String, List<String>> componentAttribution = new HashMap<>();
 		
 		OssComponents ossComponent;
 		
 		for(OssComponents bean : ossComponentList) {
-			String componentKey = (CoConstDef.FLAG_YES.equals(hideOssVersionYn) 
+			String componentKey = (hideOssVersionFlag
 									? bean.getOssName() 
 									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 			
@@ -1764,64 +1113,151 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			} else {
 				ossComponent = bean;
 			}
-					
-			// 라이선스 정보 생성
-			OssComponentsLicense license = new OssComponentsLicense();
-			license.setLicenseId(bean.getLicenseId());
-			license.setLicenseName(bean.getLicenseName());
-			license.setLicenseText(bean.getLicenseText());
-			license.setAttribution(bean.getAttribution());
-			// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
-			// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
-			if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
-				ossComponent.addOssComponentsLicense(license);
-				// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
-				// MULTI LICENSE를 가지는 oss의 개별로 추가된 copyright의 경우, Identification Confirm시에 DB에 업데이트한 정보를 기준으로 추출되기 때문에, preview 단계에서 오류가 발견되어 수정하여도 반영되지 않는다
-				// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
-				// 여기서 oss id와 license id를 이용하여 찾는다.
-				// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
-				 if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
-					 bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
-				
-					 // multi license 추가 copyright
-					 if(!isEmpty(bean.getOssCopyright())) {
-						 String addCopyright = avoidNull(ossComponent.getCopyrightText());
-						
-						 if(!isEmpty(ossComponent.getCopyrightText())) {
-							 addCopyright += "\r\n";
-						 }
-						
-						 addCopyright += bean.getOssCopyright();
-						 ossComponent.setCopyrightText(addCopyright);
-					 }
-				 }
-			}
 			
-			if(isDisclosure) {
-				if(addDisclosure) {
-					srcInfo.replace(componentKey, ossComponent);
+			if(hideOssVersionFlag) {
+				List<String> copyrightList = componentCopyright.containsKey(componentKey) 
+						? (List<String>) componentCopyright.get(componentKey) 
+						: new ArrayList<>();
+						
+				List<String> attributionList = componentAttribution.containsKey(componentKey) 
+						? (List<String>) componentAttribution.get(componentKey) 
+						: new ArrayList<>();
+						
+				if(!isEmpty(bean.getCopyrightText())) {
+					for(String copyright : bean.getCopyrightText().split("\n")) {
+						copyrightList.add(copyright);
+					}
+				}
+				
+				if(!isEmpty(bean.getOssAttribution())) {
+					attributionList.add(bean.getOssAttribution());
+				}
+
+				// 라이선스 정보 생성
+				OssComponentsLicense license = new OssComponentsLicense();
+				license.setLicenseId(bean.getLicenseId());
+				license.setLicenseName(bean.getLicenseName());
+				license.setLicenseText(bean.getLicenseText());
+				license.setAttribution(bean.getAttribution());
+
+				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+					ossComponent.addOssComponentsLicense(license);
+				}
+				
+
+				String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
+				
+				// multi license 추가 copyright
+				if(!isEmpty(ossCopyright)) {
+					for(String copyright : ossCopyright.split("\n")) {
+						copyrightList.add(copyright);
+					}
+				}
+				
+				
+				// 중복제거
+				copyrightList = copyrightList.stream()
+												.filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase()))
+												.collect(Collectors.toList()); 
+				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
+				componentCopyright.put(componentKey, copyrightList);
+				
+				attributionList = attributionList.stream()
+													.filter(CommonFunction.distinctByKey(a -> avoidNull(a).trim().toUpperCase()))
+													.collect(Collectors.toList()); 
+				ossComponent.setOssAttribution(String.join("\r\n", attributionList));
+				componentAttribution.put(componentKey, attributionList);
+				
+				if(isDisclosure) {
+					if(addDisclosure) {
+						srcInfo.replace(componentKey, ossComponent);
+					} else {
+						srcInfo.put(componentKey, ossComponent);
+					}
 				} else {
-					srcInfo.put(componentKey, ossComponent);
+					if(addNotice) {
+						noticeInfo.replace(componentKey, ossComponent);
+					} else {
+						noticeInfo.put(componentKey, ossComponent);
+					}
+				}
+				
+				if(!licenseInfo.containsKey(license.getLicenseName())) {
+					licenseInfo.put(license.getLicenseName(), license);
 				}
 			} else {
-				if(addNotice) {
-					noticeInfo.replace(componentKey, ossComponent);
+				
+				// 라이선스 정보 생성
+				OssComponentsLicense license = new OssComponentsLicense();
+				license.setLicenseId(bean.getLicenseId());
+				license.setLicenseName(bean.getLicenseName());
+				license.setLicenseText(bean.getLicenseText());
+				license.setAttribution(bean.getAttribution());
+				
+				// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
+				// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
+				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+					ossComponent.addOssComponentsLicense(license);
+					
+					// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
+					// MULTI LICENSE를 가지는 oss의 개별로 추가된 copyright의 경우, Identification Confirm시에 DB에 업데이트한 정보를 기준으로 추출되기 때문에, preview 단계에서 오류가 발견되어 수정하여도 반영되지 않는다
+					// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
+					// 여기서 oss id와 license id를 이용하여 찾는다.
+					// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
+					bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+					
+					// multi license 추가 copyright
+					if(!isEmpty(bean.getOssCopyright())) {
+						String addCopyright = avoidNull(ossComponent.getCopyrightText());
+						
+						if(!isEmpty(ossComponent.getCopyrightText())) {
+							addCopyright += "\r\n";
+						}
+						 
+						addCopyright += bean.getOssCopyright();
+						ossComponent.setCopyrightText(addCopyright);
+					}
+				}
+				
+				if(isDisclosure) {
+					if(addDisclosure) {
+						srcInfo.replace(componentKey, ossComponent);
+					} else {
+						srcInfo.put(componentKey, ossComponent);
+					}
 				} else {
-					noticeInfo.put(componentKey, ossComponent);
+					if(addNotice) {
+						noticeInfo.replace(componentKey, ossComponent);
+					} else {
+						noticeInfo.put(componentKey, ossComponent);
+					}
+				}
+				
+				if(!licenseInfo.containsKey(license.getLicenseName())) {
+					licenseInfo.put(license.getLicenseName(), license);
 				}
 			}
-			
-			if(!licenseInfo.containsKey(license.getLicenseName())) {
-				licenseInfo.put(license.getLicenseName(), license);
+		}
+		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		Set<String> noticeKeyList = noticeInfo.keySet();
+		if(hideOssVersionFlag) {
+			for(String key : noticeKeyList) {
+				if(srcInfo.containsKey(key)) {
+					noticeInfo.remove(key);
+				}
 			}
 		}
+		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
-
+		
 		if(addOssComponentList != null) {
 			for(OssComponents bean : addOssComponentList) {
-				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				String componentKey = (hideOssVersionFlag
+											? bean.getOssName() 
+											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				
 				if("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -1835,7 +1271,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				bean.addOssComponentsLicense(license);
 				
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
+						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
+						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
@@ -1895,7 +1332,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if(!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
-
+			
 			srcList.add(bean);
 		}
 		
@@ -1959,7 +1396,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			distributionSiteUrl = "http://" + distributionSiteUrl;
 		}
 		model.put("noticeType", noticeType);
-		model.put("noticeTitle", CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType()));
+		model.put("noticeTitle", CommonFunction.getNoticeFileName("Self-Check_"+prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType()));
 		model.put("companyNameFull", companyNameFull);
 		model.put("distributionSiteUrl", distributionSiteUrl);
 		model.put("email", email);
@@ -1992,9 +1429,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		}
 
 		if("text".equals(ossNotice.getFileType())){
-			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_NOTICE_TEXT_TEMPLATE));
+			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_SELFCHECK_NOTICE_TEXT_TEMPLATE));
 		} else {
-			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_TEMPLATE));
+			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_SELFCHECK_NOTICE_DEFAULT_TEMPLATE));
 		}
 
 		model.put("addOssComponentList", addOssComponentList);
@@ -2072,39 +1509,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		return ossCopyright;
 	}
-	
-	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
-		String fileName = prjName;
-		
-		if(!isEmpty(prjVersion)) {
-			fileName += "_" + prjVersion;
-		}
-		
-		if(!isEmpty(fileSeq)){
-			fileName += "_" + fileSeq;
-		}
-		
-		// file명에 사용할 수 없는 특수문자 체크
-		if(!FileUtil.isValidFileName(fileName)) {
-			fileName = FileUtil.makeValidFileName(fileName, "_");
-		}
-		
-		String fileExt = FilenameUtils.getExtension(orgFileName);
-		
-		if(orgFileName.toLowerCase().endsWith(".tgz.gz")) {
-			fileExt = "tgz.gz";
-		} else if(orgFileName.toLowerCase().endsWith(".tar.bz2")) {
-			fileExt = "tar.bz2";
-		} else if(orgFileName.toLowerCase().endsWith(".tar.gz")) {
-			fileExt = "tar.gz";
-		}
-		
-		if(fileExt.startsWith(".")) {
-			fileExt = fileExt.substring(1);
-		}
-		
-		return fileName + "." + fileExt;
-	}
 
 	@Override
 	public String getNoticeHtmlFileForPreview(OssNotice ossNotice) throws IOException {
@@ -2116,6 +1520,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	private String getNoticeVelocityTemplateFileForPreview(String contents, Project project, String fileType, String simpleFlag) throws IOException {
 		return getNoticeVelocityTemplateFileForPreview(contents, project, fileType, simpleFlag, false);
 	}
+	
 	private String getNoticeVelocityTemplateFileForPreview(String contents, Project project, String fileType, String simpleFlag, boolean isConfirm) throws IOException {
 		String fileId = "";
 		String filePath = "";
@@ -2126,12 +1531,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		if(fileType == "text"){
 			fileId = "";
 			filePath = NOTICE_PATH + ( isConfirm ? "/" : "/preview/") + project.getPrjId();
-			fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
+			fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName("Self-Check_"+project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
 			contents = contents.replace("\n", line).replace(",)", ")").replace("<br>", line).replace("&copy;", "©").replace("&quot;", "\"").replace("&lt;", "<").replace("&gt;", ">").replace("&#39;", "\'");
 		} else {
 			fileId = "";
 			filePath = NOTICE_PATH + ( isConfirm ? "/" : "/preview/") + project.getPrjId();
-			fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
+			fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName("Self-Check_"+project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
 			
 			// custom edit를 사용하고, packaging confirm 인 경우 이면서 simple인 경우
 			// license text 부분만 다시 변경한다.
@@ -2154,7 +1559,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 			}
 		}
-		if(FileUtil.writhFile(filePath, fileName, contents)) {
+		if(FileUtil.writeFile(filePath, fileName, contents)) {
 			// 파일 등록
 			fileId = fileService.registFileDownload(filePath, fileName, fileName);
 		}
@@ -2174,5 +1579,108 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		return getNoticeVelocityTemplateFileForPreview(getNoticeHtml(ossNotice), prjInfo, ossNotice.getFileType(), ossNotice.getSimpleNoticeFlag(), isConfirm);	
 	}
+	
+	@Override
+	@Transactional
+	public void registOssNotice(OssNotice ossNotice) throws Exception {
+		if(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn())){
+			selfCheckMapper.insertOssNotice(ossNotice);
+		} else {
+			selfCheckMapper.updateOssNotice(ossNotice);
+		}
+	}
+	
+	@Override
+	public List<OssComponents> setMergeGridData(List<OssComponents> gridData) {
+		List<OssComponents> tempData = new ArrayList<OssComponents>();
+		List<OssComponents> resultGridData = new ArrayList<OssComponents>();
+		
+		String groupColumn = "";
 
+		final Comparator<OssComponents> comp = Comparator.comparing((OssComponents o) -> o.getOssName()+"|"+o.getOssVersion());
+		gridData = gridData.stream().sorted(comp).collect(Collectors.toList());
+		
+		for(OssComponents info : gridData) {
+			if(isEmpty(groupColumn)) {
+				groupColumn = info.getOssName() + "-" + info.getOssVersion();
+			}
+						
+			if(groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
+					&& !("-".equals(info.getOssName()) 
+					&& !"NA".equals(info.getLicenseType()))) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
+				tempData.add(info);
+			} else { // 다른 grouping
+				setMergeData(tempData, resultGridData);
+				groupColumn = info.getOssName() + "-" + info.getOssVersion();
+				tempData.clear();
+				
+				tempData.add(info);
+			}
+		}
+		
+		setMergeData(tempData, resultGridData);
+		
+		return resultGridData;
+	}	
+	
+	public static void setMergeData(List<OssComponents> tempData, List<OssComponents> resultGridData){
+		if(tempData.size() > 0) {
+			Collections.sort(tempData, new Comparator<OssComponents>() {
+				@Override
+				public int compare(OssComponents o1, OssComponents o2) {
+					if(o1.getLicenseName().length() >= o2.getLicenseName().length()) {
+						return 1;
+					}else {
+						return -1;
+					}
+				}
+			});
+			
+			OssComponents rtnBean = null;
+			
+			for(OssComponents temp : tempData) {
+				if(rtnBean == null) {
+					rtnBean = temp;
+					
+					continue;
+				}
+				
+				String key = temp.getOssName() + "-" + temp.getLicenseType();
+				
+				if("--NA".equals(key)) {
+					if(!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
+						resultGridData.add(rtnBean);
+						rtnBean = temp;
+						
+						continue;
+					}
+				}
+				
+				for(String licenseName : temp.getLicenseName().split(",")) {
+					boolean equalFlag = false;
+					
+					for(String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
+						if(rtnLicenseName.equals(licenseName)) {
+							equalFlag = true;
+							
+							break;
+						}
+					}
+					
+					if(!equalFlag) {
+						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
+					}
+				}
+			}
+			
+			resultGridData.add(rtnBean);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public History work(Object param) {
+		// 미사용
+		return new History();
+	}
 }

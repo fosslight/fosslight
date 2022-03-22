@@ -3,6 +3,7 @@
 <script type="text/javascript">
 var bomValidMsgData;
 var bomDiffMsgData;
+var bomInfoMsgData;
 var groupBuffer='';
 var _popupOssAutoAnalysis = null;
 var ossAnalysisStatus = "${project.ossAnalysisStatus}";

@@ -371,7 +371,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			
 			if(!isEmpty(contents)) {
 				String filePath = CommonFunction.appendProperty("root.dir", "internal.url.dir.path");
-				FileUtil.writhFile(filePath, fileName, contents);
+				FileUtil.writeFile(filePath, fileName, contents);
 				
 				SuccessType = true;
 			} else {

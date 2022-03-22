@@ -97,6 +97,7 @@ dependencies {
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.2'
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.2'
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.2'
+	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.12.2'
 	implementation group: 'org.codehaus.jackson', name: 'jackson-core-asl', version: '1.9.13'
 	implementation group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.13'
 	implementation group: 'org.json', name: 'json', version: '20210307'
