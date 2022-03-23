@@ -165,6 +165,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<ProjectIdentification> list = null;
+		List<String> unconfirmedLicenseList = new ArrayList<>();
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
 		boolean isLoadFromProject = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefPrjId());
@@ -218,6 +219,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			List<ProjectIdentification> licenseList = selfCheckMapper.identificationSubGrid(param);
 			
 			for(ProjectIdentification licenseBean : licenseList) {
+				if(!unconfirmedLicenseList.contains(avoidNull(licenseBean.getLicenseName()))) {
+					if(isEmpty(licenseBean.getLicenseId())) {
+						unconfirmedLicenseList.add(licenseBean.getLicenseName());
+					}
+				}
+				
 				for(ProjectIdentification bean : list) {
 					if(licenseBean.getComponentId().equals(bean.getComponentId())) {
 						// 수정가능 여부 초기설정
@@ -372,6 +379,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		map.put("subData", subMap);
 		map.put("mainData", list);
+		map.put("unconfirmedLicenseList", unconfirmedLicenseList);
 
 		return map;
 	}
