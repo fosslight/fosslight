@@ -672,14 +672,7 @@ public class SelfCheckController extends CoTopComponent {
 		try {
 			selfCheckService.registOssNotice(ossNotice);
 			
-			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
-			String noticeFileId = prjMasterInfo.getNoticeFileId();
-			
-			if(isEmpty(noticeFileId)) {
-				downloadId = selfCheckService.getNoticeHtmlFileForPreview(ossNotice);
-			} else {
-				downloadId = noticeFileId;
-			}
+			downloadId = selfCheckService.getNoticeHtmlFileForPreview(ossNotice);
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -711,13 +704,7 @@ public class SelfCheckController extends CoTopComponent {
 		try {
 			selfCheckService.registOssNotice(ossNotice);
 			
-			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
-			
-			if(!isEmpty(prjMasterInfo.getNoticeTextFileId())) {
-				downloadId = prjMasterInfo.getNoticeTextFileId();
-			} else {
-				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
-			}
+			downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -738,13 +725,7 @@ public class SelfCheckController extends CoTopComponent {
 		try {
 			selfCheckService.registOssNotice(ossNotice);
 			
-			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
-			
-			if(!isEmpty(prjMasterInfo.getSimpleHtmlFileId())) {
-				downloadId = prjMasterInfo.getSimpleHtmlFileId();
-			} else {
-				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
-			}
+			downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -764,13 +745,7 @@ public class SelfCheckController extends CoTopComponent {
 		try {
 			selfCheckService.registOssNotice(ossNotice);
 			
-			Project prjMasterInfo = selfCheckService.getProjectBasicInfo(ossNotice.getPrjId());
-			
-			if(!isEmpty(prjMasterInfo.getSimpleTextFileId())) {
-				downloadId = prjMasterInfo.getSimpleTextFileId();
-			} else {
-				downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
-			}
+			downloadId = selfCheckService.getNoticeTextFileForPreview(ossNotice);
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
