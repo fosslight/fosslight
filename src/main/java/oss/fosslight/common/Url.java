@@ -19,7 +19,7 @@ public final class Url {
 		public static final String LOGIN_JSP = TILES + PATH + "/login";
 		
 		public static final String LOGIN_EXPIRED = PATH + "/loginExpired";
-		public static final String SESSION_SAVE_KEY_VAL = PATH + "KeyValSave/{sesKey}/{sesVal}";
+		public static final String SESSION_SAVE_KEY_VAL = PATH + "KeyValSave/{sesKey}/**";
 	}
 	
 	/**

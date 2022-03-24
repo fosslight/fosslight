@@ -13,9 +13,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.HandlerMapping;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
@@ -61,7 +63,10 @@ public class SessionController extends CoTopComponent{
 	}
 	
 	@GetMapping(value=SESSION.SESSION_SAVE_KEY_VAL, produces = "text/html; charset=utf-8")
-	public @ResponseBody ResponseEntity<Object> sessionKeyValSave(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String sesKey, @PathVariable String sesVal){
+	public @ResponseBody ResponseEntity<Object> sessionKeyValSave(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String sesKey){
+		final String path = req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
+	    final String bestMatchingPattern = req.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
+	    String sesVal = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
 		
 		putSessionObject(CoConstDef.SESSION_KEY_PREFIX_DEFAULT_SEARCHVALUE + sesKey, sesVal);
 		return makeJsonResponseHeader();

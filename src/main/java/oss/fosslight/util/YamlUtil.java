@@ -158,17 +158,14 @@ public class YamlUtil extends CoTopComponent {
 	private static List<Map<String, Object>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
 		List<Map<String, Object>> result = new ArrayList<>();
 		
-		for(ProjectIdentification bean : list) {
-			// version이 null인 경우 yaml로 출력하지 않음.
-			if(isEmpty(bean.getOssVersion())) {
-				continue;
-			}
-			
+		for(ProjectIdentification bean : list) {			
 			LinkedHashMap<String, Object> yamlFormat = new LinkedHashMap<>();
 				
 				yamlFormat.put("name", 		startCharCheck(bean.getOssName()));
 				
+			if(!isEmpty(bean.getOssVersion())) {
 				yamlFormat.put("version", 	startCharCheck(bean.getOssVersion()));
+			}
 			
 			if(!isEmpty(bean.getDownloadLocation())) {
 				yamlFormat.put("source", 	startCharCheck(bean.getDownloadLocation()));
@@ -213,7 +210,7 @@ public class YamlUtil extends CoTopComponent {
 	public static String startCharCheck(String value) {
 		String specialChar = ":{}[],&*#?|-<>=!%@\\";
 		
-		return specialChar.indexOf(value.charAt(0)) > -1 ? ("'" + value + "'") : value;
+		return !isEmpty(value) && specialChar.indexOf(value.charAt(0)) > -1 ? ("'" + value + "'") : value;
 	}
 	
 	public static String convertJSON2YAML(String jsonStr) {
