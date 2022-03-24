@@ -617,6 +617,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .ui-jqgrid .ui-jqgrid-bdiv {margin-bottom:-1px;}
 .ui-jqgrid tr.jqgrow td {font-weight: normal; overflow: hidden; white-space: nowrap; border-bottom-width: 1px; border-bottom-color: inherit; border-bottom-style: solid;height:29px;padding:0 4px;font-family:Tahoma;}
 .ui-jqgrid tr.jqgrow td textarea {margin:2px 0 0 ;}
+.ui-jqgrid tr.jqgrow td[aria-describedby="list_prjName"] {cursor: pointer;}
 .ui-jqgrid .ui-jqgrid-pager {/*height:35px;*/padding-bottom:5px !important;}
 .ui-jqgrid .ui-pg-table {margin-top:-1px;}
 .ui-jqgrid .ui-pg-table td {height:30px;}
