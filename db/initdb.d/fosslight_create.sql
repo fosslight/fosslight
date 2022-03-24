@@ -2613,11 +2613,13 @@ FLUSH PRIVILEGES;
 
 
 /* `search` table : save data related search info  */
-CREATE TABLE `fosslight`.`search` (
-`filter` longtext DEFAULT NULL,
-`search_type` varchar(20),
-`created_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-`updated_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-`user_id` VARCHAR(45) NULL,
-PRIMARY KEY (`user_id`, `search_type`)
-);
+DROP TABLE IF EXISTS `SEARCH`;
+CREATE TABLE IF NOT EXISTS `SEARCH` (
+  `FILTER` longtext DEFAULT NULL,
+  `SEARCH_TYPE` varchar(20) NOT NULL DEFAULT '',
+  `CREATED_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `UPDATED_TIME` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `USER_ID` varchar(45) NOT NULL DEFAULT '',
+  PRIMARY KEY (`USER_ID`,`SEARCH_TYPE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

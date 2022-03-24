@@ -219,17 +219,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			List<ProjectIdentification> licenseList = selfCheckMapper.identificationSubGrid(param);
 			
 			for(ProjectIdentification licenseBean : licenseList) {
-				if(!unconfirmedLicenseList.contains(avoidNull(licenseBean.getLicenseName()))) {
-					if(isEmpty(licenseBean.getLicenseId())) {
-						unconfirmedLicenseList.add(licenseBean.getLicenseName());
-					}
-				}
-				
 				for(ProjectIdentification bean : list) {
 					if(licenseBean.getComponentId().equals(bean.getComponentId())) {
 						// 수정가능 여부 초기설정
 						licenseBean.setEditable(CoConstDef.FLAG_YES);
 						bean.addComponentLicenseList(licenseBean);
+						
+						if(!unconfirmedLicenseList.contains(avoidNull(licenseBean.getLicenseName()))) {
+							if(CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) 
+									&& isEmpty(licenseBean.getLicenseId())) {
+								unconfirmedLicenseList.add(licenseBean.getLicenseName());
+							}
+						}
+						
 						break;
 					}
 				}
@@ -974,10 +976,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	}
 
 	@Override
-	public String getNoticeHtml(OssNotice ossNotice) throws IOException {
-		Project prjInfo = getProjectBasicInfo(ossNotice.getPrjId());		
-		ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
-	
+	public String getNoticeHtml(OssNotice ossNotice) throws IOException {	
 		// Convert Map to Apache Velocity Template
 		return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));		
 	}
