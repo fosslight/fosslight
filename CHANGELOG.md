@@ -1,5 +1,29 @@
 # Changelog
 
+## v1.3.0 (25/03/2022)
+## 🚀 Features
+
+- Fix the bug where unregistered OSS cannot be searched by CVE-ID. @FOSSLight-dev  (#440)
+- Register OSS in bulk by uploading Excel @doggai10 (#418)
+
+## 🐛 Hotfixes
+
+- Fix the bug where License, OSS, Project, and 3rd Party List could not be loaded. @soimkim (#446)
+- Fix the bug where unregistered OSS cannot be searched by CVE-ID. @FOSSLight-dev  (#440)
+
+## 🔧 Maintenance
+
+- Display pointer when mouse hovers on project name @qkrdmstlr3 (#444)
+- Self-check > Notice tab > Don't print unconfirmed licenses @FOSSLight-dev (#445)
+- Change the character that separates multiple nicknames from `\n` to `,` @soimkim (#437)
+- OSS Bulk > Separate the function to check header column @soimkim (#439)
+- OSS Bulk > Separate the function to read data by column @soimkim (#438)
+- Show up to 5 Vulnerability in OSS details @FOSSLight-dev (#436)
+- Add Sample template to OSS Bulk Registration @soimkim (#435)
+- Do not load if OSS Name or Declared License is null in OSS Bulk @FOSSLight-dev  (#434)
+
+---
+
 ## v1.2.34 (18/03/2022)
 ## 🚀 Features
 
@@ -528,21 +552,3 @@
 ## 🐛 Hotfixes
 
 - Update Oss Sync Function @FOSSLight-dev (#117)
-
----
-
-## v1.2.5 (09/09/2021)
-## Changes
-## 🚀 Features
-
-- Recommend the OSS Name according to the OSS Naming Rule @namkyu1999 (#82)
-
-## 🐛 Hotfixes
-
-- Update OSS Sync Function @FOSSLight-dev (#117)
-- Exclude from 'Check OSS Name' unless it is an 'Unconfirmed open source' @soimkim (#116)
-
-## 🔧 Maintenance
-
-- Delete "Need check" in the Obligation Type from the search box in the License List @Lee-JaeHyuk (#101)
-- Translate some korean comments to english @wkdalsgh192 (#60)
