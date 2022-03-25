@@ -29,12 +29,12 @@ services:
          - ./web-data:/data/fosslight
        environment:
          TZ: Asia/Seoul
-       command: sh -c "./wait-for db:3306 -t 120 && java -jar FOSSLight.war --root.dir=/data/fosslight 
-               --server.port=8180
-               --spring.datasource.url=db:3306/fosslight
-               --spring.datasource.username=fosslight
-               --spring.datasource.password=fosslight
-               --logging.path=/data/fosslight/logs
+       command: sh -c "./wait-for db:3306 -t 120 && java -jar FOSSLight.war --root.dir=${ROOT_DIR:-/data/fosslight}
+               --server.port=${SERVICE_PORT:-8180}
+               --spring.datasource.url=${DATABASE_SOURCE:-db:3306/fosslight}
+               --spring.datasource.username=${DATABASE_USER:-fosslight}
+               --spring.datasource.password=${DATABASE_PASSWORD:-fosslight}
+               --logging.path=${LOGGING_PATH:-/data/fosslight/logs}
                --verify.bin.path=./verify
                --export.template.path=./template"
     mail:
