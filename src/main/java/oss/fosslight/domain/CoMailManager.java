@@ -13,8 +13,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -242,7 +244,49 @@ public class CoMailManager extends CoTopComponent {
     			convertDataMap.put("vulnerability_prj_recalc_oss_info", _reMakeContents);
     			
     		}
-
+    		
+    		// ldap Search시 사용자 정보가 변경된 경우
+    		if(CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO.equals(bean.getMsgType()) && bean.getParamList() != null) {
+    			List<Map<String, Object>> userList = bean.getParamList();
+    			List<T2Users> changedUserList = new ArrayList<>();
+    			List<T2Users> retireeUserList = new ArrayList<>();
+    			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    	        Calendar c1 = Calendar.getInstance();
+    	        String strToday = sdf.format(c1.getTime());
+    	        
+    			for(Map<String, Object> userInfo : userList) {
+    				T2Users t2user = new T2Users();
+    				t2user.setUserId((String) userInfo.get("userId"));
+    				t2user.setModifiedDate(strToday);
+    				
+    				// 정보 변경 사용자
+    				if(userInfo.containsKey("beforeUserName")) {
+    					String userName  = (String) userInfo.get("beforeUserName");
+    						   userName += " -> ";
+    						   userName += (String) userInfo.get("afterUserName");
+    						   
+    					t2user.setUserName(userName);
+    					
+    					changedUserList.add(t2user);
+    				}
+    				// 퇴직자
+    				else {
+    					t2user.setUserName((String) userInfo.get("afterUserName"));
+    					String useYn  = (String) userInfo.get("beforeUseYn");
+		    				   useYn += " -> ";
+		    				   useYn += (String) userInfo.get("afterUseYn");
+		    				   
+    					t2user.setUseYn(useYn);
+    					
+    					retireeUserList.add(t2user);
+    				}
+    				
+    			}
+    			
+    			convertDataMap.put("changed_user_info", changedUserList);
+    			convertDataMap.put("retiree_user_info", retireeUserList);
+    		}
+    		
     		// Common
     		{
         		if(isEmpty(bean.getCreationUserId())) {
@@ -662,6 +706,7 @@ public class CoMailManager extends CoTopComponent {
     			break;
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
+    		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
     			bean.setToIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
