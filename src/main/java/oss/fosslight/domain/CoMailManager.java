@@ -283,8 +283,14 @@ public class CoMailManager extends CoTopComponent {
     				
     			}
     			
-    			convertDataMap.put("changed_user_info", changedUserList);
-    			convertDataMap.put("retiree_user_info", retireeUserList);
+    			if(changedUserList.size() > 0) {
+    				convertDataMap.put("changed_user_info", changedUserList);
+    			}
+    			
+    			if(retireeUserList.size() > 0) {
+    				convertDataMap.put("retiree_user_info", retireeUserList);
+    			}
+    			
     		}
     		
     		// Common
