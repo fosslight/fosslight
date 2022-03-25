@@ -1764,6 +1764,7 @@
 			, DOWNLOAD_LOCATION = #{downloadLocation}
 			, COPYRIGHT = #{copyrightText}
 			, EXCLUDE_YN = #{excludeYn}
+			, OBLIGATION_TYPE = #{obligationType}
 		WHERE
 			REFERENCE_ID = #{referenceId}
 			AND REFERENCE_DIV = #{referenceDiv}
@@ -1824,9 +1825,7 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batScore)">
 						, BAT_SCORE
 						</if>
-						<if test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
 						, OBLIGATION_TYPE
-						</if>
 					)
 			VALUES
 					(
@@ -1879,9 +1878,7 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(batScore)">
 						, #{batScore}
 						</if>
-						<if test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
 						, #{obligationType}
-						</if>
 					)
 	</insert>
 	
@@ -2517,7 +2514,7 @@
 			, T2.FILE_PATH
 			, T5.LICENSE_TYPE
 		FROM PRE_PROJECT_MASTER T1 
-			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10'
+			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.EXCLUDE_YN = 'N' AND T2.OSS_ID IS NULL
 			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
 			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
