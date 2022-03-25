@@ -3002,7 +3002,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			inFile= new FileInputStream(new File(downloadpath+"/OssCheckList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
-			int sheetIdx = wb.getSheetIndex("OSS List");
+			int sheetIdx = wb.getSheetIndex("Open Source Software List");
 			Sheet sheet1 = wb.getSheetAt(sheetIdx); // OSS List sheet
 			
 			//OSS-List-[3rd ID]-[3rd Party Name]-[3rd Party Software Name]-[3rd Party Software Version]-[Date].xlsx
