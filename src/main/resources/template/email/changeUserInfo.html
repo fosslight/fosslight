@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html lang="ko">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<style>
+			.marker{background-color: Yellow;}
+		</style>
+		<title>FOSSLight Hub</title>
+	</head>
+	<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td width="60" style="background:#f9f9f9"></td>
+				<td>
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr> 
+							<td colspan="3" height="25" style="background:#c00c3f">
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+							</td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+							#if( $contentsTitle )
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
+							#end
+							#if( $contentsSubTitle )
+								<p style="font-size:12px;">$contentsSubTitle</p>
+							#end
+								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; User information &raquo;</h2>
+							#if( $changed_user_info )
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<tr>
+										<th style="padding:5px;background:#f0f0f0;">ID</th>
+										<th style="padding:5px;background:#f0f0f0;">Name Changed</th>
+										<th style="padding:5px;background:#f0f0f0;">Modified date</th>
+									</tr>
+									#foreach( $userInfo in $changed_user_info )
+									<tr>
+										<td style="padding:5px;">$!userInfo.userId</td>
+										<td style="padding:5px;">$!userInfo.userName</td>
+										<td style="padding:5px;">$!userInfo.modifiedDate</td>
+									</tr>
+									#end
+								</table>
+							#end
+							<br />
+							#if( $retiree_user_info )
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<tr>
+										<th style="padding:5px;background:#f0f0f0;">ID</th>
+										<th style="padding:5px;background:#f0f0f0;">Name</th>
+										<th style="padding:5px;background:#f0f0f0;">Use YN</th>
+										<th style="padding:5px;background:#f0f0f0;">Modified date</th>
+									</tr>
+									#foreach( $userInfo in $retiree_user_info )
+									<tr>
+										<td style="padding:5px;">$!userInfo.userId</td>
+										<td style="padding:5px;">$!userInfo.userName</td>
+										<td style="padding:5px;">$!userInfo.useYn</td>
+										<td style="padding:5px;">$!userInfo.modifiedDate</td>
+									</tr>
+									#end
+								</table>
+							#end
+								<br />
+								<div style="margin:20px 0;border:1px dashed #666;"></div>
+								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
+								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr>
+					</table>
+				</td>
+				<td width="60" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+		</table>
+		
+	</body>
+</html>

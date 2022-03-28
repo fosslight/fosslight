@@ -131,6 +131,7 @@ public class CoMail extends ComBean {
 	
 	private Map<String, OssMaster> paramOssInfoMap;
 	
+	private List<Map<String, Object>> paramList;
 	
 	/**  Informations *. */
 	
@@ -955,6 +956,14 @@ public class CoMail extends ComBean {
 		this.paramOssInfoMap = paramOssInfoMap;
 	}
 
+	public List<Map<String, Object>> getParamList() {
+		return paramList;
+	}
+
+	public void setParamList(List<Map<String, Object>> paramList) {
+		this.paramList = paramList;
+	}
+	
 	public String getBinaryCommitResult() {
 		return binaryCommitResult;
 	}

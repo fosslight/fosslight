@@ -552,6 +552,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
 
+	/** changed USER Info */
+	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";
+	
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED = "66"; // OSDD에서 DESCRIPTION이 삭제된 경우

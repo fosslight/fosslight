@@ -243,7 +243,9 @@
 	        <if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
 	             AND T1.DIVISION LIKE CONCAT('%',#{division},'%')
 	        </if>
-
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(useYn)">
+	             AND T1.USE_YN = #{useYn}
+	        </if>
 	    ORDER BY DIVISION, USER_NAME
     </select>
 	
