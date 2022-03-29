@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -170,7 +171,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
 			String ossVersion = oss.getOssVersion();
-			String currentLicense = oss.getLicenseName();
+			String currentLicense = getLicenseNameSort(oss.getLicenseName());
 			String checkedLicense = "";
 
 			// Search Priority 1. find by oss name and oss version
@@ -338,6 +339,22 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return resMap;
 	}
 
+	private String getLicenseNameSort(String licenseName) {
+    	String sortedValue = "";
+		
+		String splitLicenseNm[] = licenseName.split(",");
+		Arrays.sort(splitLicenseNm);
+		
+		for (int i=0; i< splitLicenseNm.length; i++) {
+			sortedValue += splitLicenseNm[i];
+			if (i<splitLicenseNm.length-1) {
+				sortedValue += ",";
+			}
+		}
+		
+		return sortedValue;
+    }
+	
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
 		String checkedLicense;
 		try {
@@ -425,6 +442,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			licenses = projectMapper.getLicenses(prjOssMaster);
+			licenses.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
 			checkLicense += makeLicenseExpression(licenses);
 		}
 		return checkLicense;
