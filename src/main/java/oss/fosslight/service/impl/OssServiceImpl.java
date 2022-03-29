@@ -1762,11 +1762,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 						} else {
-							OssMaster ossBean = new OssMaster();
-							ossBean.setOssName(bean.getOssName());
-							if(checkExistsOssByname(ossBean) > 0) {
-								continue;
-							}
+//							OssMaster ossBean = new OssMaster();
+//							ossBean.setOssName(bean.getOssName());
+//							if(checkExistsOssByname(ossBean) > 0) {
+//								continue;
+//							}
 
 							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
 
