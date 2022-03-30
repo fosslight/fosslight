@@ -2186,7 +2186,9 @@
 									</foreach>
 								</if>
 				 				)
+				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 				 		   AND VERSION = #{ossVersion}
+				 		</if>
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
 				    ON DATA.CVE_ID = CVE.CVE_ID
