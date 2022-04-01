@@ -4264,7 +4264,10 @@ public class CommonFunction extends CoTopComponent {
 		
 		if(list != null) {
 			for(ProjectIdentification bean : list) {
-				if("-".equals(bean.getOssName()) && isEmpty(bean.getObligationType()) && !checkIncludeUnconfirmedLicense(bean.getComponentLicenseList())) {
+				if("-".equals(bean.getOssName())  
+						&& !unclearObligationList.contains(bean.getGridId()) 
+						&& isEmpty(bean.getObligationType()) 
+						&& !checkIncludeUnconfirmedLicense(bean.getComponentLicenseList())) {
 					String obligationType = CommonFunction.getObligationTypeWithSelectedLicense(bean);
 					if(!isEmpty(obligationType)) {
 						bean.setObligationType(obligationType);
