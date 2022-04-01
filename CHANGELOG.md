@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.1 (01/04/2022)
+## 🚀 Features
+
+- Load user information from LDAP @FOSSLight-dev (#456)
+- Adopt docker-compose Variable substitution @darjeeling (#453)
+
+## 🐛 Hotfixes
+
+- Fix bugs in `Check Licens`e and `Check OSS Name`. @FOSSLight-dev (#463)
+
+## 🔧 Maintenance
+
+- Update OSS Type Mark > VersionDiff Service Transactional Declaration @FOSSLight-dev (#465)
+- Change the sheet name of the 3rd party checklist @soimkim (#455)
+
+---
+
 ## v1.3.0 (25/03/2022)
 ## 🚀 Features
 
@@ -533,22 +550,3 @@
 
 - unquoted port mapping may be interpreted as a base-60 value @riyenas0925 (#139)
 - Initialize test code setting @astrod (#135)
-
----
-
-## v1.2.6 (17/09/2021)
-## Changes
-## 🚀 Features
-
-- Update warning message condition @FOSSLight-dev (#132)
-- Add function to save NVD Feed Data from 2002 @FOSSLight-dev (#118)
-- Search website regardless of http://, https://, www. @doggai10 (#114)
-
-## 🔧 Maintenance
-- Add alert when the number of OSS versions is 1 @riyenas0925 (#123)
-- Add line separator between notice intro and OSS list @wkdalsgh192 (#121)
-- Add user guide and restriction to license popup @riyenas0925 (#125)
-
-## 🐛 Hotfixes
-
-- Update Oss Sync Function @FOSSLight-dev (#117)
