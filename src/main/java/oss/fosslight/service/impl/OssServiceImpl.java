@@ -2682,7 +2682,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return bean;
 	}
 
+	@Transactional
 	@Override
+	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public void updateVersionDiff(OssMaster ossMaster) {
 		Map<String, OssMaster> updateOSSLicenseMap = new HashMap<>();
 		OssMaster param = new OssMaster();
