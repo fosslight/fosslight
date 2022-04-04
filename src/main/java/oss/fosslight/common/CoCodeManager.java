@@ -635,6 +635,20 @@ public class CoCodeManager extends CoTopComponent {
         }
     }
 	
+    public static String genOptionCheckbox(String s, String s1) {
+   	 	return genOptionCheckbox(s, s1, -1);
+    }
+    
+	private static String genOptionCheckbox(String s, String s1, int i) {
+		CoCode code = getCodeInstance(s);
+        
+        if (code != null) {
+            return code.createOptionCheckboxString(s, s1, i);
+        } else {
+            return null;
+        }
+	}
+
 	public static String genRadio(String s, String distributionType, String networkServerType) {
         CoCode code = getCodeInstance(s);
         

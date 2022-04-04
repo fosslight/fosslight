@@ -69,7 +69,12 @@ public class StatisticsController extends CoTopComponent{
 		Statistics stat = new Statistics();
 		stat.setStartDate(startDate);
 		stat.setEndDate(endDate);
-		stat.setDivisionNo(divisionNo);
+		if(divisionNo.contains(",")) {
+			String[] divisionNums = divisionNo.split(",");
+			stat.setDivisionNums(divisionNums);
+		}else {
+			stat.setDivisionNo(divisionNo);
+		}
 		stat.setPieSize(pieSize);
 		stat.setChartType(chartType);
 		stat.setIsRawData(isRawData);
