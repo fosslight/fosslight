@@ -1607,6 +1607,7 @@
 			} else {
 				$("#complete").hide(); 
 				$("#copy").hide();
+                $("#osType").trigger("change");
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 			}

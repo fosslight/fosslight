@@ -369,6 +369,9 @@ public class CoConstDef {
 	
 	/** OS 타입 코드 - 213 */
 	public static final String CD_OS_TYPE = "213";
+	public static final String CD_OS_TYPE_LINUX = "100";
+	public static final String CD_OS_TYPE_WINDOWS = "200";
+	public static final String CD_OS_TYPE_MACOS = "300";
 	public static final String CD_OS_TYPE_ETC = "999";
 	/** Status of Distribute */
 	public static final String CD_DISTRIBUTE_STATUS		= "215";
