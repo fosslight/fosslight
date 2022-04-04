@@ -492,12 +492,12 @@ public class CoCode {
             
             if(s1.equals("oss")) {
             	stringbuffer.append("<li><input type='checkbox' name='mostUsedOssChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
-                .append(" id='checkbox_").append(codedtl.cdDtlNo).append("' />")
-                .append("<label for='checkbox_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
+                .append(" id='checkboxOss_").append(codedtl.cdDtlNo).append("' />")
+                .append("<label for='checkboxOss_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
             } else {
             	stringbuffer.append("<li><input type='checkbox' name='mostUsedLicenseChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
-                .append(" id='checkbox_").append(codedtl.cdDtlNo).append("' />")
-                .append("<label for='checkbox_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
+                .append(" id='checkboxLicense_").append(codedtl.cdDtlNo).append("' />")
+                .append("<label for='checkboxLicense_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
             }
         }
 
