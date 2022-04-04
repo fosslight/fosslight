@@ -525,7 +525,12 @@
 		 WHERE CHART_TYPE = #{chartType}
 		   AND DATE_FORMAT(CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNo)">
-		   AND DIV_NO = #{divisionNo}
+	 	   AND DIV_NO = #{divisionNo}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(divisionNums)">
+		 	<foreach collection="divisionNums" item="_divisionNums" open="AND DIV_NO IN (" close=")" separator=",">
+		 		#{_divisionNums}
+		 	</foreach>
 		 </if>
 		 GROUP BY COMPONENT_NAME
 		 ORDER BY COLUMN_CNT DESC

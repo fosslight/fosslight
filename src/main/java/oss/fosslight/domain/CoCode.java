@@ -477,4 +477,30 @@ public class CoCode {
 
         return stringbuffer.toString();
     }
+
+	public String createOptionCheckboxString(String s, String s1, int i) {
+		StringBuffer stringbuffer = new StringBuffer();
+        int j = 0;
+        for(int k = codeDtls.size(); j < k; j++)
+        {
+            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
+            
+            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
+            {
+            	continue;
+            }
+            
+            if(s1.equals("oss")) {
+            	stringbuffer.append("<li><input type='checkbox' name='mostUsedOssChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
+                .append(" id='checkbox_").append(codedtl.cdDtlNo).append("' />")
+                .append("<label for='checkbox_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
+            } else {
+            	stringbuffer.append("<li><input type='checkbox' name='mostUsedLicenseChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
+                .append(" id='checkbox_").append(codedtl.cdDtlNo).append("' />")
+                .append("<label for='checkbox_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
+            }
+        }
+
+        return stringbuffer.toString();
+	}
 }

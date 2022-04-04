@@ -32,6 +32,7 @@ public class Statistics extends ComBean implements Serializable {
 	private String divisionNm;
 	private int divisionOrder;
 	private String titleNm;
+	private String[] divisionNums;
 	
 	private int category0Cnt = -1;
 	private int category1Cnt = -1;
