@@ -1226,6 +1226,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			log.error("FAILED TO REMOVE OSS DATA.", e);
 		}
 		
+		updateLicenseDivDetail(ossMaster);
+		
 		return result;
 	}
 
@@ -1378,21 +1380,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			boolean multiLicenseFlag = false;
 			boolean dualLicenseFlag = false;
 			boolean vDiffFlag = false;
-			
-			if(CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
-				for(OssLicense license : master.getOssLicenses()) {
-					// AND 조건이 존재할 경우 MULTI
-					// OR 조건이 존재ㅏㄹ 경우 DUAL
-					if("AND".equalsIgnoreCase(license.getOssLicenseComb())) {
-						multiLicenseFlag = true;
-					}
-					
-					if("OR".equalsIgnoreCase(license.getOssLicenseComb())) {
-						dualLicenseFlag = true;
-					}
-				}
-			}
 
+			// Update multi / dual flag
+			OssMaster updateParam = new OssMaster();
+			
 			// version 에 따라 라이선스가 달라지는지 체크 (v-diff)
 			OssMaster param = new OssMaster();
 			List<String> ossNameList = new ArrayList<>();
@@ -1407,34 +1398,95 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			if(ossMap != null && ossMap.size() > 1) {
 				// 비교대상 key룰 먼저 설정
-				String _key = makeLicenseIdKeyStr(master.getOssLicenses());
+				List<List<OssLicense>> andCombLicenseListStandard = new ArrayList<>();
+				List<List<OssLicense>> andCombLicenseListCompare = new ArrayList<>();
+				
+				int idx = 0;
 				
 				for(OssMaster _bean : ossMap.values()) {
 					if(!isEmpty(_bean.getOssId())) {
-						ossIdListByName.add(_bean.getOssId());
-						
-						if(!vDiffFlag && _bean.getOssLicenses() != null) {
-							if(!_key.equals(makeLicenseIdKeyStr(_bean.getOssLicenses()))) {
-								vDiffFlag = true;
+						for(OssLicense license : _bean.getOssLicenses()) {
+							if("AND".equalsIgnoreCase(license.getOssLicenseComb())) {
+								multiLicenseFlag = true;
+							}
+							
+							if("OR".equalsIgnoreCase(license.getOssLicenseComb())) {
+								dualLicenseFlag = true;
 							}
 						}
+						
+						updateParam.setOssId(_bean.getOssId());
+						updateParam.setMultiLicenseFlag(multiLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+						updateParam.setDualLicenseFlag(dualLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+						
+						ossMapper.updateOssLicenseFlag(updateParam);
+						
+						updateParam = new OssMaster();
+						multiLicenseFlag = false;
+						dualLicenseFlag = false;
+						
+						ossIdListByName.add(_bean.getOssId());
+						
+						if(idx == 0) {
+							andCombLicenseListStandard = makeLicenseKeyList(_bean.getOssLicenses());
+						}else {
+							if(!vDiffFlag && _bean.getOssLicenses() != null) {
+								andCombLicenseListCompare = makeLicenseKeyList(_bean.getOssLicenses());
+								
+								if(andCombLicenseListStandard.size() != andCombLicenseListCompare.size()) {
+									vDiffFlag = true;
+								}else {
+									if(!checkLicenseListVersionDiff(andCombLicenseListStandard, andCombLicenseListCompare)) {
+										vDiffFlag = true;
+									}
+								}
+								
+								andCombLicenseListCompare = new ArrayList<>();
+							}
+						}
+						
+						idx++;
 					}
 				}
 			}
 			
-			//multi / dual 여부 flag 업데이트
-			OssMaster updateParam = new OssMaster();
-			updateParam.setOssId(master.getOssId());
-			updateParam.setMultiLicenseFlag(multiLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-			updateParam.setDualLicenseFlag(dualLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-			
-			ossMapper.updateOssLicenseFlag(updateParam);
-			
+			ossIdListByName = ossIdListByName.stream().distinct().collect(Collectors.toList());
 			updateParam.setOssIdList(ossIdListByName);
 			updateParam.setVersionDiffFlag(vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 			
-			ossMapper.updateOssLicenseVDiffFlag(updateParam);		
+			ossMapper.updateOssLicenseVDiffFlag(updateParam);
 		}
+	}
+
+	private boolean checkLicenseListVersionDiff(List<List<OssLicense>> andCombLicenseListStandard, List<List<OssLicense>> andCombLicenseListCompare) {
+		List<String> standardKey = new ArrayList<>();
+		List<String> compareKey = new ArrayList<>();
+		
+		String licenseId = "";
+		
+		for(List<OssLicense> standardList : andCombLicenseListStandard) {
+			standardList.sort(Comparator.comparing(OssLicense::getLicenseId));
+			
+			for(OssLicense ol : standardList) {
+				licenseId += ol.getLicenseId() + ",";
+			}
+			
+			standardKey.add(licenseId.substring(0, licenseId.length()-1));
+			licenseId = "";
+		}
+		
+		for(List<OssLicense> compareList : andCombLicenseListCompare) {
+			compareList.sort(Comparator.comparing(OssLicense::getLicenseId));
+			
+			for(OssLicense ol : compareList) {
+				licenseId += ol.getLicenseId() + ",";
+			}
+			
+			compareKey.add(licenseId.substring(0, licenseId.length()-1));
+			licenseId = "";
+		}
+		
+		return standardKey.containsAll(compareKey);
 	}
 
 	@Override
@@ -1480,6 +1532,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
+	}
+	
+	private List<List<OssLicense>> makeLicenseKeyList(List<OssLicense> list) {
+		List<List<OssLicense>> andCombLicenseList = new ArrayList<>();
+		
+		for(OssLicense license : list) {
+			if(andCombLicenseList.isEmpty() || "OR".equals(license.getOssLicenseComb())) {
+				andCombLicenseList.add(new ArrayList<>());
+			}
+			
+			andCombLicenseList.get(andCombLicenseList.size()-1).add(license);
+		}
+		
+		return andCombLicenseList;
 	}
 	
 	private String makeLicenseIdKeyStr(List<OssLicense> list) {
@@ -2680,33 +2746,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		bean.setCopyright(CommonFunction.lineReplaceToBR(bean.getCopyright()));
 
 		return bean;
-	}
-
-	@Transactional
-	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
-	public void updateVersionDiff(OssMaster ossMaster) {
-		Map<String, OssMaster> updateOSSLicenseMap = new HashMap<>();
-		OssMaster param = new OssMaster();
-		List<String> ossNameList = new ArrayList<>();
-		ossNameList.add(ossMaster.getOssName());
-		String[] ossNames = new String[ossNameList.size()];
-		param.setOssNames(ossNameList.toArray(ossNames));
-		
-		// oss name 또는 nick name으로 참조 가능한 oss 이름만으로 검색한 db 정보
-		Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
-		
-		if(ossMap != null) {
-			for(OssMaster _tempBean : ossMap.values()) {
-				if(!updateOSSLicenseMap.containsKey(_tempBean.getOssId())) {
-					updateOSSLicenseMap.put(_tempBean.getOssId(), _tempBean);
-				}
-			}
-		}
-		
-		for(OssMaster bean : updateOSSLicenseMap.values()) {
-			updateLicenseDivDetail(bean);
-		}
 	}
 
 	@Override
