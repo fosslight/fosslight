@@ -1448,6 +1448,50 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						idx++;
 					}
 				}
+			} else {
+				String ossId = "";
+				
+				if(ossMap != null) {
+					for(OssMaster _bean : ossMap.values()) {
+						if(!isEmpty(_bean.getOssId())) {
+							ossId = _bean.getOssId();
+							
+							for(OssLicense license : _bean.getOssLicenses()) {
+								if("AND".equalsIgnoreCase(license.getOssLicenseComb())) {
+									multiLicenseFlag = true;
+								}
+								
+								if("OR".equalsIgnoreCase(license.getOssLicenseComb())) {
+									dualLicenseFlag = true;
+								}
+							}
+						}
+					}
+				}else {
+					if(CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
+						ossId = master.getOssId();
+						
+						for(OssLicense license : master.getOssLicenses()) {
+							if("AND".equalsIgnoreCase(license.getOssLicenseComb())) {
+								multiLicenseFlag = true;
+							}
+											
+							if("OR".equalsIgnoreCase(license.getOssLicenseComb())) {
+								dualLicenseFlag = true;
+							}
+						}
+					}
+				}
+				
+				if(ossId.isEmpty()) {
+					ossId = master.getOssId();
+				}
+				
+				updateParam.setOssId(ossId);
+				updateParam.setMultiLicenseFlag(multiLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+				updateParam.setDualLicenseFlag(dualLicenseFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+				
+				ossMapper.updateOssLicenseFlag(updateParam);
 			}
 			
 			ossIdListByName = ossIdListByName.stream().distinct().collect(Collectors.toList());
