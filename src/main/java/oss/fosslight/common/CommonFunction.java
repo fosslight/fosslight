@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -4339,7 +4340,7 @@ public class CommonFunction extends CoTopComponent {
 		return false;
 	}
 
-	public static List<ProjectIdentification> makeLicensePermissiveList(List<ProjectIdentification> licenses) {
+	public static List<ProjectIdentification> makeLicensePermissiveList(List<ProjectIdentification> licenses, String currentLicense) {
 		List<List<ProjectIdentification>> andCombLicenseList = new ArrayList<>();
 		
 		for(ProjectIdentification bean : licenses) {
@@ -4348,6 +4349,29 @@ public class CommonFunction extends CoTopComponent {
 			}
 			
 			andCombLicenseList.get(andCombLicenseList.size()-1).add(bean);
+		}
+		
+		List<String> andCombLicenseNameList = new ArrayList<>();
+		String andCombLicenseName = "";
+		
+		for(List<ProjectIdentification> andList : andCombLicenseList) {
+			if(andList.size() > 1) {
+				andList.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
+			}
+			for(ProjectIdentification pi : andList) {
+				andCombLicenseName += pi.getLicenseName() + ",";
+			}
+			andCombLicenseName = andCombLicenseName.substring(0, andCombLicenseName.length()-1);
+			andCombLicenseNameList.add(andCombLicenseName);
+			andCombLicenseName = "";
+		}
+		
+		int idx = 0;
+		for(String licenseName : andCombLicenseNameList) {
+			if(licenseName.contains(currentLicense)) {
+				return andCombLicenseList.get(idx);
+			}
+			idx++;
 		}
 		
 		List<ProjectIdentification> licenseList = new ArrayList<>();
