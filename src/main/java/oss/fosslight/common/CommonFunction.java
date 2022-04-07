@@ -4338,5 +4338,60 @@ public class CommonFunction extends CoTopComponent {
 		}
 		return false;
 	}
-	
+
+	public static List<ProjectIdentification> makeLicensePermissiveList(List<ProjectIdentification> licenses) {
+		List<List<ProjectIdentification>> andCombLicenseList = new ArrayList<>();
+		
+		for(ProjectIdentification bean : licenses) {
+			if(andCombLicenseList.size() == 0 || "OR".equals(bean.getOssLicenseComb())) {
+				andCombLicenseList.add(new ArrayList<>());
+			}
+			
+			andCombLicenseList.get(andCombLicenseList.size()-1).add(bean);
+		}
+		
+		List<ProjectIdentification> licenseList = new ArrayList<>();
+		int pmsCnt = 0;
+		int wcpCnt = 0;
+		int cpCnt = 0;
+		int pfCnt = 0;
+		int naCnt = 0;
+		
+		for(List<ProjectIdentification> andList : andCombLicenseList) {
+			switch(getLicensePermissive(andList)) {
+				case CoConstDef.CD_LICENSE_TYPE_PMS:
+					if(pmsCnt == 0) {
+						licenseList = andList;
+						pmsCnt++;
+					}
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_WCP:
+					if(pmsCnt == 0 && wcpCnt == 0) {
+						licenseList = andList;
+						wcpCnt++;
+					}
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_CP:
+					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0) {
+						licenseList = andList;
+						cpCnt++;
+					}
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_PF:
+					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
+						licenseList = andList;
+						pfCnt++;
+					}
+					break;
+				case CoConstDef.CD_LICENSE_TYPE_NA:
+					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0 && naCnt == 0) {
+						licenseList = andList;
+						naCnt++;
+					}
+					break;
+			}
+		}
+		
+		return licenseList;
+	}
 }

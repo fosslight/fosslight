@@ -442,7 +442,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			licenses = projectMapper.getLicenses(prjOssMaster);
-			licenses.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
 			checkLicense += makeLicenseExpression(licenses);
 		}
 		return checkLicense;
@@ -452,7 +451,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		String license = "";
 
 		if(licenses.size() != 0){
+			licenses = CommonFunction.makeLicensePermissiveList(licenses);
 			licenses = CommonFunction.makeLicenseExcludeYn(licenses);
+			licenses.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
 			license = CommonFunction.makeLicenseExpressionIdentify(licenses, ",");
 		}
 
