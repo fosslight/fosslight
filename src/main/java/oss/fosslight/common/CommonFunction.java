@@ -4351,29 +4351,6 @@ public class CommonFunction extends CoTopComponent {
 			andCombLicenseList.get(andCombLicenseList.size()-1).add(bean);
 		}
 		
-		List<String> andCombLicenseNameList = new ArrayList<>();
-		String andCombLicenseName = "";
-		
-		for(List<ProjectIdentification> andList : andCombLicenseList) {
-			if(andList.size() > 1) {
-				andList.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
-			}
-			for(ProjectIdentification pi : andList) {
-				andCombLicenseName += pi.getLicenseName() + ",";
-			}
-			andCombLicenseName = andCombLicenseName.substring(0, andCombLicenseName.length()-1);
-			andCombLicenseNameList.add(andCombLicenseName);
-			andCombLicenseName = "";
-		}
-		
-		int idx = 0;
-		for(String licenseName : andCombLicenseNameList) {
-			if(licenseName.contains(currentLicense)) {
-				return andCombLicenseList.get(idx);
-			}
-			idx++;
-		}
-		
 		List<ProjectIdentification> licenseList = new ArrayList<>();
 		int pmsCnt = 0;
 		int wcpCnt = 0;
@@ -4388,30 +4365,80 @@ public class CommonFunction extends CoTopComponent {
 						licenseList = andList;
 						pmsCnt++;
 					}
+					
+					if(pmsCnt > 0) {
+						for(ProjectIdentification pi : andList) {
+							if(currentLicense.contains(pi.getLicenseName())) {
+								licenseList = andList;
+								break;
+							}
+						}
+					}
+					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
 					if(pmsCnt == 0 && wcpCnt == 0) {
 						licenseList = andList;
 						wcpCnt++;
 					}
+					
+					if(wcpCnt > 0) {
+						for(ProjectIdentification pi : andList) {
+							if(currentLicense.contains(pi.getLicenseName())) {
+								licenseList = andList;
+								break;
+							}
+						}
+					}
+					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_CP:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0) {
 						licenseList = andList;
 						cpCnt++;
 					}
+					
+					if(cpCnt > 0) {
+						for(ProjectIdentification pi : andList) {
+							if(currentLicense.contains(pi.getLicenseName())) {
+								licenseList = andList;
+								break;
+							}
+						}
+					}
+					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
 						licenseList = andList;
 						pfCnt++;
 					}
+					
+					if(pfCnt > 0) {
+						for(ProjectIdentification pi : andList) {
+							if(currentLicense.contains(pi.getLicenseName())) {
+								licenseList = andList;
+								break;
+							}
+						}
+					}
+					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_NA:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0 && naCnt == 0) {
 						licenseList = andList;
 						naCnt++;
 					}
+					
+					if(naCnt > 0) {
+						for(ProjectIdentification pi : andList) {
+							if(currentLicense.contains(pi.getLicenseName())) {
+								licenseList = andList;
+								break;
+							}
+						}
+					}
+					
 					break;
 			}
 		}
