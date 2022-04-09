@@ -64,6 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// 'X-Frame-Options' to 'DENY' 대응
 		.headers().frameOptions().disable().and()
 		.authorizeRequests().antMatchers(Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
+		.authorizeRequests().antMatchers("/*" + Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
 		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
 		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
 		// 요청에 대한 권한 매핑

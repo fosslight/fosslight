@@ -3294,6 +3294,9 @@ public class CoMailManager extends CoTopComponent {
 				helper.setFrom(from);
 			}
 			else if(!isEmpty(userId) && !isEmpty(userName)) {
+				if(userName.length() > 15 && userName.contains("/") && userName.split("/").length > 1) {
+					userName = userName.substring(0, userName.lastIndexOf("/"));
+				}
 				InternetAddress from = new InternetAddress(mailFrom, userName + " " + userId + " (FOSSLight)", "UTF-8");
 				helper.setFrom(from);
 			} else {

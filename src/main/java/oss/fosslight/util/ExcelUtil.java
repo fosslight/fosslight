@@ -736,7 +736,7 @@ public class ExcelUtil extends CoTopComponent {
 			orgList = list;
 			
 			try {
-				OssComponentUtil.getInstance().makeOssComponent(list, true);
+				OssComponentUtil.getInstance().makeOssComponent(list, true, true);
 			} catch (IllegalAccessException | InstantiationException | InvocationTargetException
 					| NoSuchMethodException e) {
 				// TODO Auto-generated catch block
@@ -745,7 +745,7 @@ public class ExcelUtil extends CoTopComponent {
 				return false;
 			}
 
-			checkLicenseNameChanged(orgList, list, fileSeq);
+//			checkLicenseNameChanged(orgList, list, fileSeq);
 		}
 		return true;
 	}

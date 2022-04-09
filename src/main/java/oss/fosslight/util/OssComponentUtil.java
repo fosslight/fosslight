@@ -40,6 +40,10 @@ public class OssComponentUtil {
 	}
 	
 	public void makeOssComponent(List<OssComponents> selectedData, boolean replaceLikeLicense) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+		makeOssComponent(selectedData, replaceLikeLicense, false);
+	}
+	
+	public void makeOssComponent(List<OssComponents> selectedData, boolean replaceLikeLicense, boolean replaceDownloadHomepage) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 		// DB 확인 된 OSS list
 		List<OssComponents> fillList = new ArrayList<>();
 		// DB 에 등록되지 않은 oss list
@@ -75,10 +79,10 @@ public class OssComponentUtil {
 			if(regData.containsKey(key)) {
 				// 사용자가 입력한 oss 가 db에 존재한다면
 				// DB + 입력정보
-				fillList.addAll(mergeOssAndLicense(regData.get(key), bean));				
+				fillList.addAll(mergeOssAndLicense(regData.get(key), bean, replaceDownloadHomepage));				
 			} else if("N/A".equalsIgnoreCase(bean.getOssVersion()) && regData.containsKey((bean.getOssName() + "_").toUpperCase()))  {
 				bean.setOssVersion("");
-				fillList.addAll(mergeOssAndLicense(regData.get((bean.getOssName() + "_").toUpperCase()), bean));	
+				fillList.addAll(mergeOssAndLicense(regData.get((bean.getOssName() + "_").toUpperCase()), bean, replaceDownloadHomepage));	
 			} else {
 				// DB에서 확인되지 않은 OSS
 				// 라이선스별로 row 등록
@@ -103,7 +107,7 @@ public class OssComponentUtil {
 		}
 	}
 	
-	private List<OssComponents> mergeOssAndLicense(OssMaster master, OssComponents ossComponent) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+	private List<OssComponents> mergeOssAndLicense(OssMaster master, OssComponents ossComponent, boolean replaceDownloadHomepage) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 		// 1. OSS Master를 기준으로 Merge 한다.
 		
 		// 사용자가 입력한 라이선스가 oss 에 포함되어 있지 않을 경우
@@ -112,7 +116,7 @@ public class OssComponentUtil {
 		
 		List<OssComponents> list = new ArrayList<>();
 
-		setOssBasicInfo(ossComponent, master);
+		setOssBasicInfo(ossComponent, master, replaceDownloadHomepage);
 		
 		// 멀티라이선스인 경우
 		if(CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
@@ -140,17 +144,19 @@ public class OssComponentUtil {
 		return list;
 	}
 	
-	private void setOssBasicInfo(OssComponents ossComponent, OssMaster master) {
+	private void setOssBasicInfo(OssComponents ossComponent, OssMaster master, boolean replaceDownloadHomepage) {
 		if(StringUtil.isEmpty(ossComponent.getOssId())) {
 			ossComponent.setOssId(master.getOssId());
 		}
 		
-		if(StringUtil.isEmpty(ossComponent.getDownloadLocation())) {
-			ossComponent.setDownloadLocation(master.getDownloadLocation());
-		}
-		
-		if(StringUtil.isEmpty(ossComponent.getHomepage())) {
-			ossComponent.setHomepage(master.getHomepage());
+		if(!replaceDownloadHomepage) {
+			if(StringUtil.isEmpty(ossComponent.getDownloadLocation())) {
+				ossComponent.setDownloadLocation(master.getDownloadLocation());
+			}
+			
+			if(StringUtil.isEmpty(ossComponent.getHomepage())) {
+				ossComponent.setHomepage(master.getHomepage());
+			}
 		}
 
 		if(StringUtil.isEmpty(ossComponent.getCopyrightText())) {

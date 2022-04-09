@@ -176,7 +176,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 1. find by oss name and oss version
 			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
-			checkedLicense = combineOssLicenses(prjOssLicenses);
+			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
 				String evidence = getMessage("check.evidence.exist.nameAndVersion");
@@ -194,7 +194,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			// Search Priority 2. find by oss download location and version
 			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
-			checkedLicense = combineOssLicenses(prjOssLicenses);
+			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
 				String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
@@ -213,7 +213,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							ProjectIdentification::getLicenseName
 					))
 					.collect(Collectors.toList());
-			checkedLicense = combineOssLicenses(prjOssLicenses);
+			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
 			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense) && !isEachOssVersionDiff(prjOssLicenses)) {
 				String evidence = getMessage("check.evidence.exist.downloadLocation");
@@ -431,7 +431,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return res.get("status").equals("OK");
 	}
 
-	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters) {
+	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
 		String checkLicense = "";
 		List<ProjectIdentification> licenses;
 
@@ -442,17 +442,18 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			licenses = projectMapper.getLicenses(prjOssMaster);
-			licenses.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
-			checkLicense += makeLicenseExpression(licenses);
+			checkLicense += makeLicenseExpression(licenses, currentLicense);
 		}
 		return checkLicense;
 	}
 
-	private String makeLicenseExpression(List<ProjectIdentification> licenses) {
+	private String makeLicenseExpression(List<ProjectIdentification> licenses, String currentLicense) {
 		String license = "";
 
 		if(licenses.size() != 0){
+			licenses = CommonFunction.makeLicensePermissiveList(licenses, currentLicense);
 			licenses = CommonFunction.makeLicenseExcludeYn(licenses);
+			licenses.sort(Comparator.comparing(ProjectIdentification::getLicenseName));
 			license = CommonFunction.makeLicenseExpressionIdentify(licenses, ",");
 		}
 
