@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.2 (09/04/2022)
+## 🐛 Hotfixes
+
+- Fix the bug of loading all licenses even though it is a dual license in Check License. @FOSSLight-dev  (#473)
+- Fix the bug that an error occurs when downloading the SPDX file @FOSSLight-dev  (#467)
+- Change the indication of unclear obligation to OSS Name : - @FOSSLight-dev  (#466)
+
+## 🔧 Maintenance
+
+- Add a commit message checker @soimkim (#471)
+
+---
+
 ## v1.3.1 (01/04/2022)
 ## 🚀 Features
 
@@ -530,23 +543,3 @@
 ## 🔧 Maintenance
 
 - Exclude test on release @soimkim (#144)
-
----
-
-## v1.2.7 (24/09/2021)
-## Changes
-## 🚀 Features
-
-- Update warning message condition @FOSSLight-dev (#143)
-- Change load all sheets starting with SRC in oss_report_src (REST_API) @riyenas0925 (#131)
-- Add deactivate flag on getOssInfo @doggai10 (#129)
-- Update warning message condition @FOSSLight-dev (#132)
-
-## 🐛 Hotfixes
-
-- Update warning message condition @FOSSLight-dev (#143)
-
-## 🔧 Maintenance
-
-- unquoted port mapping may be interpreted as a base-60 value @riyenas0925 (#139)
-- Initialize test code setting @astrod (#135)
