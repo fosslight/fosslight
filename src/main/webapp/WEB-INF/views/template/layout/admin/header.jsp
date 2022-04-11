@@ -44,7 +44,7 @@
 					<c:if test="${dashboardFlag}">
 					    <li><a href="#<c:url value="/dashboard/list"/>" class="add-tab">Dashboard</a></li>
 				    </c:if>
-				    <c:if test="${statisticsFlag and ct:isAdmin()}">
+				    <c:if test="${statisticsFlag}">
 							<li><a href="#<c:url value="/statistics/view"/>" class="add-tab">Statistics</a></li>
 					</c:if>
 					<li><a href="#<c:url value="/license/list"/>" class="add-tab">License List</a></li>
