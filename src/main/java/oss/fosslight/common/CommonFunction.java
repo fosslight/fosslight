@@ -4366,29 +4366,11 @@ public class CommonFunction extends CoTopComponent {
 						pmsCnt++;
 					}
 					
-					if(pmsCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
 					if(pmsCnt == 0 && wcpCnt == 0) {
 						licenseList = andList;
 						wcpCnt++;
-					}
-					
-					if(wcpCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
 					}
 					
 					break;
@@ -4398,15 +4380,6 @@ public class CommonFunction extends CoTopComponent {
 						cpCnt++;
 					}
 					
-					if(cpCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
@@ -4414,29 +4387,11 @@ public class CommonFunction extends CoTopComponent {
 						pfCnt++;
 					}
 					
-					if(pfCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_NA:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0 && naCnt == 0) {
 						licenseList = andList;
 						naCnt++;
-					}
-					
-					if(naCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
 					}
 					
 					break;
