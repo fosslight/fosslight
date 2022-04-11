@@ -77,7 +77,7 @@
 					     WHERE CD_NO = '200'
 					       AND USE_YN = 'Y') A
 			<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
-				  LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+				  LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 				  				  , CASE 
 										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
 										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
@@ -104,7 +104,7 @@
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
-				 LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+				 LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 							     , ADMIN.USER_NAME AS CATEGORY
 						      FROM PROJECT_MASTER PM
 						      <!-- 
@@ -130,7 +130,7 @@
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
-				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 						        , (SELECT SUBSTRING_INDEX(CD_DTL_NM, '(', 1) AS CD_DTL_NM 
 									 FROM T2_CODE_DTL 
 									WHERE CD_NO = '207' AND CD_DTL_NO = PM.DISTRIBUTION_TYPE) AS CATEGORY
@@ -151,7 +151,7 @@
 		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('NET', categoryType)">
-				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 						        , CASE WHEN NETWORK_SERVER_TYPE = 'Y' THEN 'Network Service' ELSE 'Others' END CATEGORY
 							 FROM PROJECT_MASTER PM
 							 <!-- 
@@ -441,7 +441,7 @@
 					       AND USE_YN = 'Y') A
 			<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
 				  LEFT JOIN (SELECT 
-				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 								  , PM.STATUS AS CATEGORY 
 							   FROM PARTNER_MASTER PM
 							   <!-- 
@@ -460,7 +460,7 @@
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 				 LEFT JOIN (SELECT 
-								(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = PM.DIVISION) AS CD_DTL_NM
+								(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 								 , ADMIN.USER_NAME AS CATEGORY 
 							  FROM PARTNER_MASTER PM
 							  <!-- 
@@ -492,7 +492,7 @@
 	
 	<select id="getUserRelatedChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		SELECT A.CD_DTL_NM AS DIVISION_NM
-     		 , (SELECT COUNT(1) AS CNT FROM T2_USERS WHERE DIVISION = A.CD_DTL_NO) AS CATEGORY0_CNT
+     		 , (SELECT COUNT(1) AS CNT FROM T2_USERS WHERE IF(DIVISION = '', '999', DIVISION) = A.CD_DTL_NO) AS CATEGORY0_CNT
 		     , COUNT(STAT.CNT) AS CATEGORY1_CNT
 		  FROM (SELECT CD_DTL_NO
   					 , CD_DTL_NM
