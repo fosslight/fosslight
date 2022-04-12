@@ -3836,6 +3836,8 @@ public class ProjectController extends CoTopComponent {
 		map.put("identificationStatus", prjBean.getIdentificationStatus());
 		map.put("verificationStatus", prjBean.getVerificationStatus());
 		map.put("distributionStatus", prjBean.getDestributionStatus());
+		map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
+		map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
 		map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
 		map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));
