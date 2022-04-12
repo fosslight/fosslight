@@ -2714,6 +2714,62 @@ public class CommonFunction extends CoTopComponent {
 		return rtnStr;
 	}
 
+	public static String makeValidMsgTohtml(Map<String, String> validMessageMap, List<ProjectIdentification> ossComponents) {
+		List<String> rtnStrList = new ArrayList<>();
+		String rtnStr = getMessage("msg.oss.check.ossName.format");
+		
+		if(validMessageMap != null) {
+			for(String key : validMessageMap.keySet()) {
+				if(rtnStrList.size() == 10) {
+					break;
+				}
+				
+				for(ProjectIdentification pi : ossComponents) {
+					if(pi.getGridId().equals(key.substring(key.indexOf(".") + 1, key.length()))) {
+						String replaceString = "";
+						if(pi.getOssName().contains(",")) {
+							replaceString = pi.getOssName().replace(",", "&#44;");
+						}else if(pi.getOssName().contains("<")) {
+							replaceString = pi.getOssName().replace("<", "&#60;");
+						}else if(pi.getOssName().contains(">")) {
+							replaceString = pi.getOssName().replace(">", "&#62;");
+						}
+						if(!isEmpty(replaceString) && !rtnStrList.contains(replaceString)) {
+							rtnStrList.add(replaceString);
+							rtnStr += "<br />" + "- " + replaceString;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return rtnStr;
+	}
+	
+	public static Boolean booleanOssNameFormatForValidMsg(Map<String, String> validMessageMap) {
+		boolean validFlag = false;
+		
+		if(validMessageMap != null) {
+			for(String key : validMessageMap.keySet()) {
+				if("isValid".equalsIgnoreCase(key)) {
+					continue;
+				}
+				
+				String msg = removeLineSeparator(validMessageMap.get(key));
+				if(key.indexOf(".") > -1) {
+					if(msg.contains("Formatting") && key.substring(0, key.indexOf(".")).equals("ossName")) {
+						validFlag = true;
+						break;
+					}
+				}
+				
+			}
+		}
+		
+		return validFlag;
+	}
+
 	public static String removeLineSeparator(String s) {
 		return avoidNull(s).replaceAll("\r\n", "").replaceAll("\n", "").replaceAll("<br>", "").replaceAll("<br/>", "").replaceAll("<br />", "");
 	}
@@ -4366,29 +4422,11 @@ public class CommonFunction extends CoTopComponent {
 						pmsCnt++;
 					}
 					
-					if(pmsCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_WCP:
 					if(pmsCnt == 0 && wcpCnt == 0) {
 						licenseList = andList;
 						wcpCnt++;
-					}
-					
-					if(wcpCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
 					}
 					
 					break;
@@ -4398,15 +4436,6 @@ public class CommonFunction extends CoTopComponent {
 						cpCnt++;
 					}
 					
-					if(cpCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_PF:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0) {
@@ -4414,29 +4443,11 @@ public class CommonFunction extends CoTopComponent {
 						pfCnt++;
 					}
 					
-					if(pfCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
-					}
-					
 					break;
 				case CoConstDef.CD_LICENSE_TYPE_NA:
 					if(pmsCnt == 0 && wcpCnt == 0 && cpCnt == 0 && pfCnt == 0 && naCnt == 0) {
 						licenseList = andList;
 						naCnt++;
-					}
-					
-					if(naCnt > 0) {
-						for(ProjectIdentification pi : andList) {
-							if(currentLicense.contains(pi.getLicenseName())) {
-								licenseList = andList;
-								break;
-							}
-						}
 					}
 					
 					break;
