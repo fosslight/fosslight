@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.3.3 (15/04/2022)
+## 🚀 Features
+
+- Add statistics to menu @FOSSLight-dev (#475)
+
+## 🐛 Hotfixes
+
+- Fix the bug where the request button disappears when packaging rejects. @FOSSLight-dev (#476)
+
+---
+
 ## v1.3.2 (09/04/2022)
 ## 🐛 Hotfixes
 
@@ -535,11 +546,3 @@
 ## 🔧 Maintenance
 
 - Check whether comments are entered when the drop button is clicked @namkyu1999 (#146)
-
----
-
-## v1.2.8 (24/09/2021)
-## Changes
-## 🔧 Maintenance
-
-- Exclude test on release @soimkim (#144)
