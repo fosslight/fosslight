@@ -767,7 +767,11 @@ var bom_data = {
 				, beforeSelectRow: function(rowid, e) {
 					return true;
 				}
-				, onCellSelect: function(rowid,iCol,cellcontent,e) {}
+				, onCellSelect: function(rowid,iCol,cellcontent,e) {
+					if(iCol == "0"){
+						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, null, com_fn.getLicenseName);
+					}
+				}
 				, ondblClickRow: function(rowid,iRow,iCol,e) {
 					// 해당 탭 이동 및 선택된 행 셀렉트
 					if(iCol != "0" && iCol != "19" && iCol != "20"){
