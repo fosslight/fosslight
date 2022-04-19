@@ -287,7 +287,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String ossCopyFlag = "N";
 	
 	private String defaultSearchFlag;
-
+	private String[] existOssNickNames;
 
 	private List<String> declaredLicenses;
 	/**
@@ -1988,5 +1988,13 @@ public class OssMaster extends ComBean implements Serializable{
 				this.addDeclaredLicense(s.trim());
 			}
 		}
+	}
+
+	public String[] getExistOssNickNames() {
+		return existOssNickNames;
+	}
+
+	public void setExistOssNickNames(String[] existOssNickNames) {
+		this.existOssNickNames = existOssNickNames;
 	}
 }

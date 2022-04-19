@@ -4348,9 +4348,7 @@ public class CommonFunction extends CoTopComponent {
 		
 		List<String> licenseNameList = getAllAvailableLicenseUpperCaseName(ossName, ossVer);
 		for(ProjectIdentification license : licenseList) {
-			System.out.println(license.getLicenseName());
 			if(!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
-				System.out.println();
 				return true;
 			}
 		}
