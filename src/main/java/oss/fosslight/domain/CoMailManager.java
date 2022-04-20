@@ -345,12 +345,13 @@ public class CoMailManager extends CoTopComponent {
     				convertDataMap.put("after", convertCodeProjectBaiscInfo( bean.getCompareDataAfter()));
     			}
     			
+    			if(CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())) {
+    				convertDataMap.put("paramOssInfo", bean.getParamOssInfo());
+    				convertModifiedData(convertDataMap, bean.getMsgType());
+				}
     			
     			// as-is, to-be 비교 메일의 경우, 변경 부분 서식을 위한 처리추가
     			if(bean.getCompareDataBefore() != null || bean.getCompareDataAfter() != null) {
-    				if(CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())) {
-        				convertDataMap.put("before", bean.getCompareDataBefore());
-    				}
     				convertModifiedData(convertDataMap, bean.getMsgType());
     			}
     			
@@ -2268,39 +2269,42 @@ public class CoMailManager extends CoTopComponent {
 			convertDataMap.replace("before", before);
 			convertDataMap.replace("after", after);
 		}else if(CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(msgType)) {
-			OssMaster om = (OssMaster) convertDataMap.get("before");
-			List<String> checkOssNickNamesAdd = new ArrayList<>();
-			
-			if(om.getOssNicknames().length > 0) {
-				if(om.getExistOssNickNames().length > 0) {
-					checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames()).stream().filter(x -> !Arrays.asList(om.getExistOssNickNames()).contains(x)).collect(Collectors.toList());
-				}else {
-					checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames());
+			OssMaster om = (OssMaster) convertDataMap.get("paramOssInfo");
+						
+			if(om != null) {
+				List<String> checkOssNickNamesAdd = new ArrayList<>();
+				
+				if(om.getOssNicknames().length > 0) {
+					if(om.getExistOssNickNames().length > 0) {
+						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames()).stream().filter(x -> !Arrays.asList(om.getExistOssNickNames()).contains(x)).collect(Collectors.toList());
+					}else {
+						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames());
+					}
+				}
+				
+				if(checkOssNickNamesAdd.size() > 0) {
+					String changeOssNickName = "";
+					
+					if(om.getExistOssNickNames().length > 0) {
+						for(String nickName : om.getExistOssNickNames()) {
+							changeOssNickName += nickName + "<br/>";
+						}
+					}
+					
+					for(String ossNickName : checkOssNickNamesAdd) {
+						if(!isEmpty(ossNickName)) {
+							ossNickName = appendChangeStyle("newVersion_ossNickNameAdd", ossNickName);
+							changeOssNickName += ossNickName + "<br/>";
+						}
+					}
+					
+					if(!isEmpty(changeOssNickName)) {
+						OssMaster ossBasicInfo = (OssMaster) convertDataMap.get("oss_basic_info");
+						ossBasicInfo.setOssNickname(changeOssNickName);
+						convertDataMap.replace("oss_basic_info", ossBasicInfo);
+					}
 				}
 			}
-			
-			if(checkOssNickNamesAdd.size() > 0) {
-				String changeOssNickName = "";
-				
-				if(om.getExistOssNickNames().length > 0) {
-					for(String nickName : om.getExistOssNickNames()) {
-						changeOssNickName += nickName + "<br/>";
-					}
-				}
-				
-				for(String ossNickName : checkOssNickNamesAdd) {
-					if(!isEmpty(ossNickName)) {
-						ossNickName = appendChangeStyle("newVersion_ossNickNameAdd", ossNickName);
-						changeOssNickName += ossNickName + "<br/>";
-					}
-				}
-				
-				if(!isEmpty(changeOssNickName)) {
-					OssMaster ossBasicInfo = (OssMaster) convertDataMap.get("oss_basic_info");
-					ossBasicInfo.setOssNickname(changeOssNickName);
-					convertDataMap.replace("oss_basic_info", ossBasicInfo);
-				}
-			}		
 		}
 		return convertDataMap;
 	}
