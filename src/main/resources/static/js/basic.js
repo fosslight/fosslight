@@ -1381,8 +1381,7 @@ var autoComplete = {
 	    .focus(function() {if ($(this).attr('state') != 'open') {
 	    	$(this).autocomplete("search");}
 	    	if($(".ui-autocomplete").is(':visible')){
-	    		var width = $(".basicSearch .col3").innerWidth() - $(this).position().left;
-	    		$(".ui-autocomplete").css("width", width);
+	    		$(".ui-autocomplete").css("width", parseInt($(this).css("width")) + 20);
 	    	}
 	    });
 
