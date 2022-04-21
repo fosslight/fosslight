@@ -1378,7 +1378,12 @@ var autoComplete = {
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 	    
 	    $(".autoComReviewer").autocomplete({source: autoComplete.reviewerTag, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
-	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
+	    .focus(function() {if ($(this).attr('state') != 'open') {
+	    	$(this).autocomplete("search");}
+	    	if($(".ui-autocomplete").is(':visible')){
+	    		$(".ui-autocomplete").css("width", parseInt($(this).css("width")) + 20);
+	    	}
+	    });
 
 	    $(".autoComCreatorDivision").autocomplete({source: autoComplete.creatorDivisionTag, minLength: 0,
 	    	open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); if($(this).parent().find('input[name=creatorNm]').val() == ""){$(this).parent().find('input[name=creator]').val('');}},

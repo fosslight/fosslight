@@ -515,7 +515,7 @@ public class OssController extends CoTopComponent{
 				}
 				
 				if(isNewVersion) {
-					mailBean.setCompareDataBefore(ossMaster);
+					mailBean.setParamOssInfo(ossMaster);
 				}
 				
 				CoMailManager.getInstance().sendMail(mailBean);				
