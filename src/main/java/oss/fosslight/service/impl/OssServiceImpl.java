@@ -2108,7 +2108,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 								if(isEmpty(commentId)) {
 									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-									checkOssNameComment += "<p><b>Opensource Names</b></p>";
+									checkOssNameComment += "<p><b>Open Source Name</b></p>";
 									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
@@ -2152,7 +2152,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 								if(isEmpty(commentId)) {
 									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-									checkOssNameComment += "<p><b>Opensource Names</b></p>";
+									checkOssNameComment += "<p><b>Open Source Name</b></p>";
 									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
