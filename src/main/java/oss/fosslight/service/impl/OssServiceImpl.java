@@ -3016,22 +3016,4 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return result;
 	}
-	
-	@Override
-	public int getOssVersionCountByName(String ossName) {
-		return ossMapper.getOssVersionCountByName(ossName);
-	}
-
-	@Override
-	public String checkOssNameDiff(OssMaster ossMaster) {
-		boolean ossName_Flag = false;
-		
-		OssMaster orgBean = getOssInfo(ossMaster.getOssId(), false);
-		if(!orgBean.getOssName().equals(ossMaster.getOssName())
-				&& !CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
-			ossName_Flag = true;
-		}
-		
-		return ossName_Flag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
-	}
 }

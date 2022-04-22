@@ -269,12 +269,6 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("detail", toJson(ossMaster));
 		model.addAttribute("ossId", ossMaster.getOssId());
 		
-		if(isEmpty(ossMaster.getOssId())) {
-			model.addAttribute("ossNameCnt", 0);
-		}else {
-			model.addAttribute("ossNameCnt", ossService.getOssVersionCountByName(ossMaster.getOssName()));
-		}
-		
 		// 참조 프로젝트 목록 조회
 		boolean projectListFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
 		
@@ -452,8 +446,10 @@ public class OssController extends CoTopComponent{
 				
 				if("Y".equals(ossMaster.getRenameFlag())) {
 					List<OssMaster> diffOssVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
-					afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
-					afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+					if(diffOssVersionMergeList.size() > 0) {
+						afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
+						afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+					}
 				}
 				
 				if(!beforeBean.getOssName().equalsIgnoreCase(afterBean.getOssName())) {
@@ -2165,19 +2161,6 @@ public class OssController extends CoTopComponent{
 
 		resMap.put("res", true);
 		resMap.put("value", ossWithStatusList);
-		return makeJsonResponseHeader(resMap);
-	}
-	
-	@PostMapping(value = OSS.CHECK_OSS_NAME_DIFF)
-	public @ResponseBody ResponseEntity<Object> checkOssNameDiff(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res,
-			Model model) {
-		OssMaster om = new OssMaster();
-		om.setOssId((String) map.get("ossId"));
-		om.setOssName((String) map.get("ossName"));
-		
-		HashMap<String, Object> resMap = new HashMap<>();
-		resMap.put("vFlag", ossService.checkOssNameDiff(om));
-		
 		return makeJsonResponseHeader(resMap);
 	}
 }
