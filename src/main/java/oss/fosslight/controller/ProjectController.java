@@ -1923,7 +1923,7 @@ public class ProjectController extends CoTopComponent {
 							resultSb.append("<br>");
 						} else {
 							hasOssNick = true;
-							resultSb.append("<b>Opensource Names</b><br>");
+							resultSb.append("<b>Open Source Name</b><br>");
 						}
 
 						resultSb.append(s);
