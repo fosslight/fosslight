@@ -669,9 +669,7 @@ public class OssController extends CoTopComponent{
 			
 			checkList.add(ossMaster.getOssName());
 			
-			OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
-			if(!orgBean.getOssName().equals(ossMaster.getOssName())
-					&& CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+			if(CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
 				duplicatedList.add(ossMaster.getOssName());
 				return makeJsonResponseHeader(false, "rename", duplicatedList);
 			}
