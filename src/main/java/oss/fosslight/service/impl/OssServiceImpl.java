@@ -2856,31 +2856,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMapper.changeOssNameByDelete(om);
 			}
 			
-			List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
-			String[] ossNicknames = ossMaster.getOssNicknames();
-			if(ossNicknameList != null && !ossNicknameList.isEmpty()) {
-				ossMapper.deleteOssNickname(ossMaster);
-				
-				for(OssMaster om : ossNicknameList){
-					if(!isEmpty(om.getOssNickname())) {
-						ossMaster.setOssName(afterOssName);
-						ossMaster.setOssNickname(om.getOssNickname().trim());
-						ossMapper.insertOssNickname(ossMaster);
-					}
-				}
-			} else {
-				if(ossNicknames != null) {
-					for(String nickname : ossNicknames){
-						if(!isEmpty(nickname)) {
-							ossMaster.setOssName(afterOssName);
-							ossMaster.setOssNickname(nickname.trim());
-							ossMapper.insertOssNickname(ossMaster);
-						}
-					}
-				}else {
-					ossMapper.deleteOssNickname(ossMaster);
-				}
-			}
+			ossMapper.deleteOssNickname(ossMaster);
 			
 			CoCodeManager.getInstance().refreshOssInfo();
 			
@@ -3039,5 +3015,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public int getOssVersionCountByName(String ossName) {
+		return ossMapper.getOssVersionCountByName(ossName);
+	}
+
+	@Override
+	public String checkOssNameDiff(OssMaster ossMaster) {
+		boolean ossName_Flag = false;
+		
+		OssMaster orgBean = getOssInfo(ossMaster.getOssId(), false);
+		if(!orgBean.getOssName().equals(ossMaster.getOssName())
+				&& !CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+			ossName_Flag = true;
+		}
+		
+		return ossName_Flag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
 	}
 }
