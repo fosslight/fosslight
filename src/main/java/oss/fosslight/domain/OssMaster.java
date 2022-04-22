@@ -282,7 +282,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String mergeOssName;
 	private String mergeOssVersion;
 	
-	private String differentOssVersionMergeFlag = "N";
+	private String renameFlag = "N";
 	
 	private String ossCopyFlag = "N";
 	
@@ -1938,14 +1938,6 @@ public class OssMaster extends ComBean implements Serializable{
 		this.mergeOssId = mergeOssId;
 	}
 
-	public String getDifferentOssVersionMergeFlag() {
-		return differentOssVersionMergeFlag;
-	}
-
-	public void setDifferentOssVersionMergeFlag(String differentOssVersionMergeFlag) {
-		this.differentOssVersionMergeFlag = differentOssVersionMergeFlag;
-	}
-
 	public String getOssCopyFlag() {
 		return ossCopyFlag;
 	}
@@ -1996,5 +1988,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setExistOssNickNames(String[] existOssNickNames) {
 		this.existOssNickNames = existOssNickNames;
+	}
+
+	public String getRenameFlag() {
+		return renameFlag;
+	}
+
+	public void setRenameFlag(String renameFlag) {
+		this.renameFlag = renameFlag;
 	}
 }

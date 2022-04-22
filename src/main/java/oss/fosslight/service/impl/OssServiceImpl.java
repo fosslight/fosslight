@@ -2856,31 +2856,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMapper.changeOssNameByDelete(om);
 			}
 			
-			List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
-			String[] ossNicknames = ossMaster.getOssNicknames();
-			if(ossNicknameList != null && !ossNicknameList.isEmpty()) {
-				ossMapper.deleteOssNickname(ossMaster);
-				
-				for(OssMaster om : ossNicknameList){
-					if(!isEmpty(om.getOssNickname())) {
-						ossMaster.setOssName(afterOssName);
-						ossMaster.setOssNickname(om.getOssNickname().trim());
-						ossMapper.insertOssNickname(ossMaster);
-					}
-				}
-			} else {
-				if(ossNicknames != null) {
-					for(String nickname : ossNicknames){
-						if(!isEmpty(nickname)) {
-							ossMaster.setOssName(afterOssName);
-							ossMaster.setOssNickname(nickname.trim());
-							ossMapper.insertOssNickname(ossMaster);
-						}
-					}
-				}else {
-					ossMapper.deleteOssNickname(ossMaster);
-				}
-			}
+			ossMapper.deleteOssNickname(ossMaster);
 			
 			CoCodeManager.getInstance().refreshOssInfo();
 			

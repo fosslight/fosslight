@@ -262,9 +262,9 @@ public class OssController extends CoTopComponent{
 				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
 			}
 			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
-		} else
+		} else {
 			model.addAttribute("detectedLicenseIdByName", null);
-
+		}
 		model.addAttribute("list", toJson(map));
 		model.addAttribute("detail", toJson(ossMaster));
 		model.addAttribute("ossId", ossMaster.getOssId());
@@ -433,7 +433,7 @@ public class OssController extends CoTopComponent{
 				beforeBean = ossService.getOssInfo(ossId, true);
 				result = ossService.registOssMaster(ossMaster);
 				
-				if("Y".equals(ossMaster.getDifferentOssVersionMergeFlag())) {
+				if("Y".equals(ossMaster.getRenameFlag())) {
 					updateOssNameVersionDiffMergeObject = new HashMap<>();
 					updateOssNameVersionDiffMergeObject = ossService.updateOssNameVersionDiff(ossMaster);
 				}
@@ -444,10 +444,12 @@ public class OssController extends CoTopComponent{
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = ossService.getOssInfo(ossId, true);
 				
-				if("Y".equals(ossMaster.getDifferentOssVersionMergeFlag())) {
+				if("Y".equals(ossMaster.getRenameFlag())) {
 					List<OssMaster> diffOssVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
-					afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
-					afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+					if(diffOssVersionMergeList.size() > 0) {
+						afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
+						afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+					}
 				}
 				
 				if(!beforeBean.getOssName().equalsIgnoreCase(afterBean.getOssName())) {
@@ -523,7 +525,7 @@ public class OssController extends CoTopComponent{
 				log.error(e.getMessage(), e);
 			}
 			
-			if(!isNew && "Y".equals(ossMaster.getDifferentOssVersionMergeFlag())){
+			if(!isNew && "Y".equals(ossMaster.getRenameFlag())){
 				List<OssMaster> beforeOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("before");
 				List<OssMaster> afterOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
 				
