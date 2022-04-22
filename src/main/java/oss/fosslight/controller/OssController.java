@@ -661,6 +661,68 @@ public class OssController extends CoTopComponent{
 		
 		T2CoValidationResult vr = validator.validateObject(reqMap, list, "OSS"); 
 		
+		if(CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+			boolean sameNameFlag = false;
+			
+			List<String> checkList = new ArrayList<>();
+			List<String> duplicatedList = new ArrayList<>();
+			
+			checkList.add(ossMaster.getOssName());
+			
+			OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
+			if(!orgBean.getOssName().equals(ossMaster.getOssName())
+					&& CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+				duplicatedList.add(ossMaster.getOssName());
+				return makeJsonResponseHeader(false, "rename", duplicatedList);
+			}
+			
+			if(ossMaster.getOssNicknames() != null) {
+				for(String _nick : ossMaster.getOssNicknames()) {
+					if(!isEmpty(_nick)) {
+						if(ossMaster.getOssName().equals(_nick) || checkList.contains(_nick)) {
+							duplicatedList.add(_nick + " (The same OSS Name or Nick Name exists.)");
+							sameNameFlag = true;
+							break;
+						}
+						
+						if(checkList.isEmpty() || !checkList.contains(_nick)) {
+							checkList.add(_nick);
+						}
+					}
+				}
+			}
+			
+			if(sameNameFlag) {
+				return makeJsonResponseHeader(false, "rename", duplicatedList);
+			}
+			
+			OssMaster om = new OssMaster();
+			for(String _checkName : checkList) {
+				om.setOssName(_checkName);
+				List<OssMaster> ossNameList = ossService.getOssListByName(om);
+				if(ossNameList != null && ossNameList.size() > 0) {
+					duplicatedList.add(_checkName);
+				}
+			}
+			
+			if(duplicatedList.size() > 0) {
+				return makeJsonResponseHeader(false, "rename", duplicatedList);
+			}
+			
+			if(!vr.isValid()) {
+				Map<String, String> errMap = vr.getErrorCodeMap();
+				Map<String, String> checkErrMap = new HashMap<>();
+				
+				for(String key : errMap.keySet()) {
+					if(!key.contains("OSS_NAME") && !key.contains("OSS_NICKNAMES")) {
+						checkErrMap.put(key, errMap.get(key));
+					}
+				}
+				
+				vr.setErrorCodeMap(checkErrMap);
+			}
+		}
+		
 		if(!vr.isValid()) {
 			return makeJsonResponseHeader(vr.getValidMessageMap());
 		}
