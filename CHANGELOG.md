@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.3.4 (22/04/2022)
+## 🚀 Features
+
+- Add a Rename button to the OSS Details tab. @FOSSLight-dev (#486)
+- Display the version-specific popup when click the cell of the ID column in the BOM @FOSSLight-dev (#480)
+- Mail > Print nickname changes when OSS version is changed. @FOSSLight-dev (#479)
+
+## 🐛 Hotfixes
+
+- Fix the error that the screen changes when user selects Reviewer from the User Setting, Project List, 3rd Party List. @FOSSLight-dev (#483)
+
+## 🔧 Maintenance
+
+- Update the comments and messages @soimkim (#484)
+- Update newLogo in login, signup, menu bar @MoonDD99 (#478)
+
+---
+
 ## v1.3.3 (15/04/2022)
 ## 🚀 Features
 
@@ -528,21 +546,3 @@
 - Change from RestTemplate to WebClient @riyenas0925 (#152)
 - Fix nickname typo in mail template @epicarts (#153)
 - Add template to docker environment @soimkim (#150)
-
----
-
-## v1.2.9 (01/10/2021)
-## Changes
-## 🚀 Features
-
-- Update Statistics NONE value except @FOSSLight-dev (#149)
-- Add External Service settings to the configuration page @riyenas0925 (#145)
-- RestTemplate config for task 1 @riyenas0925 (#141)
-
-## 🐛 Hotfixes
-
-- Fix the comments history shows properly in identification(project), third-party, project info tabs @su-ram (#134)
-
-## 🔧 Maintenance
-
-- Check whether comments are entered when the drop button is clicked @namkyu1999 (#146)
