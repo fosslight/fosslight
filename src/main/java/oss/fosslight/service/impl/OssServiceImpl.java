@@ -1855,10 +1855,28 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						bean.setDownloadLocation(m.group(0));
 					}
 					
-					int cnt = ossMapper.checkOssNameUrlCnt(bean);
+					String protocol = "";
+					
+					if(bean.getDownloadLocation().startsWith("http://") 
+							|| bean.getDownloadLocation().startsWith("https://")
+							|| bean.getDownloadLocation().startsWith("git://")
+							|| bean.getDownloadLocation().startsWith("ftp://")
+							|| bean.getDownloadLocation().startsWith("svn://")) {
+						downloadlocationUrl = bean.getDownloadLocation().split("//")[1];
+						protocol = bean.getDownloadLocation().split("//")[0] + "//";
+					}
+					
+					if(downloadlocationUrl.startsWith("www.")) {
+						protocol += downloadlocationUrl.substring(0, 4);
+						downloadlocationUrl = downloadlocationUrl.substring(5, downloadlocationUrl.length());
+					}
+					
+					bean.setDownloadLocation(downloadlocationUrl);
+					
+					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
 					
 					if(cnt == 0) {
-						List<OssMaster> ossNameList = ossMapper.checkOssNameUrl(bean);
+						List<OssMaster> ossNameList = ossMapper.checkOssNameUrl2(bean);
 						String checkName = "";
 						
 						for(OssMaster ossBean : ossNameList) {
@@ -1869,6 +1887,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							checkName += ossBean.getOssName();
 						}
 						
+						if(!isEmpty(protocol)) {
+							downloadlocationUrl = protocol + downloadlocationUrl;
+							bean.setDownloadLocation(downloadlocationUrl);
+						}
+						
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 						} else {
@@ -1877,7 +1900,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 //							if(checkExistsOssByname(ossBean) > 0) {
 //								continue;
 //							}
-
 							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
 
 							while(ossNameMatcher.find()){
