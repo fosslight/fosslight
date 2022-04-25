@@ -2030,21 +2030,40 @@ var saveFlag = false;
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
-												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 												multText = licenseNames[i].value;
 												break;
 											}
 										}
 										
 										if(mult == null){
-											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 											multText = e.value;
 										}
 										
-										var licenseNameBtnText = $('#'+rowid+'_licenseNameBtn').text();
-										if (multText != null && licenseNameBtnText.indexOf(multText) < 0){
-											$('#'+rowid+'_licenseNameBtn').append(mult);
+										var rowLicenseNames = [];
+										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+											rowLicenseNames.push($(this).text());
+										});
+										
+										if (multText != null){
+											if(rowLicenseNames.length > 0){
+												var duplicateFlag = false;
+												for(var i in rowLicenseNames){
+													if(multText == rowLicenseNames[i]){
+														duplicateFlag = true;
+														break;
+													}
+												}
+												
+												if(!duplicateFlag){
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											} else {
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
 										}
+										
 										$('#'+rowid+'_licenseName').val("");
 										
 										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
@@ -2057,21 +2076,40 @@ var saveFlag = false;
 											for(var i in licenseNames){
 												if("" != e.value && e.value == licenseNames[i].value){
 													var licenseIds = $('#'+rowid+'_licenseId').val();
-													mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
+													mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 													multText = licenseNames[i].value;
 													break;
 												}
 											}
 											
 											if(mult == null && "" != e.value){
-												mult = "<span class=\"btnMulti\"><span ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span>";
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 												multText = e.value;
 											}
 											
-											var licenseNameBtnText = $('#'+rowid+'_licenseNameBtn').text();
-											if (multText != null && licenseNameBtnText.indexOf(multText) < 0){
-												$('#'+rowid+'_licenseNameBtn').append(mult);
+											var rowLicenseNames = [];
+											$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+												rowLicenseNames.push($(this).text());
+											});
+											
+											if (multText != null){
+												if(rowLicenseNames.length > 0){
+													var duplicateFlag = false;
+													for(var i in rowLicenseNames){
+														if(multText == rowLicenseNames[i]){
+															duplicateFlag = true;
+															break;
+														}
+													}
+													
+													if(!duplicateFlag){
+														$('#'+rowid+'_licenseNameBtn').append(mult);
+													}
+												} else {
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
 											}
+											
 											$('#'+rowid+'_licenseName').val("");
 	
 											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
@@ -2261,7 +2299,7 @@ var saveFlag = false;
 
 						result.forEach(function(cur,idx){
 							if(cur != ""){
-								var mult = "<span class=\"btnMulti\">" + cur + "<button onclick='com_fn.deleteLicense(this)'>x</button></span>";
+								var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicense(this)'>x</button></span><br/>";
 								$('#'+rowid+'_licenseName').parent().append(mult);
 							}
 						});
