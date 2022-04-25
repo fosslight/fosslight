@@ -1267,6 +1267,9 @@ public class OssController extends CoTopComponent{
 		
 		// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
+		if(isNewVersion) {
+			ossMaster.setExistOssNickNames(ossService.getOssNickNameListByOssName(ossMaster.getOssName()));
+		}
 		
 		ossMaster.setLicenseDiv(CoConstDef.LICENSE_DIV_SINGLE); // default
 		// multi license 대응
@@ -1787,6 +1790,9 @@ public class OssController extends CoTopComponent{
 		
 		// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
 		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
+		if(isNewVersion) {
+			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
+		}
 		
 		resultData.setGridId(analysisBean.getGridId());
 		resultData.setLicenseDiv(CoConstDef.LICENSE_DIV_SINGLE); // default
