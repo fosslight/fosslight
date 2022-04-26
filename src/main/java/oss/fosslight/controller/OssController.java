@@ -431,11 +431,12 @@ public class OssController extends CoTopComponent{
 			// OSS 수정
 			if(!isNew){
 				beforeBean = ossService.getOssInfo(ossId, true);
-				result = ossService.registOssMaster(ossMaster);
 				
-				if("Y".equals(ossMaster.getRenameFlag())) {
+				if(CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
 					updateOssNameVersionDiffMergeObject = new HashMap<>();
 					updateOssNameVersionDiffMergeObject = ossService.updateOssNameVersionDiff(ossMaster);
+				}else {
+					result = ossService.registOssMaster(ossMaster);
 				}
 				
 				CoCodeManager.getInstance().refreshOssInfo();
@@ -444,11 +445,13 @@ public class OssController extends CoTopComponent{
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = ossService.getOssInfo(ossId, true);
 				
-				if("Y".equals(ossMaster.getRenameFlag())) {
-					List<OssMaster> diffOssVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
-					if(diffOssVersionMergeList.size() > 0) {
-						afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
-						afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+				if(CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+					if(updateOssNameVersionDiffMergeObject != null) {
+						List<OssMaster> diffOssVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
+						if(diffOssVersionMergeList != null && diffOssVersionMergeList.size() > 0) {
+							afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
+							afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+						}
 					}
 				}
 				
@@ -507,6 +510,10 @@ public class OssController extends CoTopComponent{
 					}
 				}
 				
+				if(CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+					mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
+				}
+				
 				CoMail mailBean = new CoMail(mailType);
 				mailBean.setParamOssId(ossId);
 				mailBean.setComment(ossMaster.getComment());
@@ -525,29 +532,33 @@ public class OssController extends CoTopComponent{
 				log.error(e.getMessage(), e);
 			}
 			
-			if(!isNew && "Y".equals(ossMaster.getRenameFlag())){
-				List<OssMaster> beforeOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("before");
-				List<OssMaster> afterOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
-				
-				for(int i=0; i<afterOssNameVersionMergeList.size(); i++) {
-					History history = new History();
-					history = ossService.work(afterOssNameVersionMergeList.get(i));
-					action = CoConstDef.ACTION_CODE_UPDATE;
-					history.sethAction(action);
-					historyService.storeData(history);
+			if(!isNew && isChangedName && CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())){
+				if(updateOssNameVersionDiffMergeObject != null) {
+					List<OssMaster> beforeOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("before");
+					List<OssMaster> afterOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
 					
-					try {
-						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
-												
-						CoMail mailBean = new CoMail(mailType);
-						mailBean.setParamOssId(afterOssNameVersionMergeList.get(i).getOssId());
-						mailBean.setComment(ossMaster.getComment());
-						mailBean.setCompareDataBefore(beforeOssNameVersionMergeList.get(i));
-						mailBean.setCompareDataAfter(afterOssNameVersionMergeList.get(i));
-						
-						CoMailManager.getInstance().sendMail(mailBean);				
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
+					if(afterOssNameVersionMergeList != null) {
+						for(int i=0; i<afterOssNameVersionMergeList.size(); i++) {
+							History history = new History();
+							history = ossService.work(afterOssNameVersionMergeList.get(i));
+							action = CoConstDef.ACTION_CODE_UPDATE;
+							history.sethAction(action);
+							historyService.storeData(history);
+							
+							try {
+								String mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
+														
+								CoMail mailBean = new CoMail(mailType);
+								mailBean.setParamOssId(afterOssNameVersionMergeList.get(i).getOssId());
+								mailBean.setComment(ossMaster.getComment());
+								mailBean.setCompareDataBefore(beforeOssNameVersionMergeList.get(i));
+								mailBean.setCompareDataAfter(afterOssNameVersionMergeList.get(i));
+								
+								CoMailManager.getInstance().sendMail(mailBean);				
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}
+						}
 					}
 				}
 			}
@@ -663,6 +674,39 @@ public class OssController extends CoTopComponent{
 		
 		if(CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
 			boolean sameNameFlag = false;
+			boolean ossNicknameFlag= false;
+			
+			OssMaster ossInfo = ossService.getOssInfo(ossMaster.getOssId(), false);
+			
+			if(ossInfo != null && ossInfo.getOssName().equals(ossMaster.getOssName())) {
+				if(ossMaster.getOssNicknames() != null) {
+					if(ossInfo.getOssNicknames() != null) {
+						String[] beforeOssNicknames = ossInfo.getOssNicknames();
+						String[] ossNicknames = ossMaster.getOssNicknames();
+						
+						for(String beforeOssNickname : beforeOssNicknames) {
+							for(String ossNickname : ossNicknames) {
+								if(beforeOssNickname.equals(ossNickname)) {
+									ossNicknameFlag = true;
+									break;
+								}
+							}
+							
+							if(ossNicknameFlag) {
+								break;
+							}
+						}
+					}
+				} else {
+					if(ossInfo.getOssNicknames() == null) {
+						ossNicknameFlag = true;
+					}
+				}
+				
+				if(ossNicknameFlag) {
+					return makeJsonResponseHeader(false, "rename");
+				}
+			}
 			
 			List<String> checkList = new ArrayList<>();
 			List<String> duplicatedList = new ArrayList<>();

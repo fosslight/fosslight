@@ -2850,36 +2850,53 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Transactional
 	@Override
 	public Map<String, List<OssMaster>> updateOssNameVersionDiff(OssMaster ossMaster) {
-		String beforeOssName = ossMaster.getOssName();
-		String afterOssName = ossMaster.getMergeOssName();
+		String beforeOssName = getOssInfo(ossMaster.getOssId(), false).getOssName();
+		String afterOssName = ossMaster.getOssName();
 		
 		Map<String, List<OssMaster>> ossNameVersionDiffMergeObject = new HashMap<>();
+		List<OssMaster> beforeOssNameVersionBeanList = new ArrayList<OssMaster>();
+		List<OssMaster> afterOssNameVersionBeanList = new ArrayList<OssMaster>();
+		List<String> beforeOssNameVersionOssIdList = new ArrayList<String>();
+		OssMaster beforeOssNameVersionBean = null;
+		OssMaster afterOssNameVersionBean = null;
+		
+		List<String> beforeOssNameList = new ArrayList<>();
+		beforeOssNameList.add(beforeOssName);
+		String[] beforeOssNames = new String[beforeOssNameList.size()];
+		ossMaster.setOssNames(beforeOssNameList.toArray(beforeOssNames));
+		
+		Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
 		
 		if(!beforeOssName.equals(afterOssName)) {
-			List<OssMaster> beforeOssNameVersionBeanList = new ArrayList<OssMaster>();
-			List<OssMaster> afterOssNameVersionBeanList = new ArrayList<OssMaster>();
-			List<String> beforeOssNameVersionOssIdList = new ArrayList<String>();
-			OssMaster beforeOssNameVersionBean = null;
-			OssMaster afterOssNameVersionBean = null;
-			
-			List<String> beforeOssNameList = new ArrayList<>();
-			beforeOssNameList.add(beforeOssName);
-			String[] beforeOssNames = new String[beforeOssNameList.size()];
-			ossMaster.setOssNames(beforeOssNameList.toArray(beforeOssNames));
-			
-			Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
-			
 			for(OssMaster om : beforeOssMap.values()) {
-				beforeOssNameVersionOssIdList.add(om.getOssId());
-				beforeOssNameVersionBean = getOssInfo(om.getOssId(), true);
-				beforeOssNameVersionBeanList.add(beforeOssNameVersionBean);
+				if(!ossMaster.getOssVersion().equals(om.getOssVersion())) {
+					beforeOssNameVersionOssIdList.add(om.getOssId());
+					beforeOssNameVersionBean = getOssInfo(om.getOssId(), true);
+					beforeOssNameVersionBeanList.add(beforeOssNameVersionBean);
+				}
 				
 				om.setOssName(afterOssName);
 				ossMapper.changeOssNameByDelete(om);
 			}
-			
+		}
+		
+		ossMaster.setOssName(beforeOssName);
+		
+		if(ossMaster.getOssNicknames() != null) {
 			ossMapper.deleteOssNickname(ossMaster);
 			
+			ossMaster.setOssName(afterOssName);
+			for(String nickName : ossMaster.getOssNicknames()){
+				if(!isEmpty(nickName)) {
+					ossMaster.setOssNickname(nickName.trim());
+					ossMapper.insertOssNickname(ossMaster);
+				}
+			}
+		} else {
+			ossMapper.deleteOssNickname(ossMaster);
+		}
+		
+		if(!beforeOssName.equals(afterOssName)) {
 			CoCodeManager.getInstance().refreshOssInfo();
 			
 			for(String ossId : beforeOssNameVersionOssIdList) {

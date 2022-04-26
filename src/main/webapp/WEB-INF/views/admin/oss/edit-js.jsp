@@ -16,6 +16,7 @@
 	var detectedLicenseValid = true;
 	var deactivateFlag = "N";
 	var renameFlag = "N";
+	var nickNameClone;
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
@@ -30,6 +31,7 @@
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
+			nickNameClone = $('.multiTxtSet').clone().html();
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
 			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 			deactivateFlag = (data.detail&&data.detail.deactivateFlag)||"N";
@@ -1555,7 +1557,7 @@
 				}
 				
 				for(var k in json.resultData.addNickArr) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
 				}
 				
@@ -1574,12 +1576,17 @@
 				
 				alertify.alert(_alertMsg, function(){});
 			} else if(json.validMsg == "rename"){
-				var data = json.resultData;
-				var _alertMsg  = '<spring:message code="msg.oss.check.rename"/>';
-				for(var i in data){
-					_alertMsg += '<br> - ' + data[i];
+				if(typeof json.resultData !== 'undefined'){
+					var data = json.resultData;
+					var _alertMsg  = '<spring:message code="msg.oss.check.rename"/>';
+					for(var i in data){
+						_alertMsg += '<br> - ' + data[i];
+					}
+					alertify.alert(_alertMsg, function(){});
+				}else{
+					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
 				}
-				alertify.alert(_alertMsg, function(){});
+				
 				renameFlag = 'N';
 				$('input[name=renameFlag]').val(renameFlag);
 			} else if(json.resultData) {
@@ -1588,7 +1595,7 @@
 				alertify.alert(_alertMsg, function(){});
 
 				for(var k in json.resultData) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
 				}
 				
@@ -1641,7 +1648,7 @@
 				}
 				
 				for(var k in json.resultData.addNickArr) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
 				}
 				$('.smallDelete').on('click', function(){
@@ -1659,7 +1666,7 @@
 			} else if(json.resultData) {
 				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
 				for(var k in json.resultData) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
 				}
 				$('.smallDelete').on('click', function(){
