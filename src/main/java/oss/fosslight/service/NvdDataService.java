@@ -54,18 +54,18 @@ public class NvdDataService {
 		
 		// GET Nvd Meta Data
 		// 작업등록
-//		try {
-//			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
-//			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
-//			
-//			if(fileCheck) {
-//				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
-//				nvdMetaDataSyncJob();
-//			}
-//		} catch (Exception e) {
-//			log.error(e.getMessage(), e);
-//			return "91";
-//		}
+		try {
+			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
+			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			
+			if(fileCheck) {
+				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
+				nvdMetaDataSyncJob();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return "91";
+		}
 		
 		try {
 			// initialize NVD Data Feed
