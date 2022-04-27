@@ -3055,4 +3055,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return result;
 	}
+
+	@Override
+	public List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList) {
+		if(checkList != null && checkList.size() > 0) {
+			List<OssMaster> ossNicknameList = ossMapper.getOssNicknameListWithoutOwn(ossMaster);
+			ossNicknameList = ossNicknameList.stream().filter(e -> checkList.contains(e.getOssNickname())).collect(Collectors.toList());
+			
+			if(ossNicknameList != null && ossNicknameList.size() > 0) {
+				for(OssMaster om : ossNicknameList) {
+					duplicatedList.add(om.getOssNickname());
+				}
+			}
+		}
+		
+		return duplicatedList;
+	}
 }

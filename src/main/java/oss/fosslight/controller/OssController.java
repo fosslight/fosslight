@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -681,23 +682,14 @@ public class OssController extends CoTopComponent{
 			if(ossInfo != null && ossInfo.getOssName().equals(ossMaster.getOssName())) {
 				if(ossMaster.getOssNicknames() != null) {
 					if(ossInfo.getOssNicknames() != null) {
-						String[] beforeOssNicknames = ossInfo.getOssNicknames();
-						String[] ossNicknames = ossMaster.getOssNicknames();
-						
-						for(String beforeOssNickname : beforeOssNicknames) {
-							for(String ossNickname : ossNicknames) {
-								if(beforeOssNickname.equals(ossNickname)) {
-									ossNicknameFlag = true;
-									break;
-								}
-							}
-							
-							if(ossNicknameFlag) {
-								break;
+						if(ossMaster.getOssNicknames().length == ossInfo.getOssNicknames().length) {
+							List<String> duplicateOssNicknames = Arrays.asList(ossMaster.getOssNicknames()).stream().filter(e -> !Arrays.asList(ossInfo.getOssNicknames()).contains(e.toString())).collect(Collectors.toList());
+							if(duplicateOssNicknames == null || duplicateOssNicknames.size() == 0) {
+								ossNicknameFlag = true;
 							}
 						}
 					}
-				} else {
+				}else {
 					if(ossInfo.getOssNicknames() == null) {
 						ossNicknameFlag = true;
 					}
@@ -738,16 +730,9 @@ public class OssController extends CoTopComponent{
 				return makeJsonResponseHeader(false, "rename", duplicatedList);
 			}
 			
-			OssMaster om = new OssMaster();
-			for(String _checkName : checkList) {
-				om.setOssName(_checkName);
-				List<OssMaster> ossNameList = ossService.getOssListByName(om);
-				if(ossNameList != null && ossNameList.size() > 0) {
-					duplicatedList.add(_checkName);
-				}
-			}
+			duplicatedList = ossService.getOssNicknameListWithoutOwn(ossInfo, checkList, duplicatedList);
 			
-			if(duplicatedList.size() > 0) {
+			if(duplicatedList != null && duplicatedList.size() > 0) {
 				return makeJsonResponseHeader(false, "rename", duplicatedList);
 			}
 			
