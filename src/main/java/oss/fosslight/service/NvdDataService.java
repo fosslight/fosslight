@@ -54,18 +54,18 @@ public class NvdDataService {
 		
 		// GET Nvd Meta Data
 		// 작업등록
-		try {
-			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
-			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
-			
-			if(fileCheck) {
-				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
-				nvdMetaDataSyncJob();
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			return "91";
-		}
+//		try {
+//			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
+//			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+//			
+//			if(fileCheck) {
+//				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
+//				nvdMetaDataSyncJob();
+//			}
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			return "91";
+//		}
 		
 		try {
 			// initialize NVD Data Feed
@@ -218,14 +218,17 @@ public class NvdDataService {
 				}
 				
 				String cveId = (String) cveInfo.get("cveId");
-				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
-				
-				ossList.clear();
 				
 				// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
 				// 적용대상 cpe match list
 				List<String> matchNames = null;
 				cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
+				
+//				if(cpe_match_all.isEmpty()) {
+//					log.info("REJECTED CVE " + cveId);
+//				}
+				
+				ossList.clear();
 				for (Map<String, Object> cpe_match_data : cpe_match_all) {
 					// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 					// Version Range 조건 취득
@@ -272,7 +275,8 @@ public class NvdDataService {
 						ossList.add(_productInfo);
 					}
 				}
-				
+
+				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
 				// 신규등록
 				if(comapare == null){
 					nvdDataMapper.insertCveInfoV3(cveInfo);
@@ -357,25 +361,27 @@ public class NvdDataService {
 		String cveId = (String) cveDataInfo.get("ID");
 		// impact
 		Map<String, Object> impact = (Map<String, Object>) cveItem.get("impact");
-		// CVSS V3가 없는 경우 V2 Score를 사용
-		if(!impact.containsKey("baseMetricV3") && !impact.containsKey("baseMetricV2")) {
-			return null;
-		}
+
+//		if(!impact.containsKey("baseMetricV3") && !impact.containsKey("baseMetricV2")) {
+//			// REJECT
+//			return null;
+//		}
 		
-		String baseScore = null;
-		String baseMetric = "V3";
+		// CVSS V3가 없는 경우 V2 Score를 사용
+		String baseScore = "0";
+		String baseMetric = "";
 		if(impact.containsKey("baseMetricV3")) {
 			Map<String, Object> baseMetricV3 = (Map<String, Object>) impact.get("baseMetricV3");
 			Map<String, Object> cvssV3 = (Map<String, Object>) baseMetricV3.get("cvssV3");
-			baseScore = String.valueOf(cvssV3.get("baseScore"));						
-		} else {
+			baseScore = String.valueOf(cvssV3.get("baseScore"));
+			baseMetric = "V3";					
+		} else if(impact.containsKey("baseMetricV2")){
 			Map<String, Object> baseMetricV2 = (Map<String, Object>) impact.get("baseMetricV2");
 			Map<String, Object> cvssV2 = (Map<String, Object>) baseMetricV2.get("cvssV2");
 			baseScore = String.valueOf(cvssV2.get("baseScore"));
 			baseMetric = "V2";
 		}
 
-		
 		List<Map<String, String>> ossList = new ArrayList<>();
 		List<Map<String, Object>> cpe_match_all = new ArrayList<>();
 	
