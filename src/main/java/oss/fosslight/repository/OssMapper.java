@@ -232,6 +232,4 @@ public interface OssMapper {
 	List<OssComponents> getConfirmOssComponentsList(OssMaster ossMaster);
 
 	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
-	
-	List<OssMaster> getOssNicknameListWithoutOwn(OssMaster ossMaster);
 }
