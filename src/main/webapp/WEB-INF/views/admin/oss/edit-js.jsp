@@ -15,6 +15,8 @@
 	var gLicenseData = new Array();
 	var detectedLicenseValid = true;
 	var deactivateFlag = "N";
+	var renameFlag = "N";
+	var nickNameClone;
 	//데이터 객체
 	var data = {
 		detail : ${empty detail ? 'null':detail},
@@ -29,6 +31,7 @@
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
+			nickNameClone = $('.multiTxtSet').clone().html();
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
 			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 			deactivateFlag = (data.detail&&data.detail.deactivateFlag)||"N";
@@ -235,90 +238,15 @@
 			
 			//라이센스 등록
 			$("#save").on('click',function(){
-				if(fn.checkValid()){
-					// 폼 에러 메세지 숨기기
-					$("span.retxt").hide();
-					// 그리드 에러 메세지 지우기
-					$("div.retxt").remove();
-
-					// 멀티 일경우 라이센스는 1건 이상이어야 한다.
-					var licenseDiv = "";
-					var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
-
-					switch (licenseChoiceLength) {
-						case 0:
-							alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
-							return false;
-							break;
-						case 1:
-							$("input[name=licenseDiv]").val("S");
-							licenseDiv = "S";
-							break;
-						default:
-							$("input[name=licenseDiv]").val("M");
-							licenseDiv = "M";
-							break;
-					}
-
-					var rows = getOssGridRows('#_licenseChoice');
-					var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
-					var gridStr = "_licenseChoice";
-					var jsValidResult = true;
-				
-					dataIds.forEach(function(dataId){
-						var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
-						var licenseName = rowData.licenseNameEx;
-
-						if(checkLicenseSelected(licenseName) == null) {
-							var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
-
-							if(errRow) {
-								errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
-							}
-
-							$("div.retxt._licenseChoice_"+dataId).show();
-							
-							jsValidResult = false;
-						}
-					});
-					
-					if(!jsValidResult || !detectedLicenseValid) {
-						alertify.error('<spring:message code="msg.common.valid" />', 0);
-						$("span.retxt").show();
-						
-						return false;
-					}
-
-					var editorVal = CKEDITOR.instances.editor.getData();
-					var localDeactivateFlag = $("[name='deactivateFlag']").val();
-
-					if(editorVal == "") {
-						if(deactivateFlag == "N" 
-							&& localDeactivateFlag == "Y"){ // deactivate Flag checked
-							alertify.alert('<spring:message code="msg.oss.required.deactivate" />', function(){});
-							return false;
-						}
-
-						if(deactivateFlag == "Y" 
-							&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
-							alertify.alert('<spring:message code="msg.oss.required.activate" />', function(){});
-							return false;
-						}
-					}
-					
-					alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
-						if (e) {
-							// 세이브 전 그리드 처리
-							$('#_licenseChoice').jqGrid('saveRow',lastsel);
-							
-							// 최종 세이브 호출
-							registSubmit();
-						} else {
-							return false;
-						}
-					});
-				}
+				fn.save();
 			});
+			
+			$("#rename").on('click',function(){
+				renameFlag = 'Y';
+				$('input[name=renameFlag]').val(renameFlag);
+				fn.save();
+			});
+			
 			$("#copy").on('click',function(){
 				activeDeleteTabInFrame();
 				var ossId = $('input[name=ossId]').val();
@@ -1629,7 +1557,7 @@
 				}
 				
 				for(var k in json.resultData.addNickArr) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
 				}
 				
@@ -1647,13 +1575,27 @@
 				}
 				
 				alertify.alert(_alertMsg, function(){});
+			} else if(json.validMsg == "rename"){
+				if(typeof json.resultData !== 'undefined'){
+					var data = json.resultData;
+					var _alertMsg  = '<spring:message code="msg.oss.check.rename"/>';
+					for(var i in data){
+						_alertMsg += '<br> - ' + data[i];
+					}
+					alertify.alert(_alertMsg, function(){});
+				}else{
+					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
+				}
+				
+				renameFlag = 'N';
+				$('input[name=renameFlag]').val(renameFlag);
 			} else if(json.resultData) {
 				var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
 					_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
 				alertify.alert(_alertMsg, function(){});
 
 				for(var k in json.resultData) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
 				}
 				
@@ -1706,7 +1648,7 @@
 				}
 				
 				for(var k in json.resultData.addNickArr) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
 				}
 				$('.smallDelete').on('click', function(){
@@ -1724,7 +1666,7 @@
 			} else if(json.resultData) {
 				alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
 				for(var k in json.resultData) {
-					$(data.clone).appendTo('.multiTxtSet');
+					$(nickNameClone).appendTo('.multiTxtSet');
 					$('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
 				}
 				$('.smallDelete').on('click', function(){
@@ -1788,6 +1730,8 @@
 			});
 		}else{
 			alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			renameFlag = 'N';
+			$('input[name=renameFlag]').val(renameFlag);
 		}
 	};
 	// 색 설정
@@ -1835,6 +1779,8 @@
 	//에러엘럿
 	function onError(data, status){
 		alertify.error('<spring:message code="msg.common.valid2" />', 0);
+		renameFlag = 'N';
+		$('input[name=renameFlag]').val(renameFlag);
     };
     
 	function deleteComment(obj){
@@ -2253,6 +2199,91 @@ var fn = {
 		_param = _param.replace(/&/g,"%26");
 		_param = _param.replace(/\+/g,"%2B"); 
 		 return _param;
+	},
+	save : function() {
+		if(fn.checkValid()){
+			// 폼 에러 메세지 숨기기
+			$("span.retxt").hide();
+			// 그리드 에러 메세지 지우기
+			$("div.retxt").remove();
+
+			// 멀티 일경우 라이센스는 1건 이상이어야 한다.
+			var licenseDiv = "";
+			var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+			switch (licenseChoiceLength) {
+				case 0:
+					alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
+					return false;
+					break;
+				case 1:
+					$("input[name=licenseDiv]").val("S");
+					licenseDiv = "S";
+					break;
+				default:
+					$("input[name=licenseDiv]").val("M");
+					licenseDiv = "M";
+					break;
+			}
+
+			var rows = getOssGridRows('#_licenseChoice');
+			var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
+			var gridStr = "_licenseChoice";
+			var jsValidResult = true;
+		
+			dataIds.forEach(function(dataId){
+				var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+				var licenseName = rowData.licenseNameEx;
+
+				if(checkLicenseSelected(licenseName) == null) {
+					var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
+
+					if(errRow) {
+						errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
+					}
+
+					$("div.retxt._licenseChoice_"+dataId).show();
+					
+					jsValidResult = false;
+				}
+			});
+			
+			if(!jsValidResult || !detectedLicenseValid) {
+				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				$("span.retxt").show();
+				
+				return false;
+			}
+
+			var editorVal = CKEDITOR.instances.editor.getData();
+			var localDeactivateFlag = $("[name='deactivateFlag']").val();
+
+			if(editorVal == "") {
+				if(deactivateFlag == "N" 
+					&& localDeactivateFlag == "Y"){ // deactivate Flag checked
+					alertify.alert('<spring:message code="msg.oss.required.deactivate" />', function(){});
+					return false;
+				}
+
+				if(deactivateFlag == "Y" 
+					&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
+					alertify.alert('<spring:message code="msg.oss.required.activate" />', function(){});
+					return false;
+				}
+			}
+			
+			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+				if (e) {
+					// 세이브 전 그리드 처리
+					$('#_licenseChoice').jqGrid('saveRow',lastsel);
+					
+					// 최종 세이브 호출
+					registSubmit();
+				} else {
+					return false;
+				}
+			});
+		}
 	}
 }
 </script>

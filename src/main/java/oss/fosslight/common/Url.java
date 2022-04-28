@@ -211,6 +211,7 @@ public final class Url {
 		public static final String OSS_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/ossBulkEditPopup";
 		
 		public static final String CHECK_OSS_VERSION_DIFF = PATH + "/checkOssVersionDiff";
+		public static final String CHECK_OSS_NAME_DIFF = PATH + "/checkOssNameDiff";
 	}
 	
 	public static final class PROJECT {
@@ -472,6 +473,7 @@ public final class Url {
 		public static final String LIST_JSP = TILES_ROOT + PATH + "/list";
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
+		public static final String CHECK_CVE_ID = PATH + "/checkCveId";
 		
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/AutoCompleteAjax";
 		public static final String VERSION_AUTOCOMPLETE_AJAX = PATH + "/VersionAutoCompleteAjax";

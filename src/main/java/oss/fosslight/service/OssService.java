@@ -116,4 +116,6 @@ public interface OssService extends HistoryConfig{
 	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 	
 	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
+
+	List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList);
 }

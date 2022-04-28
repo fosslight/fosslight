@@ -2274,15 +2274,15 @@ public class CoMailManager extends CoTopComponent {
 			if(om != null) {
 				List<String> checkOssNickNamesAdd = new ArrayList<>();
 				
-				if(om.getOssNicknames().length > 0) {
-					if(om.getExistOssNickNames().length > 0) {
+				if(om.getOssNicknames() != null && om.getOssNicknames().length > 0) {
+					if(om.getExistOssNickNames() != null && om.getExistOssNickNames().length > 0) {
 						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames()).stream().filter(x -> !Arrays.asList(om.getExistOssNickNames()).contains(x)).collect(Collectors.toList());
 					}else {
 						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames());
 					}
 				}
 				
-				if(checkOssNickNamesAdd.size() > 0) {
+				if(checkOssNickNamesAdd != null && checkOssNickNamesAdd.size() > 0) {
 					String changeOssNickName = "";
 					
 					if(om.getExistOssNickNames().length > 0) {

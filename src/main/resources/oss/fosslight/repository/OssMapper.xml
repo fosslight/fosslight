@@ -2190,4 +2190,15 @@
 		ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
 		LIMIT 5
 	</select>
+	
+	<select id="getOssNicknameListWithoutOwn" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
+		SELECT
+			OSS_NICKNAME
+		FROM
+			OSS_NICKNAME
+		WHERE
+			OSS_NAME <![CDATA[<>]]> #{ossName}
+		GROUP BY
+			OSS_NICKNAME 
+	</select>
 </mapper>

@@ -15,6 +15,7 @@
 				<input type="hidden" name="downloadLocation"/>
 				<input type="hidden" name="licenseId" value=""/>
 				<input type="hidden" name="deactivateFlag" value="N"/>
+				<input type="hidden" name="renameFlag" value="N"/>
 				<input type="hidden" name="ossCopyFlag" value="N"/>
 				<!-- Main Table [S] -->
 				<table class="dCase">
@@ -27,7 +28,11 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/><c:if test="${!empty ossId}"><input type="checkbox" id="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate</c:if>
+									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/>
+										<c:if test="${!empty ossId}">
+											<input type="checkbox" id="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate
+											<span style="display:inline-block; width:5px;"></span><input id="rename" type="button" value="Rename" class="btnColor blue" />
+										</c:if>
 									<span class="retxt"></span>
 								</div>
 							</td>
