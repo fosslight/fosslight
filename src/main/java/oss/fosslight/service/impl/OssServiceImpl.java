@@ -2904,8 +2904,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			afterOssNameVersionBeanList.add(afterOssNameVersionBean);
 		}
 		
-		beforeOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
-		afterOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+		if(beforeOssNameVersionBeanList != null && !beforeOssNameVersionBeanList.isEmpty()) {
+			beforeOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+			afterOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+		}
 		
 		ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
 		ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
