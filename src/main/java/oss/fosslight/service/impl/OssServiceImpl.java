@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2905,8 +2906,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		if(beforeOssNameVersionBeanList != null && !beforeOssNameVersionBeanList.isEmpty()) {
-			beforeOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
-			afterOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
+			beforeOssNameVersionBeanList = beforeOssNameVersionBeanList.stream()
+										.sorted(Comparator.comparing(OssMaster::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+										.collect(Collectors.toList());
+			afterOssNameVersionBeanList = afterOssNameVersionBeanList.stream()
+										.sorted(Comparator.comparing(OssMaster::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+										.collect(Collectors.toList());
 		}
 		
 		ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
@@ -2927,7 +2932,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setPrjId(pm.getPartnerId());
 					
 					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					confirmOssComponentsList = confirmOssComponentsList.stream()
+											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+											.collect(Collectors.toList());
 					
 					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
@@ -2975,7 +2982,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setPrjId(prj.getPrjId());
 					
 					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					confirmOssComponentsList = confirmOssComponentsList.stream()
+											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+											.collect(Collectors.toList());
 					
 					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
