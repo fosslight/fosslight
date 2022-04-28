@@ -1037,6 +1037,24 @@ public class T2CoProjectValidator extends T2CoValidator {
 		}
 
 		if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
+			if(kind.equals("HOMEPAGE")) {
+				if(val.startsWith("http://") || val.startsWith("https://") || val.startsWith("git://") || val.startsWith("ftp://") || val.startsWith("svn://")) {
+					val = val.split("//")[1];
+				}
+				
+				if(val.startsWith("www.")) {
+					val = val.substring(5, val.length());
+				}
+				
+				if(getData.startsWith("http://") || getData.startsWith("https://") || getData.startsWith("git://") || getData.startsWith("ftp://") || getData.startsWith("svn://")) {
+					getData = getData.split("//")[1];
+				}
+				
+				if(getData.startsWith("www.")) {
+					getData = getData.substring(5, getData.length());
+				}
+			}
+			
 			return !val.equals(getData);
 		}
 		
