@@ -2285,7 +2285,7 @@ public class CoMailManager extends CoTopComponent {
 				if(checkOssNickNamesAdd != null && checkOssNickNamesAdd.size() > 0) {
 					String changeOssNickName = "";
 					
-					if(om.getExistOssNickNames().length > 0) {
+					if(om.getExistOssNickNames() != null && om.getExistOssNickNames().length > 0) {
 						for(String nickName : om.getExistOssNickNames()) {
 							changeOssNickName += nickName + "<br/>";
 						}
