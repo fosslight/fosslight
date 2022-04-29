@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -2867,14 +2869,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
 		
-		if(!beforeOssName.equals(afterOssName)) {
-			for(OssMaster om : beforeOssMap.values()) {
-				if(!ossMaster.getOssVersion().equals(om.getOssVersion())) {
-					beforeOssNameVersionOssIdList.add(om.getOssId());
-					beforeOssNameVersionBean = getOssInfo(om.getOssId(), true);
-					beforeOssNameVersionBeanList.add(beforeOssNameVersionBean);
-				}
-				
+		for(OssMaster om : beforeOssMap.values()) {
+			if(!ossMaster.getOssVersion().equals(om.getOssVersion())) {
+				beforeOssNameVersionOssIdList.add(om.getOssId());
+				beforeOssNameVersionBean = getOssInfo(om.getOssId(), true);
+				beforeOssNameVersionBeanList.add(beforeOssNameVersionBean);
+			}
+			
+			if(!beforeOssName.equals(afterOssName)) {
 				om.setOssName(afterOssName);
 				ossMapper.changeOssNameByDelete(om);
 			}
@@ -2896,20 +2898,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossMapper.deleteOssNickname(ossMaster);
 		}
 		
+		CoCodeManager.getInstance().refreshOssInfo();
+		
+		for(String ossId : beforeOssNameVersionOssIdList) {
+			afterOssNameVersionBean = getOssInfo(ossId, true);
+			afterOssNameVersionBeanList.add(afterOssNameVersionBean);
+		}
+		
+		if(beforeOssNameVersionBeanList != null && !beforeOssNameVersionBeanList.isEmpty()) {
+			beforeOssNameVersionBeanList = beforeOssNameVersionBeanList.stream()
+										.sorted(Comparator.comparing(OssMaster::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+										.collect(Collectors.toList());
+			afterOssNameVersionBeanList = afterOssNameVersionBeanList.stream()
+										.sorted(Comparator.comparing(OssMaster::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+										.collect(Collectors.toList());
+		}
+		
+		ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
+		ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
+		
 		if(!beforeOssName.equals(afterOssName)) {
-			CoCodeManager.getInstance().refreshOssInfo();
-			
-			for(String ossId : beforeOssNameVersionOssIdList) {
-				afterOssNameVersionBean = getOssInfo(ossId, true);
-				afterOssNameVersionBeanList.add(afterOssNameVersionBean);
-			}
-			
-			beforeOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
-			afterOssNameVersionBeanList.sort(Comparator.comparing(OssMaster::getOssVersion));
-			
-			ossNameVersionDiffMergeObject.put("before", beforeOssNameVersionBeanList);
-			ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
-			
 			ossMaster.setOssName(beforeOssName);
 			ossMaster.setOssVersion(null);
 			
@@ -2924,7 +2932,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setPrjId(pm.getPartnerId());
 					
 					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					confirmOssComponentsList = confirmOssComponentsList.stream()
+											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+											.collect(Collectors.toList());
 					
 					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
@@ -2972,7 +2982,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setPrjId(prj.getPrjId());
 					
 					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList.sort(Comparator.comparing(OssComponents::getOssVersion));
+					confirmOssComponentsList = confirmOssComponentsList.stream()
+											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
+											.collect(Collectors.toList());
 					
 					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
@@ -3059,12 +3071,29 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList) {
 		if(checkList != null && checkList.size() > 0) {
-			List<OssMaster> ossNicknameList = ossMapper.getOssNicknameListWithoutOwn(ossMaster);
-			ossNicknameList = ossNicknameList.stream().filter(e -> checkList.contains(e.getOssNickname())).collect(Collectors.toList());
+			List<OssMaster> ossNameCheckList = ossMapper.selectOssNameList();
+			ossNameCheckList = ossNameCheckList.stream()
+							.filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssName())))
+							.collect(Collectors.toList());
+						
+			List<OssMaster> ossNicknameCheckList = ossMapper.selectOssNicknameListWithoutOwn(ossMaster);
+			ossNicknameCheckList = ossNicknameCheckList.stream()
+								.filter(e -> checkList.stream().anyMatch(Predicate.isEqual(e.getOssNickname())))
+								.collect(Collectors.toList());
 			
-			if(ossNicknameList != null && ossNicknameList.size() > 0) {
-				for(OssMaster om : ossNicknameList) {
-					duplicatedList.add(om.getOssNickname());
+			if(ossNameCheckList != null && ossNameCheckList.size() > 0) {
+				for(OssMaster om : ossNameCheckList) {
+					if(duplicatedList.isEmpty() || !duplicatedList.contains(om.getOssName())) {
+						duplicatedList.add(om.getOssName());
+					}
+				}
+			}
+			
+			if(ossNicknameCheckList != null && ossNicknameCheckList.size() > 0) {
+				for(OssMaster om : ossNicknameCheckList) {
+					if(duplicatedList.isEmpty() || !duplicatedList.contains(om.getOssNickname())) {
+						duplicatedList.add(om.getOssNickname());
+					}
 				}
 			}
 		}

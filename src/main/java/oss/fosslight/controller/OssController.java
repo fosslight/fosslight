@@ -533,7 +533,7 @@ public class OssController extends CoTopComponent{
 				log.error(e.getMessage(), e);
 			}
 			
-			if(!isNew && isChangedName && CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())){
+			if(!isNew && CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())){
 				if(updateOssNameVersionDiffMergeObject != null) {
 					List<OssMaster> beforeOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("before");
 					List<OssMaster> afterOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
