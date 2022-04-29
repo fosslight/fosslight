@@ -267,6 +267,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 			oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
 			
+			protocol = "";
+			endUrl = "";
+			downloadlocationUrlEndSplit = "";
+			
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
 
