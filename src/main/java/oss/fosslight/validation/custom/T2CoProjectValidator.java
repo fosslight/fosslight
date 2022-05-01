@@ -1672,6 +1672,36 @@ public class T2CoProjectValidator extends T2CoValidator {
 							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 						}
 					}
+					
+					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get(checkKey);
+					if(ossBean != null) {
+						if(CoConstDef.FLAG_YES.equals(ossBean.getDeactivateFlag())){
+							if (CommonFunction.isAdmin()) {
+								errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+							} else {
+								diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+							}
+						}
+					} else {
+						OssMaster om = null;
+						
+						for(String key : CoCodeManager.OSS_INFO_UPPER.keySet()) {
+							if(key.contains(bean.getOssName().toUpperCase())) {
+								om = CoCodeManager.OSS_INFO_UPPER.get(key);
+								break;
+							}
+						}
+						
+						if(om != null) {
+							if(CoConstDef.FLAG_YES.equals(om.getDeactivateFlag())){
+								if (CommonFunction.isAdmin()) {
+									errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+								} else {
+									diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+								}
+							}
+						}
+					}
 				}
 
 				// 2) OSS VERSION

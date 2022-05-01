@@ -1050,10 +1050,15 @@
 				 , A.CVSS_SCORE
 				 , A.COPYRIGHT AS COPYRIGHT_TEXT
 		  FROM OSS_MASTER A
-		WHERE A.USE_YN = 'Y'
-			AND A.DEACTIVATE_FLAG = 'N'
-			AND A.OSS_VERSION = #{ossVersion}
-			AND A.DOWNLOAD_LOCATION = #{downloadLocation}
+		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
+	 	    ON A.OSS_ID = DOWN.OSS_ID
+		 WHERE A.USE_YN = 'Y'
+		   AND A.DEACTIVATE_FLAG = 'N'
+		   AND A.OSS_VERSION = #{ossVersion}
+		   AND (
+				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%') 
+				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+			   )
 	</select>
 
 	<select id="getOssFindByDownloadLocation" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
@@ -1067,10 +1072,14 @@
 				 , A.COPYRIGHT AS COPYRIGHT_TEXT
 				 , B.VERSION_DIFF_FLAG
 		  FROM OSS_MASTER A
-		  INNER JOIN OSS_MASTER_LICENSE_FLAG B ON A.OSS_ID = B.OSS_ID
+		 INNER JOIN OSS_MASTER_LICENSE_FLAG B ON A.OSS_ID = B.OSS_ID
+		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN ON A.OSS_ID = DOWN.OSS_ID
 		WHERE A.USE_YN = 'Y'
 			AND A.DEACTIVATE_FLAG = 'N'
-			AND A.DOWNLOAD_LOCATION = #{downloadLocation}
+			AND (
+				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%') 
+				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+			   )
 	</select>
 
 	<select id="getLicenses" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">

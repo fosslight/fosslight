@@ -167,6 +167,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			errors.add(e.getStatusText());
 		}
 
+		String protocol = "";
+		String endUrl = "";
+		String downloadlocationUrlEndSplit = "";
+		
 		for(ProjectIdentification oss : ossList) {
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
@@ -192,6 +196,40 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				continue;
 			}
 
+			if(oss.getDownloadLocation().contains("github.com")) {
+				if(oss.getDownloadLocation().startsWith("git@")){
+					protocol = "git@";
+					oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
+				}
+				
+				if(oss.getDownloadLocation().startsWith("http://") 
+						|| oss.getDownloadLocation().startsWith("https://")
+						|| oss.getDownloadLocation().startsWith("git://")
+						|| oss.getDownloadLocation().startsWith("ftp://")
+						|| oss.getDownloadLocation().startsWith("svn://")) {
+					if(isEmpty(protocol)) {
+						protocol = oss.getDownloadLocation().split("//")[0] + "//";
+						oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
+					}
+				}
+				
+				if(oss.getDownloadLocation().startsWith("www.")) {
+					protocol += oss.getDownloadLocation().substring(0, 4);
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
+				}
+				
+				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
+				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+					downloadlocationUrlEndSplit = oss.getDownloadLocation().substring(oss.getDownloadLocation().indexOf("#"), oss.getDownloadLocation().length());
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+				}
+				
+				if(oss.getDownloadLocation().endsWith(".git")) {
+					endUrl = ".git";
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
+				}
+			}
+			
 			// Search Priority 2. find by oss download location and version
 			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
@@ -202,6 +240,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				oss.setCheckLicense(checkedLicense);
 				oss.setCheckedEvidence(evidence);
 				oss.setCheckedEvidenceType("DB");
+				oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
 				result.add(oss);
 				continue;
 			}
@@ -221,10 +260,17 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				oss.setCheckLicense(checkedLicense);
 				oss.setCheckedEvidence(evidence);
 				oss.setCheckedEvidenceType("DB");
+				oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
 				result.add(oss);
 				continue;
 			}
 
+			oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
+			
+			protocol = "";
+			endUrl = "";
+			downloadlocationUrlEndSplit = "";
+			
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
 
