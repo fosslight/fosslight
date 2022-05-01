@@ -57,7 +57,6 @@
 				<input type="hidden" name="prjModelJson" style="display: none;"/>
 				<input type="hidden" name="comment" />
 				<input type="hidden" name="userComment" />
-				<!-- 2018-07-19 choye 추가 -->
 				<input type="hidden" name="commId" />
 				<input type="hidden" name="statusRequestYn" />
 				<input type="hidden" id="refPartnerId" name="refPartnerId" value="${project.refPartnerId}" />
@@ -71,7 +70,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.project.name" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input name="prjName" type="text" class="autoComProjectNm w100P"/>
+									<input name="prjName" type="text" value="${project.prjName}" class="autoComProjectNm w100P"/>
 									<span class="retxt">This field is required.</span>
 								</div>
 								<c:if test="${empty project.prjId}"><a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:38px; left:1060px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a></c:if>
@@ -82,7 +81,7 @@
 							<th class="dCase"><spring:message code="msg.common.field.project.version" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input name="prjVersion" type="text" class="w100P"/>
+									<input name="prjVersion" value="${project.prjVersion}" type="text" class="w100P"/>
 									<span class="retxt">This field is required.</span>
 								</div>
 							</td>

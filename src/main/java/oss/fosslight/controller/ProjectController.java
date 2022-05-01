@@ -3244,11 +3244,12 @@ public class ProjectController extends CoTopComponent {
 
 		project = projectService.getProjectDetail(project);
 		
-		String comemnt = "";
+		String comment = "";
 		String identificationStatus = project.getIdentificationStatus();
 		String verificationStatus = project.getVerificationStatus();
 		
-		project.setPrjName(project.getPrjName() + "_Copied");
+		project.setPrjName(project.getPrjName());
+		project.setPrjVersion(avoidNull(project.getPrjVersion()) + "_Copied");
 		
 		if(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(identificationStatus)) {
 			T2Users user = new T2Users();
@@ -3259,21 +3260,21 @@ public class ProjectController extends CoTopComponent {
 			project.setPriority(CoConstDef.CD_PRIORITY_P2);
 			project.setReviewerName("");
 			project.setPrjUserName(userService.getUser(user).getUserName());
-			
-			comemnt = "Copy with confirm status from [PRJ-" + prjId + "] " + project.getPrjName();
+
+			comment = "Copy with confirm status from [PRJ-" + prjId + "] " + project.getPrjName();
 			
 			if(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(verificationStatus)) {
 				project.setVerificationStatusConfFlag(CoConstDef.FLAG_YES);
 			}
 		}else {
-			comemnt = "Copied from [PRJ-" + prjId + "] " + project.getPrjName();
+			comment = "Copied from [PRJ-" + prjId + "] " + project.getPrjName();
 			
 			if (!isEmpty(project.getPrjVersion())) {
-				comemnt += "_" + project.getPrjVersion();
+				comment += "_" + project.getPrjVersion();
 			}
 		}
 		
-		project.setComment(comemnt);
+		project.setComment(comment);
 		project.setDistributeDeployTime(null);
 		project.setDistributeDeployYn(null);
 		project.setDistributeDeployModelYn(null);
