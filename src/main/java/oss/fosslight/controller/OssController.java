@@ -357,7 +357,8 @@ public class OssController extends CoTopComponent{
 		if(isVersionup) {
 			ossMaster.setOssVersion(_version);
 		} else {
-			ossMaster.setOssName(ossMaster.getOssName() + "_Copied");
+			ossMaster.setOssName(ossMaster.getOssName());
+			ossMaster.setOssVersion(avoidNull(ossMaster.getOssVersion()) + "_Copied");
 		}
 		
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
