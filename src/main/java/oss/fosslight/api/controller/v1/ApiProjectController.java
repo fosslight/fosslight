@@ -206,12 +206,16 @@ public class ApiProjectController extends CoTopComponent {
 		try {
 			if(CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
 				Map<String, Object> paramMap = new HashMap<String, Object>();
-				
-				String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
-				
-				if(isEmpty(osTypeStr)) {
-					return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
-							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+
+				if(!isEmpty(osType)) {
+					String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
+
+					if(isEmpty(osTypeStr)) {
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+					}
+				} else {
+					osType = CoConstDef.CD_OS_TYPE_LINUX;
 				}
 				
 				if(!isEmpty(distributionType)) {
