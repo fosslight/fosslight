@@ -3256,7 +3256,6 @@ public class ProjectController extends CoTopComponent {
 			user.setUserId(loginUserName());
 			
 			project.setIdentificationStatusConfFlag(CoConstDef.FLAG_YES);
-			project.setPrjVersion(avoidNull(project.getPrjVersion(), "").equals("") ? avoidNull(project.getPrjVersion()) : project.getPrjVersion() + "_Copied");
 			project.setPriority(CoConstDef.CD_PRIORITY_P2);
 			project.setReviewerName("");
 			project.setPrjUserName(userService.getUser(user).getUserName());
