@@ -44,7 +44,7 @@
         for (var i=0; i < loadedInfo.length; i++){
             for (var j = 0; j < jsonData.length; j++){
                 if (jsonData[j]['oss']['ossName'] === loadedInfo[i]['ossName']){
-                    jsonData[j]['status'] = 'loaded';
+                    jsonData[j]['status'] = 'Added';
                     break;
                 }
             }
@@ -71,6 +71,7 @@
                             loadedInfo = data['value'];
                             console.log(data);
                             checkLoaded();
+                            alertify.alert('<spring:message code="msg.common.success" />', function(){});
                         } else if (data['res'] == false) {
                             showErrorMsg();
                         }
@@ -103,12 +104,12 @@
                 { name: 'status', index:'status', width: 150, align: 'left'}
             ],
             viewrecords: true,
-            rowNum: 10,
-            rowList:[20,40,60],
+            rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
+            rowList: [${ct:getConstDef("DISP_PAGENATION_LIST_STR")}],
             autowidth: true,
             gridview: true,
             height: 'auto',
-            pager: "#jqGridPager"
+            pager: '#pager'
         });
 
         var accept1 = '';
