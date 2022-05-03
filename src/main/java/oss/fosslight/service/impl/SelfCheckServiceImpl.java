@@ -600,17 +600,18 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		selfCheckMapper.deleteOssComponentsWithIds(param);
 		
+		// delete file
+		if(project.getCsvFile() != null && project.getCsvFile().size() > 0) {
+			for (int i = 0; i < project.getCsvFile().size(); i++) {
+				selfCheckMapper.deleteFileBySeq(project.getCsvFile().get(i));
+				fileService.deletePhysicalFile(project.getCsvFile().get(i), "SELF");
+			}
+		}
+		
 		// 파일 등록
-		if(!isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
+		if(!isEmpty(project.getSrcCsvFileId())){
 			selfCheckMapper.updateFileId(project);
 			
-			if(project.getCsvFile() != null) {
-				for (int i = 0; i < project.getCsvFile().size(); i++) {
-					fileService.deletePhysicalFile(project.getCsvFile().get(i), "SELF");
-					selfCheckMapper.deleteFileBySeq(project.getCsvFile().get(i));
-				}		
-				
-			}
 			if(project.getCsvFileSeq() != null) {
 				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
 					selfCheckMapper.updateFileBySeq(project.getCsvFileSeq().get(i));

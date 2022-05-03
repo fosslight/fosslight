@@ -772,8 +772,9 @@
 	</select>
 	
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
-		DELETE FROM T2_FILE 
-		 WHERE FILE_SEQ = #{fileSeq} 	
+		UPDATE T2_FILE 
+			SET DEL_YN = 'Y'
+		 WHERE FILE_SEQ = #{fileSeq}
 	</delete>
 	
 	<update id="updateFileBySeq" parameterType="oss.fosslight.domain.T2File">
