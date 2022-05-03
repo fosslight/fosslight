@@ -19,7 +19,7 @@
     </div>
     <div class="btnLayout">
         <span class="left">
-            <input type="button" id="btn" value="Bulk registration" class="btnColor red" style="width: 125px;" />
+            <input type="button" id="btn" value="Save" class="btnColor red" style="width: 125px;" />
         </span>
     </div>
     </body>

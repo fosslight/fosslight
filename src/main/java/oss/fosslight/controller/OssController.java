@@ -1253,14 +1253,12 @@ public class OssController extends CoTopComponent{
 			// if oss not duplicated save
 			if(!isDup){
 				notSavedOss.add(oss);
-				log.info("duplicate not here");
 			}
 		}
 		for (OssMaster oss : notSavedOss){
 			ossService.registOssMaster(oss);
 			Map<String, String> ossNameMap = new HashMap<>();
 			ossNameMap.put("ossName", oss.getOssName());
-			log.info("ossName ={}", oss.getOssName());
 			ossNameMapList.add(ossNameMap);
 		}
 		resMap.put("res", true);
@@ -2247,7 +2245,7 @@ public class OssController extends CoTopComponent{
 			for (int i = 0; i < ossList.size(); i++) {
 				ossWithStatus = new HashMap<>();
 				ossWithStatus.put("oss", ossList.get(i));
-				ossWithStatus.put("status", "Not loaded");
+				ossWithStatus.put("status", "Ready");
 				ossWithStatusList.add(ossWithStatus);
 			}
 		} else {
