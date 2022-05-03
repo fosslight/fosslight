@@ -1047,6 +1047,10 @@
 			var fileData = src_evt.csvDelFileSeq;
 			var fileSeq = src_evt.csvFileSeq;
 			var identificationSubStatusSrc = "";
+			if(fileSeq.length == 0) {
+				$("#srcCsvFileId").val("");
+				csvFileId = "";
+			}
 			
 			// 메인 그리드
 			var mainData = target.jqGrid('getGridParam','data');

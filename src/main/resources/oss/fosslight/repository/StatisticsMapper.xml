@@ -337,7 +337,7 @@
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
 							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
-								AND OM.CREATOR != OM.MODIFIER) STAT
+								AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
 					</choose>    
 				    ON A.DATE = STAT.DATE
@@ -376,6 +376,18 @@
 								</otherwise>
 							</choose>
 							   FROM LICENSE_MASTER LM
+							<if test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
+							  INNER JOIN (
+							  		SELECT OLD.LICENSE_ID
+							  	  	  FROM OSS_MASTER OM
+							  	INNER JOIN OSS_LICENSE_DECLARED OLD
+							  	        ON OM.OSS_ID = OLD.OSS_ID
+							  	     WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
+							  	       AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')
+							  	  GROUP BY OLD.LICENSE_ID
+							  ) OSM
+							     ON LM.LICENSE_ID = OSM.LICENSE_ID
+							</if>
 							  INNER JOIN T2_USERS T1
 							     ON LM.MODIFIER = T1.USER_ID
 							  INNER JOIN (SELECT CD_DTL_NO
@@ -397,7 +409,7 @@
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON LM.MODIFIER = ADMIN.USER_ID AND LM.USE_YN = 'Y'
 							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
-							    AND LM.CREATOR != LM.MODIFIER) STAT
+							    AND DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
 					</choose>
 				    ON A.DATE = STAT.DATE
