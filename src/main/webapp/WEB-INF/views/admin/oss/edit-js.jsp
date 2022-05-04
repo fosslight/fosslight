@@ -124,13 +124,13 @@
 							if(index == 0){
 								$('.multiDownloadLocationSet span:first').remove();
 							}
-							if(downloadLocation!=''){
+							if(downloadLocation != '' && downloadLocation != null){
 								$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
 								$('.multiDownloadLocationSet input[type=text]:last').val(downloadLocation);
 								$('.smallDelete').on('click', function(){
 									$(this).parent().remove();
 								});
-							}					
+							}
 						});
 						
 						break;
