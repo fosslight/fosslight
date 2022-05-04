@@ -134,10 +134,38 @@
 			})				
 			
 			$('#drop').on('click', function(){
-				var comment = CKEDITOR.instances.editor2.getData();
+				var comment = CKEDITOR.instances.editor.getData();
+
 				if(comment == ""){
-					alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
-				}else{
+
+					var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to drop this project?\nThis will permanently drop all datas.';
+					innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+					innerHtml    += '		<div id="editor3" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
+					innerHtml    += '	</div>';
+					innerHtml    += '</div>';
+					
+					alertify.confirm(innerHtml, function () {
+						if(CKEDITOR.instances['editor3'].getData() == ""){
+							alertify.alert('<spring:message code="msg.project.required.comments" />', function(){});
+
+							return false;
+						}else{
+							fn.exeProjectDrop();
+						}
+					});
+
+					var _editor = CKEDITOR.instances.editor3;
+					
+					if(_editor) {
+						_editor.destroy();
+					}
+					
+					CKEDITOR.replace('editor3', {});
+					
+				}else if(comment != ""){
+					alertify.alert('<spring:message code="msg.project.warn.drop.rsv" />', function(){});
+				}
+				else{
 					if(distributionStatus == "PROC"){
 						var comment = '<spring:message code="msg.project.distribution.loading" />';
 						
