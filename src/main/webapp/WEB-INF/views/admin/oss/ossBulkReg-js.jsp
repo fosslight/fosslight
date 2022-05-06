@@ -41,12 +41,17 @@
 
     function checkLoaded(){
         $("#list").jqGrid('clearGridData');
-        for (var i=0; i < loadedInfo.length; i++){
-            for (var j = 0; j < jsonData.length; j++){
-                if (jsonData[j]['oss']['ossName'] === loadedInfo[i]['ossName']){
-                    jsonData[j]['status'] = 'Added';
+        for (var i=0; i < jsonData.length; i++){
+            var addedOSS = false;
+            for (var j = 0; j < loadedInfo.length; j++){
+                if (jsonData[i]['oss']['ossName'] === loadedInfo[j]['ossName']){
+                    jsonData[i]['status'] = 'Added';
+                    addedOSS = true;
                     break;
                 }
+            }
+            if (!addedOSS) {
+                jsonData[i]['status'] = 'Failed';
             }
         }
         stubColData();
