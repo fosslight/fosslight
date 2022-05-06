@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.6 (06/05/2022)
+## 🐛 Hotfixes
+
+- Fix the bug if the download location is null @soimkim (#500)
+- Fix the page not showing in OSS Bulk @soimkim (#498)
+- After deleting the uploaded file in Self-check, change the error that occurs when saving. @FOSSLight-dev  (#496)
+- Fix bug where suffix is added twice in version @soimkim (#494)
+
+## 🔧 Maintenance
+
+- Change Status Message for Row Registration Failed in OSS Bulk @soimkim (#503)
+- When copying OSS and Project, try setting the name and version. @soimkim (#492)
+- Fix the bug where the warning message is not displayed for the deactivated OSS @FOSSLight-dev (#490)
+
+---
+
 ## v1.3.5 (29/04/2022)
 ## Changes
 ## 🐛 Hotfixes
@@ -502,31 +518,3 @@
 - Moving hardcoded messages to US and KR properties @epicarts (#210)
 - Change PR merged action to only work for main @soimkim (#208)
 - Add contributors to README @soimkim (#202)
-
----
-
-## v1.2.11 (15/10/2021)
-## Changes
-## 🚀 Features
-
-- Changed - Recover Missing Messages @FOSSLight-dev (#198)
-- Supports Self-Check List OSS report as csv attachment @riyenas0925 (#190)
-- Supports BIN tab OSS report as csv attachment @riyenas0925 (#181)
-- Add send to everyone when sending comments @riyenas0925 (#176)
-- Add SPDX json and yaml types for pakaging notice download @hyewoncc (#177)
-- Supports SRC tab OSS report as csv attachment @riyenas0925 (#162)
-- Add a language change function using the dropdown for task 4 @suhwan-cheon (#151)
-
-## 🐛 Hotfixes
-
-- Changed - Recover Missing Messages @FOSSLight-dev (#198)
-- Change link format of vulnerability discovered mail (#168) @acafela (#175)
-- Restore message.properties @epicarts (#185)
-
-## 🔧 Maintenance
-
-- Translated from English to Korean in ko properties file @epicarts (#183)
-- Change Self-Check in Obligation Warning message @Lee-JaeHyuk (#192)
-- Fix error where download location is not output when ossname is "-" @riyenas0925 (#186)
-- Change the SPDX Spreadsheet output method for OSS Name is - @riyenas0925 (#179)
-- Change the status column to icon in 3rd party list @epicarts (#154)
