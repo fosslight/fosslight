@@ -138,7 +138,7 @@
 
 				if(comment == ""){
 
-					var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to drop this project?\nThis will permanently drop all datas.';
+					var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to drop this project?\n';
 					innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
 					innerHtml    += '		<div id="editor3" style="width:470px; height:300px;">' + CKEDITOR.instances['editor'].getData() + '</div>';
 					innerHtml    += '	</div>';
