@@ -1024,7 +1024,7 @@ public class OssController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(resultMap);
 	}
-	
+
 //	@GetMapping(value=OSS.OSS_BULK_REG, produces = "text/html; charset=utf-8")
 //	public String ossBulkRegPage(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 //		// oss list (oss name으로만)
@@ -1174,6 +1174,154 @@ public class OssController extends CoTopComponent{
 		return OSS.OSS_BULK_REG_JSP;
 	}
 
+	public HashMap<String, Object> saveOssFromList(OssAnalysis analysisBean) {
+		HashMap<String, Object> resMap = new HashMap<>();
+		// Duplicated OSS
+		if (CoCodeManager.OSS_INFO_UPPER.containsKey((analysisBean.getOssName() + "_" + avoidNull(analysisBean.getOssVersion())).toUpperCase())) {
+			resMap.put("result", false);
+			resMap.put("msg", "Skip");
+			return resMap;
+		}
+
+		// Convert analysis Data -> OssMaster
+		OssMaster resultData = new OssMaster();
+
+		if (!isEmpty(analysisBean.getOssName())) {
+			resultData.setOssName(analysisBean.getOssName());
+		}
+
+		if (!isEmpty(analysisBean.getOssVersion())) {
+			resultData.setOssVersion(analysisBean.getOssVersion());
+		}
+
+		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
+		if (isNewVersion) {
+			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
+		}
+		resultData.setGridId(analysisBean.getGridId());
+		resultData.setLicenseDiv(CoConstDef.LICENSE_DIV_SINGLE); // default
+		// For multi licenses
+		List<OssLicense> ossLicenseList = new ArrayList<>();
+		int licenseIdx = 0;
+
+		if (!isEmpty(analysisBean.getLicenseName())) {
+			for (String s : analysisBean.getLicenseName().toUpperCase().split(" OR ")) {
+				// Order is very important
+				String orGroupStr = s.replaceAll("\\(", " ").replaceAll("\\)", " ");
+				boolean groupFirst = true;
+				for (String s2 : orGroupStr.split(" AND ")) {
+					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(s2.trim().toUpperCase());
+					OssLicense licenseBean = new OssLicense();
+
+					if (license != null) {
+						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
+						licenseBean.setLicenseId(license.getLicenseId());
+						licenseBean.setLicenseName(license.getLicenseNameTemp());
+						licenseBean.setOssLicenseComb(groupFirst ? "OR" : "AND");
+					} else {
+						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
+						licenseBean.setLicenseId("");
+						licenseBean.setLicenseName(s2);
+						licenseBean.setOssLicenseComb(groupFirst ? "OR" : "AND");
+					}
+
+					ossLicenseList.add(licenseBean);
+					groupFirst = false;
+				}
+			}
+
+			resultData.setLicenseName(analysisBean.getLicenseName());
+			resultData.setOssLicenses(ossLicenseList);
+		} else {
+			resultData.setLicenseName("");
+		}
+
+		if (ossLicenseList.size() > 1) {
+			resultData.setLicenseDiv(CoConstDef.LICENSE_DIV_MULTI);
+		}
+
+		// Convert nick Name to Array
+		if (!isEmpty(analysisBean.getOssNickname())) {
+			resultData.setOssNickname(analysisBean.getOssNickname());
+			resultData.setOssNicknames(analysisBean.getOssNickname().split(","));
+		}
+
+		if (!isEmpty(analysisBean.getDownloadLocation())) {
+			String result = "";
+
+			for (String url : analysisBean.getDownloadLocation().split(",")) {
+				if (!isEmpty(result)) {
+					result += ",";
+				}
+				if (url.endsWith("/")) {
+					result += url.substring(0, url.length() - 1);
+				} else {
+					result += url;
+				}
+			}
+
+			resultData.setDownloadLocations(result.split(","));
+			resultData.setDownloadLocation(result);
+		} else {
+			resultData.setDownloadLocation("");
+		}
+
+		if (!isEmpty(analysisBean.getHomepage())) {
+			if (analysisBean.getHomepage().endsWith("/")) {
+				String homepage = analysisBean.getHomepage();
+				resultData.setHomepage(homepage.substring(0, homepage.length() - 1));
+			} else {
+				resultData.setHomepage(analysisBean.getHomepage());
+			}
+		} else {
+			resultData.setHomepage("");
+		}
+		if (!isEmpty(analysisBean.getDetectedLicense())) {
+			resultData.setDetectedLicenses(Arrays.asList(analysisBean.getDetectedLicense().split(",")));
+		}
+		resultData.setAttribution(analysisBean.getAttribution());
+		resultData.setCopyright(analysisBean.getOssCopyright());
+		resultData.setSummaryDescription(analysisBean.getSummaryDescription());
+		// Without using editor, in case of comments registered as textarea, change to br tag
+		resultData.setComment(CommonFunction.lineReplaceToBR(analysisBean.getComment()));
+		// It does not clear&insert nickname, but adds to the remaining nicknames after removing duplicates.
+		resultData.setAddNicknameYn(CoConstDef.FLAG_YES);
+
+
+		Map<String, Object> result = null;
+		String resultOssId = "";
+
+		try {
+			resultOssId = ossService.registOssMaster(resultData);
+			analysisBean.setComponentId(analysisBean.getGroupId());
+			analysisBean.setReferenceOssId(resultOssId);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resMap.put("result", false);
+			resMap.put("msg", "Fail");
+			return resMap;
+		}
+
+		CoCodeManager.getInstance().refreshOssInfo();
+		History h = ossService.work(resultData);
+		h.sethAction(CoConstDef.ACTION_CODE_INSERT);
+		historyService.storeData(h);
+
+		// Send an email
+		try {
+			CoMail mailBean = new CoMail(isNewVersion ? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION : CoConstDef.CD_MAIL_TYPE_OSS_REGIST);
+			mailBean.setParamOssId(resultOssId);
+
+			mailBean.setComment(resultData.getComment());
+			CoMailManager.getInstance().sendMail(mailBean);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		resMap.put("result", true);
+		resMap.put("msg", "");
+		return resMap;
+	}
+
 	@PostMapping(value= OSS.BULK_REG_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjaxJson(
 			@RequestBody List<OssMaster> ossMasters
@@ -1184,83 +1332,50 @@ public class OssController extends CoTopComponent{
 		Map<String, Object> resMap = new HashMap<>();
 
 		//When the ossMaster List delivered from the client is empty (if the upload button is pressed without uploading the file)
-		if (ossMasters.isEmpty()){
+		if (ossMasters.isEmpty()) {
 			resMap.put("res", false);
 			return makeJsonResponseHeader(resMap);
 		}
 
-		List<OssMaster> notSavedOss = new ArrayList<>();
-		boolean isDup, licenseCheck;
 		for (OssMaster oss : ossMasters) {
-			isDup = false;
-			licenseCheck=false;
-			LicenseMaster licenseMaster;
-			List<String> declaredLicenses = oss.getDeclaredLicenses();
-			boolean[] check = new boolean[declaredLicenses.size()+1];
-			List<OssLicense> ossLicenses = new ArrayList<>();
-			int licenseCount = 1;
-			if(declaredLicenses==null) continue;
-			for (String licenseName : declaredLicenses) {
-				licenseMaster =new LicenseMaster();
-				licenseMaster.setLicenseName(licenseName);
-				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
-				if(existsLicense==null){
-					licenseCheck=true;
-					break;
+			try {
+				OssAnalysis analysisBean = new OssAnalysis();
+				analysisBean.setOssName(oss.getOssName());
+				if (oss.getOssNicknames() != null) {
+					analysisBean.setOssNickname(String.join(",", oss.getOssNicknames()));
+				} else {
+					analysisBean.setOssNickname(oss.getOssNickname());
 				}
-				check[licenseCount-1]=true;
-				OssLicense convert =new OssLicense();
-				convert.setLicenseId(existsLicense.getLicenseId());
-				convert.setLicenseName(existsLicense.getLicenseName());
-				if(licenseCount>1) convert.setOssLicenseComb("AND");
-				else convert.setOssLicenseComb("");
-				convert.setLicenseNameEx(existsLicense.getLicenseNameTemp());
-				convert.setLicenseType(existsLicense.getLicenseType());
-				if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNeedsCheckYn())) {
-					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationDisclosingSrcYn())) {
-					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNotificationYn())) {
-					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-				}else{
-					convert.setObligation("");
+				analysisBean.setOssVersion(oss.getOssVersion());
+
+				analysisBean.setDownloadLocation(oss.getDownloadLocation());
+				analysisBean.setHomepage(oss.getHomepage());
+				analysisBean.setSummaryDescription(oss.getSummaryDescription());
+				analysisBean.setComment(oss.getComment());
+				analysisBean.setGridId(oss.getGridId());
+				analysisBean.setOssCopyright(oss.getOssCopyright());
+				analysisBean.setAttribution(oss.getAttribution());
+				if (oss.getDeclaredLicenses() != null) {
+					analysisBean.setLicenseName(String.join(" AND ", oss.getDeclaredLicenses()));
+				} else {
+					analysisBean.setLicenseName(oss.getDeclaredLicense());
 				}
-				convert.setObligationChecks(existsLicense.getObligationChecks());
-				ossLicenses.add(convert);
-				licenseCount++;
-			}
-			if(licenseCheck) {
-				log.error("declared license has error");
-				continue;
-			}
-			for(int i=0; i<ossLicenses.size();i++){
-				OssLicense ossLicense = ossLicenses.get(i);
-				if(!check[i])continue;
-				if(licenseCount <=2) ossLicense.setLicenseType("S");
-				else ossLicense.setLicenseType("M");
-			}
-			oss.setOssLicenses(ossLicenses);
-			oss.setAttribution("");
-			oss.setDeactivateFlag("N");
-			if(licenseCount >2) oss.setLicenseDiv("M");
-			else oss.setLicenseDiv("S");
-			// check if there is an oss that has a same name & version
-			OssMaster search = ossService.checkExistsOss(oss);
-			if(search != null ) {
-				isDup =true;
-				log.info("duplicate here");
-			}
-			// if oss not duplicated save
-			if(!isDup){
-				notSavedOss.add(oss);
+				if (oss.getDetectedLicenses() != null) {
+					analysisBean.setDetectedLicense(String.join(",", oss.getDetectedLicenses()));
+				} else {
+					analysisBean.setDetectedLicense(oss.getDetectedLicense());
+				}
+				HashMap<String, Object> addResult = saveOssFromList(analysisBean);
+				if ((boolean) addResult.get("result")) {
+					Map<String, String> ossNameMap = new HashMap<>();
+					ossNameMap.put("ossName", oss.getOssName());
+					ossNameMapList.add(ossNameMap);
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
 		}
-		for (OssMaster oss : notSavedOss){
-			ossService.registOssMaster(oss);
-			Map<String, String> ossNameMap = new HashMap<>();
-			ossNameMap.put("ossName", oss.getOssName());
-			ossNameMapList.add(ossNameMap);
-		}
+
 		resMap.put("res", true);
 		resMap.put("value", ossNameMapList);
 		return makeJsonResponseHeader(resMap);
@@ -1800,169 +1915,38 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		// 이미등록되어 있는 OSS의 경우 Skip한다.
-		if(CoCodeManager.OSS_INFO_UPPER.containsKey( (analysisBean.getOssName() + "_" + avoidNull(analysisBean.getOssVersion())).toUpperCase() )) {
-			return makeJsonResponseHeader(false, "Skip");
-		}
-		
-		// analysis Data -> OssMaster 변환
-		OssMaster resultData = new OssMaster();
-		
-		if(!isEmpty(analysisBean.getOssName())) {
-			resultData.setOssName(analysisBean.getOssName());
-		}
-		
-		if(!isEmpty(analysisBean.getOssVersion())) {
-			resultData.setOssVersion(analysisBean.getOssVersion());
-		}
-		
-		// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
-		boolean isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase());
-		if(isNewVersion) {
-			resultData.setExistOssNickNames(ossService.getOssNickNameListByOssName(resultData.getOssName()));
-		}
-		
-		resultData.setGridId(analysisBean.getGridId());
-		resultData.setLicenseDiv(CoConstDef.LICENSE_DIV_SINGLE); // default
-		// multi license 대응
-		List<OssLicense> ossLicenseList = new ArrayList<>();
-		int licenseIdx = 0;
-		
-		if(!isEmpty(analysisBean.getLicenseName())) {
-			for(String s : analysisBean.getLicenseName().toUpperCase().split(" OR ")) {
-				// 순서가 중요
-				String orGroupStr = s.replaceAll("\\(", " ").replaceAll("\\)", " ");
-				boolean groupFirst = true;
-				for(String s2 : orGroupStr.split(" AND ")) {
-					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(s2.trim().toUpperCase());
-					OssLicense licenseBean = new OssLicense();
-					
-					if(license != null) {
-						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
-						licenseBean.setLicenseId(license.getLicenseId());
-						licenseBean.setLicenseName(license.getLicenseNameTemp());
-						licenseBean.setOssLicenseComb(groupFirst ? "OR" : "AND");
-					} else {
-						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
-						licenseBean.setLicenseId("");
-						licenseBean.setLicenseName(s2);
-						licenseBean.setOssLicenseComb(groupFirst ? "OR" : "AND");
-					}
-					
-					ossLicenseList.add(licenseBean);
-					groupFirst = false;
-				}
-			}
-			
-			resultData.setLicenseName(analysisBean.getLicenseName());
-			resultData.setOssLicenses(ossLicenseList);
-		} else {
-			resultData.setLicenseName("");
-		}
-		
-		if(ossLicenseList.size() > 1) {
-			resultData.setLicenseDiv(CoConstDef.LICENSE_DIV_MULTI);
-		}
-		
-		// nick Name을 Array형으로 변경해줌
-		if(!isEmpty(analysisBean.getOssNickname())) {
-			// trim 처리는 registOssMaster 내에서 처리한다.
-			resultData.setOssNickname(analysisBean.getOssNickname());
-			resultData.setOssNicknames(analysisBean.getOssNickname().split(","));
-		}
-		
-		if(!isEmpty(analysisBean.getDownloadLocation())){
-			String result = "";
-			
-			for(String url : analysisBean.getDownloadLocation().split(",")) {
-				if(!isEmpty(result)) {
-					result += ",";
-				}
-				
-				if(url.endsWith("/")) {
-					result += url.substring(0, url.length()-1);
-				} else {
-					result += url;
-				}
-			}
-			
-			resultData.setDownloadLocations(result.split(","));
-			resultData.setDownloadLocation(result);
-		} else {
-			resultData.setDownloadLocation("");
-		}
-		
-		if(!isEmpty(analysisBean.getHomepage())) {
-			if(analysisBean.getHomepage().endsWith("/")) {
-				String homepage = analysisBean.getHomepage();
-				resultData.setHomepage(homepage.substring(0, homepage.length()-1));
-			} else {
-				resultData.setHomepage(analysisBean.getHomepage());
-			}
-		} else {
-			resultData.setHomepage("");
-		}
-		
-		resultData.setCopyright(analysisBean.getOssCopyright());
-		resultData.setSummaryDescription(analysisBean.getSummaryDescription());
-		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
-		resultData.setComment(CommonFunction.lineReplaceToBR(analysisBean.getComment()) );
-		resultData.setAddNicknameYn(CoConstDef.FLAG_YES); //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
-		
-		HashMap<String, Object> resMap = new HashMap<>();
-		
-		try {
-			// validator
-			T2CoOssValidator validator = new T2CoOssValidator();
-			validator.setAppendix("ossAnalysis", analysisBean);
-			validator.setVALIDATION_TYPE(validator.VALID_OSSANALYSIS);
-			T2CoValidationResult vr = validator.validate(new HashMap<>()); 
-			Map<String, String> validMapResult = vr.getValidMessageMap();
-			Map<String, String> diffMapResult = vr.getDiffMessageMap();
-			
-			resMap.put("validMapResult", validMapResult);
-			resMap.put("diffMapResult", diffMapResult);
-			
-			if(!vr.isValid()) {
-				return makeJsonResponseHeader(false, "Fail", resMap);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			
-			return makeJsonResponseHeader(false, "Fail");
-		}
-		
-		Map<String, Object> result = null;
-		String resultOssId = "";
-		
-		try {
-			resultOssId = ossService.registOssMaster(resultData); // oss 정보 등록
-			analysisBean.setComponentId(analysisBean.getGroupId());
-			analysisBean.setReferenceOssId(resultOssId);
-			result = ossService.updateAnalysisComplete(analysisBean); // auto-analysis 완료처리
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			
-			return makeJsonResponseHeader(false, "Fail");
-		}
-		
-		CoCodeManager.getInstance().refreshOssInfo(); // 등록된 oss info 갱신
-		
-		History h = ossService.work(resultData);
-		h.sethAction(CoConstDef.ACTION_CODE_INSERT);
-		historyService.storeData(h);
-		
-		// history 저장 성공 후 메일 발송
-		try {
-			CoMail mailBean = new CoMail(isNewVersion ? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION : CoConstDef.CD_MAIL_TYPE_OSS_REGIST);
-			mailBean.setParamOssId(resultOssId);
 
-			mailBean.setComment(resultData.getComment());
-			CoMailManager.getInstance().sendMail(mailBean);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+		HashMap<String, Object> addResult = saveOssFromList(analysisBean);
+		Map<String, Object> result = null;
+		if ((Boolean) addResult.get("result")) {
+			try {
+				HashMap<String, Object> resMap = new HashMap<>();
+
+				// validator
+				T2CoOssValidator validator = new T2CoOssValidator();
+				validator.setAppendix("ossAnalysis", analysisBean);
+				validator.setVALIDATION_TYPE(validator.VALID_OSSANALYSIS);
+				T2CoValidationResult vr = validator.validate(new HashMap<>());
+				Map<String, String> validMapResult = vr.getValidMessageMap();
+				Map<String, String> diffMapResult = vr.getDiffMessageMap();
+
+				resMap.put("validMapResult", validMapResult);
+				resMap.put("diffMapResult", diffMapResult);
+
+				if (!vr.isValid()) {
+					return makeJsonResponseHeader(false, "Fail", resMap);
+				}
+
+				result = ossService.updateAnalysisComplete(analysisBean); // Complete auto-analysis
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				return makeJsonResponseHeader(false, "Fail");
+			}
+
+		} else {
+			String error_msg = (String) addResult.get("msg");
+			return makeJsonResponseHeader(false, error_msg);
 		}
-		
 		return makeJsonResponseHeader(result);
 	}
 	
