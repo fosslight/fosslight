@@ -1189,6 +1189,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				ossMapper.deleteOssLicense(ossMaster);
+				updateLicenseDivDetail(ossMaster);
+				
 				ossMapper.deleteOssDownloadLocation(ossMaster);
 				ossMapper.deleteOssMaster(ossMaster);
 			
@@ -1220,6 +1222,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				ossMapper.deleteOssLicense(ossMaster);
+				updateLicenseDivDetail(ossMaster);
+				
 				ossMapper.deleteOssDownloadLocation(ossMaster);
 				ossMapper.deleteOssMaster(ossMaster);
 			}
@@ -1227,8 +1231,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			result = 0;
 			log.error("FAILED TO REMOVE OSS DATA.", e);
 		}
-		
-		updateLicenseDivDetail(ossMaster);
 		
 		return result;
 	}
@@ -1811,6 +1813,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					String protocol = "";
 					String endUrl = "";
 					
+					if(bean.getDownloadLocation().contains(";")) {
+						bean.setDownloadLocation(bean.getDownloadLocation().split(";")[0]);
+					}
 					if(urlSearchSeq == 0 && bean.getDownloadLocation().startsWith("git://")) {
 						protocol = "git://";
 						bean.setDownloadLocation(bean.getDownloadLocation().replace("git://", "https://"));
