@@ -15,64 +15,65 @@
     	</if>
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> OSS_ID desc</when>
-    		<otherwise> ${sidx} ${sord}</otherwise>
-<!--   		<otherwise>
+   			<otherwise>
 				<choose>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sidx)">
 						OSS_ID
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sidx)">
 						OSS_TYPE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sidx)">
 						OSS_NAME
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sidx)">
 						OSS_VERSION
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sidx)">
 						LICENSE_NAME
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sidx)">
 						LICENSE_TYPE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION', sidx)">
 						OBLIGATION
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sidx)">
 						DOWNLOAD_LOCATION
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sidx)">
 						HOMEPAGE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sidx)">
 						SUMMARY_DESCRIPTION
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sidx)">
 						CVSS_SCORE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sidx)">
 						CREATOR
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE',sidx)">
-						CREATED_DATE
+					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
+						DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER',sidx)">
+					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sidx)">
 						MODIFIER
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE',sidx)">
-						MODIFIED_DATE
+					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sidx)">
+						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
 					</when>
 				</choose>
-				<choose>
-					<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
-						ASC
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
-						DESC
-					</when>
-				</choose>
-			</otherwise> -->
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+							ASC
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+							DESC
+						</when>
+					</choose>
+				</if>
+			</otherwise>
     	</choose>
     </sql>
     

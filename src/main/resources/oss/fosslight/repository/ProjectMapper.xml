@@ -9,149 +9,108 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	<choose>
-    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY PRJ_ID desc</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('asc', sord)">
-    			ORDER BY (
-    			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 1 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 2 
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 3 
-					ELSE 4 
-			      END), ${sidx} ${sord}
-    		</when>
-			<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('desc', sord)">
-    			ORDER BY (
-    			  CASE 
-    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 4 
-					WHEN ${sidx} REGEXP '^[가-힣].+$' then 3 
-					WHEN ${sidx} REGEXP '^[0-9].+$' then 2 
-					ELSE 1 
-			      END), ${sidx} ${sord}
-    		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('IDENTIFICATION_STATUS', sidx)">
-    			ORDER BY (
-    				CASE ${sidx}
-    					WHEN '' THEN 1
-	    				WHEN 'NA' THEN 2
-	    				WHEN 'PROG' THEN 3
-	    				WHEN 'REQ' THEN 4
-	    				WHEN 'REV' THEN 5
-	    				WHEN 'CONF' THEN 6
-	    			END
-    			) ${sord}
-    		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('VERIFICATION_STATUS', sidx)">
-    			ORDER BY (
-    				CASE 
-    					WHEN IDENTIFICATION_STATUS != 'CONF' THEN 1
-    					WHEN ${sidx} = '' AND IDENTIFICATION_STATUS = 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
-    					WHEN ${sidx} = '' AND A.COMPLETE_YN = 'Y' THEN 3
-    					WHEN ${sidx} = 'NA' THEN 4
-	    				WHEN ${sidx} = 'PROG' THEN 5
-	    				WHEN ${sidx} = 'REQ' THEN 6
-	    				WHEN ${sidx} = 'REV' THEN 7
-	    				WHEN ${sidx} = 'CONF' THEN 8
-	    			END
-    			) ${sord}
-    		</when>
-    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
-    			ORDER BY (
-    				CASE
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'ERROR' THEN 7
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'DONE' THEN 6
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'RSV' THEN 5
-						WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'PROG' THEN 4
-						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND ${sidx} = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-						WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND ${sidx} = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-						WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND ${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
-						ELSE 1
-					END
-    			) ${sord}
-    		</when>
-    		<when test="@oss.fosslight.util.StringUtil@equals('DIVISION', sidx)">
-    			ORDER BY (SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '200' AND CD.CD_DTL_NO =  DIVISION) ${sord}
-    		</when>
-    		<when test="@oss.fosslight.util.StringUtil@equals('REVIEWER', sidx)">
-    			ORDER BY (SELECT u.USER_NAME FROM T2_USERS u WHERE REVIEWER = u.USER_ID) ${sord}
-    		</when>
-    		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
-    	</choose>
+    	<if test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY PRJ_ID desc</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and !@oss.fosslight.util.StringUtil@isEmpty(sord)">
+    		<choose>
+	    		<when test="@oss.fosslight.util.StringUtil@equals('PRJ_ID', sidx)">
+   	 				ORDER BY PRJ_ID
+   	 			</when>
+   	 			<when test="@oss.fosslight.util.StringUtil@equals('STATUS', sidx)">
+   	 				ORDER BY STATUS
+   	 			</when>
+   	 			<when test="@oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and @oss.fosslight.util.StringUtil@equals('asc', sord)">
+    				ORDER BY (
+    				  CASE 
+    					WHEN PRJ_NAME REGEXP '^[a-zA-Z].+$' then 1 
+						WHEN PRJ_NAME REGEXP '^[가-힣].+$' then 2 
+						WHEN PRJ_NAME REGEXP '^[0-9].+$' then 3 
+						ELSE 4 
+				      END), PRJ_NAME
+    			</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('PRJ_NAME', sidx) and @oss.fosslight.util.StringUtil@equals('desc', sord)">
+    				ORDER BY (
+    				  CASE 
+    					WHEN PRJ_NAME REGEXP '^[a-zA-Z].+$' then 4 
+						WHEN PRJ_NAME REGEXP '^[가-힣].+$' then 3 
+						WHEN PRJ_NAME REGEXP '^[0-9].+$' then 2 
+						ELSE 1 
+				      END), PRJ_NAME
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('IDENTIFICATION_STATUS', sidx)">
+    				ORDER BY (
+    					CASE IDENTIFICATION_STATUS
+    						WHEN '' THEN 1
+	    					WHEN 'NA' THEN 2
+	    					WHEN 'PROG' THEN 3
+	    					WHEN 'REQ' THEN 4
+	    					WHEN 'REV' THEN 5
+	    					WHEN 'CONF' THEN 6
+	    				END
+    				)
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('VERIFICATION_STATUS', sidx)">
+    				ORDER BY (
+    					CASE 
+    						WHEN IDENTIFICATION_STATUS != 'CONF' THEN 1
+    						WHEN VERIFICATION_STATUS = '' AND IDENTIFICATION_STATUS = 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+    						WHEN VERIFICATION_STATUS = '' AND A.COMPLETE_YN = 'Y' THEN 3
+    						WHEN VERIFICATION_STATUS = 'NA' THEN 4
+	    					WHEN VERIFICATION_STATUS = 'PROG' THEN 5
+	    					WHEN VERIFICATION_STATUS = 'REQ' THEN 6
+	    					WHEN VERIFICATION_STATUS = 'REV' THEN 7
+	    						WHEN VERIFICATION_STATUS = 'CONF' THEN 8
+	    				END
+    				)
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
+    				ORDER BY (
+    					CASE
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'ERROR' THEN 7
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'DONE' THEN 6
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'RSV' THEN 5
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'PROG' THEN 4
+							WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND DESTRIBUTION_STATUS = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+							WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+							WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+							ELSE 1
+						END
+    				) 
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('DISTRIBUTION_TYPE', sidx)">
+    				ORDER BY (SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '207' AND CD.CD_DTL_NO =  DISTRIBUTION_TYPE)
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('DIVISION', sidx)">
+    				ORDER BY (SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '200' AND CD.CD_DTL_NO =  DIVISION)
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sidx)">
+    				ORDER BY CREATOR
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
+    				ORDER BY DATE_FORMAT(CREATED_DATE, '%Y%m%d')
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sidx)">
+    				ORDER BY DATE_FORMAT(MODIFIED_DATE, '%Y%m%d')
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('REVIEWER', sidx)">
+    				ORDER BY (SELECT USER_NAME FROM T2_USERS WHERE USER_ID = REVIEWER) IS NULL ASC, (SELECT USER_NAME FROM T2_USERS WHERE USER_ID = REVIEWER)
+    			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('COMMENT', sidx)">
+    				ORDER BY COMMENT
+    			</when>
+    		</choose>
+    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+    			<choose>
+  	  				<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+    					ASC
+    				</when>
+    				<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+    					DESC
+    				</when>
+    			</choose>
+    		</if>
+    	</if>
     </sql>
-
-	<sql id="filters">
-		<foreach collection="filtersMap.rules" item="item">
-			AND
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals('ossId', item.field)">
-					OSS_ID
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ossName', item.field)">
-					OSS_NAME
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ossVersion', item.field)">
-					OSS_VERSION
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cveId', item.field)">
-					CVE_ID
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cvssScore', item.field)">
-					CVSS_SCORE
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cveIdTo', item.field)">
-					CVE_ID_TO
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cvssScoreTo', item.field)">
-					CVSS_SCORE_TO
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('regDt', item.field)">
-					DATE_FORMAT(REG_DT, '%Y-%m-%d')
-				</when>
-			</choose>
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals('eq', item.op)">
-					= #{item.data}
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ne', item.op)">
-					<![CDATA[<>]]> #{item.data}
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('bw', item.op)">
-					LIKE CONCAT(#{item.data}, '%')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('bn', item.op)">
-					NOT LIKE CONCAT(#{item.data}, '%')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ew', item.op)">
-					LIKE CONCAT('%', #{item.data})
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('en', item.op)">
-					NOT LIKE CONCAT('%', #{item.data})
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cn', item.op)">
-					LIKE CONCAT('%', #{item.data}, '%')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('nc', item.op)">
-					NOT LIKE CONCAT('%', #{item.data}, '%')
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('lt', item.op)">
-					<![CDATA[<]]> #{item.data}
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('le', item.op)">
-					<![CDATA[<=]]> #{item.data}
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('gt', item.op)">
-					<![CDATA[>]]> #{item.data}
-				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ge', item.op)">
-					<![CDATA[>=]]> #{item.data}
-				</when>
-				<otherwise>
-
-				</otherwise>
-			</choose>
-		</foreach>
-    </sql>
-    	
+	
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* ProjectMapper.selectProjectTotalCount */
 		SELECT COUNT(*) FROM (
@@ -1662,10 +1621,6 @@
 		) RTN
 		
 		WHERE 1=1
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
-		</if>
-		
 		GROUP BY GROUPBY
 		
 		<if test="@oss.fosslight.util.StringUtil@equals('componentId', sortField)">
@@ -3853,21 +3808,53 @@
 			</choose>
 	 <choose>
    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY MODEL_NAME ASC, PRJ_ID DESC</when>
-   		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
-   			ORDER BY (
-   				CASE
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'ERROR' THEN 7
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'DONE' THEN 6
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'RSV' THEN 5
-					WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND ${sidx} = 'PROG' THEN 4
-					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND ${sidx} = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-					WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND ${sidx} = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
-					WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND ${sidx} = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
-					ELSE 1
-				END
-   			) ${sord}
-   		</when>
-		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+   		<otherwise>
+   		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx)">
+   			ORDER BY
+   			<choose>
+   				<when test="@oss.fosslight.util.StringUtil@equals('MODEL_NAME', sidx)">
+   					MODEL_NAME
+   				</when>
+   				<when test="@oss.fosslight.util.StringUtil@equals('STATUS', sidx)">
+   					STATUS
+   				</when>
+   				<when test="@oss.fosslight.util.StringUtil@equals('PRJ_ID', sidx)">
+   					PRJ_ID
+   				</when>
+   				<when test="@oss.fosslight.util.StringUtil@equals('DISTRIBUTION_TYPE', sidx)">
+   					(SELECT CD.CD_DTL_NM FROM T2_CODE_DTL CD WHERE CD.CD_NO = '207' AND CD.CD_DTL_NO =  DISTRIBUTION_TYPE)
+   				</when>
+   				<when test="@oss.fosslight.util.StringUtil@equals('DESTRIBUTION_STATUS', sidx)">
+   					(
+   						CASE
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'ERROR' THEN 7
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'DONE' THEN 6
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'RSV' THEN 5
+							WHEN IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND IFNULL(DISTRIBUTE_TARGET, 'NA') != 'NA' AND DESTRIBUTION_STATUS = 'PROG' THEN 4
+							WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'NA' AND DESTRIBUTION_STATUS = 'NA') OR (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DISTRIBUTE_TARGET = 'NA' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+							WHEN (IDENTIFICATION_STATUS = 'CONF' AND VERIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = 'NA')  OR (VERIFICATION_STATUS != '' AND VERIFICATION_STATUS != 'CONF' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') OR (DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') = 'Y') THEN 3
+							WHEN VERIFICATION_STATUS = 'CONF' AND IDENTIFICATION_STATUS = 'CONF' AND DESTRIBUTION_STATUS = '' AND IFNULL(A.COMPLETE_YN, 'N') != 'Y' THEN 2
+							ELSE 1
+						END
+   					)
+   				</when>
+   				<when test="@oss.fosslight.util.StringUtil@equals('DISTRIBUTE_DEPLOY_TIME', sidx)">
+   					DATE_FORMAT(DISTRIBUTE_DEPLOY_TIME, '%Y%m%d')
+   				</when>
+				<otherwise></otherwise>
+   			</choose>
+   			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+   				<choose>
+   					<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+    					ASC
+    				</when>
+    				<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+    					DESC
+    				</when>
+   				</choose>
+   			</if>
+   		</if>
+   		</otherwise>
    	</choose>
 	<include refid="limitPage"/>
 	</select>

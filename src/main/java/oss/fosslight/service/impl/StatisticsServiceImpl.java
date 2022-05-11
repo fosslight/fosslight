@@ -160,6 +160,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
 		statistics.setNoneUser(statisticsMapper.getNoneUser());
+		statistics.setCategorySize(titleArray.size());
 		
 		statistics.setUpdateType("ADD");
 		List<Statistics> list = statisticsMapper.getUpdatedOssChartData(statistics);
@@ -246,6 +247,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
 		statistics.setNoneUser(statisticsMapper.getNoneUser());
+		statistics.setCategorySize(titleArray.size());
 		
 		statistics.setUpdateType("ADD");
 		List<Statistics> list = statisticsMapper.getUpdatedLicenseChartData(statistics);
@@ -335,6 +337,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 		
 		statistics.setTitleArray(titleArray); // Chart Title
+		statistics.setCategorySize(titleArray.size());
 		
 		List<Statistics> list = statisticsMapper.getTrdPartyRelatedChartData(statistics);
 		

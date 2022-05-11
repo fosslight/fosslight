@@ -42,19 +42,31 @@
                 AND T2.AUTHORITY = #{schValue}
             </if>
         </if> 
-        <choose>
-            <when test="!@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortField) and !@oss.fosslight.util.StringUtil@isEmptyTrimmed(sortOrder) ">
-                <if test="@oss.fosslight.util.StringUtil@equals('userId', sortField)">
-                ORDER BY USER_ID ${sortOrder}
-                </if>
-                <if test="@oss.fosslight.util.StringUtil@equals('userName', sortField)">
-                ORDER BY USER_NAME ${sortOrder}
-                </if>
-            </when>
-            <otherwise>
-                ORDER BY CREATED_DATE DESC
-            </otherwise>
-        </choose> 
+        <if test="@oss.fosslight.util.StringUtil@isEmpty(sortField)">
+        	ORDER BY CREATED_DATE DESC
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(sortField)">
+        	ORDER BY
+        	<choose>
+        		<when test="@oss.fosslight.util.StringUtil@equals('userId', sortField)">
+        			USER_ID
+        		</when>
+        		<when test="@oss.fosslight.util.StringUtil@equals('userName', sortField)">
+        			USER_NAME
+        		</when>
+        		<otherwise></otherwise>
+        	</choose>
+        	<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortOrder)">
+        		<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+						ASC
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+						DESC
+					</when>
+				</choose>
+        	</if>
+        </if>
     </select>
     <!-- 특정 사용자 가져오기 -->
     <select id="getUser" parameterType="oss.fosslight.domain.T2Users" resultType="oss.fosslight.domain.T2Users"> 

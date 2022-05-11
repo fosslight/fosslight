@@ -9,28 +9,32 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-		ORDER BY ${sidx} ${sord}
-<!--   	<choose> -->
-			<!--TODO : CD_NO will be convert into CAST(CD_NO AS SIGNED) in the getter.
-			But It should be done in this file. Like equals('CD_NO', sidx)-->
-<!--		<when test="@oss.fosslight.util.StringUtil@equals('CAST(CD_NO AS SIGNED)',sidx)">
-				CAST(CD_NO AS SIGNED)
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('CD_NM',sidx)">
-				CD_NM
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('CD_EXP',sidx)">
-				CD_EXP
-			</when>
-		</choose>
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
-				ASC
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
-				DESC
-			</when>
-		</choose> -->
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx)">
+    		ORDER BY
+   			<choose>
+				<!--TODO : CD_NO will be convert into CAST(CD_NO AS SIGNED) in the getter.
+				But It should be done in this file. Like equals('CD_NO', sidx)-->
+				<when test="@oss.fosslight.util.StringUtil@equals('CAST(CD_NO AS SIGNED)', sidx)">
+					CAST(CD_NO AS SIGNED)
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CD_NM', sidx)">
+					CD_NM
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CD_EXP', sidx)">
+					CD_EXP
+				</when>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+						ASC
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+						DESC
+					</when>
+				</choose>
+			</if>
+    	</if>
     </sql>
     
     <select id="selectCodeTotalCount" parameterType="oss.fosslight.domain.T2Code" resultType="int">
