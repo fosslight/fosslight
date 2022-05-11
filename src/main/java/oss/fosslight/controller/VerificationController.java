@@ -447,36 +447,32 @@ public class VerificationController extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-								
-				if(prjInfo != null && !CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag()) && !ignoreMailSend) {
+
+				if (prjInfo != null) {
 					try {
-						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF);
-						mailBean.setParamPrjId(ossNotice.getPrjId());
-						
-						if(!isEmpty(ossNotice.getUserComment())) {
-							mailBean.setComment(ossNotice.getUserComment());
+						String mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF;
+						String mailContentCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF;
+						if (ignoreMailSend) {
+							mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY;
+							mailContentCode = mailTemplateCode;
+						} else if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())) {
+							mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY;
 						}
-						
-						CoMailManager.getInstance().sendMail(mailBean);
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-					}
-				} else if(prjInfo != null) {
-					// android 또는 distributin과 관련 없는 경우, packaging이 완료되었음만 공지한다.
-					try {
-						CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY);
+						CoMail mailBean = new CoMail(mailTemplateCode);
 						mailBean.setParamPrjId(ossNotice.getPrjId());
-						
-						if(!isEmpty(ossNotice.getUserComment())) {
-							mailBean.setComment(ossNotice.getUserComment());
+						String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, mailContentCode));
+						userComment = avoidNull(userComment) + "<br />" + _tempComment;
+
+						if (!isEmpty(userComment)) {
+							mailBean.setComment(userComment);
 						}
-						
+
 						CoMailManager.getInstance().sendMail(mailBean);
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
 					}
 				}
-				
+
 				// package file 이 존재하는 경우 파일명을 변경한다.
 				verificationService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
 			} else { // preview 인 경우
