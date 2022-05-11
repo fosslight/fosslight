@@ -87,32 +87,39 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
 			AND MODIFIED_DATE <![CDATA[<=]]> #{endDate}
 		</if>
-		<bind name="field" value="@oss.fosslight.util.StringUtil@convertToUnderScore(sortField)"/>
-		ORDER BY ${field} ${sortOrder}
-<!-- 	<if test="sortField eq 'idx'">
-			ORDER BY IDX
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx)">
+			ORDER BY
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('IDX', sidx)">
+					IDX
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('H_TITLE', sidx)">
+					H_TITLE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('H_TYPE_NM', sidx)">
+					H_TYPE_NM
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('H_ACTION', sidx)">
+					H_ACTION
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sidx)">
+					MODIFIER
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sidx)">
+					MODIFIED_DATE
+				</when>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+						ASC
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+						DESC
+					</when>
+				</choose>
+			</if>
 		</if>
-		<if test="sortField eq 'hTitle'">
-			ORDER BY H_TITLE
-		</if>
-		<if test="sortField eq 'hTypeNm'">
-			ORDER BY H_TYPE_NM
-		</if>
-		<if test="sortField eq 'hAction'">
-			ORDER BY H_ACTION
-		</if>
-		<if test="sortField eq 'modifier'">
-			ORDER BY MODIFIER
-		</if>
-		<if test="sortField eq 'modifiedDate'">
-			ORDER BY MODIFIED_DATE
-		</if>
-		<if test="sortOrder eq 'asc'">
-			ASC
-		</if>
-		<if test="sortOrder eq 'desc'">
-			DESC
-		</if> -->
 		<include refid="limitPage"/>
 	</select>
 	

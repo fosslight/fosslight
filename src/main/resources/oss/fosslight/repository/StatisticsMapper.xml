@@ -47,29 +47,29 @@
 		SELECT RTN.CD_DTL_NM AS DIVISION_NM
 		     , RTN.CD_ORDER AS DIVISION_ORDER
 			<foreach collection="titleArray" item="item" index="index">
-			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
-			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
 			 </if>
 		  FROM (SELECT A.CD_DTL_NM
 		  			 , A.CD_ORDER
 			 	  <foreach collection="titleArray" item="item" index="index">
 			 	  	<choose>
     					<when test="@oss.fosslight.util.StringUtil@equals('unassigned', item)">
-							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
+							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY#{index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  	   STAT.CATEGORY = #{user}
 					  </foreach>
-					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
+					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM
 						     , CD_ORDER
@@ -288,22 +288,22 @@
 	<select id="getUpdatedOssChartData"  parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		SELECT CONCAT(RTN.DATE, '(', #{updateType}, ')') AS COLUMN_NAME		
 			<foreach collection="titleArray" item="item" index="index">
-			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			  	 , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  	   STAT.CATEGORY = #{user}
 				  </foreach>
-				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
-					 	 LIMIT ${diffMonthCnt}) A
+					 	 LIMIT #{diffMonthCnt}) A
 				  LEFT JOIN (SELECT ADMIN.USER_NAME AS CATEGORY
 				  			<choose>
 								<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)"> 
@@ -332,11 +332,11 @@
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
 							  	 ON OM.CREATOR = ADMIN.USER_ID AND OM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
+							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
+							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
 								AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
 					</choose>    
@@ -350,22 +350,22 @@
 	<select id="getUpdatedLicenseChartData"  parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		SELECT CONCAT(RTN.DATE, '(', #{updateType}, ')') AS COLUMN_NAME	
 			<foreach collection="titleArray" item="item" index="index">
-			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
-	  			 	 , IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			     , IF(
 				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = <![CDATA['${user}']]>
+				  	   STAT.CATEGORY = #{user}
 				  </foreach>
-				     , COUNT(1), 0) AS CATEGORY${titleArray.size}
-				  FROM (SELECT DATE_FORMAT(DATE_ADD('${startDate}', INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
+				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
-					 	 LIMIT ${diffMonthCnt}) A
+					 	 LIMIT #{diffMonthCnt}) A
 				  LEFT JOIN (SELECT ADMIN.USER_NAME AS CATEGORY
 				  			<choose>
 								<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
@@ -382,7 +382,7 @@
 							  	  	  FROM OSS_MASTER OM
 							  	INNER JOIN OSS_LICENSE_DECLARED OLD
 							  	        ON OM.OSS_ID = OLD.OSS_ID
-							  	     WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
+							  	     WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
 							  	       AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')
 							  	  GROUP BY OLD.LICENSE_ID
 							  ) OSM
@@ -404,11 +404,11 @@
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
 							  	 ON LM.CREATOR = ADMIN.USER_ID AND LM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
+							  WHERE DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON LM.MODIFIER = ADMIN.USER_ID AND LM.USE_YN = 'Y'
-							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} 
+							  WHERE DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
 							    AND DATE_FORMAT(LM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(LM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
 					</choose>
@@ -422,29 +422,29 @@
 	<select id="getTrdPartyRelatedChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		SELECT RTN.CD_DTL_NM AS DIVISION_NM
 			<foreach collection="titleArray" item="item" index="index">
-			 , MAX(RTN.CATEGORY${index}) AS CATEGORY${index}_CNT
+			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
-			 , MAX(RTN.CATEGORY${titleArray.size}) AS CATEGORY${titleArray.size}_CNT
+			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
 			 </if>
 		  FROM (SELECT A.CD_DTL_NM
 		  			 , A.CD_ORDER
 			 	  <foreach collection="titleArray" item="item" index="index">
 	  			  <choose>
     					<when test="@oss.fosslight.util.StringUtil@equals('unassigned', item)">
-							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY${index}
+							, IF(STAT.CD_DTL_NM IS NOT NULL AND STAT.CATEGORY IS NULL, COUNT(1), 0) AS CATEGORY#{index}
 						</when>
     					<otherwise>
-    						, IF(STAT.CATEGORY = <![CDATA['${item}']]>, COUNT(1), 0) AS CATEGORY${index}
+    						, IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
     					</otherwise>
     				</choose>
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
 					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = <![CDATA['${user}']]>
+					  	   STAT.CATEGORY = #{user}
 					  </foreach>
-					  , COUNT(1), 0) AS CATEGORY${titleArray.size}
+					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM
 						     , CD_ORDER

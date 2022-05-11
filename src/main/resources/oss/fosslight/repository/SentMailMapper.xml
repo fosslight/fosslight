@@ -7,114 +7,117 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	ORDER BY ${sidx} ${sord}
-    <!-- 
-        ORDER BY
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals('MSG_TYPE', sidx)">
-				MSG_TYPE
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('SND_STATUS', sidx)">
-				SND_STATUS
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('EML_TITLE', sidx)">
-				EML_TITLE
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('CREATION_DATE', sidx)">
-				CREATION_DATE
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('CREATION_USER_ID', sidx)">
-				CREATION_USER_ID
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('ERROR_MSG', sidx)">
-				ERROR_MSG
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('EML_TO', sidx)">
-				EML_TO
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('EML_CC', sidx)">
-				EML_CC
-			</when>
-		</choose>
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
-				ASC
-			</when>
-			<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
-				DESC
-			</when>
-		</choose>-->
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(sidx)">
+    		ORDER BY
+        	<choose>
+	        	<when test="@oss.fosslight.util.StringUtil@equals('SND_SEQ', sidx)">
+					SND_SEQ
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('MSG_TYPE', sidx)">
+					MSG_TYPE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('SND_STATUS', sidx)">
+					SND_STATUS
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('EML_TITLE', sidx)">
+					EML_TITLE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CREATION_DATE', sidx)">
+					CREATION_DATE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CREATION_USER_ID', sidx)">
+					CREATION_USER_ID
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('ERROR_MSG', sidx)">
+					ERROR_MSG
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('EML_TO', sidx)">
+					EML_TO
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('EML_CC', sidx)">
+					EML_CC
+				</when>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('asc', sord)">
+					ASC
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('desc', sord)">
+					DESC
+				</when>
+			</choose>
+			</if>
+		</if>
     </sql>
 
 	<sql id="filters">
-		<foreach collection="filtersMap.rules" item="item">
-			AND
+		AND
+		<foreach collection="filtersMap.rules" item="item" separator="AND">
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals('msgType', item.field)">
+				<when test='item.field == "msgType"'>
 					MSG_TYPE
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('sndStatus', item.field)">
+				<when test='item.field == "sndStatus"'>
 					SND_STATUS
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('emlTitle', item.field)">
+				<when test='item.field == "emlTitle"'>
 					EML_TITLE
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('creationDate', item.field)">
-					DATE_FORMAT(CREATION_DATE, '%Y-%m-%d')
+				<when test='item.field == "creationDate"'>
+					DATE_FORMAT(CREATION_DATE, '%Y%m%d')
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('creationUserId', item.field)">
+				<when test='item.field == "creationUserId"'>
 					CREATION_USER_ID
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('errorMsg', item.field)">
+				<when test='item.field == "errorMsg"'>
 					ERROR_MSG
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('emlTo', item.field)">
+				<when test='item.field == "emlTo"'>
 					EML_TO
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('emlCc', item.field)">
+				<when test='item.field == "emlCc"'>
 					EML_CC
 				</when>
 			</choose>
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equals('eq', item.op)">
+				<when test='item.op == "eq"'>
 					= #{item.data}
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ne', item.op)">
+				<when test='item.op == "ne"'>
 					<![CDATA[<>]]> #{item.data}
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('bw', item.op)">
+				<when test='item.op == "bw"'>
 					LIKE CONCAT(#{item.data}, '%')
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('bn', item.op)">
+				<when test='item.op == "bn"'>
 					NOT LIKE CONCAT(#{item.data}, '%')
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ew', item.op)">
+				<when test='item.op == "ew"'>
 					LIKE CONCAT('%', #{item.data})
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('en', item.op)">
+				<when test='item.op == "en"'>
 					NOT LIKE CONCAT('%', #{item.data})
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('cn', item.op)">
+				<when test='item.op == "cn"'>
 					LIKE CONCAT('%', #{item.data}, '%')
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('nc', item.op)">
+				<when test='item.op == "nc"'>
 					NOT LIKE CONCAT('%', #{item.data}, '%')
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('lt', item.op)">
+				<when test='item.op == "lt"'>
 					<![CDATA[<]]> #{item.data}
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('le', item.op)">
+				<when test='item.op == "le"'>
 					<![CDATA[<=]]> #{item.data}
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('gt', item.op)">
+				<when test='item.op == "gt"'>
 					<![CDATA[>]]> #{item.data}
 				</when>
-				<when test="@oss.fosslight.util.StringUtil@equals('ge', item.op)">
+				<when test='item.op == "ge"'>
 					<![CDATA[>=]]> #{item.data}
 				</when>
-				<otherwise>
-
-				</otherwise>
+				<otherwise></otherwise>
 			</choose>
 		</foreach>
     </sql>
@@ -126,7 +129,7 @@
     	EMAIL_SND_HIS
     WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
     </select>
 	<select id="selectSentMailList" parameterType="oss.fosslight.domain.CoMail" resultType="oss.fosslight.domain.CoMail">
@@ -135,7 +138,7 @@
 		FROM EMAIL_SND_HIS
 		WHERE 1=1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(filterCondition)">
-			${filterCondition}
+			<include refid="filters"/>
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>

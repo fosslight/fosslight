@@ -59,6 +59,7 @@ public class Statistics extends ComBean implements Serializable {
 	private String columnName;
 	private int columnCnt;
 	private int diffMonthCnt;
+	private int categorySize;
 	
 	/**
 	 * UPDATED OSS & License CHART
