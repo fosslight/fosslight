@@ -1702,196 +1702,214 @@ public class ExcelUtil extends CoTopComponent {
 		return "false".equals(value) ? "" : StringUtil.isNumeric(value) ? StringUtil.trim(value) : StringUtil.trim(value).replaceAll("(^\\p{Z}+|\\p{Z}+$)", "");
 	}
 
+	public static Map<String, List<Project>> getModelList(MultipartFile multipart, String localPath, String distributionType, String prjId, String modelListAppendFlag, String modelSeq) {
+		List<Project> resultModel = new ArrayList<Project>();
+		List<Project> resultModelDelete = new ArrayList<Project>();
+		Map<String, List<Project>> result = readModelList(multipart, localPath, prjId, modelListAppendFlag, modelSeq, distributionType);
+		return result;
+	}
+
 	public static Map<String, List<Project>> getModelList(MultipartHttpServletRequest req, String localPath, String distributionType, String prjId, String modelListAppendFlag, String modelSeq) {
 		Map<String, List<Project>> result = new HashMap<>();
 		List<Project> resultModel = new ArrayList<Project>();
 		List<Project> resultModelDelete = new ArrayList<Project>();
+
 		Iterator<String> fileNames = req.getFileNames();
-		List<Project> modelList = projectMapper.selectModelList(prjId);
-		List<Project> modelDeleteList = projectMapper.selectDeleteModelList(prjId);
-		
-		// osdd에 존재하는 model만 체크한다.
-		Map<String, Project> osddModelInfo = new HashMap<>();
-		List<Project> deDuplicateModelList = new ArrayList<Project>();
-		
-		if(modelList != null) {
-			for(Project bean : modelList) {
-				if(CoConstDef.FLAG_YES.equals(bean.getOsddSyncYn())) {
-					osddModelInfo.put(bean.getCategory() + "|" + bean.getModelName().trim().toUpperCase(), bean);
-				}
-			}
-			
-			for(Project bean : modelDeleteList) {
-				if(CoConstDef.FLAG_YES.equals(bean.getOsddSyncYn())) {
-					osddModelInfo.put(bean.getCategory() + "|" + bean.getModelName().trim().toUpperCase(), bean);
-				}
-			}
+		while (fileNames.hasNext()) {
+			Map<String, List<Project>> tempResult = readModelList(req.getFile(fileNames.next()), localPath, prjId, modelListAppendFlag, modelSeq, distributionType);
+			resultModelDelete.addAll(tempResult.get("delModelList"));
+			resultModel.addAll(tempResult.get("currentModelList"));
 		}
-		
-		String modelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
-		
-		while(fileNames.hasNext()){
-			MultipartFile multipart = req.getFile(fileNames.next());
-			String fileName = multipart.getOriginalFilename();
-			String[] ext = StringUtil.split(fileName, ".");
-			String extType = ext[ext.length-1];
-			String codeExt[] = StringUtil.split(codeMapper.selectExtType("11"),",");
-			ArrayList<String> duplicateModel = new ArrayList<String>();
-			int count = 0;
-			
-			for(int i = 0; i < codeExt.length; i++){
-				if(codeExt[i].equals(extType)){
-					count++;
-				};
-			}
-			
-			if(count != 1) {
-				result = null;
-			} else {
-				if(fileName.indexOf("/") > -1) {
-					fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-					
-					log.debug("File upload OriginalFileName Substring with File.separator : " + fileName);
-				}
-				
-				if(fileName.indexOf("\\") > -1) {
-					fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
-					
-					log.debug("File upload OriginalFileName Substring with File.separator : " + fileName);
-				}
-				
-				File file = new File(localPath+ "/" + fileName );
-				FileUtil.transferTo(multipart, file);
-				Workbook wb = null;
-				
-				try {
-					wb = WorkbookFactory.create(file);
-					int rowindex = Integer.parseInt(avoidNull(modelSeq, "0"));
-					int colindex=0;		
-					Sheet sheet = wb.getSheetAt(0);
-					Row row = null;
-						
-					for(int idx = 1; idx <= sheet.getPhysicalNumberOfRows(); idx++){
-						row = sheet.getRow(idx);
-						
-						if(row == null) {
-							continue;
-						}
-						
-						int maxcols = row.getLastCellNum();
-						Project param = new Project();
-						
-						for(colindex = 0; colindex < maxcols; colindex++) {
-							Cell cell = row.getCell(colindex);
-							String value = getCellData(cell);
-							
-							if(colindex == 0) {
-								param.setModelName(value.trim().toUpperCase());
-							} else if(colindex == 1) {
-								String main = StringUtil.trim(StringUtil.split(value, ">")[0]);
-								String sub = StringUtil.trim(StringUtil.split(value, ">")[1]);
-								
-								for(String s : CoCodeManager.getCodes(modelCode)) {
-									if(CoCodeManager.getCodeString(modelCode, s).equals(main)) {
-										main = s;
-										String subCdNo = CoCodeManager.getSubCodeNo(modelCode, s);
-										for(String subCode : CoCodeManager.getCodes(subCdNo)) {
-											if(CoCodeManager.getCodeString(subCdNo, subCode).equals(sub)) {
-												sub = subCode;
-												break;
-											}
-										}
-										
-										break;
-									}
-								}
-								
-								param.setCategory(main+sub);
-							} else if(colindex == 2) {
-								boolean isDateFormat = false;
-								
-								try {
-									isDateFormat = org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell);
-								} catch (Exception e) {}
-								
-								if(isDateFormat) {
-									SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-									param.setReleaseDate(formatter.format(cell.getDateCellValue()));
-								} else {
-									param.setReleaseDate(getCellData(cell));
-								}
-							} else if(colindex == 3) {
-								// delete 처리
-								value = avoidNull(value).trim();
-								
-								if(!isEmpty(value) && CoConstDef.FLAG_YES.equals(value) || "1".equals(value)) {
-									param.setDelYn(CoConstDef.FLAG_YES);
-								} else {
-									param.setDelYn(CoConstDef.FLAG_NO);
-								}
-							}
-						}
-						
-						String key = param.getCategory() + "|" + param.getModelName();
-						
-						if(osddModelInfo.containsKey(key)) {
-							if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
-								continue;
-							}
-							Project modelBean = osddModelInfo.get(key);
-							param.setOsddSyncYn(CoConstDef.FLAG_YES);
-							param.setModifier(modelBean.getModifier());
-							param.setModifiedDate(modelBean.getModifiedDate());
-						}
-						
-						if(!CoConstDef.FLAG_YES.equals(param.getDelYn())) {
-							if(!duplicateModel.contains(key)) {
-								param.setGridId(prjId + CoConstDef.FLAG_NO + ++rowindex);
-								resultModel.add(param);
-								duplicateModel.add(key);
-							}
-						} else {
-							param.setGridId(prjId + CoConstDef.FLAG_YES + ++rowindex);
-							resultModelDelete.add(param);
-						}
-					}
-					
-					if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
-						deDuplicateModelList = modelList
-													.stream()
-													.filter(before -> 
-														resultModel
-															.stream()
-															.filter(after -> 
-																	(before.getCategory() + "|" + before.getModelName()).equalsIgnoreCase(after.getCategory() + "|" + after.getModelName())
-																	).collect(Collectors.toList()).size() == 0
-															).collect(Collectors.toList());
-						
-						deDuplicateModelList.addAll(resultModel);
-					}
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				} finally {
-					try {
-						wb.close();
-					} catch (Exception e) {}
-				}
-			}
-		}
-		
-		if(CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
-			result.put("currentModelList", deDuplicateModelList);
-		}else {
-			result.put("currentModelList", resultModel);
-		}
-		
+		result.put("currentModelList", resultModel);
 		result.put("delModelList", resultModelDelete);
-		
+
 		return result;
 	}
+
+	public static Map<String, List<Project>> readModelList(MultipartFile multipart, String localPath, String prjId, String modelListAppendFlag, String modelSeq, String distributionType) {
+		Map<String, List<Project>> result = new HashMap<>();
+		List<Project> resultModel = new ArrayList<Project>();
+		List<Project> resultModelDelete = new ArrayList<Project>();
+		List<Project> deDuplicateModelList = new ArrayList<Project>();
+
+		List<Project> modelList = projectMapper.selectModelList(prjId);
+		List<Project> modelDeleteList = projectMapper.selectDeleteModelList(prjId);
+
+		Map<String, Project> osddModelInfo = new HashMap<>();
+		String modelCode = CoConstDef.CD_DISTRIBUTE_SITE_SKS.equals(distributionType) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
+
+		if (modelList != null) {
+			for (Project bean : modelList) {
+				if (CoConstDef.FLAG_YES.equals(bean.getOsddSyncYn())) {
+					osddModelInfo.put(bean.getCategory() + "|" + bean.getModelName().trim().toUpperCase(), bean);
+				}
+			}
+
+			for (Project bean : modelDeleteList) {
+				if (CoConstDef.FLAG_YES.equals(bean.getOsddSyncYn())) {
+					osddModelInfo.put(bean.getCategory() + "|" + bean.getModelName().trim().toUpperCase(), bean);
+				}
+			}
+		}
+
+		String fileName = multipart.getOriginalFilename();
+		String[] ext = StringUtil.split(fileName, ".");
+		String extType = ext[ext.length - 1];
+		String codeExt[] = StringUtil.split(codeMapper.selectExtType("11"), ",");
+		ArrayList<String> duplicateModel = new ArrayList<String>();
+		int count = 0;
+
+		for (int i = 0; i < codeExt.length; i++) {
+			if (codeExt[i].equals(extType)) {
+				count++;
+			}
+			;
+		}
+
+		if (count != 1) {
+			result = null;
+		} else {
+			if (fileName.indexOf("/") > -1) {
+				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+				log.debug("File upload OriginalFileName Substring with File.separator : " + fileName);
+			}
+
+			if (fileName.indexOf("\\") > -1) {
+				fileName = fileName.substring(fileName.lastIndexOf("\\") + 1);
+				log.debug("File upload OriginalFileName Substring with File.separator : " + fileName);
+			}
+
+			File file = new File(localPath + "/" + fileName);
+			FileUtil.transferTo(multipart, file);
+			Workbook wb = null;
+
+			try {
+				wb = WorkbookFactory.create(file);
+				int rowindex = Integer.parseInt(avoidNull(modelSeq, "0"));
+				int colindex = 0;
+				Sheet sheet = wb.getSheetAt(0);
+				Row row = null;
+
+				for (int idx = 1; idx <= sheet.getPhysicalNumberOfRows(); idx++) {
+					row = sheet.getRow(idx);
+
+					if (row == null) {
+						continue;
+					}
+
+					int maxcols = row.getLastCellNum();
+					Project param = new Project();
+
+					for (colindex = 0; colindex < maxcols; colindex++) {
+						Cell cell = row.getCell(colindex);
+						String value = getCellData(cell);
+
+						if (colindex == 0) {
+							param.setModelName(value.trim().toUpperCase());
+						} else if (colindex == 1) {
+							String main = StringUtil.trim(StringUtil.split(value, ">")[0]);
+							String sub = StringUtil.trim(StringUtil.split(value, ">")[1]);
+
+							for (String s : CoCodeManager.getCodes(modelCode)) {
+								if (CoCodeManager.getCodeString(modelCode, s).equals(main)) {
+									main = s;
+									String subCdNo = CoCodeManager.getSubCodeNo(modelCode, s);
+									for (String subCode : CoCodeManager.getCodes(subCdNo)) {
+										if (CoCodeManager.getCodeString(subCdNo, subCode).equals(sub)) {
+											sub = subCode;
+											break;
+										}
+									}
+
+									break;
+								}
+							}
+
+							param.setCategory(main + sub);
+						} else if (colindex == 2) {
+							boolean isDateFormat = false;
+
+							try {
+								isDateFormat = org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell);
+							} catch (Exception e) {
+							}
+
+							if (isDateFormat) {
+								SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+								param.setReleaseDate(formatter.format(cell.getDateCellValue()));
+							} else {
+								param.setReleaseDate(getCellData(cell));
+							}
+						} else if (colindex == 3) {
+							// delete 처리
+							value = avoidNull(value).trim();
+
+							if (!isEmpty(value) && CoConstDef.FLAG_YES.equals(value) || "1".equals(value)) {
+								param.setDelYn(CoConstDef.FLAG_YES);
+							} else {
+								param.setDelYn(CoConstDef.FLAG_NO);
+							}
+						}
+					}
+
+					String key = param.getCategory() + "|" + param.getModelName();
+
+					if (osddModelInfo.containsKey(key)) {
+						if (CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
+							continue;
+						}
+						Project modelBean = osddModelInfo.get(key);
+						param.setOsddSyncYn(CoConstDef.FLAG_YES);
+						param.setModifier(modelBean.getModifier());
+						param.setModifiedDate(modelBean.getModifiedDate());
+					}
+
+					if (!CoConstDef.FLAG_YES.equals(param.getDelYn())) {
+						if (!duplicateModel.contains(key)) {
+							param.setGridId(prjId + CoConstDef.FLAG_NO + ++rowindex);
+							resultModel.add(param);
+							duplicateModel.add(key);
+						}
+					} else {
+						param.setGridId(prjId + CoConstDef.FLAG_YES + ++rowindex);
+						resultModelDelete.add(param);
+					}
+				}
+
+				if (CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
+					deDuplicateModelList = modelList
+							.stream()
+							.filter(before ->
+									resultModel
+											.stream()
+											.filter(after ->
+													(before.getCategory() + "|" + before.getModelName()).equalsIgnoreCase(after.getCategory() + "|" + after.getModelName())
+											).collect(Collectors.toList()).size() == 0
+							).collect(Collectors.toList());
+
+					deDuplicateModelList.addAll(resultModel);
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			} finally {
+				try {
+					wb.close();
+				} catch (Exception e) {
+				}
+			}
+		}
+		if (CoConstDef.FLAG_YES.equals(modelListAppendFlag)) {
+			result.put("currentModelList", deDuplicateModelList);
+		} else {
+			result.put("currentModelList", resultModel);
+		}
+
+		result.put("delModelList", resultModelDelete);
+		return result;
+	}
+
 	
 	public static List<ProjectIdentification> getVerificationList(MultipartHttpServletRequest req, String localPath) {
-		//硫��떚�뙆�듃由ы�섏뒪�듃 �뙆�씪濡� 蹂��솚�븯湲�
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		Iterator<String> fileNames = req.getFileNames();
 		

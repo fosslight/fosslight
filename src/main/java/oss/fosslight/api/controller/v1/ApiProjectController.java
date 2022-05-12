@@ -37,6 +37,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
@@ -178,7 +179,65 @@ public class ApiProjectController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	})
+	@PostMapping(value = {API.FOSSLIGHT_API_MODEL_UPDATE})
+	public CommonResult updateModelList(
+			@RequestHeader String _token,
+			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+			@ApiParam(value = "Model List to update", required = true) @RequestPart(required = true) MultipartFile modelReport) {
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+			List<String> prjIdList = new ArrayList<String>();
+			prjIdList.add(prjId);
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjIdList);
+			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+
+			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+			if (searchFlag) {
+				if (modelReport != null) {
+					if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
+							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > modelReport.getSize()) { // Max file size :5MB
+
+						Project project = new Project();
+						project.setPrjId(prjId);
+						Map<String, List<Project>> modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
+								project.getDistributionType(), prjId, CoConstDef.FLAG_YES, "0");
+
+						project.setModelList(modelList.get("currentModelList"));
+						projectService.insertProjectModel(project);
+						return responseService.getSingleResult(resultMap);
+
+					} else {
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
+								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+					}
+				} else {
+					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
+							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
+				}
+			} else {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+	}
+
+
 	@ApiOperation(value = "Create Project", notes = "project 생성")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
