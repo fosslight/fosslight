@@ -1015,8 +1015,8 @@
 		   AND A.DEACTIVATE_FLAG = 'N'
 		   AND A.OSS_VERSION = #{ossVersion}
 		   AND (
-				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%') 
-				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}) 
+				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 			   )
 	</select>
 
@@ -1036,8 +1036,8 @@
 		WHERE A.USE_YN = 'Y'
 			AND A.DEACTIVATE_FLAG = 'N'
 			AND (
-				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%') 
-				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+				A.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}) 
+				OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 			   )
 	</select>
 
