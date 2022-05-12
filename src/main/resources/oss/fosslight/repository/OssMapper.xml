@@ -1740,8 +1740,8 @@
 		    ON OM.OSS_ID = DOWN.OSS_ID
 		 WHERE OM.OSS_NAME != #{ossName}
 		   AND (
-		   		   OM.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
-		    	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+		   		   OM.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
+		    	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 		       )
 		 GROUP BY OM.OSS_NAME
 	</select>
@@ -1829,8 +1829,8 @@
 		    ON OM.OSS_ID = DOWN.OSS_ID
 		 WHERE OM.OSS_NAME = #{ossName}
 		   AND ( 
-		   		OM.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
-		    	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation}, '%')
+		   		OM.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
+		    	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 		       )
 	</select>
 	

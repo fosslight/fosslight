@@ -170,6 +170,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		String protocol = "";
 		String endUrl = "";
 		String downloadlocationUrlEndSplit = "";
+		String semicolonStr = "";
 		
 		for(ProjectIdentification oss : ossList) {
 			List<ProjectIdentification> prjOssLicenses;
@@ -182,13 +183,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
 			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
-				String evidence = getMessage("check.evidence.exist.nameAndVersion");
-				oss.setCheckOssList("Y");
-				oss.setCheckLicense(checkedLicense);
-				oss.setCheckedEvidence(evidence);
-				oss.setCheckedEvidenceType("DB");
-				result.add(oss);
+			if (!checkedLicense.isEmpty()) {
+				if(!currentLicense.equals(checkedLicense)) {
+					String evidence = getMessage("check.evidence.exist.nameAndVersion");
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("DB");
+					result.add(oss);
+				}
 				continue;
 			}
 
@@ -196,37 +199,58 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				continue;
 			}
 
-			if(oss.getDownloadLocation().contains("github.com")) {
-				if(oss.getDownloadLocation().startsWith("git@")){
-					protocol = "git@";
-					oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
+			if(oss.getDownloadLocation().contains(";")) {
+				int idx = 0;
+				for(String smc : oss.getDownloadLocation().split(";")) {
+					if(idx > 0) {
+						semicolonStr += smc + ";";
+					}
+					idx++;
 				}
-				
-				if(oss.getDownloadLocation().startsWith("http://") 
-						|| oss.getDownloadLocation().startsWith("https://")
-						|| oss.getDownloadLocation().startsWith("git://")
-						|| oss.getDownloadLocation().startsWith("ftp://")
-						|| oss.getDownloadLocation().startsWith("svn://")) {
-					if(isEmpty(protocol)) {
-						protocol = oss.getDownloadLocation().split("//")[0] + "//";
-						oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
+				semicolonStr = semicolonStr.substring(0, semicolonStr.length()-1);
+				oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
+			}
+			
+			if(oss.getDownloadLocation().startsWith("git@")){
+				protocol = "git@";
+				oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
+			}
+			
+			if(oss.getDownloadLocation().startsWith("http://") 
+					|| oss.getDownloadLocation().startsWith("https://")
+					|| oss.getDownloadLocation().startsWith("git://")
+					|| oss.getDownloadLocation().startsWith("ftp://")
+					|| oss.getDownloadLocation().startsWith("svn://")) {
+				if(isEmpty(protocol)) {
+					protocol = oss.getDownloadLocation().split("//")[0] + "//";
+					oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
+				}
+			}
+			
+			if(oss.getDownloadLocation().startsWith("www.")) {
+				protocol += oss.getDownloadLocation().substring(0, 4);
+				oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
+			}
+			
+			if(oss.getDownloadLocation().contains(".git")) {
+				if(oss.getDownloadLocation().endsWith(".git")) {
+					endUrl = ".git";
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
+				} else {
+					if(oss.getDownloadLocation().contains("#")) {
+						endUrl = oss.getDownloadLocation().substring(oss.getDownloadLocation().indexOf("#"), oss.getDownloadLocation().length());
+						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+						downloadlocationUrlEndSplit = ".git";
+						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 					}
 				}
-				
-				if(oss.getDownloadLocation().startsWith("www.")) {
-					protocol += oss.getDownloadLocation().substring(0, 4);
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
-				}
-				
+			}
+			
+			if(isEmpty(downloadlocationUrlEndSplit)) {
 				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
 				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
 					downloadlocationUrlEndSplit = oss.getDownloadLocation().substring(oss.getDownloadLocation().indexOf("#"), oss.getDownloadLocation().length());
 					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-				}
-				
-				if(oss.getDownloadLocation().endsWith(".git")) {
-					endUrl = ".git";
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 				}
 			}
 			
@@ -234,14 +258,16 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense)) {
-				String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
-				oss.setCheckOssList("Y");
-				oss.setCheckLicense(checkedLicense);
-				oss.setCheckedEvidence(evidence);
-				oss.setCheckedEvidenceType("DB");
-				oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
-				result.add(oss);
+			if (!checkedLicense.isEmpty()) {
+				if(!currentLicense.equals(checkedLicense)) {
+					String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("DB");
+					oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
+					result.add(oss);
+				}
 				continue;
 			}
 			
@@ -254,22 +280,25 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					.collect(Collectors.toList());
 			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty() && !currentLicense.equals(checkedLicense) && !isEachOssVersionDiff(prjOssLicenses)) {
-				String evidence = getMessage("check.evidence.exist.downloadLocation");
-				oss.setCheckOssList("Y");
-				oss.setCheckLicense(checkedLicense);
-				oss.setCheckedEvidence(evidence);
-				oss.setCheckedEvidenceType("DB");
-				oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
-				result.add(oss);
+			if (!checkedLicense.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
+				if(!currentLicense.equals(checkedLicense)) {
+					String evidence = getMessage("check.evidence.exist.downloadLocation");
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("DB");
+					oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
+					result.add(oss);
+				}
 				continue;
 			}
 
-			oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl);
+			oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
 			
 			protocol = "";
 			endUrl = "";
 			downloadlocationUrlEndSplit = "";
+			semicolonStr = "";
 			
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
