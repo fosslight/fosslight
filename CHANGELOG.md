@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3.7 (13/05/2022)
+## 🚀 Features
+
+- Add model updates to the API @soimkim (#507)
+
+## 🔧 Maintenance
+
+- Check OSS Name/License > refine the download location. @FOSSLight-dev (#508)
+- Check OSS Name, License > Change the way you find links @FOSSLight-dev (#506)
+- Add a default comment to the Packaging confirm mail @soimkim (#505)
+
+---
+
 ## v1.3.6 (06/05/2022)
 ## 🐛 Hotfixes
 
@@ -493,28 +506,3 @@
 - Fix the missing item that print the "Declared :" message @FOSSLight-dev (#228)
 - Fix the bug where the link tag is displayed in the mail subject. @FOSSLight-dev (#225)
 
-
----
-
-## v1.2.12 (22/10/2021)
-## Changes
-## 🚀 Features
-- Supports 3rd Party List OSS report as csv attachment @riyenas0925 (#203)
-- Support Import SPDX Spreadsheet in Self-Check List @kimtaehyun98 (#201)
-- Support Import SPDX Spreadsheet in BIN tab @kimtaehyun98 (#200)
-- Update statistics mostused & oss name merge function @FOSSLight-dev (#216)
-- Add SPDX json and yaml formats for modified notice packaging @hyewoncc (#193)
-- Support Import SPDX Spreadsheet in SRC tab @kimtaehyun98 (#184)
-
-## 🐛 Hotfixes
-
-- Update statistics mostused & oss name merge function @FOSSLight-dev (#216)
-- Add missing STATISTICS_MOSTUSED table @riyenas0925 (#214)
-- Modify detected licenses to be separated by , in mail sent @riyenas0925 (#205)
-- Bug Fix when Import SPDX Spreadsheet in SRC tab @kimtaehyun98 (#199)
-
-## 🔧 Maintenance
-
-- Moving hardcoded messages to US and KR properties @epicarts (#210)
-- Change PR merged action to only work for main @soimkim (#208)
-- Add contributors to README @soimkim (#202)
