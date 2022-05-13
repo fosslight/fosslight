@@ -1310,6 +1310,15 @@ var src_fn_com = {
 		target.jqGrid('saveRow',rowid);
 
 		var licenseName = target.jqGrid('getCell',rowid,'licenseName');
+		if(licenseName.indexOf("<div class=") > -1) {
+			licenseName = licenseName.substring(0, licenseName.indexOf("<div class="));
+		}
+		if(licenseName.indexOf("+") > -1) {
+			licenseName = licenseName.replace(/\+/g, "%2B");
+		}
+		if(licenseName.indexOf("&") > -1){
+			licenseName = licenseName.replace(/&/g, "%26");
+		}
 		target.jqGrid('editRow',rowid);
 
 		if(_popup == null || _popup.closed) {
