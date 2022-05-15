@@ -36,7 +36,9 @@ FOSSLight는 Open Source Compliance Process를 효율적으로 수행하는 데 
   - 검토할 OSS에 대한 License, 보안 취약점 등 사전 확인 기능
 
 ## Documentation
-설치 방법 및 사용 방법에 대해 [**FOSSLight 가이드**](https://fosslight.org/fosslight-guide/)를 통해 제공하고 있습니다.
+- [Release Note](https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md) 
+- [Change Log](https://github.com/fosslight/fosslight_system/blob/main/CHANGELOG.md)
+- [FOSSLight guide](https://fosslight.org/fosslight-guide-en/) : 설치 방법 및 사용 방법을 확인할 수 있습니다.
 
 ## Demo site
 미리 FOSSLight의 여러 기능들을 체험해볼 수 있도록 [**Demo 사이트**](https://demo.fosslight.org/)를 운영하고 있습니다.  
