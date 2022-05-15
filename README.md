@@ -34,9 +34,12 @@ FOSSLight Hub is an integrated system that can efficiently process the open sour
   - Manage OSS for 3rd party Software
 - **Self-check**
   - Check the information of OSS you wish to examine
-
+  
 ## Documentation
-We provide the guide for the installation and how to use it. Please refer the **[FOSSLight guide](https://fosslight.org/fosslight-guide-en/)**.
+- [Release Note](https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md) 
+- [Change Log](https://github.com/fosslight/fosslight_system/blob/main/CHANGELOG.md)
+- [FOSSLight guide](https://fosslight.org/fosslight-guide-en/)
+     We provide the guide for the installation and how to use it.    
 
 ## Demo site
 You can experience FOSSLight Hub through the **[Demo site](https://demo.fosslight.org/)**.  
