@@ -5,7 +5,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [1.3.7](https://github.com/fosslight/fosslight/releases/tag/v1.3.7) (2022-05-13)
 ### Changed
 * Change the download location matching method when searching OSS in DB in Check OSS name/License.
-    - Fix the mismatch with github.com/fosslight/fosslight_util when searching for github.com/fosslight/fosslight.
+    - Instead of checking whether the download location comparison method is included, it is changed to exact matching.    
+      ex. A bug that matched github.com/fosslight/fosslight_util when searching for github.com/fosslight/fosslight has been fixed.
 
 ## [1.3.4](https://github.com/fosslight/fosslight/releases/tag/v1.3.4) (2022-04-22)
 ### New
