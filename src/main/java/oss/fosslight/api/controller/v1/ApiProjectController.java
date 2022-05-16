@@ -201,7 +201,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("userId", userInfo.getUserId());
 			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
-			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+			paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
 
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			if (searchFlag) {
