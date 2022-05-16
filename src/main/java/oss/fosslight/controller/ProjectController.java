@@ -56,6 +56,7 @@ import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.History;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
@@ -1033,6 +1034,7 @@ public class ProjectController extends CoTopComponent {
 		Project beforeBean = null;
 		Project afterBean = null;
 		String copy = req.getParameter("copy");
+		String confirmStatusCopy = req.getParameter("confirmStatusCopy");
 		String creatorIdByName = null;
 		
 		if (CommonFunction.isAdmin() && !isNew && !"true".equals(copy)) {
@@ -1301,9 +1303,317 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		
+		if(copy.equals("true") && !confirmStatusCopy.equals("false")) {
+			Map<String, Object> copyConfirmStatusResultMap = updateCopyConfirmStatus(req, project, confirmStatusCopy, userComment);
+			if(copyConfirmStatusResultMap.get("result").equals("true")) {
+				lastResult.put("confirmCopyStatusSuccess", "true");
+			}else {
+				String falseStep = "";
+				
+				if(copyConfirmStatusResultMap.get("step").equals("verificationProgress")) {
+					falseStep = "verification";
+					project.setIdentificationStatus(null);
+					project.setVerificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
+				} else {
+					falseStep = "identification";
+					project.setIdentificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
+					project.setVerificationStatus(null);
+				} 
+				
+				Project prj = projectService.getProjectBasicInfo(project.getPrjId());
+				if(falseStep.equals("verification") && !isEmpty(prj.getVerificationStatus())) {
+					project.setVerificationStatus(prj.getVerificationStatus());
+				}
+				
+				projectService.updateCopyConfirmStatusProjectStatus(project);
+				
+				lastResult.put("confirmCopyStatusSuccess", "false");
+				if(!confirmStatusCopy.equals("IdentificationProg")) {
+					lastResult.put("confirmCopyStatusFail", falseStep);
+				}
+			}
+		}
+		
 		return makeJsonResponseHeader(true, null, lastResult);
 	}
 	
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> updateCopyConfirmStatus(HttpServletRequest req, Project project, String confirmStatusCopy, String userComment) {
+		log.info("copyConfirmStatus Start >>> " + project.getPrjId());
+		
+		Map<String, Object> returnMap = new HashMap<String, Object>();
+		boolean identificationStatusRequest = false;
+		boolean identificationStatusConfirm = false;
+		
+		if(!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			ProjectIdentification identification = new ProjectIdentification();
+			identification.setReferenceId(project.getCopyPrjId());
+			identification.setMerge(CoConstDef.FLAG_NO);
+			Map<String, Object> result = getOssComponentDataInfo(identification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			projectService.insertCopyConfirmStatusBomList(project, identification);
+			
+			if(result.containsKey("validData") && (confirmStatusCopy.equals("IdentificationConf") || confirmStatusCopy.equals("verificationConf"))) {
+				log.error("copyConfirmStatus error >>> bom validation");
+				returnMap.put("result", "false");
+				returnMap.put("step", "IdentificationProgress");
+				return returnMap;
+			}
+			
+			if(!result.containsKey("validData") && !confirmStatusCopy.equals("IdentificationProg")) {
+				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+				
+				try {
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+					resultMap.put("userComment", "");
+					updateProjectNotification(project, resultMap);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					returnMap.put("result", "false");
+					returnMap.put("step", "identificationProgress");
+					return returnMap;
+				} finally {
+					identificationStatusRequest = true;
+				}
+			}
+		}else {
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceId(project.getPrjId());
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			Map<String, Object> map = null;
+			map = projectService.getIdentificationGridList(param);
+			
+			if (map != null && map.containsKey("mainData")
+					&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+				T2CoProjectValidator pv = new T2CoProjectValidator();
+				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+
+				pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+				pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				
+				if (!vr.isValid()) {
+					log.error("copyConfirmStatus error >>> mainData validation");
+					returnMap.put("result", "false");
+					returnMap.put("step", "identificationProgress");
+					return returnMap;
+				}
+			}else {
+				returnMap.put("result", "false");
+				returnMap.put("step", "identificationProgress");
+				return returnMap;
+			}
+			
+			if(isEmpty(projectService.getProjectBasicInfo(project.getPrjId()).getSrcAndroidNoticeFileId())) {
+				log.error("copyConfirmStatus error > androidNoticeFile empty");
+				returnMap.put("result", "false");
+				returnMap.put("step", "identificationProgress");
+				return returnMap;
+			}
+			
+			if(!confirmStatusCopy.equals("IdentificationProg")) {
+				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+				
+				try {
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+					resultMap.put("userComment", "");
+					updateProjectNotification(project, resultMap);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					returnMap.put("result", "false");
+					returnMap.put("step", "identificationProgress");
+					return returnMap;
+				} finally {
+					identificationStatusRequest = true;
+				}
+			}
+		}
+		
+		if(identificationStatusRequest) {
+			project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+			project.setIgnoreBinaryDbFlag(CoConstDef.FLAG_NO);
+			
+			try {
+				Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+				resultMap.put("userComment", "");
+				updateProjectNotification(project, resultMap);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				returnMap.put("result", "false");
+				returnMap.put("step", "identificationProgress");
+				return returnMap;
+			} finally {
+				identificationStatusConfirm = true;
+			}
+		}
+		
+		if (identificationStatusConfirm && confirmStatusCopy.equals("verificationConf")) {
+			Project prjInfo = projectService.getProjectBasicInfo(project.getPrjId());
+			Project copyPrjInfo = projectService.getProjectBasicInfo(project.getCopyPrjId());
+			
+			if(!project.getNetworkServerType().equals(copyPrjInfo.getNetworkServerType())) {
+				returnMap.put("result", "false");
+				returnMap.put("step", "verificationProgress");
+				return returnMap;
+			}
+			
+			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging");
+			List<String> fileSeqsList = projectService.getPackageFileList(project, filePath);
+			
+			if(fileSeqsList.size() > 0) {
+				ProjectIdentification identification = new ProjectIdentification();
+				identification.setReferenceId(project.getPrjId());
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
+				
+				// verify
+				T2File file = new T2File();
+				file.setCreator(loginUserName());
+				
+				List<Map<String, Object>> verifyResult = new ArrayList<Map<String,Object>>();
+				Map<String, Object> resMap = null;
+				List<String> filePathList = new ArrayList<>();
+				List<String> componentIdList = new ArrayList<>();
+				
+				List<ProjectIdentification> ocList = projectService.selectIdentificationGridList(identification);
+				for(ProjectIdentification pi : ocList) {
+					filePathList.add(pi.getFilePath());
+					componentIdList.add(pi.getComponentId());
+				}
+				Map<Object, Object> map = new HashMap<>();
+				map.put("prjId", project.getPrjId());
+				map.put("fileSeqs", fileSeqsList);
+				map.put("gridFilePaths", filePathList);
+				map.put("gridComponentIds", componentIdList);
+				
+				try {
+					boolean isChangedPackageFile = verificationService.getChangedPackageFile(project.getPrjId(), fileSeqsList);
+					int seq = 1;
+					
+					for(String fileSeq : fileSeqsList){
+						map.put("fileSeq", fileSeq);
+						map.put("packagingFileIdx", seq++);
+						map.put("isChangedPackageFile", isChangedPackageFile);
+						verifyResult.add(verificationService.processVerification(map, file, project));
+					}
+					
+					resMap = verifyResult.get(0);
+					
+					if(fileSeqsList.size() > 1){
+						resMap.put("verifyValid", verifyResult.get(verifyResult.size()-1).get("verifyValid"));
+						resMap.put("fileCounts", verifyResult.get(verifyResult.size()-1).get("fileCounts"));
+					}
+					
+					verificationService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));
+					verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
+				} catch(Exception e) {
+					log.error(e.getMessage(), e);
+					returnMap.put("result", "false");
+					returnMap.put("step", "verificationProgress");
+					return returnMap;
+				} 
+			}
+			
+			OssNotice ossNotice = verificationService.selectOssNoticeOne(project.getCopyPrjId());
+			ossNotice.setPrjId(project.getPrjId());
+			ossNotice.setEditNoticeYn(CoConstDef.FLAG_YES);
+			verificationService.registOssNoticeConfirmStatus(ossNotice);
+			
+			// download flag
+			prjInfo.setAllowDownloadNoticeHTMLYn(copyPrjInfo.getAllowDownloadNoticeHTMLYn());
+			prjInfo.setAllowDownloadNoticeTextYn(copyPrjInfo.getAllowDownloadNoticeTextYn());
+			prjInfo.setAllowDownloadSimpleHTMLYn(copyPrjInfo.getAllowDownloadSimpleHTMLYn());
+			prjInfo.setAllowDownloadSimpleTextYn(copyPrjInfo.getAllowDownloadSimpleTextYn());
+			prjInfo.setAllowDownloadSPDXSheetYn(copyPrjInfo.getAllowDownloadSPDXSheetYn());
+			prjInfo.setAllowDownloadSPDXRdfYn(copyPrjInfo.getAllowDownloadSPDXRdfYn());
+			prjInfo.setAllowDownloadSPDXTagYn(copyPrjInfo.getAllowDownloadSPDXTagYn());
+			prjInfo.setAllowDownloadSPDXJsonYn(copyPrjInfo.getAllowDownloadSPDXJsonYn());
+			prjInfo.setAllowDownloadSPDXYamlYn(copyPrjInfo.getAllowDownloadSPDXYamlYn());
+			
+			verificationService.updateProjectAllowDownloadBitFlag(prjInfo);
+			
+			boolean ignoreMailSend = false;
+
+			prjInfo.setIdentificationStatus(null);
+			prjInfo.setCompleteYn(null);
+			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
+			prjInfo.setDestributionStatus(null);
+			prjInfo.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+			
+			try {
+				Map<String, Object> resultMap = projectService.updateProjectStatus(prjInfo);
+				resultMap.put("userComment", "");
+				updateProjectNotification(prjInfo, resultMap);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				returnMap.put("result", "false");
+				returnMap.put("step", "verificationProgress");
+				return returnMap;
+			}
+			
+			ossNotice.setDomain(CommonFunction.getDomain(req));
+			
+			try {
+				verificationService.getNoticeHtmlFile(ossNotice);
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+				returnMap.put("result", "false");
+				returnMap.put("step", "verificationProgress");
+				return returnMap;
+			}
+			
+			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+			prjInfo.setDestributionStatus(null);
+			prjInfo.setModifier(loginUserName());
+
+			try {
+				verificationService.updateStatusWithConfirm(prjInfo, ossNotice, true);
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+				returnMap.put("result", "false");
+				returnMap.put("step", "verificationProgress");
+				return returnMap;
+			}
+			
+			try {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+				commHisBean.setReferenceId(project.getPrjId());
+				commHisBean.setContents("");
+				commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
+				
+				commentService.registComment(commHisBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			if (prjInfo != null) {
+				String noticeUserComment = ossNotice.getUserComment();
+				try {
+					String mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF;
+					String mailContentCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_CONF;
+					if (ignoreMailSend) {
+						mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY;
+						mailContentCode = mailTemplateCode;
+					} else if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())) {
+						mailTemplateCode = CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COMFIRMED_ONLY;
+					}
+					CoMail mailBean = new CoMail(mailTemplateCode);
+					mailBean.setParamPrjId(ossNotice.getPrjId());
+					String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, mailContentCode));
+					noticeUserComment = avoidNull(noticeUserComment) + "<br />" + _tempComment;
+
+					if (!isEmpty(noticeUserComment)) {
+						mailBean.setComment(noticeUserComment);
+					}
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		returnMap.put("result", "true");
+		return returnMap;
+	}
+
 	/**
 	 * [API] 프로젝트 삭제.
 	 *
