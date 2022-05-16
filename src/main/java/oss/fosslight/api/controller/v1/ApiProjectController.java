@@ -201,7 +201,8 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("userId", userInfo.getUserId());
 			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
-			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+			paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
 
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			if (searchFlag) {
@@ -540,6 +541,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
 			paramMap.put("distributionType", "normal");
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
@@ -682,6 +684,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "normal");
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
@@ -937,6 +940,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
 			paramMap.put("distributionType", "android");
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			UploadFile ossReportBean = null;
@@ -1156,6 +1160,7 @@ public class ApiProjectController extends CoTopComponent {
 		paramMap.put("userId", userInfo.getUserId());
 		paramMap.put("userRole", userRole(userInfo));
 		paramMap.put("prjId", prjIdList);
+		paramMap.put("readOnly", CoConstDef.FLAG_NO);
 		
 		boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 		String errorMsg = "";

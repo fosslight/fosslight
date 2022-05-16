@@ -221,7 +221,9 @@
 							 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId} -->
 							 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{userId} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{userId}) ))
 							)
-							OR PUBLIC_YN = 'Y'
+				  <if test="@oss.fosslight.util.StringUtil@notEquals('N', readOnly)">
+					  OR PUBLIC_YN = 'Y'
+				  </if>
 					)
 			  </if>
 				<foreach item="item" index="index" collection="prjId" open=" AND (" close=")" separator="OR">
