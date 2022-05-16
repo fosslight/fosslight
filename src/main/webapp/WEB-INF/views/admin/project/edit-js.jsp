@@ -16,6 +16,11 @@
 	var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 	var osTypeEtc = "${ct:getConstDef('CD_OS_TYPE_ETC')}";
 	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+	var completeYn = '${project.completeYn}';
+	var verificationStatus = '${project.verificationStatus}';
+	var checkPartner = '${project.refPartnerId}';
+	var identificationStatusConfFlag = '${project.identificationStatusConfFlag}';
+	var verificationStatusConfFlag = '${project.verificationStatusConfFlag}';
 	
 	$(document).ready(function() {
 		'use strict';
@@ -51,6 +56,27 @@
 		
 		if('${project.destributionStatus}' == 'NA' && '${project.completeYn}' == 'Y'){
 			$("#saveModel").show();
+		}
+
+		if('Y' == completeYn){
+			fn.disabledCompleteRow(true);
+			$("#tr_distribute > td > span.fileex_back").hide();
+			$("#allDelete").hide();
+		}
+
+		// If packaging step equals confirmed, OSS Notice not editable
+		if('CONF' == verificationStatus){
+			fn.disabledVerificationConfirm(true);
+		}
+
+		if(checkPartner != ''){
+			$("#noticeType1").attr("disabled", true);
+			$("#noticeTypeEtc").attr("disabled", true);
+		}
+
+		if(('Y' == "${project.copyFlag}" || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked')){
+			$("[name='noticeType']").attr("disabled", true);
+			$("#noticeTypeEtc").attr("disabled", true);
 		}
 	});
 	
@@ -182,13 +208,34 @@
 					confirmMsg = '<spring:message code="msg.common.confirm.save" />';
 				}
 
-				alertify.confirm(confirmMsg, function (e) {
-					if (e) {
-						fn.saveSubmit();
-					} else {
-						return false;
-					}
-				});
+				if('Y' == identificationStatusConfFlag){
+					alertify.confirm(confirmMsg, function (e) {
+						if (e) {
+							fn.showCopyStatusConfirm();
+						} else {
+							return false;
+						}
+					});
+				}else{
+					alertify.confirm(confirmMsg, function (e) {
+						if (e) {
+							fn.saveSubmit();
+						} else {
+							return false;
+						}
+					});
+				}
+			});
+
+			$("#popCopyConfirmSave").click(function(){
+				fn.saveSubmit();
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				$("#copyConfirmPopup").hide();
+			});
+
+			$("#popCopyConfirmCancel").click(function(){
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				$("#copyConfirmPopup").hide();
 			});
 			
 			// 모델 저장
@@ -775,6 +822,14 @@
 				if($("input[name=distributeTarget]").is(":disabled")){
 					$("input[name=distributeTarget]").removeAttr("disabled");
 				}
+
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(false);
+				}
+
+				if('CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(false);
+				}
 				
 			<c:if test="${ct:isAdmin() and not empty project.prjId and 'Y' ne project.copyFlag}">
 				var creator = $("input[name=creator]").val();
@@ -786,11 +841,24 @@
 			</c:if>
 				
 				var URL = '';
+
+				var confirmStatusCopyFlag = true;
+				var confirmStatusCopyVal = "";
+				if($('input:radio[name="confirmStatusCopyRadio"]').is(':checked')){
+					confirmStatusCopyVal = $('input:radio[name="confirmStatusCopyRadio"]:checked').val();
+					fn.disabledVerificationConfirm(false);
+				}else{
+					confirmStatusCopyFlag = false;
+				}
 				
 				if(data.copy){
-					URL = '<c:url value="/project/saveAjax?copy=true"/>';
+					if(confirmStatusCopyFlag){
+						URL = '<c:url value="/project/saveAjax?copy=true&confirmStatusCopy='+confirmStatusCopyVal+'"/>';
+					} else {
+						URL = '<c:url value="/project/saveAjax?copy=true&confirmStatusCopy=false"/>';
+					}
 				} else {
-					URL = '<c:url value="/project/saveAjax?copy=false"/>';
+					URL = '<c:url value="/project/saveAjax?copy=false&confirmStatusCopy=false"/>';
 				}
 				
 				//public 값 넣어주기
@@ -839,6 +907,14 @@
 			},
 			// 성공 콜백
 			onRegistSuccess : function(json, status){
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(true);
+				}
+
+				if('CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(true);
+				}
+				
 				if(json.isValid == 'false') {
 					var _errMsg = '<spring:message code="msg.common.valid" />';
 					
@@ -850,46 +926,79 @@
 					gridListBulkEdit("_modelList", pickdates);
 					createValidMsgComplex(json);
 				}else if(json.isValid == 'true') {
-					var prjId = $('input[name=prjId]').val();
-					
-					if(data.copy) {
-						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							reloadTabInframe('<c:url value="/project/list"/>');
-							
-							deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
-							
-							activeTabInFrameList("PROJECT");
-						});
-					} else {
-						alertify.alert('<spring:message code="msg.common.success" />', function(){
-							reloadTabInframe('<c:url value="/project/list"/>');
-							
-							if(prjId == '') {
-								deleteTabInFrame('#<c:url value="/project/edit"/>');
-								activeTabInFrameList("PROJECT");
-							} else {
-								var status = data.detail.destributionStatus;
-								var flag = "false";
+					if(typeof json.resultData !== "undefined" && typeof json.resultData.confirmCopyStatusSuccess !== "undefined"){
+						if(json.resultData.confirmCopyStatusSuccess == 'false'){
+							var msg;
+							if(typeof json.resultData.confirmCopyStatusFail !== "undefined"){
+								var confirmCopyStatusFail = json.resultData.confirmCopyStatusFail;
 								
-								if (json.resultData) {
-									flag = json.resultData.isAdd;
+								if("identification" == confirmCopyStatusFail){
+									msg = '<spring:message code="msg.project.copy.confirm.status.fail.identification" />';
+								}else if("verification" == confirmCopyStatusFail){
+									msg = '<spring:message code="msg.project.copy.confirm.status.fail.verification" />';
 								}
-								
-								if(status == "DONE" && flag == "true") {
-									alertify.confirm('<spring:message code="msg.project.required.only" />', function () {
-											deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
-											createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
-										}, function() {
-											deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
-											activeTabInFrameList("PROJECT");
-										}
-									);
-								} else {
-									deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
-									activeTabInFrameList("PROJECT");
-								}
+							}else{
+								msg = '<spring:message code="msg.common.success" />';
 							}
-						});	
+
+							alertify.alert(msg, function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								
+								deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
+								
+								activeTabInFrameList("PROJECT");
+							});
+						}else if(json.resultData.confirmCopyStatusSuccess == 'true'){
+							alertify.alert('<spring:message code="msg.common.success" />', function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								
+								deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
+								
+								activeTabInFrameList("PROJECT");
+							});
+						}
+					}else{
+						var prjId = $('input[name=prjId]').val();
+						
+						if(data.copy) {
+							alertify.alert('<spring:message code="msg.common.success" />', function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								
+								deleteTabInFrame('#<c:url value="/project/copy/'+data.copy.prjId+'"/>');
+								
+								activeTabInFrameList("PROJECT");
+							});
+						} else {
+							alertify.alert('<spring:message code="msg.common.success" />', function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								
+								if(prjId == '') {
+									deleteTabInFrame('#<c:url value="/project/edit"/>');
+									activeTabInFrameList("PROJECT");
+								} else {
+									var status = data.detail.destributionStatus;
+									var flag = "false";
+									
+									if (json.resultData) {
+										flag = json.resultData.isAdd;
+									}
+									
+									if(status == "DONE" && flag == "true") {
+										alertify.confirm('<spring:message code="msg.project.required.only" />', function () {
+												deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
+												createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
+											}, function() {
+												deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
+												activeTabInFrameList("PROJECT");
+											}
+										);
+									} else {
+										deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
+										activeTabInFrameList("PROJECT");
+									}
+								}
+							});	
+						}
 					}
 				}
 			},
@@ -920,6 +1029,14 @@
 			},
 			// 에러 콜백
 			onError : function(data, status) {
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(true);
+				}
+				
+				if('CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(true);
+				}
+				
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			},
 			selectDivision : function() {
@@ -1452,6 +1569,29 @@
             		
             				event.returnValue = false;
             	}
+			},
+			disabledCompleteRow : function(disabledBoolean){
+				var diabledNameList = ['prjName', 'osType', 'osTypeEtc', 'distributionType', 'networkServerType', 'distributeTarget', 'noticeType', 'noticeTypeEtc', 'priority', 'creatorNm', 'reviewer'];
+				diabledNameList.forEach(function(names){$('input[name='+names+'], select[name='+names+']').attr('disabled', disabledBoolean)});
+			},
+			disabledVerificationConfirm : function(flag){
+				$('input[name=noticeType]').attr('disabled', flag);
+				$('select[name=noticeTypeEtc]').attr('disabled', flag);
+			},
+			showCopyStatusConfirm : function(){
+				var identificationStatusConfFlag = $("#identificationStatusConfFlag").val();
+				var verificationStatusConfFlag = $("#verificationStatusConfFlag").val();
+
+				if('Y' != identificationStatusConfFlag){
+					$("#CSIdentificationConfirm > input[type=radio]").attr("disabled", true);
+				}
+
+				if('Y' != verificationStatusConfFlag){
+					$("#CSVerificationConfirm > input[type=radio]").attr("disabled", true);
+				}
+
+				$("#CSIdentificationProgress > input[type=radio]").prop("checked", true);
+				$("#copyConfirmPopup").show();
 			}
 		}
 	

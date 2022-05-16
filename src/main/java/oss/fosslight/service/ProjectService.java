@@ -169,6 +169,14 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteStatisticsMostUsedInfo(Project project);
 	
 	public void addPartnerData(Project project);
+
+	public void insertCopyConfirmStatusBomList(Project project, ProjectIdentification identification);
+
+	public List<String> getPackageFileList(Project project, String filePath);
+
+	public List<ProjectIdentification> selectIdentificationGridList(ProjectIdentification identification);
+
+	public void updateCopyConfirmStatusProjectStatus(Project project);
 }
 
 

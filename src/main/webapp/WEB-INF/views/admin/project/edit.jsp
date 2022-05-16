@@ -60,6 +60,8 @@
 				<input type="hidden" name="commId" />
 				<input type="hidden" name="statusRequestYn" />
 				<input type="hidden" id="refPartnerId" name="refPartnerId" value="${project.refPartnerId}" />
+				<input type="hidden" id="identificationStatusConfFlag" value="${project.identificationStatusConfFlag}" />
+				<input type="hidden" id="verificationStatusConfFlag" value="${project.verificationStatusConfFlag}" />
 				<table class="dCase">
 					<colgroup>
 						<col width="188" />
@@ -372,3 +374,17 @@
 	<!---->
 </div>
 <!-- //wrap -->
+<!-- Popup -->
+<div id="copyConfirmPopup" class="pop changeStatusPop">
+	<h1 class="orange">What status do you want after copying project?</h1>
+	<div class="popdata">
+		<div class="radioSet" id="CSIdentificationProgress"><input type="radio" id="r1" name="confirmStatusCopyRadio" value="IdentificationProg"><label for="r1">Identification Progress</label></div>
+		<div class="radioSet mt10" id="CSIdentificationConfirm"><input type="radio" id="r2" name="confirmStatusCopyRadio" value="IdentificationConf"><label for="r2">Identification Confirm</label></div>
+		<div class="radioSet mt10" id="CSVerificationConfirm"><input type="radio" id="r3" name="confirmStatusCopyRadio" value="verificationConf"><label for="r3">Packaging Confirm</label></div>
+	</div>
+	<div class="pbtn">
+		<input id="popCopyConfirmCancel" type="button" value="Cancel" class="btnCancel btnColor" />
+		<input id="popCopyConfirmSave" type="button" value="OK" class="btnColor red" />
+	</div>
+</div>
+<!-- //Popup -->

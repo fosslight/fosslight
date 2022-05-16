@@ -4714,4 +4714,76 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// project - partner Map Insert
 		partnerMapper.insertPartnerMapList(partnerBean);
 	}
+
+	@Override
+	public void insertCopyConfirmStatusBomList(Project project, ProjectIdentification identification) {
+		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+		
+		for(ProjectIdentification pi : bomList) {
+			List<OssComponentsLicense> licenseList = projectMapper.selectBomLicense(pi);
+			pi.setReferenceId(project.getPrjId());
+			// 컴포넌트 마스터 인서트
+			projectMapper.registBomComponents(pi);
+			
+			for(OssComponentsLicense licenseBean : licenseList) {
+				licenseBean.setComponentId(pi.getComponentId());
+				projectMapper.registComponentLicense(licenseBean);
+			}
+		}
+	}
+
+	@Override
+	public List<String> getPackageFileList(Project project, String filePath) {
+		Project prj = getProjectBasicInfo(project.getCopyPrjId());
+		List<String> fileSeqs = new ArrayList<>();
+		
+		if(!isEmpty(prj.getPackageFileId())) {
+			List<UploadFile> uploadFile = fileService.setReusePackagingFile(prj.getPackageFileId());
+			
+			HashMap<String, Object> fileMap = new HashMap<>();
+			fileMap.put("prjId", project.getPrjId());
+			fileMap.put("refPrjId", project.getCopyPrjId());
+			fileMap.put("refFileSeq", prj.getPackageFileId());
+			fileMap.put("fileSeq", uploadFile.get(0).getRegistSeq());
+			boolean reuseCheck = verificationService.setReusePackagingFile(fileMap);
+			
+			if(reuseCheck) {
+				fileSeqs.add(uploadFile.get(0).getRegistSeq());
+			}
+			
+			if(!isEmpty(prj.getPackageFileId2())) {
+				List<UploadFile> file2 = fileService.setReusePackagingFile(prj.getPackageFileId2());
+				fileMap.put("refFileSeq", prj.getPackageFileId2());
+				fileMap.put("fileSeq", file2.get(0).getRegistSeq());
+				reuseCheck = verificationService.setReusePackagingFile(fileMap);
+				
+				if(reuseCheck) {
+					fileSeqs.add(file2.get(0).getRegistSeq());
+				}
+			}
+			
+			if(!isEmpty(prj.getPackageFileId3())) {
+				List<UploadFile> file3 = fileService.setReusePackagingFile(prj.getPackageFileId3());
+				fileMap.put("refFileSeq", prj.getPackageFileId3());
+				fileMap.put("fileSeq", file3.get(0).getRegistSeq());
+				reuseCheck = verificationService.setReusePackagingFile(fileMap);
+				
+				if(reuseCheck) {
+					fileSeqs.add(file3.get(0).getRegistSeq());
+				}
+			}
+		}
+		
+		return fileSeqs;
+	}
+
+	@Override
+	public List<ProjectIdentification> selectIdentificationGridList(ProjectIdentification identification) {
+		return projectMapper.selectIdentificationGridList(identification);
+	}
+
+	@Override
+	public void updateCopyConfirmStatusProjectStatus(Project project) {
+		projectMapper.updateCopyConfirmStatusProjectStatus(project);
+	}
 }
