@@ -548,6 +548,11 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				ossComponent.get(i).setComponentIdx(componentIdx);
 				String _componentId = ossComponent.get(i).getReferenceId() + "-" + ossComponent.get(i).getReferenceDiv() + "-" + ossComponent.get(i).getComponentIdx();
 				
+				OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get((ossComponent.get(i).getOssName() +"_"+ avoidNull(ossComponent.get(i).getOssVersion())).toUpperCase());
+				if(ossInfo != null) {
+					ossComponent.get(i).setObligationType(ossInfo.getObligationType());
+				}
+				
 				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
 				deleteRows.add(componentIdx);
 				
@@ -1082,8 +1087,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		Map<String, List<String>> componentAttribution = new HashMap<>();
 		
 		OssComponents ossComponent;
+		String ossInfoUpperKey = "";
 		
 		for(OssComponents bean : ossComponentList) {
+			ossInfoUpperKey = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+			if(CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoUpperKey) && isEmpty(bean.getHomepage())) {
+				bean.setHomepage(CoCodeManager.OSS_INFO_UPPER.get(ossInfoUpperKey).getHomepage());
+			}
+			
 			String componentKey = (hideOssVersionFlag
 									? bean.getOssName() 
 									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
@@ -1263,6 +1274,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if(addOssComponentList != null) {
 			for(OssComponents bean : addOssComponentList) {
+				if("-".equals(bean.getOssName()) || !CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())
+						|| !CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
+					if(!isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage())) {
+						bean.setHomepage(bean.getDownloadLocation());
+					}
+				}
+				
 				String componentKey = (hideOssVersionFlag
 											? bean.getOssName() 
 											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
