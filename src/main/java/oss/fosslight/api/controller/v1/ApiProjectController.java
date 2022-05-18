@@ -212,9 +212,10 @@ public class ApiProjectController extends CoTopComponent {
 
 						Project project = projectService.getProjectBasicInfo(prjId);
 						Map<String, List<Project>> modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
-								project.getDistributionType(), prjId, CoConstDef.FLAG_YES, "0");
+								project.getDistributeTarget(), prjId, CoConstDef.FLAG_YES, "0");
 
 						project.setModelList(modelList.get("currentModelList"));
+
 						projectService.insertProjectModel(project);
 						return responseService.getSingleResult(resultMap);
 
