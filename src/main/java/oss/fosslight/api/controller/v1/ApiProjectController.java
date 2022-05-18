@@ -210,8 +210,7 @@ public class ApiProjectController extends CoTopComponent {
 					if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > modelReport.getSize()) { // Max file size :5MB
 
-						Project project = new Project();
-						project.setPrjId(prjId);
+						Project project = projectService.getProjectBasicInfo(prjId);
 						Map<String, List<Project>> modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
 								project.getDistributionType(), prjId, CoConstDef.FLAG_YES, "0");
 
