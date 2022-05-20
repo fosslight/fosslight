@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.3.8 (20/05/2022)
+## Changes
+## 🚀 Features
+
+- When copying a project, add a pop-up to choose which level to copy to. @FOSSLight-dev  (#513)
+
+## 🐛 Hotfixes
+
+- Fix the bug where the model cannot be found @soimkim (#517)
+- Fix the bug where the distribution site is changed when the model is updated with the api @soimkim (#516)
+
+## 🔧 Maintenance
+
+- Add validation error message @FOSSLight-dev (#518)
+- When issuing a Notice in Self-check, load and include the OSS link instead of the Homepage by loading the Download location @FOSSLight-dev (#515)
+- API > Update models regardless of status @soimkim (#514)
+- Add a release note @soimkim (#510)
+
+---
+
 ## v1.3.7 (13/05/2022)
 ## 🚀 Features
 
@@ -88,7 +108,7 @@
 
 ## 🐛 Hotfixes
 
-- Fix bugs in `Check Licens`e and `Check OSS Name`. @FOSSLight-dev (#463)
+- Fix bugs in `Check License` and `Check OSS Name`. @FOSSLight-dev (#463)
 
 ## 🔧 Maintenance
 
@@ -99,8 +119,6 @@
 
 ## v1.3.0 (25/03/2022)
 ## 🚀 Features
-
-- Fix the bug where unregistered OSS cannot be searched by CVE-ID. @FOSSLight-dev  (#440)
 - Register OSS in bulk by uploading Excel @doggai10 (#418)
 
 ## 🐛 Hotfixes
@@ -135,7 +153,7 @@
 
 ## 🔧 Maintenance
 
-- Show 'list more' in Vulnerability in OSS details @FOSSLight-dev (#430)
+- Show 'list more' in Vulnerability in OSS details @FOSSLight-dev (#430)
 - Self-check > Mark Obligation unclear for deactivate. @FOSSLight-dev (#427)
 
 
@@ -491,18 +509,3 @@
 
 - Update send email function (oss type image) @FOSSLight-dev (#235)
 - Update OSS Table legacy function, OSS Info mail format @FOSSLight-dev (#231)
-
----
-
-## v1.2.13 (27/10/2021)
-## Changes
-## 🚀 Features
-
-- Load and save all sheets with sheet names starting with Self-check, SRC, BIN @namkyu1999 (#223)
-- Support Import SPDX Spreadsheet in 3rd Party @kimtaehyun98 (#220)
-
-## 🐛 Hotfixes
-
-- Fix the missing item that print the "Declared :" message @FOSSLight-dev (#228)
-- Fix the bug where the link tag is displayed in the mail subject. @FOSSLight-dev (#225)
-
