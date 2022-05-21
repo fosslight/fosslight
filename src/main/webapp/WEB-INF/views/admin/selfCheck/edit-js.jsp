@@ -824,14 +824,19 @@
             var value = $("[name='"+name+"']:checked").val()
             var key = name.split("_")[1];
 
+            var srcR1 = document.getElementById("srcR1");
+            var srcUploadUrl = document.getElementById("2");
+
             switch(value){
                 case "1":
-                    $('#uploadGroup').show();
-                    $('#wgetUrl_' + key).hide();
+                    $('.uploadSet').show();
+                    $('.wgetUrl').hide();
+                    srcUploadUrl.checked = false;
                     break;
                 case "2":
-                    $('#uploadGroup').hide();
+                    $('.uploadSet').hide();
                     $('#wgetUrl_' + key).show();
+                    srcR1.checked = false;
                     break;
                 default:
                     break;
