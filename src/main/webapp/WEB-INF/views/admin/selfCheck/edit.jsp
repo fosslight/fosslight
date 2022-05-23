@@ -81,7 +81,8 @@
 		<div id="ossList" class="tabContent">
 			<fieldset class="editSearchUp grayBox singleLine mt20">
 				<div class="sukind">
-					<span class="radioSet srcBtn"><input type="radio" id="srcR1" name="srcSelectOption" onchange="src_fn.changeSelectOption()" value="1" checked/><label for="srcR1">Upload Analysis Result</label></span>
+					<span class="radioSet srcBtn"><input type="radio" id="srcR1" name="srcSelectOption" onchange="fn.changeSelectOption(this)" value="1" checked/><label for="srcR1">Upload Analysis Result</label></span>
+					<span class="radioSet srcBtn"><input type="radio" id="2" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="2" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_ANALYSIS_USED_FLAG')) eq 'N'}"></c:if>/><label for="2">URL </label></span>
 				</div>
 					<form id="srcUploadForm" class="srcBtn">
 						<input type="hidden" id="srcCsvFileId" value="${project.srcCsvFileId }">
@@ -90,7 +91,7 @@
 							<dd>
 								<div class="basicCase">
 									<div class="uploadTit">
-										<span class="checkSet"><label for="2">Please select a file to upload</label></span>	
+										<span class="checkSet"><label for="2">Please select a file to upload</label></span>
 									</div>
 									<div class="uploadGroup">
 										<div class="uploadSet">
@@ -118,8 +119,7 @@
 											</div>
 										</div>
 										<br/>
-										<span><input type="radio" id="2" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="2" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_ANALYSIS_USED_FLAG')) eq 'N'}">disabled</c:if>/><label for="2">URL </label></span>
-										<div id="wgetUrl_${i}" style="width: 500px; display: none;"><input type="text" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
+										<div id="wgetUrl_${i}" class="wgetUrl" style="width: 500px; display: none;"><input type="text" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
 									</div>
 								</div>
 							</dd>
