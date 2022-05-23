@@ -92,6 +92,8 @@ public class PackingRequestTest {
                 .param("sortField","")
                 .param("sortOrder","")
                 .param("hotYn","N")
+                .param("copy","false")
+                .param("confirmStatusCopy","false")
                 .header("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse();
