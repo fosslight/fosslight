@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -2318,7 +2320,206 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return map;
 	}
-	
+
+	@Transactional
+	@Override
+	public Map<String, Object> saveOss(OssMaster ossMaster) {
+		String resCd = "00";
+		String result = null;
+		HashMap<String, Object> resMap = new HashMap<>();
+		/*Json String -> Json Object*/
+		String jsonString = ossMaster.getOssLicensesJson();
+		Type collectionType = new TypeToken<List<OssLicense>>() {
+		}.getType();
+		List<OssLicense> list = checkLicenseId((List<OssLicense>) fromJson(jsonString, collectionType));
+
+		ossMaster.setOssLicenses(list);
+		String action = "";
+		String ossId = ossMaster.getOssId();
+		boolean isNew = StringUtil.isEmpty(ossId);
+		boolean isNewVersion = false; // 새로운 version을 등록
+		boolean isChangedName = false;
+		boolean isDeactivateFlag = false;
+		boolean isActivateFlag = false;
+		OssMaster beforeBean = null;
+		OssMaster afterBean = null;
+
+		// downloadLocations이 n건일때 0번째 값은 oss Master로 저장.
+		String[] downloadLocations = ossMaster.getDownloadLocations();
+
+		if (downloadLocations != null) {
+			if (downloadLocations.length >= 1) {
+				for (String url : downloadLocations) {
+					if (!isEmpty(url)) {
+						ossMaster.setDownloadLocation(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
+
+						break;
+					}
+				}
+			}
+		} else if (downloadLocations == null) {
+			ossMaster.setDownloadLocation("");
+		}
+
+		if (!ossMaster.getComment().startsWith("<p>")) {
+			ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()));
+		}
+
+		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
+
+		try {
+			History h = new History();
+
+			if (("Y").equals(ossMaster.getOssCopyFlag())) {
+				ossMaster.setOssId(null);
+				isNew = true;
+			}
+
+			// OSS 수정
+			if (!isNew) {
+				beforeBean = getOssInfo(ossId, true);
+
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+					updateOssNameVersionDiffMergeObject = new HashMap<>();
+					updateOssNameVersionDiffMergeObject = updateOssNameVersionDiff(ossMaster);
+				} else {
+					result = registOssMaster(ossMaster);
+				}
+
+				CoCodeManager.getInstance().refreshOssInfo();
+
+				h = work(ossMaster);
+				action = CoConstDef.ACTION_CODE_UPDATE;
+				afterBean = getOssInfo(ossId, true);
+
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+					if (updateOssNameVersionDiffMergeObject != null) {
+						List<OssMaster> diffOssVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
+						if (diffOssVersionMergeList != null && diffOssVersionMergeList.size() > 0) {
+							afterBean.setOssNickname(diffOssVersionMergeList.get(0).getOssNickname());
+							afterBean.setOssNicknames(diffOssVersionMergeList.get(0).getOssNicknames());
+						}
+					}
+				}
+
+				if (!beforeBean.getOssName().equalsIgnoreCase(afterBean.getOssName())) {
+					isChangedName = true;
+				}
+
+				String beforeDeactivateFlag = avoidNull(beforeBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
+				String afterDeactivateFlag = avoidNull(afterBean.getDeactivateFlag(), CoConstDef.FLAG_NO);
+
+				if (CoConstDef.FLAG_NO.equals(beforeDeactivateFlag)
+						&& CoConstDef.FLAG_YES.equals(afterDeactivateFlag)) {
+					isDeactivateFlag = true;
+				}
+
+				if (CoConstDef.FLAG_YES.equals(beforeDeactivateFlag)
+						&& CoConstDef.FLAG_NO.equals(afterDeactivateFlag)) {
+					isActivateFlag = true;
+				}
+			} else { // OSS 등록
+				// 기존에 동일한 이름으로 등록되어 있는 OSS Name인 지 확인
+				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
+				if (isNewVersion) {
+					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
+				}
+				result = registOssMaster(ossMaster);
+				CoCodeManager.getInstance().refreshOssInfo();
+				ossId = result;
+
+				h = work(ossMaster);
+				action = CoConstDef.ACTION_CODE_INSERT;
+			}
+
+			h.sethAction(action);
+			historyService.storeData(h);
+
+			// history 저장 성공 후 메일 발송
+			try {
+				String mailType = "";
+
+				if (isNew) {
+					mailType = isNewVersion
+							? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION
+							: CoConstDef.CD_MAIL_TYPE_OSS_REGIST;
+				} else {
+					mailType = isChangedName
+							? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME
+							: CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+
+					if (isDeactivateFlag) {
+						mailType = CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED;
+					}
+
+					if (isActivateFlag) {
+						mailType = CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED;
+					}
+				}
+
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+					mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
+				}
+
+				CoMail mailBean = new CoMail(mailType);
+				mailBean.setParamOssId(ossId);
+				mailBean.setComment(ossMaster.getComment());
+
+				if (!isNew && !isDeactivateFlag) {
+					mailBean.setCompareDataBefore(beforeBean);
+					mailBean.setCompareDataAfter(afterBean);
+				}
+
+				if (isNewVersion) {
+					mailBean.setParamOssInfo(ossMaster);
+				}
+
+				CoMailManager.getInstance().sendMail(mailBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+
+			if (!isNew && CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+				if (updateOssNameVersionDiffMergeObject != null) {
+					List<OssMaster> beforeOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("before");
+					List<OssMaster> afterOssNameVersionMergeList = updateOssNameVersionDiffMergeObject.get("after");
+
+					if (afterOssNameVersionMergeList != null) {
+						for (int i = 0; i < afterOssNameVersionMergeList.size(); i++) {
+							History history = new History();
+							history = work(afterOssNameVersionMergeList.get(i));
+							action = CoConstDef.ACTION_CODE_UPDATE;
+							history.sethAction(action);
+							historyService.storeData(history);
+
+							try {
+								String mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
+
+								CoMail mailBean = new CoMail(mailType);
+								mailBean.setParamOssId(afterOssNameVersionMergeList.get(i).getOssId());
+								mailBean.setComment(ossMaster.getComment());
+								mailBean.setCompareDataBefore(beforeOssNameVersionMergeList.get(i));
+								mailBean.setCompareDataAfter(afterOssNameVersionMergeList.get(i));
+
+								CoMailManager.getInstance().sendMail(mailBean);
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}
+						}
+					}
+				}
+			}
+			resCd = "10";
+			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+		} catch (Exception e) {
+			log.error("OSS " + action + "Failed.", e);
+			log.error(e.getMessage(), e);
+		}
+		resMap.put("resCd", resCd);
+		resMap.put("ossId", result);
+		return resMap;
+	}
+
 	@Transactional
 	@Override
 	public Map<String, Object> saveOssNickname(ProjectIdentification paramBean) {
@@ -2360,7 +2561,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		return map;
 	}
-	
+
+	public List<OssLicense> checkLicenseId(List<OssLicense> list) {
+		// license name만 있고 id는 없는 경우를 우해 license id를 찾는다.
+		// validation에서 license id는 필수로 되어 있기때문
+		if (list != null) {
+			for (OssLicense bean : list) {
+				if (isEmpty(bean.getLicenseId()) && CoCodeManager.LICENSE_INFO_UPPER.containsKey(bean.getLicenseNameEx().toUpperCase())) {
+					bean.setLicenseId(CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseNameEx().toUpperCase()).getLicenseId());
+
+					if (isEmpty(bean.getLicenseName())) {
+						bean.setLicenseName(CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseNameEx().toUpperCase()).getLicenseName());
+					}
+				}
+			}
+		}
+
+		return list;
+	}
+
 	@Transactional
 	@Override
 	public Map<String, Object> saveOssAnalysisList(OssMaster ossBean, String key) {
