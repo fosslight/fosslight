@@ -961,8 +961,9 @@ public class OssController extends CoTopComponent{
 		return OSS.OSS_BULK_REG_JSP;
 	}
 
-	@PostMapping(value= OSS.BULK_REG_AJAX)
-	public @ResponseBody ResponseEntity<Object> saveAjaxJson(
+	@PostMapping(value = OSS.BULK_REG_AJAX)
+	public @ResponseBody
+	ResponseEntity<Object> saveAjaxJson(
 			@RequestBody List<OssMaster> ossMasters
 			, HttpServletRequest req
 			, HttpServletResponse res
@@ -970,83 +971,113 @@ public class OssController extends CoTopComponent{
 		List<Map<String, String>> ossNameMapList = new ArrayList<>();
 		Map<String, Object> resMap = new HashMap<>();
 
-		//When the ossMaster List delivered from the client is empty (if the upload button is pressed without uploading the file)
-		if (ossMasters.isEmpty()){
+		if (ossMasters.isEmpty()) {
+			//When the ossMaster List delivered from the client is empty (if the upload button is pressed without uploading the file)
 			resMap.put("res", false);
 			return makeJsonResponseHeader(resMap);
 		}
 
 		List<OssMaster> notSavedOss = new ArrayList<>();
-		boolean isDup, licenseCheck;
+		boolean licenseCheck;
 		for (OssMaster oss : ossMasters) {
-			isDup = false;
-			licenseCheck=false;
+			oss.setOssCopyFlag(CoConstDef.FLAG_NO);
+			oss.setRenameFlag(CoConstDef.FLAG_NO);
+			oss.setAddNicknameYn(CoConstDef.FLAG_YES); // Append nickname only
+			licenseCheck = false;
 			LicenseMaster licenseMaster;
 			List<String> declaredLicenses = oss.getDeclaredLicenses();
-			boolean[] check = new boolean[declaredLicenses.size()+1];
+			String downloadLocation = oss.getDownloadLocation();
+			if (downloadLocation != null)
+				oss.setDownloadLocations(downloadLocation.split(","));
+			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
-			if(declaredLicenses==null) continue;
+			if (declaredLicenses == null) continue;
+
 			for (String licenseName : declaredLicenses) {
-				licenseMaster =new LicenseMaster();
+				licenseMaster = new LicenseMaster();
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
-				if(existsLicense==null){
-					licenseCheck=true;
+				if (existsLicense == null) {
+					log.info("Unconfirmed license:" + licenseName);
+					licenseCheck = true;
 					break;
 				}
-				check[licenseCount-1]=true;
-				OssLicense convert =new OssLicense();
+				check[licenseCount - 1] = true;
+				OssLicense convert = new OssLicense();
 				convert.setLicenseId(existsLicense.getLicenseId());
 				convert.setLicenseName(existsLicense.getLicenseName());
-				if(licenseCount>1) convert.setOssLicenseComb("AND");
+				if (licenseCount > 1) convert.setOssLicenseComb("AND");
 				else convert.setOssLicenseComb("");
 				convert.setLicenseNameEx(existsLicense.getLicenseNameTemp());
 				convert.setLicenseType(existsLicense.getLicenseType());
-				if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNeedsCheckYn())) {
+				if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationNeedsCheckYn())) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationDisclosingSrcYn())) {
+				} else if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationDisclosingSrcYn())) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(existsLicense.getObligationNotificationYn())) {
+				} else if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationNotificationYn())) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-				}else{
+				} else {
 					convert.setObligation("");
 				}
 				convert.setObligationChecks(existsLicense.getObligationChecks());
 				ossLicenses.add(convert);
 				licenseCount++;
 			}
-			if(licenseCheck) {
-				log.error("declared license has error");
+			for (String licenseName : oss.getDetectedLicenses()) {
+				licenseMaster = new LicenseMaster();
+				licenseMaster.setLicenseName(licenseName);
+				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
+				if (existsLicense == null) {
+					log.info("Unconfirmed license:" + licenseName);
+					licenseCheck = true;
+					break;
+				}
+			}
+			if (licenseCheck) {
+				log.warn("Add failed due to declared license:" + oss.getOssName());
 				continue;
 			}
-			for(int i=0; i<ossLicenses.size();i++){
+
+			for (int i = 0; i < ossLicenses.size(); i++) {
 				OssLicense ossLicense = ossLicenses.get(i);
-				if(!check[i])continue;
-				if(licenseCount <=2) ossLicense.setLicenseType("S");
+				if (!check[i]) continue;
+				if (licenseCount <= 2) ossLicense.setLicenseType("S");
 				else ossLicense.setLicenseType("M");
 			}
 			oss.setOssLicenses(ossLicenses);
-			oss.setAttribution("");
-			oss.setDeactivateFlag("N");
-			if(licenseCount >2) oss.setLicenseDiv("M");
+
+			if (licenseCount > 2) oss.setLicenseDiv("M");
 			else oss.setLicenseDiv("S");
-			// check if there is an oss that has a same name & version
-			OssMaster search = ossService.checkExistsOss(oss);
-			if(search != null ) {
-				isDup =true;
-				log.info("duplicate here");
+
+			boolean checkDuplicated = true;
+			if (ossService.checkExistsOss(oss) != null) {
+				log.warn("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
+				checkDuplicated = false;
+			} else {
+				List<String> nameToCheck = new ArrayList<>();
+				nameToCheck.add(oss.getOssName());
+				if (oss.getOssNicknames() != null) nameToCheck.addAll(Arrays.asList(oss.getOssNicknames()));
+				for (String nick : nameToCheck) {
+					OssMaster nickCheck = new OssMaster();
+					nickCheck.setOssName(nick);
+					nickCheck.setOssNameTemp(oss.getOssName());
+					OssMaster checkNick = ossService.checkExistsOssNickname2(nickCheck);
+					if (checkNick != null) {
+						log.warn(nick + " is stored as a nick in another " + checkNick.getOssName());
+						checkDuplicated = false;
+						break;
+					}
+				}
 			}
-			// if oss not duplicated save
-			if(!isDup){
-				notSavedOss.add(oss);
+			if (checkDuplicated) {
+				Map<String, Object> result = ossService.saveOss(oss);
+				if (result.get("resCd").equals("10")) {
+					Map<String, String> ossNameMap = new HashMap<>();
+					ossNameMap.put("ossName", oss.getOssName());
+					ossNameMapList.add(ossNameMap);
+				}
 			}
-		}
-		for (OssMaster oss : notSavedOss){
-			ossService.registOssMaster(oss);
-			Map<String, String> ossNameMap = new HashMap<>();
-			ossNameMap.put("ossName", oss.getOssName());
-			ossNameMapList.add(ossNameMap);
 		}
 		resMap.put("res", true);
 		resMap.put("value", ossNameMapList);
@@ -1075,7 +1106,7 @@ public class OssController extends CoTopComponent{
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("validMapResult", validMapResult);
 		resMap.put("diffMapResult", diffMapResult);
-		
+
 		if(!vr.isValid()) {
 			return makeJsonResponseHeader(resMap);
 		}
@@ -1159,7 +1190,7 @@ public class OssController extends CoTopComponent{
 		}
 		
 		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
-		ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()) );
+		ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()));
 		ossMaster.setAddNicknameYn(CoConstDef.FLAG_YES); //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
 		String resultOssId = ossService.registOssMaster(ossMaster);
 		CoCodeManager.getInstance().refreshOssInfo();
