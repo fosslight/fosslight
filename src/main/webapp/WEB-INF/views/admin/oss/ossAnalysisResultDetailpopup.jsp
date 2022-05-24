@@ -118,8 +118,9 @@
 						});
 					}
 				});
-				
-				var licenseData = selectData.licenseName.split(/\s(?=AND|OR)/g);
+
+				var replaceLicenseData = selectData.licenseName.replace(/\,/gi, ' AND ');
+				var licenseData = replaceLicenseData.split(/\s(?=AND|OR)/g);
 				var licenseDiv = licenseData.length > 1 ? "M" : "S";
 				$("[name='licenseDiv"+seq+"']").eq(licenseDiv.toUpperCase() == "M" ? 1 : 0).trigger("click");
 
