@@ -550,23 +550,16 @@ public class T2CoOssValidator extends T2CoValidator {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else {
 				boolean breakPoint = false;
-				String chkStr = analysisBean.getLicenseName().toUpperCase();
 				
-				for(String s1 : chkStr.split(" OR ")) {
-					for(String s2 : s1.split(" AND ")) {
-						if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
-							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".UNCONFIRMED");
-							breakPoint = true;
-							
-							break;
-						}
-					}
-					
-					if(breakPoint) {
+				for(String s2 : analysisBean.getLicenseName().split(",")) {
+					if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
+						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".UNCONFIRMED");
+						breakPoint = true;
+						
 						break;
 					}
 				}
-				
+								
 				// error가 없다면, 괄호안에 OR 조건이 포함되어 있는지 체크
 				// 괄호 안에는 OR Operator가 존재할 수 없음 (AND만)
 				if(!breakPoint) {

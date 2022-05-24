@@ -2648,12 +2648,12 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(row[ossNameCol]).trim().replaceAll("\t", ""));
 					bean.setOssNickname(nickNameCol < 0 ? "" : row[nickNameCol]);
 					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(row[ossVersionCol]).trim().replaceAll("\t", ""));
-					bean.setLicenseName(licenseCol < 0 ? "" : avoidNull(row[licenseCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
-					bean.setConcludedLicense(concludedLicenseCol < 0 ? "" : avoidNull(row[concludedLicenseCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
-					bean.setAskalonoLicense(askalonoLicenseCol < 0 ? "" : avoidNull(row[askalonoLicenseCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
-					bean.setScancodeLicense(scancodeLicenseCol < 0 ? "" : avoidNull(row[scancodeLicenseCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
-					bean.setNeedReviewLicenseAskalono(needReviewLicenseAskalonoCol < 0 ? "" : avoidNull(row[needReviewLicenseAskalonoCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
-					bean.setNeedReviewLicenseScanode(needReviewLicenseScancodeCol < 0 ? "" : avoidNull(row[needReviewLicenseScancodeCol]).trim().replaceAll("\t", "").replaceAll(",", " AND "));
+					bean.setLicenseName(licenseCol < 0 ? "" : avoidNull(row[licenseCol]).trim().replaceAll("\t", ""));
+					bean.setConcludedLicense(concludedLicenseCol < 0 ? "" : avoidNull(row[concludedLicenseCol]).trim().replaceAll("\t", ""));
+					bean.setAskalonoLicense(askalonoLicenseCol < 0 ? "" : avoidNull(row[askalonoLicenseCol]).trim().replaceAll("\t", ""));
+					bean.setScancodeLicense(scancodeLicenseCol < 0 ? "" : avoidNull(row[scancodeLicenseCol]).trim().replaceAll("\t", ""));
+					bean.setNeedReviewLicenseAskalono(needReviewLicenseAskalonoCol < 0 ? "" : avoidNull(row[needReviewLicenseAskalonoCol]).trim().replaceAll("\t", ""));
+					bean.setNeedReviewLicenseScanode(needReviewLicenseScancodeCol < 0 ? "" : avoidNull(row[needReviewLicenseScancodeCol]).trim().replaceAll("\t", ""));
 					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(row[downloadLocationCol]).trim().replaceAll("\t", ""));
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
