@@ -1628,7 +1628,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String currentObligation = null;
 		boolean isFirst = true;
 		List<OssLicense> andLicenseList = new ArrayList<>();
-		
+
 		for(OssLicense license : ossMaster.getOssLicenses()) {
 			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 			master = master != null ? master : new LicenseMaster();
@@ -2327,13 +2327,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String resCd = "00";
 		String result = null;
 		HashMap<String, Object> resMap = new HashMap<>();
+
 		/*Json String -> Json Object*/
 		String jsonString = ossMaster.getOssLicensesJson();
-		Type collectionType = new TypeToken<List<OssLicense>>() {
-		}.getType();
-		List<OssLicense> list = checkLicenseId((List<OssLicense>) fromJson(jsonString, collectionType));
+		if (!isEmpty(jsonString)) {
+			Type collectionType = new TypeToken<List<OssLicense>>() {
+			}.getType();
+			List<OssLicense> list = checkLicenseId((List<OssLicense>) fromJson(jsonString, collectionType));
+			ossMaster.setOssLicenses(list);
+		}
 
-		ossMaster.setOssLicenses(list);
 		String action = "";
 		String ossId = ossMaster.getOssId();
 		boolean isNew = StringUtil.isEmpty(ossId);
@@ -2344,37 +2347,44 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster beforeBean = null;
 		OssMaster afterBean = null;
 
+
 		// downloadLocations이 n건일때 0번째 값은 oss Master로 저장.
 		String[] downloadLocations = ossMaster.getDownloadLocations();
-
 		if (downloadLocations != null) {
 			if (downloadLocations.length >= 1) {
 				for (String url : downloadLocations) {
 					if (!isEmpty(url)) {
 						ossMaster.setDownloadLocation(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
-
 						break;
 					}
 				}
 			}
-		} else if (downloadLocations == null) {
+		} else {
 			ossMaster.setDownloadLocation("");
 		}
 
-		if (!ossMaster.getComment().startsWith("<p>")) {
+		if (!isEmpty(ossMaster.getHomepage())) {
+			if (ossMaster.getHomepage().endsWith("/")) {
+				String homepage = ossMaster.getHomepage();
+				ossMaster.setHomepage(homepage.substring(0, homepage.length() - 1));
+			} else {
+				ossMaster.setHomepage(ossMaster.getHomepage());
+			}
+		} else {
+			ossMaster.setHomepage("");
+		}
+
+		if (!isEmpty(ossMaster.getComment()) && !ossMaster.getComment().startsWith("<p>")) {
 			ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()));
 		}
 
 		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
-
 		try {
-			History h = new History();
-
+			History h;
 			if (("Y").equals(ossMaster.getOssCopyFlag())) {
 				ossMaster.setOssId(null);
 				isNew = true;
 			}
-
 			// OSS 수정
 			if (!isNew) {
 				beforeBean = getOssInfo(ossId, true);
@@ -2476,7 +2486,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 				CoMailManager.getInstance().sendMail(mailBean);
 			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+				log.error("Failed to send mail:" + e.getMessage());
 			}
 
 			if (!isNew && CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
