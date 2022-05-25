@@ -84,6 +84,8 @@ public interface OssService extends HistoryConfig{
 	Map<String, Object> saveOssCheckName(ProjectIdentification paramBean, String targetName);
 	
 	Map<String, Object> saveOssNickname(ProjectIdentification paramBean);
+
+	Map<String, Object> saveOss(OssMaster ossBean);
 	
 	Map<String, Object> saveOssAnalysisList(OssMaster ossBean, String key);
 	
@@ -112,6 +114,8 @@ public interface OssService extends HistoryConfig{
 	String checkOssVersionDiff(OssMaster ossMaster);
 
 	Map<String, List<OssMaster>> updateOssNameVersionDiff(OssMaster ossMaster);
+
+	List<OssLicense> checkLicenseId(List<OssLicense> list);
 
 	OssMaster getSaveSesstionOssInfoByName(OssMaster ossMaster);
 	
