@@ -949,7 +949,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			);
 			
 			ossMapper.insertOssLicenseDeclared(om);
-		}		
+		}
 		
 		// Detected License Insert / 20210806_Distinct Add
 		List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
@@ -2321,7 +2321,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return map;
 	}
 
-	@Transactional
 	@Override
 	public Map<String, Object> saveOss(OssMaster ossMaster) {
 		String resCd = "00";
@@ -2346,7 +2345,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isActivateFlag = false;
 		OssMaster beforeBean = null;
 		OssMaster afterBean = null;
-
 
 		// downloadLocations이 n건일때 0번째 값은 oss Master로 저장.
 		String[] downloadLocations = ossMaster.getDownloadLocations();
@@ -2390,7 +2388,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				beforeBean = getOssInfo(ossId, true);
 
 				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
-					updateOssNameVersionDiffMergeObject = new HashMap<>();
 					updateOssNameVersionDiffMergeObject = updateOssNameVersionDiff(ossMaster);
 				} else {
 					result = registOssMaster(ossMaster);
@@ -2434,9 +2431,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (isNewVersion) {
 					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
 				}
-				result = registOssMaster(ossMaster);
+				ossId = registOssMaster(ossMaster);
 				CoCodeManager.getInstance().refreshOssInfo();
-				ossId = result;
 
 				h = work(ossMaster);
 				action = CoConstDef.ACTION_CODE_INSERT;
@@ -2445,32 +2441,28 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			h.sethAction(action);
 			historyService.storeData(h);
 
-			// history 저장 성공 후 메일 발송
+			// Send mail
+			String mailType = "";
+			if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+				mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
+			} else if (isNew) {
+				mailType = isNewVersion
+						? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION
+						: CoConstDef.CD_MAIL_TYPE_OSS_REGIST;
+			} else {
+				mailType = isChangedName
+						? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME
+						: CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
+
+				if (isDeactivateFlag) {
+					mailType = CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED;
+				}
+
+				if (isActivateFlag) {
+					mailType = CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED;
+				}
+			}
 			try {
-				String mailType = "";
-
-				if (isNew) {
-					mailType = isNewVersion
-							? CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION
-							: CoConstDef.CD_MAIL_TYPE_OSS_REGIST;
-				} else {
-					mailType = isChangedName
-							? CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME
-							: CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;
-
-					if (isDeactivateFlag) {
-						mailType = CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED;
-					}
-
-					if (isActivateFlag) {
-						mailType = CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED;
-					}
-				}
-
-				if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
-					mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
-				}
-
 				CoMail mailBean = new CoMail(mailType);
 				mailBean.setParamOssId(ossId);
 				mailBean.setComment(ossMaster.getComment());
@@ -2478,13 +2470,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (!isNew && !isDeactivateFlag) {
 					mailBean.setCompareDataBefore(beforeBean);
 					mailBean.setCompareDataAfter(afterBean);
-				}
-
-				if (isNewVersion) {
+				} else if (isNewVersion) {
 					mailBean.setParamOssInfo(ossMaster);
 				}
-
 				CoMailManager.getInstance().sendMail(mailBean);
+
 			} catch (Exception e) {
 				log.error("Failed to send mail:" + e.getMessage());
 			}
@@ -2496,24 +2486,21 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 					if (afterOssNameVersionMergeList != null) {
 						for (int i = 0; i < afterOssNameVersionMergeList.size(); i++) {
-							History history = new History();
-							history = work(afterOssNameVersionMergeList.get(i));
+							History history = work(afterOssNameVersionMergeList.get(i));
 							action = CoConstDef.ACTION_CODE_UPDATE;
 							history.sethAction(action);
 							historyService.storeData(history);
 
 							try {
-								String mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
-
+								mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
 								CoMail mailBean = new CoMail(mailType);
-								mailBean.setParamOssId(afterOssNameVersionMergeList.get(i).getOssId());
 								mailBean.setComment(ossMaster.getComment());
+								mailBean.setParamOssId(afterOssNameVersionMergeList.get(i).getOssId());
 								mailBean.setCompareDataBefore(beforeOssNameVersionMergeList.get(i));
 								mailBean.setCompareDataAfter(afterOssNameVersionMergeList.get(i));
-
 								CoMailManager.getInstance().sendMail(mailBean);
 							} catch (Exception e) {
-								log.error(e.getMessage(), e);
+								log.error("Failed to send mail:" + e.getMessage());
 							}
 						}
 					}
@@ -2526,7 +2513,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			log.error(e.getMessage(), e);
 		}
 		resMap.put("resCd", resCd);
-		resMap.put("ossId", result);
+		resMap.put("ossId", ossId);
 		return resMap;
 	}
 
