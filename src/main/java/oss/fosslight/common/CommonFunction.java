@@ -3455,7 +3455,7 @@ public class CommonFunction extends CoTopComponent {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
 							
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(licenseMaster.getLicenseName());
+							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
@@ -3487,7 +3487,7 @@ public class CommonFunction extends CoTopComponent {
 							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(nm.toUpperCase());
 							
 							license.setLicenseId(licenseMaster.getLicenseId());
-							license.setLicenseName(licenseMaster.getLicenseName());
+							license.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
 						} else {
 							license.setLicenseId("");
 							license.setLicenseName(nm);
