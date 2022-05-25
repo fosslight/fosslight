@@ -171,24 +171,21 @@ public class CoMailManager extends CoTopComponent {
     		// Get component information
     		String mailComponents = CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT, bean.getMsgType());
 
-    		// Acquire data by component without comparing changes (compare VO data directly)
-    		if(!isEmpty(mailComponents)) {
-    			for(String component : mailComponents.split(",")) {
-    				if(!isEmpty(component)) {
-    					component = component.trim();
-    					Object _contents = setContentsInfo(bean, component);
-    					if(_contents != null) {
-    						if(CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(component)) {
-    							component = CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS;
-    							convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, component), _contents);
-    							component = CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL;
-    						}else {
-    							convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, component), _contents);
-    						}
-    					}
-    				}
-    			}
-    		}
+			// Acquire data by component without comparing changes (compare VO data directly)
+			if (!isEmpty(mailComponents)) {
+				for (String component : mailComponents.split(",")) {
+					if (!isEmpty(component)) {
+						component = component.trim();
+						Object _contents = setContentsInfo(bean, component);
+						if (_contents != null) {
+							if (CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(component)) {
+								component = CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS;
+							}
+							convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, component), _contents);
+						}
+					}
+				}
+			}
     		
     		if(CoConstDef.CD_MAIL_TYPE_OSS_DELETE.equals(bean.getMsgType()) && bean.getParamOssInfo() != null) {
     			OssMaster oss_basic_info = bean.getParamOssInfo();
@@ -3110,55 +3107,55 @@ public class CoMailManager extends CoTopComponent {
 		List<Map<String, Object>> dataList = new ArrayList<>();
 
 		try (
-			Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			) {
-			
-				int parameterIndex = 1;
-				for(String param : params) {
-					pstmt.setString(parameterIndex++, param);
-				}
+				Connection conn = DriverManager.getConnection(connStr, connUser, connPw);
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+		) {
 
+			int parameterIndex = 1;
+			for (String param : params) {
+
+				pstmt.setString(parameterIndex++, param);
+			}
 			try (
-				ResultSet rs = pstmt.executeQuery();
-			){
+					ResultSet rs = pstmt.executeQuery();
+			) {
 				if (rs != null) {
 					ResultSetMetaData rsmd = rs.getMetaData();
 					int colCount = rsmd.getColumnCount(); // 컬럼수
 					Map<String, Object> dataMap;
 					while (rs.next()) {
 						dataMap = new HashMap<>();
-						for(int colIdx=1; colIdx<=colCount; colIdx++) {
-							String _contents = (String)rs.getString(colIdx);
-							if(avoidNull(_contents).indexOf("\n") > -1) {
+						for (int colIdx = 1; colIdx <= colCount; colIdx++) {
+							String _contents = (String) rs.getString(colIdx);
+							if (avoidNull(_contents).indexOf("\n") > -1) {
 								_contents = _contents.replaceAll("\n", "<br />");
 							}
 							dataMap.put(rsmd.getColumnLabel(colIdx), _contents);
 						}
-						
-						if(CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO.equals(key)) {
-							if(dataMap.containsKey("identificationStatus") && dataMap.containsKey("verificationStatus") 
+
+						if (CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO.equals(key)) {
+							if (dataMap.containsKey("identificationStatus") && dataMap.containsKey("verificationStatus")
 									&& CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(dataMap.get("identificationStatus")) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(dataMap.get("verificationStatus"))) {
-								if(dataMap.containsKey("noticeFileId")) {
+								if (dataMap.containsKey("noticeFileId")) {
 									dataMap.remove("noticeFileId");
 								}
-								if(dataMap.containsKey("packageFileId")) {
+								if (dataMap.containsKey("packageFileId")) {
 									dataMap.remove("packageFileId");
 								}
 							}
-							
-						} 
-						
-						if(CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(key)) {
+
+						}
+
+						if (CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PRJ.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_OSS.equals(key) || CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(key)) {
 							dataMap.remove("noticeFileId");
 							dataMap.remove("packageFileId");
 						}
-						
+
 						dataList.add(dataMap);
 					}
 				}
 			}
-			
+
 		} catch (SQLException e) {
 			log.error(e.getMessage(), e);
 		}
