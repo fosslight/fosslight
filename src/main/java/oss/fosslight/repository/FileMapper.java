@@ -68,4 +68,6 @@ public interface FileMapper {
 	public List<T2File> getBinAndroidFileList(@Param("prjId") String prjId, @Param("ossReportId") String ossReportId);
 
 	public T2File getFileInfo2(T2File file);
+
+	public void insertCopyPhysicalFileInfo(T2File fileInfo);
 }

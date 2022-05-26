@@ -4786,4 +4786,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void updateCopyConfirmStatusProjectStatus(Project project) {
 		projectMapper.updateCopyConfirmStatusProjectStatus(project);
 	}
+
+	@Override
+	public void copySrcAndroidNoticeFile(Project project) {
+		Project prj = getProjectBasicInfo(project.getCopyPrjId());
+		
+		if(!isEmpty(prj.getSrcAndroidNoticeFileId())) {
+			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId());
+			project.setSrcAndroidNoticeFileId(fileId);
+			projectMapper.updateFileId(project);
+		}
+	}
 }
