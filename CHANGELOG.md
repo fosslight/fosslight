@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.3.9 (27/05/2022)
+## 🐛 Hotfixes
+
+- Fix the bug that the file is deleted when copying @FOSSLight-dev (#528)
+- Fix OSS bulk registration bugs @soimkim (#525)
+- Fix test errors during testing packaging @soimkim (#521)
+
+## 🔧 Maintenance
+
+- Use OSS storage logic in OSS Bulk Registration. @soimkim (#523)
+- If a Short Identifier exists in the license, display it as Short ID. @FOSSLight-dev  (#524)
+- Change the UI for self-check upload @suhwan-cheon (#520)
+
+---
+
 ## v1.3.8 (20/05/2022)
 ## Changes
 ## 🚀 Features
@@ -496,16 +511,3 @@
 
 - Retry when NVD download fails and update email information. @FOSSLight-dev (#238)
 - Delete the github action for merging into main @soimkim (#239)
-
----
-
-## v1.2.14 (29/10/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Revert - Column mapping for import SPDX Spreadsheet @FOSSLight-dev  (#229)
-
-## 🔧 Maintenance
-
-- Update send email function (oss type image) @FOSSLight-dev (#235)
-- Update OSS Table legacy function, OSS Info mail format @FOSSLight-dev (#231)
