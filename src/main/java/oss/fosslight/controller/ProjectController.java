@@ -1091,6 +1091,9 @@ public class ProjectController extends CoTopComponent {
 				beforeBean.setModelList(projectService.getModelListExcel(project));
 				beforeBean.setWatcherList(projectService.getWatcherList(project));
 				projectService.registProject(project);
+				if(copy.equals("true") && (project.getNoticeType() != null && project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED))) {
+					projectService.copySrcAndroidNoticeFile(project);
+				}
 				afterBean = projectService.getProjectBasicInfo(project.getPrjId());
 				afterBean.setModelList(list);
 				afterBean.setWatchers(project.getWatchers());

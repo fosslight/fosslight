@@ -3628,30 +3628,39 @@ public class CommonFunction extends CoTopComponent {
 					
 					try {
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
-						newestOssInfo.setGridId(""+gridSeq++);
-						newestOssInfo.setOssVersion(userData.getOssVersion());
-						newestOssInfo.setComment(comment);
+						if(newestOssInfo != null) {
+							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setOssVersion(userData.getOssVersion());
+							newestOssInfo.setComment(comment);
+						}
 						
 						if(userData.getOssName().toUpperCase().equals(totalAnalysis.getOssName().toUpperCase())) {
-							String newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, newestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
+							String newestMergeNickName = "";
+							if(newestOssInfo != null) {
+								newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, newestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
+								newestOssInfo.setOssNickname(newestMergeNickName);
+							}else {
+								newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, null);
+							}
 							
-							newestOssInfo.setOssNickname(newestMergeNickName);
 							totalAnalysis.setOssNickname(newestMergeNickName);
-							
 							askalono.setOssNickname(newestMergeNickName);
 							scancode.setOssNickname(newestMergeNickName);
 							userData.setOssNickname(newestMergeNickName);
 						} else {
 							totalNewestOssInfo = ossService.getNewestOssInfo(totalAnalysis); // 사용자 정보의 ossName기준 최신 등록정보
-
-							totalNewestOssInfo.setGridId(""+gridSeq++);
-							totalNewestOssInfo.setOssVersion(userData.getOssVersion());
+							String totalNewestMergeNickName = "";
 							
-							String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
+							if(totalNewestOssInfo != null) {
+								totalNewestOssInfo.setGridId(""+gridSeq++);
+								totalNewestOssInfo.setOssVersion(userData.getOssVersion());
+								totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
+								totalNewestOssInfo.setOssNickname(totalNewestMergeNickName);
+							}else {
+								totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, null);
+							} 
 							
-							totalNewestOssInfo.setOssNickname(totalNewestMergeNickName);
 							totalAnalysis.setOssNickname(totalNewestMergeNickName);
-							
 							askalono.setOssNickname(totalNewestMergeNickName);
 							scancode.setOssNickname(totalNewestMergeNickName);
 							userData.setOssNickname(totalNewestMergeNickName);

@@ -21,6 +21,7 @@
 	var checkPartner = '${project.refPartnerId}';
 	var identificationStatusConfFlag = '${project.identificationStatusConfFlag}';
 	var verificationStatusConfFlag = '${project.verificationStatusConfFlag}';
+	var copyFlag = '${project.copyFlag}';
 	
 	$(document).ready(function() {
 		'use strict';
@@ -74,7 +75,7 @@
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
 
-		if(('Y' == "${project.copyFlag}" || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked')){
+		if(('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked')){
 			$("[name='noticeType']").attr("disabled", true);
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
@@ -827,7 +828,8 @@
 					fn.disabledCompleteRow(false);
 				}
 
-				if('CONF' == verificationStatus){
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
 					fn.disabledVerificationConfirm(false);
 				}
 				
@@ -911,7 +913,8 @@
 					fn.disabledCompleteRow(true);
 				}
 
-				if('CONF' == verificationStatus){
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
 					fn.disabledVerificationConfirm(true);
 				}
 				
@@ -1033,7 +1036,8 @@
 					fn.disabledCompleteRow(true);
 				}
 				
-				if('CONF' == verificationStatus){
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
 					fn.disabledVerificationConfirm(true);
 				}
 				

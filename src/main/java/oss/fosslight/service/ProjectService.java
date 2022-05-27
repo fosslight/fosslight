@@ -177,6 +177,8 @@ public interface ProjectService extends HistoryConfig{
 	public List<ProjectIdentification> selectIdentificationGridList(ProjectIdentification identification);
 
 	public void updateCopyConfirmStatusProjectStatus(Project project);
+	
+	void copySrcAndroidNoticeFile(Project project);
 }
 
 

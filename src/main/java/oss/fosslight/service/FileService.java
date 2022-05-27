@@ -50,4 +50,6 @@ public interface FileService {
 	public List<UploadFile> setReusePackagingFile(String refFileSeq);
 
 	public void deletePhysicalFile(T2File t2File, String flag);
+
+	public String copyPhysicalFile(String fileId);
 }

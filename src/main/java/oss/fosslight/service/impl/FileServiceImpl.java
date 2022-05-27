@@ -1118,4 +1118,39 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			log.info(e.getMessage(), e);
 		}
 	}
+
+	@Override
+	public String copyPhysicalFile(String fileId) {
+		boolean fileCopyFlag = false;
+		String newFileId = fileMapper.getFileId();
+		List<T2File> orgFileInfoList = fileMapper.getFileInfoList(fileId);
+		
+		for(T2File orgFile : orgFileInfoList) {
+			String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
+			
+			UUID randomUUID = UUID.randomUUID();
+			String copyFileName = randomUUID + "." + orgFile.getExt();
+			String newFile = orgFile.getLogiPath();
+			
+			if(FileUtil.copyFile(baseFile, newFile, copyFileName)) {
+				T2File fileInfo = new T2File();
+				fileInfo.setFileId(newFileId);
+				fileInfo.setFileSeq(orgFile.getFileSeq());
+				fileInfo.setLogiNm(copyFileName);
+				
+				fileMapper.insertCopyPhysicalFileInfo(fileInfo);
+				fileCopyFlag = true;
+			}else {
+				fileCopyFlag = false;
+			}
+			
+			if(!fileCopyFlag) {
+				newFileId = null;
+				log.error("physical file copy error");
+				break;
+			}
+		}
+		
+		return newFileId;
+	}
 }
