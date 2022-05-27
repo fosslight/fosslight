@@ -1121,6 +1121,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 	@Override
 	public String copyPhysicalFile(String fileId) {
+		boolean fileCopyFlag = false;
 		String newFileId = fileMapper.getFileId();
 		List<T2File> orgFileInfoList = fileMapper.getFileInfoList(fileId);
 		
@@ -1138,6 +1139,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				fileInfo.setLogiNm(copyFileName);
 				
 				fileMapper.insertCopyPhysicalFileInfo(fileInfo);
+				fileCopyFlag = true;
+			}else {
+				fileCopyFlag = false;
+			}
+			
+			if(!fileCopyFlag) {
+				newFileId = null;
+				log.error("physical file copy error");
+				break;
 			}
 		}
 		

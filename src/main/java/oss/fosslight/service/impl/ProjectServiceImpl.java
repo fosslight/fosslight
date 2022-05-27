@@ -4793,8 +4793,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if(!isEmpty(prj.getSrcAndroidNoticeFileId())) {
 			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId());
-			project.setSrcAndroidNoticeFileId(fileId);
-			projectMapper.updateFileId(project);
+			if(!isEmpty(fileId)) {
+				project.setSrcAndroidNoticeFileId(fileId);
+				projectMapper.updateFileId(project);
+			}
 		}
 	}
 }
