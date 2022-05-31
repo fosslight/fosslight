@@ -189,10 +189,13 @@ public class ApiProjectController extends CoTopComponent {
 	public CommonResult updateModelList(
 			@RequestHeader String _token,
 			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-			@ApiParam(value = "Model List to update", required = true) @RequestPart(required = true) MultipartFile modelReport) {
+			@ApiParam(value = "Model List (ex. MODEL_NAME|ETC > Etc|20220428)", required = false) @RequestParam(required = false) String[] modelListToUpdate,
+			@ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, List<Project>> modelList = null;
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
 
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
@@ -206,38 +209,45 @@ public class ApiProjectController extends CoTopComponent {
 
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			if (searchFlag) {
+				Project project = projectService.getProjectBasicInfo(prjId);
 				if (modelReport != null) {
 					if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > modelReport.getSize()) { // Max file size :5MB
-
-						Project project = projectService.getProjectBasicInfo(prjId);
-						Map<String, List<Project>> modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
+						modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
 								project.getDistributeTarget(), prjId, CoConstDef.FLAG_YES, "0");
-
-						project.setModelList(modelList.get("currentModelList"));
-
-						projectService.insertProjectModel(project);
-						return responseService.getSingleResult(resultMap);
-
 					} else {
-						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
-								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+						errorCode = CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE;
 					}
 				} else {
-					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
-							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
+					if (modelListToUpdate != null) {
+						List<String[]> models = new ArrayList<>();
+						for (String strModel : modelListToUpdate) {
+							String[] model = strModel.split("\\|");
+							if (model.length > 2) models.add(model);
+						}
+						if (models.size() > 0)
+							modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
+					} else {
+						errorCode = CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE;
+					}
+				}
+
+				if (modelList != null) {
+					project.setModelList(modelList.get("currentModelList"));
+					projectService.insertProjectModel(project);
+					return responseService.getSingleResult(resultMap);
 				}
 			} else {
-				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+				errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
-					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+			errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
 		}
-	}
 
+		return responseService.getFailResult(errorCode
+				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
+	}
 
 	@ApiOperation(value = "Create Project", notes = "project 생성")
     @ApiImplicitParams({
