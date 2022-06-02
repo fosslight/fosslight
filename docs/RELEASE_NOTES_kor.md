@@ -7,8 +7,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 </p>
 
 ## [1.4.0](https://github.com/fosslight/fosslight/releases/tag/v1.4.0) (2022-06-03)
-### Fixed
+### Changed
 * Java 버전을 8에서 11로 변경
+### New
 * Self-check > Check license 버튼 추가
 
 ## [1.3.9](https://github.com/fosslight/fosslight/releases/tag/v1.3.9) (2022-05-27)
