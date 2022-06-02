@@ -1612,7 +1612,7 @@
 					_popupCheckOssLicense.close();
 				}
 				
-				_popupCheckOssName = window.open('<c:url value="/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv=10&targetName=self"/>', 'Check License', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+				_popupCheckOssLicense = window.open('<c:url value="/oss/checkOssLicense?prjId=${project.prjId}&referenceDiv=10&targetName=self"/>', 'Check License', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 				if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
 					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
