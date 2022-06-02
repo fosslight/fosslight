@@ -23,7 +23,7 @@
 		</div>
 		<c:set var="projectVersion" value="${ct:getProperty('project.version')}"></c:set>
 		<div class="version">
-			<strong><a style="color: #AC1E35;" href="https://github.com/fosslight/fosslight/releases/tag/v${projectVersion}" target='_blank'>v${projectVersion}</a></strong>
+			<strong><a style="color: #AC1E35;" href="https://github.com/fosslight/fosslight/blob/develop/RELEASE_NOTES.md" target='_blank'>v${projectVersion}</a></strong>
 		</div>
 		<div class="userLang">
 			<select id="selectLang">
