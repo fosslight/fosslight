@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,8 +42,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtilsBean;
@@ -56,6 +53,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.springframework.security.core.Authentication;
@@ -1829,19 +1828,24 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static List<String> getAndroidNoticeBinaryXmlList(String url) throws Exception {
-	    DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-       //DOM 파서로부터 입력받은 파일을 파싱하도록 요청
-        DocumentBuilder db = f.newDocumentBuilder();
+
         List<String> noticeBinaryList = new ArrayList<>();
-        org.w3c.dom.Document xmlDoc =  db.parse(url);
         
-        //루트 엘리먼트 접근 
-        org.w3c.dom.Element root = xmlDoc.getDocumentElement();
-        org.w3c.dom.NodeList fileList = root.getElementsByTagName("file-name");
-        
-        for (int i = 0; i < fileList.getLength(); i++) {
-            org.w3c.dom.Node node = fileList.item(i);
-            String nodeValue = node.getNodeValue();
+		Document doc = Jsoup.parse(new File(url), "UTF-8").parser(Parser.xmlParser());
+		
+		Elements fileList = doc.getElementsByTag("file-name");
+		
+		for(Element el : fileList) {
+			if(el.childNodeSize() == 0) {
+				continue;
+			}
+			Node node = el.childNode(0);
+            String nodeValue = node.toString();
+            
+            nodeValue = StringUtil.avoidNull(nodeValue, "").replace("\n", "");
+            if(StringUtil.isEmpty(nodeValue)) {
+            	continue;
+            }
             noticeBinaryList.add(nodeValue);
             
             if (nodeValue.startsWith("/")) {
@@ -1859,7 +1863,38 @@ public class CommonFunction extends CoTopComponent {
                     noticeBinaryList.add("/" + nodeValue);
                 }
             }
-        }
+		}
+		
+//	    DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+//       //DOM 파서로부터 입력받은 파일을 파싱하도록 요청
+//        DocumentBuilder db = f.newDocumentBuilder();
+//        org.w3c.dom.Document xmlDoc =  db.parse(url);
+//        
+//        //루트 엘리먼트 접근 
+//        org.w3c.dom.Element root = xmlDoc.getDocumentElement();
+//        org.w3c.dom.NodeList fileList = root.getElementsByTagName("file-name");
+//        
+//        for (int i = 0; i < fileList.getLength(); i++) {
+//            org.w3c.dom.Node node = fileList.item(i);
+//            String nodeValue = node.getNodeValue();
+//            noticeBinaryList.add(nodeValue);
+//            
+//            if (nodeValue.startsWith("/")) {
+//                noticeBinaryList.add(nodeValue.substring(1));
+//            } else {
+//                noticeBinaryList.add("/" + nodeValue);
+//            }
+//            
+//            // path 정보를 무시하고 binary 파일명만 추가 (binary file은 사전에 중복 제거되어 유니크하다)
+//            if(nodeValue.indexOf("/") > -1) {
+//                noticeBinaryList.add(nodeValue.substring(nodeValue.lastIndexOf("/")));
+//                noticeBinaryList.add(nodeValue.substring(nodeValue.lastIndexOf("/") + 1));
+//            } else {
+//                if(!noticeBinaryList.contains( ("/" + nodeValue) )) {
+//                    noticeBinaryList.add("/" + nodeValue);
+//                }
+//            }
+//        }
         
         return noticeBinaryList;
     }

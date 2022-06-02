@@ -202,6 +202,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// 이전에 생성된 프로젝트를 위해 Default를 설정한다.
 		Map<String, Object> NoticeInfo = projectMapper.getNoticeType(project.getPrjId());
+		if(NoticeInfo == null) {
+			NoticeInfo = new HashMap<>();
+		}
 		project.setNoticeType(avoidNull((String) NoticeInfo.get("noticeType"), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
 		project.setNoticeTypeEtc(avoidNull((String) NoticeInfo.get("noticeTypeEtc")));
 		project.setAndroidFlag(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(project.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
