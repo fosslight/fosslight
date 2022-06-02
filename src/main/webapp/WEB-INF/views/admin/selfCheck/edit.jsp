@@ -91,7 +91,7 @@
 							<dd>
 								<div class="basicCase">
 									<div class="uploadTit">
-										<span class="checkSet"><label for="2">Please select a file to upload</label></span>
+										<span class="checkSet"><label for="2">Enter the link of the source to be analyzed</label></span>
 									</div>
 									<div class="uploadGroup">
 										<div class="uploadSet">
