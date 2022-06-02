@@ -21,6 +21,11 @@ public class SPDXUtil2 {
 		inputFile.deleteOnExit();
 
 		logger.debug("SPDX format convert ("+prjId+") :" + inputFilePath + " => " + outputFilePath);
-		SpdxConverter.convert(inputFilePath, outputFilePath);
+		try {
+			SpdxConverter.convert(inputFilePath, outputFilePath);
+		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
+			throw e;
+		}
 	}
 }
