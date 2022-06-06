@@ -193,7 +193,7 @@
 					records:function(obj){return obj.records;}
 				},
 				colNames: ['ID','Project Name (Version)', 'Version', 'Operating System'
-				           , 'Distribution Type', 'Download', '', 'CVSS Score', 'Division', 'Creator'
+				           , 'Distribution Type', 'Download', '', 'Vulnerability', 'Division', 'Creator'
 				           , 'Created Date','oss count'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
