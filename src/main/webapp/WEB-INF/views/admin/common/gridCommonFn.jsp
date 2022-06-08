@@ -1310,6 +1310,9 @@ var src_fn_com = {
 		target.jqGrid('saveRow',rowid);
 
 		var licenseName = target.jqGrid('getCell',rowid,'licenseName');
+		if(licenseName.indexOf("<a class=") > -1) {
+			licenseName = $(licenseName).text();
+		}
 		if(licenseName.indexOf("<div class=") > -1) {
 			licenseName = licenseName.substring(0, licenseName.indexOf("<div class="));
 		}
