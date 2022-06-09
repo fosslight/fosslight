@@ -2165,7 +2165,7 @@
 			
 			$(".tabMenu a span").remove();
 			
-			tabMenuA.eq("0").text("oss List");
+			tabMenuA.eq("0").text("OSS List");
 			tabMenuA.eq("1").text("Notice");
 			
 			var tag = "<span>"+$(target).text()+"</span>";
