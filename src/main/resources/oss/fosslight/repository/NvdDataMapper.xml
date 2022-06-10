@@ -593,6 +593,13 @@
 		<foreach collection="list" item="item" index="index" separator=",">
 		(#{item.PRODUCT}, #{item.VERSION}, #{item.CVE_ID}, #{item.CVSS_SCORE}, #{item.VULN_SUMMARY}, #{item.MODI_DATE})
 		</foreach>
+		ON DUPLICATE KEY UPDATE 
+		PRODUCT = values(PRODUCT)
+		, VERSION = values(VERSION)
+		, CVE_ID = values(CVE_ID)
+		, CVSS_SCORE = values(CVSS_SCORE)
+		, VULN_SUMMARY = values(VULN_SUMMARY)
+		, MODI_DATE = values(MODI_DATE)
 	</insert>
 	
 	<update id="createTableCpeMatchTemp">CREATE TABLE IF NOT EXISTS NVD_CPE_MATCH_TEMP LIKE NVD_CPE_MATCH</update>
