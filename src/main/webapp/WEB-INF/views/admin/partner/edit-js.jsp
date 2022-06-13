@@ -510,7 +510,7 @@ var saveFlag = false;
 			});
 
 			$("#createProject").on("click", function(){
-				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', "${detail.partnerId}||${detail.partnerName}||${detail.softwareName}");
+				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', encodeURIComponent("${detail.partnerId}||${detail.partnerName}||${detail.softwareName}"));
 			});
 		},
 		tabInit: function(){
