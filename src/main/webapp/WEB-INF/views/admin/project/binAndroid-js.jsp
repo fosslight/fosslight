@@ -1130,23 +1130,18 @@ var binAndroid_fn = {
 			return false;	
 		}
 		
-		var DiffCnt = 0;
-		if("true" == "${ct:isAdmin()}"){
-			var diffMsgDataList = JSON.parse(JSON.stringify(binAndroidDiffMsgData), function(key, value){
-				if(key.toUpperCase().indexOf("LICENSENAME") > -1){
-					if(value.indexOf("Declared") == -1){
-						return value;
-					}
-				}else{
+		var diffMsgDataList = JSON.parse(JSON.stringify(binAndroidDiffMsgData), function(key, value){
+			if(key.toUpperCase().indexOf("LICENSENAME") > -1){
+				if(value.indexOf("Declared") == -1){
 					return value;
 				}
-			});
-			
-			DiffCnt = Object.keys(diffMsgDataList).reduce(binAndroid_fn.checkErrorData, []).length;
-		} else {
-			DiffCnt = Object.keys(binAndroidDiffMsgData).reduce(binAndroid_fn.checkErrorData, []).length;
-		}
-
+			}else{
+				return value;
+			}
+		});
+		
+		var DiffCnt = Object.keys(diffMsgDataList).reduce(binAndroid_fn.checkErrorData, []).length;
+		
         if(DiffCnt > 0){
         	alertify.alert("<spring:message code='msg.project.download.notice' />", function(){});
 
