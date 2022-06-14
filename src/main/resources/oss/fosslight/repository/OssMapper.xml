@@ -2144,7 +2144,7 @@
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
 		SELECT 
-			CONCAT(T1.OSS_NAME, '|', MAX(T1.OSS_VERSION)) AS OSS_NAME
+			T1.OSS_NAME
         FROM OSS_MASTER T1
         WHERE T1.USE_YN = 'Y'
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
