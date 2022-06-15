@@ -4092,13 +4092,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if(diffData != null) {
-			diffCnt = diffData.keySet()
-								.stream()
-								.filter(c -> c.toUpperCase().contains("OSSNAME") 
-												|| c.toUpperCase().contains("OSSVERSION") 
-												|| c.toUpperCase().contains("LICENSENAME"))
-								.collect(Collectors.toList())
-								.size();
+			Map<String, Object> diffDataMap = new HashMap<String, Object>();
+			for(String key : diffData.keySet()) {
+				if(key.toUpperCase().contains("LICENSENAME")) {
+					String diffMsg = (String) diffData.get(key);
+					if(!diffMsg.contains("Declared")) {
+						diffDataMap.put(key, diffData.get(key));
+					}
+				} else {
+					diffDataMap.put(key, diffData.get(key));
+				}
+			}
+			
+			if(!diffDataMap.isEmpty()) {
+				diffCnt = diffDataMap.keySet()
+						.stream()
+						.filter(c -> c.toUpperCase().contains("OSSNAME") 
+										|| c.toUpperCase().contains("OSSVERSION") 
+										|| c.toUpperCase().contains("LICENSENAME"))
+						.collect(Collectors.toList())
+						.size();
+			}
 		}
 		
 		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
