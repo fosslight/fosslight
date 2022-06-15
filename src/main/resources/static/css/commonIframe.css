@@ -536,6 +536,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 
 .uploadCase .basicCase {position:relative;clear:left;display:inline-block;width:100%;}
 .uploadCase .basicCase .uploadTit {float:left;width:190px;font-size:13px;color:#454545;}
+.uploadCase .basicCase .uploadTitCheckSet {float:left;width:235px;font-size:13px;color:#454545;}
 .uploadCase .basicCase .uploadSet {float:left;}
 
 .uploadCase .androidCase {position:relative;clear:left;display:inline-block;margin-top:5px;padding:8px 0 0 0;width:100%;border-top:1px solid #c5c5c5;}
