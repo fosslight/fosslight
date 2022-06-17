@@ -289,35 +289,12 @@
             	, IF(	T3.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
             ) AS OBLIGATION_CHECKS
             , SUB1.OSS_TYPE AS OSS_TYPE
-			, T4.MULTI_FLAG
 			, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 			, T1.DEACTIVATE_FLAG
 		FROM OSS_MASTER					T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
-		LEFT OUTER JOIN (
-		   SELECT 
-			   A.OSS_VERSION
-			   , A.OSS_NAME
-			   , CASE WHEN A.OSS_CNT > 1 
-				   THEN 1  
-				   ELSE 0 
-				 END AS MULTI_FLAG
-		   FROM (
-			   SELECT 
-				   MAX(t1.OSS_VERSION) AS OSS_VERSION
-				   , t1.OSS_NAME
-				   , COUNT(t1.OSS_NAME) AS OSS_CNT
-			   FROM OSS_MASTER t1
-			   WHERE t1.USE_YN = 'Y'
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
-					AND t1.VULN_YN = 'Y' 
-	        		AND t1.CVE_ID = #{cveId}
-				</if>
-			   GROUP BY OSS_NAME
-			) A
-		) T4 ON T1.OSS_VERSION = T4.OSS_VERSION AND T1.OSS_NAME = T4.OSS_NAME
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'			/*Code Table*/
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
@@ -522,9 +499,6 @@
             	, IF(	T3.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
             ) AS OBLIGATION_CHECKS
             , SUB1.OSS_TYPE AS OSS_TYPE
-            <if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
-			, T4.MULTI_FLAG
-			</if>
 			, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
 			, T1.COPYRIGHT
@@ -534,30 +508,6 @@
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
-		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
-		LEFT OUTER JOIN (
-		   SELECT 
-			   A.OSS_VERSION
-			   , A.OSS_NAME
-			   , CASE WHEN A.OSS_CNT > 1 
-				   THEN 1  
-				   ELSE 0 
-				 END AS MULTI_FLAG
-		   FROM (
-			   SELECT 
-				   MAX(t1.OSS_VERSION) AS OSS_VERSION
-				   , t1.OSS_NAME
-				   , COUNT(t1.OSS_NAME) AS OSS_CNT
-			   FROM OSS_MASTER t1
-			   WHERE t1.USE_YN = 'Y'
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
-					AND t1.VULN_YN = 'Y' 
-	        		AND t1.CVE_ID = #{cveId}
-				</if>
-			   GROUP BY OSS_NAME
-			) A
-		) T4 ON T1.OSS_VERSION = T4.OSS_VERSION AND T1.OSS_NAME = T4.OSS_NAME
-		</if>
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
@@ -2190,5 +2140,18 @@
 				    ON DATA.CVE_ID = CVE.CVE_ID
 		ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
 		LIMIT 5
+	</select>
+	
+	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT 
+			T1.OSS_NAME
+        FROM OSS_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+        	AND T1.VULN_YN = 'Y' 
+            AND T1.CVE_ID = #{cveId}
+        </if>
+		GROUP BY T1.OSS_NAME
+		HAVING COUNT(T1.OSS_NAME) > 1
 	</select>
 </mapper>

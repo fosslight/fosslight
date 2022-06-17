@@ -115,20 +115,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ArrayList<OssMaster> newList = new ArrayList<>();
 		List<OssMaster> list = ossMapper.selectOssList(ossMaster);
 		
-		if(list.size() == 0){
-			ossMaster.setVersionCheck(CoConstDef.FLAG_NO);
-			list = ossMapper.selectOssList(ossMaster);
-		}
-		
 		String orgOssName = ossMaster.getOssName();
+		List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
 		
 		for(OssMaster oss : list){
-			// multi flag 가 null 인 경우
-			if(isEmpty(oss.getMultiFlag())) {
-				oss.setMultiFlag("1");
-			}
-			
-			if("1".equals(oss.getMultiFlag())) {
+			if(multiOssList.contains(oss.getOssName())) {
 				ossMaster.setOssId(oss.getOssId());
 				ossMaster.setOssName(oss.getOssName());
 				List<OssMaster> subList = ossMapper.selectOssSubList(ossMaster);
@@ -1728,7 +1719,112 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public Map<String, Object> checkExistsOssDownloadLocation(OssMaster ossMaster) {
 		Map<String, Object> returnMap = new HashMap<String, Object>();
-		returnMap.put("downloadLocation", ossMapper.checkExistsOssDownloadLocation(ossMaster));
+		
+		if(!isEmpty(ossMaster.getDownloadLocation())) {
+			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+			int urlSearchSeq = -1;
+			int seq = 0;
+			
+			try {
+				if(ossMaster.getDownloadLocation().contains(";")) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().split(";")[0]);
+				}
+				
+				for(String url : checkOssNameUrl) {
+					if(urlSearchSeq == -1 && ossMaster.getDownloadLocation().contains(url)) {
+						urlSearchSeq = seq;
+						break;
+					}
+					seq++;
+				}
+				
+				String downloadLocationUrl = "";
+				
+				if(ossMaster.getDownloadLocation().startsWith("git://")) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().replace("git://", "https://"));
+				} else if(ossMaster.getDownloadLocation().startsWith("ftp://")) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().replace("ftp://", "https://"));
+				} else if(ossMaster.getDownloadLocation().startsWith("svn://")) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().replace("svn://", "https://"));
+				} else if(ossMaster.getDownloadLocation().startsWith("git@")) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().replace("git@", "https://"));
+				}
+				
+				if(ossMaster.getDownloadLocation().contains(".git")) {
+					if(ossMaster.getDownloadLocation().endsWith(".git")) {
+						ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().length()-4));
+					} else {
+						if(ossMaster.getDownloadLocation().contains("#")) {
+							ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().indexOf("#")));
+							ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().length()-4));
+						}
+					}
+				}
+				
+				String[] downloadlocationUrlSplit = ossMaster.getDownloadLocation().split("/");
+				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().indexOf("#")));
+				}
+				
+				if( urlSearchSeq > -1 ) {
+					Pattern p = null;
+					
+					switch(urlSearchSeq) {
+						case 0: // github
+							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
+							
+							break;
+						case 1: // npm
+							if(ossMaster.getDownloadLocation().contains("/package/@")) {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+							}else {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+							}
+							
+							break;
+						case 2: // pypi
+							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+							
+							break;
+						case 3: // maven
+							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+
+							break;
+						case 4: // pub
+							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+							break;
+						case 5: // cocoapods
+							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
+							break;
+						default:
+							break;
+					}
+					
+					Matcher m = p.matcher(ossMaster.getDownloadLocation());
+					
+					while(m.find()) {
+						ossMaster.setDownloadLocation(m.group(0));
+					}
+				}	
+					
+				if(ossMaster.getDownloadLocation().startsWith("http://") 
+						|| ossMaster.getDownloadLocation().startsWith("https://")) {
+					downloadLocationUrl = ossMaster.getDownloadLocation().split("//")[1];
+				}
+				
+				if(downloadLocationUrl.startsWith("www.")) {
+					downloadLocationUrl = downloadLocationUrl.substring(5, downloadLocationUrl.length());
+				}
+				
+				ossMaster.setDownloadLocation(downloadLocationUrl);
+				returnMap.put("downloadLocation", ossMapper.checkExistsOssDownloadLocation(ossMaster));
+				
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
 		
 		return returnMap;
 	}
@@ -1736,7 +1832,112 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public Map<String, Object> checkExistsOssHomepage(OssMaster ossMaster) {
 		Map<String, Object> returnMap = new HashMap<String, Object>();
-		returnMap.put("homepage", ossMapper.checkExistsOssHomepage(ossMaster));
+		
+		if(!isEmpty(ossMaster.getHomepage())) {
+			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+			int urlSearchSeq = -1;
+			int seq = 0;
+			
+			try {
+				if(ossMaster.getHomepage().contains(";")) {
+					ossMaster.setHomepage(ossMaster.getHomepage().split(";")[0]);
+				}
+				
+				for(String url : checkOssNameUrl) {
+					if(urlSearchSeq == -1 && ossMaster.getHomepage().contains(url)) {
+						urlSearchSeq = seq;
+						break;
+					}
+					seq++;
+				}
+				
+				String homepageUrl = "";
+				
+				if(ossMaster.getHomepage().startsWith("git://")) {
+					ossMaster.setHomepage(ossMaster.getHomepage().replace("git://", "https://"));
+				} else if(ossMaster.getHomepage().startsWith("ftp://")) {
+					ossMaster.setHomepage(ossMaster.getHomepage().replace("ftp://", "https://"));
+				} else if(ossMaster.getHomepage().startsWith("svn://")) {
+					ossMaster.setHomepage(ossMaster.getHomepage().replace("svn://", "https://"));
+				} else if(ossMaster.getHomepage().startsWith("git@")) {
+					ossMaster.setHomepage(ossMaster.getHomepage().replace("git@", "https://"));
+				}
+				
+				if(ossMaster.getHomepage().contains(".git")) {
+					if(ossMaster.getHomepage().endsWith(".git")) {
+						ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().length()-4));
+					} else {
+						if(ossMaster.getHomepage().contains("#")) {
+							ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().indexOf("#")));
+							ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().length()-4));
+						}
+					}
+				}
+				
+				String[] downloadlocationUrlSplit = ossMaster.getHomepage().split("/");
+				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+					ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().indexOf("#")));
+				}
+				
+				if( urlSearchSeq > -1 ) {
+					Pattern p = null;
+					
+					switch(urlSearchSeq) {
+						case 0: // github
+							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
+							
+							break;
+						case 1: // npm
+							if(ossMaster.getHomepage().contains("/package/@")) {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+							}else {
+								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+							}
+							
+							break;
+						case 2: // pypi
+							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+							
+							break;
+						case 3: // maven
+							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+
+							break;
+						case 4: // pub
+							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+							break;
+						case 5: // cocoapods
+							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
+							break;
+						default:
+							break;
+					}
+					
+					Matcher m = p.matcher(ossMaster.getHomepage());
+					
+					while(m.find()) {
+						ossMaster.setHomepage(m.group(0));
+					}
+				}	
+					
+				if(ossMaster.getHomepage().startsWith("http://") 
+						|| ossMaster.getHomepage().startsWith("https://")) {
+					homepageUrl = ossMaster.getHomepage().split("//")[1];
+				}
+				
+				if(homepageUrl.startsWith("www.")) {
+					homepageUrl = homepageUrl.substring(5, homepageUrl.length());
+				}
+				
+				ossMaster.setHomepage(homepageUrl);
+				returnMap.put("homepage", ossMapper.checkExistsOssHomepage(ossMaster));
+				
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
 		
 		return returnMap;
 	}

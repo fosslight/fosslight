@@ -199,6 +199,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> errMsgList = new ArrayList<>();
 		String ossReportfileId = ossReportBean.getRegistFileId();
 		String resultFileId = "";
+		Map<String, Object> checkHeaderSheetName = new HashMap<String, Object>();
 		
 		try {
 			if(resultTxtBean != null) {
@@ -206,7 +207,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 			
 			// 1) build image를 기준으로 oss data mapping (공통)
-			if (!ExcelUtil.readAndroidBuildImage("BIN (Android)", true, sheet, ossReportfileId, resultFileId, reportData, errMsgList)) {
+			if (!ExcelUtil.readAndroidBuildImage("BIN (Android)", true, sheet, ossReportfileId, resultFileId, reportData, errMsgList, checkHeaderSheetName)) {
 				for(String s : errMsgList) { // error 처리
 					if(isEmpty(s)) {
 						continue;

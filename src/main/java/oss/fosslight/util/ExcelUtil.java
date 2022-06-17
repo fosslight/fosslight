@@ -2005,7 +2005,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @param errMsg
 	 * @return
 	 */
-	public static boolean readAndroidBuildImage(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, String resultFileSeq, List<OssComponents> list, List<String> errMsgList) {
+	public static boolean readAndroidBuildImage(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, String resultFileSeq, List<OssComponents> list, List<String> errMsgList, Map<String, Object> checkHeaderSheetName) {
 		T2File fileInfo = fileService.selectFileInfoById(fileSeq);
 		
 		if(fileInfo == null) {
@@ -2052,6 +2052,7 @@ public class ExcelUtil extends CoTopComponent {
 					sheet = wb.getSheetAt(sheetSeq);
 				}
 				
+				readAndroidBuildFindHeaderRowIndex(sheet, checkHeaderSheetName);
 				readAndroidBuildImageSheet(sheet, list, errMsgList);
 			}
 		} catch (ColumnNameDuplicateException e) {
@@ -2856,5 +2857,52 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 		return ossMasterList;
+	}
+	
+	private static void readAndroidBuildFindHeaderRowIndex(Sheet sheet, Map<String, Object> checkHeaderSheetName) {
+		int DefaultHeaderRowIndex = 2; // default header index
+		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
+
+		if (DefaultHeaderRowIndex > -1) {
+			Row row = sheet.getRow(DefaultHeaderRowIndex);
+			int binaryNameCnt = 0;
+			int sourceCodePathCnt = 0;
+			int ossNameCnt = 0;
+			int ossVersionCnt = 0;
+			int licenseNameCnt = 0;
+			
+			for(Cell cell : row) {
+				String header = avoidNull(getCellData(cell)).trim().toUpperCase();
+				switch(header) {
+					case "BINARY/LIBRARY FILE":
+					case "BINARY NAME": binaryNameCnt++;
+						break;
+						
+					case "DIRECTORY":
+					case "SOURCE CODE PATH": sourceCodePathCnt++;
+						break;
+						
+					case "OSS COMPONENT":
+					case "OSS NAME": ossNameCnt++;
+						break;
+						
+					case "OSS VERSION": ossVersionCnt++;
+						break;
+						
+					case "LICENSE": licenseNameCnt++;
+						break;
+					default:break;
+				}
+			}
+			
+			if(binaryNameCnt == 0 || sourceCodePathCnt == 0 || ossNameCnt == 0 || ossVersionCnt == 0 || licenseNameCnt == 0) {
+				if(checkHeaderSheetName.containsKey("checkHeaderSheetName")) {
+					String orgSheetName = (String) checkHeaderSheetName.get("checkHeaderSheetName");
+					checkHeaderSheetName.put("checkHeaderSheetName", orgSheetName + ", " + sheet.getSheetName());
+				} else {
+					checkHeaderSheetName.put("checkHeaderSheetName", sheet.getSheetName());
+				}
+			}
+		}
 	}
 }

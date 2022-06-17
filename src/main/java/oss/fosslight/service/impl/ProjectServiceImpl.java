@@ -3342,8 +3342,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// notice.html 파일이 있으면 notice.html내 해당 binary가 존재하는지 여부를 체크 csv내의 결과와 다를 경우 warning
 		if(noticeBinaryList != null) {
 			for(ProjectIdentification bean : reportData) {
-				// 사용자 입력 정보를 무시 
-				bean.setBinaryNotice(noticeBinaryList.contains(bean.getBinaryName()) ? "ok" : "nok");
+				boolean fileNameCheckFlag = false;
+				String binaryNm = bean.getBinaryName();
+				
+				if(binaryNm.indexOf("/") > -1) {
+					if(!binaryNm.endsWith("/")) {
+						binaryNm = binaryNm.substring(binaryNm.lastIndexOf("/")+1);
+					} else {
+						fileNameCheckFlag = true;
+					}
+				}
+				
+				if(fileNameCheckFlag) {
+					bean.setBinaryNotice("nok");
+				} else {
+					bean.setBinaryNotice(noticeBinaryList.contains(binaryNm) ? "ok" : "nok");
+				}
 			}
 		}
 		
@@ -4092,13 +4106,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if(diffData != null) {
-			diffCnt = diffData.keySet()
-								.stream()
-								.filter(c -> c.toUpperCase().contains("OSSNAME") 
-												|| c.toUpperCase().contains("OSSVERSION") 
-												|| c.toUpperCase().contains("LICENSENAME"))
-								.collect(Collectors.toList())
-								.size();
+			Map<String, Object> diffDataMap = new HashMap<String, Object>();
+			for(String key : diffData.keySet()) {
+				if(key.toUpperCase().contains("LICENSENAME")) {
+					String diffMsg = (String) diffData.get(key);
+					if(!diffMsg.contains("Declared")) {
+						diffDataMap.put(key, diffData.get(key));
+					}
+				} else {
+					diffDataMap.put(key, diffData.get(key));
+				}
+			}
+			
+			if(!diffDataMap.isEmpty()) {
+				diffCnt = diffDataMap.keySet()
+						.stream()
+						.filter(c -> c.toUpperCase().contains("OSSNAME") 
+										|| c.toUpperCase().contains("OSSVERSION") 
+										|| c.toUpperCase().contains("LICENSENAME"))
+						.collect(Collectors.toList())
+						.size();
+			}
 		}
 		
 		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
