@@ -3749,11 +3749,12 @@ public class ProjectController extends CoTopComponent {
 			String errMsg = "";
 			List<OssComponents> reportData = new ArrayList<OssComponents>();
 			List<String> errMsgList = new ArrayList<>();
+			Map<String, Object> checkHeaderSheetName = new HashMap<String, Object>();
 			
 			try {
 				// 1) build image를 기준으로 oss data mapping (공통)
 				if (!ExcelUtil.readAndroidBuildImage("", true, sheetList.toArray(new String[sheetList.size()]), fileSeq,
-						resultFileSeq, reportData, errMsgList)) {
+						resultFileSeq, reportData, errMsgList, checkHeaderSheetName)) {
 					// error 처리
 					for(String s : errMsgList) {
 						if(isEmpty(s)) {
