@@ -3342,8 +3342,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// notice.html 파일이 있으면 notice.html내 해당 binary가 존재하는지 여부를 체크 csv내의 결과와 다를 경우 warning
 		if(noticeBinaryList != null) {
 			for(ProjectIdentification bean : reportData) {
-				// 사용자 입력 정보를 무시 
-				bean.setBinaryNotice(noticeBinaryList.contains(bean.getBinaryName()) ? "ok" : "nok");
+				boolean fileNameCheckFlag = false;
+				String binaryNm = bean.getBinaryName();
+				
+				if(binaryNm.indexOf("/") > -1) {
+					if(!binaryNm.endsWith("/")) {
+						binaryNm = binaryNm.substring(binaryNm.lastIndexOf("/")+1);
+					} else {
+						fileNameCheckFlag = true;
+					}
+				}
+				
+				if(fileNameCheckFlag) {
+					bean.setBinaryNotice("nok");
+				} else {
+					bean.setBinaryNotice(noticeBinaryList.contains(binaryNm) ? "ok" : "nok");
+				}
 			}
 		}
 		
