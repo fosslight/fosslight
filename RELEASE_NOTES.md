@@ -6,6 +6,12 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+
+## [1.4.1](https://github.com/fosslight/fosslight/releases/tag/v1.4.1) (2022-06-17)
+### Changed
+* Update Spring boot version 2.1.7 to 2.6.8
+* Shorten the loading time when searching in OSS List
+
 ## [1.4.0](https://github.com/fosslight/fosslight/releases/tag/v1.4.0) (2022-06-03)
 ### Changed
 * Change Java version from 8 to 11

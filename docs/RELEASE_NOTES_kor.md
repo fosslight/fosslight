@@ -6,6 +6,11 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.4.1](https://github.com/fosslight/fosslight/releases/tag/v1.4.1) (2022-06-17)
+### Changed
+* Spring boot version을 2.1.7에서 2.6.8로 변경
+* OSS List에서 검색시 로딩 시간 단축
+
 ## [1.4.0](https://github.com/fosslight/fosslight/releases/tag/v1.4.0) (2022-06-03)
 ### Changed
 * Java 버전을 8에서 11로 변경
