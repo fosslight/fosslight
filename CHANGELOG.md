@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.4.1 (17/06/2022)
+## 🐛 Hotfixes
+
+- Update Spring boot version 2.1.7 to 2.6.8 @FOSSLight-dev (#544)
+- Fix a bug where a popup does not appear when clicking the R icon in the License List @FOSSLight-dev (#542)
+
+## 🔧 Maintenance
+
+- Shorten the loading time when searching in OSS List. @FOSSLight-dev (#547)
+- Update Spring boot version 2.1.7 to 2.6.8 @FOSSLight-dev (#544)
+- Change the column name to CVSS Score to Vulnerability in Self Check Tab @MyunghyunNero (#540)
+- Change 'oss List' to 'OSS List'. @Gseungmin (#541)
+---
+
 ## v1.4.0 (02/06/2022)
 ## Changes
 ## 🔧 Maintenance
@@ -488,17 +502,3 @@
 - Fix the vulnerability for inapproate error message @yugeeklab (#268)
 - Fix the vulnerability for inapproate error message @yugeeklab (#263)
 - Refactor Check License, Check OSS Name @riyenas0925 (#262)
-
----
-
-## v1.2.16 (12/11/2021)
-## Changes
-## 🐛 Hotfixes
-
-- Update Check OSS Name Function @FOSSLight-dev (#257)
-- Fix SPDX convert error (when invalid download location) @riyenas0925 (#251)
-
-## 🔧 Maintenance
-
-- Update spdx/tools-java version @riyenas0925 (#260)
-- Fix the bug that occurs when loading the BOM @FOSSLight-dev (#253)
