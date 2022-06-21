@@ -684,7 +684,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 								changeMap.put("prev", deduplicatedBeforeBom.get(beforeKey));
 								changeMap.put("now", deduplicatedAfterBom.get(afterKey));
 								
-								changeList.put(getCompareKey(deduplicatedBeforeBom), changeMap);
+								changeList.put(afterKey, changeMap);
+								break;
 							}
 						}
 					}
