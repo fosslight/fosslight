@@ -1540,7 +1540,7 @@
 		  FROM ( SELECT T1.OSS_ID 
 		  			  , T1.OSS_NAME 
 					  , (CASE 
-					  		  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) = #{downloadLocation} THEN 1
+					  		  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%', #{downloadLocation}) THEN 1
 							  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{downloadLocation},'%') THEN 2
 							  ELSE 3
 						  END) AS S_ORDER
@@ -1566,7 +1566,7 @@
 			SELECT
 				OSS_ID
 				, OSS_NAME
-				, (CASE WHEN HOMEPAGE = #{homepage} THEN 1
+				, (CASE WHEN HOMEPAGE LIKE CONCAT('%',#{homepage}) THEN 1
 						WHEN HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
 						ELSE 3
 				  END) AS S_ORDER
