@@ -1623,6 +1623,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		for(OssLicense license : ossMaster.getOssLicenses()) {
 			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 			master = master != null ? master : new LicenseMaster();
+			if(!isEmpty(master.getLicenseId()) && !license.getLicenseId().equals(master.getLicenseId())) {
+				license.setLicenseId(master.getLicenseId());
+			}
 			license.setLicenseType(master.getLicenseType());
 			
 			// obligation 설정
