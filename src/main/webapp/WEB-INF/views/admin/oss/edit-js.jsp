@@ -538,6 +538,7 @@
 					$('#'+lastsel+' > td:eq(7)').text(licenseName); // licenseName
 					$('#'+lastsel+' > td:eq(10)').text(ui.item.licenseType); // licenseType
 					$('#'+lastsel+' > td:eq(11)').text(ui.item.obligationChecks); // obligationChecks
+					$('#'+lastsel+' > td:eq(8)').text(ui.item.licenseId); // licenseId
 					showLicenseText(licenseName);
 					gLicenseData[lastsel] = "Y";
 					return false;

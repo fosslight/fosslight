@@ -1623,6 +1623,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		for(OssLicense license : ossMaster.getOssLicenses()) {
 			LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 			master = master != null ? master : new LicenseMaster();
+			if(!isEmpty(master.getLicenseId()) && !license.getLicenseId().equals(master.getLicenseId())) {
+				license.setLicenseId(master.getLicenseId());
+			}
 			license.setLicenseType(master.getLicenseType());
 			
 			// obligation 설정
@@ -1766,6 +1769,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().indexOf("#")));
 				}
 				
+				if(!ossMaster.getDownloadLocation().startsWith("https://")) {
+					ossMaster.setDownloadLocation("https://" + ossMaster.getDownloadLocation());
+				}
+				
 				if( urlSearchSeq > -1 ) {
 					Pattern p = null;
 					
@@ -1818,7 +1825,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					downloadLocationUrl = downloadLocationUrl.substring(5, downloadLocationUrl.length());
 				}
 				
-				ossMaster.setDownloadLocation(downloadLocationUrl);
+				if(!isEmpty(downloadLocationUrl)) {
+					ossMaster.setDownloadLocation(downloadLocationUrl);
+				}
 				returnMap.put("downloadLocation", ossMapper.checkExistsOssDownloadLocation(ossMaster));
 				
 			} catch (Exception e) {
@@ -1874,9 +1883,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				}
 				
-				String[] downloadlocationUrlSplit = ossMaster.getHomepage().split("/");
-				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+				String[] homepageUrlSplit = ossMaster.getHomepage().split("/");
+				if(homepageUrlSplit[homepageUrlSplit.length-1].indexOf("#") > -1) {
 					ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().indexOf("#")));
+				}
+				
+				if(!ossMaster.getHomepage().startsWith("https://")) {
+					ossMaster.setHomepage("https://" + ossMaster.getHomepage());
 				}
 				
 				if( urlSearchSeq > -1 ) {
@@ -1931,7 +1944,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					homepageUrl = homepageUrl.substring(5, homepageUrl.length());
 				}
 				
-				ossMaster.setHomepage(homepageUrl);
+				if(!isEmpty(homepageUrl)) {
+					ossMaster.setHomepage(homepageUrl);
+				}
 				returnMap.put("homepage", ossMapper.checkExistsOssHomepage(ossMaster));
 				
 			} catch (Exception e) {

@@ -530,6 +530,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			String verify_chk_list = CommonFunction.getStringFromFile(chk_list_file_path).replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId + "/", "");
+			if(verify_chk_list.contains(VERIFY_PATH_DECOMP +"/"+ prjId)) {
+				verify_chk_list = verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId, "");
+			}
 			log.info("VERIFY Read verify_chk_list END : " + prjId);
 			
 			result = verify_chk_list.split(System.lineSeparator());
@@ -587,10 +590,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if(isFirst) {
-							// 첫번째 path를 압축을 푼 처번째 dir로 사용
-							decompressionRootPath = s;
-							
-							isFirst = false;
+							if(!isFile) {
+								// 첫번째 path를 압축을 푼 처번째 dir로 사용
+								decompressionRootPath = s;
+								
+								isFirst = false;
+							}
 						}
 						
 						int cnt = 0;

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -378,13 +379,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		for(Map<String, Object> li : list) {
 			String licenseId = CommonFunction.removeDuplicateStringToken(avoidNull((String) li.get("licenseId")).toString(), ",");
 			String licenseName = CommonFunction.removeDuplicateStringToken((String) li.get("licenseName"), ",");
-			String componentId = (String) li.get("componentId").toString();
+			String componentId = String.valueOf(li.get("componentId"));
 			List<HashMap<String, Object>> listLicense = apiProjectMapper.selectBomLicense(componentId);
 			
-			li.replace("licenseId", licenseId);
-			li.replace("licenseName", licenseName);
-			li.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
-			li.put("ossComponentsLicenseList", listLicense);
+			li.put("LICENSE_ID", licenseId);
+			li.put("LICENSE_NAME", licenseName);
+			li.put("ROLE_OUT_LICENSE", CoCodeManager.CD_ROLE_OUT_LICENSE);
+			li.put("OSS_COMPONENTS_LICENSE_LIST", listLicense);
 		}
 		
 		return setMergeGridData(list);
@@ -451,8 +452,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					continue;
 				}
 				
-				String tempLicenseName = ((String) temp.get("licenseName"));
-				String rtnLicenseName = ((String) rtnBean.get("licenseName"));
+				String tempLicenseName = (String) temp.get("licenseName");
+				String rtnLicenseName = (String) rtnBean.get("licenseName");
 				String key = (String) temp.get("ossName") + "-" + (String) temp.get("licenseType");
 				
 				if("--NA".equals(key)) {
@@ -519,39 +520,33 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> deleteList = new HashMap<String, Object>();
 		Map<String, Object> changeList = new HashMap<String, Object>();
 		
-		for(Map<String, Object> before : beforeBomList) {
-			String ossName = (String) before.get("ossName");
-			List<Map<String, Object>> afterList = afterBomList.stream().filter(after -> ((String)after.get("ossName")).equals(ossName)).collect(Collectors.toList());
-			
-			if(afterList.size() == 0) {
-				Map<String, Object> deleteMap = new HashMap<String, Object>();
-				
-				deleteMap.put("name", (String) before.get("ossName"));
-				deleteMap.put("version", avoidNull((String) before.get("ossVersion"), ""));
-				deleteMap.put("license", Arrays.asList(((String) before.get("licenseName")).split(",")));
-				deleteList.put(getCompareKey(before), deleteMap);
-			} else {
-				if(!((String)afterList.get(0).get("ossVersion")).equals((String) before.get("ossVersion"))
-						 || !((String)afterList.get(0).get("licenseName")).equals((String) before.get("licenseName"))) {
-					Map<String, Object> changeMap = new HashMap<String, Object>();
-					
-					changeMap.put("name", (String) before.get("ossName"));
-					changeMap.put("prev_version", avoidNull((String) before.get("ossVersion"), ""));
-					changeMap.put("prev_license", Arrays.asList(((String) before.get("licenseName")).split(",")));
-					changeMap.put("now_version", avoidNull((String) afterList.get(0).get("ossVersion"), ""));
-					changeMap.put("now_license", Arrays.asList(((String) afterList.get(0).get("licenseName")).split(",")));
-					
-					changeList.put(getCompareKey(before), changeMap);
-				}
-			}
-		}
+		List<Map<String, Object>> filteredBeforeBomList = beforeBomList
+				.stream()
+				.filter(bfList -> afterBomList
+									.stream()
+									.filter(afList -> 
+											((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort((String) bfList.get("licenseName")))
+											.equalsIgnoreCase((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort((String) afList.get("licenseName")))
+											).collect(Collectors.toList()).size() == 0
+				).collect(Collectors.toList());
 		
-		for(Map<String, Object> after : afterBomList) {
+		List<Map<String, Object>> filteredAfterBomList = afterBomList
+				.stream()
+				.filter(afList -> beforeBomList
+									.stream()
+									.filter(bfList -> 
+											((String) afList.get("ossName") + "||" + (String) afList.get("ossVersion") + "||" + getLicenseNameSort((String) afList.get("licenseName")))
+											.equalsIgnoreCase((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort((String) bfList.get("licenseName")))
+											).collect(Collectors.toList()).size() == 0
+				).collect(Collectors.toList());
+		
+		// status > add
+		for(Map<String, Object> after : filteredAfterBomList) {
 			String ossName = (String) after.get("ossName");
-			int addTargetCnt = beforeBomList.stream().filter(before -> ((String)before.get("ossName")).equals(ossName)).collect(Collectors.toList()).size();
+			int addTargetCnt = filteredBeforeBomList.stream().filter(before -> ((String)before.get("ossName")).equals(ossName)).collect(Collectors.toList()).size();
 			
 			if(addTargetCnt == 0) {
-				Map<String, Object> addMap = new HashMap<String, Object>();
+				Map<String, Object> addMap = new LinkedHashMap<String, Object>();
 				
 				addMap.put("name", (String) after.get("ossName"));
 				addMap.put("version", avoidNull((String) after.get("ossVersion"), ""));
@@ -561,12 +556,165 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 		}
 		
+		// status > delete
+		for(Map<String, Object> before : filteredBeforeBomList) {
+			String ossName = (String) before.get("ossName");
+			List<Map<String, Object>> afterList = filteredAfterBomList.stream().filter(after -> ((String)after.get("ossName")).equals(ossName)).collect(Collectors.toList());
+			
+			if(afterList.size() == 0) {
+				Map<String, Object> deleteMap = new LinkedHashMap<String, Object>();
+				
+				deleteMap.put("name", (String) before.get("ossName"));
+				deleteMap.put("version", avoidNull((String) before.get("ossVersion"), ""));
+				deleteMap.put("license", Arrays.asList(((String) before.get("licenseName")).split(",")));
+				deleteList.put(getCompareKey(before), deleteMap);
+			}
+		}
+		
+		// status > change
+		if(!filteredBeforeBomList.isEmpty() && !filteredAfterBomList.isEmpty()) {
+			List<Map<String, Object>> deduplicatedBeforeBomList = new ArrayList<>();
+			List<Map<String, Object>> deduplicatedAfterBomList = new ArrayList<>();
+			
+			boolean firstFlag = true;
+			boolean deduplicateFlag = false;
+			
+			for(Map<String, Object> filteredBeforeBom : filteredBeforeBomList) {
+				String ossName = (String) filteredBeforeBom.get("ossName");
+				String ossVersion = (String) filteredBeforeBom.get("ossVersion");
+				String licenseName = (String) filteredBeforeBom.get("licenseName");
+				
+				if(firstFlag) {
+					List<Map<String, Object>> addBeforeBomList = new ArrayList<>();
+					Map<String, Object> addBeforeBom = new LinkedHashMap<>();
+					Map<String, Object> addBeforeBom2 = new HashMap<>();
+					
+					addBeforeBom.put("version", ossVersion);
+					addBeforeBom.put("licenseName", licenseName.trim());
+					addBeforeBomList.add(addBeforeBom);
+					addBeforeBom2.put(ossName, addBeforeBomList);
+					deduplicatedBeforeBomList.add(addBeforeBom2);
+					
+					firstFlag = false;
+				} else {
+					for(Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
+						if(deduplicatedBeforeBom.containsKey(ossName)) {
+							@SuppressWarnings("unchecked")
+							List<Map<String, Object>> orgValues = (List<Map<String, Object>>) deduplicatedBeforeBom.get(ossName);
+							
+							Map<String, Object> addBeforeBom = new LinkedHashMap<>();
+							addBeforeBom.put("version", ossVersion);
+							addBeforeBom.put("licenseName", licenseName.trim());
+							orgValues.add(addBeforeBom);
+							deduplicatedBeforeBom.replace(ossName, orgValues);
+							deduplicateFlag = true;
+						}
+					}
+					
+					if(!deduplicateFlag) {
+						List<Map<String, Object>> addBeforeBomList = new ArrayList<>();
+						Map<String, Object> addBeforeBom = new LinkedHashMap<>();
+						Map<String, Object> addBeforeBom2 = new HashMap<>();
+						addBeforeBom.put("version", ossVersion);
+						addBeforeBom.put("licenseName", licenseName.trim());
+						addBeforeBomList.add(addBeforeBom);
+						addBeforeBom2.put(ossName, addBeforeBomList);
+						deduplicatedBeforeBomList.add(addBeforeBom2);
+					}
+					
+					deduplicateFlag = false;
+				}
+			}
+			
+			for(Map<String, Object> filteredAfterBom : filteredAfterBomList) {
+				String ossName = (String) filteredAfterBom.get("ossName");
+				String ossVersion = (String) filteredAfterBom.get("ossVersion");
+				String licenseName = (String) filteredAfterBom.get("licenseName");
+				
+				if(firstFlag) {
+					List<Map<String, Object>> addAfterBomList = new ArrayList<>();
+					Map<String, Object> addAfterBom = new LinkedHashMap<>();
+					Map<String, Object> addAfterBom2 = new HashMap<>();
+					
+					addAfterBom.put("version", ossVersion);
+					addAfterBom.put("licenseName", licenseName.trim());
+					addAfterBomList.add(addAfterBom);
+					addAfterBom2.put(ossName, addAfterBomList);
+					deduplicatedAfterBomList.add(addAfterBom2);
+					
+					firstFlag = false;
+				} else {
+					for(Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
+						if(deduplicatedAfterBom.containsKey(ossName)) {
+							@SuppressWarnings("unchecked")
+							List<Map<String, Object>> orgValues = (List<Map<String, Object>>) deduplicatedAfterBom.get(ossName);
+							
+							Map<String, Object> addBeforeBom = new LinkedHashMap<>();
+							addBeforeBom.put("version", ossVersion);
+							addBeforeBom.put("licenseName", licenseName.trim());
+							orgValues.add(addBeforeBom);
+							deduplicatedAfterBom.replace(ossName, orgValues);
+							deduplicateFlag = true;
+						} 
+					}
+					
+					if(!deduplicateFlag) {
+						List<Map<String, Object>> addAfterBomList = new ArrayList<>();
+						Map<String, Object> addAfterBom = new LinkedHashMap<>();
+						Map<String, Object> addAfterBom2 = new HashMap<>();
+						addAfterBom.put("version", ossVersion);
+						addAfterBom.put("licenseName", licenseName.trim());
+						addAfterBomList.add(addAfterBom);
+						addAfterBom2.put(ossName, addAfterBomList);
+						deduplicatedAfterBomList.add(addAfterBom2);
+					}
+					
+					deduplicateFlag = false;
+				}
+			}
+			
+			for(Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
+				for(String beforeKey : deduplicatedBeforeBom.keySet()) {
+					for(Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
+						for(String afterKey : deduplicatedAfterBom.keySet()) {
+							if(beforeKey.equalsIgnoreCase(afterKey)) {
+								Map<String, Object> changeMap = new LinkedHashMap<String, Object>();
+								
+								changeMap.put("name", afterKey);
+								changeMap.put("prev", deduplicatedBeforeBom.get(beforeKey));
+								changeMap.put("now", deduplicatedAfterBom.get(afterKey));
+								
+								changeList.put(afterKey, changeMap);
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		// add, delete, change가 값이없으면 완전일치한 project로 판단. 
 		resultMap.put("add", 	addList.values());
 		resultMap.put("delete", deleteList.values());
 		resultMap.put("change", changeList.values());
 		
 		return resultMap;
+	}
+	
+	private String getLicenseNameSort(String licenseName) {
+		String sortedValue = "";
+		
+		String splitLicenseNm[] = licenseName.trim().split(",");
+		Arrays.sort(splitLicenseNm);
+		
+		for (int i=0; i< splitLicenseNm.length; i++) {
+			sortedValue += splitLicenseNm[i];
+			if (i<splitLicenseNm.length-1) {
+				sortedValue += ", ";
+			}
+		}
+		
+		return sortedValue;
 	}
 	
 	@Override
