@@ -3355,49 +3355,7 @@ public class CoMailManager extends CoTopComponent {
 			helper.setCc(coMail.getCcIds() != null ? coMail.getCcIds() : new String[]{});
 			helper.setBcc(coMail.getBccIds() != null ? coMail.getBccIds() : new String[]{});
 			helper.setSubject(coMail.getEmlTitle());
-			
-			// iconSet image conversion
-			String IMAGE_PATH = CommonFunction.emptyCheckProperty("root.dir", "/home/osc") + "/imagetemp/";
-			String emlMessage = coMail.getEmlMessage();
-			String imgPath = "";
-			boolean multiFlag = false;
-			boolean dualFlag = false;
-			boolean vdifFlag = false;
-			
-			if (emlMessage.contains("iconSet multi")) {
-				imgPath = "<img src=\"cid:img_email_icon_multi.png\">";
-				emlMessage = emlMessage.replace("<span class=\"iconSet multi\">Multi</span>", imgPath);
-				multiFlag = true;
-			}
-			
-			if (emlMessage.contains("iconSet dual")) {
-				imgPath = "<img src=\"cid:img_email_icon_dual.png\">";
-				emlMessage = emlMessage.replace("<span class=\"iconSet dual\">Dual</span>", imgPath);
-				dualFlag = true;
-			}
-			
-			if (emlMessage.contains("iconSet vdif")) {
-				imgPath = "<img src=\"cid:img_email_icon_vdif.png\">";
-				emlMessage = emlMessage.replace("<span class=\"iconSet vdif\">v-Diff</span>", imgPath);
-				vdifFlag = true;
-			}
-			
-			helper.setText(emlMessage, true);
-			
-			if (multiFlag) {
-				FileSystemResource multiImg = new FileSystemResource(new java.io.File(IMAGE_PATH + "img_email_icon_multi.png"));
-				helper.addInline("img_email_icon_multi.png", multiImg);
-			}
-			
-			if (dualFlag) {
-				FileSystemResource dualImg = new FileSystemResource(new java.io.File(IMAGE_PATH + "img_email_icon_dual.png"));
-				helper.addInline("img_email_icon_dual.png", dualImg);
-			}
-			
-			if (vdifFlag) {
-				FileSystemResource vdifImg = new FileSystemResource(new java.io.File(IMAGE_PATH + "img_email_icon_vdif.png"));
-				helper.addInline("img_email_icon_vdif.png", vdifImg);
-			}
+			helper.setText(coMail.getEmlMessage(), true);
 			
 			// Email Send
 			mailSender.send(message);
