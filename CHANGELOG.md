@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.4.2 (24/06/2022)
+## Changes
+## 🔧 Maintenance
+
+- Update download location and homepage > same link check condition @FOSSLight-dev (#551)
+- Change the data format of API > bom compare > change @FOSSLight-dev (#550)
+- Update UI (3rd party/Basic Information) @Min-Kyungsun (#550)
+
+
+---
+
 ## v1.4.1 (17/06/2022)
 ## 🐛 Hotfixes
 
@@ -482,23 +493,3 @@
 
 - Fix heap memory issue when registering CPE Match Feed @FOSSLight-dev (#289)
 - Update the project's report template @soimkim (#286)
-
----
-
-## v1.2.17 (19/11/2021)
-## Changes
-## 🚀 Features
-
-- Create integration test codes @astrod @mingukang-kr  @sw-develop @Lee-JaeHyuk (#254)
-- Add Check License in Self-Check @riyenas0925 (#265)
-- Check OSS License in existing db @riyenas0925 (#258)
-
-## 🔧 Maintenance
-
-- Shorten the time required to save during OSS sync @FOSSLight-dev (#273)
-- Fix the vulnerability that public array is assigned to private variable @yugeeklab (#267)
-- Fix the vulnerability for public method that return private type @yugeeklab (#266)
-- Fix Null pointer exception  @yugeeklab (#252)
-- Fix the vulnerability for inapproate error message @yugeeklab (#268)
-- Fix the vulnerability for inapproate error message @yugeeklab (#263)
-- Refactor Check License, Check OSS Name @riyenas0925 (#262)
