@@ -84,24 +84,8 @@
 	// 이벤트
 	var evt = {
 		init : function(){
-			var site = $('input[name=distributeTarget]:checked').val();
-			var siteCd = ${ct:getAllValuesJson(ct:getConstDef('CD_DISTRIBUTE_CODE'))};
-			var categoryCd = '';
-			if(site) {
-				switch(site){
-					case siteCd[0].cdDtlNo:	categoryCd='${ct:getConstDef("CD_MODEL_TYPE")}';	break;
-					case siteCd[1].cdDtlNo:	categoryCd='${ct:getConstDef("CD_MODEL_TYPE2")}';	break;
-				}				
-			}
-			
-			if(categoryCd == '') {
-				categoryCd='${ct:getConstDef("CD_MODEL_TYPE")}';
-
-				$("#tr_distribute").hide();
-			}
-			
+            var categoryCd='${ct:getConstDef("CD_MODEL_TYPE")}';
 			getCategoryCodeJson(categoryCd);
-			
 			modelList.load();
 			
 			// 왓쳐 추가
