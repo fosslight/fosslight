@@ -6,6 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.4.2](https://github.com/fosslight/fosslight/releases/tag/v1.4.2) (2022-06-24)
+### Changed
+* API > bom compare 의 change data 포맷 변경
+
 ## [1.4.1](https://github.com/fosslight/fosslight/releases/tag/v1.4.1) (2022-06-17)
 ### Changed
 * Spring boot version을 2.1.7에서 2.6.8로 변경
