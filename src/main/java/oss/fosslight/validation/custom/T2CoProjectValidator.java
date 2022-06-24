@@ -1018,94 +1018,212 @@ public class T2CoProjectValidator extends T2CoValidator {
 			return false;
 		}
 
+		String[] splitCheckVal = val.split(",");
+		
 		switch (kind) {
-			case "DOWNLOAD":
-				getData = ossMaster.getDownloadLocation();
-				getData2 = ossMaster.getDownloadLocationGroup();
-				break;
-			case "HOMEPAGE":
-				getData = ossMaster.getHomepage();
-				break;
-			case "COPYRIGHT":
-				getData = avoidNull(ossMaster.getCopyright(), "").trim();
-				break;
-			case "LICENSE":
-				getData = ossMaster.getOssLicenseText();
-				break;
-			default:
-				break;
+		case "DOWNLOAD":
+			getData = ossMaster.getDownloadLocation();
+			getData2 = ossMaster.getDownloadLocationGroup();
+			if(getData.contains(",") && isEmpty(getData2)) {
+				ossMaster.setDownloadLocationGroup(getData);
+				getData2 = getData;
+			}
+			break;
+		case "HOMEPAGE":
+			getData = ossMaster.getHomepage();
+			break;
+		case "COPYRIGHT":
+			getData = avoidNull(ossMaster.getCopyright(), "").trim();
+			break;
+		case "LICENSE":
+			getData = ossMaster.getOssLicenseText();
+			break;
+		default:
+			break;
 		}
 
-		if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
-			if(kind.equals("HOMEPAGE")) {
-				if(val.startsWith("http://") || val.startsWith("https://") || val.startsWith("git://") || val.startsWith("ftp://") || val.startsWith("svn://")) {
-					val = val.split("//")[1];
+		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+		
+		for(String checkVal : splitCheckVal) {
+			if(checkVal.contains(";")) {
+				checkVal = checkVal.split(";")[0];
+			}
+			
+			checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
+			
+			if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
+				if(kind.equals("HOMEPAGE")) {
+					if(checkVal.startsWith("http://") || checkVal.startsWith("https://")) {
+						checkVal = checkVal.split("//")[1];
+					}
+					
+					if(checkVal.startsWith("www.")) {
+						checkVal = checkVal.substring(5, checkVal.length());
+					}
+					
+					if(getData.contains(";")) {
+						getData = getData.split(";")[0];
+					}
+					
+					getData = linkPatternCompile(checkOssNameUrl, getData);
+					
+					if(getData.startsWith("http://") || getData.startsWith("https://")) {
+						getData = getData.split("//")[1];
+					}
+					
+					if(getData.startsWith("www.")) {
+						getData = getData.substring(5, getData.length());
+					}
 				}
 				
-				if(val.startsWith("www.")) {
-					val = val.substring(5, val.length());
+				if(!getData.equals(checkVal)) {
+					return true;
+				}
+			}
+			
+			if(kind.equals("DOWNLOAD") && !isEmpty(getData2)){
+				if(checkVal.startsWith("http://") || checkVal.startsWith("https://")) {
+					checkVal = checkVal.split("//")[1];
 				}
 				
-				if(getData.startsWith("http://") || getData.startsWith("https://") || getData.startsWith("git://") || getData.startsWith("ftp://") || getData.startsWith("svn://")) {
+				if(checkVal.startsWith("www.")) {
+					checkVal = checkVal.substring(5, checkVal.length());
+				}
+				
+				boolean chkFlag = false;
+				
+				for(String downloadLocation : getData2.split(",")){
+					downloadLocation = linkPatternCompile(checkOssNameUrl, downloadLocation);
+					
+					if(downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://")) {
+						downloadLocation = downloadLocation.split("//")[1];
+					}
+					
+					if(downloadLocation.startsWith("www.")) {
+						downloadLocation = downloadLocation.substring(5, downloadLocation.length());
+					}
+					
+					if(downloadLocation.equals(checkVal)) {
+						chkFlag = true;
+						break;
+					}
+				}
+				
+				if(!chkFlag) {
+					return true;
+				}
+			}else if(kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)){
+				if(checkVal.startsWith("http://") || checkVal.startsWith("https://")) {
+					checkVal = checkVal.split("//")[1];
+				}
+				
+				if(checkVal.startsWith("www.")) {
+					checkVal = checkVal.substring(5, checkVal.length());
+				}
+				
+				getData = linkPatternCompile(checkOssNameUrl, getData);
+				
+				if(getData.startsWith("http://") || getData.startsWith("https://")) {
 					getData = getData.split("//")[1];
 				}
 				
 				if(getData.startsWith("www.")) {
 					getData = getData.substring(5, getData.length());
 				}
-			}
-			
-			return !val.equals(getData);
-		}
-		
-		if(kind.equals("DOWNLOAD") && !isEmpty(getData2)) {
-			if(val.startsWith("http://") || val.startsWith("https://") || val.startsWith("git://") || val.startsWith("ftp://") || val.startsWith("svn://")) {
-				val = val.split("//")[1];
-			}
-			
-			if(val.startsWith("www.")) {
-				val = val.substring(5, val.length());
-			}
-			
-			for(String downloadLocation : getData2.split(",")) {
-				if(downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://") || downloadLocation.startsWith("git://")
-						|| downloadLocation.startsWith("ftp://") || downloadLocation.startsWith("svn://")) {
-					downloadLocation = downloadLocation.split("//")[1];
-				}
 				
-				if(downloadLocation.startsWith("www.")) {
-					downloadLocation = downloadLocation.substring(5, downloadLocation.length());
-				}
-				
-				if(val.equals(downloadLocation)){
-					return false;
+				if(!getData.equals(checkVal)) {
+					return true;
 				}
 			}
-			
-			return true;
-		} else if(kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)) {
-			if(val.startsWith("http://") || val.startsWith("https://") || val.startsWith("git://") || val.startsWith("ftp://") || val.startsWith("svn://")) {
-				val = val.split("//")[1];
-			}
-			
-			if(val.startsWith("www.")) {
-				val = val.substring(5, val.length());
-			}
-			
-			if(getData.startsWith("http://") || getData.startsWith("https://") || getData.startsWith("git://") || getData.startsWith("ftp://") || getData.startsWith("svn://")) {
-				getData = getData.split("//")[1];
-			}
-			
-			if(getData.startsWith("www.")) {
-				getData = getData.substring(5, getData.length());
-			}
-			
-			return !val.equals(getData);
 		}
 		
 		return false;
 	}
 	
+	private String linkPatternCompile(List<String> checkOssNameUrl, String checkVal) {
+		int urlSearchSeq = -1;
+		int seq = 0;
+		
+		for(String url : checkOssNameUrl) {
+			if(urlSearchSeq == -1 && checkVal.contains(url)) {
+				urlSearchSeq = seq;
+				break;
+			}
+			seq++;
+		}
+		
+		Pattern p = null;
+		
+		if(checkVal.startsWith("git://")) {
+			checkVal = checkVal.replace("git://", "https://");
+		} else if(checkVal.startsWith("ftp://")) {
+			checkVal = checkVal.replace("ftp://", "https://");
+		} else if(checkVal.startsWith("svn://")) {
+			checkVal = checkVal.replace("svn://", "https://");
+		} else if(checkVal.startsWith("git@")) {
+			checkVal = checkVal.replace("git@", "https://");
+		}
+		
+		if(checkVal.contains(".git")) {
+			if(checkVal.endsWith(".git")) {
+				checkVal = checkVal.substring(0, checkVal.length()-4);
+			} else {
+				if(checkVal.contains("#")) {
+					checkVal = checkVal.substring(0, checkVal.indexOf("#"));
+					checkVal = checkVal.substring(0, checkVal.length()-4);
+				}
+			}
+		}
+		
+		String[] downloadlocationUrlSplit = checkVal.split("/");
+		if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+			checkVal = checkVal.substring(0, checkVal.indexOf("#"));
+		}
+		
+		if( urlSearchSeq > -1 ) {
+			switch(urlSearchSeq) {
+				case 0: // github
+					p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
+				
+					break;
+				case 1: // npm
+					if(checkVal.contains("/package/@")) {
+						p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+					}else {
+						p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+					}
+				
+					break;
+				case 2: // pypi
+					p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
+				
+					break;
+				case 3: // maven
+					p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
+
+				break;
+				case 4: // pub
+					p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
+
+					break;
+				case 5: // cocoapods
+					p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+
+					break;
+				default:
+					break;
+			}
+		
+			Matcher m = p.matcher(checkVal);
+		
+			while(m.find()) {
+				checkVal = m.group(0);
+			}
+		}
+		
+		return checkVal;
+	}
+
 	private boolean hasOssLicense(OssMaster ossMaster, List<OssComponentsLicense> list) {
 		return hasOssLicense(ossMaster, list, true);
 	}
