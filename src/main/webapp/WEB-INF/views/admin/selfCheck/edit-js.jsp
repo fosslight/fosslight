@@ -829,8 +829,8 @@
 
             switch(value){
                 case "1":
-                    $('.checksrcR1').hide();
-                    $('.check2').show();
+                    $('.checksrcR1').show();
+                    $('.check2').hide();
                     $('.uploadSet').show();
                     $('.wgetUrl').hide();
                     srcUploadUrl.checked = false;
