@@ -300,7 +300,7 @@
 							<th class="dCase  txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
+									<input type="text" name="creatorNm" class="autoComCreatorDivision w350" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
 									<span class="retxt">This field is required.</span>
 									<input type="hidden" name="creator" <c:if test="${not empty project }">value='${project.creator}'</c:if>/>
 								</div>
@@ -310,7 +310,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.division" /></th>
 							<td class="dCase">
 								<div class="pb5">
-									<span class="selectSet w150">
+									<span class="selectSet w350">
 										<strong for="division" title="Watcher part selected value">Select Division</strong>
 										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
 											<option value=""></option>
@@ -324,7 +324,7 @@
                             <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">
                                 <div class="required">
-                                    <input type="text" name="reviewer" value="${project.reviewerName}" disabled="disabled"/>
+                                    <input type="text" name="reviewer" class="w350" value="${project.reviewerName}" disabled="disabled"/>
                                 </div>
                             </td>
                         </tr>

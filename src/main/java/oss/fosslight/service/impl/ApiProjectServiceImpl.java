@@ -590,7 +590,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					Map<String, Object> addBeforeBom2 = new HashMap<>();
 					
 					addBeforeBom.put("version", ossVersion);
-					addBeforeBom.put("licenseName", licenseName.trim());
+					addBeforeBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 					addBeforeBomList.add(addBeforeBom);
 					addBeforeBom2.put(ossName, addBeforeBomList);
 					deduplicatedBeforeBomList.add(addBeforeBom2);
@@ -604,7 +604,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 							
 							Map<String, Object> addBeforeBom = new LinkedHashMap<>();
 							addBeforeBom.put("version", ossVersion);
-							addBeforeBom.put("licenseName", licenseName.trim());
+							addBeforeBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 							orgValues.add(addBeforeBom);
 							deduplicatedBeforeBom.replace(ossName, orgValues);
 							deduplicateFlag = true;
@@ -616,7 +616,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						Map<String, Object> addBeforeBom = new LinkedHashMap<>();
 						Map<String, Object> addBeforeBom2 = new HashMap<>();
 						addBeforeBom.put("version", ossVersion);
-						addBeforeBom.put("licenseName", licenseName.trim());
+						addBeforeBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 						addBeforeBomList.add(addBeforeBom);
 						addBeforeBom2.put(ossName, addBeforeBomList);
 						deduplicatedBeforeBomList.add(addBeforeBom2);
@@ -637,7 +637,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					Map<String, Object> addAfterBom2 = new HashMap<>();
 					
 					addAfterBom.put("version", ossVersion);
-					addAfterBom.put("licenseName", licenseName.trim());
+					addAfterBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 					addAfterBomList.add(addAfterBom);
 					addAfterBom2.put(ossName, addAfterBomList);
 					deduplicatedAfterBomList.add(addAfterBom2);
@@ -651,7 +651,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 							
 							Map<String, Object> addBeforeBom = new LinkedHashMap<>();
 							addBeforeBom.put("version", ossVersion);
-							addBeforeBom.put("licenseName", licenseName.trim());
+							addBeforeBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 							orgValues.add(addBeforeBom);
 							deduplicatedAfterBom.replace(ossName, orgValues);
 							deduplicateFlag = true;
@@ -663,7 +663,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						Map<String, Object> addAfterBom = new LinkedHashMap<>();
 						Map<String, Object> addAfterBom2 = new HashMap<>();
 						addAfterBom.put("version", ossVersion);
-						addAfterBom.put("licenseName", licenseName.trim());
+						addAfterBom.put("license", Arrays.asList(licenseName.trim().split(",")));
 						addAfterBomList.add(addAfterBom);
 						addAfterBom2.put(ossName, addAfterBomList);
 						deduplicatedAfterBomList.add(addAfterBom2);
