@@ -27,7 +27,10 @@ function showLicenseText(target) {
 				<tbody>
 					<tr>
 						<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
-						<td class="dCase">${ossInfo.ossName}</td>
+						<td class="dCase">
+							<a href=<c:url value='/oss/edit/${ossInfo.ossId}'/> target="_blank" class="urlLink"
+							   onClick="window.open(this.href, 'OSS_'+${ossInfo.ossId},'width=1100, height=900, toolbar=no, location=no, left=-2000, top=0'); return false;">${ossInfo.ossName}</a>
+						</td>
 					</tr>
 					<tr>
 						<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
