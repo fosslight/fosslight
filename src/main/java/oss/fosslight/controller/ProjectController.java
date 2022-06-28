@@ -1517,7 +1517,6 @@ public class ProjectController extends CoTopComponent {
 			
 			OssNotice ossNotice = verificationService.selectOssNoticeOne(project.getCopyPrjId());
 			ossNotice.setPrjId(project.getPrjId());
-			ossNotice.setEditNoticeYn(CoConstDef.FLAG_YES);
 			verificationService.registOssNoticeConfirmStatus(ossNotice);
 			
 			// download flag

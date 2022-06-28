@@ -2418,11 +2418,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			// android project는 notice를 사용하지 않음.
 			if(!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {
-				if(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn())){
-					verificationMapper.insertOssNotice(ossNotice);
-				}else if(CoConstDef.FLAG_NO.equals(ossNotice.getEditNoticeYn())){
-					verificationMapper.updateOssNotice(ossNotice);
-				}
+				verificationMapper.insertOssNotice(ossNotice);
 			}
 			
 			if(isEmpty(project.getVerificationStatus())){
