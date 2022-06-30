@@ -94,7 +94,7 @@ public class VerificationController extends CoTopComponent {
 		
 		OssNotice _noticeInfo = projectService.setCheckNotice(projectMaster);
 		
-		if(_noticeInfo != null && CoConstDef.FLAG_NO.equals(projectMaster.getUseCustomNoticeYn())) {
+		if(_noticeInfo != null) {
 			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
 			model.addAttribute("ossNotice", _noticeInfo);
 		}

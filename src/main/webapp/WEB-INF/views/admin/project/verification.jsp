@@ -416,6 +416,11 @@
 											</div>
 										</div>
 									</dd>
+									<c:if test="${project.useCustomNoticeYn eq 'Y'}">
+									<dd class="mt20">
+										<span class="useCustomNotice"><spring:message code="msg.project.verification.use.custom.notice"/></span>
+									</dd>
+									</c:if>
 									<dd class="mt10">
 										<div class="basicCase">
 											<span class="right">

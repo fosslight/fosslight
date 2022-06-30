@@ -795,3 +795,5 @@ div .retxtg {padding-top:2px;font-size:11px;color:gray !important;}
 .statisticsLayout .grdItemSyncPopup:last-child {padding-left:5px; padding-right:10px;}
 .syncPopupEditor {padding:0px 10px 0px;}
 .btnLayoutSyncPopupBtn {float:right; padding-right:10px;}
+
+.useCustomNotice {display:inline-block; padding-left:190px; color:#FF0000;}
