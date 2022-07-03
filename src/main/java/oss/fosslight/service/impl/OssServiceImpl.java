@@ -2019,6 +2019,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			try {
 				boolean semicolonFlag = false;
 				String semicolonStr = "";
+				String downloadLocation = bean.getDownloadLocation();
 				
 				if(bean.getDownloadLocation().contains(";")) {
 					semicolonFlag = true;
@@ -2042,28 +2043,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				if( urlSearchSeq > -1 ) {
-					String protocol = "";
-					String endUrl = "";
-					String downloadlocationUrlEndSplit = "";
-					
 					if(urlSearchSeq == 0) {
 						if(bean.getDownloadLocation().startsWith("git://")) {
-							protocol = "git://";
 							bean.setDownloadLocation(bean.getDownloadLocation().replace("git://", "https://"));
 						}
 						if(bean.getDownloadLocation().startsWith("git@")) {
-							protocol = "git@";
 							bean.setDownloadLocation(bean.getDownloadLocation().replace("git@", "https://"));
 						}
 						if(bean.getDownloadLocation().contains(".git")) {
 							if(bean.getDownloadLocation().endsWith(".git")) {
-								endUrl = ".git";
 								bean.setDownloadLocation(bean.getDownloadLocation().substring(0, bean.getDownloadLocation().length()-4));
 							} else {
 								if(bean.getDownloadLocation().contains("#")) {
-									endUrl = bean.getDownloadLocation().substring(bean.getDownloadLocation().indexOf("#"), bean.getDownloadLocation().length());
 									bean.setDownloadLocation(bean.getDownloadLocation().substring(0, bean.getDownloadLocation().indexOf("#")));
-									downloadlocationUrlEndSplit = ".git";
 									bean.setDownloadLocation(bean.getDownloadLocation().substring(0, bean.getDownloadLocation().length()-4));
 								}
 							}
@@ -2072,19 +2064,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					String downloadlocationUrl = bean.getDownloadLocation();
 					
-					if(isEmpty(downloadlocationUrlEndSplit)) {
-						String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");
-						
-						if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-							downloadlocationUrlEndSplit = downloadlocationUrl.substring(downloadlocationUrl.indexOf("#"), downloadlocationUrl.length());
-							downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
-						}
+					String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");
+					if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+						downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
 					}
 					
 					Pattern p = null;
 					
 					switch(urlSearchSeq) {
 						case 0: // github
+							if(downloadlocationUrl.contains("www.")) {
+								downloadlocationUrl = downloadlocationUrl.replace("www.", "");
+							}
 							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
 							
 							break;
@@ -2128,16 +2119,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							|| bean.getDownloadLocation().startsWith("ftp://")
 							|| bean.getDownloadLocation().startsWith("svn://")) {
 						downloadlocationUrl = bean.getDownloadLocation().split("//")[1];
-						if(isEmpty(protocol)) {
-							protocol = bean.getDownloadLocation().split("//")[0] + "//";
-						}
 					}
 					
 					if(downloadlocationUrl.startsWith("www.")) {
-						if(!isEmpty(protocol) && !protocol.contains("@")) {
-							protocol += downloadlocationUrl.substring(0, 4);
-						}
-						downloadlocationUrl = downloadlocationUrl.substring(5, downloadlocationUrl.length());
+						downloadlocationUrl = downloadlocationUrl.substring(4, downloadlocationUrl.length());
 					}
 					
 					bean.setDownloadLocation(downloadlocationUrl);
@@ -2158,29 +2143,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
-							
-							if(!isEmpty(protocol)) {
-								if(protocol.contains("git")) {
-									downloadlocationUrl = "https://" + downloadlocationUrl;
-								} else {
-									downloadlocationUrl = protocol + downloadlocationUrl;
-								}
-							}
 						} else {
 //							OssMaster ossBean = new OssMaster();
 //							ossBean.setOssName(bean.getOssName());
 //							if(checkExistsOssByname(ossBean) > 0) {
 //								continue;
 //							}
-							if(!isEmpty(protocol)) {
-								if(protocol.contains("git")) {
-									downloadlocationUrl = "https://" + downloadlocationUrl;
-								} else {
-									downloadlocationUrl = protocol + downloadlocationUrl;
-								}
-							}
-							
-							Matcher ossNameMatcher = p.matcher(downloadlocationUrl);
+							String downloadLocationMatcher = "https://" + downloadlocationUrl;
+							Matcher ossNameMatcher = p.matcher(downloadLocationMatcher);
 
 							while(ossNameMatcher.find()){
 
@@ -2220,22 +2190,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 
 						if(!isEmpty(checkName)) {
-							if(!isEmpty(semicolonStr)) {
-								downloadlocationUrl += downloadlocationUrlEndSplit + endUrl + ";" + semicolonStr;
-							}else {
-								downloadlocationUrl += downloadlocationUrlEndSplit + endUrl;
-							}
-							
-							bean.setDownloadLocation(downloadlocationUrl);
+							bean.setDownloadLocation(downloadLocation);
 							bean.setCheckName(checkName);
 							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
 						}
 					}
 				} else {
 					String downloadlocationUrl = "";
-					String protocol = "";
-					String downloadlocationUrlEndSplit = "";
-					String endUrl = "";
 					
 					if(semicolonFlag) {
 						downloadlocationUrl = bean.getDownloadLocation().split(";")[0];
@@ -2244,7 +2205,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					if(downloadlocationUrl.startsWith("git@")) {
-						protocol = "git@";
 						downloadlocationUrl = downloadlocationUrl.replace("git@", "");
 					}
 					
@@ -2253,37 +2213,27 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							|| downloadlocationUrl.startsWith("git://")
 							|| downloadlocationUrl.startsWith("ftp://")
 							|| downloadlocationUrl.startsWith("svn://")) {
-						if(isEmpty(protocol)) {
-							protocol = downloadlocationUrl.split("//")[0] + "//";
-						}
 						downloadlocationUrl = downloadlocationUrl.split("//")[1];
 					}
 					
 					if(downloadlocationUrl.startsWith("www.")) {
-						protocol += downloadlocationUrl.substring(0, 4);
 						downloadlocationUrl = downloadlocationUrl.substring(5, downloadlocationUrl.length());
 					}
 					
 					if(downloadlocationUrl.contains(".git")) {
 						if(downloadlocationUrl.endsWith(".git")) {
-							endUrl = ".git";
 							downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.length()-4);
 						} else {
 							if(downloadlocationUrl.contains("#")) {
-								endUrl = downloadlocationUrl.substring(downloadlocationUrl.indexOf("#"), downloadlocationUrl.length());
 								downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
-								downloadlocationUrlEndSplit = ".git";
 								downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.length()-4);
 							}
 						}
 					}
 					
-					if(downloadlocationUrlEndSplit.isEmpty()) {
-						String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");
-						if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-							downloadlocationUrlEndSplit = downloadlocationUrl.substring(downloadlocationUrl.indexOf("#"), downloadlocationUrl.length());
-							downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
-						}
+					String[] downloadlocationUrlSplit = downloadlocationUrl.split("/");
+					if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+						downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.indexOf("#"));
 					}
 					
 					bean.setDownloadLocation(downloadlocationUrl);
@@ -2303,16 +2253,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 						
 						if(!isEmpty(checkName)) {
-							if(semicolonFlag) {
-								downloadlocationUrl = protocol + downloadlocationUrl + downloadlocationUrlEndSplit + endUrl + ";" + semicolonStr;
-							}else {
-								downloadlocationUrl = protocol + downloadlocationUrl + downloadlocationUrlEndSplit + endUrl;
-							}
-							
 							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
 							if(!bean.getOssName().equals(bean.getCheckName())) {
-								bean.setDownloadLocation(downloadlocationUrl);
+								bean.setDownloadLocation(downloadLocation);
 								result.add(bean);
 							}
 						}
