@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.4.3 (03/07/2022)
+## 🚀 Features
+
+- Add default comments (3rd party confirmed mail) @Min-Kyungsun (#556)
+- Open oss details window in oss version information @Min-Kyungsun (#555)
+- Add model information to project's basic Information tab @Min-Kyungsun (#552)
+
+## 🐛 Hotfixes
+
+- Copy whether notice has been modified or not @FOSSLight-dev  (#554)
+
+## 🔧 Maintenance
+
+- Packaging > Notice tab > edit html > Show message if checked. @FOSSLight-dev (#557)
+- Change the message when selecting URL @70825 (#546)
+
+---
+
 ## v1.4.2 (24/06/2022)
 ## Changes
 ## 🔧 Maintenance
@@ -470,26 +488,3 @@
 - Eliminate Null Point Exception @yugeeklab (#290)
 - Fix a vulnerability for public methods that return private array @yugeeklab (#291)
 - Fix the vulnerability that public array is assigned to private variable @yugeeklab (#302)
-
----
-
-## v1.2.18 (26/11/2021)
-## Changes
-- Modify the length of the license name and revert it @FOSSLight-dev (#281)
-
-## 🚀 Features
-
-- Add file path and copyright to Self-check @FOSSLight-dev (#292)
-- Add license inquiry function using external API (Github, Clearly Defined) @riyenas0925 (#269)
-- Save configuration when users search @astrod (#276)
-- Update OSS Table Function @FOSSLight-dev (#284)
-- Update OSS Table > view comment info of oss popup @FOSSLight-dev (#282)
-
-## 🐛 Hotfixes
-
-- Fix check oss name save error @riyenas0925 (#277)
-
-## 🔧 Maintenance
-
-- Fix heap memory issue when registering CPE Match Feed @FOSSLight-dev (#289)
-- Update the project's report template @soimkim (#286)
