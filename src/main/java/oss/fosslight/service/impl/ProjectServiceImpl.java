@@ -3193,11 +3193,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ProjectIdentification PI = new ProjectIdentification();
 				PI.setComponentId(oc.getComponentId());
 				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				PI = subGridData.get(0);
-				
-				oc.setLicenseName(PI.getLicenseName());
-				oc.setLicenseText(PI.getLicenseText());
-				oc.setCopyrightText(PI.getCopyrightText());
+				if(!subGridData.isEmpty()) {
+					PI = subGridData.get(0);
+					
+					oc.setLicenseName(PI.getLicenseName());
+					oc.setLicenseText(PI.getLicenseText());
+					oc.setCopyrightText(PI.getCopyrightText());
+				}
 			}
 		}
 		
@@ -3291,11 +3293,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ProjectIdentification PI = new ProjectIdentification();
 				PI.setComponentId(oc.getComponentId());
 				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				PI = subGridData.get(0);
-				
-				oc.setLicenseName(PI.getLicenseName());
-				oc.setLicenseText(PI.getLicenseText());
-				oc.setCopyrightText(PI.getCopyrightText());
+				if(!subGridData.isEmpty()) {
+					PI = subGridData.get(0);
+					
+					oc.setLicenseName(PI.getLicenseName());
+					oc.setLicenseText(PI.getLicenseText());
+					oc.setCopyrightText(PI.getCopyrightText());
+				}
 			}
 		}
 		
