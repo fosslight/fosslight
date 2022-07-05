@@ -61,6 +61,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add("Others");
 		} 
 		
+		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
+		if("REV".equals(statistics.getCategoryType())) {
+			statistics.setCategorySize(titleArray.size());
+		}
 		statistics.setTitleArray(titleArray); // Chart Title
 		
 		List<Statistics> list = statisticsMapper.getDivisionalProjectChartData(statistics);
@@ -157,6 +161,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add(title.getTitleNm());
 		}
 		
+		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
+		
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
 		statistics.setNoneUser(statisticsMapper.getNoneUser());
@@ -243,6 +249,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		for(Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
 		}
+		
+		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
 		
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
