@@ -1314,8 +1314,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.deleteProjectModel(project);
 
 			// project model insert
-			if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget()) 
-					&& project.getModelList().size() > 0) {
+			if (project.getModelList().size() > 0) {
 				for (int i = 0; i < project.getModelList().size(); i++) {
 					project.getModelList().get(i).setPrjId(project.getPrjId());
 					projectMapper.insertProjectModel(project.getModelList().get(i));
