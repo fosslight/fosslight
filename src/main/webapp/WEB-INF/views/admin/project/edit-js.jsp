@@ -1835,8 +1835,8 @@
                             }
 						]}
    					},
-					{name: 'modifier', index: 'modifier', align: 'center', width:80, editable:false},
-					{name: 'modifiedDate', index: 'modifiedDate', align: 'center', width:80, editable:false, sorttype:'date'},
+					{name: 'modifier', index: 'modifier', align: 'center', width:80, editable:false, hidden:true},
+					{name: 'modifiedDate', index: 'modifiedDate', align: 'center', width:80, editable:false, sorttype:'date', hidden:true},
 					{name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: fn.setDelBtn},
 					{name: 'osddSyncYn', index: 'osddSyncYn', hidden:true},
 				],

@@ -1314,8 +1314,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.deleteProjectModel(project);
 
 			// project model insert
-			if (!CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget()) 
-					&& project.getModelList().size() > 0) {
+			if (project.getModelList().size() > 0) {
 				for (int i = 0; i < project.getModelList().size(); i++) {
 					project.getModelList().get(i).setPrjId(project.getPrjId());
 					projectMapper.insertProjectModel(project.getModelList().get(i));
@@ -3193,11 +3192,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ProjectIdentification PI = new ProjectIdentification();
 				PI.setComponentId(oc.getComponentId());
 				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				PI = subGridData.get(0);
-				
-				oc.setLicenseName(PI.getLicenseName());
-				oc.setLicenseText(PI.getLicenseText());
-				oc.setCopyrightText(PI.getCopyrightText());
+				if(!subGridData.isEmpty()) {
+					PI = subGridData.get(0);
+					
+					oc.setLicenseName(PI.getLicenseName());
+					oc.setLicenseText(PI.getLicenseText());
+					oc.setCopyrightText(PI.getCopyrightText());
+				}
 			}
 		}
 		
@@ -3291,11 +3292,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ProjectIdentification PI = new ProjectIdentification();
 				PI.setComponentId(oc.getComponentId());
 				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				PI = subGridData.get(0);
-				
-				oc.setLicenseName(PI.getLicenseName());
-				oc.setLicenseText(PI.getLicenseText());
-				oc.setCopyrightText(PI.getCopyrightText());
+				if(!subGridData.isEmpty()) {
+					PI = subGridData.get(0);
+					
+					oc.setLicenseName(PI.getLicenseName());
+					oc.setLicenseText(PI.getLicenseText());
+					oc.setCopyrightText(PI.getCopyrightText());
+				}
 			}
 		}
 		
