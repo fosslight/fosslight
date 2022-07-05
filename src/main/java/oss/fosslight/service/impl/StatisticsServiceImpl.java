@@ -344,6 +344,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add(title.getTitleNm());
 		}
 		
+		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
+				
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setCategorySize(titleArray.size());
 		
@@ -398,6 +400,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 				
 				if(data.getCategory7Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
+				}
+				
+				if(data.getCategory8Cnt() > -1) {
+					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
 				}
 			}
 
