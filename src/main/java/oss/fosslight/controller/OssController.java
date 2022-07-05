@@ -595,18 +595,17 @@ public class OssController extends CoTopComponent{
 				String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
 				if(orgNickNames != null && orgNickNames.length > 0) {
 					boolean ossNameCheck = false;
-					String targetName = "";
 					
-					for(String n : orgNickNames) {
-						if(ossMaster.getOssName().equalsIgnoreCase(n)) {
+					if(ossMaster.getOssNicknames() != null) {
+						if(orgNickNames.length != ossMaster.getOssNicknames().length) {
 							ossNameCheck = true;
-							targetName = n;
-							break;
 						}
+					} else {
+						ossNameCheck = true;
 					}
 					
-					if(ossNameCheck && !isEmpty(targetName)) {
-						return makeJsonResponseHeader(false, "duplicatedNick", MessageFormat.format(validator.getCustomMessage("OSS_NAME.DUPLICATEDNICK"), targetName, orgBean.getOssId(), orgBean.getOssId(), orgBean.getOssName()));
+					if(ossNameCheck) {
+						return makeJsonResponseHeader(false, "duplicatedNick", MessageFormat.format(validator.getCustomMessage("OSS_NAME.DUPLICATEDNICK"), ossMaster.getOssName(), orgBean.getOssId(), orgBean.getOssId(), orgBean.getOssName()));
 					}
 				}
 				
