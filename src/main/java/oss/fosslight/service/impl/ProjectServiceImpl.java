@@ -1653,16 +1653,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
 
+		// delete file
+		if(project.getCsvFile() != null && project.getCsvFile().size() > 0) {
+			deleteUploadFile(project, refDiv);
+		}
+		
 		// 파일 등록
 		if(!isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
 			projectMapper.updateFileId(project);
-			
-			if(project.getCsvFile() != null) {
-				for (int i = 0; i < project.getCsvFile().size(); i++) {
-					fileService.deletePhysicalFile(project.getCsvFile().get(i), "SRC");
-					projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
-				}				
-			}
 			
 			if(project.getCsvFileSeq() != null) {
 				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
@@ -1679,6 +1677,45 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			projectMapper.updateAndroidNoticeFileInfoWithLoadFromProject(project);
 		}
+	}
+	
+	private void deleteUploadFile(Project project, String refDiv) {
+		Project prjFileCheck = projectMapper.getProjectBasicInfo(project);
+		boolean fileDeleteCheckFlag = false;
+		
+		if(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+			if(project.getCsvFileSeq().size() == 0 && !isEmpty(prjFileCheck.getSrcCsvFileId())) {
+				project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		} else if(CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
+			if(isEmpty(project.getBinCsvFileId()) && !isEmpty(prjFileCheck.getBinCsvFileId())) {
+				project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+			if(isEmpty(project.getBinBinaryFileId()) && !isEmpty(prjFileCheck.getBinBinaryFileId())) {
+				project.setBinBinaryFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		} else {
+			if(isEmpty(project.getSrcAndroidCsvFileId()) && !isEmpty(prjFileCheck.getSrcAndroidCsvFileId())) {
+				project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+			if(isEmpty(project.getSrcAndroidNoticeFileId()) && !isEmpty(prjFileCheck.getSrcAndroidNoticeFileId())) {
+				project.setSrcAndroidNoticeFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		}
+		
+		if(project.getCsvFile() != null && project.getCsvFile().size() > 0) {
+			for (int i = 0; i < project.getCsvFile().size(); i++) {
+				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
+				fileService.deletePhysicalFile(project.getCsvFile().get(i), "Identification");
+			}
+		}
+		
+		if(fileDeleteCheckFlag) projectMapper.updateFileId2(project);
 	}
 	
 	@Override
