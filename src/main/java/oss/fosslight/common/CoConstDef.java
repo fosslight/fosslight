@@ -93,15 +93,18 @@ public class CoConstDef {
 	public static final int FLAG_G = 0x40;
 	public static final int FLAG_H = 0x80;
 	public static final int FLAG_I = 0x100;
-	
-	/**	System Setting Code List */
+
+	/**
+	 * System Setting Code List
+	 */
 	// System Setting
-	public static final String CD_SYSTEM_SETTING				= "909";
-	public static final String CD_LDAP_USED_FLAG				= "910";
-	public static final String CD_SMTP_USED_FLAG				= "911";
-//	public static final String CD_MENU_AUTH_FLAG				= "912";
-	public static final String CD_EXTERNAL_SERVICE_USED_FLAG	= "940";
-	public static final String CD_EXTERNAL_ANALYSIS_USED_FLAG	= "950";
+	public static final String CD_SYSTEM_SETTING = "909";
+	public static final String CD_LDAP_USED_FLAG = "910";
+	public static final String CD_SMTP_USED_FLAG = "911";
+	//	public static final String CD_MENU_AUTH_FLAG = "912";
+	public static final String CD_EXTERNAL_SERVICE_USED_FLAG = "940";
+	public static final String CD_EXTERNAL_ANALYSIS_USED_FLAG = "950";
+	public static final String CD_HIDE_EMAIL_FLAG = "960";
 
 
 	// Login Setting
