@@ -1590,6 +1590,8 @@
 				
 				renameFlag = 'N';
 				$('input[name=renameFlag]').val(renameFlag);
+			} else if(json.validMsg == "duplicatedNick"){
+				alertify.alert(json.resultData, function(){});
 			} else if(json.resultData) {
 				var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
 					_alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';

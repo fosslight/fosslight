@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -589,6 +590,29 @@ public class OssController extends CoTopComponent{
 			if(orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
 				List<String> orgNickList = new ArrayList<>();
 				List<String> delNickList = new ArrayList<>();
+				
+				// 기존 oss name 이 변경되었고, 변경된 oss name 이 기존 oss name 의 nick name 인 경우 제외
+				String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
+				if(orgNickNames != null && orgNickNames.length > 0) {
+					boolean ossNameCheck = false;
+					
+					if(ossMaster.getOssNicknames() != null) {
+						if(orgNickNames.length != ossMaster.getOssNicknames().length) {
+							ossNameCheck = true;
+						} else {
+							if(!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
+								ossNameCheck = true;
+							}
+						}
+					} else {
+						ossNameCheck = true;
+					}
+					
+					if(ossNameCheck) {
+						return makeJsonResponseHeader(false, "duplicatedNick", MessageFormat.format(validator.getCustomMessage("OSS_NAME.DUPLICATEDNICK"), ossMaster.getOssName(), orgBean.getOssId(), orgBean.getOssId(), orgBean.getOssName()));
+					}
+				}
+				
 				// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
 				Map<String, List<String>> diffMap = new HashMap<>();
 				String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
