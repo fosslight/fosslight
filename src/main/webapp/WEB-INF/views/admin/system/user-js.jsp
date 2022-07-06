@@ -230,7 +230,7 @@
 			}).error(function (data, status, headers, config) {});
 		}
 	};
-	
+
 	//유저 그리드
 	var userList = {
 		modifyRowId: [],		//수정된 모든 rowID
@@ -239,12 +239,12 @@
 		load: function(data){
 			userList.modifyRowId = [];
 			userList.lastEditRowId = "";
-			
+
 			//그리드 생성
 			$('#list').jqGrid({
 				url: '<c:url value="/system/user/listAjax"/>'
 				, datatype: 'json'
-				, data: data 
+				, data: data
 				, jsonReader:{
 					repeatitems: false,
 					id:'userId',
@@ -253,16 +253,22 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				}
-				, colNames: ['AD ID', 'E-mail', 'Name', 'Division', 'Registered Date', 'Token', 'Expire Date'
+				, colNames: ['AD ID',
+					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_HIDE_EMAIL_FLAG')) eq 'N'}">
+					'E-mail',
+					</c:if>
+					'Name', 'Division', 'Registered Date', 'Token', 'Expire Date'
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 					, 'Token Proc'
 					</c:if>
 					, 'password', 'Use YN', 'Admin']
 				, colModel: [
 					{name: 'userId', index: 'userId', width: 150, allign: 'center'},
-					{name: 'email', index: 'email', width: 200, allign: 'center'},
+					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_HIDE_EMAIL_FLAG')) eq 'N'}">
+					    {name: 'email', index: 'email', width: 200, allign: 'center'},
+					</c:if>
 					{name: 'userName', index: 'userName', width: 100, allign: 'center', editable: true},
-					{name: 'division', index: 'division', width: 150, allign: 'right', editable: true, formatter: 'select', edittype:"select", 
+					{name: 'division', index: 'division', width: 150, allign: 'right', editable: true, formatter: 'select', edittype:"select",
 						editoptions:{value:divisionList}
 					},
 					{name: 'createdDate', index: 'createdDate', width: 100, align: 'center'},
@@ -272,19 +278,19 @@
 						var btnHTML = '';
 						var tokenFlag = rowObject.token != undefined ? true : false;
 						var rowId = options.rowId||"";
-						
+
 						if(tokenFlag){
 							btnHTML += '<input id="search" type="button" value="Delete" class="btnColor" style="width:60px;"  onclick="fn.procToken(\''+rowId+'\', \'DELETE\')"/>';
 						} else {
 							btnHTML += '<input id="search" type="button" value="Create" class="btnColor" style="width:60px;" onclick="fn.procToken(\''+rowId+'\', \'CREATE\')"/>';
 						}
-						
+
 						return btnHTML;
 					}},
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 					{name: 'password', index: 'password', width:150, align: 'center', formatter: function(cellvalue, options, rowObject){
 						var rowId = options.rowId||"";
-						var btnHTML = '<input id="search" type="button" value="reset" class="btnColor" style="width:60px;"  onclick="fn.resetPassword(\''+rowId+'\')"/>';				
+						var btnHTML = '<input id="search" type="button" value="reset" class="btnColor" style="width:60px;"  onclick="fn.resetPassword(\''+rowId+'\')"/>';
 						return btnHTML;
 					}},
 					</c:if>
@@ -310,7 +316,7 @@
 						fn.saveLastRow();
 					}
 					$("#list").jqGrid('editRow',rowid,true,function(){});
-					userList.lastEditRowId = rowid;					
+					userList.lastEditRowId = rowid;
 				}
 				, loadComplete:function(data) {
 					// id(key값)의 max값을 lastIdNo에 설정
