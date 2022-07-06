@@ -599,6 +599,10 @@ public class OssController extends CoTopComponent{
 					if(ossMaster.getOssNicknames() != null) {
 						if(orgNickNames.length != ossMaster.getOssNicknames().length) {
 							ossNameCheck = true;
+						} else {
+							if(!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
+								ossNameCheck = true;
+							}
 						}
 					} else {
 						ossNameCheck = true;
