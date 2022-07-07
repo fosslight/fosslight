@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.4.4 (07/07/2022)
+## Changes
+## 🐛 Hotfixes
+
+- Fix the bug where sorting by column is not possible in the 3rd party list @FOSSLight-dev (#562)
+- Fix the bug where uploaded files are not visible @FOSSLight-dev (#560)
+- Fix bug where CVE-ID is returned as duplicate in API > Vulnerability. @FOSSLight-dev (#559)
+
+## 🔧 Maintenance
+
+- Hide user email as per option @soimkim (#561)
+- Modify Model Information table in project's basic information tab @Min-Kyungsun (#558)
+
+---
+
 ## v1.4.3 (03/07/2022)
 ## 🚀 Features
 
@@ -464,27 +479,3 @@
 ## 🐛 Hotfixes
 
 - Fix the bug where data is not output when sending mail @yugeeklab (#313)
-
----
-
-## v1.2.19 (03/12/2021)
-## Changes
-## 🚀 Features
-
-- Change github token in code management @riyenas0925 (#308)
-- Update Open API and deleting files function @FOSSLight-dev (#305)
-- Add to show Check License conversion evidences @riyenas0925 (#300)
-- Add a function to copy 3rd party to Project @FOSSLight-dev (#303)
-- Save language settings per user @riyenas0925 (#285)
-- SPDX Spreadsheet License List parsing @kimtaehyun98 (#255)
-
-## 🔧 Maintenance
-
-- Change the license url in OSS Notice (simple version) @FOSSLight-dev (#311)
-- Fix a cross-site scripting issue @yugeeklab (#259)
-- Upgrade ckeditor4 @yugeeklab (#307)
-- Fix a vulnerability for resource leak @yugeeklab (#278)
-- Fix bugs related to partner registration @FOSSLight-dev (#309)
-- Eliminate Null Point Exception @yugeeklab (#290)
-- Fix a vulnerability for public methods that return private array @yugeeklab (#291)
-- Fix the vulnerability that public array is assigned to private variable @yugeeklab (#302)
