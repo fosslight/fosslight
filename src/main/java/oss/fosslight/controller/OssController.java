@@ -588,10 +588,7 @@ public class OssController extends CoTopComponent{
 			
 			// oss name 변경 여부 확인
 			if(orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
-				List<String> orgNickList = new ArrayList<>();
-				List<String> delNickList = new ArrayList<>();
-				
-				// 기존 oss name 이 변경되었고, 변경된 oss name 이 기존 oss name 의 nick name 인 경우 제외
+				// 기존 oss name 이 변경되었는데, oss nick name 까지 동시에 변경 할 경우 제외
 				String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
 				if(orgNickNames != null && orgNickNames.length > 0) {
 					boolean ossNameCheck = false;
@@ -609,10 +606,12 @@ public class OssController extends CoTopComponent{
 					}
 					
 					if(ossNameCheck) {
-						return makeJsonResponseHeader(false, "duplicatedNick", MessageFormat.format(validator.getCustomMessage("OSS_NAME.DUPLICATEDNICK"), ossMaster.getOssName(), orgBean.getOssId(), orgBean.getOssId(), orgBean.getOssName()));
+						return makeJsonResponseHeader(false, "notChange");
 					}
 				}
 				
+				List<String> orgNickList = new ArrayList<>();
+				List<String> delNickList = new ArrayList<>();
 				// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
 				Map<String, List<String>> diffMap = new HashMap<>();
 				String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());

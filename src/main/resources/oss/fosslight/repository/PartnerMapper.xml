@@ -96,6 +96,7 @@
 					 , t1.OSS_FILE_ID
 					 , t1.BINARY_FILE_ID
 					 , t1.REVIEWER
+					 , t8.USER_NAME AS REVIEWER_NAME
 					 , t1.USE_YN
 					 , t2.USER_NAME AS CREATOR
 					 , t1.CREATED_DATE
@@ -302,10 +303,10 @@
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
 			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
-				ORDER BY A.USER_NAME ASC
+				ORDER BY A.REVIEWER_NAME ASC
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
-				ORDER BY A.USER_NAME DESC
+				ORDER BY A.REVIEWER_NAME DESC
 			</if>
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('comment', sortField)">
@@ -928,6 +929,7 @@
 		LEFT JOIN PARTNER_WATCHER t4 ON t1.PARTNER_ID = t4.PARTNER_ID
 		LEFT JOIN OSS_COMPONENTS t5 ON t1.PARTNER_ID = t5.REFERENCE_ID AND t5.REFERENCE_DIV = '20'
 		LEFT JOIN OSS_COMPONENTS_LICENSE t6  ON t5.COMPONENT_ID = t6.COMPONENT_ID
+		LEFT JOIN T2_USERS t8 ON t1.REVIEWER = t8.USER_ID
 	<if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
 	    LEFT JOIN (SELECT PARTNER_ID, GROUP_CONCAT(PRJ_ID ORDER BY PRJ_ID ASC) AS PRJ_ID FROM PROJECT_PARTNER_MAP GROUP BY PARTNER_ID) t7 ON t1.PARTNER_ID = t7.PARTNER_ID
 	</if>
@@ -1063,10 +1065,10 @@
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('creator', sortField)">
 			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
-				ORDER BY t1.CREATOR ASC
+				ORDER BY t2.USER_NAME ASC
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
-				ORDER BY t1.CREATOR DESC
+				ORDER BY t2.USER_NAME DESC
 			</if>
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('createdDate', sortField)">
@@ -1077,12 +1079,20 @@
 				ORDER BY t1.CREATED_DATE DESC
 			</if>
 		</if>
-		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
+		<if test="@oss.fosslight.util.StringUtil@equals('modifiedDate', sortField)">
 			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
-				ORDER BY t1.REVIEWER ASC
+				ORDER BY t1.MODIFIED_DATE ASC
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
-				ORDER BY t1.REVIEWER DESC
+				ORDER BY t1.MODIFIED_DATE DESC
+			</if>
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@equals('reviewer', sortField)">
+			<if test="@oss.fosslight.util.StringUtil@equals('asc', sortOrder)">
+				ORDER BY t8.USER_NAME ASC
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('desc', sortOrder)">
+				ORDER BY t8.USER_NAME DESC
 			</if>
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('comment', sortField)">
