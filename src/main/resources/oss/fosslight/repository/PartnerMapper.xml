@@ -22,6 +22,15 @@
 				LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
 	   		WHERE
 				t1.USE_YN = 'Y'
+				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+					AND (t1.CREATOR = #{loginUserName} 
+						OR t2.USER_ID  = #{loginUserName} 
+						OR (t2.USER_ID = 'all' AND t2.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+            		<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
+                		OR t1.PUBLIC_YN = 'Y'
+           		 	</if>
+                	)
+				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 					AND t1.PARTNER_ID = #{partnerId}
 				</if>
@@ -111,6 +120,7 @@
 				 	 , t4.OSS_VERSION
 				 	 , t1.CREATOR AS CREATOR_ID
 				 	 , t4.FILE_PATH
+				 	 , t2.USER_ID
 				 <if test="@oss.fosslight.util.StringUtil@equals(modelFlag, 'Y')">
 					 , t9.PRJ_ID
 				 </if>
@@ -145,6 +155,15 @@
 				  LEFT JOIN T2_FILE t10 ON t10.FILE_SEQ = t1.BINARY_FILE_ID
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
+		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+			AND (A.CREATOR = #{loginUserName} 
+				OR A.USER_ID  = #{loginUserName} 
+				OR (A.USER_ID = 'all' AND A.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+            	<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
+                	OR A.PUBLIC_YN = 'Y'
+           		</if>
+        	)
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 		   AND A.PARTNER_ID = #{partnerId}
 		</if>
