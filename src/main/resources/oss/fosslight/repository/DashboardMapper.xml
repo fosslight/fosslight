@@ -59,7 +59,8 @@
 			FROM PROJECT_MASTER T1 
 		WHERE 
 			T1.USE_YN = 'Y'
-			AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y' OR T1.STATUS_REQUEST_YN = 'Y')
+			AND (IFNULL(T1.DROP_YN, '') <![CDATA[<>]]> 'Y')
+			AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y'  OR T1.STATUS_REQUEST_YN = 'Y')
 	       	 <choose>
 	            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
@@ -136,6 +137,7 @@
 			FROM PROJECT_MASTER T1 
 			WHERE 
 				T1.USE_YN = 'Y'
+				AND (IFNULL(T1.DROP_YN, '') <![CDATA[<>]]> 'Y')
 				AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y' OR T1.STATUS_REQUEST_YN = 'Y')
 		       	 <choose>
 		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
