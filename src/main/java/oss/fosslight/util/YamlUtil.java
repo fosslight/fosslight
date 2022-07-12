@@ -164,6 +164,8 @@ public class YamlUtil extends CoTopComponent {
 				
 			if(!isEmpty(bean.getOssVersion())) {
 				yamlFormat.put("version", bean.getOssVersion());
+			} else{
+				yamlFormat.put("version", "");
 			}
 
 			if(isEmpty(typeCode)) {
@@ -193,7 +195,7 @@ public class YamlUtil extends CoTopComponent {
 			}
 			
 			if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
-				yamlFormat.put("exclude", 	"true");
+				yamlFormat.put("exclude", true);
 			}
 			
 			if(!isEmpty(bean.getComments())) {
