@@ -98,9 +98,9 @@ public class YamlUtil extends CoTopComponent {
 			}
 		}
 		
-		// oss-pkg-info-PRJ-[ID]-[prj-Name]_[date].yaml
-		String fileName = "oss-pkg-info-PRJ-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
-		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr, "Open Source Software Package:"));
+		// fosslight-sbom-info-PRJ-[ID]-[prj-Name]_[date].yaml
+		String fileName = "fosslight-sbom-info-PRJ-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
+		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
 	private static String makeYamlPartner(String dataStr, String typeCode)  throws Exception {
@@ -122,9 +122,9 @@ public class YamlUtil extends CoTopComponent {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
-		// oss-pkg-info-3rd-[ID]-[3rd-Name]_[date].yaml
-		String fileName = "oss-pkg-info-3rd-" + partnerBean.getPartnerId() + "-" + partnerBean.getPartnerName();
-		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr, "Open Source Software Package:"));
+		// fosslight-sbom-info-3rd-[ID]-[3rd-Name]_[date].yaml
+		String fileName = "fosslight-sbom-info-3rd-" + partnerBean.getPartnerId() + "-" + partnerBean.getPartnerName();
+		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
 	private static String makeYamlSelfCheck(String dataStr, String typeCode) throws Exception {
@@ -146,73 +146,72 @@ public class YamlUtil extends CoTopComponent {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
-		// oss-pkg-info-SelfCheck-[ID]-[self-check-Name]_[date].yaml
-		String fileName = "oss-pkg-info-SelfCheck-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
-		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr, "Open Source Software Package:"));
+		// fosslight-sbom-info-SelfCheck-[ID]-[self-check-Name]_[date].yaml
+		String fileName = "fosslight-sbom-info-SelfCheck-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
+		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
-	private static List<Map<String, Object>> checkYamlFormat(List<ProjectIdentification> list) {
+	private static LinkedHashMap<String, List<Map<String, Object>>> checkYamlFormat(List<ProjectIdentification> list) {
 		return checkYamlFormat(list, "");
 	}
 	
-	private static List<Map<String, Object>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
-		List<Map<String, Object>> result = new ArrayList<>();
+	private static LinkedHashMap<String, List<Map<String, Object>>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
+		LinkedHashMap<String, List<Map<String, Object>>> result = new LinkedHashMap<>();
 		
-		for(ProjectIdentification bean : list) {			
+		for(ProjectIdentification bean : list) {
+			List<Map<String, Object>> ossNameResult = new ArrayList<>();
 			LinkedHashMap<String, Object> yamlFormat = new LinkedHashMap<>();
 				
-				yamlFormat.put("name", 		startCharCheck(bean.getOssName()));
-				
 			if(!isEmpty(bean.getOssVersion())) {
-				yamlFormat.put("version", 	startCharCheck(bean.getOssVersion()));
+				yamlFormat.put("version", bean.getOssVersion());
 			}
-			
-			if(!isEmpty(bean.getDownloadLocation())) {
-				yamlFormat.put("source", 	startCharCheck(bean.getDownloadLocation()));
-			}
-			
-			if(!isEmpty(bean.getHomepage())) {
-				yamlFormat.put("homepage", 	startCharCheck(bean.getHomepage()));
-			}
-			
-				String licenseNameStr = bean.getLicenseName();
-				yamlFormat.put("license",	licenseNameStr.contains(",") ? licenseNameStr.split(",") : startCharCheck(licenseNameStr));
-			
+
 			if(isEmpty(typeCode)) {
 				if(!isEmpty(bean.getBinaryName())) {
 					String binaryNameStr = bean.getBinaryName();
-					yamlFormat.put("file", 		binaryNameStr.contains("\n") ? binaryNameStr.split("\n") : startCharCheck(binaryNameStr));
+					yamlFormat.put("source name or path", binaryNameStr.contains("\n") ? binaryNameStr.split("\n") : binaryNameStr);
 				} else if(!isEmpty(bean.getFilePath())) {
-					String filePathStr = bean.getFilePath(); 
-					yamlFormat.put("file", 		filePathStr.contains("\n") ? filePathStr.split("\n") : startCharCheck(filePathStr));
+					String filePathStr = bean.getFilePath();
+					yamlFormat.put("source name or path", filePathStr.contains("\n") ? filePathStr.split("\n") : filePathStr);
 				}
 			}
-			
+
+			String licenseNameStr = bean.getLicenseName();
+			yamlFormat.put("license",	licenseNameStr.contains(",") ? licenseNameStr.split(",") : licenseNameStr);
+
+			if(!isEmpty(bean.getDownloadLocation())) {
+				yamlFormat.put("download location", bean.getDownloadLocation());
+			}
+
+			if(!isEmpty(bean.getHomepage())) {
+				yamlFormat.put("homepage", 	bean.getHomepage());
+			}
+
 			if(!isEmpty(bean.getCopyrightText())) {
 				String copyrightStr = bean.getCopyrightText();
-				yamlFormat.put("copyright", copyrightStr.contains("\n") ? Arrays.asList(copyrightStr.split("\n")) : startCharCheck(copyrightStr));
+				yamlFormat.put("copyright text", copyrightStr.contains("\n") ? Arrays.asList(copyrightStr.split("\n")) : copyrightStr);
 			}
 			
 			if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
-				yamlFormat.put("exclude", 	"True");
+				yamlFormat.put("exclude", 	"true");
 			}
 			
 			if(!isEmpty(bean.getComments())) {
-				yamlFormat.put("comment", 	startCharCheck(bean.getComments()));
+				yamlFormat.put("comment", bean.getComments());
 			}
-			
-			result.add(yamlFormat);
+			String ossNameStr = bean.getOssName();
+			if(ossNameStr.length() == 0) {
+				ossNameStr = "-";
+			}
+			if(result.containsKey(ossNameStr)) {
+				ossNameResult = result.get(ossNameStr);
+			}
+			ossNameResult.add(yamlFormat);
+			result.put(ossNameStr, ossNameResult);
 		}
-		
 		return result;
 	}
-	
-	public static String startCharCheck(String value) {
-		String specialChar = ":{}[],&*#?|-<>=!%@\\";
-		
-		return !isEmpty(value) && specialChar.indexOf(value.charAt(0)) > -1 ? ("'" + value + "'") : value;
-	}
-	
+
 	public static String convertJSON2YAML(String jsonStr) {
 		return convertJSON2YAML(jsonStr, "");
 	}
@@ -225,8 +224,7 @@ public class YamlUtil extends CoTopComponent {
 				JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonStr);
 		        // save it as YAML
 				yamlStr = new YAMLMapper().writeValueAsString(jsonNodeTree);
-				yamlStr = yamlStr.replaceAll("\"", "").replaceAll("'", "\"").replaceAll("---", ""); // value > double quot제거, 시작문자(---) 제거
-				
+				yamlStr = yamlStr.replaceAll("---","");
 				// 접두사 존재시 추가
 				if(!isEmpty(suffix)) {
 					yamlStr = suffix + yamlStr;
