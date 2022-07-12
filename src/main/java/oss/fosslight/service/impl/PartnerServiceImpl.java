@@ -96,18 +96,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Transactional
 	public Map<String, Object> getPartnerMasterList(PartnerMaster partnerMaster) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		int records = 0;
-		List<PartnerMaster> list = new ArrayList<PartnerMaster>();
 		
-		if("ROLE_USER".equals(partnerMaster.getLoginUserRole())) {
-			records = partnerMapper.selectPartnerMasterTotalCountUser(partnerMaster);
-			partnerMaster.setTotListSize(records);
-			list = partnerMapper.selectPartnerListUser(partnerMaster);
-		} else {
-			records = partnerMapper.selectPartnerMasterTotalCount(partnerMaster);
-			partnerMaster.setTotListSize(records);
-			list = partnerMapper.selectPartnerList(partnerMaster);
-		}
+		int records = partnerMapper.selectPartnerMasterTotalCount(partnerMaster);
+		partnerMaster.setTotListSize(records);
+		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if(list != null) {
 			for(PartnerMaster bean : list) {
