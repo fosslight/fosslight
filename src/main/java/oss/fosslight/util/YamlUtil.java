@@ -224,7 +224,7 @@ public class YamlUtil extends CoTopComponent {
 				JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonStr);
 		        // save it as YAML
 				yamlStr = new YAMLMapper().writeValueAsString(jsonNodeTree);
-				yamlStr = yamlStr.replaceAll("---","");
+				yamlStr = yamlStr.replaceAll("---","").trim();
 				// 접두사 존재시 추가
 				if(!isEmpty(suffix)) {
 					yamlStr = suffix + yamlStr;
