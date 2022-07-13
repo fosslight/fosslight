@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Build the image from source
 FROM gradle:6.8.2-jdk11 AS build
-
 COPY --chown=gradle:gradle . /home/gradle/src
 
 WORKDIR /home/gradle/src
@@ -11,7 +10,7 @@ RUN gradle build --no-daemon --exclude-task test
 
 
 #Create the containerized app
-FROM openjdk:14-alpine
+FROM adoptopenjdk/openjdk11:jre-11.0.15_10-ubuntu
 LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
@@ -22,8 +21,8 @@ ADD ./src/main/resources/template /app/template
 
 RUN chmod +x /app/wait-for
 RUN chmod +x /app/verify/verify
-RUN apk update && apk add bash
 
+RUN apt-get update && apt-get install -y netcat
 WORKDIR /app
 
 CMD ["java" , "-jar", "FOSSLight.war", "--root.dir=/data/fosslight", "--server.port=8180"]
