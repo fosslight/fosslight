@@ -139,10 +139,6 @@
 												    case "13":    identificationTabOrder = "4";    break;
 												}
 
-												<c:if test="${projectInfo.targetName eq 'identification' || projectInfo.targetName eq 'partner'}">
-												successMsg += '<br>(<spring:message code="msg.project.entered.first.tab" />)';
-												</c:if>
-
 												/**
 												 * reload identication tab you're working on
 												 */
