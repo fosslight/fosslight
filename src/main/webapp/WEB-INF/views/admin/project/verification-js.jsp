@@ -1021,7 +1021,14 @@
 				fn.appendEditVisible(this);
 				
 				if(CKEDITOR.instances.editor2) {
-					CKEDITOR.instances.editor2.setReadOnly(!checked);
+					var appendEditor = CKEDITOR.instances.editor2;
+					appendEditor.on('beforePaste', function(event) {
+						loading.show();
+					});
+					appendEditor.on('afterPaste', function(event) {
+						loading.hide();
+					});
+					appendEditor.setReadOnly(!checked);
 				}
 			});
 			
@@ -1358,6 +1365,12 @@
 						        height: 620
 						    });
 							CKEDITOR.instances.editor3.setData(result.resultData);
+							CKEDITOR.instances.editor3.on('beforePaste', function(event) {
+							    loading.show();
+							});
+						    CKEDITOR.instances.editor3.on('afterPaste', function(event) {
+							    loading.hide();
+							});
 						})
 						.setContent(contents)
 						.show();
