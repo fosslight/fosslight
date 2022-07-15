@@ -49,7 +49,7 @@ public class ImageViewController extends CoTopComponent {
 	
 	@RequestMapping(value=IMAGE_VIEW.GUI_REPORT_ID_NM)
 	private ImageView getGuiReportImage(@PathVariable String batId, @PathVariable String imageName, ModelMap modelMap) {
-		String batPath = CommonFunction.emptyCheckProperty("bat.root.path", "/batsystem/");
+		String batPath = CommonFunction.emptyCheckProperty("vat.root.path", CommonFunction.getProperty("root.dir") + "/batsystem/");
 		String dirPath = Paths.get(batPath).resolve("out").resolve(batId+"_dir").resolve("images").toString();
 		Path reportImagePath = Paths.get(dirPath).resolve(imageName);
 		File reportImageFile = reportImagePath.toFile();

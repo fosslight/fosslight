@@ -110,7 +110,7 @@ public class DownloadProcController extends CoTopComponent {
 		baseImageUrl += "/imageView/guiReport/" + batId + "/";
 		// bat reposrt path
 		String fileName = checkSum + "-guireport";
-		String filePath  = CommonFunction.emptyCheckProperty("bat.root.path", "/batsystem/");
+		String filePath  = CommonFunction.emptyCheckProperty("vat.root.path", CommonFunction.getProperty("root.dir") + "/batsystem/");
 		filePath = filePath + "out/" + batId + "_dir" + "/reports/" + fileName + ".html";
 		File file = new File(filePath);
 		

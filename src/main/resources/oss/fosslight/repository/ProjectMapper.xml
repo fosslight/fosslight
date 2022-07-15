@@ -2555,6 +2555,9 @@
 			    AND CVSS_SCORE = (SELECT MAX(CVSS_SCORE) 
 			  						FROM NVD_DATA_SCORE_V3 
 			  					   WHERE PRODUCT = IFNULL(L1.OSS_NAME, M.OSS_NAME))) AS CVSS_SCORE_MAX
+		<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
+			, BAR.GUIREPORT_FLAG
+		</if>
 	   FROM OSS_COMPONENTS M
 	   LEFT OUTER JOIN OSS_MASTER L1 
 		       ON M.OSS_NAME = L1.OSS_NAME
@@ -2563,6 +2566,16 @@
 		LEFT OUTER JOIN (
 			SELECT PRODUCT, VERSION, CVSS_SCORE, CVE_ID, 'Y' AS VULN_YN FROM NVD_DATA_SCORE_V3 WHERE PRODUCT != '-'
 			) NVD ON NVD.PRODUCT = IFNULL(L1.OSS_NAME, M.OSS_NAME) AND NVD.VERSION = IF(IFNULL(M.OSS_VERSION,'') = '', '-', M.OSS_VERSION)
+		<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
+		LEFT OUTER JOIN (
+			SELECT BAT_ID, CHECK_SUM, GUIREPORT_FLAG
+			  FROM BINARY_ANALYSIS_RESULT
+			 WHERE BAT_ID = ${refBatId}
+		  GROUP BY CHECK_SUM, GUIREPORT_FLAG
+		) BAR
+		ON M.REFERENCE_ID = BAR.BAT_ID
+	   AND M.BAT_CHECKSUM = BAR.CHECK_SUM
+		</if>
 	  WHERE M.REFERENCE_DIV = #{referenceDiv}
 	    AND M.REFERENCE_ID = #{referenceId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(componentId)">
