@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.4.5 (15/07/2022)
+## Changes
+## 🚀 Features
+
+- Change yaml file format when oss list is exported as yaml @Min-Kyungsun (#566)
+
+## 🐛 Hotfixes
+
+- Show the project list in Opened Jobs of Dashboard when user is not admin @Min-Kyungsun (#565)
+
+## 🔧 Maintenance
+
+- Update BAT > show GUI report icon @FOSSLight-dev (#573)
+- Update Dockerfile for Mac M1 @soimkim (#571)
+- Update CKEditor text paste function @FOSSLight-dev  (#569)
+- Add description when returning Vulnerability API @soimkim (#567)
+- Hide the dropped project list in Opened Jobs of Dashboard @Min-Kyungsun (#564)
+
+---
+
 ## v1.4.4 (07/07/2022)
 ## Changes
 ## 🐛 Hotfixes
@@ -467,15 +487,3 @@
 - Change SPDX dependecy version @riyenas0925 (#323)
 - Exception handling when accessing a deleted project @FOSSLight-dev (#322)
 - Change token to invisible @riyenas0925 (#312)
-
----
-
-## v1.2.20 (03/12/2021)
-## Changes
-## 🚀 Features
-
-- Change the creator and modifier from ID to name in OSS list, License … @acafela (#295)
-
-## 🐛 Hotfixes
-
-- Fix the bug where data is not output when sending mail @yugeeklab (#313)
