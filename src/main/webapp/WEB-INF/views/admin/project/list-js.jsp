@@ -979,7 +979,7 @@
 				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
-					{name: 'prjName', index: 'prjName', width: 200, align: 'left'},
+					{name: 'prjName', index: 'prjName', width: 200, align: 'left', cellattr: function (rowId, val, rawObject, cm, rdata) {return 'title="' + "Double click" + '"';}},
 					{name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true},
 					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, cellattr: fn.cellattrStatus, sortable : true},
 					{name: 'identificationStatus', index: 'identificationStatus', width: 200, align: 'left', formatter: fn.displayIdentification, unformatter: fn.unformatter, sortable : true, title:false},
