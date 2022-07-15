@@ -6,6 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.4.5](https://github.com/fosslight/fosslight/releases/tag/v1.4.5) (2022-07-15)
+### Changed
+* YAML 버튼 클릭시 출력되는 양식 최신화
+
 ## [1.4.3](https://github.com/fosslight/fosslight/releases/tag/v1.4.3) (2022-07-03)
 ### New
 * Project의 Basic Information탭 > Model 정보 추가
