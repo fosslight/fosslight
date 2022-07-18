@@ -124,8 +124,15 @@
 			var params = {};
 			var password = $("#password").val();
 			var userName = $('#userInfoArea input[name="userName"]').val();
-			var division = $('#userInfoArea select[name="division"] option:selected').val();
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+			var division = $.trim($('#userInfoArea select[name="division"] option:selected').val());
+			var confirmMsg = "";
+			if(division === ""){
+			    division = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+			    confirmMsg = '<spring:message code="msg.configuration.confirm.save"/>';
+			} else {
+			        confirmMsg = '<spring:message code="msg.common.confirm.save"/>'
+			}
+			alertify.confirm(confirmMsg, function (e) {
 				if (e) {
 					$.ajax({
 						type: 'POST',
