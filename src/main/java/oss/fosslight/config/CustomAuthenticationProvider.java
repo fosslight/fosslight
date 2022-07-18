@@ -5,10 +5,7 @@
 
 package oss.fosslight.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -82,8 +79,29 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (StringUtil.isNotEmpty(user_pw)) {
 			
 			// 사용자 가입여부 체크
-			if(!userService.existUserIdOrEmail(user_id)) {
-				return isAuthenticated;
+			if(!userService.existUserIdOrEmail(user_id)){
+				Map<String, String> userInfo = new HashMap<>();
+				T2Users vo = new T2Users();
+				vo.setUserId(user_id);
+				vo.setCreatedDateCurrentTime();
+				vo.setCreator(user_id);
+				vo.setModifier(user_id);
+
+
+				String[] info = userService.checkUserInfo(vo);
+				String userName = info[0];
+				String userEmail = info[1];
+				if(StringUtil.isEmptyTrimmed(userEmail)) {
+					throw new RuntimeException("Ldap 사용자 정보 확인 불가 " + vo.getUserId());
+				}
+				vo.setEmail(userEmail);
+				if(StringUtil.isEmptyTrimmed(userName)){
+					 throw new RuntimeException("Ldap 사용자 정보 확인 불가 " + vo.getUserId());
+				}
+				vo.setUserName(userName);
+				vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+
+				userService.addNewUsers(vo);
 			}
 			
 			String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
