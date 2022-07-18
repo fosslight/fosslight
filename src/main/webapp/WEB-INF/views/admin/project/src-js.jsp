@@ -837,9 +837,11 @@ var src_grid = {
 										
 										srcList.jqGrid("setCell", rowid, "licenseName", licenseName);
 										fn_grid_com.saveCellData(srcList.attr("id"), rowid, "licenseName", licenseName, null, null);
-										srcList.jqGrid('saveRow',rowid);
-										
-										fn_grid_com.mvOssPage(srcList, rowid);
+                                        currentOssName = e.value;
+                                        if (currentOssName != '') {
+                                            srcList.jqGrid('saveRow',rowid);
+                                            fn_grid_com.mvOssPage(srcList, rowid);
+                                        }
 									});
 									
 									currentOssName = e.value;
