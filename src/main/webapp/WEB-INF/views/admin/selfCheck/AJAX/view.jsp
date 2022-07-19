@@ -13,7 +13,7 @@ $(document).ready(function() {
 			<h2>Project Information</h2>
 			<ul>
 				<li class="first">
-					<span>Project Name</span><strong><label>${project.prjName} <c:if test="${not empty project.prjVersion}">(${project.prjVersion})</c:if></label></strong>
+					<span>Project Name</span><strong><label>${project.prjName} <c:if test="${not empty project.prjVersion}">(<c:out value="${project.prjVersion}"/>)</c:if></label></strong>
 				</li>
 				<li>
 					<span>Created</span><strong><label>${project.prjUserName} ${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</label></strong>
