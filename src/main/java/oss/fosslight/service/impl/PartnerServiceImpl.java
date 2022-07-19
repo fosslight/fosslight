@@ -946,4 +946,46 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	public int updateDivision(String partnerId, String division) {
 		return partnerMapper.updateDivision(partnerId, division);
 	}
+
+	@Override
+	public Map<String, List<PartnerMaster>> updatePartnerDivision(PartnerMaster partnerMaster) {
+		Map<String, List<PartnerMaster>> updatePartnerDivMap = new HashMap<>();
+		List<PartnerMaster> beforeBeanList = new ArrayList<>();
+		List<PartnerMaster> afterBeanList = new ArrayList<>();
+		
+		PartnerMaster param = new PartnerMaster();
+		String division = partnerMaster.getParDivision();
+		String comment = "";
+		
+		for(String partnerId : partnerMaster.getPartnerIds()) {
+			param.setPartnerId(partnerId);
+			PartnerMaster beforeBean = getPartnerMasterOne(param);
+			
+			if(!beforeBean.getDivision().equals(division)) {
+				PartnerMaster afterBean = getPartnerMasterOne(param);
+				afterBean.setDivision(division);
+				
+				partnerMapper.updateDivision(partnerId, division);
+				
+				comment = "해당 Partner 의 Division ( " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) 
+						+ " => " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision())
+						+ " ) 이 변경되었습니다.";
+				
+				afterBean.setUserComment(comment);
+				
+				beforeBeanList.add(beforeBean);
+				afterBeanList.add(afterBean);
+			}
+		}
+		
+		if(!beforeBeanList.isEmpty()) {
+			updatePartnerDivMap.put("before", beforeBeanList);
+		}
+		
+		if(!afterBeanList.isEmpty()) {
+			updatePartnerDivMap.put("after", afterBeanList);
+		}
+		
+		return updatePartnerDivMap;
+	}
 }

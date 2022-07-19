@@ -338,4 +338,6 @@ public interface ProjectMapper {
 	void updateCopyConfirmStatusProjectStatus(Project project);
 
 	void updateConfirmCopyVerificationDestributionStatus(Project project);
+
+	void updateProjectDivision(Project project);
 }

@@ -196,6 +196,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	/** The cve id. */
 	private String cveId;
 	
+	private String[] partnerIds;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1181,6 +1183,14 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setCveId(String cveId) {
 		this.cveId = cveId;
+	}
+
+	public String[] getPartnerIds() {
+		return partnerIds;
+	}
+
+	public void setPartnerIds(String[] partnerIds) {
+		this.partnerIds = partnerIds;
 	}
 	
 }
