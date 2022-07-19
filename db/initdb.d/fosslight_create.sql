@@ -2380,6 +2380,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('909', '940', 'External Service Flag', '', 'N', 5, 'Y'),
 	('909', '950', 'External Analysis Flag', '', 'N', 6, 'Y'),
 	('909', '960', 'Hide email in user list', '', 'N', 7, 'Y'),
+	('909', '970', 'Use license internal url', '', 'N', 8, 'N'),
 	('910', '100', 'Provider Url', '', '', 1, 'Y'),
 	('911', '100', 'Mail Server', '', '', 100, 'Y'),
 	('911', '101', 'Email Address', '', '', 101, 'Y'),
