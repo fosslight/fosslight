@@ -4220,4 +4220,15 @@
 		WHERE
 			PRJ_ID = #{prjId}
 	</update>
+	
+	<update id="updateProjectDivision" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+			PROJECT_MASTER
+		SET
+			DIVISION = #{division}
+			, MODIFIER = #{loginUserName}
+			, MODIFIED_DATE = now()
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
 </mapper>

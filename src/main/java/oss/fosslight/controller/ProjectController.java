@@ -4178,6 +4178,45 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(yamlFileId);
 	}
 	
+	@PostMapping(value=PROJECT.PROJECT_DIVISION)
+	public @ResponseBody ResponseEntity<Object> updateProjectDivision(@RequestBody Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		Map<String, List<Project>> updatePrjDivision = projectService.updateProjectDivision(project);
+		
+		if(updatePrjDivision.containsKey("before") && updatePrjDivision.containsKey("after")) {
+			List<Project> beforePrjList = (List<Project>) updatePrjDivision.get("before");
+			List<Project> afterPrjList = (List<Project>) updatePrjDivision.get("after");
+			
+			if((beforePrjList != null && !beforePrjList.isEmpty()) 
+					&& (afterPrjList != null && !afterPrjList.isEmpty())
+					&& beforePrjList.size() == afterPrjList.size()) {
+				
+				for(int i=0; i<beforePrjList.size(); i++) {
+					try {
+						CommentsHistory commentsHistory = new CommentsHistory();
+						commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+						commentsHistory.setReferenceId(afterPrjList.get(i).getPrjId());
+						commentsHistory.setContents(afterPrjList.get(i).getUserComment());
+						
+						commentService.registComment(commentsHistory, false);
+						
+						String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED;
+						CoMail mailBean = new CoMail(mailType);
+						mailBean.setParamPrjId(afterPrjList.get(i).getPrjId());
+						mailBean.setCompareDataBefore(beforePrjList.get(i));
+						mailBean.setCompareDataAfter(afterPrjList.get(i));
+						
+						CoMailManager.getInstance().sendMail(mailBean);
+					} catch(Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}
+		}
+		
+		return makeJsonResponseHeader();
+	}
+	
 	public void updateProjectNotification(Project project, Map<String, Object> resultMap) {
 		if(resultMap != null){
 			String mailType = (String) resultMap.get("mailType");

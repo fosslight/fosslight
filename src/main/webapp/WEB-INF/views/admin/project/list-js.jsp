@@ -957,6 +957,45 @@
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
+		}, changeDivision : function(){
+			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+
+			if(chk > 0){
+				$(".selectSet").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
+				$("#changeDivisionPop").show();
+			} else {
+				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			}
+		}, changeDivisionSave : function(){
+			var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
+			var division = $("#changeDivisionPop select[name=division]").val();
+
+			alertify.confirm('<spring:message code="msg.common.change.division" />', function (e) {
+				if (e) {
+					$('#changeDivisionPop').hide();
+					
+					$.ajax({
+						type: 'POST',
+						url :'<c:url value="/project/updateProjectDivision"/>',
+						data: JSON.stringify({'prjIds':changeDivisionArr, 'prjDivision':division}),
+						contentType : 'application/json',
+						success: function (data) {
+							alertify.alert('<spring:message code="msg.common.success" />', function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								activeTabInFrameList("PROJECT");
+							});
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		}, changeDivisionCancel : function(){
+			$("#changeDivisionPop select[name=division] option").remove();
+			$('#changeDivisionPop').hide();
 		}
 	};
 	

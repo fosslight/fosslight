@@ -4870,4 +4870,50 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 	}
+
+	@Override
+	public Map<String, List<Project>> updateProjectDivision(Project project) {
+		Map<String, List<Project>> updateProjectDivMap = new HashMap<>();
+		List<Project> beforeBeanList = new ArrayList<>();
+		List<Project> afterBeanList = new ArrayList<>();
+		
+		Project param = new Project();
+		String division = project.getPrjDivision();
+		String comment = "";
+		
+		for(String prjId : project.getPrjIds()) {
+			param.setPrjId(prjId);
+			Project beforeBean = getProjectDetail(param);
+			
+			if(!beforeBean.getDivision().equals(division)) {
+				Project afterBean = getProjectDetail(param);
+				afterBean.setDivision(division);
+				
+				projectMapper.updateProjectDivision(afterBean);
+				
+				comment = "해당 Project 의 Division ( " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) 
+						+ " => " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision())
+						+ " ) 이 변경되었습니다.";
+				
+				afterBean.setUserComment(comment);
+				
+				Map<String, List<Project>> modelMap = getModelList(prjId);
+				beforeBean.setModelList((List<Project>) modelMap.get("currentModelList"));
+				afterBean.setModelList((List<Project>) modelMap.get("currentModelList"));
+				
+				beforeBeanList.add(beforeBean);
+				afterBeanList.add(afterBean);
+			}
+		}
+		
+		if(!beforeBeanList.isEmpty()) {
+			updateProjectDivMap.put("before", beforeBeanList);
+		}
+		
+		if(!afterBeanList.isEmpty()) {
+			updateProjectDivMap.put("after", afterBeanList);
+		}
+		
+		return updateProjectDivMap;
+	}
 }
