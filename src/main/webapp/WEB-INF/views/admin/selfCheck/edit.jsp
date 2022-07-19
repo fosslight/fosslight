@@ -92,7 +92,7 @@
 								<div class="basicCase">
 									<div class="uploadTitCheckSet">
 										<span class="checkSet"><label class="checksrcR1">Please select a file to upload</label></span>
-										<span class="checkSet"><label class="check2" style="display:none;">Enter the link of the source to be analyzed</label></span>
+										<span class="checkSet" style="display:none;"><label class="check2">Enter the link of the source to be analyzed</label></span>
 									</div>
 									<div class="uploadGroup">
 										<div class="uploadSet">
