@@ -36,20 +36,29 @@
 			$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
 			
 			initParam = serializeObjectHelper();
-			
+
 			var defaultSearchFlag = "${searchBean.defaultSearchFlag}";
 			if(defaultSearchFlag != 'Y') {
 				// just make grid ui
 				initParam.ignoreSearchFlag = "Y";
 			}
-			
+
 			$('#search').on('click',function(e){
 				e.preventDefault();
-				
+
+				var searchOSSName = $("input[type=text][name=ossName]").val();
+				$("input[type=text][name=ossName]").val(searchOSSName.trim());
+
+				var searchLicenseName = $("input[type=text][name=licenseName]").val();
+				$("input[type=text][name=licenseName]").val(searchLicenseName.trim());
+
+				var searchHomepage = $("input[type=text][name=homepage]").val();
+				$("input[type=text][name=homepage]").val(searchHomepage.trim());
+
 				var postData = serializeObjectHelper();
 				postData.ignoreSearchFlag = "N";
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
-				
+
 			});
 			
 			$(".cal").on("keyup", function(e){
