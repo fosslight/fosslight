@@ -202,7 +202,7 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				$(data.clone).appendTo('.multiTxtSet');
+				$(data.clone).prependTo('.multiTxtSet');
 				
 				$('.smallDelete').on('click', function(){
 					$(this).parent().parent().remove();
