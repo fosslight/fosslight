@@ -94,11 +94,14 @@
 								<input id="webpageAdd" type="button" value="+ Add" class="btnCLight gray" />
 							</td>
 						</tr>
-						<c:if test="${not empty licenseInfo.internalUrl}">
-						<tr>
-							<th class="dCase"><spring:message code="msg.common.field.internalURL" /></th>
-							<td class="dCase"><a href="${licenseInfo.internalUrl}" target="_blank">${licenseInfo.internalUrl}</a></td>
-						</tr>
+						<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_NOTICE_INTERNAL_URL')) eq 'Y'}">
+							<c:if test="${not empty licenseInfo.internalUrl}">
+								<tr>
+									<th class="dCase"><spring:message code="msg.common.field.internalURL"/></th>
+									<td class="dCase"><a href="${licenseInfo.internalUrl}"
+														 target="_blank">${licenseInfo.internalUrl}</a></td>
+								</tr>
+							</c:if>
 						</c:if>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.userGuide" /></th>

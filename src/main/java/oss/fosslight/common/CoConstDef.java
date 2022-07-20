@@ -147,7 +147,8 @@ public class CoConstDef {
 	public static final String CD_NOTICE_HTML_STR				= "HTML";
 	public static final String CD_DTL_NOTICE_HTML				= "100";
 	public static final String CD_DTL_NOTICE_TEXT				= "101";
-	public static final String CD_DTL_NOTICE_SPDX				= "102";	
+	public static final String CD_DTL_NOTICE_SPDX				= "102";
+	public static final String CD_NOTICE_INTERNAL_URL			= "970";
 	
 	/** System Setting Code List End */
 	
