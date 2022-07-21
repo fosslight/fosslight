@@ -2570,8 +2570,8 @@ CREATE TABLE IF NOT EXISTS `T2_USERS` (
 DELETE FROM `T2_USERS`;
 /*!40000 ALTER TABLE `T2_USERS` DISABLE KEYS */;
 INSERT INTO `T2_USERS` (`USER_ID`, `USER_NAME`, `PASSWORD`, `EMAIL`, `DIVISION`, `ENABLED`, `DEFAULT_TAB`, `DEFAULT_LOCALE`, `USE_YN`, `TOKEN`, `EXPIRE_DATE`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`) VALUES
-	('admin', '시스템관리자', '$2a$10$XYU3br/w7y2VYmVju74kMu/Ma1wcw5IdadA2pwHP/VElKLk4osynC', 'admin@fosslight.org', '', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now()),
-	('user', '사용자', '$2a$10$b.VehympJvYfccwGNRYqi.po8UH4uhkbpTanUXDyBLCnfclqy.wgy', 'user@fosslight.org', '', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now());
+	('admin', '시스템관리자', '$2a$10$XYU3br/w7y2VYmVju74kMu/Ma1wcw5IdadA2pwHP/VElKLk4osynC', 'admin@fosslight.org', '999', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now()),
+	('user', '사용자', '$2a$10$b.VehympJvYfccwGNRYqi.po8UH4uhkbpTanUXDyBLCnfclqy.wgy', 'user@fosslight.org', '999', b'1', '001', 'en_US', 'Y', NULL, NULL, 'SYSTEM', now(), 'SYSTEM', now());
 /*!40000 ALTER TABLE `T2_USERS` ENABLE KEYS */;
 
 -- 테이블 fosslight.USER_NOTICE 구조 내보내기

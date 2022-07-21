@@ -32,7 +32,10 @@
 			$(document).ready(function() {
 				$("#okRegister, #btnCancel, #btn_login, #btnRegist").css("cursor", "pointer");
 				$(".registArea").css("display", "none");
-				
+				var ldapFlag = "${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG'))}";
+				if(ldapFlag === 'Y') {
+					$('#btnRegist').hide();
+				}
 				$('#btnRegist').click(function(){
 					$(".loginArea").hide();
 					$('.registArea').show();

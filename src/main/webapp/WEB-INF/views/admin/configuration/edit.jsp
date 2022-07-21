@@ -24,6 +24,7 @@
 								<span class="selectSet" style="width: 200px;">
 									<strong title="Division selected value"></strong>
 									<select name="division">
+										<option value=""></option>
 										${ct:genOptionSelected(ct:getConstDef("CD_USER_DIVISION"), userInfo.division)}
 									</select>
 								</span>	
