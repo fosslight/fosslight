@@ -820,6 +820,7 @@ var fn_grid_com = {
 		},
 		// 메인 그리드 에디트 모드 설정
 	 	setMainEditMode : function(target, rowid){
+                        target.jqGrid('setColProp','gridId', {editable: true});
 			target.jqGrid('setColProp','licenseId', {editable: true});
 			target.jqGrid('setColProp','licenseName', {editable: true});
 			target.jqGrid('setColProp','licenseText', {editable: true});
