@@ -6,6 +6,12 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.4.6](https://github.com/fosslight/fosslight/releases/tag/v1.4.6) (2022-07-22)
+### New
+* Project List에서 Change Division 버튼 추가
+### Changed
+* OSS Notice 발행시 기본적으로 License의 internal url 대신 Website를 출력
+
 ## [1.4.5](https://github.com/fosslight/fosslight/releases/tag/v1.4.5) (2022-07-15)
 ### Changed
 * YAML 버튼 클릭시 출력되는 양식 최신화

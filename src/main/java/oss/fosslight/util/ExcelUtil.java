@@ -2205,7 +2205,7 @@ public class ExcelUtil extends CoTopComponent {
 				return false;
 			}
 			
-			checkLicenseNameChanged(orgList, list, fileSeq);
+//			checkLicenseNameChanged(orgList, list, fileSeq);
 		}
 		
 		return true;
