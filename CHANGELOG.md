@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.4.6 (22/07/2022)
+## Changes
+## 🚀 Features
+
+- Add the function to change division @FOSSLight-dev (#586)
+
+## 🔧 Maintenance
+
+- Reload tab to you're working on after checking OSS Name/License @FRESH-TUNA (#568)
+- Add a flag to use the license's internal url @soimkim (#587)
+---
+
 ## v1.4.5 (15/07/2022)
 ## Changes
 ## 🚀 Features
@@ -466,24 +478,3 @@
 - Add a function to change the OSS table in bulk (incomplete) @FOSSLight-dev (#338)
 - Change max height of editor @soimkim (#336)
 - Add Check License to Project tab (bin, android) @riyenas0925 (#324)
-
----
-
-## v1.2.21 (10/12/2021)
-## 🚀 Features
-
-- Fix OSS Notices to include SPDX (json) and SPDX (yaml) @riyenas0925 (#320)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the notice file format is unchecked whenever the status is changed @FOSSLight-dev (#329)
-- Fix the license duplication bug in Check License @riyenas0925 (#318)
-
-## 🔧 Maintenance
-
-- Add test to github action for PR @yugeeklab (#301)
-- Remove the label setting for PR from the guide @soimkim (#327)
-- Update 3rd party list UI @riyenas0925 (#315)
-- Change SPDX dependecy version @riyenas0925 (#323)
-- Exception handling when accessing a deleted project @FOSSLight-dev (#322)
-- Change token to invisible @riyenas0925 (#312)
