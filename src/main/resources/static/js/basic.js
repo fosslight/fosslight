@@ -656,6 +656,14 @@ var changeTab = function(pos){
 	}
 }
 
+var changeButtonPosition = function(p1,p2,p3){
+	var btns = $(".btnLayout");
+
+	btns.filter($("#upperGroup")).css("display",p1);
+	btns.filter($("#belowGroup")).css("display",p2);
+	$(".jqGridSet").css("margin-top", p3);
+}
+
 // error msg
 function makeErrMsg(msg) {
 	return '<div class="retxt">'+ msg +'</div>';

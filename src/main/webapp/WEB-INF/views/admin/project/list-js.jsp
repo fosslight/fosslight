@@ -28,7 +28,16 @@
 		//}
 		
 		showHelpLink("Project_List_Main");
-	});	
+	});
+
+	$(document).scroll(function() {
+        if ($(window).scrollTop() == 0) {
+            changeButtonPosition("inline-block","none","0px");
+        }
+        if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+            changeButtonPosition("none","inline-block","53px");
+        }
+    })
 	
 	//데이터 객체
 	var gridTooltip = {
