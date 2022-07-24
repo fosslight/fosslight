@@ -23,6 +23,7 @@ RUN chmod +x /app/wait-for
 RUN chmod +x /app/verify/verify
 
 RUN apt-get update && apt-get install -y netcat
+RUN ln -s /bin/sh bash
 WORKDIR /app
 
 CMD ["java" , "-jar", "FOSSLight.war", "--root.dir=/data/fosslight", "--server.port=8180"]
