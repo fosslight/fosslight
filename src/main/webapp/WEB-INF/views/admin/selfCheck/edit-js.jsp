@@ -829,15 +829,15 @@
 
             switch(value){
                 case "1":
-                    $('.checksrcR1').show();
-                    $('.check2').hide();
+                    $('.checksrcR1').closest('span').show();
+                    $('.check2').closest('span').hide();
                     $('.uploadSet').show();
                     $('.wgetUrl').hide();
                     srcUploadUrl.checked = false;
                     break;
                 case "2":
-                    $('.checksrcR1').hide();
-                    $('.check2').show();
+                    $('.checksrcR1').closest('span').hide();
+                    $('.check2').closest('span').show();
                     $('.uploadSet').hide();
                     $('#wgetUrl_' + key).show();
                     srcR1.checked = false;
