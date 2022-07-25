@@ -3,7 +3,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
 	id 'war'
-	id 'checkstyle'
 	id 'eclipse' // optional (to generate Eclipse project files)
 	id 'idea' // optional (to generate IntelliJ IDEA project files)
 }
@@ -31,11 +30,6 @@ repositories {
 
 test {
 	useJUnitPlatform()
-}
-
-checkstyle {
-	maxWarnings = 0
-	toolVersion = '10.1'
 }
 
 processResources {
