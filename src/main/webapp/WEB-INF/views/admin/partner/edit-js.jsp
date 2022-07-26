@@ -2303,7 +2303,9 @@ var saveFlag = false;
 								$('#'+rowid+'_licenseName').parent().append(mult);
 							}
 						});
-						
+                                                var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                                var nextRow = rowid
+                                                $('#'+nextRow+"_"+nextCol).focus();
 						$('#'+rowid+'_licenseName').val("");
 					}
 				},

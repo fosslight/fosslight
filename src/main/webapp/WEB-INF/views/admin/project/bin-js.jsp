@@ -1254,6 +1254,10 @@ var bin_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
+
+                                var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                var nextRow = rowid
+                                $('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binList");
