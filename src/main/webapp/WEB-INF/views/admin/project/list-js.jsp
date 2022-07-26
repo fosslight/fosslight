@@ -961,7 +961,7 @@
 			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 
 			if(chk > 0){
-				$(".selectSet").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
+				$("#changeDivisionSelect").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
 				$("#changeDivisionPop").show();
 			} else {
 				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
