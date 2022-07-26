@@ -1215,17 +1215,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				int idx = 1;
 				List<String[]> rows = new ArrayList<>();
-				int length = fileData.getModelListInfo().size();
+				int modelListLength = fileData.getModelListInfo().size();
+				int productGroupsLength = fileData.getProductGroups().size();
 				List<String> productGroups = fileData.getProductGroups();
 				List<String> modelInfo = fileData.getModelListInfo();
+				
+				int length = productGroupsLength > modelListLength ? productGroupsLength : modelListLength;
 				
 				for(int i = 0 ; i < length ; i++){
 					List<String> params = new ArrayList<>();
 					
 					// main 정보
 					params.add(Integer.toString(idx++)); // No
-					params.add(productGroups.size() > 0 ? productGroups.get(i) : ""); // Product Group
-					params.add(modelInfo.get(i)); // Model(Software) Name
+					params.add(productGroupsLength > 0 && productGroupsLength > i ? productGroups.get(i) : ""); // Product Group
+					params.add(modelListLength > 0 && modelListLength > i ? modelInfo.get(i) : ""); // Model(Software) Name
 					
 					rows.add(params.toArray(new String[params.size()]));
 				}

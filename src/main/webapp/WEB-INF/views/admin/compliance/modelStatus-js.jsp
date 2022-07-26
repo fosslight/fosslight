@@ -206,6 +206,11 @@
 				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}":
 					display = "<span class=\"iconSt complete\">"+cellvalue+"</span>";
 					break;
+
+				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}":
+					display = "<span class=\"iconSt drop\">"+cellvalue+"</span>";
+
+					break;
 			}
 			return display;
 		},

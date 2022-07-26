@@ -165,7 +165,7 @@
 				<div class="popdata">
 					<div class="mtb20">
 						<span>Division</label>
-						<span class="selectSet" style="width: 200px;">
+						<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
 							<strong title="Division selected value"></strong>
 							<select name="division">
 								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
