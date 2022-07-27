@@ -38,10 +38,10 @@
 	                   +"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
-	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>" 
-                       +"<dl><dt><span class=\"priority priority_1\"></span>Priority1</dt></dl><br>"
-                       +"<dl><dt><span class=\"priority priority_2\"></span>Priority2</dt></dl><br>"
-	                   +"</div>",
+	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
+					   +"<dl><dt><span class=\"priority priority_1\"></span>Priority1</dt></dl><br>"
+					   +"<dl><dt><span class=\"priority priority_2\"></span>Priority2</dt></dl><br>"
+					   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
 		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
@@ -963,7 +963,7 @@
 			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 
 			if(chk > 0){
-				$(".selectSet").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
+				$("#changeDivisionSelect").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
 				$("#changeDivisionPop").show();
 			} else {
 				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
