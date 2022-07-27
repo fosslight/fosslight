@@ -1840,6 +1840,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				break;
+
+			case "vulnerabilityPopup":	//export in vulnerability popup
+				Type ossMaster = new TypeToken<OssMaster>(){}.getType();
+				OssMaster bean = (OssMaster) fromJson(dataStr, ossMaster);
+				bean.setPageListSize(MAX_RECORD_CNT_LIST);
+
+				Map<String, Object> vulnerabilityPopupMap = vulnerabilityService.getVulnListByOssName(bean);
+
+				if(isMaximumRowCheck((int) vulnerabilityPopupMap.get("records"))){
+					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityPopupMap.get("rows"));
+				}
+
+				break;
+
 			case "autoAnalysis":
 				OssMaster ossBean = new OssMaster();
 				ossBean.setPrjId(dataStr);
