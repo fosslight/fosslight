@@ -300,7 +300,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .iconSet.nick.dummy {width:25px;height:12px;background-position:-265px -170px;vertical-align:middle;} /* 20161025 by sw-yun empty */
 .iconSet.trd {width:28px;height:16px;background-position:right -60px;vertical-align:middle;} /* 2018-06-12 by mj-cho */
 .iconSt.drop {background-color:#a39d9b;background-position:-155px -225px;} /* 2021-01-26 */
-.priority {display:inline-block;width:15px;height:15px;background:red;}
+.priority {display:inline-block;width:15px;height:15px;}
 .priority.priority_1 {background:#FEAEC9;}
 .priority.priority_2 {background:#FFFCB7;}
 /*
