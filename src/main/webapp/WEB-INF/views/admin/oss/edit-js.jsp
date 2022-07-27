@@ -1685,17 +1685,10 @@
 		} else if(json.isValid == 'true') {
 			var v_flag = checkVdiff();
 
-			if(v_flag == "Y"){
-				alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
-					if (e) {
-						checkExistOssConf();
-					} else {
-						return false;
-					}
-				});
-			}else if(v_flag == ""){
+			if(v_flag == ""){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				return;
+				
 			}else{
 				checkExistOssConf();
 			}
