@@ -4,7 +4,7 @@
 	<!---->
 	<div>
 		<fieldset class="listSearch mt20">
-			<form>
+			<form action="/configurationForm" method="post">
 				<dl class="basicSearch col1">
 					<dt>Settings</dt>
 					<dd>
@@ -70,9 +70,9 @@
 									<c:choose>
 										<c:when test="${fn:contains(code[1], 'Flag')}">
 											<c:set var="title" value="${code[1].replaceAll(' ', '')}" />
-										<%--
+<%--
 											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="${title}" name="${title}" <c:if test="${code[3] eq 'Y'}">checked</c:if> <c:if test="${fn:contains(title, 'NoticeFlag')}">disabled</c:if> /></dd>
-										--%>
+--%>
 											<c:if test="${not empty ct:getCodeValues(code[2])}">
 												<c:choose>
 													<c:when test="${fn:contains(title, 'NoticeFlag')}">
@@ -80,12 +80,14 @@
 													</c:when>
 												</c:choose>
 											</c:if>
+
 										</c:when>
 										<c:otherwise>
 											<dd><label>${code[1]}</label><input type="text" id="${code[0]}" value="${code[3]}" /></dd>
 										</c:otherwise>
 									</c:choose>
 								</c:forEach>
+                                <dd><label>License Link</label><input type="checkbox" id="licenceLink" name="licenseLink"></dd>
 							</dl>
 						</div>
 					</dd>
