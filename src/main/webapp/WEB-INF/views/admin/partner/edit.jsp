@@ -230,7 +230,7 @@
 										${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 									</select>
 								</span>
-								<span class="selectSet w220">
+								<span class="selectSet w350">
 									<strong for="userName" title="selected value">Select User</strong>
 									<select id="userName">
 									</select>
@@ -252,7 +252,7 @@
 									</c:when>
 									<c:otherwise>
 										<span class="pd5">@</span>
-										<input type="text" id="emailTemp" style="width:196px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+										<input type="text" id="emailTemp" style="width:326px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
 									</c:otherwise>
 								</c:choose>
 								<input id="addEmail" type="button" value="+ Add" class="btnCLight gray" />
@@ -271,7 +271,7 @@
 										</c:if>
 									</select>
 								</span>
-								<span><input type="text" id="listId" name="listId" style="width:220px" placeholder="Input ID you want to copy"/></span>
+								<span><input type="text" id="listId" name="listId" style="width:350px" placeholder="Input ID you want to copy"/></span>
 								<input id="addList" type="button" value="+ Add" class="btnCLight gray" />
 							</div>
 							<div class="multiTxtSet2" id="nameSpace">
@@ -298,7 +298,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision w350" value="" ${(ct:isAdmin() and detail.status ne 'CONF') ? '' : 'disabled="disabled"'} />
+									<input type="text" name="creatorNm" class="autoComCreatorDivision w600" value="" ${(ct:isAdmin() and detail.status ne 'CONF') ? '' : 'disabled="disabled"'} />
 									<input type="hidden" name="creator" <c:if test="${not empty detail }">value='${detail.creator}'</c:if>/>
 									<span class="retxt">This field is required.</span>
 								</div>
@@ -308,7 +308,7 @@
 							<th class="dCase txStr"><spring:message code="msg.common.field.division" /></th>
 							<td class="dCase">
 								<div class="pb5">
-									<span class="selectSet w350">
+									<span class="selectSet w600">
 										<strong for="division" title="Watcher part selected value">Select Division</strong>
 										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
 											<option value=""></option>
@@ -322,7 +322,7 @@
                             <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">
                                 <div class="required">
-                                    <input type="text" name="reviewerName" class="w350" value="${detail.reviewerName}" disabled="disabled"/>
+                                    <input type="text" name="reviewerName" class="w600" value="${detail.reviewerName}" disabled="disabled"/>
                                 </div>
                             </td>
                         </tr>
