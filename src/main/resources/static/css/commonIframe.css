@@ -135,11 +135,12 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .w100 {width:100px !important;}
 .w120 {width:120px !important;}
 .w150 {width:150px !important;}
-.w155 {width:155px !important;} /* 161104 jh_son 추가 */
+.w155 {width:155px !important;}
 .w200 {width:200px !important;}
-.w220 {width:220px !important;} /* 171017 yuns 추가 */
+.w220 {width:220px !important;}
 .w250 {width:250px !important;}
 .w350 {width:350px !important;}
+.w500 {width:500px !important;}
 .w600 {width:600px !important;}
 .w725 {width:725px !important;}
 .w1025 {width:1025px !important;}
