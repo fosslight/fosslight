@@ -39,6 +39,8 @@
 	                   +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
+	                   +"<dl><dt><span class=\"priority priority_1\"></span>Priority1</dt></dl><br>"
+	                   +"<dl><dt><span class=\"priority priority_2\"></span>Priority2</dt></dl><br>"
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
 		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
