@@ -1623,6 +1623,9 @@ var binAndroid_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
+                                var nextCol = binAndroidList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                var nextRow = rowid
+                                $('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binAndroidList");
