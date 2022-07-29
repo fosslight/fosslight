@@ -41,7 +41,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		history.setTotListSize(hisotryMapper.selectHistoryDataTotalCount(history));
 		List<History> hList = hisotryMapper.selectHistoryData(history);
 
-		map.put("pageInfo", history);  // page: curPage, total: blockEnd, records: totListSize
+		map.put("pageInfo", history);	// page: curPage, total: blockEnd, records: totListSize
 		map.put("rows", hList);
 
 		return map;
@@ -118,9 +118,9 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 			ret = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
 		} else if(inf[0].equals("Code")) {
 			if((dtlCd[1]).equals("obligation")){
-				ret = generateObligationCodeRetValue(dMap);
+				ret = dMap != null ? (String)dMap.get("obligationType"): "";
 			}else{
-				ret = generateGeneralCodeRetValue(inf, dtlCd, dMap);
+				ret = dMap != null ?nvl(CoCodeManager.getCodeString(inf[2], (String)dMap.get(dtlCd[1])), inf[2]) : "";
 			}
 		} else if(inf[0].equals("Array") && "999".equals(dtlCd[2])) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
@@ -151,8 +151,8 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 				colNames.add(colInfo);
 			}
 
-			sTblMap.put("type", inf[1]);      // model name
-			sTblMap.put("colNames", colNames); // list columns
+			sTblMap.put("type", inf[1]);		// model name
+			sTblMap.put("colNames", colNames);	// list columns
 
 			// colModel 생성
 			List<Map<String, Object>> subList = new ArrayList<Map<String, Object>>();
@@ -167,7 +167,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 
 					// row data 생성
 					for(String[] sDtlCd : CoCodeManager.getValues(sCdNm)){
-						String[] sInf = CoCodeManager.getCodeExpString(sCdNm, sDtlCd[0]).split("\\|"); // EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
+						String[] sInf = CoCodeManager.getCodeExpString(sCdNm, sDtlCd[0]).split("\\|");	// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 
 						if(sInf[0].equals("String")){
 							sDataMap.put(sDtlCd[1], escapeSql(nvl((String)sMap.get(sDtlCd[1]))) );
@@ -191,15 +191,4 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 	public String escapeSql(String str){
 		return str == null ? "null" : String.format("%s", str.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\"", "\\\""));
 	}
-
-	// "Code" key 값이 Obligation 아닌 경우, 결과값 반환 함수
-	public String generateGeneralCodeRetValue(String[] inf, String[] dtlCd, Map<String, Object> dMap){
-		return dMap != null ?nvl(CoCodeManager.getCodeString(inf[2], (String)dMap.get(dtlCd[1])), inf[2]) : "";
-	}
-
-	// "Code" key 값이 Obligation 인 경우, 결과값으로 Obligation Type 반환 함수
-	public String generateObligationCodeRetValue(Map<String, Object> dMap){
-		return dMap != null ? (String)dMap.get("obligationType"): "";
-	}
-
 }
