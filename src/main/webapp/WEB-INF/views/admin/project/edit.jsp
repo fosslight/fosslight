@@ -244,7 +244,7 @@
 											${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 										</select>
 									</span>
-									<span class="selectSet w220">
+									<span class="selectSet w350">
 										<strong for="prjUserId" title="Watcher name selected value">Select User</strong>
 										<select id="prjUserId" name="prjUserId">
 										</select>
@@ -267,7 +267,7 @@
 										</c:when>
 										<c:otherwise>
 											<span class="pd5">@</span>
-											<input type="text" id="emailTemp" style="width:196px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+											<input type="text" id="emailTemp" style="width:326px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
 										</c:otherwise>
 									</c:choose>
 									<input id="addEmail" type="button" value="+ Add" class="btnCLight gray" />
@@ -286,7 +286,7 @@
 											</c:if>											
 										</select>
 									</span>
-									<span><input type="text" id="listId" name="listId" style="width:220px" placeholder="Input ID you want to copy"/></span>
+									<span><input type="text" id="listId" name="listId" style="width:350px" placeholder="Input ID you want to copy"/></span>
 									<input id="addList" type="button" value="+ Add" class="btnCLight gray" />
 								</div>
 								<div id="multiDiv" class="multiTxtSet2">
@@ -300,7 +300,7 @@
 							<th class="dCase  txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">
-									<input type="text" name="creatorNm" class="autoComCreatorDivision w350" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
+									<input type="text" name="creatorNm" class="autoComCreatorDivision w600" value="" ${ct:isAdmin() ? '' : 'disabled="disabled"'} />
 									<span class="retxt">This field is required.</span>
 									<input type="hidden" name="creator" <c:if test="${not empty project }">value='${project.creator}'</c:if>/>
 								</div>
@@ -324,7 +324,7 @@
                             <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
                             <td class="dCase">
                                 <div class="required">
-                                    <input type="text" name="reviewer" class="w350" value="${project.reviewerName}" disabled="disabled"/>
+                                    <input type="text" name="reviewer" class="w600" value="${project.reviewerName}" disabled="disabled"/>
                                 </div>
                             </td>
                         </tr>
