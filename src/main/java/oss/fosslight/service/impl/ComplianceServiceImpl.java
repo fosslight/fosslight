@@ -78,6 +78,8 @@ public class ComplianceServiceImpl implements ComplianceService {
 					bean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, bean.getDistributionType()));
 					// Project Status - delay 기능이 삭제됨. 기존에도 delay를 표시하지 않았으므로 priority도 표시하지 않게 처리함.
 					bean.setStatus( CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, bean.getStatus()));
+					// Project OS Type
+					bean.setOsType(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, bean.getOsType()));
 					// Project priority 
 					bean.setPriority(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, bean.getPriority())); // 사용을 하지 않지만 값은 저장해둠.
 					// Identification Status

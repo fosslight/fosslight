@@ -309,6 +309,7 @@ public class ProjectController extends CoTopComponent {
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setNoticeType(CoConstDef.CD_GENERAL_MODEL);
+		project.setOsType(CoConstDef.CD_OS_TYPE_LINUX);
 		project.setPriority(CoConstDef.CD_PRIORITY_P2);
 		
 		Object _param =  getSessionObject(CoConstDef.SESSION_KEY_PREFIX_DEFAULT_SEARCHVALUE + "PARTNER", true);
@@ -3568,6 +3569,7 @@ public class ProjectController extends CoTopComponent {
 			user.setUserId(loginUserName());
 			
 			project.setIdentificationStatusConfFlag(CoConstDef.FLAG_YES);
+			project.setOsType(CoConstDef.CD_OS_TYPE_LINUX);
 			project.setPriority(CoConstDef.CD_PRIORITY_P2);
 			project.setReviewerName("");
 			project.setPrjUserName(userService.getUser(user).getUserName());

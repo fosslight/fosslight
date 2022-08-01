@@ -106,10 +106,10 @@
 							<td class="dCase">
 								<div class="required">
 									<span class="selectSet writeSelect">
-										<strong title="Operating system selected value"></strong>
+										<strong for="osType" title="Operating system selected value"></strong>
 										<select id="osType" name="osType" style="width: 300px;">
 											<option value=""></option>
-											${ct:genOption(ct:getConstDef("CD_OS_TYPE"))}
+											${ct:genOptionSelected(ct:getConstDef("CD_OS_TYPE"), project.osType)}
 										</select>
 									</span>
 									<input id="osTypeEtc" name="osTypeEtc" type="text" disabled="disabled"/>

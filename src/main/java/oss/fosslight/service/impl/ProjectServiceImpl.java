@@ -162,6 +162,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						bean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, bean.getDistributionType()));
 						// Project Status
 						bean.setStatus(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, bean.getStatus()));
+						// Project OS Type
+						bean.setOsType(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, bean.getOsType()));
 						// Project priority 
 						bean.setPriority(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, bean.getPriority()));
 						// Identification Status

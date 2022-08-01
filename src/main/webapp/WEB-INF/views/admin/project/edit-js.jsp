@@ -1612,6 +1612,7 @@
 				$('select[name=category]').val(data.detail.category).trigger('change');
 				$('select[name=prjDivision]').val(data.detail.prjDivision).trigger('change');
 				//$('select[name=prjUserId]').val(data.detail.prjUserId).trigger('change');
+				$("#osType").trigger("change");
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 				
@@ -1723,6 +1724,7 @@
 				$('select[name=category]').val(data.copy.category).trigger('change');
 				$('select[name=prjDivision]').val(data.copy.prjDivision).trigger('change');
 				$('select[name=prjUserId]').val(data.copy.prjUserId).trigger('change');
+				$("#osType").trigger("change");
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 				
@@ -1735,6 +1737,7 @@
 			} else {
 				$("#complete").hide(); 
 				$("#copy").hide();
+				$("#osType").trigger("change");
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 			}
