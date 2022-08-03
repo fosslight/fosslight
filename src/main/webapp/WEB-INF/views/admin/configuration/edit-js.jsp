@@ -6,8 +6,21 @@
 	$(document).ready(function(){
 		'use strict';
 		data.init();
-		evt.init();	
-	});
+		evt.init();
+        var userDivision = $('#userInfoArea select[name="division"]');
+        for(var i=0;i<userDivision.children().length;i++){
+            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
+                break;
+            }
+            if(userDivision.children().length - 1 == i ) {
+                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+                if(${sessUserInfo.division} == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+                    $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                    $('#userInfoArea select[name="division"] option:last').change();
+                }
+            }
+        }
+    });
 	var commentTemp = '';
 	var data = {
 		init : function(){
