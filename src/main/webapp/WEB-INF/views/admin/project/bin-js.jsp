@@ -318,7 +318,13 @@ var bin_fn = {
 		var target = $("#binList");
 		var prjId = '${project.prjId}';
 		var binCsvFileId = $('#binCsvFileId').val();
+		if("" != binCsvFileId && $(".binFileArea").find("li").length == 0){
+			binCsvFileId = "";
+		}
 		var binBinaryFileId = $("#binBinaryFileId").val();
+		if("" != binBinaryFileId && $(".binBinaryFileArea").find("li").length == 0){
+			binBinaryFileId = "";
+		}
 		var identificationSubStatusBin = $("#applicableBin:checked").val();
 		
 		var delFileData = bin_evt.csvDelFileSeq;
