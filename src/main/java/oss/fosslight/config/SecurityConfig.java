@@ -149,7 +149,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             T2Users userInfo = userService.getUserAndAuthorities(user);
             
             HashMap<String, Object> info = new HashMap<String, Object>();
-            
+			if(StringUtil.isEmptyTrimmed(userInfo.getDivision())){
+				userInfo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+			}
             info.put("sessUserInfo", userInfo);
             auth.setDetails(info);
             
