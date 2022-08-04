@@ -459,7 +459,7 @@ var activeTabInFrameList = function(targetTab){
 	if("PROJECT" == targetTab) {
 		tabName = "Project List";
 	} else if("PARTNER" == targetTab) {
-		
+		tabName = "3rd Party List";
 	} else if("OSS" == targetTab) {
 		
 	} else if("LICENSE" == targetTab) {

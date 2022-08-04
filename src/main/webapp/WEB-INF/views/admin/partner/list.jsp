@@ -92,6 +92,30 @@
 		</fieldset>
 		<!---->
 		<div class="btnLayout">
+			<!-- Popup -->
+			<div id="changeDivisionPop" class="pop changeDivisionPop">
+				<h1 class="orange">Change Division</h1>
+				<div class="popdata">
+					<div class="mtb20">
+						<span>Division</label>
+						<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
+							<strong title="Division selected value"></strong>
+							<select name="division">
+								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
+							</select>
+						</span>	
+					</div>
+				</div>
+				<div class="pbtn">
+					<input type="button" value="Cancel" class="btnCancel btnColor" onclick="fn.changeDivisionCancel();"/>
+					<input type="button" value="OK" class="btnColor red" onclick="fn.changeDivisionSave();"/>
+				</div>
+			</div>
+			<!-- //Popup -->
+		
+			<span class="left">
+				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
+			</span>
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#<c:url value="/partner/edit"/>')" />
@@ -104,6 +128,9 @@
 		</div>
 		<!---->
 		<div class="btnLayout">
+			<span class="left">
+				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
+			</span>
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#<c:url value="/partner/edit"/>')" />

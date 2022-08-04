@@ -39,6 +39,8 @@
 	                   +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
 	                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
+	                   +"<dl><dt><span class=\"priority priority_1\"></span>Priority1</dt></dl><br>"
+	                   +"<dl><dt><span class=\"priority priority_2\"></span>Priority2</dt></dl><br>"
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
 		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
@@ -957,7 +959,48 @@
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
-		}
+		}, changeDivision : function(){
+			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+
+			if(chk > 0){
+				$("#changeDivisionSelect").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
+				$("#changeDivisionPop").show();
+			} else {
+				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			}
+		}, changeDivisionSave : function(){
+			var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
+			var division = $("#changeDivisionPop select[name=division]").val();
+
+			alertify.confirm('<spring:message code="msg.common.change.division" />', function (e) {
+				if (e) {
+					$('#changeDivisionPop').hide();
+					
+					$.ajax({
+						type: 'POST',
+						url :'<c:url value="/project/updateProjectDivision"/>',
+						data: JSON.stringify({'prjIds':changeDivisionArr, 'prjDivision':division}),
+						contentType : 'application/json',
+						success: function (data) {
+							alertify.alert('<spring:message code="msg.common.success" />', function(){
+								reloadTabInframe('<c:url value="/project/list"/>');
+								activeTabInFrameList("PROJECT");
+							});
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		}, changeDivisionCancel : function(){
+			$("#changeDivisionPop select[name=division] option").remove();
+			$('#changeDivisionPop').hide();
+		}, toolTipDoubleclick: function () {
+                    return 'title="' + "Double click" + '"';
+            }
 	};
 	
 	// jqGrid
@@ -979,7 +1022,7 @@
 				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
-					{name: 'prjName', index: 'prjName', width: 200, align: 'left'},
+					{name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick},
 					{name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true},
 					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, cellattr: fn.cellattrStatus, sortable : true},
 					{name: 'identificationStatus', index: 'identificationStatus', width: 200, align: 'left', formatter: fn.displayIdentification, unformatter: fn.unformatter, sortable : true, title:false},

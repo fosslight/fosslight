@@ -2656,16 +2656,18 @@ public class CommonFunction extends CoTopComponent {
 			
 			if(!isEmpty(licenseName)) {
 				String fileName = licenseName.replaceAll(" ", "_").replaceAll("/", "_") + ".html";
-				
-				if(distributionFlag) {
+				boolean DEFAULT_URL_FLAG = !CoConstDef.FLAG_YES.equals(CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_NOTICE_INTERNAL_URL));
+				if (DEFAULT_URL_FLAG) {
+					return licenseMaster.getWebpage();
+				} else if (distributionFlag) {
 					String distributeUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTE_CODE, CoConstDef.CD_DTL_DISTRIBUTE_LGE);
 					distributeUrl += filePath + "/" + fileName;
-					
+
 					return distributeUrl;
 				} else {
 					String domain = licenseMaster.getDomain();
 					String fileUrl = domain + filePath + "/" + fileName;
-					
+
 					return fileUrl;
 				}
 			}

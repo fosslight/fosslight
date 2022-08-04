@@ -324,6 +324,7 @@ public final class Url {
 		public static final String PROJECT_BINARY_DB_SAVE = PATH + "/binaryDBSave";
 		
 		public static final String MAKE_YAML = PATH + "/makeYaml/{code}";
+		public static final String PROJECT_DIVISION = PATH + "/updateProjectDivision";
 	}
 	
 	public static final class VERIFICATION {
@@ -440,6 +441,7 @@ public final class Url {
 		public static final String SAVE_BINARY_DB = PATH + "/saveBinaryDB";
 		
 		public static final String MAKE_YAML = PATH + "/makeYaml";
+		public static final String PARTNER_DIVISION = PATH + "/updatePartnerDivision";
 	}
 	
 	public static final class USER {

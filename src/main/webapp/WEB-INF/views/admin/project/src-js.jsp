@@ -1187,6 +1187,10 @@ var src_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
+
+                                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                var nextRow = rowid
+                                $('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("srcList");

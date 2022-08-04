@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3378,25 +3380,42 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> reportData, List<String> noticeBinaryList) throws IOException {
 		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, String> validMap = new HashMap<>();
-		
-		// notice.html 파일이 있으면 notice.html내 해당 binary가 존재하는지 여부를 체크 csv내의 결과와 다를 경우 warning
-		if(noticeBinaryList != null) {
-			for(ProjectIdentification bean : reportData) {
-				boolean fileNameCheckFlag = false;
+
+		if (noticeBinaryList != null) {
+			for (ProjectIdentification bean : reportData) {
 				String binaryNm = bean.getBinaryName();
-				
-				if(binaryNm.indexOf("/") > -1) {
-					if(!binaryNm.endsWith("/")) {
-						binaryNm = binaryNm.substring(binaryNm.lastIndexOf("/")+1);
-					} else {
-						fileNameCheckFlag = true;
+				String binaryNameWithoutPath = binaryNm;
+
+				if (binaryNm.indexOf("/") > -1) {
+					if (!binaryNm.endsWith("/")) {
+						binaryNameWithoutPath = binaryNm.substring(binaryNm.lastIndexOf("/") + 1);
 					}
 				}
-				
-				if(fileNameCheckFlag) {
-					bean.setBinaryNotice("nok");
+				bean.setBinaryNotice("nok");
+				if (noticeBinaryList.contains(binaryNameWithoutPath)) {
+					bean.setBinaryNotice("ok");
 				} else {
-					bean.setBinaryNotice(noticeBinaryList.contains(binaryNm) ? "ok" : "nok");
+					try {
+						ArrayList<String> apex_name_to_search = new ArrayList<String>();
+						Pattern pattern = Pattern.compile("apex/([^/]+)/");
+						Matcher matcher = pattern.matcher(binaryNm);
+						while (matcher.find()) {
+							String apex_name = matcher.group(1);
+							if (!apex_name.isEmpty()) {
+								apex_name_to_search.add(apex_name + ".apex");
+								apex_name_to_search.add(apex_name + ".capex");
+							}
+							break;
+						}
+						for (String apex_search : apex_name_to_search) {
+							if (noticeBinaryList.contains(apex_search)) {
+								bean.setBinaryNotice("ok");
+								break;
+							}
+						}
+					} catch (Exception e) {
+						log.debug(e.getMessage());
+					}
 				}
 			}
 		}
@@ -4869,5 +4888,51 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				projectMapper.updateFileId(project);
 			}
 		}
+	}
+
+	@Override
+	public Map<String, List<Project>> updateProjectDivision(Project project) {
+		Map<String, List<Project>> updateProjectDivMap = new HashMap<>();
+		List<Project> beforeBeanList = new ArrayList<>();
+		List<Project> afterBeanList = new ArrayList<>();
+		
+		Project param = new Project();
+		String division = project.getPrjDivision();
+		String comment = "";
+		
+		for(String prjId : project.getPrjIds()) {
+			param.setPrjId(prjId);
+			Project beforeBean = getProjectDetail(param);
+			
+			if(!beforeBean.getDivision().equals(division)) {
+				Project afterBean = getProjectDetail(param);
+				afterBean.setDivision(division);
+				
+				projectMapper.updateProjectDivision(afterBean);
+				
+				comment = "해당 Project 의 Division ( " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) 
+						+ " => " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision())
+						+ " ) 이 변경되었습니다.";
+				
+				afterBean.setUserComment(comment);
+				
+				Map<String, List<Project>> modelMap = getModelList(prjId);
+				beforeBean.setModelList((List<Project>) modelMap.get("currentModelList"));
+				afterBean.setModelList((List<Project>) modelMap.get("currentModelList"));
+				
+				beforeBeanList.add(beforeBean);
+				afterBeanList.add(afterBean);
+			}
+		}
+		
+		if(!beforeBeanList.isEmpty()) {
+			updateProjectDivMap.put("before", beforeBeanList);
+		}
+		
+		if(!afterBeanList.isEmpty()) {
+			updateProjectDivMap.put("after", afterBeanList);
+		}
+		
+		return updateProjectDivMap;
 	}
 }

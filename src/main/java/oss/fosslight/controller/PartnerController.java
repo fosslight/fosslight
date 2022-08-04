@@ -1234,4 +1234,38 @@ public class PartnerController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(yamlFileId);
 	}
+	
+	@PostMapping(value=PARTNER.PARTNER_DIVISION)
+	public @ResponseBody ResponseEntity<Object> updatePartnerDivision(
+			@RequestBody PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		Map<String, List<PartnerMaster>> updatePartnerDivision = partnerService.updatePartnerDivision(partnerMaster);	
+		
+		if(updatePartnerDivision.containsKey("before") && updatePartnerDivision.containsKey("after")) {
+			List<PartnerMaster> beforePartnerList = (List<PartnerMaster>) updatePartnerDivision.get("before");
+			List<PartnerMaster> afterPartnerList = (List<PartnerMaster>) updatePartnerDivision.get("after");
+			
+			if((beforePartnerList != null && !beforePartnerList.isEmpty()) 
+					&& (afterPartnerList != null && !afterPartnerList.isEmpty())
+					&& beforePartnerList.size() == afterPartnerList.size()) {
+				
+				for(int i=0; i<beforePartnerList.size(); i++) {
+					try {
+						CommentsHistory commentsHistory = new CommentsHistory();
+						commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+						commentsHistory.setReferenceId(afterPartnerList.get(i).getPartnerId());
+						commentsHistory.setContents(afterPartnerList.get(i).getUserComment());
+						
+						commentService.registComment(commentsHistory, false);
+					} catch(Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			}
+		}
+		
+		return makeJsonResponseHeader();
+	}
 }

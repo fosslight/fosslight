@@ -261,22 +261,21 @@
 						    }
 						}
 					},
+					beforeSelectRow: function(rowid){
+						if(lastSelection != undefined && rowid != lastSelection) {
+							cleanErrMsg("ossList", lastSelection);
+							$("#ossList").jqGrid('saveRow',lastSelection);
+							gridValidMsgRowId(ossValidMsg, "ossList", lastSelection);
+							gridDiffMsgRowId(ossDiffMsg, "ossList", lastSelection);
+						}
+					},
 					onSelectRow: function(rowid){
 						var completeYn = "SUCCESS" == $("#ossList").getRowData(rowid).result.toUpperCase();
 						
 						if(!completeYn){
 							if (rowid) {
-								var grid = $("#ossList");
-								
-								if(lastSelection != undefined) {
-									cleanErrMsg("ossList", lastSelection);
-									grid.jqGrid('saveRow',lastSelection);
-									gridValidMsgRowId(ossValidMsg, "ossList", lastSelection);
-									gridDiffMsgRowId(ossDiffMsg, "ossList", lastSelection);
-								}
-								          
 								cleanErrMsg("ossList", rowid);
-								grid.jqGrid('editRow',rowid, {keys: true} );
+								$("#ossList").jqGrid('editRow',rowid, {keys: true} );
 								
 								lastSelection = rowid;
 							}

@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.4.7 (29/07/2022)
+## 🐛 Hotfixes
+
+- Remove version diff notification popup when deleting OSS @FOSSLight-dev  (#609)
+- Fix the bug where search terms are entered during change division @FOSSLight-dev (#603)
+- Fix bugs that do not run with docker-compose on Windows @soimkim (#598)
+- Change the multilingual setting to ignore the country @yujung7768903 (#592)
+
+## 🔧 Maintenance
+
+- Add priority to the status tooltip of the Project List @JIY0UNG (#602)
+- Increase the length of the name field  @hataerin (#604)
+- Move to a cell what I double-click @Gseungmin (#580)
+- Add guide comment in Configuration @MoonDD99 (#600)
+- Change nickname input position of OSS List, License List when Add button is clicked @70825 (#589)
+- Make it search even if space is included at the beginning and end of the word in the OSS List @MiniVee (#591)
+- Fix comment in Self-check to remove newline @acisliver (#583)
+- XSS prevention with jstl @swa07016 (#588)
+- Show "Double click" when mouse hovers on project name @MyunghyunNero (#572)
+- Hide user email as per option @MiniVee (#593)
+
+---
+
+## v1.4.6 (22/07/2022)
+## Changes
+## 🚀 Features
+
+- Add the function to change division @FOSSLight-dev (#586)
+
+## 🔧 Maintenance
+
+- Reload tab to you're working on after checking OSS Name/License @FRESH-TUNA (#568)
+- Add a flag to use the license's internal url @soimkim (#587)
+---
+
 ## v1.4.5 (15/07/2022)
 ## Changes
 ## 🚀 Features
@@ -437,53 +472,3 @@
 - Check OSS Name > Change download location to git:// from https:// @FOSSLight-dev (#357)
 - Send comments to Creator, Watcher, and Reviewer by mail. @riyenas0925 (#355)
 - Add parameter for merging option to BOM export. @FOSSLight-dev (#350)
-
----
-
-## v1.2.22 (17/12/2021)
-## Changes
-
-- Add multilingual support about delivery form @yugeeklab (#335)
-
-## 🚀 Features
-
-- Add OSS Notice issuance function to Self-Check @namkyu1999 (#288)
-- In Check OSS Name, make it possible to select from multiple OSS Names. @FOSSLight-dev  (#342)
-- Add External Service health check @riyenas0925 (#310)
-
-## 🐛 Hotfixes
-
-- Eliminate null pointer exception in OSS Controller @yugeeklab (#316)
-- Change the ckeditor config value related to file upload. @FOSSLight-dev (#343)
-- Eliminate null pointer exception in CoMailManager @yugeeklab (#317)
-- Fix heap memory issue when registering CPE Data Feed (GC Limit) @FOSSLight-dev (#332)
-- Apply autogrow to ckeditor @yugeeklab (#328)
-
-## 🔧 Maintenance
-
-- Support Check OSS Name, Check License multilingual @riyenas0925 (#344)
-- Do not print () if the OSS version is null when leaving a comment in the Check License. @riyenas0925 (#339)
-- Add a function to change the OSS table in bulk (incomplete) @FOSSLight-dev (#338)
-- Change max height of editor @soimkim (#336)
-- Add Check License to Project tab (bin, android) @riyenas0925 (#324)
-
----
-
-## v1.2.21 (10/12/2021)
-## 🚀 Features
-
-- Fix OSS Notices to include SPDX (json) and SPDX (yaml) @riyenas0925 (#320)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the notice file format is unchecked whenever the status is changed @FOSSLight-dev (#329)
-- Fix the license duplication bug in Check License @riyenas0925 (#318)
-
-## 🔧 Maintenance
-
-- Add test to github action for PR @yugeeklab (#301)
-- Remove the label setting for PR from the guide @soimkim (#327)
-- Update 3rd party list UI @riyenas0925 (#315)
-- Change SPDX dependecy version @riyenas0925 (#323)
-- Exception handling when accessing a deleted project @FOSSLight-dev (#322)
-- Change token to invisible @riyenas0925 (#312)
