@@ -485,7 +485,8 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .projdecBtn {position:absolute;right:0;top:23px;}
 .commentBtn {position:absolute;right:0;bottom:-23px;}
 .projectContents {position:relative;top:120px;}
-.commentEditor {position:fixed;top:145px;z-index:100;padding:0;display:inline-block;width:1025px;background:#fff;}
+.projectContentsDistribution {position:relative;top:130px;}
+.commentEditor {position:fixed;top:160px;z-index:100;padding:0;display:inline-block;width:1025px;background:#fff;}
 .cBtn {clear:left;display:inline-block;width:100%;text-aling:right;}
 .cBtn .btnCLight {float:right;margin:0 0 0 5px;}
 /**/
