@@ -139,11 +139,10 @@
 			var userName = $('#userInfoArea input[name="userName"]').val();
 			var division = $.trim($('#userInfoArea select[name="division"] option:selected').val());
 			var confirmMsg = "";
-			if(division === ""){
-			    division = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+			if(division === "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}"){
 			    confirmMsg = '<spring:message code="msg.configuration.confirm.save"/>';
 			} else {
-			        confirmMsg = '<spring:message code="msg.common.confirm.save"/>'
+                confirmMsg = '<spring:message code="msg.common.confirm.save"/>'
 			}
 			alertify.confirm(confirmMsg, function (e) {
 				if (e) {
