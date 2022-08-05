@@ -588,6 +588,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.setNewOssId(bean.getOssId()); // 삭제하지 않고 이름만 변경해서 재사용한다.
 					
 					ossMapper.changeOssNameByDelete(bean);
+					// Version Flag Setting
+					updateLicenseDivDetail(bean);
 					
 					commentService.registComment(historyBean);
 
