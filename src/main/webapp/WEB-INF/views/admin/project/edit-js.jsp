@@ -29,7 +29,17 @@
 		initSample2();
 		data.init();
 		evt.init();
-		
+
+        var prjDivision = $("#prjDivision");
+        for(var i=0;i<prjDivision.children().length;i++){
+            if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
+                break;
+            }
+            if(prjDivision.children().length-1 == i) {
+                prjDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}'></option>");
+            }
+        }
+
 		if('${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
 			$("input[name=creatorNm]").val('${project.prjUserName}');
 		}

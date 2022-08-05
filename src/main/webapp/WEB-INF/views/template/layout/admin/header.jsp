@@ -13,6 +13,14 @@
 			let selectedOption = $('#selectLang').val();
 			window.location.replace('?lang=' + selectedOption);
 		});
+
+		if(${sessUserInfo.division} === ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+			alertify.alert('<spring:message code="msg.configuration.notice.devision" />', function (e) {
+				if (e) {
+					$('.configurationSpan .add-tab').trigger("click");
+				}
+			});
+		}
 	});
 </script>
 <!-- header -->
@@ -34,7 +42,7 @@
 		</div>
 		<div class="userLogout">
 			<input type="hidden" id="defaultTabAnchorArr" value="${sessUserInfo.defaultTabAnchor}" />
-			<span class="configurationSpan"><a href="#<c:url value="/configuration/edit"/>" class="add-tab" title="${sessUserInfo.userName}"><span><img src="${ctxPath}/images/settings.png" alt="FOSSLight Hub" width="14" height="14" /></span>&nbsp;&nbsp;${sessUserInfo.userName}</a></span>
+			<span class="configurationSpan"><a href="#<c:url value="/configuration/edit"/>" class="add-tab" title="User Settings"><span><img src="${ctxPath}/images/settings.png" alt="FOSSLight Hub" width="14" height="14" /></span>&nbsp;&nbsp;${sessUserInfo.userName}</a></span>
 			<span class="userLogoutSpan"><a href="<c:url value="/session/logout-proc"/>" class="userLogoutA">Logout</a></span>
 			<p style="margin-top: 20px;"><marquee behavior="scroll" direction="left">${ct:getCodeExpString(ct:getConstDef('CD_MARQUEE'), ct:getConstDef('CD_DTL_CONTENTS'))}</marquee></p>
 		</div>
