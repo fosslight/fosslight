@@ -91,13 +91,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				String[] info = userService.checkUserInfo(vo);
 				String userName = info[0];
 				String userEmail = info[1];
-				if(StringUtil.isEmptyTrimmed(userEmail)) {
-					throw new RuntimeException("Ldap 사용자 정보 확인 불가 " + vo.getUserId());
+				if(StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
+					log.debug("Cannot find Ldap user information : " + vo.getUserId());
+					return false;
 				}
 				vo.setEmail(userEmail);
-				if(StringUtil.isEmptyTrimmed(userName)){
-					 throw new RuntimeException("Ldap 사용자 정보 확인 불가 " + vo.getUserId());
-				}
 				vo.setUserName(userName);
 				vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 
