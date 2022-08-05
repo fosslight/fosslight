@@ -1769,8 +1769,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setDownloadLocation(ossMaster.getDownloadLocation().substring(0, ossMaster.getDownloadLocation().indexOf("#")));
 				}
 				
-				if(!ossMaster.getDownloadLocation().startsWith("https://")) {
-					ossMaster.setDownloadLocation("https://" + ossMaster.getDownloadLocation());
+				if(!ossMaster.getDownloadLocation().startsWith("http://") && !ossMaster.getDownloadLocation().startsWith("https://")) {
+					if(ossMaster.getDownloadLocation().contains("//")) {
+						ossMaster.setDownloadLocation("https://" + ossMaster.getDownloadLocation().split("//")[1]);
+					} else {
+						ossMaster.setDownloadLocation("https://" + ossMaster.getDownloadLocation());
+					}
 				}
 				
 				if( urlSearchSeq > -1 ) {
@@ -1888,8 +1892,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setHomepage(ossMaster.getHomepage().substring(0, ossMaster.getHomepage().indexOf("#")));
 				}
 				
-				if(!ossMaster.getHomepage().startsWith("https://")) {
-					ossMaster.setHomepage("https://" + ossMaster.getHomepage());
+				if(!ossMaster.getHomepage().startsWith("http://") && !ossMaster.getHomepage().startsWith("https://")) {
+					if(ossMaster.getHomepage().contains("//")) {
+						ossMaster.setHomepage("https://" + ossMaster.getHomepage().split("//")[1]);
+					} else {
+						ossMaster.setHomepage("https://" + ossMaster.getHomepage());
+					}
 				}
 				
 				if( urlSearchSeq > -1 ) {
