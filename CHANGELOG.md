@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.4.8 (05/08/2022)
+## 🚀 Features
+
+- Skip registration step when using LDAP @Min-Kyungsun (#576)
+
+## 🐛 Hotfixes
+
+- Fix return value to Obligation Type @myway00 (#607)
+- When renaming to another OSS while deleting OSS, check License @FOSSLight-dev  (#624)
+
+## 🔧 Maintenance
+
+- Change the CVSS Score for sending Vulnerability alerts from 9.0 to 8.0 @FOSSLight-dev (#621)
+- Show the user's name, when Mouse hover @hataerin (#616)
+- Increase the length of the project's name field @MiniVee (#613)
+- Caching Dependencies to speed up workflows @jongwooo (#610)
+
+---
+
 ## v1.4.7 (29/07/2022)
 ## 🐛 Hotfixes
 
@@ -453,22 +472,3 @@
 - Add Check License function in Self-Check page @riyenas0925 (#367)
 - License and Comment output when loading SPDX @riyenas0925 (#358)
 - Hide the Check License, Check OSS Name buttons with the same conditions as the Save button. @Zeusjonass (#354)
-
----
-
-## v1.2.23 (24/12/2021)
-## 🚀 Features
-
-- Show FOSSLight version in sidebar @riyenas0925 (#352)
-
-## 🐛 Hotfixes
-
-- Fix mismatching error in Check License @riyenas0925 (#349)
-
-## 🔧 Maintenance
-
-- Delete ${sidx}, ${sord}, ${schKeywordSql} and ${filterCondition} for defending SQL Injection  @yugeeklab (#346)
-- Update distribution mailing condition. @FOSSLight-dev  (#359)
-- Check OSS Name > Change download location to git:// from https:// @FOSSLight-dev (#357)
-- Send comments to Creator, Watcher, and Reviewer by mail. @riyenas0925 (#355)
-- Add parameter for merging option to BOM export. @FOSSLight-dev (#350)
