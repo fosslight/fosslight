@@ -1409,6 +1409,8 @@ public class OssController extends CoTopComponent{
 				result.addAll(ossService.checkOssNameData(mainData, null, diffMap));
 				resMap.put("diffMap", diffMap);
 			}
+			
+			result.addAll(ossService.checkOssNameData(mainData, null, null));
 		}
 		
 		if(result.size() > 0) {
