@@ -4205,6 +4205,7 @@ public class ProjectController extends CoTopComponent {
 						mailBean.setParamPrjId(afterPrjList.get(i).getPrjId());
 						mailBean.setCompareDataBefore(beforePrjList.get(i));
 						mailBean.setCompareDataAfter(afterPrjList.get(i));
+						mailBean.setToIdsCheckDivision(true);
 						
 						CoMailManager.getInstance().sendMail(mailBean);
 					} catch(Exception e) {

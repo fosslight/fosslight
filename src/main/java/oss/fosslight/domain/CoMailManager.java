@@ -884,7 +884,12 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(bean.getMsgType())
     						){
-    					toList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함하고 있음
+    					if(!bean.isToIdsCheckDivision()) {
+    						toList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함하고 있음
+    					} else {
+    						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId()));
+    					}
+    					
         				if(!isEmpty(prjInfo.getReviewer())) {
         					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
