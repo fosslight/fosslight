@@ -3077,6 +3077,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 		
+		if(validMap == null && diffMap == null) {
+			resultData.addAll(componentData.stream().filter(e -> e.getOssName().equals("-")).collect(Collectors.toList()));
+		}
+		
 		return resultData;
 	}
 	

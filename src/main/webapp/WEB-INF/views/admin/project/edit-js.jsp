@@ -30,6 +30,20 @@
 		data.init();
 		evt.init();
 
+        var userDivision = $('#division');
+        for(var i=0;i<userDivision.children().length;i++){
+            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
+                break;
+            }
+            if(userDivision.children().length - 1 == i ) {
+                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+                if('${project.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+                    $('#division option:last').attr("selected", "selected");
+                    $('#division option:last').change();
+                }
+            }
+        }
+
         var prjDivision = $("#prjDivision");
         for(var i=0;i<prjDivision.children().length;i++){
             if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
