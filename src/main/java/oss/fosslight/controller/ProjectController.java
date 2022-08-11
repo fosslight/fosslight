@@ -998,6 +998,26 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	/**
+	 * [API] Comment Update.
+	 *
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the response entity
+	 */
+	@PostMapping(value = PROJECT.UPDATE_COMMENT)
+	public @ResponseBody ResponseEntity<Object> updateComment(@RequestBody Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		try {
+			projectService.updateComment(project);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		return makeJsonResponseHeader();
+	}
+
+	/**
 	 * [API] 프로젝트 저장.
 	 *
 	 * @param project the project

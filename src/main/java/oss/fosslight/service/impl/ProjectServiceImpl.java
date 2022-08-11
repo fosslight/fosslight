@@ -4940,4 +4940,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return updateProjectDivMap;
 	}
+
+	@Override
+	public void updateComment(Project project) {
+		projectMapper.updateComment(project);
+	}
 }
