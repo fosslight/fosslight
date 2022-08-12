@@ -2127,6 +2127,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('122', '8', 'OSL-1.1', '', '', 8, 'Y'),
 	('122', '9', 'OSL-2.0', '', '', 9, 'Y'),
 	('200', '999', 'N/A', '', '', 999, 'Y'),
+	('200', '1', 'Open Source Task', '', '', 1, 'Y'),
 	('201', 'CP', 'Copyleft', '', '', 3, 'Y'),
 	('201', 'NA', 'Proprietary', '', '', 4, 'Y'),
 	('201', 'PF', 'Proprietary Free', '', '', 5, 'Y'),
