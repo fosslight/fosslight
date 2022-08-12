@@ -1488,13 +1488,13 @@
 			AND LICENSE_ID = #{licenseId}
 	</select>
 	
-	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
+	<update id="updateComment" parameterType="oss.fosslight.domain.Project">
 		UPDATE
 			PROJECT_MASTER
 		SET
-			COMMENT = #{commId}
+			COMMENT = #{comment}
 		WHERE
-			PRJ_ID = #{referenceId}
+			PRJ_ID = #{prjId}
 	</update>
 	
 	<update id="deleteComment" parameterType="oss.fosslight.domain.CommentsHistory">

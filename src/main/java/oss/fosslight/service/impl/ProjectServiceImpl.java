@@ -4920,6 +4920,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				beforeBean.setModelList((List<Project>) modelMap.get("currentModelList"));
 				afterBean.setModelList((List<Project>) modelMap.get("currentModelList"));
 				
+				if(afterBean.getWatcherList() != null && !afterBean.getWatcherList().isEmpty()) {
+					List<String> prjWatchers = afterBean.getWatcherList().stream().map(e -> e.getPrjDivision() + "/" + e.getPrjUserId()).collect(Collectors.toList());
+					afterBean.setWatchers(prjWatchers.toArray(new String[prjWatchers.size()]));
+				}
+				
 				beforeBeanList.add(beforeBean);
 				afterBeanList.add(afterBean);
 			}
@@ -4934,5 +4939,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		return updateProjectDivMap;
+	}
+
+	@Override
+	public void updateComment(Project project) {
+		projectMapper.updateComment(project);
 	}
 }

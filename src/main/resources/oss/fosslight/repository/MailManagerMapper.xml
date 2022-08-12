@@ -77,6 +77,15 @@
 		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN PROJECT_MASTER T2 ON T1.USER_ID = T2.CREATOR
 		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
 	</select>
+	<select id="setProjectWatcherMailListNotCheckDivision" parameterType="String" resultType="String">
+		SELECT DISTINCT T1.EMAIL
+		FROM T2_USERS T1
+		INNER JOIN PROJECT_WATCHER T2 ON T1.USER_ID = T2.USER_ID
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+		UNION
+		SELECT T1.EMAIL FROM T2_USERS T1 INNER JOIN PROJECT_MASTER T2 ON T1.USER_ID = T2.CREATOR
+		WHERE T1.USE_YN = 'Y' AND T2.PRJ_ID = #{prjId}
+	</select>
 	<select id="getPartnerInfo" parameterType="String" resultType="oss.fosslight.domain.PartnerMaster">
 	SELECT * FROM PARTNER_MASTER WHERE PARTNER_ID = #{partnerId}
 	</select>

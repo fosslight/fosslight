@@ -325,6 +325,7 @@ public final class Url {
 		
 		public static final String MAKE_YAML = PATH + "/makeYaml/{code}";
 		public static final String PROJECT_DIVISION = PATH + "/updateProjectDivision";
+		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 	}
 	
 	public static final class VERIFICATION {
