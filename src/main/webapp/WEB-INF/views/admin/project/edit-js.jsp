@@ -30,11 +30,15 @@
 		data.init();
 		evt.init();
 
-        if(CKEDITOR.instances.editor) {
-            var _editor = CKEDITOR.instances.editor;
-            _editor.destroy();
+        if($('input[name=prjId]').val() == "") {
+            $("#editAdditionalInfomation").hide();
+        } else {
+            if(CKEDITOR.instances.editor) {
+                var _editor = CKEDITOR.instances.editor;
+                _editor.destroy();
+            }
+            CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
         }
-        CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
 
         var userDivision = $('#division');
         for(var i=0;i<userDivision.children().length;i++){
