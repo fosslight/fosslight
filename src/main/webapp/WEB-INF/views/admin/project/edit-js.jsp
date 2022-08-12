@@ -30,7 +30,7 @@
 		data.init();
 		evt.init();
 
-        if($('input[name=prjId]').val() == "") {
+        if($('input[name=prjId]').val() == "" || copyFlag == 'Y') {
             $("#editAdditionalInfomation").hide();
         } else {
             if(CKEDITOR.instances.editor) {
