@@ -2732,6 +2732,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Cell cellDocumentNamespace = getCell(row, cellIdx); cellIdx++;
 				String spdxidentifier = "SPDXRef-" + strPrjName.replaceAll(" ", "") + "-" + createdTime;
 				String domain = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org/");
+				if(!domain.endsWith("/")) {
+					domain += "/";
+				}
 				cellDocumentNamespace.setCellValue(domain + spdxidentifier);
 				
 				// Document Contents
