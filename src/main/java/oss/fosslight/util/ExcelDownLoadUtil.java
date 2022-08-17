@@ -633,7 +633,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			
 			for(String key : vr.getValidMessageMap().keySet()) {
-				if(key.contains(gridId)) {
+				if(key.contains(".") && gridId.equals(key.split("[.]")[1])) {
 					if(!isEmpty(message)) {
 						message += "/";
 					}
@@ -651,7 +651,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				gridId = bean.getGridId();
 			}
 			for(String key : vr.getDiffMessageMap().keySet()) {
-				if(key.contains(gridId)) {
+				if(key.contains(".") && gridId.equals(key.split("[.]")[1])) {
 					if(!isEmpty(message)) {
 						message += "/";
 					}
