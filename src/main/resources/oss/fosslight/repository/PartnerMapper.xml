@@ -24,8 +24,13 @@
 				t1.USE_YN = 'Y'
 				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 					AND (t1.CREATOR = #{loginUserName} 
-						OR t2.USER_ID  = #{loginUserName} 
-						OR (t2.USER_ID = 'all' AND t2.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+						OR EXISTS (
+						SELECT 1
+							FROM PARTNER_WATCHER A1 
+							WHERE A1.PARTNER_ID = t1.PARTNER_ID 
+							AND (A1.USER_ID = #{loginUserName}
+						   		OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName})) )
+					)
             		<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
                 		OR t1.PUBLIC_YN = 'Y'
            		 	</if>
@@ -157,8 +162,13 @@
 		 WHERE A.USE_YN = 'Y'
 		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 			AND (A.CREATOR = #{loginUserName} 
-				OR A.USER_ID  = #{loginUserName} 
-				OR (A.USER_ID = 'all' AND A.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+					OR EXISTS (
+					SELECT 1
+						FROM PARTNER_WATCHER A1 
+						WHERE A1.PARTNER_ID = A.PARTNER_ID 
+						AND (A1.USER_ID = #{loginUserName}
+						   		OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName})) )
+					)
             	<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
                 	OR A.PUBLIC_YN = 'Y'
            		</if>
