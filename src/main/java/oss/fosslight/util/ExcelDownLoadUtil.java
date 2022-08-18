@@ -2871,6 +2871,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 							cellLicenseDeclared.setCellValue(licenseStr);
 							attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
+						} else {
+							String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+							cellLicenseDeclared.setCellValue(licenseStr);
+							attributionText = bean.getAttribution();
 						}
 					}
 					
