@@ -279,7 +279,7 @@ public class SPDXDownloadController extends CoTopComponent {
 			String prjId = (String)map.get("prjId");
 			
 			if("spdxRdf".equals(spdxType)) {
-				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx_self", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				T2File sheetFile = fileService.selectFileInfo(sheetFileId);
 				String sheetFullPath = sheetFile.getLogiPath();
 				
@@ -317,7 +317,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					log.error(e.getMessage(), e);
 				}
 			} else if("spdxTag".equals(spdxType)) {
-				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx_self", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				T2File sheetFile = fileService.selectFileInfo(sheetFileId);
 				String sheetFullPath = sheetFile.getLogiPath();
 				
@@ -355,7 +355,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					log.error(e.getMessage(), e);
 				}
 			} else if("spdxJson".equals(spdxType)) {
-				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx_self", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				T2File sheetFile = fileService.selectFileInfo(sheetFileId);
 				String sheetFullPath = sheetFile.getLogiPath();
 
@@ -392,7 +392,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					log.error(e.getMessage(), e);
 				}
 			} else if("spdxYaml".equals(spdxType)) {
-				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				String sheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx_self", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				T2File sheetFile = fileService.selectFileInfo(sheetFileId);
 				String sheetFullPath = sheetFile.getLogiPath();
 
@@ -429,7 +429,7 @@ public class SPDXDownloadController extends CoTopComponent {
 					log.error(e.getMessage(), e);
 				}
 			} else if("spdx".equals(spdxType)){
-				downloadId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId("spdx_self", dataStr, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			} else {
 				log.error("not match type...");
 				
