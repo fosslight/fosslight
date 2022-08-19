@@ -345,6 +345,7 @@
             <span class="right">
                 <c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>
+					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/
                 </c:if>
                 <c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />
@@ -369,6 +370,7 @@
 			<span class="right">
 				<c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
 					<input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>
+					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/
 				</c:if>
 				<c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
 					<input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />

@@ -1612,6 +1612,28 @@ var saveFlag = false;
 				}
 			});
 		},
+        downloadYaml: function () {
+            var params = {'partnerId': '${detail.partnerId}', 'partnerName': '${detail.partnerName}'};
+
+            $.ajax({
+                type: "POST",
+                url: '<c:url value="/partner/makeYaml"/>',
+                data: JSON.stringify(params),
+                dataType: 'json',
+                cache: false,
+                contentType: 'application/json',
+                success: function (data) {
+                    if ("false" == data.isValid) {
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    } else {
+                        window.location = '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+                    }
+                },
+                error: function (data) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+        },
 		displayNotify : function(cellvalue, options, rowObject){
 			var display = "";
 			var obligationLicense = rowObject["obligationLicense"];

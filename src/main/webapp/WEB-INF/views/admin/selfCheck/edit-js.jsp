@@ -845,9 +845,31 @@
                 default:
                     break;
             }
+        },
+        downloadYaml : function(){
+            var params = {"prjId":"${project.prjId}", "prjName" : "${project.prjName}"};
+
+            $.ajax({
+                type: "POST",
+                url: '<c:url value="/selfCheck/makeYaml"/>',
+                data: JSON.stringify(params),
+                dataType : 'json',
+                cache : false,
+                contentType : 'application/json',
+                success: function (data) {
+                    if("false" == data.isValid) {
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    } else {
+                        window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+                    }
+                },
+                error: function(data){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
         }
 	};
-	
+
 	// 데이타
 	var data = {
 		modelValues:'',
