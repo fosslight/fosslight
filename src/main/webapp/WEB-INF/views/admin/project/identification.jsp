@@ -341,6 +341,7 @@
                     </span>
                     <span class="right">
                         <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
+                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('SRC')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
 	                        <input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -356,6 +357,7 @@
 				<div class="btnLayout">
 					<span class="right">
 						<input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
+						<input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('SRC')"/>
 						<c:if test="${project.dropYn ne 'Y'}">
 							<input id="srcReset" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
 							<input id="srcSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -526,6 +528,7 @@
                     </span>
                     <span class="right">
                         <input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
+                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BIN')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
 	                        <input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -540,6 +543,7 @@
 				<div class="btnLayout">
 					<span class="right">
 						<input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
+						<input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BIN')"/>
 						<input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
 						<input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
 						<!-- Popup -->
@@ -762,6 +766,7 @@
                     </span>
                     <span class="right">
                         <input type="button" value="Export" onclick="binAndroid_fn.downloadExcel()" class="btnColor red btnExpor binAndroidBtn" />
+                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('ANDROID')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="binAndroidReset" type="button" value="Reset" class="btnColor btnReset binAndroidBtn idenReset" />
 	                        <input id="binAndroidSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -776,6 +781,7 @@
 				<div class="btnLayout">
 					<span class="right">
 						<input type="button" value="Export" onclick="binAndroid_fn.downloadExcel()" class="btnColor red btnExpor binAndroidBtn" />
+						<input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('ANDROID')"/>
 						<c:if test="${project.dropYn ne 'Y'}">
 							<input id="binAndroidReset" type="button" value="Reset" class="btnColor btnReset binAndroidBtn idenReset" />
 							<input id="binAndroidSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -816,6 +822,7 @@
 					</c:if>
                     <span class="right">
                         <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
+                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomReset" type="button" value="Reset" class="btnColor btnReset idenReset" />
 	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>
@@ -831,6 +838,7 @@
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
 					<span class="right">
 						<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
+						<input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
 						<c:if test="${project.dropYn ne 'Y'}">
 							<input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
 							<input id="bomSave" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>
