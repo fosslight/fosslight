@@ -4123,6 +4123,12 @@ public class CommonFunction extends CoTopComponent {
 			comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) + "<br />";
 			comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision()) + "<br /></p>";
 		}
+
+		if(!beforeBean.getComment().equals(afterBean.getComment())) {
+			comment += "<p><strong>Additional Information</strong><br />";
+			comment += "Before : " + beforeBean.getComment() + "<br />";
+			comment += "After : " + afterBean.getComment() + "</p>";
+		}
 		
 		return comment;
 	}

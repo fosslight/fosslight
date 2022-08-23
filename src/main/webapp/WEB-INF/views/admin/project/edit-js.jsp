@@ -238,7 +238,7 @@
 				}else{
 					alertify.confirm(confirmMsg, function (e) {
 						if (e) {
-							fn.saveSubmit();
+							fn.saveSubmit(true);
 						} else {
 							return false;
 						}
@@ -247,7 +247,7 @@
 			});
 
 			$("#popCopyConfirmSave").click(function(){
-				fn.saveSubmit();
+				fn.saveSubmit(true);
 				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
 				$("#copyConfirmPopup").hide();
 			});
@@ -572,25 +572,7 @@
 	                $("#saveBtn").hide();
 	                $("#cancelBtn").hide();
 	                $("#editAdditionalInfomation").show();
-
-	                var data = {"prjId" : $('input[name=prjId]').val() , "comment" : CKEDITOR.instances.editor.getData()};
-
-	                $.ajax({
-	                    url : '<c:url value="/project/updateComment"/>',
-	                    type : 'POST',
-	                    data : JSON.stringify(data),
-	                    dataType : 'json',
-	                    cache : false,
-	                    contentType : 'application/json',
-	                    success: function(){
-	                        $("#saveBtn").unbind("click");
-	                        alertify.success('<spring:message code="msg.common.success" />');
-	                    },
-	                    error : function(){
-	                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
-	                    }
-	                });
-	                return false;
+	                fn.saveSubmit(false);
 	            });
 
 	            $("#cancelBtn").click( function(e) {
@@ -878,7 +860,7 @@
 				});
 			},
 			// 저장
-			saveSubmit : function(){
+			saveSubmit : function(reload){
 				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
@@ -949,7 +931,14 @@
 					type : 'POST',
 					dataType: "json",
 					cache : false,
-					success: fn.onRegistSuccess,
+					success: function(data) {
+						if(reload) {
+							fn.onRegistSuccess(data);
+						}
+						else {
+							alertify.success('<spring:message code="msg.common.success" />');
+						}
+					},
 					error : fn.onError
 				}).submit();
 			},
