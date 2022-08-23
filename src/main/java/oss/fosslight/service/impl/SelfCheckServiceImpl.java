@@ -1273,17 +1273,30 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
 		
 		if(addOssComponentList != null) {
+			ossComponent = null;
+			
 			for(OssComponents bean : addOssComponentList) {
+				String componentKey = (hideOssVersionFlag
+						? bean.getOssName() 
+						: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				
+				boolean addSrcInfo = srcInfo.containsKey(componentKey);
+				boolean addNoticeInfo = noticeInfo.containsKey(componentKey);
+				
+				if(addSrcInfo) {
+					ossComponent = srcInfo.get(componentKey);
+				} else if(addNoticeInfo) {
+					ossComponent = noticeInfo.get(componentKey);
+				} else {
+					ossComponent = bean;
+				}
+				
 				if("-".equals(bean.getOssName()) || !CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(bean.getOssName().toUpperCase())
 						|| !CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
 					if(!isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage())) {
-						bean.setHomepage(bean.getDownloadLocation());
+						ossComponent.setHomepage(bean.getDownloadLocation());
 					}
 				}
-				
-				String componentKey = (hideOssVersionFlag
-											? bean.getOssName() 
-											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				
 				if("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -1294,14 +1307,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				license.setLicenseName(bean.getLicenseName());
 				license.setLicenseText(bean.getLicenseText());
 				license.setAttribution(bean.getAttribution());
-				bean.addOssComponentsLicense(license);
-				
+				ossComponent.addOssComponentsLicense(license);
+								
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
 						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
-					srcInfo.put(componentKey, bean);
+					srcInfo.put(componentKey, ossComponent);
 				} else {
-					noticeInfo.put(componentKey, bean);
+					noticeInfo.put(componentKey, ossComponent);
 				}
 				
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
