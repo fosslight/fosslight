@@ -167,11 +167,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			errors.add(e.getStatusText());
 		}
 
-		String protocol = "";
-		String endUrl = "";
-		String downloadlocationUrlEndSplit = "";
-		String semicolonStr = "";
-		
 		for(ProjectIdentification oss : ossList) {
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
@@ -200,19 +195,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			if(oss.getDownloadLocation().contains(";")) {
-				int idx = 0;
-				for(String smc : oss.getDownloadLocation().split(";")) {
-					if(idx > 0) {
-						semicolonStr += smc + ";";
-					}
-					idx++;
-				}
-				semicolonStr = semicolonStr.substring(0, semicolonStr.length()-1);
 				oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
 			}
 			
 			if(oss.getDownloadLocation().startsWith("git@")){
-				protocol = "git@";
 				oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
 			}
 			
@@ -221,37 +207,27 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					|| oss.getDownloadLocation().startsWith("git://")
 					|| oss.getDownloadLocation().startsWith("ftp://")
 					|| oss.getDownloadLocation().startsWith("svn://")) {
-				if(isEmpty(protocol)) {
-					protocol = oss.getDownloadLocation().split("//")[0] + "//";
-					oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
-				}
+				oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
 			}
 			
 			if(oss.getDownloadLocation().startsWith("www.")) {
-				protocol += oss.getDownloadLocation().substring(0, 4);
 				oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
 			}
 			
 			if(oss.getDownloadLocation().contains(".git")) {
 				if(oss.getDownloadLocation().endsWith(".git")) {
-					endUrl = ".git";
 					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 				} else {
 					if(oss.getDownloadLocation().contains("#")) {
-						endUrl = oss.getDownloadLocation().substring(oss.getDownloadLocation().indexOf("#"), oss.getDownloadLocation().length());
 						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-						downloadlocationUrlEndSplit = ".git";
 						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
 					}
 				}
 			}
 			
-			if(isEmpty(downloadlocationUrlEndSplit)) {
-				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
-				if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-					downloadlocationUrlEndSplit = oss.getDownloadLocation().substring(oss.getDownloadLocation().indexOf("#"), oss.getDownloadLocation().length());
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-				}
+			String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
+			if(downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+				oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
 			}
 			
 			// Search Priority 2. find by oss download location and version
@@ -265,7 +241,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					oss.setCheckLicense(checkedLicense);
 					oss.setCheckedEvidence(evidence);
 					oss.setCheckedEvidenceType("DB");
-					oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
+					oss.setDownloadLocation(downloadLocation);
 					result.add(oss);
 				}
 				continue;
@@ -287,18 +263,13 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					oss.setCheckLicense(checkedLicense);
 					oss.setCheckedEvidence(evidence);
 					oss.setCheckedEvidenceType("DB");
-					oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
+					oss.setDownloadLocation(downloadLocation);
 					result.add(oss);
 				}
 				continue;
 			}
 
-			oss.setDownloadLocation(protocol + oss.getDownloadLocation() + downloadlocationUrlEndSplit + endUrl + semicolonStr);
-			
-			protocol = "";
-			endUrl = "";
-			downloadlocationUrlEndSplit = "";
-			semicolonStr = "";
+			oss.setDownloadLocation(downloadLocation);
 			
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
