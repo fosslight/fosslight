@@ -1307,7 +1307,24 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				license.setLicenseName(bean.getLicenseName());
 				license.setLicenseText(bean.getLicenseText());
 				license.setAttribution(bean.getAttribution());
-				ossComponent.addOssComponentsLicense(license);
+				
+				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+					ossComponent.addOssComponentsLicense(license);
+					
+					bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+					
+					// multi license 추가 copyright
+					if(!isEmpty(bean.getOssCopyright())) {
+						String addCopyright = avoidNull(ossComponent.getCopyrightText());
+						
+						if(!isEmpty(ossComponent.getCopyrightText())) {
+							addCopyright += "\r\n";
+						}
+						 
+						addCopyright += bean.getOssCopyright();
+						ossComponent.setCopyrightText(addCopyright);
+					}
+				}
 								
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
