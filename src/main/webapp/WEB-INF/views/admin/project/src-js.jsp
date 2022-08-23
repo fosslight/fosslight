@@ -127,7 +127,7 @@ var src_evt = {
 								var num = i+1;
 								var checkedTxt = "";
 								
-								if(result[1][i].name.toUpperCase().trim() == "SRC"){
+								if(result[1][i].name.toUpperCase().trim().startsWith("SRC")){
 									checkedTxt = "checked";
 								}
 								
