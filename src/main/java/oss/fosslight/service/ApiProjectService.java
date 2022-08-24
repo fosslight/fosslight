@@ -37,6 +37,8 @@ public interface ApiProjectService {
 	public List<Map<String, Object>> getBomList(String prjId);
 	
 	public List<Map<String, Object>> setMergeGridData(List<Map<String, Object>> list);
+
+	public Map<String, Object> getBomExportJson(String prjId);
 	
 	public Map<String, Object> getBomCompare(List<Map<String, Object>> beforeBomList, List<Map<String, Object>> afterBomList);
 	

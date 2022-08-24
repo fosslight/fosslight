@@ -746,8 +746,11 @@ public final class Url {
 			public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/model_update";
 			
 			/** API Project BOM Tab Export */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export"; 
-			
+			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export";
+
+			/** API Project BOM Tab Export JSON*/
+			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/prj_bom_export_json";
+
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
 			

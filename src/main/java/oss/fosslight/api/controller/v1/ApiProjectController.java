@@ -478,6 +478,40 @@ public class ApiProjectController extends CoTopComponent {
 			return null;
 		}
 	}
+
+	@ApiOperation(value = "Project Bom Tab Export Json", notes = "Project > Bom tab Export Json")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	})
+	@GetMapping(value = {API.FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON})
+	public CommonResult getPrjBomExportJson(
+			@RequestHeader String _token,
+			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId) {
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<String> prjIdList = new ArrayList<String>();
+			prjIdList.add(prjId);
+
+			Map<String, Object> paramMap = new HashMap<String, Object>();
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjIdList);
+			paramMap.put("distributionType", "normal");
+
+			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
+
+			if(searchFlag) {
+				resultMap = apiProjectService.getBomExportJson(prjId);
+			}
+			return responseService.getSingleResult(resultMap);
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+	}
 	
 	@ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
     @ApiImplicitParams({
