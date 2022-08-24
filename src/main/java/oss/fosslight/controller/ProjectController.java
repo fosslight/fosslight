@@ -1173,6 +1173,12 @@ public class ProjectController extends CoTopComponent {
 		if (!isNew) {
 			try {
 				String mailType = "true".equals(copy)?CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED:CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED;
+				String diffDivisionComment = "";
+				
+				if(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(mailType) && !beforeBean.getDivision().equals(afterBean.getDivision())){
+					diffDivisionComment = CommonFunction.getDiffItemComment(beforeBean, afterBean);
+				}
+				
 				CoMail mailBean = new CoMail(mailType);
 				mailBean.setParamPrjId(project.getPrjId());
 				mailBean.setCompareDataBefore(beforeBean);
@@ -1187,10 +1193,11 @@ public class ProjectController extends CoTopComponent {
 				CoMailManager.getInstance().sendMail(mailBean);
 				
 				if(CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(mailType)){
+					String diffItemComment = CommonFunction.getDiffItemComment(beforeBean, afterBean, true);
+					
 					try {
-						String diffItemComment = CommonFunction.getDiffItemComment(beforeBean, afterBean);
-						
-						if(!isEmpty(diffItemComment)) {
+						if(!isEmpty(diffItemComment) || !isEmpty(diffDivisionComment)) {
+							diffItemComment += diffDivisionComment;
 							CommentsHistory commHisBean = new CommentsHistory();
 							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
 							commHisBean.setReferenceId(project.getPrjId());
@@ -4213,13 +4220,6 @@ public class ProjectController extends CoTopComponent {
 				
 				for(int i=0; i<beforePrjList.size(); i++) {
 					try {
-						CommentsHistory commentsHistory = new CommentsHistory();
-						commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
-						commentsHistory.setReferenceId(afterPrjList.get(i).getPrjId());
-						commentsHistory.setContents(afterPrjList.get(i).getUserComment());
-						
-						commentService.registComment(commentsHistory, false);
-						
 						String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED;
 						CoMail mailBean = new CoMail(mailType);
 						mailBean.setParamPrjId(afterPrjList.get(i).getPrjId());
@@ -4228,6 +4228,18 @@ public class ProjectController extends CoTopComponent {
 						mailBean.setToIdsCheckDivision(true);
 						
 						CoMailManager.getInstance().sendMail(mailBean);
+						
+						try {
+							CommentsHistory commentsHistory = new CommentsHistory();
+							commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+							commentsHistory.setReferenceId(afterPrjList.get(i).getPrjId());
+							commentsHistory.setContents(afterPrjList.get(i).getUserComment());
+							commentsHistory.setStatus("Changed");
+							
+							commentService.registComment(commentsHistory, false);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
 					} catch(Exception e) {
 						log.error(e.getMessage(), e);
 					}
