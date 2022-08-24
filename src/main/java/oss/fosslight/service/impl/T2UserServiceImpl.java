@@ -22,7 +22,10 @@ import javax.naming.directory.SearchResult;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -326,6 +329,9 @@ public class T2UserServiceImpl implements T2UserService {
 		for(int i = 0;i<vo.size();i++) {
 			vo.get(i).setModifier(vo.get(i).getUserId());
 			vo.get(i).setPassword("");
+			if(vo.get(i).getDivision().trim().equals("")){
+				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+			}
 			
 			userMapper.updateUsers(vo.get(i));	
 			
@@ -582,7 +588,84 @@ public class T2UserServiceImpl implements T2UserService {
 
 	@Override
 	public int updateUserNameDivision(T2Users userInfo) {
+		HashMap<String, Object> info = new HashMap<String, Object>();
+		info.put("sessUserInfo", userInfo);
+		SecurityContext sec = SecurityContextHolder.getContext();
+		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
+		auth.setDetails(info);
 		return userMapper.updateUserNameDivision(userInfo);
 	}
 
+	private Hashtable<String, String> makeLdapProperty() {
+		String LDAP_SEARCH_DOMAIN = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
+		String LDAP_SEARCH_ID = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID);
+		String LDAP_SEARCH_PW = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW);
+
+		Hashtable<String, String> properties = new Hashtable<String, String>();
+		properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
+		properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
+		properties.put(Context.SECURITY_PRINCIPAL, LDAP_SEARCH_ID + LDAP_SEARCH_DOMAIN);
+		properties.put(Context.SECURITY_CREDENTIALS, LDAP_SEARCH_PW);
+
+		return properties;
+	}
+
+	public String[] checkUserInfo(T2Users userInfo) {
+		return checkUserInfo(userInfo, makeLdapProperty());
+	}
+
+	private String[] checkUserInfo(T2Users userInfo, Hashtable<String, String> property) {
+		String[] result = new String[2];
+
+		String[] attrIDs = { "distinguishedName", "displayName", "title", "mail", "cn" };
+		String filter = "(cn=" + userInfo.getUserId() + ")";
+
+		DirContext con = null;
+		SearchControls constraints = new SearchControls();
+		NamingEnumeration<SearchResult> m_ne = null;
+		try {
+			con = new InitialDirContext(property);
+			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+			if(attrIDs != null) {
+				constraints.setReturningAttributes(attrIDs);
+			}
+
+			String searchKey = StringUtil.avoidNull(CommonFunction.getProperty("ldap.search.key"), "");
+			m_ne = con.search(searchKey, filter, constraints);
+		} catch (NamingException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if(con != null) {
+				try {
+					con.close();
+				} catch (NamingException e) {}
+			}
+		}
+
+		try {
+			SearchResult sr = null;
+
+			while (m_ne.hasMoreElements()) {
+				sr = (SearchResult) m_ne.next();
+				if(sr != null) {
+					// 이름/직책/부서(email)
+					String displayName = (String) sr.getAttributes().get("displayName").get();
+					String email = (String) sr.getAttributes().get("mail").get();
+					if(StringUtil.isEmptyTrimmed(displayName)) {
+						result[0] = email.split("@")[0];
+					} else{
+						result[0] = displayName.replaceAll("\\("+email+"\\)", "").trim();
+					}
+					result[1] = email;
+				}
+			}
+			return result;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+
+			return null;
+		}
+	}
 }

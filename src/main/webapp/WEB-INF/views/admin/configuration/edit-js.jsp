@@ -6,8 +6,21 @@
 	$(document).ready(function(){
 		'use strict';
 		data.init();
-		evt.init();	
-	});
+		evt.init();
+        var userDivision = $('#userInfoArea select[name="division"]');
+        for(var i=0;i<userDivision.children().length;i++){
+            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
+                break;
+            }
+            if(userDivision.children().length - 1 == i ) {
+                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+                if(${sessUserInfo.division} == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+                    $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                    $('#userInfoArea select[name="division"] option:last').change();
+                }
+            }
+        }
+    });
 	var commentTemp = '';
 	var data = {
 		init : function(){
@@ -124,8 +137,14 @@
 			var params = {};
 			var password = $("#password").val();
 			var userName = $('#userInfoArea input[name="userName"]').val();
-			var division = $('#userInfoArea select[name="division"] option:selected').val();
-			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+			var division = $.trim($('#userInfoArea select[name="division"] option:selected').val());
+			var confirmMsg = "";
+			if(division === "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}"){
+			    confirmMsg = '<spring:message code="msg.configuration.confirm.save"/>';
+			} else {
+                confirmMsg = '<spring:message code="msg.common.confirm.save"/>'
+			}
+			alertify.confirm(confirmMsg, function (e) {
 				if (e) {
 					$.ajax({
 						type: 'POST',

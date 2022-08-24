@@ -181,6 +181,8 @@ public interface ProjectService extends HistoryConfig{
 	void copySrcAndroidNoticeFile(Project project);
 
 	public Map<String, List<Project>> updateProjectDivision(Project project);
+
+	public void updateComment(Project project);
 }
 
 

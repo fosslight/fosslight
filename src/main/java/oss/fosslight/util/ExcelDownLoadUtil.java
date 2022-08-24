@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -33,6 +34,8 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
@@ -40,6 +43,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -443,6 +447,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					// Restriction
 					params.add(isMainRow ? (isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()) : "");
 					
+					addColumnWarningMessage(type, bean, vr, params);
+					
 					rows.add(params.toArray(new String[params.size()]));
 				} else {
 					// exclude 제외
@@ -590,6 +596,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
 					}
 					
+					addColumnWarningMessage(type, bean, vr, params);
+					
 					rows.add(params.toArray(new String[params.size()]));
 				}
 			}
@@ -598,11 +606,110 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if(!rows.isEmpty()) {
 				int startIdx = isSelfCheck ? 1 : 2;
 				
-				makeSheet(sheet, rows, startIdx, true);
+				try {
+					Font font = WorkbookFactory.create(true).createFont();
+					
+					if(isSelfCheck) {
+						makeSheetAddWarningMsg(sheet, rows, startIdx, false, font);
+					} else {
+						makeSheetAddWarningMsg(sheet, rows, startIdx, true, font);
+					}
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
 			}
 		}
 	}
 	
+	private static void addColumnWarningMessage(String type, ProjectIdentification bean, T2CoValidationResult vr, List<String> params) {
+		String message = "";
+		
+		if(!vr.getValidMessageMap().isEmpty()) {
+			String gridId = "";
+			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				gridId = bean.getComponentId();
+			} else {
+				gridId = bean.getGridId();
+			}
+			
+			for(String key : vr.getValidMessageMap().keySet()) {
+				if(key.contains(".") && gridId.equals(key.split("[.]")[1])) {
+					if(!isEmpty(message)) {
+						message += "/";
+					}
+					
+					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getValidMessageMap().get(key) + "(FONT_RED)";
+				}
+			}
+		}
+		
+		if(!vr.getDiffMessageMap().isEmpty()) {
+			String gridId = "";
+			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				gridId = bean.getComponentId();
+			} else {
+				gridId = bean.getGridId();
+			}
+			for(String key : vr.getDiffMessageMap().keySet()) {
+				if(key.contains(".") && gridId.equals(key.split("[.]")[1])) {
+					if(!isEmpty(message)) {
+						message += "/";
+					}
+					
+					message += warningMsgCode((key.split("[.]")[0]).toUpperCase()) + vr.getDiffMessageMap().get(key) + "(FONT_BLUE)";
+				}
+			}
+		}
+		
+		params.add(isEmpty(message) ? "" : message);
+	}
+	
+	private static String warningMsgCode(String key) {
+		String warningMsgCode = "";
+		switch(key) {
+			case "OSSNAME" :
+			case "OSS NAME" :
+			case "OSS NAME ( OPEN SOURCE SOFTWARE NAME )":
+			case "OSS COMPONENT":
+			case "PACKAGE NAME":
+				warningMsgCode = "(ON) ";
+				break;
+			case "OSSVERSION" :
+			case "PACKAGE VERSION":
+				warningMsgCode = "(OV) ";
+				break;
+			case "LICENSE" :
+			case "LICENSENAME" :
+			case "LICENSE NAME" :
+				warningMsgCode = "(L) ";
+				break;
+			case "DOWNLOADLOCATION" :
+			case "PACKAGE DOWNLOAD LOCATION":
+				warningMsgCode = "(D) ";
+				break;
+			case "HOMEPAGE" :
+			case "OSS WEBSITE":
+			case "HOME PAGE":
+				warningMsgCode = "(H) ";
+				break;
+			case "SOURCENAMEORPATH" :
+			case "SOURCECODEPATH" :
+			case "SOURCE NAME OR PATH" :
+			case "SOURCE CODE PATH" :
+				warningMsgCode = "(S) ";
+				break;
+			case "BINARYNAME" :
+			case "BINARYNAMEORSOURCEPATH" :
+			case "BINARY NAME" :
+			case "BINARY NAME OR SOURCE PATH" :
+				warningMsgCode = "(B) ";
+				break;
+			default :
+				break;
+		}
+		
+		return warningMsgCode;
+	}
 	/**
 	 * 
 	 * @param sheet
@@ -696,6 +803,89 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				String cellValue = avoidNull(rowParam[colNum]);
 				cell.setCellValue(cellValue);
+				cell.setCellType(CellType.STRING);
+			}
+		}
+	}
+	
+	private static void makeSheetAddWarningMsg(Sheet sheet, List<String[]> rows, int templateRowNum, boolean useLastCellComment, Font font) {
+		int startRow= 1;
+		int startCol = 0;
+		int endCol = 0;
+		if(rows.isEmpty()){
+		}else{
+			endCol = rows.get(0).length-1;
+		}
+		int shiftRowNum = rows.size();
+		
+		Row templateRow = sheet.getRow(templateRowNum);
+		
+		startRow = templateRow.getRowNum();
+
+		Row styleTemplateRow = sheet.getRow(startRow);
+		Cell templateCell = styleTemplateRow.getCell(0);
+		CellStyle style = templateCell.getCellStyle();
+		
+		for (int i = startRow; i < startRow + shiftRowNum; i++) {
+			String[] rowParam = rows.get(i - startRow);
+
+			Row row = sheet.getRow(i);
+			if(row == null) {
+				row = sheet.createRow(i);
+			}
+
+			for (int colNum = startCol; colNum <= endCol; colNum++) {
+				Cell cell = row.getCell(colNum);
+				
+				if(cell == null) {
+					cell = row.createCell(colNum);
+				}
+				
+				// comment의 경우 줄바꿈 처리
+				if((useLastCellComment && colNum == endCol - 1) || colNum == endCol) {
+					CellStyle cs = style;
+					cs.setWrapText(true);
+					cell.setCellStyle(cs);
+				} else {
+					cell.setCellStyle(style);
+				}
+				
+				// 수식 삭제
+				if(CellType.FORMULA == cell.getCellType()) {
+					cell.setCellType(CellType.BLANK);
+				}
+				
+				// warning message의 경우 색상 처리
+				if(colNum == endCol) {
+					String cellValue = avoidNull(rowParam[colNum]);
+					String richTextStr = cellValue.replaceAll("[(]FONT_RED[)]", "").replaceAll("[(]FONT_BLUE[)]", "").replaceAll("[/]", System.lineSeparator());
+					
+					RichTextString messageStr = new XSSFRichTextString(richTextStr);
+					{
+						String[] messageArr = cellValue.split("/");
+						int startIndex = 0;
+						
+						for(int j=0; j<messageArr.length; j++) {
+							String message = "";
+							if(messageArr[j].contains("(FONT_RED)")) {
+								message = messageArr[j].split("[(]FONT_RED[)]")[0];
+								font.setColor(HSSFColor.HSSFColorPredefined.RED.getIndex());
+								messageStr.applyFont(startIndex, startIndex + message.length(), font);
+							} else if(messageArr[j].contains("(FONT_BLUE)")){
+								message = messageArr[j].split("[(]FONT_BLUE[)]")[0];
+								font.setColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
+								messageStr.applyFont(startIndex, startIndex + message.length(), font);
+							}
+							startIndex = startIndex + message.length() + System.lineSeparator().length();
+						}
+					}
+					
+					cell.setCellValue(messageStr);
+				} else {
+					String cellValue = avoidNull(rowParam[colNum]);
+					cell.setCellValue(cellValue);
+				}
+				
 				cell.setCellType(CellType.STRING);
 			}
 		}
@@ -1215,17 +1405,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				int idx = 1;
 				List<String[]> rows = new ArrayList<>();
-				int length = fileData.getModelListInfo().size();
+				int modelListLength = fileData.getModelListInfo().size();
+				int productGroupsLength = fileData.getProductGroups().size();
 				List<String> productGroups = fileData.getProductGroups();
 				List<String> modelInfo = fileData.getModelListInfo();
+				
+				int length = productGroupsLength > modelListLength ? productGroupsLength : modelListLength;
 				
 				for(int i = 0 ; i < length ; i++){
 					List<String> params = new ArrayList<>();
 					
 					// main 정보
 					params.add(Integer.toString(idx++)); // No
-					params.add(productGroups.size() > 0 ? productGroups.get(i) : ""); // Product Group
-					params.add(modelInfo.get(i)); // Model(Software) Name
+					params.add(productGroupsLength > 0 && productGroupsLength > i ? productGroups.get(i) : ""); // Product Group
+					params.add(modelListLength > 0 && modelListLength > i ? modelInfo.get(i) : ""); // Model(Software) Name
 					
 					rows.add(params.toArray(new String[params.size()]));
 				}
@@ -1837,6 +2030,20 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				break;
+
+			case "vulnerabilityPopup":	//export in vulnerability popup
+				Type ossMaster = new TypeToken<OssMaster>(){}.getType();
+				OssMaster bean = (OssMaster) fromJson(dataStr, ossMaster);
+				bean.setPageListSize(MAX_RECORD_CNT_LIST);
+
+				Map<String, Object> vulnerabilityPopupMap = vulnerabilityService.getVulnListByOssName(bean);
+
+				if(isMaximumRowCheck((int) vulnerabilityPopupMap.get("records"))){
+					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityPopupMap.get("rows"));
+				}
+
+				break;
+
 			case "autoAnalysis":
 				OssMaster ossBean = new OssMaster();
 				ossBean.setPrjId(dataStr);
@@ -2525,6 +2732,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Cell cellDocumentNamespace = getCell(row, cellIdx); cellIdx++;
 				String spdxidentifier = "SPDXRef-" + strPrjName.replaceAll(" ", "") + "-" + createdTime;
 				String domain = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org/");
+				if(!domain.endsWith("/")) {
+					domain += "/";
+				}
 				cellDocumentNamespace.setCellValue(domain + spdxidentifier);
 				
 				// Document Contents
@@ -2661,6 +2871,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 							cellLicenseDeclared.setCellValue(licenseStr);
 							attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
+						} else {
+							String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+							cellLicenseDeclared.setCellValue(licenseStr);
+							attributionText = bean.getAttribution();
 						}
 					}
 					

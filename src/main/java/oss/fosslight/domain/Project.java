@@ -275,7 +275,7 @@ public class Project extends ComBean implements Serializable {
 	private String beforeDistributeName;		// 배포되었던 디스크립선 이름
 	
 	/** The distribute software type. */
-	private String distributeSoftwareType; 		// 소프트웨어/모델 타입
+	private String distributeSoftwareType = CoConstDef.CD_DTL_NOTICE_DEFAULT_SOFTWARE_TYPE_MODEL; 		// 소프트웨어/모델 타입
 	
 	/** The before distribute software type. */
 	private String beforeDistributeSoftwareType; 		// 배포되었던 소프트웨어/모델 타입

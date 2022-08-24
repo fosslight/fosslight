@@ -135,11 +135,12 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .w100 {width:100px !important;}
 .w120 {width:120px !important;}
 .w150 {width:150px !important;}
-.w155 {width:155px !important;} /* 161104 jh_son 추가 */
+.w155 {width:155px !important;}
 .w200 {width:200px !important;}
-.w220 {width:220px !important;} /* 171017 yuns 추가 */
+.w220 {width:220px !important;}
 .w250 {width:250px !important;}
 .w350 {width:350px !important;}
+.w500 {width:500px !important;}
 .w600 {width:600px !important;}
 .w725 {width:725px !important;}
 .w1025 {width:1025px !important;}
@@ -299,7 +300,10 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .iconSet.nick {width:25px;height:12px;background-position:-215px -150px;vertical-align:middle;} /* 20161025 by mj-cho */
 .iconSet.nick.dummy {width:25px;height:12px;background-position:-265px -170px;vertical-align:middle;} /* 20161025 by sw-yun empty */
 .iconSet.trd {width:28px;height:16px;background-position:right -60px;vertical-align:middle;} /* 2018-06-12 by mj-cho */
-.iconSt.drop {background-color:#a39d9b;background-position:-155px -225px;} /* 2021-01-26 */ 
+.iconSt.drop {background-color:#a39d9b;background-position:-155px -225px;} /* 2021-01-26 */
+.priority {display:inline-block;width:15px;height:15px;}
+.priority.priority_1 {background:#FEAEC9;}
+.priority.priority_2 {background:#FFFCB7;}
 /*
 .iconSt {display:inline-block;width:15px;height:15px;line-height:1000%;font-size:0;overflow:hidden;border:1px solid;border-radius:20px;}
 .iconSt.draft {border-color:#c0ad10;background:#fce41a;}
@@ -481,7 +485,8 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .projdecBtn {position:absolute;right:0;top:23px;}
 .commentBtn {position:absolute;right:0;bottom:-23px;}
 .projectContents {position:relative;top:120px;}
-.commentEditor {position:fixed;top:145px;z-index:100;padding:0;display:inline-block;width:1025px;background:#fff;}
+.projectContentsDistribution {position:relative;top:130px;}
+.commentEditor {position:fixed;top:160px;z-index:100;padding:0;display:inline-block;width:1025px;background:#fff;}
 .cBtn {clear:left;display:inline-block;width:100%;text-aling:right;}
 .cBtn .btnCLight {float:right;margin:0 0 0 5px;}
 /**/

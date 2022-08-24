@@ -121,7 +121,7 @@ var bin_evt = {
 								var num = i+1;
 								var checkedTxt = "";
 								
-								if(result[1][i].name.toUpperCase().trim() == "BIN") {
+								if(result[1][i].name.toUpperCase().trim().startsWith("BIN")) {
 									checkedTxt = "checked";
 								}
 								
@@ -318,7 +318,13 @@ var bin_fn = {
 		var target = $("#binList");
 		var prjId = '${project.prjId}';
 		var binCsvFileId = $('#binCsvFileId').val();
+		if("" != binCsvFileId && $(".binFileArea").find("li").length == 0){
+			binCsvFileId = "";
+		}
 		var binBinaryFileId = $("#binBinaryFileId").val();
+		if("" != binBinaryFileId && $(".binBinaryFileArea").find("li").length == 0){
+			binBinaryFileId = "";
+		}
 		var identificationSubStatusBin = $("#applicableBin:checked").val();
 		
 		var delFileData = bin_evt.csvDelFileSeq;
@@ -1254,6 +1260,10 @@ var bin_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
+
+                                var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                var nextRow = rowid
+                                $('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binList");

@@ -1170,7 +1170,13 @@
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
     	AND OSS_ID<![CDATA[<>]]>#{ossId}
     	</if>
-  		AND (OSS_NAME=#{ossName} AND OSS_VERSION=#{ossVersion})
+  		AND OSS_NAME=#{ossName} 
+  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+  			AND OSS_VERSION=#{ossVersion}
+  		</if>
+  		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+  			AND (OSS_VERSION = '' OR OSS_VERSION IS NULL)
+  		</if>
   		ORDER BY CREATED_DATE DESC
   		LIMIT 1
     </select>

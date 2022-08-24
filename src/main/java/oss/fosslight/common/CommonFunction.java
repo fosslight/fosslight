@@ -4117,6 +4117,21 @@ public class CommonFunction extends CoTopComponent {
 			comment += "After : " + afterBean.getPriority() + "</p>";
 		}
 		
+		// Project Division
+		if(!beforeBean.getDivision().equals(afterBean.getDivision())) {
+			comment += "<p><strong>Division</strong><br />";
+			comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) + "<br />";
+			comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision()) + "<br /></p>";
+		}
+		
+		String before = beforeBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
+		String after = afterBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
+		if(!before.equals(after)) {
+			comment += "<p><strong>Additional Information</strong><br />";
+			comment += "Before : " + beforeBean.getComment() + "<br />";
+			comment += "After : " + afterBean.getComment() + "</p>";
+		}
+		
 		return comment;
 	}
 	

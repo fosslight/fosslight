@@ -61,4 +61,6 @@ public interface MailManagerMapper {
 	public List<Map<String, Object>> getTempMail();
 	
 	public void deleteTempMail(String mailSeq);
+
+	public List<String> setProjectWatcherMailListNotCheckDivision(String paramPrjId);
 }

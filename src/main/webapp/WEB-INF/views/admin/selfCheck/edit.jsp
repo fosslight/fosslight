@@ -92,7 +92,7 @@
 								<div class="basicCase">
 									<div class="uploadTitCheckSet">
 										<span class="checkSet"><label class="checksrcR1">Please select a file to upload</label></span>
-										<span class="checkSet"><label class="check2" style="display:none;">Enter the link of the source to be analyzed</label></span>
+										<span class="checkSet" style="display:none;"><label class="check2">Enter the link of the source to be analyzed</label></span>
 									</div>
 									<div class="uploadGroup">
 										<div class="uploadSet">
@@ -141,6 +141,7 @@
 	            <a class="iconSet help left" id="helpLink_vulerabiityExport" style="display: none; position:relative; cursor: pointer; right:10px;"></a>
 	                <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
 	                <input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
+	                <input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
 	                <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
 	                <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
 	                <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
@@ -157,6 +158,7 @@
 				<span class="right">
 					<input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
 					<input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
+					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
 					<input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
 					<input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
 					<input id="srcReset" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />

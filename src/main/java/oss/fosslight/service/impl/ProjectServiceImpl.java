@@ -4910,15 +4910,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				projectMapper.updateProjectDivision(afterBean);
 				
-				comment = "해당 Project 의 Division ( " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) 
-						+ " => " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision())
-						+ " ) 이 변경되었습니다.";
+				comment = CommonFunction.getDiffItemComment(beforeBean, afterBean);
 				
 				afterBean.setUserComment(comment);
 				
 				Map<String, List<Project>> modelMap = getModelList(prjId);
 				beforeBean.setModelList((List<Project>) modelMap.get("currentModelList"));
 				afterBean.setModelList((List<Project>) modelMap.get("currentModelList"));
+				
+				if(afterBean.getWatcherList() != null && !afterBean.getWatcherList().isEmpty()) {
+					List<String> prjWatchers = afterBean.getWatcherList().stream().map(e -> e.getPrjDivision() + "/" + e.getPrjUserId()).collect(Collectors.toList());
+					afterBean.setWatchers(prjWatchers.toArray(new String[prjWatchers.size()]));
+				}
 				
 				beforeBeanList.add(beforeBean);
 				afterBeanList.add(afterBean);
@@ -4934,5 +4937,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		return updateProjectDivMap;
+	}
+
+	@Override
+	public void updateComment(Project project) {
+		projectMapper.updateComment(project);
 	}
 }

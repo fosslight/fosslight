@@ -29,7 +29,41 @@
 		initSample2();
 		data.init();
 		evt.init();
-		
+
+        if($('input[name=prjId]').val() == "" || copyFlag == 'Y') {
+            $("#editAdditionalInfomation").hide();
+        } else {
+            if(CKEDITOR.instances.editor) {
+                var _editor = CKEDITOR.instances.editor;
+                _editor.destroy();
+            }
+            CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
+        }
+
+        var userDivision = $('#division');
+        for(var i=0;i<userDivision.children().length;i++){
+            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
+                break;
+            }
+            if(userDivision.children().length - 1 == i ) {
+                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+                if('${project.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+                    $('#division option:last').attr("selected", "selected");
+                    $('#division option:last').change();
+                }
+            }
+        }
+
+        var prjDivision = $("#prjDivision");
+        for(var i=0;i<prjDivision.children().length;i++){
+            if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
+                break;
+            }
+            if(prjDivision.children().length-1 == i) {
+                prjDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}'></option>");
+            }
+        }
+
 		if('${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
 			$("input[name=creatorNm]").val('${project.prjUserName}');
 		}
@@ -204,7 +238,7 @@
 				}else{
 					alertify.confirm(confirmMsg, function (e) {
 						if (e) {
-							fn.saveSubmit();
+							fn.saveSubmit(true);
 						} else {
 							return false;
 						}
@@ -213,7 +247,7 @@
 			});
 
 			$("#popCopyConfirmSave").click(function(){
-				fn.saveSubmit();
+				fn.saveSubmit(true);
 				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
 				$("#copyConfirmPopup").hide();
 			});
@@ -517,6 +551,44 @@
 	};
 	
 	var fn = {
+	        editComment : function() {
+	            $("#saveBtn").show();
+	            $("#cancelBtn").show();
+	            $("#editAdditionalInfomation").hide();
+	            if(CKEDITOR.instances.editor) {
+	                var _editor = CKEDITOR.instances.editor;
+	                _editor.destroy();
+	            }
+	            CKEDITOR.replace('editor');
+	            var originComment = CKEDITOR.instances.editor.getData();
+
+	            $("#saveBtn").click(function(e){
+	                e.preventDefault();
+	                if(CKEDITOR.instances.editor) {
+	                    var _editor = CKEDITOR.instances.editor;
+	                    _editor.destroy();
+	                }
+	                CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
+	                $("#saveBtn").hide();
+	                $("#cancelBtn").hide();
+	                $("#editAdditionalInfomation").show();
+	                fn.saveSubmit(false);
+	            });
+
+	            $("#cancelBtn").click( function(e) {
+	                e.preventDefault();
+	                if(CKEDITOR.instances.editor) {
+	                    var _editor = CKEDITOR.instances.editor;
+	                    _editor.destroy();
+	                }
+	                CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
+	                CKEDITOR.instances.editor.setData(originComment);
+	                $("#saveBtn").hide();
+	                $("#cancelBtn").hide();
+	                $("#editAdditionalInfomation").show();
+	                $("#cancelBtn").unbind("click");
+	            });
+	        },
 		copy : function(){
 			var prjId = $('input[name=prjId]').val();
 			
@@ -788,7 +860,7 @@
 				});
 			},
 			// 저장
-			saveSubmit : function(){
+			saveSubmit : function(reload){
 				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
@@ -859,7 +931,14 @@
 					type : 'POST',
 					dataType: "json",
 					cache : false,
-					success: fn.onRegistSuccess,
+					success: function(data) {
+						if(reload) {
+							fn.onRegistSuccess(data);
+						}
+						else {
+							alertify.success('<spring:message code="msg.common.success" />');
+						}
+					},
 					error : fn.onError
 				}).submit();
 			},

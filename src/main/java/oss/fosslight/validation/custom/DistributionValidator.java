@@ -45,16 +45,6 @@ public class DistributionValidator extends T2CoValidator {
 				}
 			}
 			
-			// distributeSoftwareType
-			{
-				basicKey = "DISTRIBUTE_SOFTWARE_TYPE";
-				String errCd = checkBasicError(basicKey, dataBean.getDistributeSoftwareType());
-				
-				if(!isEmpty(errCd)) {
-					errMap.put(basicKey, errCd);
-				}
-			}
-			
 			// model info
 			if(dataBean.getModelList() != null && !dataBean.getModelList().isEmpty()) {
 				// 중복체크

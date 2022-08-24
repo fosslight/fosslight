@@ -47,6 +47,7 @@ public class AjaxSessionTimeoutFilter implements Filter {
                 } else {
                 	try {
 	                       chain.doFilter(req, res);
+	                       return;
 	                } catch (AccessDeniedException e) {
 	                	log.error("sendError: " + HttpServletResponse.SC_FORBIDDEN);
 	                    res.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -57,6 +58,7 @@ public class AjaxSessionTimeoutFilter implements Filter {
                 }
         } else {
         	chain.doFilter(req, res);
+        	return;
         }
 	}
 	

@@ -436,7 +436,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					}
 					
 					param.setDownloadLocation(location.trim());
-					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocationWithOssName(param);
+					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 					List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
 					
 					if(list != null && !list.isEmpty()) {
@@ -467,7 +467,7 @@ public class T2CoOssValidator extends T2CoValidator {
 				}
 				
 				param.setHomepage(ossBean.getHomepage().trim());
-				Map<String, Object> paramMap = ossService.checkExistsOssHomepageWithOssName(param);
+				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				
 				if(list != null && !list.isEmpty()) {
@@ -640,7 +640,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					}
 					
 					param.setDownloadLocation(location.trim());
-					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocationWithOssName(param);
+					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 					List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
 					
 					if(list != null && !list.isEmpty()) {
@@ -673,7 +673,7 @@ public class T2CoOssValidator extends T2CoValidator {
 				}
 				
 				param.setHomepage(analysisBean.getHomepage().trim());
-				Map<String, Object> paramMap = ossService.checkExistsOssHomepageWithOssName(param);
+				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				
 				if(list != null && !list.isEmpty()) {

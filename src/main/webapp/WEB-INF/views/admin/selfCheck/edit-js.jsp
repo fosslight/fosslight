@@ -829,15 +829,15 @@
 
             switch(value){
                 case "1":
-                    $('.checksrcR1').show();
-                    $('.check2').hide();
+                    $('.checksrcR1').closest('span').show();
+                    $('.check2').closest('span').hide();
                     $('.uploadSet').show();
                     $('.wgetUrl').hide();
                     srcUploadUrl.checked = false;
                     break;
                 case "2":
-                    $('.checksrcR1').hide();
-                    $('.check2').show();
+                    $('.checksrcR1').closest('span').hide();
+                    $('.check2').closest('span').show();
                     $('.uploadSet').hide();
                     $('#wgetUrl_' + key).show();
                     srcR1.checked = false;
@@ -845,9 +845,31 @@
                 default:
                     break;
             }
+        },
+        downloadYaml : function(){
+            var params = {"prjId":"${project.prjId}", "prjName" : "${project.prjName}"};
+
+            $.ajax({
+                type: "POST",
+                url: '<c:url value="/selfCheck/makeYaml"/>',
+                data: JSON.stringify(params),
+                dataType : 'json',
+                cache : false,
+                contentType : 'application/json',
+                success: function (data) {
+                    if("false" == data.isValid) {
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    } else {
+                        window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+                    }
+                },
+                error: function(data){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
         }
 	};
-	
+
 	// 데이타
 	var data = {
 		modelValues:'',
@@ -2104,7 +2126,9 @@
 								$('#'+rowid+'_licenseNameBtn').append(mult);
 							}
 						});
-						
+                                                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
+                                                var nextRow = rowid
+                                                $('#'+nextRow+"_"+nextCol).focus();
 						$('#'+rowid+'_licenseName').val("");
 					}
 				},

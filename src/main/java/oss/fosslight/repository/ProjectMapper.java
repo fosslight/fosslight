@@ -103,7 +103,7 @@ public interface ProjectMapper {
 
 	String selectLicenseComb(ProjectIdentification projectIdentification);
 
-	void updateComment(CommentsHistory result);
+	void updateComment(Project result);
 
 	void deleteComment(CommentsHistory commentsHistory);
 

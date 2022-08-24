@@ -147,6 +147,8 @@ public class CoMail extends ComBean {
 	
 	private String binaryCommitResult;
 	
+	private boolean toIdsCheckDivision = false;
+	
 	/**
 	 *  //.
 	 *
@@ -970,6 +972,14 @@ public class CoMail extends ComBean {
 
 	public void setBinaryCommitResult(String binaryCommitResult) {
 		this.binaryCommitResult = binaryCommitResult;
+	}
+
+	public boolean isToIdsCheckDivision() {
+		return toIdsCheckDivision;
+	}
+
+	public void setToIdsCheckDivision(boolean toIdsCheckDivision) {
+		this.toIdsCheckDivision = toIdsCheckDivision;
 	}
 
  } 

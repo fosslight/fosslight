@@ -13,6 +13,14 @@
 			let selectedOption = $('#selectLang').val();
 			window.location.replace('?lang=' + selectedOption);
 		});
+
+		if(${sessUserInfo.division} === ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+			alertify.alert('<spring:message code="msg.configuration.notice.devision" />', function (e) {
+				if (e) {
+					$('.configurationSpan .add-tab').trigger("click");
+				}
+			});
+		}
 	});
 </script>
 <!-- header -->

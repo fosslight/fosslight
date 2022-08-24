@@ -1,5 +1,75 @@
 # Changelog
 
+## v1.4.9 (12/08/2022)
+## 🚀 Features
+
+- Add export feature to vulnerability popup @FRESH-TUNA (#608)
+- Add CVE_ID input field in /api/v1/vulnerability_data @MiniVee (#620)
+
+## 🐛 Hotfixes
+
+- Fix the bug of infinite loading when searching for CVE ID with - @FOSSLight-dev (#626)
+
+## 🔧 Maintenance
+- In the basic information tab of the project, add an edit/save button in the additional information field. @Min-Kyungsun (#628)
+- When adding or copying project, remove view/edit button to additional information. @Min-Kyungsun (#629)
+
+---
+
+## v1.4.8 (05/08/2022)
+## 🚀 Features
+
+- Skip registration step when using LDAP @Min-Kyungsun (#576)
+
+## 🐛 Hotfixes
+
+- Fix return value to Obligation Type @myway00 (#607)
+- When renaming to another OSS while deleting OSS, check License @FOSSLight-dev  (#624)
+
+## 🔧 Maintenance
+
+- Change the CVSS Score for sending Vulnerability alerts from 9.0 to 8.0 @FOSSLight-dev (#621)
+- Show the user's name, when Mouse hover @hataerin (#616)
+- Increase the length of the project's name field @MiniVee (#613)
+- Caching Dependencies to speed up workflows @jongwooo (#610)
+
+---
+
+## v1.4.7 (29/07/2022)
+## 🐛 Hotfixes
+
+- Remove version diff notification popup when deleting OSS @FOSSLight-dev  (#609)
+- Fix the bug where search terms are entered during change division @FOSSLight-dev (#603)
+- Fix bugs that do not run with docker-compose on Windows @soimkim (#598)
+- Change the multilingual setting to ignore the country @yujung7768903 (#592)
+
+## 🔧 Maintenance
+
+- Add priority to the status tooltip of the Project List @JIY0UNG (#602)
+- Increase the length of the name field  @hataerin (#604)
+- Move to a cell what I double-click @Gseungmin (#580)
+- Add guide comment in Configuration @MoonDD99 (#600)
+- Change nickname input position of OSS List, License List when Add button is clicked @70825 (#589)
+- Make it search even if space is included at the beginning and end of the word in the OSS List @MiniVee (#591)
+- Fix comment in Self-check to remove newline @acisliver (#583)
+- XSS prevention with jstl @swa07016 (#588)
+- Show "Double click" when mouse hovers on project name @MyunghyunNero (#572)
+- Hide user email as per option @MiniVee (#593)
+
+---
+
+## v1.4.6 (22/07/2022)
+## Changes
+## 🚀 Features
+
+- Add the function to change division @FOSSLight-dev (#586)
+
+## 🔧 Maintenance
+
+- Reload tab to you're working on after checking OSS Name/License @FRESH-TUNA (#568)
+- Add a flag to use the license's internal url @soimkim (#587)
+---
+
 ## v1.4.5 (15/07/2022)
 ## Changes
 ## 🚀 Features
@@ -392,98 +462,3 @@
 - Support variable context path.  @FOSSLight-dev  (#382)
 - Show progress bar when deleting OSS.  @FOSSLight-dev  (#382)
 - Deduplicate Licenses in one cell.  @FOSSLight-dev  (#382)
----
-
-## v1.2.24 (31/12/2021)
-## 🚀 Features
-
-- Added function to generate OSS List through github link in Self-Check @namkyu1999 (#353)
-- Add Check OSS Name and Check License function in 3rd party @riyenas0925 (#364)
-- Add the Bulk Edit funtion @FOSSLight-dev (#361)
-
-## 🐛 Hotfixes
-
-- Update redistribution and vulnerability discovered mailing sql @FOSSLight-dev (#369)
-- Fix the bug that occurs when checking hide version in OSS notice @FOSSLight-dev (#368)
-- Fix Vulnerability, Sent mail list not searchable bug @FOSSLight-dev (#365)
-- Fix infinite loading bug when clicking Check License @riyenas0925 (#362)
-- Fix xss filter for License List with &amp; @yugeeklab (#356)
-
-## 🔧 Maintenance
-
-- Add display in comments only when License is OR, AND @riyenas0925 (#376)
-- Add comment output when loading SPDX @riyenas0925 (#373)
-- Delete License output when loading SPDX @riyenas0925 (#372)
-- Fix License and Comment output when loading SPDX @riyenas0925 (#371)
-- Add Check License function in Self-Check page @riyenas0925 (#367)
-- License and Comment output when loading SPDX @riyenas0925 (#358)
-- Hide the Check License, Check OSS Name buttons with the same conditions as the Save button. @Zeusjonass (#354)
-
----
-
-## v1.2.23 (24/12/2021)
-## 🚀 Features
-
-- Show FOSSLight version in sidebar @riyenas0925 (#352)
-
-## 🐛 Hotfixes
-
-- Fix mismatching error in Check License @riyenas0925 (#349)
-
-## 🔧 Maintenance
-
-- Delete ${sidx}, ${sord}, ${schKeywordSql} and ${filterCondition} for defending SQL Injection  @yugeeklab (#346)
-- Update distribution mailing condition. @FOSSLight-dev  (#359)
-- Check OSS Name > Change download location to git:// from https:// @FOSSLight-dev (#357)
-- Send comments to Creator, Watcher, and Reviewer by mail. @riyenas0925 (#355)
-- Add parameter for merging option to BOM export. @FOSSLight-dev (#350)
-
----
-
-## v1.2.22 (17/12/2021)
-## Changes
-
-- Add multilingual support about delivery form @yugeeklab (#335)
-
-## 🚀 Features
-
-- Add OSS Notice issuance function to Self-Check @namkyu1999 (#288)
-- In Check OSS Name, make it possible to select from multiple OSS Names. @FOSSLight-dev  (#342)
-- Add External Service health check @riyenas0925 (#310)
-
-## 🐛 Hotfixes
-
-- Eliminate null pointer exception in OSS Controller @yugeeklab (#316)
-- Change the ckeditor config value related to file upload. @FOSSLight-dev (#343)
-- Eliminate null pointer exception in CoMailManager @yugeeklab (#317)
-- Fix heap memory issue when registering CPE Data Feed (GC Limit) @FOSSLight-dev (#332)
-- Apply autogrow to ckeditor @yugeeklab (#328)
-
-## 🔧 Maintenance
-
-- Support Check OSS Name, Check License multilingual @riyenas0925 (#344)
-- Do not print () if the OSS version is null when leaving a comment in the Check License. @riyenas0925 (#339)
-- Add a function to change the OSS table in bulk (incomplete) @FOSSLight-dev (#338)
-- Change max height of editor @soimkim (#336)
-- Add Check License to Project tab (bin, android) @riyenas0925 (#324)
-
----
-
-## v1.2.21 (10/12/2021)
-## 🚀 Features
-
-- Fix OSS Notices to include SPDX (json) and SPDX (yaml) @riyenas0925 (#320)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the notice file format is unchecked whenever the status is changed @FOSSLight-dev (#329)
-- Fix the license duplication bug in Check License @riyenas0925 (#318)
-
-## 🔧 Maintenance
-
-- Add test to github action for PR @yugeeklab (#301)
-- Remove the label setting for PR from the guide @soimkim (#327)
-- Update 3rd party list UI @riyenas0925 (#315)
-- Change SPDX dependecy version @riyenas0925 (#323)
-- Exception handling when accessing a deleted project @FOSSLight-dev (#322)
-- Change token to invisible @riyenas0925 (#312)

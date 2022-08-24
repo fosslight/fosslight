@@ -7,6 +7,7 @@
 			<form action="/configurationForm" method="post">
 				<dl class="basicSearch col1">
 					<dt>Settings</dt>
+					<div><spring:message code="msg.configuration.guide.comment" /></div>
 					<dd>
 						<span class="checkSet"><input type="checkbox" id="loginFlag" name="loginFlag" class="mainCategory" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'Y'}">checked</c:if> /><label for="loginFlag">Authentication using LDAP</label></span>
 						<div class="detailArea">
