@@ -74,22 +74,20 @@
 				}
 				
 				_editor = CKEDITOR.replace('comm_editor_'+_commId);
+				var originComment = CKEDITOR.instances['comm_editor_'+_commId].getData();
 
 				$("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
 				$("#spanBtnArea_"+_commId+" > .btnEditMode").show();
-				$("#spanBtnArea_"+_commId+" > .closeModComment").click(function(e){
-					e.preventDefault();
+				$("#spanBtnArea_"+_commId+" > .closeModComment").off("click").on("click", function(e){
 					fn_commemt.createNonToolbarEditor(_commId);
-					
+					CKEDITOR.instances['comm_editor_' +_commId].setData(originComment);
 					$("#spanBtnArea_"+_commId+" > .btnViewMode").show();
 					$("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
-					$("#spanBtnArea_"+_commId+" > .closeModComment").unbind('click');
 				});
-				
-				$("#spanBtnArea_"+_commId+" > .modifyComment").click(function(e){
-					e.preventDefault();
-					var param = {commId : _commId, contents : _editor.getData(), referenceDiv: _referenceDiv, referenceId: _referenceId};
-					
+
+				$("#spanBtnArea_"+_commId+" > .modifyComment").off("click").on("click", function(e){
+					var param = {commId : _commId, contents : replaceWithLink(_editor.getData()), referenceDiv: _referenceDiv, referenceId: _referenceId};
+
 					$.ajax({
 						url : '<c:url value="/comment/updateComment"/>',
 						type : 'POST',
@@ -102,7 +100,6 @@
 							$("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
 							
 							alertify.success('<spring:message code="msg.common.success" />');
-							$("#spanBtnArea_"+_commId+" > .modifyComment").unbind('click');
 						},
 						error : function(){
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -114,6 +111,7 @@
 			},
 			createNonToolbarEditor : function(_commId) {
 				var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+				var editorVal = _editor.getData();
 				
 				if(_editor) {
 					_editor.destroy();
@@ -125,6 +123,7 @@
 						customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
 							});
 				}
+				CKEDITOR.instances['comm_editor_'+_commId].setData(replaceWithLink(editorVal));
 			},
 			getMoreCommentList : function(){
 				$.ajax({

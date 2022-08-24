@@ -19,6 +19,13 @@
 	
 	$(document).ready(function() {
 		'use strict';
+        if('${project.viewOnlyFlag}' == 'N') {
+            var copyUrl = "";
+            var protocol = window.location.protocol;
+            var host =  window.location.host;
+            copyUrl = protocol + "//" + host + "/index?id=" + '${project.prjId}' + "&project=true";
+            window.location.href = copyUrl;
+        }
 		
 	<c:if test="${empty message}">
 		//initSample();

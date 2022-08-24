@@ -443,6 +443,8 @@ public final class Url {
 		
 		public static final String MAKE_YAML = PATH + "/makeYaml";
 		public static final String PARTNER_DIVISION = PATH + "/updatePartnerDivision";
+
+		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
 	}
 	
 	public static final class USER {

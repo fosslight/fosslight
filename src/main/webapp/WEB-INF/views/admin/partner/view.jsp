@@ -4,6 +4,8 @@
 <!-- wrap -->
 <c:set var="isCommited" value="${detail.status eq 'CONF'}"/>
 <div id="wrapIframe">
+<c:if test="${detail.viewOnlyFlag eq 'Y'}">
+
 	<c:if test="${empty message}">
 		<!---->
 		<div class="projdecTop" style="height:auto;">
@@ -264,6 +266,7 @@
 </c:if>
 <c:if test="${not empty message}">
 	${message}
+</c:if>
 </c:if>
 </div>
 <div id="blind_wrap"></div>

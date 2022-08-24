@@ -2,6 +2,7 @@
 <%@ include file="/WEB-INF/constants.jsp"%>
 <!-- wrap -->
 <div id="wrapIframe">
+<c:if test="${project.viewOnlyFlag eq 'Y'}">
 	<c:if test="${not empty project.prjId}">
 		<div class="projdecTop">
 			<div class="projectInfo">
@@ -209,6 +210,7 @@
 	<c:if test="${not empty message}">
 		${message}
 	</c:if>
+</c:if>
 	<!---->
 </div>
 <!-- //wrap -->
