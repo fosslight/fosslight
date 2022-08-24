@@ -1258,16 +1258,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
-		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		Set<String> noticeKeyList = noticeInfo.keySet();
-		if(hideOssVersionFlag) {
-			for(String key : noticeKeyList) {
-				if(srcInfo.containsKey(key)) {
-					noticeInfo.remove(key);
-				}
-			}
-		}
-		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
@@ -1340,6 +1330,20 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		if(hideOssVersionFlag) {
+			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
+			Set<String> noticeKeyList = noticeInfo.keySet();
+			
+			for(String key : noticeKeyList) {
+				if(!srcInfo.containsKey(key)) {
+					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
+				}
+			}
+			
+			noticeInfo = hideOssVersionMergeNoticeInfo;
+		}
+		
 		boolean isTextNotice = "text".equals(ossNotice.getFileType());
 		
 		Map<String, String> ossAttributionMap = new HashMap<>();
@@ -1367,6 +1371,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			noticeList.add(bean);
 		}
+		
+		Collections.sort(noticeList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
 		List<OssComponents> srcList = new ArrayList<>();
 		
 		for(OssComponents bean : srcInfo.values()) {
@@ -1391,6 +1403,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			srcList.add(bean);
 		}
+		
+		Collections.sort(srcList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
 		
 		List<OssComponentsLicense> licenseList = new ArrayList<>();
 		List<OssComponentsLicense> licenseListUrls = new ArrayList<>(); //simple version용
