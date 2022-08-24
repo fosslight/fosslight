@@ -1264,11 +1264,22 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if(addOssComponentList != null) {
 			ossComponent = null;
+			Map<String, List<String>> addOssComponentCopyright = new HashMap<>();
 			
 			for(OssComponents bean : addOssComponentList) {
 				String componentKey = (hideOssVersionFlag
 						? bean.getOssName() 
 						: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				
+				List<String> copyrightList = addOssComponentCopyright.containsKey(componentKey) 
+						? (List<String>) addOssComponentCopyright.get(componentKey) 
+						: new ArrayList<>();
+				
+				if(!isEmpty(bean.getCopyrightText())) {
+					for(String copyright : bean.getCopyrightText().split("\n")) {
+						copyrightList.add(copyright);
+					}
+				}
 				
 				boolean addSrcInfo = srcInfo.containsKey(componentKey);
 				boolean addNoticeInfo = noticeInfo.containsKey(componentKey);
@@ -1300,22 +1311,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				
 				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
 					ossComponent.addOssComponentsLicense(license);
-					
-					bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
-					
-					// multi license 추가 copyright
-					if(!isEmpty(bean.getOssCopyright())) {
-						String addCopyright = avoidNull(ossComponent.getCopyrightText());
-						
-						if(!isEmpty(ossComponent.getCopyrightText())) {
-							addCopyright += "\r\n";
-						}
-						 
-						addCopyright += bean.getOssCopyright();
-						ossComponent.setCopyrightText(addCopyright);
-					}
 				}
-								
+				
+				copyrightList = copyrightList.stream()
+												.filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase()))
+												.collect(Collectors.toList()); 
+				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
+				addOssComponentCopyright.put(componentKey, copyrightList);
+				
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
 						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
