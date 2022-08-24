@@ -364,6 +364,10 @@
 				</span>
 			</c:if>
 			<span class="right">
+				<input id="copyUrl" type="text" style="width:1px; height:1px; margin:0; padding:0; border: 0;">
+				<c:if test="${not empty project.prjId}">
+					<input type="button" value="Share URL" class="btnColor red" onclick="fn.shareUrl();" />
+				</c:if>
 				<c:if test="${project.viewOnlyFlag eq 'N'}">
 					<input id="complete" type="button" value="Complete" class="btnColor wauto" style="display: none;"/>
 				</c:if>
