@@ -62,6 +62,9 @@
 	}
 	
 	var fn = {
+		unformatter : function(cellvalue, options, rowObject){
+			return cellvalue;
+		},
 		downloadExcel : function(){
 			if(isMaximumRowCheck(totalRow)){
 				var data = $('#3rdSearch').serializeObject();
@@ -106,7 +109,9 @@
 			var display = "";
 			
 			if(cellvalue !="" && cellvalue != undefined){
-				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue+"</div>";
+				var tmpStr = new RegExp();
+				tmpStr = /[<][^>]*[>]/gi;
+				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
 			}
 			
 			return display;
@@ -317,7 +322,7 @@
 					{name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true},
 					{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true},
 					{name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true},
-					{name: 'description', index: 'description', width: 100, align: 'left', sortable : true},
+					{name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter},
 					{name: 'cveId', index: 'cveId', hidden:true},
 					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
 					{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
