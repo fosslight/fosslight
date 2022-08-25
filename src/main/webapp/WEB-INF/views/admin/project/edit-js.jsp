@@ -1501,7 +1501,7 @@
 							_editor.destroy();
 						}
 						
-						CKEDITOR.replace('editor4', {});
+						CKEDITOR.replace('editor4', {autoGrow_maxHeight:200});
 					</c:if>
 				</c:if>
 
