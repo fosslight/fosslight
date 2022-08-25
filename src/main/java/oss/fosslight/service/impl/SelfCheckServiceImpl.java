@@ -1258,6 +1258,20 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		if(hideOssVersionFlag) {
+			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
+			Set<String> noticeKeyList = noticeInfo.keySet();
+			
+			for(String key : noticeKeyList) {
+				if(!srcInfo.containsKey(key)) {
+					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
+				}
+			}
+			
+			noticeInfo = hideOssVersionMergeNoticeInfo;
+		}
+		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
@@ -1322,7 +1336,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
 						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
-					srcInfo.put(componentKey, ossComponent);
+					if(!noticeInfo.containsKey(componentKey)) {
+						srcInfo.put(componentKey, ossComponent);
+					}
 				} else {
 					noticeInfo.put(componentKey, ossComponent);
 				}
@@ -1331,20 +1347,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					licenseInfo.put(componentKey, license);
 				}
 			}
-		}
-		
-		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		if(hideOssVersionFlag) {
-			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
-			Set<String> noticeKeyList = noticeInfo.keySet();
-			
-			for(String key : noticeKeyList) {
-				if(!srcInfo.containsKey(key)) {
-					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
-				}
-			}
-			
-			noticeInfo = hideOssVersionMergeNoticeInfo;
 		}
 		
 		boolean isTextNotice = "text".equals(ossNotice.getFileType());
