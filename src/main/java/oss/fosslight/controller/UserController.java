@@ -94,7 +94,7 @@ public class UserController extends CoTopComponent {
 		
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
 		
-		if(CoConstDef.FLAG_NO.equals(ldapFlag)) {
+		if(!CoConstDef.FLAG_YES.equals(ldapFlag)) {
 			vo.setPassword(encodePassword((String) validResultMap.get("USER_PW")));
 		}
 		
