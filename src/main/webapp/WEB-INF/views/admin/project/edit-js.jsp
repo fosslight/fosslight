@@ -1726,7 +1726,8 @@
 				if($('select[name=osType]').val() == null) {
 					$('select[name=osType]').val("").trigger('change');
 				}
-				
+
+				$('#editor').css("width", $(".miCase").width());
 				$('#editor').html(data.detail.comment);
 				$('select[name=category]').val(data.detail.category).trigger('change');
 				$('select[name=prjDivision]').val(data.detail.prjDivision).trigger('change');
@@ -1836,7 +1837,8 @@
 				if($('select[name=osType]').val() == null) {
 					$('select[name=osType]').val("").trigger('change');
 				}
-				
+
+				$('#editor').css("width", $(".miCase").width());
 				$('#editor').html(data.copy.comment);
 				$('textarea[name=comment]').val(data.copy.comment);
 				$('select[name=category]').val(data.copy.category).trigger('change');
