@@ -1258,27 +1258,28 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
-		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		Set<String> noticeKeyList = noticeInfo.keySet();
-		if(hideOssVersionFlag) {
-			for(String key : noticeKeyList) {
-				if(srcInfo.containsKey(key)) {
-					noticeInfo.remove(key);
-				}
-			}
-		}
-		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
 		
 		if(addOssComponentList != null) {
 			ossComponent = null;
+			Map<String, List<String>> addOssComponentCopyright = new HashMap<>();
 			
 			for(OssComponents bean : addOssComponentList) {
 				String componentKey = (hideOssVersionFlag
 						? bean.getOssName() 
 						: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				
+				List<String> copyrightList = addOssComponentCopyright.containsKey(componentKey) 
+						? (List<String>) addOssComponentCopyright.get(componentKey) 
+						: new ArrayList<>();
+				
+				if(!isEmpty(bean.getCopyrightText())) {
+					for(String copyright : bean.getCopyrightText().split("\n")) {
+						copyrightList.add(copyright);
+					}
+				}
 				
 				boolean addSrcInfo = srcInfo.containsKey(componentKey);
 				boolean addNoticeInfo = noticeInfo.containsKey(componentKey);
@@ -1310,22 +1311,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				
 				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
 					ossComponent.addOssComponentsLicense(license);
-					
-					bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
-					
-					// multi license 추가 copyright
-					if(!isEmpty(bean.getOssCopyright())) {
-						String addCopyright = avoidNull(ossComponent.getCopyrightText());
-						
-						if(!isEmpty(ossComponent.getCopyrightText())) {
-							addCopyright += "\r\n";
-						}
-						 
-						addCopyright += bean.getOssCopyright();
-						ossComponent.setCopyrightText(addCopyright);
-					}
 				}
-								
+				
+				copyrightList = copyrightList.stream()
+												.filter(CommonFunction.distinctByKey(c -> avoidNull(c).trim().toUpperCase()))
+												.collect(Collectors.toList()); 
+				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
+				addOssComponentCopyright.put(componentKey, copyrightList);
+				
 				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
 						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
@@ -1338,6 +1331,20 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					licenseInfo.put(componentKey, license);
 				}
 			}
+		}
+		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		if(hideOssVersionFlag) {
+			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
+			Set<String> noticeKeyList = noticeInfo.keySet();
+			
+			for(String key : noticeKeyList) {
+				if(!srcInfo.containsKey(key)) {
+					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
+				}
+			}
+			
+			noticeInfo = hideOssVersionMergeNoticeInfo;
 		}
 		
 		boolean isTextNotice = "text".equals(ossNotice.getFileType());
@@ -1367,6 +1374,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			noticeList.add(bean);
 		}
+		
+		Collections.sort(noticeList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
 		List<OssComponents> srcList = new ArrayList<>();
 		
 		for(OssComponents bean : srcInfo.values()) {
@@ -1391,6 +1406,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			srcList.add(bean);
 		}
+		
+		Collections.sort(srcList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
 		
 		List<OssComponentsLicense> licenseList = new ArrayList<>();
 		List<OssComponentsLicense> licenseListUrls = new ArrayList<>(); //simple version용

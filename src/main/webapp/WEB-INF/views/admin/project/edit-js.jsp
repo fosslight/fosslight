@@ -1637,6 +1637,46 @@
             				event.returnValue = false;
             	}
 			},
+			shareUrl : function(){
+				var copyUrl = "";
+				var protocol = window.location.protocol;
+				var host =  window.location.host;
+				copyUrl = protocol + "//" + host + "/project/view/${project.prjId}";
+				$("#copyUrl").val(copyUrl);
+				
+				//launch it.
+				var btnHtm = '<b>Share Link</b><br>';
+				btnHtm += '<input type="text" value="'+copyUrl+'" style="width:460px;" disabled/><br><br>';
+				btnHtm += '<input type="button" value="Copy" class="btnCancel btnColor red right" style="height:30px;width:100px;"onclick="fn.copyUrl(this)"/>';
+
+				if(!alertify.myAlert){
+					//define a new dialog
+					alertify.dialog('myAlert',function factory(){
+						return{
+							main:function(message){
+							this.message = message;
+						},
+						setup:function(){
+							return { 
+								focus: { element:0 }
+							};
+						},
+						prepare:function(){
+							this.setContent(this.message);
+						}
+					}});
+				}
+				
+				alertify.myAlert(btnHtm);
+			},
+			copyUrl : function(target){
+				var copyUrl = document.getElementById( 'copyUrl' );
+				copyUrl.select();
+				document.execCommand( 'Copy' );
+		        
+				$('.ajs-close').trigger("click");
+				alertify.success('<spring:message code="msg.common.success" />');
+			},
 			disabledCompleteRow : function(disabledBoolean){
 				var diabledNameList = ['prjName', 'osType', 'osTypeEtc', 'distributionType', 'networkServerType', 'distributeTarget', 'noticeType', 'noticeTypeEtc', 'priority', 'creatorNm', 'reviewer'];
 				diabledNameList.forEach(function(names){$('input[name='+names+'], select[name='+names+']').attr('disabled', disabledBoolean)});

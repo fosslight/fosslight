@@ -343,6 +343,10 @@
 		<!---->
 		<div class="btnLayout">
             <span class="right">
+				<input id="copyUrl" type="text" style="width:1px; height:1px; margin:0; padding:0; border: 0;">
+				<c:if test="${not empty detail.partnerId}">
+					<input type="button" value="Share URL" class="btnColor red" onclick="fn.shareUrl();" />
+				</c:if>
                 <c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>
 					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/
@@ -368,6 +372,9 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
+				<c:if test="${not empty detail.partnerId}">
+					<input type="button" value="Share URL" class="btnColor red" onclick="fn.shareUrl();" />
+				</c:if>
 				<c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
 					<input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>
 					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/
