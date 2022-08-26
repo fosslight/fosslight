@@ -35,11 +35,11 @@ var saveFlag = false;
 		//}
 		</c:if>
 
-		if($('input[name=partnerId]').val() == ""){
-			initCKEditorNoToolbar('editor4', false);
-		} else {
+		activeLink();
+		if('${detail.viewOnlyFlag}' == 'Y') {
 			initCKEditorNoToolbar('editor4', true);
-			activeLink();
+		} else {
+			initCKEditorNoToolbar('editor4', false);
 		}
 		
 		// autoConplete 문제로 인한 처리
@@ -573,42 +573,22 @@ var saveFlag = false;
 	var partyDiffMsgData_e = []; //초기화
 	var fn = {
 		editDescription : function(){
-	            $("#saveBtn").show();
-	            $("#cancelBtn").show();
-	            $("#editAdditionalInfomation").hide();
-	            initCKEditorNoToolbar("editor4", false);
-	            var originComment = CKEDITOR.instances.editor4.getData();
-
-	            $("#saveBtn").off("click").on("click", function(e){
-	                var linkText = initCKEditorNoToolbar('editor4', true);
-	                $("#saveBtn").hide();
-	                $("#cancelBtn").hide();
-	                $("#editAdditionalInfomation").show();
-
-	                var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
-	                $.ajax({
-	                    url : '<c:url value="/partner/updateDescription"/>',
-	                    type : 'POST',
-	                    data : JSON.stringify(data),
-	                    dataType : 'json',
-	                    cache : false,
-	                    contentType : 'application/json',
-	                    success: function(){
-	                        alertify.success('<spring:message code="msg.common.success" />');
-	                    },
-	                    error : function(){
-	                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
-	                    }
-	                });
-	            });
-	            $("#cancelBtn").off("click").on("click", function(e){
-	                initCKEditorNoToolbar('editor4', true);
-	                CKEDITOR.instances.editor4.setData(originComment);
-	                $("#saveBtn").hide();
-	                $("#cancelBtn").hide();
-	                $("#editAdditionalInfomation").show();
-	            });
-
+			var linkText = initCKEditorNoToolbar("editor4", false);
+			var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
+			$.ajax({
+				url : '<c:url value="/partner/updateDescription"/>',
+				type : 'POST',
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(){
+					alertify.success('<spring:message code="msg.common.success" />');
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
 		},
 		// party 그리드 데이터
 		getPartyGridData : function(){

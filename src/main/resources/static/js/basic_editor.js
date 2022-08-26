@@ -30,6 +30,8 @@ var initSample = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor.getData());
+		CKEDITOR.instances.editor.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -65,6 +67,8 @@ var initSample2 = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor2.getData());
+		CKEDITOR.instances.editor2.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -100,6 +104,8 @@ var initSample3 = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor3.getData());
+		CKEDITOR.instances.editor3.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -135,6 +141,9 @@ var initCKEditorToolbar = function (id) {
 		_editor.destroy();
 	}
 	CKEDITOR.replace(id);
+	var linkText = replaceWithLink(CKEDITOR.instances[id].getData());
+	CKEDITOR.instances[id].setData(linkText);
+	return linkText;
 }
 
 var activeLink = function(){

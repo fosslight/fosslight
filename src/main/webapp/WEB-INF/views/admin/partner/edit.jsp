@@ -142,22 +142,16 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.description" /></th>
 							<td class="dCase">
-								<c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
-									<dt id="editAdditionalInfomation" style="height: 15px;">
-										<span class="right">
-											<input type="button" class="editModify btnViewMode" onclick="fn.editDescription();"/>
-										</span>
-									</dt>
-								</c:if>
 								<div class="grid-container">
 									<div class="grid-width-100">
 										<div id="editor4"><c:if test="${not empty detail }">${detail.description }</c:if></div>
 									</div>
 								</div>
-								<div class="right mt5">
-									<input id="saveBtn" type='button' value='Save' class='btnCLight red right' style="margin-left:5px; display: none;"/>
-									<input id="cancelBtn" type='button' value='Cancel' class='btnCLight darkgray right' style="display: none;"/>
-								</div>
+								<c:if test="${(project.viewOnlyFlag ne 'Y') and (project.copyFlag ne 'Y') and (not empty project.prjId) }">
+									<div class="right mt5">
+										<input id="saveBtn" type='button' value='Save' class='btnCLight red right' style="margin-left:5px;" onclick="fn.editComment();"/>
+									</div>
+								</c:if>
 							</td>
 						</tr>
 						<tr>

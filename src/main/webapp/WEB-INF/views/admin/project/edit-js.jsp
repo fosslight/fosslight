@@ -25,17 +25,15 @@
 	
 	$(document).ready(function() {
 		'use strict';
+		data.init();
 		initSample();
 		initSample2();
-		data.init();
 		evt.init();
 
-        if($('input[name=prjId]').val() == "" || copyFlag == 'Y') {
-            $("#editAdditionalInfomation").hide();
-        } else {
+		activeLink();
+		if('${project.viewOnlyFlag}' == 'Y') {
             initCKEditorNoToolbar('editor', true);
-            activeLink();
-        }
+		}
 
         var userDivision = $('#division');
         for(var i=0;i<userDivision.children().length;i++){
@@ -548,31 +546,10 @@
 	};
 	
 	var fn = {
-	        editComment : function() {
-	            $("#saveBtn").show();
-	            $("#cancelBtn").show();
-	            $("#editAdditionalInfomation").hide();
-                    initCKEditorToolbar('editor');
-
-	            var originComment = CKEDITOR.instances.editor.getData();
-
-	            $("#saveBtn").off("click").on("click", function(e){
-                        var linkText = initCKEditorNoToolbar('editor', true);
-                        $("#saveBtn").hide();
-                        $("#cancelBtn").hide();
-                        $("#editAdditionalInfomation").show();
+		editComment : function() {
+			initCKEditorToolbar("editor");
 			fn.saveSubmit(false);
-
-	            });
-
-	            $("#cancelBtn").off("click").on("click", function(e) {
-                        initCKEditorNoToolbar('editor', true);
-                        CKEDITOR.instances.editor.setData(originComment);
-                        $("#saveBtn").hide();
-                        $("#cancelBtn").hide();
-                        $("#editAdditionalInfomation").show();
-	            });
-	        },
+		},
 		copy : function(){
 			var prjId = $('input[name=prjId]').val();
 			
