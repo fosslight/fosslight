@@ -988,4 +988,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		return updatePartnerDivMap;
 	}
+
+	@Override
+	public void updateDescription(PartnerMaster partnerMaster){
+		partnerMapper.updateDescription(partnerMaster);
+	}
+
 }

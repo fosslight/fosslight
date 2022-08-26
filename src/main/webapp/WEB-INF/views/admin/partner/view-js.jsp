@@ -23,6 +23,13 @@ var partnerStatus = "${detail.status}";
 
 	$(document).ready(function () {
 		'use strict';
+        if('${detail.viewOnlyFlag}' == 'N') {
+            var copyUrl = "";
+            var protocol = window.location.protocol;
+            var host =  window.location.host;
+            copyUrl = protocol + "//" + host + "/index?id=" + '${detail.partnerId}' + "&project=false";
+            window.location.href = copyUrl;
+        }
 		
 	<c:if test="${empty message}">
 		evt.init();

@@ -605,7 +605,15 @@
 				</foreach>
 			</if>
 	</delete>
-	
+	<update id="updateDescription" parameterType="oss.fosslight.domain.PartnerMaster">
+		UPDATE
+			PARTNER_MASTER
+		SET
+			DESCRIPTION = #{description}
+		WHERE
+			PARTNER_ID = #{partnerId}
+	</update>
+
 	<update id="deleteMaster" parameterType="oss.fosslight.domain.PartnerMaster">
 	UPDATE
 		PARTNER_MASTER 

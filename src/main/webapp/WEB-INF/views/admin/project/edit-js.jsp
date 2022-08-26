@@ -25,20 +25,15 @@
 	
 	$(document).ready(function() {
 		'use strict';
+		data.init();
 		initSample();
 		initSample2();
-		data.init();
 		evt.init();
 
-        if($('input[name=prjId]').val() == "" || copyFlag == 'Y') {
-            $("#editAdditionalInfomation").hide();
-        } else {
-            if(CKEDITOR.instances.editor) {
-                var _editor = CKEDITOR.instances.editor;
-                _editor.destroy();
-            }
-            CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
-        }
+		activeLink();
+		if('${project.viewOnlyFlag}' == 'Y') {
+            initCKEditorNoToolbar('editor', true);
+		}
 
         var userDivision = $('#division');
         for(var i=0;i<userDivision.children().length;i++){
@@ -551,44 +546,10 @@
 	};
 	
 	var fn = {
-	        editComment : function() {
-	            $("#saveBtn").show();
-	            $("#cancelBtn").show();
-	            $("#editAdditionalInfomation").hide();
-	            if(CKEDITOR.instances.editor) {
-	                var _editor = CKEDITOR.instances.editor;
-	                _editor.destroy();
-	            }
-	            CKEDITOR.replace('editor');
-	            var originComment = CKEDITOR.instances.editor.getData();
-
-	            $("#saveBtn").click(function(e){
-	                e.preventDefault();
-	                if(CKEDITOR.instances.editor) {
-	                    var _editor = CKEDITOR.instances.editor;
-	                    _editor.destroy();
-	                }
-	                CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
-	                $("#saveBtn").hide();
-	                $("#cancelBtn").hide();
-	                $("#editAdditionalInfomation").show();
-	                fn.saveSubmit(false);
-	            });
-
-	            $("#cancelBtn").click( function(e) {
-	                e.preventDefault();
-	                if(CKEDITOR.instances.editor) {
-	                    var _editor = CKEDITOR.instances.editor;
-	                    _editor.destroy();
-	                }
-	                CKEDITOR.replace('editor', {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
-	                CKEDITOR.instances.editor.setData(originComment);
-	                $("#saveBtn").hide();
-	                $("#cancelBtn").hide();
-	                $("#editAdditionalInfomation").show();
-	                $("#cancelBtn").unbind("click");
-	            });
-	        },
+		editComment : function() {
+			initCKEditorToolbar("editor");
+			fn.saveSubmit(false);
+		},
 		copy : function(){
 			var prjId = $('input[name=prjId]').val();
 			
@@ -1189,7 +1150,7 @@
 					return false;
 				}
 				
-				var param = {referenceId : '${project.prjId}', referenceDiv :'19', contents : editorVal, mailSendType : type};
+				var param = {referenceId : '${project.prjId}', referenceDiv :'19', contents : replaceWithLink(editorVal), mailSendType : type};
 				
 				$.ajax({
 					url : '<c:url value="/project/sendComment"/>',

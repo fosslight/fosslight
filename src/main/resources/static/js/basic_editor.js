@@ -30,6 +30,8 @@ var initSample = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor.getData());
+		CKEDITOR.instances.editor.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -65,6 +67,8 @@ var initSample2 = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor2.getData());
+		CKEDITOR.instances.editor2.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -100,6 +104,8 @@ var initSample3 = ( function() {
 			// TODO we can consider displaying some info box that
 			// without wysiwygarea the classic editor may not work.
 		}
+		var linkText = replaceWithLink(CKEDITOR.instances.editor3.getData());
+		CKEDITOR.instances.editor3.setData(linkText);
 	};
 
 	function isWysiwygareaAvailable() {
@@ -116,4 +122,37 @@ var initSample3 = ( function() {
 function resetEditor(instance) {
 	instance.updateElement();
 	instance.setData('');
+}
+
+var initCKEditorNoToolbar = function (id, readOnly) {
+	if(CKEDITOR.instances[id]) {
+		var _editor = CKEDITOR.instances[id];
+		_editor.destroy();
+	}
+	CKEDITOR.replace(id, {customConfig:"/js/customEditorConf_Comment.js", readOnly : readOnly});
+	var linkText = replaceWithLink(CKEDITOR.instances[id].getData());
+	CKEDITOR.instances[id].setData(linkText);
+	return linkText;
+}
+
+var initCKEditorToolbar = function (id) {
+	if(CKEDITOR.instances[id]) {
+		var _editor = CKEDITOR.instances.editor;
+		_editor.destroy();
+	}
+	CKEDITOR.replace(id);
+	var linkText = replaceWithLink(CKEDITOR.instances[id].getData());
+	CKEDITOR.instances[id].setData(linkText);
+	return linkText;
+}
+
+var activeLink = function(){
+	CKEDITOR.on('instanceReady', function (ev) {
+		$('iframe').contents().unbind("click").bind("click",function(e){
+			var url = e.target.href;
+			if (url !== undefined && url !== "") {
+				window.open(url);
+			}
+		});
+	});
 }

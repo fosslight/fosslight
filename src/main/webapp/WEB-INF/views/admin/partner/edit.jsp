@@ -141,7 +141,18 @@
 						</c:if>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.description" /></th>
-							<td class="dCase"><textarea class="w100P h150" id="description" name="description" ${confirmStatusDisabled}><c:if test="${not empty detail }">${detail.description }</c:if></textarea></td>
+							<td class="dCase">
+								<div class="grid-container">
+									<div class="grid-width-100">
+										<div id="editor4"><c:if test="${not empty detail }">${detail.description }</c:if></div>
+									</div>
+								</div>
+								<c:if test="${(project.viewOnlyFlag ne 'Y') and (project.copyFlag ne 'Y') and (not empty project.prjId) }">
+									<div class="right mt5">
+										<input id="saveBtn" type='button' value='Save' class='btnCLight red right' style="margin-left:5px;" onclick="fn.editComment();"/>
+									</div>
+								</c:if>
+							</td>
 						</tr>
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.Agreement" /><br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>

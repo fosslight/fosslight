@@ -1268,4 +1268,18 @@ public class PartnerController extends CoTopComponent{
 		
 		return makeJsonResponseHeader();
 	}
+
+	@PostMapping(value = PARTNER.UPDATE_DESCRIPTION)
+	public @ResponseBody ResponseEntity<Object> updateDescription(
+			@RequestBody PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		try {
+			partnerService.updateDescription(partnerMaster);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader();
+	}
 }

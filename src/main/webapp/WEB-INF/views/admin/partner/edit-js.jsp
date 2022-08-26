@@ -34,6 +34,13 @@ var saveFlag = false;
 			//bat_evt.init();
 		//}
 		</c:if>
+
+		activeLink();
+		if('${detail.viewOnlyFlag}' == 'Y') {
+			initCKEditorNoToolbar('editor4', true);
+		} else {
+			initCKEditorNoToolbar('editor4', false);
+		}
 		
 		// autoConplete 문제로 인한 처리
 		$("#partnerName").val(partnerData.partnerName);
@@ -565,6 +572,24 @@ var saveFlag = false;
 	var partyValidMsgData_e = []; //초기화
 	var partyDiffMsgData_e = []; //초기화
 	var fn = {
+		editDescription : function(){
+			var linkText = initCKEditorNoToolbar("editor4", false);
+			var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
+			$.ajax({
+				url : '<c:url value="/partner/updateDescription"/>',
+				type : 'POST',
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(){
+					alertify.success('<spring:message code="msg.common.success" />');
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
 		// party 그리드 데이터
 		getPartyGridData : function(){
 			$.ajax({
