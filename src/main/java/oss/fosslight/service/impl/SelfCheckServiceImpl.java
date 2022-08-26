@@ -1333,14 +1333,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
 				addOssComponentCopyright.put(componentKey, copyrightList);
 				
-				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
-						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
-					if(!noticeInfo.containsKey(componentKey)) {
-						srcInfo.put(componentKey, ossComponent);
-					}
-				} else {
-					noticeInfo.put(componentKey, ossComponent);
+				switch(CommonFunction.checkObligationSelectedLicense(ossComponent.getOssComponentsLicense())){
+					case CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE: 
+						if(hideOssVersionFlag) {
+							if(!srcInfo.containsKey(componentKey)) srcInfo.put(componentKey, ossComponent);
+						} else {
+							srcInfo.put(componentKey, ossComponent);
+						}
+						
+						break;
+					case CoConstDef.CD_DTL_OBLIGATION_NOTICE: 
+						if(hideOssVersionFlag) {
+							if(!noticeInfo.containsKey(componentKey)) noticeInfo.put(componentKey, ossComponent);
+						} else {
+							noticeInfo.put(componentKey, ossComponent);
+						}
+						
+						break;
 				}
 				
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
