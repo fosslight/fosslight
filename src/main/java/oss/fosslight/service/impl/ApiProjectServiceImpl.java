@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,7 @@ import oss.fosslight.common.ShellCommander;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssNotice;
+import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.ApiFileMapper;
@@ -43,9 +46,11 @@ import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.ApiVulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.util.YamlUtil;
 
 @Service
 @Slf4j
@@ -57,6 +62,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Autowired ProjectService projectService;
 	@Autowired CommentService commentService;
 	@Autowired ApiOssMapper apiOssMapper;
+	@Autowired ApiVulnerabilityService apiVulnerabilityService;
 	
 	HashMap<String, HashMap<String, Object>> OSS_INFO_UPPER = new HashMap<>();
 	HashMap<String, HashMap<String, Object>> OSS_INFO_BY_ID = new HashMap<>();
@@ -511,6 +517,48 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	public boolean updatePackageFile(Map<String, Object> paramMap) {
 		return apiProjectMapper.updatePackageFile(paramMap) > 0;
+	}
+
+	// Json Format: Yaml Format + Vulnerability
+	@Override
+	public Map<String, Object> getBomExportJson(String prjId) {
+		// Get Yaml Format
+		String type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+		Project project = new Project();
+		project.setPrjId(prjId);
+
+		String dataStr = toJson(project);
+		Type projectType = new TypeToken<Project>(){}.getType();
+		Project projectBean = (Project) fromJson(dataStr, projectType);
+
+		ProjectIdentification _param = new ProjectIdentification();
+		_param.setReferenceDiv(type);
+		_param.setReferenceId(projectBean.getPrjId());
+		_param.setMerge(CoConstDef.FLAG_NO);
+
+		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
+		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
+
+		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(projectService.setMergeGridData(list), type);
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		// Integrate Yaml Format, Vulnerability
+		for(String resultYamlFormatKey: resultYamlFormat.keySet()){
+			List<Map<String, Object>> yamlFormatList = resultYamlFormat.get(resultYamlFormatKey);
+			for(Map<String, Object> yamlFormatMap: yamlFormatList) {
+				String version = (String) yamlFormatMap.get("version");
+				List<Map<String, Object>> maxScoreNvdInfoList = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version);
+
+				if (!maxScoreNvdInfoList.isEmpty()) {
+					Map<String, Object> maxScoreNvdInfoMap = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version).get(0);
+					yamlFormatMap.put("Vulnerability", maxScoreNvdInfoMap.get("cvssScore"));
+				}
+			}
+			resultMap.put(resultYamlFormatKey, yamlFormatList);
+		}
+
+		return resultMap;
 	}
 	
 	@Override

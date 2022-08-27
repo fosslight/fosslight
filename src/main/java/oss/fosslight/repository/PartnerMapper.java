@@ -146,4 +146,6 @@ public interface PartnerMapper {
 	void updateOssList(ProjectIdentification projectIdentification);
 
 	public int updateDivision(@Param("partnerId") String partnerId, @Param("division") String division);
+
+	void updateDescription(PartnerMaster partnerMaster);
 }

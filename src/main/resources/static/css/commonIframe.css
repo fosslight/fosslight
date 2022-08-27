@@ -161,6 +161,8 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .txBlueIt {font-style:italic;font-size:13px;font-weight:600;color:#0070c0;}
 .urlLink {display:block;color:#0070c0 !important;text-decoration:underline !important;}
 .urlLink2 {color:#0070c0 !important;text-decoration:underline !important;}
+.commentContentsArea a {color:#0070c0 !important;text-decoration:underline !important;}
+
 /* ===== Table ===== */
 /* write : 글쓰기 */
 .tbws1 {border:1px solid #cbc7bd;border-radius:5px;overflow:hidden;}

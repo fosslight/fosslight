@@ -155,7 +155,7 @@ public class YamlUtil extends CoTopComponent {
 		return checkYamlFormat(list, "");
 	}
 	
-	private static LinkedHashMap<String, List<Map<String, Object>>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
+	public static LinkedHashMap<String, List<Map<String, Object>>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
 		LinkedHashMap<String, List<Map<String, Object>>> result = new LinkedHashMap<>();
 		
 		for(ProjectIdentification bean : list) {

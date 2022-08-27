@@ -216,7 +216,7 @@
 			loading.show();
 			
 			var editorVal = CKEDITOR.instances.editor.getData();
-			$('input[name=comment]').val(editorVal);
+			$('input[name=comment]').val(replaceWithLink(editorVal));
 
 			var pData = $('#licenseForm').serializeObject();
 			
@@ -295,15 +295,15 @@
 		var contents = $(obj).parent().parent().next().html();
 		CKEDITOR.instances.editor3.setData(contents);
 		//코멘트 수정
-		$('.closeModComment').click(function(){
+		$('.closeModComment').off("click").on("click", function(){
 			$('.commModifyPop').hide();
 			$('#blind_wrap').hide();	
 		});
 		
-		$('.modifyComment').click(function(){
+		$('.modifyComment').off("click").on("click", function(){
 			var editorVal = CKEDITOR.instances.editor3.getData();
 			var register = '${sessUserInfo.userId}';
-			var param = {commId : modifyCommentId, referenceId : data.detail.licenseId, referenceDiv :'30', contents : editorVal};
+			var param = {commId : modifyCommentId, referenceId : data.detail.licenseId, referenceDiv :'30', contents : replaceWithLink(editorVal)};
 			$.ajax({
 				url : '<c:url value="/license/saveComment"/>',
 				type : 'POST',
@@ -346,7 +346,7 @@ var fn_commemt = {
             	referenceDiv : 'license'
             },
             success : function(data){
-                $('#commentListArea').html(data);
+                $('#commentListArea').html(replaceWithLink(data));
             },
             error : function(xhr, ajaxOptions, thrownError){
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -383,17 +383,17 @@ var fn_commemt = {
 
         $("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
         $("#spanBtnArea_"+_commId+" > .btnEditMode").show();
-        $("#spanBtnArea_"+_commId+" > .closeModComment").click(function(e){
+        $("#spanBtnArea_"+_commId+" > .closeModComment").off("click").on("click", function(e){
             e.preventDefault();
             fn_commemt.createNonToolbarEditor(_commId);
             $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
             $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
         });
         
-        $("#spanBtnArea_"+_commId+" > .modifyComment").click(function(e){
+        $("#spanBtnArea_"+_commId+" > .modifyComment").off("click").on("click", function(e){
             e.preventDefault();
             var _referenceId = $('input[name=licenseId]').val();
-            var param = {commId : _commId, contents : _editor.getData(), referenceDiv: '30', referenceId: _referenceId};
+            var param = {commId : _commId, contents : replaceWithLink(_editor.getData()), referenceDiv: '30', referenceId: _referenceId};
 
             $.ajax({
             	url : '<c:url value="/comment/updateComment"/>',

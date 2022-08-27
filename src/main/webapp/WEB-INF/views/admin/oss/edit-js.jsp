@@ -1700,7 +1700,7 @@
 		loading.show();
 		saveRow();
 		var editorVal = CKEDITOR.instances.editor.getData();
-		$('input[name=comment]').val(editorVal);
+		$('input[name=comment]').val(replaceWithLink(editorVal));
 		$("#ossForm").ajaxForm({
 			url :'<c:url value="/oss/saveAjax"/>',
             type : 'POST',
@@ -1805,15 +1805,15 @@ function modifyComment(obj){
 	CKEDITOR.instances.editor3.setData(contents);
 	
 	//코멘트 수정
-	$('.closeModComment').click(function(){
+	$('.closeModComment').off("click").on("click", function(){
 		$('.commModifyPop').hide();
 		$('#blind_wrap').hide();	
 	});
 	
-	$('.modifyComment').click(function(){
-		var editorVal = CKEDITOR.instances.editor3.getData();
+	$('.modifyComment').off("click").on("click", function(){
+        var editorVal = CKEDITOR.instances.editor3.getData();
 		var register = '${sessUserInfo.userId}';
-		var param = {commId : modifyCommentId, referenceId : data.detail.ossId, referenceDiv :'40', contents : editorVal};
+		var param = {commId : modifyCommentId, referenceId : data.detail.ossId, referenceDiv :'40', contents : replaceWithLink(editorVal)};
 		$.ajax({
 			url : '<c:url value="/oss/saveComment"/>',
 			type : 'POST',
@@ -1988,7 +1988,7 @@ var fn_commemt = {
     						}
     						
     						temp.find('.dateArea').text(data[i].createdDate);
-    						temp.find('.commentContentsArea').html(data[i].contents);
+    						temp.find('.commentContentsArea').html(replaceWithLink(data[i].contents));
     						temp.find('input[name=commId]').val(commId);
     						temp.removeAttr('name');
     					}	
@@ -2029,17 +2029,15 @@ var fn_commemt = {
         $("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
         $("#spanBtnArea_"+_commId+" > .btnEditMode").show();
         
-        $("#spanBtnArea_"+_commId+" > .closeModComment").click(function(e){
-            e.preventDefault();
+        $("#spanBtnArea_"+_commId+" > .closeModComment").off("click").on("click", function(e){
             fn_commemt.createNonToolbarEditor(_commId);
             $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
             $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
         });
         
-        $("#spanBtnArea_"+_commId+" > .modifyComment").click(function(e){
-            e.preventDefault();
+        $("#spanBtnArea_"+_commId+" > .modifyComment").off("click").on("click", function(e){
             var _referenceId = $('input[name=ossId]').val();
-            var param = {commId : _commId, contents : _editor.getData(), referenceDiv: '40', referenceId: _referenceId};
+            var param = {commId : _commId, contents : replaceWithLink(_editor.getData()), referenceDiv: '40', referenceId: _referenceId};
             $.ajax({
             	url : '<c:url value="/comment/updateComment"/>',
                 type : 'POST',
@@ -2064,6 +2062,7 @@ var fn_commemt = {
     createNonToolbarEditor : function(_commId) {
 
         var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+        var editorVal = _editor.getData();
         if(_editor) {
             _editor.destroy();
         }
@@ -2073,6 +2072,7 @@ var fn_commemt = {
             	customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
                     });
         }
+        CKEDITOR.instances['comm_editor_'+_commId].setData(replaceWithLink(editorVal));
     }
 }
 

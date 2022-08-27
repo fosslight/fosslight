@@ -1,6 +1,7 @@
 var lastTab = -1;	//이전 탭 기억변수
 var selectTab = -1;	//현재 탭 기억변수
 var deleteFlag = false;
+var LINKREGEXP = /\[PRJ-\d+\](?!<\/a>)|\[3rd-\d+\](?!<\/a>)/gi;
 
 $( document ).ajaxSend(function( event, jqxhr, settings ) {
   jqxhr.setRequestHeader("AJAX", true);
@@ -110,15 +111,23 @@ $(document).ready(function (){
 	});
 
 	function initTab(){
-		var _defaultTabStr = $("#defaultTabAnchorArr").val()||"";
-				
-		$.each(_defaultTabStr.split(","), function(idx, val){
-			var _gnbHref = $("#header > div > div.gnb a[href$='"+val+"']");
-			
-			if(_gnbHref && _gnbHref.length == 1) {
-				$("#header > div > div.gnb a[href$='"+val+"']").trigger("click");
-			}
-		});
+		var query = window.location.search;
+		var param = new URLSearchParams(query);
+		var id = param.get("id");
+		var prjFlag = param.get("project");
+		if(id != null && prjFlag != null) {
+			createTab(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty",prjFlag == 'true' ? "#/project/edit/" + id : "#/partner/edit/" + id);
+		} else {
+			var _defaultTabStr = $("#defaultTabAnchorArr").val()||"";
+
+			$.each(_defaultTabStr.split(","), function(idx, val){
+				var _gnbHref = $("#header > div > div.gnb a[href$='"+val+"']");
+
+				if(_gnbHref && _gnbHref.length == 1) {
+					$("#header > div > div.gnb a[href$='"+val+"']").trigger("click");
+				}
+			});
+		}
 	}
 	
 	function tabExitHide(){
@@ -2169,3 +2178,24 @@ function nvl(str, defaultStr){
 var searchStringOptions = {searchoptions:{sopt:['cn','eq','ne','bw','bn','ew','en','nc']}};
 var searchNumberOptions = {searchoptions:{sopt:['ge','le','gt','lt','eq']}};
 var searchDateOptions = {searchoptions:{sopt:['eq','lt','le','gt','ge']}};
+
+
+function replaceWithLink(text){
+	return text.replace(LINKREGEXP, findAndReplace);
+}
+
+function findAndReplace(match) {
+	var prj = /PRJ/i;
+	var third = /3rd/i;
+	var arrLink = match.split('-');
+	var id = arrLink[1].substring(0, arrLink[1].length-1);
+	var protocol = window.location.protocol;
+	var host =  window.location.host;
+	var url = protocol + "//" + host;
+	if(prj.test(match)) {
+		url += "/project/view/" + id;
+	} else if(third.test(match)) {
+		url += "/partner/view/" + id;
+	}
+	return "<a href=" + url +" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" +  match + "</a>";
+}

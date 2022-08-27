@@ -1258,6 +1258,20 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
+		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
+		if(hideOssVersionFlag) {
+			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
+			Set<String> noticeKeyList = noticeInfo.keySet();
+			
+			for(String key : noticeKeyList) {
+				if(!srcInfo.containsKey(key)) {
+					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
+				}
+			}
+			
+			noticeInfo = hideOssVersionMergeNoticeInfo;
+		}
+		
 		// CLASS 파일만 등록한 경우 라이선스 정보만 추가한다.
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = selfCheckMapper.selectVerificationNoticeClassAppend(ossNotice);
@@ -1319,32 +1333,29 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				ossComponent.setCopyrightText(String.join("\r\n", copyrightList));
 				addOssComponentCopyright.put(componentKey, copyrightList);
 				
-				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
-						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
-					srcInfo.put(componentKey, ossComponent);
-				} else {
-					noticeInfo.put(componentKey, ossComponent);
+				switch(CommonFunction.checkObligationSelectedLicense(ossComponent.getOssComponentsLicense())){
+					case CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE: 
+						if(hideOssVersionFlag) {
+							if(!srcInfo.containsKey(componentKey)) srcInfo.put(componentKey, ossComponent);
+						} else {
+							srcInfo.put(componentKey, ossComponent);
+						}
+						
+						break;
+					case CoConstDef.CD_DTL_OBLIGATION_NOTICE: 
+						if(hideOssVersionFlag) {
+							if(!noticeInfo.containsKey(componentKey)) noticeInfo.put(componentKey, ossComponent);
+						} else {
+							noticeInfo.put(componentKey, ossComponent);
+						}
+						
+						break;
 				}
 				
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(componentKey, license);
 				}
 			}
-		}
-		
-		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		if(hideOssVersionFlag) {
-			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
-			Set<String> noticeKeyList = noticeInfo.keySet();
-			
-			for(String key : noticeKeyList) {
-				if(!srcInfo.containsKey(key)) {
-					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
-				}
-			}
-			
-			noticeInfo = hideOssVersionMergeNoticeInfo;
 		}
 		
 		boolean isTextNotice = "text".equals(ossNotice.getFileType());

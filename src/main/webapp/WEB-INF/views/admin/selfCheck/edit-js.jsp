@@ -57,7 +57,7 @@
 					cache : false,
 					data : {prjId : prjId},
 					success : function(detailResult){
-						$("#divViewMode").html(detailResult);
+						$("#divViewMode").html(replaceWithLink(detailResult));
 						$("#divViewMode").show();
 						$("#divEditMode").hide();
 					},
@@ -143,7 +143,7 @@
 		// 저장
 		saveSubmit : function(){
 			var editorVal = CKEDITOR.instances.editor.getData();
-			$('input[name=comment]').val(editorVal);
+			$('input[name=comment]').val(replaceWithLink(editorVal));
 			
 			$("#projectForm").ajaxForm({
 				url : '<c:url value="/selfCheck/saveAjax"/>',
