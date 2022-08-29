@@ -1,7 +1,7 @@
 var lastTab = -1;	//이전 탭 기억변수
 var selectTab = -1;	//현재 탭 기억변수
 var deleteFlag = false;
-var LINKREGEXP = /\[PRJ-\d+\](?!<\/a>)|\[3rd-\d+\](?!<\/a>)/gi;
+var LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 
 $( document ).ajaxSend(function( event, jqxhr, settings ) {
   jqxhr.setRequestHeader("AJAX", true);
