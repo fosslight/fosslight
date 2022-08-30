@@ -1076,7 +1076,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 				
-				if(!getData.equals(checkVal)) {
+				if(!getData.toUpperCase().equals(checkVal.toUpperCase())) {
 					return true;
 				}
 			}
@@ -1103,7 +1103,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						downloadLocation = downloadLocation.substring(5, downloadLocation.length());
 					}
 					
-					if(downloadLocation.equals(checkVal)) {
+					if(downloadLocation.toUpperCase().equals(checkVal.toUpperCase())) {
 						chkFlag = true;
 						break;
 					}
@@ -1131,7 +1131,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					getData = getData.substring(5, getData.length());
 				}
 				
-				if(!getData.equals(checkVal)) {
+				if(!getData.toUpperCase().equals(checkVal.toUpperCase())) {
 					return true;
 				}
 			}
