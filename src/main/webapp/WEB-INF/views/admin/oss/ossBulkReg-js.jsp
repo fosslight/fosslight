@@ -13,6 +13,8 @@
     var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','ossCopyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
     var selectedIds = new Set() /**set for selected rowids*/
+    var referenceId = '${projectData.prjId}';
+    var referenceDiv = '${projectData.referenceDiv}';
 
     function refreshGrid($grid, results) {
         $grid.jqGrid('clearGridData')
@@ -309,6 +311,7 @@
                 }
             }
         });
+        IdentificationGridDataExtractor.call();
     });
     var fn = {
         downloadBulkSample : function(type){
@@ -318,4 +321,70 @@
 			location.href = '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
 		}
 	}
+    const IdentificationGridDataExtractor = {
+        call : function (){
+            if(this.isFromProjectIdentification()) {
+                $.ajax({
+                    contentType: 'application/json',
+                    url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}`,
+                    dataType: "json",
+                    success: (data) => {
+                        if (data.validData) {
+                            this.addRows(data);
+                        }
+                    },
+                    error: (e) => {
+                        console.log(e);
+                    }
+                })
+            }
+
+        },
+        isFromProjectIdentification : function (){
+            return referenceId && referenceDiv;
+        },
+        addRows(data) {
+            const mainDataMap = this.getMapOfMainData(data.mainData);
+            const validData = data.validData;
+
+            delete validData.isValid;
+
+            this.getInValidGridIds(validData).forEach(gridId => {
+                const newRow = this.toOssInfo(mainDataMap[gridId]);
+
+                $("#list").jqGrid('addRowData', newRow.gridId, newRow);
+
+                ossData.push(newRow);
+            });
+        },
+        getInValidGridIds(validData) {
+            return Array.from(new Set(Object.keys(validData).map(v => v.split(".")[1])));
+        },
+        getMapOfMainData(mainData) {
+            return mainData.reduce((obj, x) => {
+                obj[x.gridId] = x;
+                return obj;
+            }, {});
+        },
+
+        toOssInfo(data) {
+            return {
+                //tab datas
+                gridId: data.gridId,
+                comment: data.comments,
+                copyright: data.copyrightText,
+                downloadLocation: data.downloadLocation,
+                homepage: data.homepage,
+                declaredLicenses: data.licenseName.split(","),
+                ossName: data.ossName,
+                ossVersion: data.ossVersion,
+
+                //oss datas
+                attribution: "",
+                detectedLicenses: [],
+                summaryDescription: "",
+                ossNicknames: []
+            }
+        }
+    }
 </script>
