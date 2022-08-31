@@ -376,7 +376,11 @@ public class CoCode {
         	for(int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
-	            
+
+                    if(CoConstDef.CD_DTL_NOTICE_SPDX.equals(codedtl.cdDtlNo)){
+                        continue;
+                    }
+
 	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
 	            {
 	            	continue;

@@ -272,7 +272,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 						
 						break;
 					case CoConstDef.CD_DTL_NOTICE_SPDX:
-						c.setCdDtlExp((String) noticeDetailMap.get(CoConstDef.CD_DTL_NOTICE_SPDX));
+						c.setCdDtlExp(CoConstDef.FLAG_YES);
 						
 						break;
 				}
