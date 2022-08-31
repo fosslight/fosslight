@@ -147,9 +147,9 @@
 										<div id="editor4"><c:if test="${not empty detail }">${detail.description }</c:if></div>
 									</div>
 								</div>
-								<c:if test="${(project.viewOnlyFlag ne 'Y') and (project.copyFlag ne 'Y') and (not empty project.prjId) }">
+								<c:if test="${(detail.viewOnlyFlag ne 'Y') and (not empty detail.partnerId) }">
 									<div class="right mt5">
-										<input id="saveBtn" type='button' value='Save' class='btnCLight red right' style="margin-left:5px;" onclick="fn.editComment();"/>
+										<input id="saveBtn" type='button' value='Save' class='btnCLight red right' style="margin-left:5px;" onclick="fn.editDescription();"/>
 									</div>
 								</c:if>
 							</td>
@@ -230,9 +230,11 @@
 							</td>
 						</tr>
 					</c:if>
+					</c:if>
 					<tr>
 						<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
 						<td class="dCase watchCase">
+							<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 							<div class="pb5">
 								<span class="selectSet w150">
 									<strong for="userDivision" title="selected value">Select Division</strong>
@@ -285,25 +287,29 @@
 								<span><input type="text" id="listId" name="listId" style="width:350px" placeholder="Input ID you want to copy"/></span>
 								<input id="addList" type="button" value="+ Add" class="btnCLight gray" />
 							</div>
+							</c:if>
 							<div class="multiTxtSet2" id="nameSpace">
 							<c:forEach var="watcher" items="${detail.partnerWatcher }" varStatus="status">
 								<span>
 									<c:if test="${not empty watcher.userId}">
 									<input class="watcherTags" type="hidden" name="watchers" value='<c:if test="${ct:getConstDef('CD_USER_DIVISION_EMPTY') ne watcher.division}">${watcher.division}/</c:if>${watcher.userId}' />
 									<strong><c:if test="${ct:getConstDef('CD_USER_DIVISION_EMPTY') ne watcher.division}"><b <c:if test="${watcher.deptUseYn eq 'N'}">class="deleteUser"</c:if>>${ct:getCodeString(ct:getConstDef("CD_USER_DIVISION"),watcher.division)}</b>/</c:if><b <c:if test="${watcher.userUseYn eq 'N'}">class="deleteUser"</c:if>>${empty watcher.userName ? watcher.userId : watcher.userName}</b></strong>
+									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher('${watcher.division}','${watcher.userId}');"/>
+									</c:if>
 									</c:if>
 									<c:if test="${empty watcher.userId}">
 									<input class="watcherTags" type="hidden" name="watchers" value='${watcher.email}/Email' />
 									<strong>${watcher.email}</strong>
+									<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 									<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher('${watcher.email}','Email');"/>
+									</c:if>
 									</c:if>
 								</span>
 							</c:forEach>
 							</div>
 						</td>
 					</tr>
-					</c:if>
 						<c:if test="${not empty detail.partnerId}">
 						<tr>
 							<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>

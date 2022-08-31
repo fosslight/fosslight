@@ -302,6 +302,12 @@
 
 						<c:if test="${not empty project.prjId and 'Y' ne project.copyFlag}">
 						<tr>
+							<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
+							<td class="dCase">
+								<div id="multiDiv" class="multiTxtSet2">
+							</td>
+						</tr>
+						<tr>
 							<th class="dCase  txStr"><spring:message code="msg.common.field.creator" /></th>
 							<td class="dCase">
 								<div class="required">

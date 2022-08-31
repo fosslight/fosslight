@@ -170,14 +170,12 @@
 								<th class="dCase">Additional Information</th>
 								<td class="dCase">${project.comment}</td>
 							</tr>
-							<c:if test="${project.viewOnlyFlag ne 'Y'}">
 							<tr>
 								<th class="dCase">Watcher</th>
 								<td class="dCase">
 									<div id="multiDiv" class="multiTxtSet2"></div>
 								</td>
 							</tr>
-							</c:if>
 							<c:if test="${ct:isAdmin() and not empty project.prjId and 'Y' ne project.copyFlag}">
 
 							</c:if>

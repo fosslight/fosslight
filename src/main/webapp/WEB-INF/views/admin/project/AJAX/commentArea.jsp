@@ -17,14 +17,16 @@
 					customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
 						});
 			}
-			var text = CKEDITOR.instances[this.id].getData();
-			var linkText;
-			if(opener == null) {
-				linkText = replaceWithLink(text);
-			} else {
-				linkText = opener.replaceWithLink(text);
+			if(CKEDITOR.instances[this.id]) {
+				var text = CKEDITOR.instances[this.id].getData();
+				var linkText;
+				if(opener == null) {
+					linkText = replaceWithLink(text);
+				} else {
+					linkText = opener.replaceWithLink(text);
+				}
+				CKEDITOR.instances[this.id].setData(linkText);
 			}
-			CKEDITOR.instances[this.id].setData(linkText);
 		});
 		
 		CKEDITOR.on('instanceReady', function (ev) {
