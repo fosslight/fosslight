@@ -2103,7 +2103,7 @@
 	</select>
 	
 	<select id="getConfirmOssComponentsList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssComponents">
-		SELECT *
+		SELECT OC.OSS_NAME, OC.OSS_VERSION
 		  FROM OSS_COMPONENTS OC
 		 WHERE OC.ADMIN_CHECK_YN != 'Y'
 		   AND OC.REFERENCE_ID = #{prjId}
@@ -2116,6 +2116,7 @@
     		</otherwise>
     	</choose>
     	  AND OC.OSS_NAME = #{ossName}
+     GROUP BY OSS_NAME, OSS_VERSION
 	</select>
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
