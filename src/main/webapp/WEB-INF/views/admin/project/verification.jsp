@@ -384,35 +384,6 @@
 														<label for="chkAllowDownloadSimpleText">Simple Text</label>
 													</span>
 												</c:if>
-												<div class="mt10">
-													<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_SPDX')) eq 'Y'}">
-														<span class="checkSet">
-															<input type="checkbox" id="chkAllowDownloadSPDXSheet" name="chkAllowDownloadSPDXSheet"
-																data-targetid="allowDownloadSPDXSheetYn" <c:if test="${project.allowDownloadSPDXSheetYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
-															<label for="chkAllowDownloadSPDXSheet">SPDX(SpreadSheet)</label>
-														</span>
-														<span class="checkSet">
-															<input type="checkbox" id="chkAllowDownloadSPDXRdf" name="chkAllowDownloadSPDXRdf"
-																data-targetid="allowDownloadSPDXRdfYn" <c:if test="${project.allowDownloadSPDXRdfYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
-															<label for="chkAllowDownloadSPDXRdf">SPDX(RDF)</label>
-														</span>
-														<span class="checkSet">
-															<input type="checkbox" id="chkAllowDownloadSPDXTag" name="chkAllowDownloadSPDXTag"
-																data-targetid="allowDownloadSPDXTagYn" <c:if test="${project.allowDownloadSPDXTagYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
-															<label for="chkAllowDownloadSPDXTag">SPDX(TAG)</label>
-														</span>
-														<span class="checkSet">
-															<input type="checkbox" id="chkAllowDownloadSPDXJson" name="chkAllowDownloadSPDXJson"
-																   data-targetid="allowDownloadSPDXJsonYn" <c:if test="${project.allowDownloadSPDXJsonYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
-															<label for="chkAllowDownloadSPDXJson">SPDX(JSON)</label>
-														</span>
-														<span class="checkSet">
-															<input type="checkbox" id="chkAllowDownloadSPDXYaml" name="chkAllowDownloadSPDXYaml"
-																   data-targetid="allowDownloadSPDXYamlYn" <c:if test="${project.allowDownloadSPDXYamlYn eq 'Y'}">checked</c:if> <c:if test="${ossNotice.editNoticeYn eq 'N' or project.verificationStatus eq 'CONF'}"> disabled</c:if> >
-															<label for="chkAllowDownloadSPDXYaml">SPDX(YAML)</label>
-														</span>
-													</c:if>
-												</div>
 											</div>
 										</div>
 									</dd>
@@ -449,13 +420,6 @@
 							<option value="noticeSimpleDownload">Simple (html)</option>
 							<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_TEXT')) eq 'Y'}">
 								<option value="noticeTextSimpleDownload">Simple (text)</option>
-							</c:if>
-							<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_NOTICE_INFO'), ct:getConstDef('CD_DTL_NOTICE_SPDX')) eq 'Y'}">
-								<option value="spdxSpreadSheet">SPDX (spreadsheet)</option>
-								<option value="spdxRdf">SPDX (RDF)</option>
-								<option value="spdxTag">SPDX (TAG)</option>
-								<option value="spdxJson">SPDX (JSON)</option>
-								<option value="spdxYaml">SPDX (YAML)</option>
 							</c:if>
 						</select>
 					</span>
