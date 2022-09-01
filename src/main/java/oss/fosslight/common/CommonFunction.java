@@ -4366,15 +4366,22 @@ public class CommonFunction extends CoTopComponent {
 	public static List<ProjectIdentification> identificationUnclearObligationCheck(List<ProjectIdentification> list, Map<String, String> errorCodeMap, Map<String, String> warningCodeMap) {
 		List<String> UNCLEAR_OBLIGATION_CODE_LIST = Arrays.asList(new String[] {
 				"LICENSE_NAME.REQUIRED" ,"LICENSE_NAME.UNCONFIRMED", "LICENSE_NAME.INCLUDE_MULTI_OPERATE", "LICENSE_NAME.NOLICENSE", "LICENSE_NAME.INCLUDE_DUAL_OPERATE"
-//				, "OSS_NAME.REQUIRED", "OSS_NAME.UNCONFIRMED", "OSS_VERSION.UNCONFIRMED", "OSS_NAME.DEACTIVATED"
-		}) ;
+		});
+		
+		List<String> UNCLEAR_OBLIGATION_CODE_NOTLICENSE_LIST = Arrays.asList(new String[] {
+				"OSS_NAME.REQUIRED", "OSS_NAME.UNCONFIRMED", "OSS_VERSION.UNCONFIRMED", "OSS_NAME.DEACTIVATED"
+		});
 		
 		List<String> unclearObligationList = new ArrayList<>();
+		List<String> unclearObligationNotLicenseList = new ArrayList<>();
 		
 		if(errorCodeMap != null) {
 			for(String key : errorCodeMap.keySet()) {
 				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_LIST.contains(errorCodeMap.get(key))) {
 					unclearObligationList.add(key.substring(key.indexOf(".") + 1, key.length()));
+				}
+				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_NOTLICENSE_LIST.contains(errorCodeMap.get(key))) {
+					unclearObligationNotLicenseList.add(key.substring(key.indexOf(".") + 1, key.length()));
 				}
 			}
 		}
@@ -4382,6 +4389,9 @@ public class CommonFunction extends CoTopComponent {
 			for(String key : warningCodeMap.keySet()) {
 				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_LIST.contains(warningCodeMap.get(key))) {
 					unclearObligationList.add(key.substring(key.indexOf(".") + 1, key.length()));
+				}
+				if(key.indexOf(".") > -1 && UNCLEAR_OBLIGATION_CODE_NOTLICENSE_LIST.contains(warningCodeMap.get(key))) {
+					unclearObligationNotLicenseList.add(key.substring(key.indexOf(".") + 1, key.length()));
 				}
 			}
 		}
@@ -4404,6 +4414,16 @@ public class CommonFunction extends CoTopComponent {
 						|| (!isEmpty(bean.getObligationType()) && (checkIncludeUnconfirmedLicense(bean.getComponentLicenseList()) || checkIncludeNotDeclaredLicense(bean.getOssName(), bean.getOssVersion(), bean.getComponentLicenseList())))) {
 					bean.setObligationGrayFlag(CoConstDef.FLAG_YES);
 					bean.setObligationMsg(getMessage("msg.project.obligation.unclear"));
+				}
+				 
+				if(unclearObligationNotLicenseList.contains(bean.getGridId())) {
+					if(isEmpty(bean.getObligationType())){
+						String obligationType = CommonFunction.getObligationTypeWithSelectedLicense(bean);
+						if(!isEmpty(obligationType)) {
+							bean.setObligationType(obligationType);
+							continue;
+						}
+					}
 				}
 			}
 		}

@@ -101,7 +101,6 @@ public class CoConstDef {
 	public static final String CD_SYSTEM_SETTING = "909";
 	public static final String CD_LDAP_USED_FLAG = "910";
 	public static final String CD_SMTP_USED_FLAG = "911";
-	//	public static final String CD_MENU_AUTH_FLAG = "912";
 	public static final String CD_EXTERNAL_SERVICE_USED_FLAG = "940";
 	public static final String CD_EXTERNAL_ANALYSIS_USED_FLAG = "950";
 	public static final String CD_HIDE_EMAIL_FLAG = "960";
@@ -618,6 +617,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_PRJ = "207";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_OSS = "208";
 	public static final String CD_MAIL_COMPONENT_PARTNER_OSSLIST = "209";
+
+	public static final String CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO = "215";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED = "210";
 	public static final String CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL = "211";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL = "212";

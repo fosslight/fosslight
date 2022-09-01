@@ -2586,6 +2586,7 @@ public class CoMailManager extends CoTopComponent {
 				param.add(bean.getParamPartnerId());
 				return makePartnerBasicInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO:
 				param.add(bean.getParamPartnerId());
 				return makePartnerOssListInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
@@ -2623,48 +2624,6 @@ public class CoMailManager extends CoTopComponent {
 				bean.setOssName((String) dataMap.get("OSS_NAME"));
 				bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
 				bean.setLicenseName((String) dataMap.get("LICENSE_NAME"));
-				
-				String ossId = (String) dataMap.get("OSS_ID");
-				String ossLicenseIds = avoidNull((String) dataMap.get("LICENSE_ID_LIST"));
-				String copyrightStr = "";  // oss master의 copyright
-				String line = "<br>";
-				
-				if(!isEmpty(ossId)) {
-					OssMaster masterBean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
-					
-					// 우선 oss master의 copy right를 설정한다. / null값 생략
-					if(!isEmpty(masterBean.getCopyright())){
-						copyrightStr = masterBean.getCopyright().replace("\n", line);
-					}else if(!isEmpty(((String) dataMap.get("COPYRIGHT")).replace("\n", ""))){
-						copyrightStr = ((String) dataMap.get("COPYRIGHT")).replace("\n", line); 
-					}
-					
-					// multi 인경우 OSS Master에 등록된 순서대로 비교하여 exclude를 제외하고 추가해야함
-					if(CoConstDef.LICENSE_DIV_MULTI.equals(masterBean.getLicenseDiv())) {
-						List<String> licenseIdList = Arrays.asList(ossLicenseIds.split(","));
-						for(OssLicense licenseBean : masterBean.getOssLicenses()) {
-							if(licenseIdList.contains(licenseBean.getLicenseId())) {
-								// license별 copyright가 적용되어 있는 경우 추가
-								if(!isEmpty(licenseBean.getOssCopyright())) {
-									if(!isEmpty(copyrightStr)){
-										copyrightStr += "<br>";
-									}
-									copyrightStr += licenseBean.getOssCopyright().replace("\n", line);
-								}
-							}
-						}
-					} else {
-						// 싱글의 경우는 license별 copyright를 추가할 필요 없음 -> single License 일때 copyright를 수기로 입력시 해당 field값을 넣어줌.
-						copyrightStr = ((String) dataMap.get("COPYRIGHT")).replace("\n", line);
-					}
-					
-				} else {
-					copyrightStr = ((String) dataMap.get("COPYRIGHT")).replace("\n", line);
-				}
-
-				bean.setCopyrightText(copyrightStr);
-				
-				
 				list.add(bean);
 			}
 		}

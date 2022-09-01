@@ -3404,30 +3404,31 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossNameVersionDiffMergeObject.put("after", afterOssNameVersionBeanList);
 		
 		if(!beforeOssName.equals(afterOssName)) {
-			ossMaster.setOssName(beforeOssName);
-			ossMaster.setOssVersion(null);
+			OssMaster param = new OssMaster();
+			param.setOssName(beforeOssName);
+			param.setOssVersion(null);
 			
 			// 3rdParty == 'CONF'
-			List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
+			List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(param);
 
 			if (confirmPartnerList.size() > 0) {
-				ossMaster.setMergeOssName(afterOssName);
-				ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				param.setMergeOssName(afterOssName);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
 				
 				for (PartnerMaster pm : confirmPartnerList) {
-					ossMaster.setPrjId(pm.getPartnerId());
+					param.setPrjId(pm.getPartnerId());
 					
-					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList = confirmOssComponentsList.stream()
-											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
-											.collect(Collectors.toList());
+					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(param);
 					
-					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
-						ossMaster.setOssVersion(oc.getOssVersion());
-						updateSuccess = ossMapper.updateOssComponents(ossMaster);
+						param.setOssVersion(oc.getOssVersion());
+						try {
+							ossMapper.updateOssComponents(param);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
 						
-						if(updateSuccess > 0) {
+						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
 									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
 									"	<tbody>\r\n" +
@@ -3450,34 +3451,35 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							historyBean.setContents(contents);
 
 							commentService.registComment(historyBean);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
 						}
-						
-						updateSuccess = 0;
 					}
 				}
 			}
 			
+			param.setOssVersion(null);
 			// Identification == 'CONF', verification
-			List<Project> confirmProjectList = ossMapper.getOssNameMergeProjectList(ossMaster);
+			List<Project> confirmProjectList = ossMapper.getOssNameMergeProjectList(param);
 
 			if (confirmProjectList.size() > 0) {
-				ossMaster.setMergeOssName(afterOssName);
-				ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+				param.setMergeOssName(afterOssName);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 				
 				for (Project prj : confirmProjectList) {
-					ossMaster.setPrjId(prj.getPrjId());
+					param.setPrjId(prj.getPrjId());
 					
-					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(ossMaster);
-					confirmOssComponentsList = confirmOssComponentsList.stream()
-											.sorted(Comparator.comparing(OssComponents::getOssVersion, Comparator.nullsLast(Comparator.naturalOrder())))
-											.collect(Collectors.toList());
+					List<OssComponents> confirmOssComponentsList = ossMapper.getConfirmOssComponentsList(param);
 					
-					int updateSuccess = 0;
 					for (OssComponents oc : confirmOssComponentsList) {
-						ossMaster.setOssVersion(oc.getOssVersion());
-						updateSuccess = ossMapper.updateOssComponents(ossMaster);
+						param.setOssVersion(oc.getOssVersion());
+						try {
+							ossMapper.updateOssComponents(param);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
 						
-						if(updateSuccess > 0) {
+						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
 									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
 									"	<tbody>\r\n" +
@@ -3499,9 +3501,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							historyBean.setContents(contents);
 							historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 							commentService.registComment(historyBean);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
 						}
-						
-						updateSuccess = 0;
 					}
 				}
 			}

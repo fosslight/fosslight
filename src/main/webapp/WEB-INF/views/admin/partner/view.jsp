@@ -157,7 +157,6 @@
 								<input type="hidden" id="documentsFileId" name="documentsFileId" value="${detail.documentsFileId}" />
 							</td>
 						</tr>
-						<c:if test="${detail.viewOnlyFlag ne 'Y'}">
 						<tr>
 							<th class="dCase">Watcher</th>
 							<td class="dCase watchCase">
@@ -177,7 +176,6 @@
 								</div>
 							</td>
 						</tr>
-						</c:if>
 							<tr>
 								<th class="dCase txStr">Creator</th>
 								<td class="dCase">${detail.creatorName}</td>
