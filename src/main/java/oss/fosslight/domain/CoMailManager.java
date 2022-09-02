@@ -14,15 +14,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -2617,15 +2609,25 @@ public class CoMailManager extends CoTopComponent {
 	 */
 	private List<OssComponents> makePartnerOssListInfo(List<Map<String, Object>> mailComponentData) {
 		List<OssComponents> list = null;
+		Set<Map<String, String>> ossSet = new HashSet<Map<String, String>>();
 		if(mailComponentData != null && !mailComponentData.isEmpty()) {
 			list = new ArrayList<>();
 			for(Map<String, Object> dataMap : mailComponentData) {
+				Map<String, String> oss = new HashMap<String, String>();
+				oss.put("OSS_NAME", (String)dataMap.get("OSS_NAME"));
+				oss.put("OSS_VERSION", (String)dataMap.get("OSS_VERSION"));
+				oss.put("LICENSE_NAME", (String)dataMap.get("LICENSE_NAME"));
+				ossSet.add(oss);
+			}
+
+			for(Map<String, String> dataSet : ossSet) {
 				OssComponents bean = new OssComponents();
-				bean.setOssName((String) dataMap.get("OSS_NAME"));
-				bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
-				bean.setLicenseName((String) dataMap.get("LICENSE_NAME"));
+				bean.setOssName(dataSet.get("OSS_NAME"));
+				bean.setOssVersion(dataSet.get("OSS_VERSION"));
+				bean.setLicenseName(dataSet.get("LICENSE_NAME"));
 				list.add(bean);
 			}
+
 		}
 		return list;
 	}
