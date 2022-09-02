@@ -982,10 +982,27 @@
 						data: JSON.stringify({'prjIds':changeDivisionArr, 'prjDivision':division}),
 						contentType : 'application/json',
 						success: function (data) {
-							alertify.alert('<spring:message code="msg.common.success" />', function(){
-								reloadTabInframe('<c:url value="/project/list"/>');
-								activeTabInFrameList("PROJECT");
-							});
+							if("true" == data.isValid){
+								alertify.alert('<spring:message code="msg.common.success" />', function(){
+									reloadTabInframe('<c:url value="/project/list"/>');
+									activeTabInFrameList("PROJECT");
+								});
+							} else {
+								var list = [];
+								list = data.resultData;
+								
+								var msg = '<spring:message code="msg.project.check.division.permissions" />';
+								msg += '<br/> - '
+
+								for(var i=0; i<list.length; i++){
+									msg += 'PRJ-' + list[i];
+									if(i < list.length - 1){
+										msg += ', ';
+									}
+								}
+								
+								alertify.alert(msg, function(){});
+							}
 						},
 						error : function(){
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);

@@ -961,15 +961,13 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			param.setPartnerId(partnerId);
 			PartnerMaster beforeBean = getPartnerMasterOne(param);
 			
-			if(!beforeBean.getDivision().equals(division)) {
+			if(!avoidNull(beforeBean.getDivision(), "").equals(division)) {
 				PartnerMaster afterBean = getPartnerMasterOne(param);
 				afterBean.setDivision(division);
 				
 				partnerMapper.updateDivision(partnerId, division);
 				
-				comment = "해당 Partner 의 Division ( " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) 
-						+ " => " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision())
-						+ " ) 이 변경되었습니다.";
+				comment = CommonFunction.getDiffItemCommentPartner(beforeBean, afterBean);
 				
 				afterBean.setUserComment(comment);
 				
