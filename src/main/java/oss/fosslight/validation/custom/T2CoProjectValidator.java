@@ -638,7 +638,14 @@ public class T2CoProjectValidator extends T2CoValidator {
 						errMap.put(basicKey + "." + bean.getGridId(), errCd);
 					}
 				}
-				// download location
+				// download location > if the url format is different, show alert
+				{
+					basicKey = "DOWNLOAD_LOCATION";
+//					gridKey = StringUtil.convertToCamelCase(basicKey);
+					if (!checkLinkUrlFormat(bean.getDownloadLocation())) {
+						errMap.put(basicKey, getMessage("msg.project.check.data.input.format"));
+					}
+				}
 				// homepage
 
 				// V-DIFF 및 편집중인 상태에서 oss 의 라이선스가 변경되어 oss는 multi이나, 라이선스가 하나만
@@ -696,6 +703,23 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 			}
 		}
+	}
+	
+	private boolean checkLinkUrlFormat(String linkUrl) {
+		String regex = "(http|ftp|https|git)://([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?";
+		String[] splitCheckVal = linkUrl.split(",");
+		
+		for(String checkVal : splitCheckVal) {
+			if(checkVal.contains(";")) {
+				checkVal = checkVal.split(";")[0];
+			}
+			
+			if (!Pattern.matches(regex, checkVal)) {
+				return false;
+			}
+		}
+				
+		return true;
 	}
 	
 	@SuppressWarnings("unchecked")
