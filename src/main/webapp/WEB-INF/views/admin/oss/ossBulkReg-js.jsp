@@ -338,7 +338,6 @@
                     }
                 })
             }
-
         },
         isFromProjectIdentification : function (){
             return referenceId && referenceDiv;
@@ -366,7 +365,6 @@
                 return obj;
             }, {});
         },
-
         toOssInfo(data) {
             return {
                 //tab datas
