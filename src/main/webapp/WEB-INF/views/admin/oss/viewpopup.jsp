@@ -61,6 +61,12 @@
 							var isSelectedRow = false;
 							
 							if(data.records > 0) {
+								if(data.records < 11) {
+									$(".jqGridSet").height(30*data.records + 60);
+								} else {
+									$(".jqGridSet").height(360);
+								}
+
 								var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
 								
 								for(var _idx=0;_idx<rowsCount;_idx++) {
@@ -202,11 +208,11 @@
 	<body>
 		<div id="wrap" style="padding-top: 10px;">
 			<div  align="center" >
-			<div class="jqGridSet" style="overflow: auto; width: 90%; height: 150px;">
+			<div class="jqGridSet" style="overflow: auto; width: 850px; height: 150px;">
 				<table id="_ossList"><tr><td></td></tr></table>
 			</div>
 			</div>
-			<div id="ossDetailInfo" style="padding: 10%;">
+			<div id="ossDetailInfo" style="padding: 3% 6% 6% 6%;">
 			</div>
 		<c:if test="${ct:isAdmin()}">
 			<input type="hidden" id="viewPopupOssId" name="viewPopupOssId"/>
