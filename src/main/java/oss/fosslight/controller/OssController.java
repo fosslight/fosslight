@@ -994,7 +994,6 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(resMap);
 		}
 
-		List<OssMaster> notSavedOss = new ArrayList<>();
 		boolean licenseCheck;
 		for (OssMaster oss : ossMasters) {
 			Map<String, String> ossDataMap = new HashMap<>();
@@ -1085,24 +1084,36 @@ public class OssController extends CoTopComponent{
 				ossDataMapList.add(ossDataMap);
 				checkDuplicated = false;
 			} else {
-				List<String> nameToCheck = new ArrayList<>();
-				nameToCheck.add(oss.getOssName());
-				if (oss.getOssNicknames() != null) nameToCheck.addAll(Arrays.asList(oss.getOssNicknames()));
-				for (String nick : nameToCheck) {
+				OssMaster nameCheck = new OssMaster();
+				nameCheck.setOssName(oss.getOssName());
+				nameCheck.setOssNameTemp(oss.getOssName());
+				OssMaster checkName = ossService.checkExistsOssNickname2(nameCheck);
+				if (checkName != null) {
+					log.warn(oss.getOssName() + " is stored as a nick in " + checkName.getOssName());
+					ossDataMap.put("gridId", oss.getGridId());
+					ossDataMap.put("status", "X (Duplicated : " + oss.getOssName() + ")");
+					ossDataMapList.add(ossDataMap);
+					checkDuplicated = false;
+				}
+			}
+
+			if (checkDuplicated && oss.getOssNicknames() != null) {
+				for (String nick : oss.getOssNicknames()) {
 					OssMaster nickCheck = new OssMaster();
 					nickCheck.setOssName(nick);
 					nickCheck.setOssNameTemp(oss.getOssName());
-					OssMaster checkNick = ossService.checkExistsOssNickname2(nickCheck);
+					OssMaster checkNick = ossService.checkExistsOssNickname(nickCheck);
 					if (checkNick != null) {
-						log.warn(nick + " is stored as a nick in another " + checkNick.getOssName());
+						log.warn(nick + " is stored as a nick or name in " + checkNick.getOssName());
 						ossDataMap.put("gridId", oss.getGridId());
-						ossDataMap.put("status", "X (Duplicated Name)");
+						ossDataMap.put("status", "X (Duplicated : " + nick + ")");
 						ossDataMapList.add(ossDataMap);
 						checkDuplicated = false;
 						break;
 					}
 				}
 			}
+
 			if (checkDuplicated) {
 				Map<String, Object> result = ossService.saveOss(oss);
 				result = ossService.sendMailForSaveOss(result);
