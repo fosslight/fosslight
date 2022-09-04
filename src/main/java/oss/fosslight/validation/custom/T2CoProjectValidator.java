@@ -710,12 +710,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 		String[] splitCheckVal = linkUrl.split(",");
 		
 		for(String checkVal : splitCheckVal) {
-			if(checkVal.contains(";")) {
-				checkVal = checkVal.split(";")[0];
-			}
-			
-			if (!Pattern.matches(regex, checkVal)) {
-				return false;
+			if (!isEmpty(checkVal)){
+				if(checkVal.contains(";")) {
+					checkVal = checkVal.split(";")[0];
+				}
+				if (!Pattern.matches(regex, checkVal)) {
+					return false;
+				}
 			}
 		}
 				
