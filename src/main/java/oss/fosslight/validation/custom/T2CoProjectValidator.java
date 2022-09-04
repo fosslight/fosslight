@@ -643,7 +643,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					basicKey = "DOWNLOAD_LOCATION";
 //					gridKey = StringUtil.convertToCamelCase(basicKey);
 					if (!checkLinkUrlFormat(bean.getDownloadLocation())) {
-						errMap.put(basicKey, getMessage("msg.project.check.data.input.format"));
+						//errMap.put(basicKey, getMessage("msg.project.check.data.input.format"));
 					}
 				}
 				// homepage
