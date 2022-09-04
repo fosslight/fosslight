@@ -1241,29 +1241,40 @@ public class PartnerController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		Map<String, List<PartnerMaster>> updatePartnerDivision = partnerService.updatePartnerDivision(partnerMaster);	
+		List<String> permissionCheckList = null;
 		
-		if(updatePartnerDivision.containsKey("before") && updatePartnerDivision.containsKey("after")) {
-			List<PartnerMaster> beforePartnerList = (List<PartnerMaster>) updatePartnerDivision.get("before");
-			List<PartnerMaster> afterPartnerList = (List<PartnerMaster>) updatePartnerDivision.get("after");
+		if(!CommonFunction.isAdmin()) {
+			CommonFunction.setPartnerService(partnerService);
+			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), partnerMaster.getPartnerIds(), "partner");
+		}
+		
+		if(permissionCheckList == null || permissionCheckList.isEmpty()){
+			Map<String, List<PartnerMaster>> updatePartnerDivision = partnerService.updatePartnerDivision(partnerMaster);	
 			
-			if((beforePartnerList != null && !beforePartnerList.isEmpty()) 
-					&& (afterPartnerList != null && !afterPartnerList.isEmpty())
-					&& beforePartnerList.size() == afterPartnerList.size()) {
+			if(updatePartnerDivision.containsKey("before") && updatePartnerDivision.containsKey("after")) {
+				List<PartnerMaster> beforePartnerList = (List<PartnerMaster>) updatePartnerDivision.get("before");
+				List<PartnerMaster> afterPartnerList = (List<PartnerMaster>) updatePartnerDivision.get("after");
 				
-				for(int i=0; i<beforePartnerList.size(); i++) {
-					try {
-						CommentsHistory commentsHistory = new CommentsHistory();
-						commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
-						commentsHistory.setReferenceId(afterPartnerList.get(i).getPartnerId());
-						commentsHistory.setContents(afterPartnerList.get(i).getUserComment());
-						
-						commentService.registComment(commentsHistory, false);
-					} catch(Exception e) {
-						log.error(e.getMessage(), e);
+				if((beforePartnerList != null && !beforePartnerList.isEmpty()) 
+						&& (afterPartnerList != null && !afterPartnerList.isEmpty())
+						&& beforePartnerList.size() == afterPartnerList.size()) {
+					
+					for(int i=0; i<beforePartnerList.size(); i++) {
+						try {
+							CommentsHistory commentsHistory = new CommentsHistory();
+							commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+							commentsHistory.setReferenceId(afterPartnerList.get(i).getPartnerId());
+							commentsHistory.setContents(afterPartnerList.get(i).getUserComment());
+							
+							commentService.registComment(commentsHistory, false);
+						} catch(Exception e) {
+							log.error(e.getMessage(), e);
+						}
 					}
 				}
 			}
+		} else {
+			return makeJsonResponseHeader(false, null, permissionCheckList);
 		}
 		
 		return makeJsonResponseHeader();

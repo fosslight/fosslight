@@ -93,14 +93,14 @@
 		<!---->
 		<div class="btnLayout">
 			<!-- Popup -->
-			<div id="changeDivisionPop" class="pop changeDivisionPop">
+			<div id="partnerChangeDivisionPop" class="pop changeDivisionPop">
 				<h1 class="orange">Change Division</h1>
 				<div class="popdata">
 					<div class="mtb20">
 						<span>Division</label>
-						<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
+						<span id="partnerChangeDivisionSelect" class="selectSet" style="width: 200px;">
 							<strong title="Division selected value"></strong>
-							<select name="division">
+							<select name="partnerDivision">
 								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 							</select>
 						</span>	

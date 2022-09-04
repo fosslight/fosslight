@@ -81,12 +81,15 @@ import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.PartnerService;
+import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
@@ -108,6 +111,18 @@ public class CommonFunction extends CoTopComponent {
 	
 	public static void setOssService(OssService service) {
 		ossService = service;
+	}
+	
+	private static ProjectService projectService;
+	
+	public static void setProjectService(ProjectService service) {
+		projectService = service;
+	}
+	
+	private static PartnerService partnerService;
+	
+	public static void setPartnerService(PartnerService service) {
+		partnerService = service;
 	}
 	
     public static String getCoConstDefVal(String nm) {
@@ -4061,6 +4076,14 @@ public class CommonFunction extends CoTopComponent {
 		}
 	}
 	
+	public static String getDiffItemCommentPartner(PartnerMaster beforeBean, PartnerMaster afterBean) {
+		String comment = "<p><strong>Division</strong><br />";
+		comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, beforeBean.getDivision()) + "<br />";
+		comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, afterBean.getDivision()) + "</span><br /></p>";
+		
+		return comment;
+	}
+	
 	public static String getDiffItemComment(Project beforeBean, Project afterBean) {
 		return getDiffItemComment(beforeBean, afterBean, false);
 	}
@@ -4540,5 +4563,58 @@ public class CommonFunction extends CoTopComponent {
 		}
 		
 		return licenseList;
+	}
+
+	public static List<String> checkUserPermissions(String userId, String[] prjIds, String gubn) {
+		List<String> notPermissionList = new ArrayList<>();
+		List<String> userIdList = null;
+		
+		switch(gubn) {
+		
+		case "project":
+			Project param = new Project();
+			for(int i=0; i<prjIds.length; i++) {
+				userIdList = new ArrayList<>();
+				param.setPrjId(prjIds[i]);
+				Project bean = projectService.getProjectDetail(param);
+				
+				userIdList.add(bean.getCreator());
+				if(bean.getWatcherList() != null) {
+					for(String watcher : bean.getWatcherList().stream().map(e -> e.getPrjUserId()).collect(Collectors.toList())) {
+						userIdList.add(watcher);
+					}
+				}
+				
+				userIdList = userIdList.stream().distinct().collect(Collectors.toList());
+				if(!userIdList.contains(userId)) {
+					notPermissionList.add(prjIds[i]);
+				}
+			}
+			break;
+		
+		case "partner":
+			PartnerMaster partner = new PartnerMaster();
+			for(int i=0; i<prjIds.length; i++) {
+				userIdList = new ArrayList<>();
+				partner.setPartnerId(prjIds[i]);
+				PartnerMaster bean = partnerService.getPartnerMasterOne(partner);
+				
+				userIdList.add(bean.getCreator());
+				if(bean.getPartnerWatcher() != null) {
+					for(String watcher : bean.getPartnerWatcher().stream().map(e -> e.getUserId()).collect(Collectors.toList())) {
+						userIdList.add(watcher);
+					}
+				}
+				
+				userIdList = userIdList.stream().distinct().collect(Collectors.toList());
+				if(!userIdList.contains(userId)) {
+					notPermissionList.add(prjIds[i]);
+				}
+			}
+			break;
+		}
+		
+		Collections.sort(notPermissionList);
+		return notPermissionList;
 	}
 }

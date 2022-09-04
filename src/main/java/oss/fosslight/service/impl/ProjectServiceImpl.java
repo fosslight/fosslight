@@ -4904,7 +4904,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			param.setPrjId(prjId);
 			Project beforeBean = getProjectDetail(param);
 			
-			if(!beforeBean.getDivision().equals(division)) {
+			if(!avoidNull(beforeBean.getDivision(), "").equals(division)) {
 				Project afterBean = getProjectDetail(param);
 				afterBean.setDivision(division);
 				

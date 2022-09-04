@@ -4208,43 +4208,54 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value=PROJECT.PROJECT_DIVISION)
 	public @ResponseBody ResponseEntity<Object> updateProjectDivision(@RequestBody Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
-		Map<String, List<Project>> updatePrjDivision = projectService.updateProjectDivision(project);
+		List<String> permissionCheckList = null;
 		
-		if(updatePrjDivision.containsKey("before") && updatePrjDivision.containsKey("after")) {
-			List<Project> beforePrjList = (List<Project>) updatePrjDivision.get("before");
-			List<Project> afterPrjList = (List<Project>) updatePrjDivision.get("after");
+		if(!CommonFunction.isAdmin()) {
+			CommonFunction.setProjectService(projectService);
+			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), project.getPrjIds(), "project");
+		}
+		
+		if(permissionCheckList == null || permissionCheckList.isEmpty()){
+			Map<String, List<Project>> updatePrjDivision = projectService.updateProjectDivision(project);
 			
-			if((beforePrjList != null && !beforePrjList.isEmpty()) 
-					&& (afterPrjList != null && !afterPrjList.isEmpty())
-					&& beforePrjList.size() == afterPrjList.size()) {
+			if(updatePrjDivision.containsKey("before") && updatePrjDivision.containsKey("after")) {
+				List<Project> beforePrjList = (List<Project>) updatePrjDivision.get("before");
+				List<Project> afterPrjList = (List<Project>) updatePrjDivision.get("after");
 				
-				for(int i=0; i<beforePrjList.size(); i++) {
-					try {
-						String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED;
-						CoMail mailBean = new CoMail(mailType);
-						mailBean.setParamPrjId(afterPrjList.get(i).getPrjId());
-						mailBean.setCompareDataBefore(beforePrjList.get(i));
-						mailBean.setCompareDataAfter(afterPrjList.get(i));
-						mailBean.setToIdsCheckDivision(true);
-						
-						CoMailManager.getInstance().sendMail(mailBean);
-						
+				if((beforePrjList != null && !beforePrjList.isEmpty()) 
+						&& (afterPrjList != null && !afterPrjList.isEmpty())
+						&& beforePrjList.size() == afterPrjList.size()) {
+					
+					for(int i=0; i<beforePrjList.size(); i++) {
 						try {
-							CommentsHistory commentsHistory = new CommentsHistory();
-							commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
-							commentsHistory.setReferenceId(afterPrjList.get(i).getPrjId());
-							commentsHistory.setContents(afterPrjList.get(i).getUserComment());
-							commentsHistory.setStatus("Changed");
+							String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED;
+							CoMail mailBean = new CoMail(mailType);
+							mailBean.setParamPrjId(afterPrjList.get(i).getPrjId());
+							mailBean.setCompareDataBefore(beforePrjList.get(i));
+							mailBean.setCompareDataAfter(afterPrjList.get(i));
+							mailBean.setToIdsCheckDivision(true);
 							
-							commentService.registComment(commentsHistory, false);
-						} catch (Exception e) {
+							CoMailManager.getInstance().sendMail(mailBean);
+							
+							try {
+								CommentsHistory commentsHistory = new CommentsHistory();
+								commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+								commentsHistory.setReferenceId(afterPrjList.get(i).getPrjId());
+								commentsHistory.setContents(afterPrjList.get(i).getUserComment());
+								commentsHistory.setStatus("Changed");
+								
+								commentService.registComment(commentsHistory, false);
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}
+						} catch(Exception e) {
 							log.error(e.getMessage(), e);
 						}
-					} catch(Exception e) {
-						log.error(e.getMessage(), e);
 					}
 				}
 			}
+		} else {
+			return makeJsonResponseHeader(false, null, permissionCheckList);
 		}
 		
 		return makeJsonResponseHeader();
