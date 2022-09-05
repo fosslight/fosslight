@@ -1785,31 +1785,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					switch(urlSearchSeq) {
 						case 0: // github
 							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-							
 							break;
 						case 1: // npm
+						case 6: // npm
 							if(ossMaster.getDownloadLocation().contains("/package/@")) {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+)/([^/]+))");
 							}else {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
 							}
-							
 							break;
 						case 2: // pypi
 							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-							
 							break;
 						case 3: // maven
 							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-
 							break;
 						case 4: // pub
 							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
 							break;
 						case 5: // cocoapods
 							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
 							break;
 						default:
 							break;
@@ -1908,31 +1903,26 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					switch(urlSearchSeq) {
 						case 0: // github
 							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-							
 							break;
 						case 1: // npm
+						case 6: // npm
 							if(ossMaster.getHomepage().contains("/package/@")) {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+)/([^/]+))");
 							}else {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
 							}
-							
 							break;
 						case 2: // pypi
 							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-							
 							break;
 						case 3: // maven
 							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-
 							break;
 						case 4: // pub
 							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
 							break;
 						case 5: // cocoapods
 							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
 							break;
 						default:
 							break;
@@ -2090,12 +2080,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							
 							break;
 						case 1: // npm
+						case 6: // npm
 							if(downloadlocationUrl.contains("/package/@")) {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+								p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+)/([^/]+))");
 							}else {
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+								p = Pattern.compile("((http|https)://npmjs.(org|com)/package/([^/]+))");
 							}
-							
 							break;
 						case 2: // pypi
 							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
@@ -2170,11 +2160,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										
 										break;
 									case 1: // npm
-										checkName = "npm:" + ossNameMatcher.group(3);
+									case 6: // npm
+										checkName = "npm:" + ossNameMatcher.group(4);
 										if(checkName.contains(":@")) {
-											checkName += "/" + ossNameMatcher.group(4);
+											checkName += "/" + ossNameMatcher.group(5);
 										}
-										
 										break;
 									case 2: // pypi
 										checkName = "pypi:" + ossNameMatcher.group(3);
@@ -2344,7 +2334,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 								break;
 							case 1: // npm
-								p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+							case 6: // npm
+								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
 
 								break;
 							case 2: // pypi
