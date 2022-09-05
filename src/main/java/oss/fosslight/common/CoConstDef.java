@@ -263,7 +263,7 @@ public class CoConstDef {
 	 */
 	/* dependency url pattern code */
 	public static final Pattern GITHUB_PATTERN = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-	public static final Pattern NPM_PATTERN = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+	public static final Pattern NPM_PATTERN = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
 	public static final Pattern PYPI_PATTERN = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
 	public static final Pattern MAVEN_CENTRAL_PATTERN = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+)(/([^/]+))?)");
 	public static final Pattern MAVEN_GOOGLE_PATTERN = Pattern.compile("((http|https)://maven.google.com/web/index.html#([^:]+):([^:]+)(:[^:]+)?)");

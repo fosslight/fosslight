@@ -1212,10 +1212,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 					break;
 				case 1: // npm
+				case 6: // npm
 					if(checkVal.contains("/package/@")) {
-						p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+)/([^/]+))");
+						p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+)/([^/]+))");
 					}else {
-						p = Pattern.compile("((http|https)://www.npmjs.com/package/([^/]+))");
+						p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
 					}
 				
 					break;
@@ -1225,15 +1226,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 					break;
 				case 3: // maven
 					p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-
-				break;
+					break;
 				case 4: // pub
 					p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
 					break;
 				case 5: // cocoapods
 					p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
 					break;
 				default:
 					break;
