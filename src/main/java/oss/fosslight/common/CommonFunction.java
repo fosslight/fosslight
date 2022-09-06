@@ -214,7 +214,7 @@ public class CommonFunction extends CoTopComponent {
     }
     
     public static String getCurrentDateTime() {
-        DateFormat df = new SimpleDateFormat("yyyyMMdd");
+        DateFormat df = new SimpleDateFormat("yyMMdd");
         return df.format(new Date());
     }
     

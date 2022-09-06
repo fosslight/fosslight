@@ -565,6 +565,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE = "670";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT = "68";
 	
+	/* Partner Binary DB Check*/
+	public static final String CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT = "470";
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
 	/** 3rd party reviewer changed */

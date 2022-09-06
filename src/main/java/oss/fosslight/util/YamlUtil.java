@@ -98,8 +98,8 @@ public class YamlUtil extends CoTopComponent {
 			}
 		}
 		
-		// fosslight-sbom-info-PRJ-[ID]-[prj-Name]_[date].yaml
-		String fileName = "fosslight-sbom-info-PRJ-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
+		// fosslight_sbom_info_[date]_prj-[ID].yaml
+		String fileName = "fosslight_sbom_info_" + CommonFunction.getCurrentDateTime() + "_prj-" + projectBean.getPrjId();
 		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
@@ -122,8 +122,8 @@ public class YamlUtil extends CoTopComponent {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
-		// fosslight-sbom-info-3rd-[ID]-[3rd-Name]_[date].yaml
-		String fileName = "fosslight-sbom-info-3rd-" + partnerBean.getPartnerId() + "-" + partnerBean.getPartnerName();
+		// fosslight_sbom_info_[date]_3rd-[ID].yaml
+		String fileName = "fosslight_sbom_info_" + CommonFunction.getCurrentDateTime() + "_3rd-" + partnerBean.getPartnerId();
 		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
@@ -146,8 +146,8 @@ public class YamlUtil extends CoTopComponent {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
-		// fosslight-sbom-info-SelfCheck-[ID]-[self-check-Name]_[date].yaml
-		String fileName = "fosslight-sbom-info-SelfCheck-" + projectBean.getPrjId() + "-" + projectBean.getPrjName();
+		// fosslight_sbom_info_[date]_self-[ID].yaml
+		String fileName = "fosslight_sbom_info_" + CommonFunction.getCurrentDateTime() + "_self-" + projectBean.getPrjId();
 		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
@@ -260,7 +260,7 @@ public class YamlUtil extends CoTopComponent {
 	
 	private static String makeYamlFileId(String targetName, String yamlStr) throws IOException {
 		UUID randomUUID = UUID.randomUUID();
-		String fileName = CommonFunction.replaceSlashToUnderline(targetName)+"_"+CommonFunction.getCurrentDateTime();
+		String fileName = CommonFunction.replaceSlashToUnderline(targetName);
 		String logiFileName = fileName + "_" + randomUUID+".yaml";
 		String filePath = writepath+"/download/";
 		
