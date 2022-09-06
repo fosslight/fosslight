@@ -29,7 +29,7 @@ var src_evt = {
 		}
 		
 		// 그리드 리셋 버튼
-		$("#srcReset, #srcResetUp").click(function(e){
+		$("#srcResetUp").click(function(e){
  			e.preventDefault();
  			
 			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
@@ -43,7 +43,7 @@ var src_evt = {
 		});
 		
 		// 그리드 저장 버튼
-		$("#srcSave, #srcSaveUp").click(function(e){
+		$("#srcSaveUp").click(function(e){
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
