@@ -126,18 +126,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-		<!---->
-		<div class="btnLayout">
-			<span class="left">
-				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
-			</span>
-			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_3rdParty', '#<c:url value="/partner/edit"/>')" />
-			</span>
-		</div>
-		<!---->
-
 	</div>
 	<!---->
 

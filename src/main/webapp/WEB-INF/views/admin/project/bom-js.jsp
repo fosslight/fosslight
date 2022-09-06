@@ -22,7 +22,7 @@ var bom_evt = {
 		bom_data.getJqGrid();
 		
 		// bomReset 버튼 
-		$('#bomReset, #bomResetUp').click(function(e){
+		$('#bomResetUp').click(function(e){
 			e.preventDefault();
 
  			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
@@ -35,7 +35,7 @@ var bom_evt = {
 		});
 		
 		// bomMerge 버튼 
-		$('#bomSave, #bomSaveUp').click(function(e){
+		$('#bomSaveUp').click(function(e){
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
