@@ -446,7 +446,7 @@
 									success : function(data){
 										if(data.isValid == 'true') {
 											var _popup = null;
-											var _encUrl = "ossName="+fn.replaceGetParamChar(ossName)+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
+											var _encUrl = "ossName="+fn.replaceGetParamChar(encodeURIComponent(ossName))+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
 											
 											if(_popup == null || _popup.closed){
 												_popup = window.open("<c:url value='/oss/osssyncpopup?"+_encUrl+"'/>", "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
