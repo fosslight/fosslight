@@ -788,7 +788,8 @@ var com_fn = {
 				binSubGrid : "",
 				applicableParty : partnerCheck,
 				applicableSrc : ($("#applicableSrc").is(":checked") ? 'N' : 'Y'),
-				applicableBin : ($("#applicableBin").is(":checked") ? 'N' : 'Y')
+				applicableBin : ($("#applicableBin").is(":checked") ? 'N' : 'Y'),
+				status : status
 			}
 			
 			$.ajax({

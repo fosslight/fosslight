@@ -183,6 +183,8 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, List<Project>> updateProjectDivision(Project project);
 
 	public void updateComment(Project project);
+
+	public String checkOssNicknameList(ProjectIdentification identification);
 }
 
 
