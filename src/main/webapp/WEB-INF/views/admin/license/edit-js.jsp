@@ -6,7 +6,7 @@
 		'use strict';
 		initSample();
 		data.init();
-		evt.init();	
+		evt.init();
 
 		if($('input[name=licenseId]').val()) {
 			fn_commemt.getCommentList();
@@ -27,7 +27,7 @@
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
 			data.cloneWebPage = $('.multiWebPageSet').clone().html();
-			
+
 			if(data.detail){
 				$('input[name=licenseId]').val(data.detail.licenseId);
 				$('select[name=licenseType]').val(data.detail.licenseType).trigger('change');
@@ -219,14 +219,14 @@
 			$('input[name=comment]').val(replaceWithLink(editorVal));
 
 			var pData = $('#licenseForm').serializeObject();
-			
+
 			if(pData.restrictions != null){
 				pData.restrictions = JSON.stringify(pData.restrictions);
 				$('input[name=restriction]').val(pData.restrictions.replace(/\"|\[|\]/gi, ""));
 			}else{
 				$('input[name=restriction]').val('');
 			}
-			
+
 			$("#licenseForm").ajaxForm({
 				url :'<c:url value="/license/saveAjax"/>',
 	            type : 'POST',
@@ -240,7 +240,7 @@
 	
 	function onRegistSuccess(json, status){
 		loading.hide();
-		
+
 		if(json.resCd == '10') {
 			alertify.alert('<spring:message code="msg.common.success" />', function(){
 				deleteTabInFrame('#<c:url value="/license/edit/'+json.licenseId+'"/>');

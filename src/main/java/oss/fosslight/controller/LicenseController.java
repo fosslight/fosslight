@@ -5,9 +5,7 @@
 
 package oss.fosslight.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,23 +22,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoCodeManager;
-import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.*;
 import oss.fosslight.common.Url.LICENSE;
-import oss.fosslight.common.CustomXssFilter;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.*;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoLicenseValidator;
 
@@ -143,7 +136,6 @@ public class LicenseController extends CoTopComponent{
 				// html link 형식으로 변환
 				licenseMaster.setDescription(CommonFunction.makeHtmlLinkTagWithText(licenseMaster.getDescription()));
 			}
-			
 			model.addAttribute("licenseInfo", licenseMaster);
 		}
 		
@@ -219,7 +211,7 @@ public class LicenseController extends CoTopComponent{
 		
 		return makeJsonResponseHeader();
 	}
-	
+
 	@PostMapping(value=LICENSE.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@ModelAttribute LicenseMaster licenseMaster
@@ -237,7 +229,7 @@ public class LicenseController extends CoTopComponent{
 		boolean isChangeName = false;
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		List<OssMaster> typeChangeOssIdList = null;
-		
+
 		if(!isNew) {
 			beforeBean =  licenseService.getLicenseMasterOne(licenseMaster);
 		}
@@ -475,5 +467,53 @@ public class LicenseController extends CoTopComponent{
 		map.put("licenseId", lm.getLicenseId());
 		
 		return makeJsonResponseHeader(map);
+	}
+
+	/**LicenseBulkReg UI*/
+	@GetMapping(value = LICENSE.LICENSE_BULK_REG, produces = "text/html; charset=utf-8")
+	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model) {
+
+		return LICENSE.LICENSE_BULK_REG_JSP;
+	}
+
+	/**LicenseBulkReg Upload Post*/
+	@ResponseBody
+	@PostMapping(value = Url.LICENSE.CSV_FILE)
+	public ResponseEntity<Object> csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
+										  HttpServletResponse res, Model model) throws Exception {
+		List<Object> limitCheckFiles = new ArrayList<>();
+		List<UploadFile> list = new ArrayList<UploadFile>();
+		List<LicenseMaster> licenseList = new ArrayList<>();
+		Iterator<String> fileNames = req.getFileNames();
+		List<Map<String, Object>> licenseWithStatusList = new ArrayList<>();
+		Map<String, Object> resMap = new HashMap<>();
+
+		while (fileNames.hasNext()) {
+			UploadFile uploadFile = new UploadFile();
+			MultipartFile multipart = req.getFile(fileNames.next());
+			uploadFile.setSize(multipart.getSize());
+			list.add(uploadFile);
+		}
+
+		limitCheckFiles = CommonFunction.checkXlsxFileLimit(list);
+		resMap.put("limitCheck", limitCheckFiles);
+		licenseList = ExcelUtil.readLicenseList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+
+		if (licenseList != null) {
+			Map<String, Object> ossWithStatus;
+			for (int i = 0; i < licenseList.size(); i++) {
+				ossWithStatus = new HashMap<>();
+				ossWithStatus.put("license", licenseList.get(i));
+				ossWithStatus.put("status", "Ready");
+				licenseWithStatusList.add(ossWithStatus);
+			}
+		} else {
+			resMap.put("res", false);
+			return makeJsonResponseHeader(resMap);
+		}
+
+		resMap.put("res", true);
+		resMap.put("value", licenseWithStatusList);
+		return makeJsonResponseHeader(resMap);
 	}
 }
