@@ -872,16 +872,6 @@
 					fn.downloadNoticeSimple();
 				} else if(type == 'noticeTextSimpleDownload') {
 					fn.downloadNoticeTextSimple();
-				} else if(type == 'spdxSpreadSheet') {
-					fn.downloadSpdxSpreadSheetExcel();
-				} else if(type == 'spdxRdf') {
-					fn.downloadSpdxRdf();
-				} else if(type == 'spdxTag') {
-					fn.downloadSpdxTag();
-				} else if(type == 'spdxJson') {
-					fn.downloadSpdxJson();
-				} else if(type == 'spdxYaml') {
-					fn.downloadSpdxYaml();
 				}
 			});
 			
@@ -952,26 +942,7 @@
 				
 				return false;
 			});
-			
-			$('#spdxSpreadSheet').click(function(e){
-				fn.downloadSpdxSpreadSheetExcel();
-			});
-			
-			$('#spdxRdf').click(function(e){
-				fn.downloadSpdxRdf();
-			});
-			
-			$('#spdxTag').click(function(e){
-				fn.downloadSpdxTag();
-			});
 
-			$('#spdxJson').click(function(e){
-				fn.downloadSpdxJson();
-			});
-
-			$('#spdxYaml').click(function(e){
-				fn.downloadSpdxYaml();
-			});
 			//// [Pakage Document Download END]
 			
 			$("#identificationTab").click(function(){
@@ -1813,120 +1784,7 @@
 	            }
 			}).submit();
 		},
-		downloadSpdxSpreadSheetExcel : function(){
-			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-			
-			$.ajax({
-				type: "POST",
-				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdx", "prjId":'${project.prjId}', "dataStr":dataStr}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
-					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			});
-		},
-		
-		downloadSpdxRdf : function() {
-			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-			
-			$.ajax({
-				type: "POST",
-				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxRdf", "prjId":'${project.prjId}', "dataStr":dataStr}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
-					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			});
-		},
-		
-		downloadSpdxTag : function() {
-			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-			
-			$.ajax({
-				type: "POST",				   
-				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxTag", "prjId":'${project.prjId}', "dataStr":dataStr}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
-					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			});
-		},
 
-		downloadSpdxJson : function() {
-			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-			
-			$.ajax({
-				type: "POST",
-				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxJson", "prjId":'${project.prjId}', "dataStr":dataStr}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
-					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			})
-		},
-
-		downloadSpdxYaml : function() {
-			var dataStr = JSON.stringify($('#noticeForm').serializeObject());
-			
-			$.ajax({
-				type: "POST",
-				url: '<c:url value="/spdxdownload/getSPDXPost"/>',
-				data: JSON.stringify({"type":"spdxYaml", "prjId":'${project.prjId}', "dataStr":dataStr}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
-					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			})
-		},
 		appendEditVisible : function(target){
 			var checked = $(target).prop("checked");
 			
