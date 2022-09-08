@@ -54,16 +54,14 @@
 				<input type="hidden" id="filters" name="filters"/>
 			</form>
 		</fieldset>
-		
-		<div class="btnLayout"></div>
-		<div class="jqGridSet">
-			<table id="list"><tr><td></td></tr></table>
-			<div id="pager"></div>
-		</div>
 		<div class="btnLayout">
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
 			</span>
+		</div>
+		<div class="jqGridSet">
+			<table id="list"><tr><td></td></tr></table>
+			<div id="pager"></div>
 		</div>
 	</div>
 	<!---->
