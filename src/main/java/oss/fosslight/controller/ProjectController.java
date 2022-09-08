@@ -2850,6 +2850,7 @@ public class ProjectController extends CoTopComponent {
 		String partyGrid = (String) map.get("partyGrid");
 		String srcMainGrid = (String) map.get("srcMainGrid");
 		String binMainGrid = (String) map.get("binMainGrid");
+		String status = (String) map.get("status");
 
 		// party
 		Type partyType = new TypeToken<List<ProjectIdentification>>() {}.getType();
@@ -2890,6 +2891,17 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, errMsg);
 		}
 
+		if(!isEmpty(status) && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(status.toUpperCase())){
+			ProjectIdentification identification = new ProjectIdentification();
+			identification.setReferenceId(prjId);
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			identification.setMerge(CoConstDef.FLAG_YES);
+			errMsg = projectService.checkOssNicknameList(identification);
+			if (!isEmpty(errMsg)) {
+				return makeJsonResponseHeader(false, errMsg);
+			}
+		}
+		
 		return makeJsonResponseHeader();
 	}
 	
