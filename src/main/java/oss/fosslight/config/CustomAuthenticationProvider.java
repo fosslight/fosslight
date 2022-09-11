@@ -13,6 +13,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -109,24 +111,20 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         userService.addNewUsers(vo);
       }
 
-      String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING,
-          CoConstDef.CD_LDAP_DOMAIN);
-      Hashtable<String, String> properties = new Hashtable<String, String>();
+      String principal = String.format(
+              "%s=%s,%s",
+              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID),
+              user_id,
+              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_BASE_DN)
+              );
 
-      /*
-      properties.put(Context.INITIAL_CONTEXT_FACTORY,
-          CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
+      Hashtable<String, String> properties = new Hashtable<>();
+
+      properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
       properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
       properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-      properties.put(Context.SECURITY_PRINCIPAL, user_id + ldapDomain);
+      properties.put(Context.SECURITY_PRINCIPAL, principal);
       properties.put(Context.SECURITY_CREDENTIALS, user_pw);
-       */
-
-      properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-      properties.put(Context.PROVIDER_URL, "ldap://127.0.0.1:389");
-      properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-      properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
-      properties.put(Context.SECURITY_CREDENTIALS, "admin");
 
       DirContext con = null;
       try {
@@ -135,6 +133,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         isAuthenticated = true;
       } catch (NamingException e) {
         log.warn("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
+        log.warn(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
       } finally {
         if (con != null) {
           try {

@@ -97,10 +97,59 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		if(loginDetailMap != null) {
 			loginAuthList.stream().map(c -> {
 				switch (c.getCdDtlNo()) {
-					case CoConstDef.CD_LDAP_SERVER_URL:
-						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_SERVER_URL));
+					case CoConstDef.CD_LDAP_URL:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_URL));
 						
 						break;
+
+					case CoConstDef.CD_LDAP_PROTOCOL:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_PROTOCOL));
+
+						break;
+
+					case CoConstDef.CD_LDAP_PORT:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_PORT));
+
+						break;
+
+					case CoConstDef.CD_LDAP_SEARCH_ID:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_ID));
+
+						break;
+
+					case CoConstDef.CD_LDAP_SEARCH_PW:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_PW));
+
+						break;
+
+					case CoConstDef.CD_LDAP_BASE_DN:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_BASE_DN));
+
+						break;
+
+					case CoConstDef.CD_LDAP_FILTER:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_FILTER));
+
+						break;
+
+					case CoConstDef.CD_LDAP_UID:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_UID));
+
+						break;
+
+					case CoConstDef.CD_SEARCH_SCOPE:
+						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_SEARCH_SCOPE));
+
+						break;
+//					case CoConstDef.CD_LDAP_INITIAL_CONTEXT_FACTORY:
+//						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_INITIAL_CONTEXT_FACTORY));
+//
+//						break;
+//
+//					case CoConstDef.CD_LDAP_ERROR_49:
+//						c.setCdDtlExp((String) loginDetailMap.get(CoConstDef.CD_LDAP_ERROR_49));
+//
+//						break;
 				}
 				
 				return c;

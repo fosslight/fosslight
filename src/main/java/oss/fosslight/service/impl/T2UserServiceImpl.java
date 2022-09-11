@@ -393,11 +393,11 @@ public class T2UserServiceImpl implements T2UserService {
       String filter) {
     boolean isAuthenticated = false;
 
-    String userId = (String) userInfo.get(idKey);
-    String userPw = (String) userInfo.get(pwKey);
+    String userId = userInfo.get(idKey);
+    String userPw = userInfo.get(pwKey);
 
     String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING,
-        CoConstDef.CD_LDAP_DOMAIN);
+        CoConstDef.CD_LDAP_BASE_DN);
     Hashtable<String, String> properties = new Hashtable<String, String>();
 
     /*
@@ -413,7 +413,7 @@ public class T2UserServiceImpl implements T2UserService {
     properties.put(Context.PROVIDER_URL, "ldap://127.0.0.1:389");
     properties.put(Context.SECURITY_AUTHENTICATION, "simple");
     properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
-    properties.put(Context.SECURITY_CREDENTIALS, "admin");
+    properties.put(Context.SECURITY_CREDENTIALS, userPw);
 
     String[] attrIDs = {"cn", "mail"};
     if (StringUtil.isEmpty(filter)) {
@@ -594,28 +594,14 @@ public class T2UserServiceImpl implements T2UserService {
   }
 
   private Hashtable<String, String> makeLdapProperty() {
-    String LDAP_SEARCH_DOMAIN = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING,
-        CoConstDef.CD_LDAP_DOMAIN);
-    String LDAP_SEARCH_ID = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO,
-        CoConstDef.CD_DTL_LDAP_SEARCH_ID);
-    String LDAP_SEARCH_PW = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO,
-        CoConstDef.CD_DTL_LDAP_SEARCH_PW);
 
-    Hashtable<String, String> properties = new Hashtable<String, String>();
-    /*
-    properties.put(Context.INITIAL_CONTEXT_FACTORY,
-        CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
+    Hashtable<String, String> properties = new Hashtable<>();
+
+    properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
     properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
     properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-    properties.put(Context.SECURITY_PRINCIPAL, LDAP_SEARCH_ID + LDAP_SEARCH_DOMAIN);
-    properties.put(Context.SECURITY_CREDENTIALS, LDAP_SEARCH_PW);
-     */
-
-    properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-    properties.put(Context.PROVIDER_URL, "ldap://127.0.0.1:389");
-    properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-    properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
-    properties.put(Context.SECURITY_CREDENTIALS, "admin");
+    properties.put(Context.SECURITY_PRINCIPAL, CoConstDef.AD_LDAP_LOGIN.LDAP_PRINCIPAL.getValue());
+    properties.put(Context.SECURITY_CREDENTIALS, CoConstDef.AD_LDAP_LOGIN.LDAP_CREDENTIAL.getValue());
 
     return properties;
   }
@@ -627,22 +613,27 @@ public class T2UserServiceImpl implements T2UserService {
   private String[] checkUserInfo(T2Users userInfo, Hashtable<String, String> property) {
     String[] result = new String[2];
 
-    String[] attrIDs = {"displayName", "title", "mail", "cn"};
-    String filter = "(cn=" + userInfo.getUserId() + ")";
+    String[] attrIDs = {"displayName", "mail"};
+    String filter = String.format(
+            "(%s=%s)",
+            CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID), userInfo.getUserId()
+    );
 
     DirContext con = null;
     SearchControls constraints = new SearchControls();
     NamingEnumeration<SearchResult> m_ne = null;
     try {
       con = new InitialDirContext(property);
-      constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+      constraints.setSearchScope(Integer.parseInt(
+              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_SEARCH_SCOPE)
+      ));
 
       if (attrIDs != null) {
         constraints.setReturningAttributes(attrIDs);
       }
 
-      String searchKey = "ou=users,dc=fosslight,dc=org";
-      m_ne = con.search(searchKey, filter, constraints);
+      String base = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_BASE_DN);
+      m_ne = con.search(base, filter, constraints);
     } catch (NamingException e) {
       log.error(e.getMessage(), e);
     } finally {

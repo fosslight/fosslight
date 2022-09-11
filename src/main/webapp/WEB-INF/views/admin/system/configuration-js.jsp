@@ -55,8 +55,10 @@
 				params["loginFlag"] = "Y";
 				
 				var loginDetail = {};
+                var isSelectTag;
 			<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_LOGIN_SETTING'))}" varStatus="status">
-				loginDetail["${code[0]}"] = $("#ldap${code[0]}").val();
+                isSelectTag = $("#ldap${code[0]}").prop("tagName") === "SELECT";
+                loginDetail["${code[0]}"] = $("#ldap${code[0]}" + (isSelectTag ? " option:selected" : "")).val();
 			</c:forEach>
 				
 				params["loginDetail"] = loginDetail;

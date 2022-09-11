@@ -5,6 +5,8 @@
 
 package oss.fosslight.common;
 
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.util.regex.Pattern;
 
 public class CoConstDef {
@@ -109,8 +111,16 @@ public class CoConstDef {
 
 	// Login Setting
 	public static final String CD_LOGIN_SETTING					= "910";
-	public static final String CD_LDAP_SERVER_URL 				= "100";
-	public static final String CD_LDAP_DOMAIN					= "200";
+	public static final String CD_LDAP_URL						= "100";
+	public static final String CD_LDAP_PROTOCOL 				= "101";
+	public static final String CD_LDAP_PORT 					= "102";
+//	public static final String CD_LDAP_DOMAIN					= "200";
+	public static final String CD_LDAP_SEARCH_ID				= "200";
+	public static final String CD_LDAP_SEARCH_PW				= "300";
+	public static final String CD_LDAP_BASE_DN					= "400";
+	public static final String CD_LDAP_FILTER					= "500";
+	public static final String CD_LDAP_UID						= "600";
+	public static final String CD_SEARCH_SCOPE					= "700";
 //	public static final String CD_LDAP_INITIAL_CONTEXT_FACTORY 	= "300";
 //	public static final String CD_LDAP_ERROR_49 				= "400";
 
@@ -203,7 +213,16 @@ public class CoConstDef {
 		
 	/** AD login LDAP */
 	public static enum AD_LDAP_LOGIN {
-		LDAP_SERVER_URL(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_SERVER_URL)),
+		LDAP_SERVER_URL(
+				UriComponentsBuilder.newInstance()
+						.scheme(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_PROTOCOL))
+						.host(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_URL))
+						.port(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_PORT))
+						.build()
+						.toUriString()
+		),
+		LDAP_PRINCIPAL(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_SEARCH_ID)),
+		LDAP_CREDENTIAL(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_SEARCH_PW)),
 		//LDAP_DOMAIN(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN)),
 		//INITIAL_CONTEXT_FACTORY(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_INITIAL_CONTEXT_FACTORY)),
 //		ERROR_49(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_ERROR_49)),

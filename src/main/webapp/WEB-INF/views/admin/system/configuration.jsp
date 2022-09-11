@@ -16,7 +16,16 @@
 								<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_LOGIN_SETTING'))}" varStatus="status">
 									<c:choose>
 										<c:when test="${fn:contains(code[1], 'Flag')}">
-											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="ldap${code[0]}" <c:if test="${code[3] eq 'Y'}">checked</c:if> /></dd>
+											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="ldap${code[0]}" <c:if test="${code[3] eq 'Y'}">checked</c:if> /></span></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'Protocol')}">
+											<dd><label>${code[1]}</label><select style="padding: 0px" id="ldap${code[0]}"><option value="ldap">LDAP</option><option value="ldaps">LDAPS</option></select></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'Search Scope')}">
+											<dd><label>${code[1]}</label><select style="padding: 0px" id="ldap${code[0]}"><option value="2">Subtree</option><option value="0">Object</option><option value="1">One level</option></select></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'PW')}">
+											<dd><label>${code[1]}</label><input type="password" id="ldap${code[0]}" value="${code[3]}"/></dd>
 										</c:when>
 										<c:otherwise>
 											<dd><label>${code[1]}</label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
