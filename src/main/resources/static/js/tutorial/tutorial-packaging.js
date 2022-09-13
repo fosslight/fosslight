@@ -1,9 +1,5 @@
 $(document).ready(function (){
-    // 하이라이트할 요소들 생성
-    // let $element25 = null;
-    // let $element26 = null;
-
-    // 하이라이트할 요소들의 배열 (element 1, 2, 3, 4)
+    // 하이라이트할 요소들의 배열
     let array_highlights = [];
     // 툴팁이 보여줄 제목 및 내용의 배열
     let array_tooltip_data = [
@@ -74,9 +70,10 @@ $(document).ready(function (){
     let elem_index = 0;
     let elem_highlight = array_highlights[elem_index];
 
+    // project list에서 'continue tutorial' 눌렀을 때
     $("#continue_tutorial_25").on("click", () => {
-            let $element25 = $(document.getElementById("tutorial_25"));
-            array_highlights.push($element25);
+        let $element25 = $(document.getElementById("tutorial_25"));
+        array_highlights.push($element25);
 
         elem_index = 0;
         elem_highlight = array_highlights[elem_index];
@@ -85,28 +82,27 @@ $(document).ready(function (){
         locate_tooltip();
         show_tooltip();
     });
+    // packaging에서 'continue tutorial' 눌렀을 때
     $("#continue_tutorial_26").on("click", () => {
-        // if (!$element26) {
-            let $element26 = $(document.getElementById("tutorial_26"));
-            let $element27 = $(document.getElementById("tutorial_27"));
-            let $element28 = $(document.getElementById("tutorial_28"));
-            let $element29 = $(document.getElementById("tutorial_29"));
-            let $element30 = $(document.getElementById("tutorial_30"));
-            let $element31 = $(document.getElementById("noticePreview"));
-            let $element32 = $(document.getElementById("packageDocDownload"));
-            let $element33 = $(document.getElementById("save"));
-            array_highlights.push($element26, $element27, $element28, $element29, $element30, $element31, $element32, $element33);
-            array_tooltip_data = [
-                { title: "Upload", content: "Sample Source Code를 다운로드 후, Upload 합니다." },
-                { title: "Verify", content: "Verify를 클릭하면 README, File List, Banned List 버튼이 활성화된 것을 확인할 수 있습니다." },
-                { title: "Notice", content: "Notice Tab으로 이동합니다." },
-                { title: "Notice", content: `"Request to generate a modified OSS Notice.를 체크하여 OSS Notice를 변경할 수 있습니다.` },
-                { title: "Notice File Format", content: `OSS Notice File Format을 추가적으로 체크할 수 있습니다.` },
-                { title: "Preview", content: `Preview 버튼을 클릭하여 OSS Notice를 확인한 후 우측 하단 OK 버튼을 클릭합니다.` },
-                { title: "Download", content: `Download 버튼을 클릭하면 OSS Notice 파일을 미리 다운로드할 수 있습니다.` },
-                { title: "Save", content: `Save 버튼을 클릭합니다.` },
-            ];
-        // }
+        let $element26 = $(document.getElementById("tutorial_26"));
+        let $element27 = $(document.getElementById("tutorial_27"));
+        let $element28 = $(document.getElementById("tutorial_28"));
+        let $element29 = $(document.getElementById("tutorial_29"));
+        let $element30 = $(document.getElementById("tutorial_30"));
+        let $element31 = $(document.getElementById("noticePreview"));
+        let $element32 = $(document.getElementById("packageDocDownload"));
+        let $element33 = $(document.getElementById("save"));
+        array_highlights.push($element26, $element27, $element28, $element29, $element30, $element31, $element32, $element33);
+        array_tooltip_data = [
+            { title: "Upload", content: "Sample Source Code를 다운로드 후, Upload 합니다." },
+            { title: "Verify", content: "Verify를 클릭하면 README, File List, Banned List 버튼이 활성화된 것을 확인할 수 있습니다." },
+            { title: "Notice", content: "Notice Tab으로 이동합니다." },
+            { title: "Notice", content: `"Request to generate a modified OSS Notice.를 체크하여 OSS Notice를 변경할 수 있습니다.` },
+            { title: "Notice File Format", content: `OSS Notice File Format을 추가적으로 체크할 수 있습니다.` },
+            { title: "Preview", content: `Preview 버튼을 클릭하여 OSS Notice를 확인한 후 우측 하단 OK 버튼을 클릭합니다.` },
+            { title: "Download", content: `Download 버튼을 클릭하면 OSS Notice 파일을 미리 다운로드할 수 있습니다.` },
+            { title: "Save", content: `Save 버튼을 클릭합니다.` },
+        ];
         elem_index = 0;
         elem_highlight = array_highlights[elem_index];
         locate_vails();
@@ -214,7 +210,6 @@ $(document).ready(function (){
 
     // tooltip의 '다음' 클릭시 실행되는 함수
     function handle_click_next() {
-        console.log(elem_index, array_highlights);
         if (elem_index === array_highlights.length - 1) {
             hide_vails_and_tooltips();
             return;
