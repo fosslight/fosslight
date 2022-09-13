@@ -559,8 +559,41 @@ var bom_fn = {
 		}else {
 			alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 		}
-	}
+	},
+    exportList:function(){
+        var buttonId = event.target.id;
+        var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");
+
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        }else{
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function() {
+        var targetFileId = event.target.id;
+        var parentId = $("#" + targetFileId).closest("div").attr("id")
+
+        // download file
+        if (targetFileId === "report_sub") bom_fn.downloadExcel();
+        else if (targetFileId === "Spreadsheet_sub") spdx_fn.downloadSpdxSpreadSheetExcel();
+        else if (targetFileId === "RDF_sub") spdx_fn.downloadSpdxRdf();
+        else if (targetFileId === "TAG_sub") spdx_fn.downloadSpdxTag();
+        else if (targetFileId === "JSON_sub") spdx_fn.downloadSpdxJson();
+        else if (targetFileId === "YAML_sub") spdx_fn.downloadSpdxYaml();
+
+        // hide list
+        $("#" + parentId).hide();
+    }
 }
+
+// close exportlist
+$(document).click(function(e){
+    if(!$("#ExportContainer").has(e.target).length){
+        $("#ExportList").hide();
+    }
+});
 
 var bom_data = {
 		getJqGrid : function(param){
