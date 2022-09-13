@@ -126,6 +126,7 @@
 				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 			</form>
 		</fieldset>
+		<input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
 		<!---->
 		<div class="btnLayout">
 			<input type="button" value="Reject" class="btnReject btnColor left" style="display: none;"/>
@@ -189,11 +190,16 @@
 			
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
+				<input type="button" value="Add" id="btn_project_add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
 			</span>
+
+			<span class="left" id=identification_start>
+			</span>
+
+
 		</div>
 		<!---->
-		<div class="jqGridSet">
+		<div class="jqGridSet" id="check_create">
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
