@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-identification.js?${jsVersion}"></script>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-identification-1.js?${jsVersion}"></script><!--한지영-->
 <jsp:include page="../common/gridCommonFn.jsp" flush="false" />
 <!-- wrap -->
 <c:set var="isCommited" value="${project.verificationStatus eq 'CONF'}"/>
@@ -11,6 +12,7 @@
 			<ul>
 				<li class="first"><span>Project Name</span><strong><label id="vPrjName"></label>
 				    <input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
+				    <input type="button" value=" start tutorial " id="start_tutorial" /><!--한지영-->
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${project.verificationStatus ne 'NA' and (not empty project.verificationStatus or project.identificationStatus eq 'CONF')}">
 					<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
