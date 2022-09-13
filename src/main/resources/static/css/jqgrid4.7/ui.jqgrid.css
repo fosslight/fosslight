@@ -166,6 +166,8 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
+    background: url("../../images/bg_btn.png") no-repeat 3px -61px;
+    padding: 0px 0px 0px 20px !important;
 } 
 .ui-jqgrid .ui-jqgrid-view input,
 .ui-jqgrid .ui-jqgrid-view select,
