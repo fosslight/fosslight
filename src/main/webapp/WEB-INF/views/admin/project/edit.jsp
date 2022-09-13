@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-proj-edit.js?${jsVersion}"></script>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <!-- wrap -->
 <div id="wrapIframe">
@@ -48,7 +49,7 @@
 		</div>
 	</div>
 	</c:if>
-	
+	<input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
 	<div class="${not empty project.prjId ? 'projectContents' : ''}">
 		<!---->
 		<div class="tbws1 w1025 mt10">

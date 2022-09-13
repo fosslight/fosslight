@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-identification.js?${jsVersion}"></script>
 <jsp:include page="../common/gridCommonFn.jsp" flush="false" />
 <!-- wrap -->
 <c:set var="isCommited" value="${project.verificationStatus eq 'CONF'}"/>
@@ -9,6 +10,7 @@
 			<h2>Project Information</h2>
 			<ul>
 				<li class="first"><span>Project Name</span><strong><label id="vPrjName"></label>
+				    <input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${project.verificationStatus ne 'NA' and (not empty project.verificationStatus or project.identificationStatus eq 'CONF')}">
 					<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
@@ -26,8 +28,8 @@
 		<div class="projdecTab">
 			<div class="subTab">
 			<div class="tabMenu">
-				<a rel="partyDiv">3rd party</a>
-				<a rel="srcDiv">SRC</a>
+				<a rel="partyDiv" id="third_party">3rd party</a>
+				<a rel="srcDiv" id="src_tab">SRC</a>
 				<a rel="binDiv">BIN</a>
 				<a rel="binAndroidDiv">BIN (Android)</a>
 				<a rel="bomDiv">BOM</a>
