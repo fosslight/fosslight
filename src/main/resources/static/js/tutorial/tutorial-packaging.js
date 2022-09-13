@@ -7,10 +7,10 @@ $(document).ready(function (){
     ];
 
     // vail 생성
-    let $vailUp = $('<div id="vail_up"></div>');
-    let $vailDown = $('<div id="vail_down"></div>');
-    let $vailLeft = $('<div id="vail_left"></div>');
-    let $vailRight = $('<div id="vail_right"></div>');
+    let $veilUp = $('<div id="veil_up"></div>');
+    let $veilDown = $('<div id="veil_down"></div>');
+    let $veilLeft = $('<div id="veil_left"></div>');
+    let $veilRight = $('<div id="veil_right"></div>');
 
     // tooltip 생성
     let $tooltip = $(
@@ -28,14 +28,14 @@ $(document).ready(function (){
     );
 
     // body 태그 내에 vail, tooltip들 넣기
-    $("body").append($vailUp);
-    $("body").append($vailDown);
-    $("body").append($vailLeft);
-    $("body").append($vailRight);
+    $("body").append($veilUp);
+    $("body").append($veilDown);
+    $("body").append($veilLeft);
+    $("body").append($veilRight);
     $("body").append($tooltip);
 
     // vail, tooltip 기본 style 설정
-    const vails = [$vailUp, $vailDown, $vailLeft, $vailRight];
+    const vails = [$veilUp, $veilDown, $veilLeft, $veilRight];
     const property_vail = {
         display: "none",
         background: "rgba(0, 0, 0, 0.2)",
@@ -129,30 +129,41 @@ $(document).ready(function (){
     function locate_vails() {
         let offset = elem_highlight.offset();
 
-        $vailUp.css({
+        $veilUp.css({
             top: 0,
             left: 0,
             width: "100%",
             height: `${offset.top}`,
         });
-        $vailDown.css({
+        $veilDown.css({
             top: `${offset.top + elem_highlight.outerHeight(true)}px`,
             left: 0,
             width: "100%",
             height: `calc(100% - ${offset.top + elem_highlight.outerHeight(true)}px)`,
         });
-        $vailLeft.css({
+        $veilLeft.css({
             top: `${offset.top}px`,
             left: 0,
             width: `${offset.left}px`,
             height: `${elem_highlight.outerHeight(true)}`,
         });
-        $vailRight.css({
+        $veilRight.css({
             top: `${offset.top}px`,
             left: `${offset.left + elem_highlight.outerWidth(true)}px`,
             width: `calc(100% - ${offset.left + elem_highlight.outerWidth(true)}px)`,
             height: `${elem_highlight.outerHeight(true)}`,
         });
+
+        // let tooltip_left =
+        //     offset.left - (tooltip_width - elem_highlight.outerWidth(true)) / 2;
+        // if (tooltip_left < 0) tooltip_left = offset.left;
+        //
+        // $tooltip.css({
+        //     position: "absolute",
+        //     top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
+        //     left: `${tooltip_left}px`,
+        //     width: `${tooltip_width}px`,
+        // });
     }
 
     // vail 모두 보이게 설정
@@ -190,10 +201,10 @@ $(document).ready(function (){
 
     // vail, tooltip을 모두 화면에 보이지 않게 함
     function hide_vails_and_tooltips() {
-        $vailUp.css("display", "none");
-        $vailDown.css("display", "none");
-        $vailLeft.css("display", "none");
-        $vailRight.css("display", "none");
+        $veilUp.css("display", "none");
+        $veilDown.css("display", "none");
+        $veilLeft.css("display", "none");
+        $veilRight.css("display", "none");
         $tooltip.css("display", "none");
     }
 
