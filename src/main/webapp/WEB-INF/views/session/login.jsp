@@ -16,6 +16,7 @@
 
 <script type="text/javascript" src="${ctxPath}/js/jquery.form.min.js"></script>
 <script type="text/javascript" src="${ctxPath}/js/basic.js?${jsVersion}"></script>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-login.js?${jsVersion}"></script>
 
 <!-- alertify -->
 <script type="text/javascript" src="${ctxPath}/js/alertifyjs/alertify.min.js"></script>
@@ -285,6 +286,7 @@
 					<fieldset>
 						<div>
 							<h1><img src="../images/img_login_logo1.png" alt="FOSSLIGHT" /></h1>
+							<div id="login_space">
 							<form name="loginForm" id="loginForm" action="<c:url value="/session/login-proc"/>">
 								<dl>
 									<dt><label for="accountInput">ID</label></dt>
@@ -297,6 +299,7 @@
 									</dd>
 								</dl>
 								<input type="button" value="LOGIN" class="btnlogin" id="btn_login" />
+								</div>
 								<span class="joinGo">
 									<span class="checkSet"><input type="checkbox" id="saveID" /><label for="saveID">SAVE ID</label></span>
 									<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
@@ -306,6 +309,7 @@
 					</fieldset>
 					<!------------>
 					<p><spring:message code="msg.login.description.forgot.pw" /></p>
+					<input type="button" value=" 📢 Start Tutorial " id="start_tutorial" />
 				</div>
 			</div>
 		</div>
