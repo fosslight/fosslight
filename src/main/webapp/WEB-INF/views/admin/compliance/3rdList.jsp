@@ -38,11 +38,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-		<div class="btnLayout" style="padding:5px 0 !important">
-			<span class="right">
-				<input name="export" type="button" value="Export" class="btnColor"/>
-			</span>
-		</div>
 		<!----->
 	</div>
 	<!---->

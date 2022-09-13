@@ -89,24 +89,6 @@
 									</tr>
 									#end
 								</table>
-								
-								#if( $bom_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $bom_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end
 								#if( $disclosure_oss_info )
 								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; List of OSS to Disclose &raquo;</h2>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
@@ -116,6 +98,23 @@
 										<th style="padding:5px;background:#f0f0f0;">License Name</th>
 									</tr>
 									#foreach( $oss in $disclosure_oss_info )
+									<tr>
+										<td style="padding:5px;">$!oss.ossName</td>
+										<td style="padding:5px;">$!oss.ossVersion</td>
+										<td style="padding:5px;">$!oss.licenseName</td>
+									</tr>
+									#end
+								</table>
+								#end
+								#if( $bom_oss_info )
+								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<tr>
+										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
+										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
+										<th style="padding:5px;background:#f0f0f0;">License Name</th>
+									</tr>
+									#foreach( $oss in $bom_oss_info )
 									<tr>
 										<td style="padding:5px;">$!oss.ossName</td>
 										<td style="padding:5px;">$!oss.ossVersion</td>

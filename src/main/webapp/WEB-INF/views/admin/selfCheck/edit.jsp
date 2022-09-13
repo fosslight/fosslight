@@ -152,19 +152,6 @@
 				<table id="srcList"><tr><td></td></tr></table>
 				<div id="srcPager"></div>
 			</div>
-			<!---->
-			<div class="btnLayout">
-				<input id="delete" type="button" value="Delete" class="btnColor left selfCheckDelete" /><!-- 2018-07-19 choye 추가 class에  selfCheckDelete -->
-				<span class="right">
-					<input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
-					<input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
-					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
-					<input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
-					<input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
-					<input id="srcReset" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
-					<input id="srcSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-				</span>
-			</div>
 		</div>
 		<div id="notice" class="tabContent">
 			<div class="mt10">

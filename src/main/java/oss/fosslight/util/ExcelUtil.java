@@ -2922,7 +2922,7 @@ public class ExcelUtil extends CoTopComponent {
 					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						HSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							//여기서 헤더 점검 필요
+							//check header in here
 							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
 							if (!validHeader){
 								log.info("The order and content of header columns must match.");
@@ -2940,6 +2940,7 @@ public class ExcelUtil extends CoTopComponent {
 					try {
 						wbHSSF.close();
 					} catch (Exception e) {
+						log.error(e.getMessage(), e);
 					}
 				}
 			} else if ("xlsx".equals(extType) || "XLSX".equals(extType)) {
@@ -2956,7 +2957,7 @@ public class ExcelUtil extends CoTopComponent {
 								return null;
 							}
 						} else {
-							//licenseMaster 객체 생성
+							//licenseMaster Object
 							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
 							if (licenseMaster != null)
 								licenseMasterList.add(licenseMaster);
@@ -2968,11 +2969,11 @@ public class ExcelUtil extends CoTopComponent {
 					try {
 						wbXSSF.close();
 					} catch (Exception e2) {
+						log.error(e2.getMessage(), e2);
 					}
 				}
 			}
 		}
-		//최종 그리드 리스트 생성
 		return licenseMasterList;
 	}
 
@@ -2991,32 +2992,12 @@ public class ExcelUtil extends CoTopComponent {
 				}
 			} else if (colIndex == 1) {
 				if (value == null || value.trim().isEmpty()) continue;
-				//LICENSE TYPE 검증
-//				if (value.toLowerCase().equals("permissive")) {
-//					licenseMaster.setLicenseType(CD_LICENSE_TYPE_PMS);
-//				} else if (value.toLowerCase().equals("weak copyleft")) {
-//					licenseMaster.setLicenseType(CD_LICENSE_TYPE_WCP);
-//				} else if (value.toLowerCase().equals("copyleft")) {
-//					licenseMaster.setLicenseType(CD_LICENSE_TYPE_CP);
-//				} else if (value.toLowerCase().equals("proprietary")) {
-//					licenseMaster.setLicenseType(CD_LICENSE_TYPE_NA);
-//				} else if (value.toLowerCase().equals("proprietary free")) {
-//					licenseMaster.setLicenseType(CD_LICENSE_TYPE_PF);
-//				}
 				licenseMaster.setLicenseType(value);
 			} else if (colIndex == 2) {
 				if (value == null || value.trim().isEmpty()) continue;
-				//obligation CheckBox
-//				if (value.toLowerCase().equals("o")) {
-//					licenseMaster.setObligationNotificationYn("O");
-//				}
 				licenseMaster.setObligationNotificationYn(value);
 			} else if (colIndex == 3) {
 				if (value == null || value.trim().isEmpty()) continue;
-				//obligation CheckBox
-//				if (value.toLowerCase().equals("o")) {
-//					licenseMaster.setObligationDisclosingSrcYn("O");
-//				}
 				licenseMaster.setObligationDisclosingSrcYn(value);
 			} else if (colIndex == 4) {
 				if (value == null || value.trim().isEmpty()) continue;

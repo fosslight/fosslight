@@ -233,16 +233,6 @@
 						<input id="btnVerifyFileContent" type="button" value="File List" class="btnColor <c:if test="${not empty project.verifyFileContent}">green</c:if>" style="width:90px;" />
 						<input id="btnProprietary" type="button" value="Banned List" class="btnColor <c:if test="${not empty project.exceptFileContent}">green</c:if>" style="width:90px;" />
 					</span>
-					<span class="right">
-						<input name="export_path" type="button" value="Export Path" class="btnColor" style="width:90px;"/>
-						<input name="upload_path" type="button" value="Upload Path" class="btnColor" style="width:90px;" />
-						<c:if test="${project.dropYn ne 'Y'}">
-							<input name="btnSavePath" type="button" value="Save" class="btnColor red" />
-							<c:if test="${(empty project.verificationStatus or project.verificationStatus eq 'PROG' or (ct:isAdmin() and project.verificationStatus eq 'REV' )) and project.viewOnlyFlag eq 'N'}">
-								<input name="verify" type="button" value="Verify" class="btnColor red" />
-							</c:if>
-						</c:if>
-					</span>
 				</div>
 			</div>
 			<!---->

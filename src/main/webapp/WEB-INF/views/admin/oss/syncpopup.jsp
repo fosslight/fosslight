@@ -183,8 +183,9 @@
 				var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
 				
 				if (checkedOssList.length > 0) { 
-
-					if (checkedSyncList.length > 0) {
+					var dataLength = CKEDITOR.instances['syncPopupEditor'].getData().length;
+					
+					if ((checkedSyncList.length > 0) || (dataLength > 0 && checkedSyncList.length == 0)) {
 						$(".loading").show();
 						
 						$("input[name=ossIds]").val(checkedOssList);
@@ -258,7 +259,7 @@
 			<div class="syncPopupEditor">
 				<div id="syncPopupEditor"></div>
 				<script type="text/javascript">
-            		CKEDITOR.replace('syncPopupEditor', {height: 150});
+            		CKEDITOR.replace('syncPopupEditor', {height: 150, basicEntities: false, fillEmptyBlocks: false});
             	</script>
 			</div>
 			<div class="btnLayout">

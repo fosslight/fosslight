@@ -39,14 +39,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-		<!---->
-		<div class="btnLayout">
-			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
-				<a onclick="fn.saveUser()" class="btnColor red btnUser">Save</a>
-			</span>
-		</div>
-		<!---->
 	</div>
 	<!---->
 

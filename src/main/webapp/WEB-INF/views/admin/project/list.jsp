@@ -197,22 +197,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-		<!---->
-		<div class="btnLayout">
-			<span class="left">
-				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
-				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>
-				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
-				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
-			</span>
-		
-			<input type="button" value="Reject" class="btnReject btnColor left" />
-			<span class="right">
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
-			</span>
-		</div>
-		<!---->
 	</div>
 	<!---->
 </div>

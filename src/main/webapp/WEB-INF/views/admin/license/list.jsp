@@ -102,7 +102,7 @@
 		<!---->
 		<div class="btnLayout">
 			<span class="right">
-				<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
+				<c:if test="${ct:isAdmin()}">
 					<input type="button" value="Bulk registration" onclick="createTabInFrame('BulkReg_License', '#/license/licenseBulkReg')" class="btnColor red" style="width: 125px;" />
 				</c:if>
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
@@ -116,19 +116,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-		<!---->
-		<div class="btnLayout">
-			<span class="right">
-				<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-					<input type="button" value="Bulk registration" onclick="createTabInFrame('BulkReg_License', '#/license/licenseBulkReg')" class="btnColor red" style="width: 125px;" />
-				</c:if>
-				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
-				<c:if test="${ct:isAdmin()}">
-					<input type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '#<c:url value="/license/edit"/>')" />
-				</c:if>
-			</span>
-		</div>
-		<!---->
 	</div>
 	<!---->
 </div>

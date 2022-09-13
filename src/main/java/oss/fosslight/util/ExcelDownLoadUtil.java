@@ -130,7 +130,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileInputStream inFile=null;
 
 		// download file name
-		String downloadFileName = "FOSSLight-Report"; // Default
+		String downloadFileName = "fosslight_report"; // Default
 
 		try {
 			//cover
@@ -157,13 +157,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				reportSheet(wb, sheet1, projectInfo);
 				
 			}
-			//OSS-Report-[ID]-[ProjectName]-[
-			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjName());
-			
-			if(!isEmpty(projectInfo.getPrjVersion())) {
-				downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjVersion());
-			}
-			
+			//fosslight_report_[date]_prj-[ID].xlsx
+			downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_prj-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId);
+
 			ProjectIdentification ossListParam = new ProjectIdentification();
 			ossListParam.setReferenceId(prjId);
 			
@@ -1678,7 +1674,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	private static String makeExcelFileId(Workbook wb, String target, String exp) throws IOException {
 		UUID randomUUID = UUID.randomUUID();
-		String fileName = CommonFunction.replaceSlashToUnderline(target)+"_"+CommonFunction.getCurrentDateTime();
+		String fileName = CommonFunction.replaceSlashToUnderline(target);
 		String logiFileName = fileName + "_" + randomUUID+"."+exp;
 		String excelFilePath = writepath+"/download/";
 		
@@ -3204,7 +3200,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Workbook wb = null;
 		
 		// download file name
-		String downloadFileName = "OSS-List"; // Default
+		String downloadFileName = "fosslight-report"; // Default
 
 		try {
 			//cover
@@ -3222,11 +3218,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			int sheetIdx = wb.getSheetIndex("Open Source Software List");
 			Sheet sheet1 = wb.getSheetAt(sheetIdx); // OSS List sheet
 			
-			//OSS-List-[3rd ID]-[3rd Party Name]-[3rd Party Software Name]-[3rd Party Software Version]-[Date].xlsx
-			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + projectInfo.getPartnerName() + "-" + projectInfo.getSoftwareName();
-			if(!isEmpty(projectInfo.getSoftwareVersion())) {
-				downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getSoftwareVersion());
-			}
+			//fosslight_report_[date]_3rd-[ID].xlsx
+			downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_3rd-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId);
 			
 			reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER, sheet1, resultMap, null, false);
 		} catch (Exception e) {
@@ -3371,7 +3364,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileInputStream inFile=null;
 
 		// download file name
-		String downloadFileName = "SelfCheck-Report"; // Default
+		String downloadFileName = "fosslight_report"; // Default
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/SelfCheck-Report.xlsx"));
 			wb = WorkbookFactory.create(inFile);
@@ -3383,13 +3376,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				projectInfo = selfCheckService.getProjectDetail(projectInfo);
 			}
 			
-			//OSS-Report-[ID]-[ProjectName]-[
-			downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId) + "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjName());
-			
-			if(!isEmpty(projectInfo.getPrjVersion())) {
-				downloadFileName += "-" + StringUtil.deleteWhitespaceWithSpecialChar(projectInfo.getPrjVersion());
-			}
-			
+			//fosslight_report_[date]_self-[ID].xlsx
+			downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_self-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId);
 			
 			ProjectIdentification ossListParam = new ProjectIdentification();
 			ossListParam.setReferenceId(prjId);

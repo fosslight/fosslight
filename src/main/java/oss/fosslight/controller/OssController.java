@@ -1890,6 +1890,7 @@ public class OssController extends CoTopComponent{
 			boolean detectedLicenseCheckFlag;
 			boolean downloadLocationCheckFlag;
 			boolean ossMasterCheclFlag;
+			boolean onlyCommentRegistFlag;
 		
 			for (int i=0; i<ossIdsArr.length; i++) {
 				param.setOssId(ossIdsArr[i]);
@@ -1911,100 +1912,109 @@ public class OssController extends CoTopComponent{
 				detectedLicenseCheckFlag = false;
 				downloadLocationCheckFlag = false;
 				ossMasterCheclFlag = false;
+				onlyCommentRegistFlag = false;
 				
-				for (int j=0; j<syncItemArr.length; j++) {
-					switch(syncItemArr[j]) {
-						case "Declared License" :
-							if (!CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()).equals(CommonFunction.makeLicenseExpression(syncBean.getOssLicenses()))) {
-								syncBean.setOssLicenses(standardOss.getOssLicenses());
-								syncBean.setLicenseName(CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()));
-								if (standardOss.getLicenseDiv().contains("Single")) {
-									syncBean.setLicenseDiv("S");
-								}else {
-									syncBean.setLicenseDiv("M");
+				if(syncItemArr.length == 1 && isEmpty(syncItemArr[0])) {
+					if(!isEmpty(comment)) {
+						onlyCommentRegistFlag = true;
+					}
+				} else {
+					for (int j=0; j<syncItemArr.length; j++) {
+						switch(syncItemArr[j]) {
+							case "Declared License" :
+								if (!CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()).equals(CommonFunction.makeLicenseExpression(syncBean.getOssLicenses()))) {
+									syncBean.setOssLicenses(standardOss.getOssLicenses());
+									syncBean.setLicenseName(CommonFunction.makeLicenseExpression(standardOss.getOssLicenses()));
+									if (standardOss.getLicenseDiv().contains("Single")) {
+										syncBean.setLicenseDiv("S");
+									}else {
+										syncBean.setLicenseDiv("M");
+									}
+									declaredLicenseCheckFlag = true;
 								}
-								declaredLicenseCheckFlag = true;
-							}
-							break;
-							
-						case "Detected License" :
-							if (syncBean.getDetectedLicenses() == null) {
-								if (standardOss.getDetectedLicenses() != null) {
-									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-									detectedLicenseCheckFlag = true;
-								}
-							}else {
-								if (standardOss.getDetectedLicenses() != null) {
-									if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+								break;
+								
+							case "Detected License" :
+								if (syncBean.getDetectedLicenses() == null) {
+									if (standardOss.getDetectedLicenses() != null) {
 										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 										detectedLicenseCheckFlag = true;
 									}
 								}else {
-									syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-									detectedLicenseCheckFlag = true;
+									if (standardOss.getDetectedLicenses() != null) {
+										if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
+											syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+											detectedLicenseCheckFlag = true;
+										}
+									}else {
+										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+										detectedLicenseCheckFlag = true;
+									}
 								}
-							}
-							break;
-							
-						case "Copyright" :
-							if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
-								syncBean.setCopyright(standardOss.getCopyright());
-								ossMasterCheclFlag = true;
-							}
-							break;
-							
-						case "Download Location" :
-							if (standardOss.getDownloadLocations() != null) {
-								if (syncBean.getDownloadLocations() == null) {
-									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-									downloadLocationCheckFlag = true;
+								break;
+								
+							case "Copyright" :
+								if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
+									syncBean.setCopyright(standardOss.getCopyright());
+									ossMasterCheclFlag = true;
+								}
+								break;
+								
+							case "Download Location" :
+								if (standardOss.getDownloadLocations() != null) {
+									if (syncBean.getDownloadLocations() == null) {
+										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+										downloadLocationCheckFlag = true;
+									}else {
+										if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
+											syncBean.setDownloadLocations(standardOss.getDownloadLocations());
+											syncBean.setDownloadLocation(standardOss.getDownloadLocation());
+											downloadLocationCheckFlag = true;
+										}
+									}
 								}else {
-									if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
+									if (syncBean.getDownloadLocations() != null) {
 										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
 										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
 										downloadLocationCheckFlag = true;
 									}
 								}
-							}else {
-								if (syncBean.getDownloadLocations() != null) {
-									syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-									syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-									downloadLocationCheckFlag = true;
+								break;
+							
+							case "Home Page" :
+								if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
+									syncBean.setHomepage(standardOss.getHomepage());
+									ossMasterCheclFlag = true;
 								}
-							}
-							break;
-						
-						case "Home Page" :
-							if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
-								syncBean.setHomepage(standardOss.getHomepage());
-								ossMasterCheclFlag = true;
-							}
-							break;
-						
-						case "Summary Description" :
-							if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
-								syncBean.setSummaryDescription(standardOss.getSummaryDescription());
-								ossMasterCheclFlag = true;
-							}
-							break;
-						
-						case "Attribution" :
-							if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
-								syncBean.setAttribution(standardOss.getAttribution());
-								ossMasterCheclFlag = true;
-							}
-							break;
+								break;
+							
+							case "Summary Description" :
+								if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
+									syncBean.setSummaryDescription(standardOss.getSummaryDescription());
+									ossMasterCheclFlag = true;
+								}
+								break;
+							
+							case "Attribution" :
+								if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
+									syncBean.setAttribution(standardOss.getAttribution());
+									ossMasterCheclFlag = true;
+								}
+								break;
+						}
 					}
 				}
-				
-				if (ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) {
+								
+				if ((ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) || onlyCommentRegistFlag) {
 					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, downloadLocationCheckFlag);
 					
-					History h = new History();
-					h = ossService.work(syncBean);
-					h.sethAction(action);
-					historyService.storeData(h);
+					if(!onlyCommentRegistFlag) {
+						History h = new History();
+						h = ossService.work(syncBean);
+						h.sethAction(action);
+						historyService.storeData(h);
+					}
 					
 					beforeBean.setDownloadLocation(String.join(",", beforeBean.getDownloadLocations()));
 					OssMaster afterBean = ossService.getOssMasterOne(param);
