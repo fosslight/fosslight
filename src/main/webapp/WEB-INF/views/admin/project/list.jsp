@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-packaging.js?${jsVersion}"></script>
 <!-- wrap -->
 <div id="wrapIframe">
 	<!---->
@@ -197,6 +198,26 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
+<<<<<<< HEAD
+=======
+		<!---->
+		<div class="btnLayout">
+			<span class="left">
+				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
+				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>
+				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
+				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
+			</span>
+		
+			<input type="button" value="Reject" class="btnReject btnColor left" />
+			<span class="right">
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
+				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
+			</span>
+		</div>
+		<button id='continue_tutorial_25' style="position: fixed; bottom: 30px; left: 30px; font-size: 30px; padding: 5px;">Continue tutorial (packaging)</button>
+		<!---->
+>>>>>>> ca7d516f (튜토리얼 구현 완료 (p25-33))
 	</div>
 	<!---->
 </div>

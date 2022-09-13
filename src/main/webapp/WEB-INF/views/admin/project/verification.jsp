@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-packaging.js?${jsVersion}"></script>
 <!-- wrap -->
 <c:set var="isCommited" value="${project.verificationStatus eq 'CONF'}"/>
 <div id="wrapIframe">
@@ -26,7 +27,7 @@
 			<div class="subTab">
 			<div class="tabMenu">
 				<a rel="packaging">Packaging</a>
-				<a rel="notice">Notice</a>
+				<a id="tutorial_28" rel="notice">Notice</a>
 			</div>
 			</div>
 		  	<c:if test="${ct:isAdmin()}">
@@ -95,8 +96,10 @@
 											</c:if>
 										</c:forEach>
 									</c:if>
+												<div id="tutorial_26">
 													<span><input type="radio" id="1" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="1" checked  <c:if test="${isCommited}">disabled</c:if> /><label for="1">Upload </label></span>
 													<div id="registFile_${i}" <c:if test="${isCommited}">style="display:none;"</c:if>>upload</div>
+												</div>
 													<span><input type="radio" id="2" name="selectOption_${i}" onchange="fn.changeSelectOption(this)" value="2" <c:if test="${isCommited}">disabled</c:if> /><label for="2">URL </label></span>
 													<div id="wgetUrl_${i}" style="width: 500px;"><input type="text" class="autoComConfParty" style="width:70%" id="sendWgetUrl_${i}" name="sendWgetUrl_${i}"/><input id="send_${i}" type="button" value="send" class="btnColor" /></div>
 													<div class="mt10">
@@ -212,7 +215,7 @@
 						<c:if test="${project.dropYn ne 'Y'}">
 							<input name="btnSavePath" type="button" value="Save" class="btnColor red" />
 							<c:if test="${(empty project.verificationStatus or project.verificationStatus eq 'PROG' or (ct:isAdmin() and project.verificationStatus eq 'REV' )) and project.viewOnlyFlag eq 'N'}">
-								<input name="verify" type="button" value="Verify" class="btnColor red" />
+								<input id="tutorial_27" name="verify" type="button" value="Verify" class="btnColor red" />
 							</c:if>
 						</c:if>
 					</span>
@@ -246,7 +249,7 @@
 					<span><input type="radio" id="r1" name="btnEditOssNotice" value="N" <c:if test="${ossNotice.editNoticeYn eq 'N'}">checked</c:if> <c:if test="${project.verificationStatus eq 'CONF'}"> disabled</c:if> /><label for="r1"><strong>Request to generate a default OSS Notice. (Select this in most cases.)</strong></label></span>
 				</div>
 				<div class="btnLayout2 w1025 mt10">
-					<span><input type="radio" id="r2" name="btnEditOssNotice" value="Y" <c:if test="${ossNotice.editNoticeYn eq 'Y'}">checked</c:if> <c:if test="${project.verificationStatus eq 'CONF'}"> disabled</c:if>/><label for="r2"><strong>Request to generate a modified OSS Notice. (Select this only in exceptional cases.)</strong></label></span>
+					<span id="tutorial_29"><input type="radio" id="r2" name="btnEditOssNotice" value="Y" <c:if test="${ossNotice.editNoticeYn eq 'Y'}">checked</c:if> <c:if test="${project.verificationStatus eq 'CONF'}"> disabled</c:if>/><label for="r2"><strong>Request to generate a modified OSS Notice. (Select this only in exceptional cases.)</strong></label></span>
 				</div>
 				<div class="boxLine mt10">
 					<div class="noticeEdit2">
@@ -284,7 +287,7 @@
 
 								<dl class="uploadCase">
 									<dd class="mt10">
-										<div class="basicCase">
+										<div id="tutorial_30" class="basicCase">
 											<div class="uploadTit">
 												<input type="checkbox" id="companyName" value="${ossNotice.editCompanyYn}"><label for="companyName">Company Name</label>											
 											</div>
@@ -513,6 +516,8 @@
 		</div>
 	</div>
 </div>
+<button id='continue_tutorial_26' style="position: fixed; bottom: 30px; left: 30px; font-size: 30px; padding: 5px;">Continue tutorial (packaging)</button>
+
 <!-- //wrap -->
 <div id="blind_wrap"></div>
 

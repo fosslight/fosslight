@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-project.js?${jsVersion}"></script>
 <script type="text/javascript">
 //<![CDATA[
 	/*global $ */
@@ -11,12 +12,12 @@
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
-	
+
 	$(document).ready(function () {
 		'use strict';
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
 		evt.init();
-		
+
 		fn.getUserIdList("Y", "REVIEWER"); // 근무자
 		fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
 
@@ -26,10 +27,11 @@
 		//}else{
 			$('.btnReject').hide();
 		//}
-		
+
 		showHelpLink("Project_List_Main");
-	});	
-	
+
+	});
+
 	//데이터 객체
 	var gridTooltip = {
 		typeCodes : [],
@@ -51,8 +53,8 @@
 		init : function(){
 			list.load();	// Grid Load
 		}
-	};	
-	
+	};
+
 	//OSS 쪽에서 프로젝트 검색을 위한 데이터
 	var evt = {
 		init : function(){
@@ -60,18 +62,18 @@
 			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
 			$('select[name=networkServerType]').val('${searchBean.networkServerType}').trigger('change');
 			$('select[name=priority]').val('${searchBean.priority}').trigger('change');
-			
+
 			refreshParam = fn.setGridParam();
-			
+
 			$('#search').on('click',function(e){
 				e.preventDefault();
 				var exPostdata = $("#list").jqGrid('getGridParam','postData');
-				exPostdata.ossId = ''; 
+				exPostdata.ossId = '';
 				var postData = fn.setGridParam();
-				
+
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
-			
+
 			$('#popCancel').click(function(){
 				$('#changeStatusPop').hide();
 			});
@@ -79,14 +81,14 @@
 			$('#popChangeStatus').on('click', function(){
 				fn.changeStatusProc();
 			});
-			
+
 			$(".cal").on("keyup", function(e){
 				calValidation(this, e);
 			});
 		}
 	};
-	
-	
+
+
 	var fn = {
 		getUserIdList : function(reviewerFlag, type){
 			return $.ajax({
@@ -105,7 +107,7 @@
 
 						    return obj;
 						}, {});
-						
+
 						if(type == "REVIEWER"){
 							userIdList = temp;
 						} else {
@@ -127,7 +129,7 @@
 // 			205 REQ		Request
 // 			205 REV		Review
 			var display = "";
-			
+
 			switch(cellvalue){
 				case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_PROGRESS'))}":
 					display = "<span class=\"iconSt draft\">"+ cellvalue +"</span>";
@@ -150,7 +152,7 @@
 
 					break;
 			}
-			
+
 			return display;
 		},
 		// Grid status cell attr
@@ -158,11 +160,11 @@
 			// project Priority의 값을 기준으로 background의 색상을 표기함.
 			var styleStr = "";
 			var priority = (rowObject["priority"]).toUpperCase();
-			
+
 			switch(priority){
 				case "P0":	styleStr = 'style="background-color:#FEAEC9"';	break; // pink
 				case "P1":	styleStr = 'style="background-color:#FFFCB7"';	break; // light yellow
-				default:	break; 
+				default:	break;
 			}
 
 			return styleStr;
@@ -176,7 +178,7 @@
 // 			206 REV		Review
 			var display = "";
 			var hasOss = false;
-			
+
 			switch(cellvalue){
 				case "":
 					if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}"){
@@ -188,11 +190,11 @@
 							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0)\">Start</a></div>";
 						}
 					}
-					
+
 					break;
 				case "N/A":
 					display = "<div class=\"tcenter\">"+cellvalue+"</div>";
-										
+
 					break;
 				default:
 					if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}" && cellvalue != "Confirm"){
@@ -213,7 +215,7 @@
 							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0)\">3rd</a>";
 						}
 						</c:if>
-					
+
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusSrc =="Y" ) {
 							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",1)\">SRC</a>"; hasOss = true;
@@ -246,20 +248,20 @@
 							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",3)\">"+rowObject.noticeTypeEtc+"</a>";
 						}
 					}
-					
+
 					if(rowObject.identificationSubStatusBat =="Y" ) {
 						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",5)\">BAT</a>";
 					}
-					
+
 					break;
 			}
-			
+
 			return display;
 		},
 		// Grid veritification cell display
 		displayVerification : function(cellvalue, options, rowObject){
 			var display = "";
-			
+
 			if(rowObject.identificationStatus != 'Confirm') {
 				if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}"
 					|| rowObject.statusRequestYn == "Y" ) {
@@ -288,26 +290,32 @@
 				} else {
 					switch(cellvalue) {
 						case "":
-							if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}" 
+							if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}"
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else if(rowObject.identificationStatus!="") {
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a></div>";
+                                if (options.rowId == 1) {
+                                    display = `<div class=\"tcenter\">
+                                        <a id='tutorial_25' class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a>
+                                    </div>`;
+                                } else {
+                                    display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a></div>";
+                                }
 							}
-							
+
 							break;
 						case "Progress":
-							if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}" 
+							if(rowObject.status == "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}"
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else {
 								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Progress</a></div>";
 							}
-							
+
 							break;
 						case "N/A":
 							display = "N/A";
-							
+
 							break;
 						case "Error":
 							display = "Error";
@@ -327,7 +335,7 @@
 					}
 				}
 			}
-			
+
 			return display;
 		},
 		// Grid distribution cell display
@@ -340,15 +348,15 @@
 					switch(cellvalue){
 						case "":
 							display = (rowObject.verificationStatus != "Confirm") ? "N/A" : "Drop";
-							
+
 							break;
 						case "Progress":
 							display = "Drop";
-							
+
 							break;
 						default:
 							display = cellvalue;
-						
+
 							break;
 					}
 				} else {
@@ -370,7 +378,7 @@
 							} else {
 								display = "N/A";
 							}
-							
+
 							break;
 						case "Error":
 							display = cellvalue;
@@ -386,43 +394,43 @@
 							} else{
 								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+")\">"+cellvalue+"</a></div>";
 							}
-						
+
 							break;
 					}
 				}
 			}
-			
+
 			return display;
 		},
 		// Grid download cell display
 		displayReportDownload : function(cellvalue, options, rowObject){
 			var display = "";
-			
+
 			if(rowObject.identificationStatus == "Confirm"){
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"FOSSLight Report\">";
 			} else {
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this)\" disabled>";
 			}
-			
+
 			if(rowObject.verificationStatus == "Confirm"){
 				if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
-					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this)\" disabled>";	
+					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this)\" disabled>";
 				} else {
 					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice\" onclick=\"fn.downloadNotice(this)\" title=\"OSS Notice\">";
 				}
-				
+
 				if(rowObject.packageFileId!=""){
 					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackage(this)\" title=\"Packaging File1\">";
 				} else {
 					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this)\" disabled>";
 				}
-				
+
 				if(rowObject.packageFileId2!=""){
 					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'2\')\" title=\"Packaging File2\">";
 				} else {
 					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'2\')\" disabled>";
 				}
-				
+
 				if(rowObject.packageFileId3!=""){
 					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'3\')\" title=\"Packaging File3\">";
 				} else {
@@ -432,14 +440,14 @@
 				display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this)\" disabled>";
 				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this)\" disabled>"
 			}
-			
+
 			return display;
 		},
 		// Grid vulnerability cell display
 		displayVulnerability : function(cellvalue, options, rowObject){
 			var display = "";
 			var _url = '<c:url value="/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
-			
+
 			if(parseInt(cellvalue) >= 9.0 ) {
 				display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 			} else if(parseInt(cellvalue) >= 7.0 ) {
@@ -453,18 +461,18 @@
 			} else {
 				display=cellvalue;
 			}
-			
+
 			return display;
 		},
 		displayComment : function(cellvalue, options, rowObject){
 			var display = "";
-			
+
 			if(cellvalue !="") {
 				var tmpStr = new RegExp();
 				tmpStr = /[<][^>]*[>]/gi;
 				display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
 			}
-			
+
 			return display;
 		},
 		// Grid identification display event
@@ -488,7 +496,7 @@
 														})
 														.indexOf(this.value)];
 			var data = {"prjId" : prjId, "reviewer" : reviewer};
-			
+
 			$.ajax({
 				url : '<c:url value="/project/updateReviewer"/>',
 				type : 'POST',
@@ -499,7 +507,7 @@
 				success: function(data){
 					$("#list").jqGrid('saveRow',prjId);
 					$("#list").jqGrid('setCell', prjId, "reviewer", reviewer);
-					
+
 					alertify.success('<spring:message code="msg.common.success" />');
 				},
 				error: function(data){
@@ -510,7 +518,7 @@
 		downloadExcel : function(){
 			if(isMaximumRowCheck(totalRow)){
 				var data = fn.setGridParam();
-				
+
 				$.ajax({
 					   type: "POST",
 					   url: '<c:url value="/exceldownload/getExcelPost"/>',
@@ -536,8 +544,8 @@
 			}
 		},
 		downloadReport : function(obj){
-			var prjId = $(obj).closest('tr').attr('id'); 
-			
+			var prjId = $(obj).closest('tr').attr('id');
+
 			$.ajax({
 				type: "POST",
 				url: '<c:url value="/exceldownload/getExcelPost"/>',
@@ -558,46 +566,46 @@
 			});
 		},
 		downloadNotice : function(obj){
-			var prjId = $(obj).closest('tr').attr('id'); 
-			
+			var prjId = $(obj).closest('tr').attr('id');
+
 			//파일 이름 임시
 			location.href = '<c:url value="/project/verification/downloadNotice?prjId='+prjId+'"/>';
 		},
 		downloadPackage : function(obj){
 			var prjId = $(obj).closest('tr').attr('id');
-			
+
 			location.href = '<c:url value="/project/verification/downloadPackage?prjId='+prjId+'"/>';
 		},
 		downloadPackageMulti : function(obj, fileIdx){
 			var prjId = $(obj).closest('tr').attr('id');
-			
+
 			location.href = '<c:url value="/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx+'"/>';
 		},
 		setGridParam : function(){
 			var paramData=$('#projectSearch').serializeObject();
-			
+
 			//public 값 넣어주기
 			if($('#checkbox3').is(':checked')) {
 				paramData.publicYn = 'N';
 			} else {
 				paramData.publicYn = 'Y';
 			}
-			
+
 			if(paramData.statuses != null) {
 				paramData.statuses = JSON.stringify(paramData.statuses);
 				paramData.statuses = paramData.statuses.replace(/\"|\[|\]/gi, "");
 			} else {
 				paramData.statuses = "";
 			}
-			
+
 			return paramData;
 		}, getUserName : function(cellvalue, options, rowObject){
 			return adminUserList[cellvalue] || "";
-		}, 
+		},
 		checkProjectCnt : function(){
 			var isValid = true;
 			var checkProjectArr = $("#list").getGridParam("selarrrow");
-			
+
 			switch(checkProjectArr.length){
 				case 1:
 					break;
@@ -617,7 +625,7 @@
 			if(fn.checkProjectCnt()) {
 				var prjId = $("#list").getGridParam("selrow");
 				var rtnParameter = {};
-				
+
 				$.ajax({
 					url : '<c:url value="/project/getProjectStatus"/>',
 					type : 'POST',
@@ -627,12 +635,12 @@
 					contentType : 'application/json',
 					success: function(data){
 						var distributionStatus = data.distributionStatus;
-						
+
 						if((distributionStatus||"").toUpperCase() == "PROC"){
 							alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
 							return false;
 						}
-						
+
 						fn.showChangeStatus(data);
 					},
 					error: function(data){
@@ -644,7 +652,7 @@
 		copy : function(){
 			if(fn.checkProjectCnt()){
 				var prjId = $("#list").getGridParam("selrow");
-				
+
 				createTabInFrame(prjId+'copy_Project', '#<c:url value="/project/copy/'+prjId+'"/>');
 			}
 		},
@@ -668,13 +676,13 @@
 			$("#CSDrop > input[type=radio]").attr("disabled", false);
 			$("#CSDelete > input[type=radio]").attr("disabled", false);
 			$("#CSComplete > input[type=radio]").attr("disabled", false);
-			
+
 			if (projectStatus == "PROG"){
 				if (identificationStatus == "" || identificationStatus == "PROG"){
 					$("#CSIdentification > input[type=radio]").attr("disabled", true);
 				}
 			}
-			
+
 			if('${sessUserInfo.authority}'=="ROLE_ADMIN"
 				&& identificationStatus == "CONF"
 				&& (!verificationStatus
@@ -694,18 +702,18 @@
 			}else{
 				$("#CSDrop > input[type=radio]").attr("disabled", true);
 			}
-			
+
 			if(projectStatus == "REV"){
 				$("#CSIdentification > input[type=radio]").attr("disabled", true);
 				$("#CSDrop > input[type=radio]").attr("disabled", true);
 				$("#CSDelete > input[type=radio]").attr("disabled", true);
 			}
-			
+
 			$("#changeStatusPop").show();
 		},
 		changeStatusProc : function(){
 			$("#reason").next(".retxt").hide(); // required reset
-			
+
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 			var changeSeq = $("input:radio[name='radioName']:checked").val();
@@ -739,8 +747,8 @@
 						if(identificationStatus == "CONF"){
 							if(distributionStatus == "DONE"){
 								param["delOsdd"] = "Y"; // -> delete with OSDD
-								
-								if(completeFlag != "Y"){ // -> delete with OSDD & identification reject 후 end 
+
+								if(completeFlag != "Y"){ // -> delete with OSDD & identification reject 후 end
 									param["changeStatusFlag"] = "Y";
 								}
 							}
@@ -753,7 +761,7 @@
 						if (dropFlag == "Y"){
 							param["completeYn"] = "N"; // -> reopen 동작
 						}
-						
+
 						fn.updateProjectStatus(param);
 					}else{
 						if(completeFlag == "Y"){
@@ -763,11 +771,11 @@
 							if (dropFlag == "Y"){
 								param["completeYn"] = "N"; // -> reopen 동작
 							}
-							
+
 							fn.updateProjectStatus(param);
 						}
 					}
-					
+
 					break;
 				case "2": // drop -> distribution Done 일경우 delete with OSDD를 실행 후 drop 처리함.
 					if(distributionStatus == "DONE"){
@@ -776,7 +784,7 @@
 							, "identificationStatus" : "PROG"
 							, "userComment" : reason
 						};
-							
+
 						param["delOsdd"] = "Y"; // -> delete with OSDD
 
 						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
@@ -803,7 +811,7 @@
 							"prjId" : prjId
 							, "userComment" : reason
 						};
-						
+
 						fn.exeProjectDrop(param);
 					}
 
@@ -818,25 +826,25 @@
 					if(identificationStatus == "CONF"){ // identification > confirm 일 경우 reject 후 delete
 						if(distributionStatus == "DONE"){
 							param["delOsdd"] = "Y"; // -> delete with OSDD
-							
+
 							if(completeFlag != "Y"){
-								param["changeStatusFlag"] = "Y"; // -> delete with OSDD & identification reject 후 end 
+								param["changeStatusFlag"] = "Y"; // -> delete with OSDD & identification reject 후 end
 							}
-						} 
+						}
 
 						if(completeFlag == "Y"){
 							param["completeYn"] = "N"; // -> reopen 동작
 						}
-						
+
 						fn.updateProjectStatus(param, fn.projectDelete);
 					} else { // identification > !confirm 일 경우 즉시 delete
 						fn.projectDelete({"prjId" : prjId, "userComment" : reason});
 					}
-					
+
 					break;
 				case "4": // complete
 					fn.updateProjectStatus({"prjId" : prjId, "completeYn" : "Y", "userComment" : reason});
-					
+
 					break;
 				default:
 					break;
@@ -844,7 +852,7 @@
 		},
 		projectDelete : function(data){
 			var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
-			
+
 			$.ajax({
 				url : '<c:url value="'+_url+'"/>',
 				type : 'POST',
@@ -882,7 +890,7 @@
 		},
 		exeProjectDrop : function (data){
 			data["dropYn"] = "Y";
-			
+
 			$.ajax({
 				url : '<c:url value="/project/updateProjectStatus"/>',
 				type : 'POST',
@@ -900,10 +908,10 @@
 		}, bomCompare : function(){ /* BOM Compare ADD */
 			// 체크박스 선택 체크
 			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
-		
+
 			if(chk < 3){
 				var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
-				
+
 				var beforePrjId = "";
 				var afterPrjId = "";
 
@@ -918,16 +926,16 @@
 						break;
 					case 2:
 						bomCompareArr.sort();
-						
+
 						beforePrjId = bomCompareArr[0];
 						afterPrjId = bomCompareArr[1];
-						
+
 						break;
 				}
-				
+
 				var tabNm = "BOM_Compare";
 				var tabLk = '#<c:url value="/project/bomCompare/'+beforePrjId+'/'+afterPrjId+'"/>';
-		
+
 				createTabInFrame(tabNm, tabLk);
 			}else {
 				alertify.alert('<spring:message code="msg.project.choose" />', function(){});
@@ -936,7 +944,7 @@
 		}, reqToOpenUser : function(data) { /* role_user 실행 시 */
 			var commentsMode = data.commId != "" ? "update" : "insert";
 			var param = {"referenceId" : data.prjId, "contents" : data.userComment, "referenceDiv" : "10", "commId" : data.commId, "commentsMode" : commentsMode};
-			
+
 			fn.commentsSave(param);
 		}, commentsSave : function(data){
 			$.ajax({
@@ -975,7 +983,7 @@
 			alertify.confirm('<spring:message code="msg.common.change.division" />', function (e) {
 				if (e) {
 					$('#changeDivisionPop').hide();
-					
+
 					$.ajax({
 						type: 'POST',
 						url :'<c:url value="/project/updateProjectDivision"/>',
@@ -990,7 +998,7 @@
 							} else {
 								var list = [];
 								list = data.resultData;
-								
+
 								var msg = '<spring:message code="msg.project.check.division.permissions" />';
 								msg += '<br/> - '
 
@@ -1000,7 +1008,7 @@
 										msg += ', ';
 									}
 								}
-								
+
 								alertify.alert(msg, function(){});
 							}
 						},
@@ -1019,7 +1027,7 @@
                     return 'title="' + "Double click" + '"';
             }
 	};
-	
+
 	// jqGrid
 	var list = {
 		load : function(){
@@ -1078,7 +1086,7 @@
 										}).blur(function(){
 											$(this).attr('state', 'closed');
 										}).on('autocompletechange', fn.reviewerChg);
-										
+
 										currentOssName = e.value;
 									}
 							}
@@ -1104,9 +1112,9 @@
 				loadonce:false,
 				loadComplete:function(data) {
 					totalRow = data.records;
-					
+
 					lastsel=-1;
-					
+
 					// color 설정
 					var target = $("#list");
 					var arr = target.jqGrid('getDataIDs');
@@ -1118,63 +1126,63 @@
 						var startDate = $("#schStartDate").val()||0;
 						var endDate = $("#schEndDate").val()||0;
 						var diffNum = +startDate - +endDate;
-						
+
 						if(diffNum > 0 && endDate > 0){
 							alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
 						}
 					}
-					
+
 					for(var idx in arr){
 						rowid = arr[idx];
 						selectEl = $("#list #"+arr[idx]);
 						status = data.rows[idx].identificationStatus;
-						
+
 	 					if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}") {
 	 						selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
-						} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}" 
+						} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}"
 								|| status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}") {
 							selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
 						} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}") {
 							selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
 						}
-						
+
 	 					if(data.rows[idx].identificationStatus == 'Confirm') {
 	 						status = data.rows[idx].verificationStatus;
 	 						if((data.rows[idx].status != "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}"
 		 						|| data.rows[idx].status != "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}" )
-		 							&& data.rows[idx].statusRequestYn == "N" 
+		 							&& data.rows[idx].statusRequestYn == "N"
 	 								&& status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}") {
 		 						selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
-		 					} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}" 
+		 					} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}"
 		 							|| status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}") {
 								selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
 							} else if(status=="${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}") {
 								selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
-							}	
+							}
 	 					}
-						
+
 	 					if(data.rows[idx].identificationStatus == 'Confirm' && data.rows[idx].verificationStatus == 'Confirm') {
 	 						status = data.rows[idx].destributionStatus;
-		 					if(status=="${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_PROGRESS'))}" 
+		 					if(status=="${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_PROGRESS'))}"
 			 					&& data.rows[idx].distributeTarget != "NA") {
 		 						selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
 							} else if(status=="${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_RESERVE'))}") {
 								selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
 							} else if(status=="${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED'))}") {
 								selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
-							}	 						
+							}
 	 					}
-	 					
+
 	 					//prjName prjVersion 데이터 join
 	 					var prjNmVer = data.rows[idx].prjName;
-	 					
+
 	 					if(data.rows[idx].prjVersion != ""){
 	 						prjNmVer += " (ver "+data.rows[idx].prjVersion+")";
 	 					}
-	 					
+
 	 					$("#list").jqGrid("setCell",rowid,"prjName",prjNmVer,"");
 					}
-					
+
 					// 툴팁 설정
 					if(!gridTooltip.existTooltip){
 						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
@@ -1189,15 +1197,15 @@
 									return $(this).prop('title');
 								}
 							});
-						
+
 							gridTooltip.existTooltip = true;
 						}
-					
+
 					$('input[id*="_releaseDate"]').attr('class', 'cal');
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					var role = '${sessUserInfo.authority}';
-					
+
 					if(role=="ROLE_ADMIN"){
 						$("#list").jqGrid('saveRow',lastsel);
 						$("#list").jqGrid('editRow',rowid);
@@ -1207,20 +1215,20 @@
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					var rowData = $("#list").jqGrid('getRowData',rowid);
 					var isAdmin = ${ct:isAdmin()};
-					
+
 					// identification의 status tex를 더블클릭시 bom으로 이동
 					if(isAdmin && iCol == 5 || !isAdmin && iCol == 4) {
 						fn.mvIdentification(rowid, "4");
 					} else if(isAdmin && iCol == 6 || !isAdmin && iCol == 5) {
 						if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
-							
+
 						} else {
 							fn.mvVerification(rowData['prjId']);
 						}
 					} else if(isAdmin && iCol == 7 || !isAdmin && iCol == 6) {
 						if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
-							
-						} else {						
+
+						} else {
 							fn.mvDistribution(rowData['prjId']);
 						}
 					} else if(iCol != 0 && iCol != 5 && iCol != 14) {
@@ -1231,6 +1239,6 @@
 			});
 		}
 	};
-	
+
 //]]>
 </script>
