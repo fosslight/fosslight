@@ -3,7 +3,7 @@ $(document).ready(function (){
     let array_highlights = [];
     // 툴팁이 보여줄 제목 및 내용의 배열
     let array_tooltip_data = [
-        { title: "Start", content: "Packaging Column 내 start 버튼을 클릭합니다." },
+        { title: "Start", content: "Packaging Column 내 start 버튼을 클릭합니다." }
     ];
 
     // vail 생성
@@ -167,9 +167,9 @@ $(document).ready(function (){
     }
 
     // vail 모두 보이게 설정
-    function show_vails() {
-        for (const vail of vails) vail.css("display", "block");
-    }
+        function show_vails() {
+          for (const vail of vails) vail.css("display", "block");
+          }
 
     // tooltip의 위치를 적절히 설정
     function locate_tooltip() {

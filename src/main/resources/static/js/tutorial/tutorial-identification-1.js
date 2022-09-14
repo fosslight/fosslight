@@ -147,9 +147,9 @@ $(document).ready(function (){
     }
 
     // vail 모두 보이게 설정
-    function show_vails() {
-        for (const vail of vails) vail.css("display", "block");
-    }
+        function show_vails() {
+          for (const vail of vails) vail.css("display", "block");
+          }
 
     // tooltip의 위치를 적절히 설정
     function locate_tooltip() {
@@ -213,3 +213,4 @@ $(document).ready(function (){
         show_tooltip();
     }
 });
+
