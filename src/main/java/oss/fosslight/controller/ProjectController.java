@@ -1913,7 +1913,7 @@ public class ProjectController extends CoTopComponent {
 					String changedByResultTxt = "";
 					
 					if(!isEmpty(changeAdded)) {
-						changedByResultTxt += "<b>The following binaries were added to OSS List automatically because they exist in the binary.txt.</b><br>";
+						changedByResultTxt += "<b>The following binaries were added to OSS List automatically because they exist in the fosslight_binary.txt.</b><br>";
 						changedByResultTxt += changeAdded;
 					}
 					
@@ -1921,7 +1921,7 @@ public class ProjectController extends CoTopComponent {
 						if(!isEmpty(changedByResultTxt)) {
 							changedByResultTxt += "<br><br>";
 						}
-						changedByResultTxt += "<b>The following binaries are written to the OSS report as excluded, but they are in the binary.txt. Make sure it is not included in the final firmware.</b><br>";
+						changedByResultTxt += "<b>The following binaries are written to the OSS report as excluded, but they are in the fosslight_binary.txt. Make sure it is not included in the final firmware.</b><br>";
 						changedByResultTxt += changeExclude;
 					}
 					

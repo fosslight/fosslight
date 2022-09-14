@@ -414,7 +414,7 @@
 												</div>
 											</div>
 											<div class="uploadSet">
-												<label>binary.txt :</label>
+												<label>fosslight_binary.txt :</label>
 												<span class="fileex_back" <c:if test="${isCommited}">style="display:none;"</c:if>>
 													<div id="binBinaryFile">upload</div>
 												</span>
@@ -614,7 +614,7 @@
 												</div>
 											</div>
 											<div class="uploadSet">
-												<label>result.txt :</label>
+												<label>fosslight_binary.txt :</label>
 												<span class="fileex_back">
 													<div id="androidResultFile">upload</div>
 												</span>
@@ -692,7 +692,7 @@
 													</div>
 												</div>
 												<div class="uploadSet inblock">
-													<label class="left">result.txt :</label>
+													<label class="left">fosslight_binary.txt :</label>
 													<span class="fileex_back">
 														<div id="androidResultFileDummy">upload</div>
 													</span>

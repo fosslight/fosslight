@@ -550,6 +550,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .uploadCase .androidCase .uploadTit {float:left;width:105px;padding:8px 0 0 0;}
 .uploadCase .androidCase .uploadTit label {font-size:13px;color:#454545;}
 .uploadCase .androidCase .uploadGroup {float:left;}
+.uploadCase .androidCase .uploadGroup .uploadSet label {float:left;padding:4px 8px 0 0;width:120px;text-align:right;}
 .uploadCase .androidCase .uploadSet {clear:left;padding:5px 0 5px;}
 .uploadCase .androidCase .uploadSet label {float:left;padding:4px 8px 0 0;width:77px;text-align:right;}
 
