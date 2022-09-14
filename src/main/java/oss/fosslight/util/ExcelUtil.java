@@ -2122,7 +2122,7 @@ public class ExcelUtil extends CoTopComponent {
 			
 			if(!addCheckList.isEmpty()) {
 				list.addAll(addCheckList);
-				addedByResultTxtStr = "<b>The following binaries were added to OSS List automatically because they exist in the result.txt.</b>";
+				addedByResultTxtStr = "<b>The following binaries were added to OSS List automatically because they exist in the fosslight_binary.txt.</b>";
 				
 				for(OssComponents bean : addCheckList) {
 					addedByResultTxtStr += "<br> - " + bean.getBinaryName();
@@ -2137,7 +2137,7 @@ public class ExcelUtil extends CoTopComponent {
 					if(removedCheckList.contains(bean.getBinaryName())) {
 						bean.setExcludeYn(CoConstDef.FLAG_YES);
 						
-						deletedByResultTxtStr += bean.getBinaryName() + " is excluded by result.txt file.<br>";
+						deletedByResultTxtStr += bean.getBinaryName() + " is excluded by fosslight_binary.txt file.<br>";
 					}
 				}
 			}
@@ -2149,7 +2149,7 @@ public class ExcelUtil extends CoTopComponent {
 				for(OssComponents bean : list) {
 					if(existsResultTextBinaryName.contains(bean.getBinaryName()) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 						if(isFirst) {
-							excludeCheckResultTxtStr = "<b>The following binaries are written to the OSS report as excluded, but they are in the result.txt. Make sure it is not included in the final firmware.</b>";
+							excludeCheckResultTxtStr = "<b>The following binaries are written to the OSS report as excluded, but they are in the fosslight_binary.txt. Make sure it is not included in the final firmware.</b>";
 							
 							isFirst = false;
 						}
@@ -2163,7 +2163,7 @@ public class ExcelUtil extends CoTopComponent {
 			// client 화면에 표시 및 save시 코멘트 내용에 추가함
 
 			if(!isEmpty(addedByResultTxtStr) || !isEmpty(deletedByResultTxtStr) || !isEmpty(excludeCheckResultTxtStr)) {
-				String _sessionData = "<b>OSS List has been changed by result.txt file. </b><br><br>";
+				String _sessionData = "<b>OSS List has been changed by fosslight_binary.txt file. </b><br><br>";
 				
 				if(!isEmpty(addedByResultTxtStr)) {
 					_sessionData += addedByResultTxtStr;
