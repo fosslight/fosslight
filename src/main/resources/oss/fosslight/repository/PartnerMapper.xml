@@ -161,7 +161,7 @@
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
 		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-			AND (A.CREATOR = #{loginUserName} 
+			AND (A.CREATOR_ID = #{loginUserName} 
 					OR EXISTS (
 					SELECT 1
 						FROM PARTNER_WATCHER A1 
