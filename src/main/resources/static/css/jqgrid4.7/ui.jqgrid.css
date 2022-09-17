@@ -168,6 +168,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     box-sizing: border-box;
     background: url("../../images/search.png") no-repeat 3px -3px;
     padding: 0px 0px 0px 20px !important;
+    background-color: white;
 } 
 .ui-jqgrid .ui-jqgrid-view input,
 .ui-jqgrid .ui-jqgrid-view select,

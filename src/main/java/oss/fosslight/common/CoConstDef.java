@@ -563,6 +563,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED = "66"; // OSDD에서 DESCRIPTION이 삭제된 경우
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE = "67"; // OSDD에서 DESCRIPTION이 삭제된 경우
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE = "670";
+	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION = "671";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT = "68";
 	
 	/* Partner Binary DB Check*/
@@ -820,4 +821,8 @@ public class CoConstDef {
 	public static final String CD_SPDX_TAG										= "spdxTag";
 	public static final String CD_SPDX_JSON										= "spdxJson";
 	public static final String CD_SPDX_YAML										= "spdxYaml";
+	
+	/* SCORE CODE */
+	public static final String CD_VULNERABILITY_MAILING_SCORE					= "980";
+	public static final String CD_VULNERABILITY_MAILING_SCORE_STANDARD			= "100";
 }
