@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<jsp:useBean id="T2CoValidationConfig" class="oss.fosslight.validation.T2CoValidationConfig" scope="page" />
 <script>
     var jsonData;
     var withStatus;
@@ -321,6 +322,7 @@
 			location.href = '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
 		}
 	}
+
     const IdentificationGridDataExtractor = {
         call : function (){
             if(this.isFromProjectIdentification()) {
@@ -357,7 +359,17 @@
             });
         },
         getInValidGridIds(validData) {
-            return Array.from(new Set(Object.keys(validData).map(v => v.split(".")[1])));
+            let inValidGridId = new Set();
+
+            let ossVersionUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_VERSION.UNCONFIRMED.MSG")%>';
+            let ossNameUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_NAME.UNCONFIRMED.MSG")%>'
+
+            for (let key in validData){
+                if (validData[key] == ossNameUnconfirmedMsg || validData[key] == ossVersionUnconfirmedMsg){
+                    inValidGridId.add(key.split(".")[1])
+                }
+            }
+            return Array.from(inValidGridId);
         },
         getMapOfMainData(mainData) {
             return mainData.reduce((obj, x) => {
