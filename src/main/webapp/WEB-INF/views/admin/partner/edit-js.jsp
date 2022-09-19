@@ -1960,6 +1960,45 @@ var saveFlag = false;
 				$('select[name=deliveryForm]').val(deliveryForm).attr('selected', 'true');
 				$('select[name=deliveryForm]').trigger('change');	
 			}
+
+			var userDivision = $('#division');
+			if('${detail.partnerId}' != '' && '${detail.division}' != ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+				for(var i=0;i<userDivision.children().length;i++){
+					if(userDivision.children()[i].value == '${detail.division}') {
+						break;
+					}
+					if(userDivision.children().length - 1 == i ) {
+						var divisionName =  "${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), detail.division)}";
+						userDivision.append("<option value='" + ${detail.division} + "' >" + divisionName+ "</option>");
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			userDivision = $('#division');
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+					break;
+				}
+				if(userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+					if('${detail.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}){
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			var prjDivision = $("#userDivision");
+			for(var i=0;i<prjDivision.children().length;i++){
+				if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
+					break;
+				}
+				if(prjDivision.children().length-1 == i) {
+					prjDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}'></option>");
+				}
+			}
 		},
 		getCommentList : function(){
 			$.ajax({

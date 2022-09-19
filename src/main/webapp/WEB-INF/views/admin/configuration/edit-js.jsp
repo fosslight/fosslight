@@ -7,19 +7,6 @@
 		'use strict';
 		data.init();
 		evt.init();
-        var userDivision = $('#userInfoArea select[name="division"]');
-        for(var i=0;i<userDivision.children().length;i++){
-            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
-                break;
-            }
-            if(userDivision.children().length - 1 == i ) {
-                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
-                if(${sessUserInfo.division} == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
-                    $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
-                    $('#userInfoArea select[name="division"] option:last').change();
-                }
-            }
-        }
     });
 	var commentTemp = '';
 	var data = {
@@ -33,6 +20,35 @@
 			}
 			$('#ConfigurationForm select[name="defaultLocale"]').trigger('change');
 			$('#userInfoArea select[name="division"]').trigger('change');
+
+			var userDivision = $('#userInfoArea select[name="division"]');
+			if('${sessUserInfo.division}' != ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+				for(var i=0;i<userDivision.children().length;i++){
+					if(userDivision.children()[i].value == '${sessUserInfo.division}') {
+						break;
+					}
+					if(userDivision.children().length - 1 == i ) {
+						var divisionName =  "${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), sessUserInfo.division)}";
+						userDivision.append("<option value='" + ${sessUserInfo.division} + "' >" + divisionName+ "</option>");
+						$('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+						$('#userInfoArea select[name="division"] option:last').change();
+					}
+				}
+			}
+
+			userDivision = $('#userInfoArea select[name="division"]');
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+					break;
+				}
+				if(userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+					if('${sessUserInfo.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}){
+						$('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+						$('#userInfoArea select[name="division"] option:last').change();
+					}
+				}
+			}
 		},
 	};
 	
