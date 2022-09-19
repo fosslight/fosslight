@@ -348,15 +348,19 @@
             const mainDataMap = this.getMapOfMainData(data.mainData);
             const validData = data.validData;
 
+            jsonData = [];
             delete validData.isValid;
 
-            this.getInValidGridIds(validData).forEach(gridId => {
-                const newRow = this.toOssInfo(mainDataMap[gridId]);
+            const ids = this.getInValidGridIds(validData);
 
-                $("#list").jqGrid('addRowData', newRow.gridId, newRow);
-
+            for(let i = 0; i < ids.length; ++i) {
+                const newRow = this.toOssInfo(mainDataMap[ids[i]]);
+                newRow.gridId = i;
+                $("#list").jqGrid('addRowData', i, newRow);
                 ossData.push(newRow);
-            });
+                jsonData.push({oss: newRow});
+            }
+            $("#list").trigger('reloadGrid');
         },
         getInValidGridIds(validData) {
             let inValidGridId = new Set();
@@ -380,15 +384,13 @@
         toOssInfo(data) {
             return {
                 //tab datas
-                gridId: data.gridId,
                 comment: data.comments,
                 copyright: data.copyrightText,
                 downloadLocation: data.downloadLocation,
                 homepage: data.homepage,
-                declaredLicenses: data.licenseName.split(","),
+                declaredLicenses: data.licenseName.trim() ? data.licenseName.trim().split(",") : [],
                 ossName: data.ossName,
                 ossVersion: data.ossVersion,
-
                 //oss datas
                 attribution: "",
                 detectedLicenses: [],
