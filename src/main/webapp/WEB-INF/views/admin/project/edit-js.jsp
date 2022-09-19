@@ -33,32 +33,7 @@
 		activeLink();
 		if('${project.viewOnlyFlag}' == 'Y') {
             initCKEditorNoToolbar('editor', true);
-		}
-
-        var userDivision = $('#division');
-        for(var i=0;i<userDivision.children().length;i++){
-            if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ) {
-                break;
-            }
-            if(userDivision.children().length - 1 == i ) {
-                userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
-                if('${project.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
-                    $('#division option:last').attr("selected", "selected");
-                    $('#division option:last').change();
-                }
-            }
         }
-
-        var prjDivision = $("#prjDivision");
-        for(var i=0;i<prjDivision.children().length;i++){
-            if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
-                break;
-            }
-            if(prjDivision.children().length-1 == i) {
-                prjDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}'></option>");
-            }
-        }
-
 		if('${project.prjId}' != "" && '${project.copyFlag}' != 'Y'){
 			$("input[name=creatorNm]").val('${project.prjUserName}');
 		}
@@ -1833,6 +1808,45 @@
 			$('input[name=distributeTarget]').mouseup(function(){
 				_distributeTargetSelectedVal = $('input[name=distributeTarget]:checked').val();
 			});
+
+			var userDivision = $('#division');
+			if('${project.prjId}' != '' && '${project.division}' != ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+				for(var i=0;i<userDivision.children().length;i++){
+					if(userDivision.children()[i].value == '${project.division}') {
+						break;
+					}
+					if(userDivision.children().length - 1 == i ) {
+						var divisionName =  "${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), project.division)}";
+						userDivision.append("<option value='" + ${project.division} + "' >" + divisionName+ "</option>");
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			userDivision = $('#division');
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}) {
+					break;
+				}
+				if(userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}' ></option>");
+					if('${project.division}' == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')}){
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			var prjDivision = $("#prjDivision");
+			for(var i=0;i<prjDivision.children().length;i++){
+				if(prjDivision.children()[i].value == ${ct:getConstDef('CD_USER_DIVISION_EMPTY')} ){
+					break;
+				}
+				if(prjDivision.children().length-1 == i) {
+					prjDivision.append("<option value='${ct:getConstDef('CD_USER_DIVISION_EMPTY')}'></option>");
+				}
+			}
 		},
 		getModelGridData : function(param){
 			$.ajax({
