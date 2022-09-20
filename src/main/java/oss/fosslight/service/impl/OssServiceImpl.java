@@ -3525,7 +3525,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			log.error(e.getMessage());
 		}
 		
-		list = checkVulnData(list, nicknameList);
+		if(list != null) {
+			list = checkVulnData(list, nicknameList);
+			list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+		}
 		
 		return list;
 	}
