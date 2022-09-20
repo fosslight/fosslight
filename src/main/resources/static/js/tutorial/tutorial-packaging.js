@@ -1,18 +1,18 @@
 $(document).ready(function () {
-  // 하이라이트할 요소들의 배열
+  // Array of elements to highlight
   let array_highlights = [];
-  // 툴팁이 보여줄 제목 및 내용의 배열
+  // Array of titles and content to be displayed by the tooltip
   let array_tooltip_data = [
     { title: "Start", content: "Packaging Column 내 start 버튼을 클릭합니다." },
   ];
 
-  // vail 생성
+  // create vail
   let $veilUp = $('<div id="veil_up"></div>');
   let $veilDown = $('<div id="veil_down"></div>');
   let $veilLeft = $('<div id="veil_left"></div>');
   let $veilRight = $('<div id="veil_right"></div>');
 
-  // tooltip 생성
+  // create tooltip
   let $tooltip = $(
     `<div id="tooltip">
             <div id="p_tooltip_title_container">
@@ -27,14 +27,14 @@ $(document).ready(function () {
           </div>`
   );
 
-  // body 태그 내에 vail, tooltip들 넣기
+  // Put vail and tooltips in body tag
   $("body").append($veilUp);
   $("body").append($veilDown);
   $("body").append($veilLeft);
   $("body").append($veilRight);
   $("body").append($tooltip);
 
-  // vail, tooltip 기본 style 설정
+  // vail, tooltip default style setting
   const vails = [$veilUp, $veilDown, $veilLeft, $veilRight];
   const property_vail = {
     display: "none",
@@ -66,11 +66,11 @@ $(document).ready(function () {
     "margin-bottom": "15px",
   });
 
-  // 하이라이트할 부분 설정
+  // Set the part to highlight
   let elem_index = 0;
   let elem_highlight = array_highlights[elem_index];
 
-  // project list에서 'continue tutorial' 눌렀을 때
+  // When 'continue tutorial' is clicked in the project list
   $("#continue_tutorial_25").on("click", () => {
     let $element25 = $(document.getElementById("tutorial_25"));
     array_highlights.push($element25);
@@ -82,7 +82,7 @@ $(document).ready(function () {
     locate_tooltip();
     show_tooltip();
   });
-  // packaging에서 'continue tutorial' 눌렀을 때
+  // When 'continue tutorial' is clicked in the packaging
   $("#continue_tutorial_26").on("click", () => {
     let $element26 = $(document.getElementById("tutorial_26"));
     let $element27 = $(document.getElementById("tutorial_27"));
@@ -139,20 +139,20 @@ $(document).ready(function () {
     show_tooltip();
   });
 
-  // 브라우저 창 크기를 바꿀 시 vail, tooltip의 위치 조절
+  // Changing the browser window size Adjust the position of the vail and tooltip
   $(window).resize(() => {
     locate_vails();
     locate_tooltip();
   });
 
-  // 튜토리얼 - 이전, 다음, 닫기 버튼을 눌렀을 때 적절히 처리
+  // Tutorial - Proper handling of previous, next, and close buttons
   $("#p_button_prev").on("click", handle_click_prev);
   $("#p_button_next").on("click", handle_click_next);
   $("#p_button_close_tooltip").on("click", hide_vails_and_tooltips);
 
   //////////////////////////////// FUNCTIONS ////////////////////////////////
 
-  // 4개 vail 각각의 위치, 크기 설정
+  // Set the position and size of each of the 4 vails
   function locate_vails() {
     let offset = elem_highlight.offset();
 
@@ -182,21 +182,21 @@ $(document).ready(function () {
     });
   }
 
-  // vail 모두 보이게 설정
+  // Make all vail visible
   function show_vails() {
     for (const vail of vails) vail.css("display", "block");
   }
 
-  // tooltip의 위치를 적절히 설정
+  // Position the tooltip appropriately
   function locate_tooltip() {
     if (!elem_highlight) return;
     let offset = elem_highlight.offset();
 
-    // 제목, 내용을 n번째 제목, 내용으로 수정
+    // Edit the title and content to the nth title and content
     $("#p_tooltip_title").text(array_tooltip_data[elem_index].title);
     $("#p_tooltip_content").text(array_tooltip_data[elem_index].content);
 
-    // 위치를 highlight element에 맞게 수정
+    // Adjust the position to match the highlight element
     const tooltip_width = 150;
     let tooltip_left =
       offset.left - (tooltip_width - elem_highlight.outerWidth(true)) / 2;
@@ -210,12 +210,12 @@ $(document).ready(function () {
     });
   }
 
-  // tooltip을 화면에 보이게 함
+  // Make the tooltip visible on the screen
   function show_tooltip() {
     $tooltip.css({ display: "flex" });
   }
 
-  // vail, tooltip을 모두 화면에 보이지 않게 함
+  // Make both vail and tooltip invisible on the screen
   function hide_vails_and_tooltips() {
     $veilUp.css("display", "none");
     $veilDown.css("display", "none");
@@ -224,7 +224,7 @@ $(document).ready(function () {
     $tooltip.css("display", "none");
   }
 
-  // tooltip의 '이전' 클릭시 실행되는 함수
+  // Function executed when 'back' of tooltip is clicked
   function handle_click_prev() {
     if (elem_index === 0) {
       return;
@@ -237,7 +237,7 @@ $(document).ready(function () {
     show_tooltip();
   }
 
-  // tooltip의 '다음' 클릭시 실행되는 함수
+  // Function executed when 'Next' of tooltip is clicked
   function handle_click_next() {
     if (elem_index === array_highlights.length - 1) {
       hide_vails_and_tooltips();
