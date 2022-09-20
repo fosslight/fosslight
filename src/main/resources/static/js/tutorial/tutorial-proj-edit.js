@@ -153,9 +153,9 @@ $(document).ready(function () {
 
     $tooltip.css({
       position: "absolute",
-      top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
-      left: `${tooltip_left}px`,
-      width: `${tooltip_width}px`,
+      top: `${offset.top + elem_highlight.outerHeight(true) - 152}px`,
+      left: `${tooltip_left + 236.5}px`,
+      width: `${tooltip_width + 150}px`,
     });
   }
 
