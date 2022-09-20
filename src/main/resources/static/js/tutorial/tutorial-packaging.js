@@ -15,14 +15,14 @@ $(document).ready(function () {
   // tooltip 생성
   let $tooltip = $(
     `<div id="tooltip">
-            <div id="tooltip_title_container">
-              <div id="tooltip_title"></div>
-              <button id="button_close_tooltip">X</button>
+            <div id="p_tooltip_title_container">
+              <div id="p_tooltip_title"></div>
+              <button id="p_button_close_tooltip">X</button>
             </div>
-            <p id="tooltip_content"></p>
+            <p id="p_tooltip_content"></p>
             <div>
-              <button id="button_prev">이전</button>
-              <button id="button_next">다음</button>
+              <button id="p_button_prev">이전</button>
+              <button id="p_button_next">다음</button>
             </div>
           </div>`
   );
@@ -52,16 +52,16 @@ $(document).ready(function () {
     "box-shadow": "rgb(0 0 0 / 25%) 0px 0px 6px 2px",
     "flex-direction": "column",
   });
-  $("#tooltip_title_container").css({
+  $("#p_tooltip_title_container").css({
     display: "flex",
     "justify-content": "space-between",
     "align-items": "center",
   });
-  $("#tooltip_title").css({
+  $("#p_tooltip_title").css({
     display: "inline-block",
     "font-weight": 600,
   });
-  $("#tooltip_content").css({
+  $("#p_tooltip_content").css({
     "margin-top": "5px",
     "margin-bottom": "15px",
   });
@@ -146,9 +146,9 @@ $(document).ready(function () {
   });
 
   // 튜토리얼 - 이전, 다음, 닫기 버튼을 눌렀을 때 적절히 처리
-  $("#button_prev").on("click", handle_click_prev);
-  $("#button_next").on("click", handle_click_next);
-  $("#button_close_tooltip").on("click", hide_vails_and_tooltips);
+  $("#p_button_prev").on("click", handle_click_prev);
+  $("#p_button_next").on("click", handle_click_next);
+  $("#p_button_close_tooltip").on("click", hide_vails_and_tooltips);
 
   //////////////////////////////// FUNCTIONS ////////////////////////////////
 
@@ -180,17 +180,6 @@ $(document).ready(function () {
       width: `calc(100% - ${offset.left + elem_highlight.outerWidth(true)}px)`,
       height: `${elem_highlight.outerHeight(true)}`,
     });
-
-    // let tooltip_left =
-    //     offset.left - (tooltip_width - elem_highlight.outerWidth(true)) / 2;
-    // if (tooltip_left < 0) tooltip_left = offset.left;
-    //
-    // $tooltip.css({
-    //     position: "absolute",
-    //     top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
-    //     left: `${tooltip_left}px`,
-    //     width: `${tooltip_width}px`,
-    // });
   }
 
   // vail 모두 보이게 설정
@@ -204,8 +193,8 @@ $(document).ready(function () {
     let offset = elem_highlight.offset();
 
     // 제목, 내용을 n번째 제목, 내용으로 수정
-    $("#tooltip_title").text(array_tooltip_data[elem_index].title);
-    $("#tooltip_content").text(array_tooltip_data[elem_index].content);
+    $("#p_tooltip_title").text(array_tooltip_data[elem_index].title);
+    $("#p_tooltip_content").text(array_tooltip_data[elem_index].content);
 
     // 위치를 highlight element에 맞게 수정
     const tooltip_width = 150;
@@ -237,7 +226,9 @@ $(document).ready(function () {
 
   // tooltip의 '이전' 클릭시 실행되는 함수
   function handle_click_prev() {
-    if (elem_index === 0) return;
+    if (elem_index === 0) {
+      return;
+    }
     elem_index -= 1;
     elem_highlight = array_highlights[elem_index];
     locate_vails();
