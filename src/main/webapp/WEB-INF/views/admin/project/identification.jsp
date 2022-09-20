@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-identification.js?${jsVersion}"></script>
-<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-identification-1.js?${jsVersion}"></script><!--한지영-->
 <jsp:include page="../common/gridCommonFn.jsp" flush="false" />
 <!-- wrap -->
 <c:set var="isCommited" value="${project.verificationStatus eq 'CONF'}"/>
@@ -11,34 +10,33 @@
 			<h2>Project Information</h2>
 			<ul>
 				<li class="first"><span>Project Name</span><strong><label id="vPrjName"></label>
-				    <input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
-				    <input type="button" value=" start tutorial " id="start_tutorial" /><!--한지영-->
+					<input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial"/>
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${project.verificationStatus ne 'NA' and (not empty project.verificationStatus or project.identificationStatus eq 'CONF')}">
-					<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
+						<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
 					</c:if>
 					<c:if test="${distributionFlag and project.destributionStatus ne 'NA' and (not empty project.destributionStatus or project.verificationStatus eq 'CONF')}">
-					<span id="distributionTab" class="btnIcon distr" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Distribution</span>
+						<span id="distributionTab" class="btnIcon distr" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Distribution</span>
 					</c:if>
-					</strong>
+				</strong>
 				</li>
 				<li><span>Created</span><strong><label id="vCreated"></label></strong></li>
 			</ul>
 			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 		</div>
-		<!---->	
+		<!---->
 		<div class="projdecTab">
 			<div class="subTab">
-			<div class="tabMenu">
-				<a rel="partyDiv" id="third_party">3rd party</a>
-				<a rel="srcDiv" id="src_tab">SRC</a>
-				<a rel="binDiv">BIN</a>
-				<a rel="binAndroidDiv">BIN (Android)</a>
-				<a rel="bomDiv">BOM</a>
-				<c:if test="${batFlag}">
-					<a rel="batDiv">BAT</a>
-				</c:if>
-			</div>
+				<div class="tabMenu">
+					<a rel="partyDiv" id="third_party">3rd party</a>
+					<a rel="srcDiv" id="src_tab">SRC</a>
+					<a rel="binDiv" id="bin_tab">BIN</a>
+					<a rel="binAndroidDiv">BIN (Android)</a>
+					<a rel="bomDiv" id="bom_tab">BOM</a>
+					<c:if test="${batFlag}">
+						<a rel="batDiv">BAT</a>
+					</c:if>
+				</div>
 			</div>
 			<div class="projdecBtn" style="display: none;">
 				<c:if test="${ct:isAdmin()}">
@@ -53,10 +51,10 @@
 						<input type="button" id="btnRejectNotice" value="Reject" class="gray btnColor" title="If you need modify, please leave a comment on FOSSLight team." onclick="return false;"/>
 					</c:when>
 					<c:when test="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.distributeDeployYn ne 'Y'}">
-						<a class="btnSet confirm"><span id="bomConfirm">Confirm</span></a>
+						<a class="btnSet confirm" id="confirm"><span id="bomConfirm">Confirm</span></a>
 						<a class="btnSet reject"><span id="bomReject">Reject</span></a>
-						<a class="btnSet review"><span id="bomRequest">Request</span></a>
-						<a class="btnSet restart"><span id="bomReviewStart">Review Start</span></a>
+						<a class="btnSet review" id="request"><span id="bomRequest">Request</span></a>
+						<a class="btnSet restart" id="reviewStart"><span id="bomReviewStart">Review Start</span></a>
 					</c:when>
 					<c:otherwise>
 					</c:otherwise>
@@ -69,160 +67,160 @@
 		</div>
 	</div>
 	<div class="commentEditor" style="display:none;">
-	<div class="cBtn">
-		<input type="button" value="Save & Send comment" class="btnCLight saveEditor" onclick="com_fn.sendEditor('WR');"/>
-		<input type="button" value="Save draft" class="btnCLight" onclick="com_fn.saveEditor();"/>
-	</div>
-	<div class="grid-container">
-		<div class="grid-width-100">
-			<div id="editor">${project.userComment}</div>
+		<div class="cBtn">
+			<input type="button" value="Save & Send comment" class="btnCLight saveEditor" onclick="com_fn.sendEditor('WR');"/>
+			<input type="button" value="Save draft" class="btnCLight" onclick="com_fn.saveEditor();"/>
 		</div>
-	</div>
-	<script>
-		initSample();
-		showHelpLink("Project_List_Identification");
-	</script>
+		<div class="grid-container">
+			<div class="grid-width-100">
+				<div id="editor">${project.userComment}</div>
+			</div>
+		</div>
+		<script>
+			initSample();
+			showHelpLink("Project_List_Identification");
+		</script>
 	</div>
 	<div>
-	
-<!-- 3rd party ****************************************************************************************************** -->
-	<c:if test="${partnerFlag}">
-		<div id="partyDiv" class="tabContent">
-			<div class="projectContents">
-				<!---->
-				<div class="orangeBox">
-					<input type="button" value="btnToggle" class="btnToggle">
-					<fieldset class="editSearchUp">
+
+		<!-- 3rd party ****************************************************************************************************** -->
+		<c:if test="${partnerFlag}">
+			<div id="partyDiv" class="tabContent">
+				<div class="projectContents">
+					<!---->
+					<div class="orangeBox">
+						<input type="button" value="btnToggle" class="btnToggle">
+						<fieldset class="editSearchUp">
 							<div class="sukind">
 								<span class="radioSet partyBtn"><input type="radio" id="1" name="selectOption" onchange="party_evt.changeSelectOption()" value="1" checked <c:if test="${isCommited}">disabled</c:if> /><label for="1">3rd party Search</label></span>
 								<span class="radioSet partyBtn"><input type="radio" id="2" name="selectOption" onchange="party_evt.changeSelectOption()" value="2" <c:if test="${isCommited}">disabled</c:if> /><label for="2">Project Search</label></span>
 								<span class="checkSet"><input type="checkbox" id="applicableParty" value="N" onchange="com_fn.checkAplicable(this, 'partyBtn')"/><label for="applicableParty">Not Applicable</label></span>
 							</div>
 							<form id="3rdSearchForm" class="partyBtn">
-							<input type="hidden" name="publicYn" value="Y">
-							<dl class="fideCase" id="3rdSearch">
-								<dt>3rd party Search Area</dt>
-								<dd>
-									<label>3rd party Name</label>
-									<input type="text" class="autoComConfParty" name="partnerName"/>
-								</dd>
-								<dd>
-									<label>Software Name</label>
-									<input type="text" class="autoComConfSwNm" name="softwareName"/>
-								</dd>
-								<dd>
-									<label>Software Version</label>
-									<input type="text" class="autoComConfSwVer" name="softwareVersion"/>
-								</dd>
-								<dd class="sBtnArea"><input type="button" value="Search" class="btnColor red wauto partyBtn" id="3rdSearchBtn"/></dd>
-							</dl>
+								<input type="hidden" name="publicYn" value="Y">
+								<dl class="fideCase" id="3rdSearch">
+									<dt>3rd party Search Area</dt>
+									<dd>
+										<label>3rd party Name</label>
+										<input type="text" class="autoComConfParty" name="partnerName"/>
+									</dd>
+									<dd>
+										<label>Software Name</label>
+										<input type="text" class="autoComConfSwNm" name="softwareName"/>
+									</dd>
+									<dd>
+										<label>Software Version</label>
+										<input type="text" class="autoComConfSwVer" name="softwareVersion"/>
+									</dd>
+									<dd class="sBtnArea"><input type="button" value="Search" class="btnColor red wauto partyBtn" id="3rdSearchBtn"/></dd>
+								</dl>
 							</form>
 							<form id="projectSearchForm" class="partyBtn">
-							<input type="hidden" name="publicYn" value="Y">
-							<dl class="fideCase" id="projectSearch" style="display:none;">
-								<dt>Project Search Area</dt>
-								<dd>
-									<label>Project Name</label>
-									<input type="text" class="autoComProjectNmConf" name="prjName"/>
-								</dd>
-								<dd>
-									<label>Project Version</label>
-									<input type="text" name="prjVersion"/>
-								</dd>
-								<dd class="sBtnArea"><input type="button" value="Search" class="btnColor black wauto partyBtn" id="3rdProjectSearchBtn"/></dd>
-							</dl>
+								<input type="hidden" name="publicYn" value="Y">
+								<dl class="fideCase" id="projectSearch" style="display:none;">
+									<dt>Project Search Area</dt>
+									<dd>
+										<label>Project Name</label>
+										<input type="text" class="autoComProjectNmConf" name="prjName"/>
+									</dd>
+									<dd>
+										<label>Project Version</label>
+										<input type="text" name="prjVersion"/>
+									</dd>
+									<dd class="sBtnArea"><input type="button" value="Search" class="btnColor black wauto partyBtn" id="3rdProjectSearchBtn"/></dd>
+								</dl>
 							</form>
-					</fieldset>
+						</fieldset>
+						<!---->
+						<div class="3rdProjectSearch editSearchUp partyBtn">
+							<div class="three1list" style="display:none;">
+								<div class="tRStit">
+									<h3>Search Results</h3>
+									<br/>
+								</div>
+								<div class="jqGridSet">
+									<table id="_list"><tr><td></td></tr></table>
+									<div id="pager"></div>
+								</div>
+							</div>
+							<!---->
+							<br/>
+							<div class="three2list" style="display:none;">
+								<div class="tRStit">
+									<h3>Detail Preview</h3>
+									<span class="right"><input type="button" value="Load" class="btnCLight" onclick="party_evt.loadToList()"/></span>
+								</div>
+								<div class="jqGridSet">
+									<table id="_list2"><tr><td></td></tr></table>
+									<div id="pager2"></div>
+								</div>
+							</div>
+						</div>
+						<div class="3rdProjectSearch2 editSearchUp partyBtn">
+							<div class="three3list" style="display:none;">
+								<div class="tRStit">
+									<h3>Search Results</h3>
+									<br/>
+								</div>
+								<div class="jqGridSet">
+									<table id="_list-1"><tr><td></td></tr></table>
+									<div id="pager-1"></div>
+								</div>
+							</div>
+							<!---->
+							<br/>
+							<div class="three4list" style="display:none;">
+								<div class="tRStit">
+									<h3>Detail Preview</h3>
+									<span class="right"><input type="button" value="Load" class="btnCLight" onclick="party_evt.projectToAddList()"/></span>
+								</div>
+								<div class="jqGridSet">
+									<table id="_list-2"><tr><td></td></tr></table>
+									<div id="pager2-2"></div>
+								</div>
+							</div>
+						</div>
+						<div class="partyBtn">
+							<div class="three5list">
+								<div class="tRStit">
+									<h3>Loaded List</h3>
+									<br/>
+								</div>
+								<div class="jqGridSet">
+									<table id="_3rdAddList"><tr><td></td></tr></table>
+								</div>
+							</div>
+						</div>
+					</div>
 					<!---->
-					<div class="3rdProjectSearch editSearchUp partyBtn">
-						<div class="three1list" style="display:none;">
-							<div class="tRStit">
-								<h3>Search Results</h3>
-								<br/>
-							</div>
-							<div class="jqGridSet">
-								<table id="_list"><tr><td></td></tr></table>
-								<div id="pager"></div>
-							</div>
-						</div>
-						<!---->
-						<br/>
-						<div class="three2list" style="display:none;">
-							<div class="tRStit">
-								<h3>Detail Preview</h3>
-								<span class="right"><input type="button" value="Load" class="btnCLight" onclick="party_evt.loadToList()"/></span>
-							</div>
-							<div class="jqGridSet">
-								<table id="_list2"><tr><td></td></tr></table>
-								<div id="pager2"></div>
-							</div>
-						</div>
-					</div>
-					<div class="3rdProjectSearch2 editSearchUp partyBtn">
-						<div class="three3list" style="display:none;">
-							<div class="tRStit">
-								<h3>Search Results</h3>
-								<br/>
-							</div>
-							<div class="jqGridSet">
-								<table id="_list-1"><tr><td></td></tr></table>
-								<div id="pager-1"></div>
-							</div>
-						</div>
-						<!---->
-						<br/>
-						<div class="three4list" style="display:none;">
-							<div class="tRStit">
-								<h3>Detail Preview</h3>
-								<span class="right"><input type="button" value="Load" class="btnCLight" onclick="party_evt.projectToAddList()"/></span>
-							</div>
-							<div class="jqGridSet">
-								<table id="_list-2"><tr><td></td></tr></table>
-								<div id="pager2-2"></div>
-							</div>
-						</div>
-					</div>
-					<div class="partyBtn">
-						<div class="three5list">
-							<div class="tRStit">
-								<h3>Loaded List</h3>
-								<br/>
-							</div>
-							<div class="jqGridSet">
-								<table id="_3rdAddList"><tr><td></td></tr></table>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!---->
-				<!---->
-				<div class="btnLayout">
+					<!---->
+					<div class="btnLayout">
 		            <span class="right">
 			            <c:if test="${project.dropYn ne 'Y'}">
-			                <input type="button" value="Reset" class="btnColor btnReset partyBtn idenReset" onclick="party_evt.reset()"/>
-			                <input type="button" id="btnPartnerSaveUp"  value="Save" class="btnColor red btnSave idenSave" onclick="party_evt.save()"/>
-		            	</c:if>
+							<input type="button" value="Reset" class="btnColor btnReset partyBtn idenReset" onclick="party_evt.reset()"/>
+							<input type="button" id="btnPartnerSaveUp"  value="Save" class="btnColor red btnSave idenSave" onclick="party_evt.save()"/>
+						</c:if>
 	            	</span>
-		        </div>
-				<div class="jqGridSet partyBtn">
-					<table id="list3"><tr><td></td></tr></table>
-					<div id="pager3"></div>
-				</div>
-				<!---->
-				<div class="btnLayout">
+					</div>
+					<div class="jqGridSet partyBtn">
+						<table id="list3"><tr><td></td></tr></table>
+						<div id="pager3"></div>
+					</div>
+					<!---->
+					<div class="btnLayout">
 					<span class="right">
 						<c:if test="${project.dropYn ne 'Y'}">
 							<input type="button" value="Reset" class="btnColor btnReset partyBtn idenReset" onclick="party_evt.reset()"/>
 							<input type="button" value="Save" class="btnColor red btnSave idenSave" onclick="party_evt.save()"/>
 						</c:if>
 					</span>
-				</div>
-				<!---->
+					</div>
+					<!---->
 
+				</div>
 			</div>
-		</div>
-	</c:if>
-<!-- SRC ************************************************************************************************************ -->
+		</c:if>
+		<!-- SRC ************************************************************************************************************ -->
 		<div id="srcDiv" class="tabContent">
 			<div class="projectContents">
 				<div class="orangeBox">
@@ -240,7 +238,7 @@
 								<dd>
 									<div class="basicCase">
 										<div class="uploadTit">
-											<span class="checkSet"><label for="2">FOSSLight Report</label></span>	
+											<span class="checkSet"><label for="2">FOSSLight Report</label></span>
 										</div>
 										<div class="uploadGroup">
 											<div class="uploadSet">
@@ -249,9 +247,9 @@
 												</span>
 												<div class="uploadList">
 													<ul class="csvFileArea">
-													<c:forEach var="csvFile" items="${project.csvFile }" varStatus="vs">
-														<c:if test="${csvFile.delYn == 'N'}">
-														<li>
+														<c:forEach var="csvFile" items="${project.csvFile }" varStatus="vs">
+															<c:if test="${csvFile.delYn == 'N'}">
+																<li>
 															<span>
 																<strong>
 																	<a href="<c:url value="/download/${csvFile.fileSeq }/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
@@ -261,9 +259,9 @@
 																	<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
 															</span>
-														</li>
-														</c:if>
-													</c:forEach>
+																</li>
+															</c:if>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -335,21 +333,21 @@
 				<div class="btnLayout">
                     <span class="left">
                     	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-	                        <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','11')" class="btnColor red" style="width: 145px;" />
-                    	</c:if>
+							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','11')" class="btnColor red" style="width: 145px;" />
+						</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
-                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
-                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
-                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('SRC')" class="btnColor btnColor red idenEdit" />
-                    	</c:if>
+							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
+							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
+							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('SRC')" class="btnColor btnColor red idenEdit" />
+						</c:if>
                     </span>
-                    <span class="right">
+					<span class="right">
                         <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('SRC')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
-	                        <input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
+							<input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
+							<input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
+						</c:if>
 						<div class="pop savePop">
 							<div class="popdata">
 								<p>The following open source and license names will be changed to names registered on the system for efficient management.</p>
@@ -364,7 +362,7 @@
 							</div>
 						</div>
                     </span>
-                </div>
+				</div>
 				<!---->
 				<div class="jqGridSet srcBtn">
 					<table id="srcList"><tr><td></td></tr></table>
@@ -372,7 +370,7 @@
 				</div>
 			</div>
 		</div>
-<!-- BIN start ************************************************************************************************************ -->
+		<!-- BIN start ************************************************************************************************************ -->
 		<div id="binDiv" class="tabContent">
 			<div class="projectContents">
 				<div class="orangeBox">
@@ -391,7 +389,7 @@
 								<dd>
 									<div class="androidCase" style="border-top: none;">
 										<div class="uploadTit">
-											<span class="checkSet"><label for="2">Binary Analysis Result</label></span>	
+											<span class="checkSet"><label for="2">Binary Analysis Result</label></span>
 										</div>
 										<div class="uploadGroup">
 											<div class="uploadSet">
@@ -401,8 +399,8 @@
 												</span>
 												<div class="uploadList">
 													<ul class="binFileArea">
-													<c:forEach var="csvFile" items="${project.binCsvFile }" varStatus="vs">
-														<li>
+														<c:forEach var="csvFile" items="${project.binCsvFile }" varStatus="vs">
+															<li>
 															<span>
 																<strong>
 																	<a href="<c:url value="/download/${csvFile.fileSeq }/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
@@ -412,8 +410,8 @@
 																	<input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
 															</span>
-														</li>
-													</c:forEach>
+															</li>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -424,8 +422,8 @@
 												</span>
 												<div class="uploadList">
 													<ul class="binBinaryFileArea">
-													<c:forEach var="csvFile" items="${project.binBinaryFile }" varStatus="vs">
-														<li>
+														<c:forEach var="csvFile" items="${project.binBinaryFile }" varStatus="vs">
+															<li>
 															<span>
 																<strong>
 																	<a href="<c:url value="/download/${csvFile.fileSeq}/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
@@ -435,8 +433,8 @@
 																	<input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, '2')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
 															</span>
-														</li>
-													</c:forEach>
+															</li>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -508,21 +506,21 @@
 				<div class="btnLayout">
                     <span class="left">
                     	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-	                       <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','15')" class="btnColor red" style="width: 145px;" />
-                    	</c:if>
+							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','15')" class="btnColor red" style="width: 145px;" />
+						</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
-                    		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
-                    		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
-                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BIN')" class="btnColor btnColor red idenEdit" />
-                    	</c:if>
+							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
+							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
+							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BIN')" class="btnColor btnColor red idenEdit" />
+						</c:if>
                     </span>
-                    <span class="right">
+					<span class="right">
                         <input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BIN')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
-	                        <input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
+							<input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
+							<input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
+						</c:if>
 						<div class="pop savePop">
 							<div class="popdata">
 								<p>The following open source and license names will be changed to names registered on the system for efficient management.</p>
@@ -537,14 +535,14 @@
 							</div>
 						</div>
                     </span>
-                </div>
-				<div class="jqGridSet binBtn">
+				</div>
+				<div class="jqGridSet binBtn" id="jqGrid">
 					<table id="binList"><tr><td></td></tr></table>
 					<div id="binPager"></div>
 				</div>
 			</div>
 		</div>
-<!-- BIN Android start ************************************************************************************************************ -->
+		<!-- BIN Android start ************************************************************************************************************ -->
 		<div id="binAndroidDiv" class="tabContent">
 			<div class="projectContents">
 				<!---->
@@ -566,7 +564,7 @@
 								<dd>
 									<div class="androidCase" style="border-top: none;">
 										<div class="uploadTit">
-											<span class="checkSet"><label for="2">Android Model</label></span>	
+											<span class="checkSet"><label for="2">Android Model</label></span>
 										</div>
 										<span class="sampleDownSet"></span>
 										<div class="uploadGroup">
@@ -577,8 +575,8 @@
 												</span>
 												<div class="uploadList">
 													<ul class="androidCsvFileArea">
-													<c:forEach var="csvFile" items="${project.androidCsvFile }" varStatus="vs">
-														<li>
+														<c:forEach var="csvFile" items="${project.androidCsvFile }" varStatus="vs">
+															<li>
 															<span>
 																<strong style="max-width:752px;">
 																	<a href="<c:url value="/download/${csvFile.fileSeq}/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
@@ -587,8 +585,8 @@
 																	<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, '2')"/>
 																</strong>
 															</span>
-														</li>
-													</c:forEach>
+															</li>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -599,21 +597,21 @@
 												</span>
 												<div class="uploadList">
 													<ul class="androidNoticeFileArea">
-													<c:forEach var="csvFile" items="${project.androidNoticeFile }" varStatus="vs">
-														<li>
+														<c:forEach var="csvFile" items="${project.androidNoticeFile }" varStatus="vs">
+															<li>
 															<span>
 																<strong style="max-width:752px;">
 																	<a href="<c:url value="/download/${csvFile.fileSeq}/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
 																	&nbsp;&nbsp;${csvFile.createdDate}
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
 																	<!-- 여기에 xml,tar.gz,zip file의 경우 변환된 html file인지 확인하고 해당 될경우 delete button을 제거함. -->
-																	<c:if test="${vs.index eq '0'}"> 
+																	<c:if test="${vs.index eq '0'}">
 																		<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, '3')"/>
 																	</c:if>
 																</strong>
 															</span>
-														</li>
-													</c:forEach>
+															</li>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -624,8 +622,8 @@
 												</span>
 												<div class="uploadList">
 													<ul class="androidResultFileArea">
-													<c:forEach var="csvFile" items="${project.androidResultFile }" varStatus="vs">
-														<li>
+														<c:forEach var="csvFile" items="${project.androidResultFile }" varStatus="vs">
+															<li>
 															<span>
 																<strong style="max-width:752px;">
 																	<a href="<c:url value="/download/${csvFile.fileSeq}/${csvFile.logiNm}"/>">${csvFile.origNm }</a>
@@ -634,8 +632,8 @@
 																	<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, '4')"/>
 																</strong>
 															</span>
-														</li>
-													</c:forEach>
+															</li>
+														</c:forEach>
 													</ul>
 												</div>
 											</div>
@@ -707,11 +705,11 @@
 												</div>
 											</div>
 										</div>
-	
+
 									</dd>
 								</dl>
 							</div>
-							
+
 							<div class="jqGridSet">
 								<table id="_binAndroidProjectList2"><tr><td></td></tr></table>
 							</div>
@@ -729,26 +727,26 @@
 				<div class="btnLayout">
 					<span class="left">
 						<c:if test="${project.dropYn ne 'Y'}">
-	                    	<input type="button" value="Supplement NOTICE.html" onclick="binAndroid_fn.showDialog('NOTICE')" class="btnColor red binAndroidBtn supplementNotice" style="width: 165px;" />
-                    	</c:if>
+							<input type="button" value="Supplement NOTICE.html" onclick="binAndroid_fn.showDialog('NOTICE')" class="btnColor red binAndroidBtn supplementNotice" style="width: 165px;" />
+						</c:if>
                     	<c:if test="${ct:isAdmin()}">
-	                        <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','14')" class="btnColor red" style="width: 145px;" />
-	                        <input type="button" value="Check License Text" onclick="fn_grid_com.checkLicenseTextValidation('${project.prjId}')" class="btnColor red" style="width: 130px;" />
-                    	</c:if>
+							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','14')" class="btnColor red" style="width: 145px;" />
+							<input type="button" value="Check License Text" onclick="fn_grid_com.checkLicenseTextValidation('${project.prjId}')" class="btnColor red" style="width: 130px;" />
+						</c:if>
                     	<c:if test="${project.dropYn ne 'Y'}">
-	                    	<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
-	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 115px;" />
-	                    	<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 100px;" />
-	                    	<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BINANDROID')" class="btnColor btnColor red idenEdit" />
-                    	</c:if>
+							<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
+							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 115px;" />
+							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 100px;" />
+							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BINANDROID')" class="btnColor btnColor red idenEdit" />
+						</c:if>
                     </span>
-                    <span class="right">
+					<span class="right">
                         <input type="button" value="Export" onclick="binAndroid_fn.downloadExcel()" class="btnColor red btnExpor binAndroidBtn" />
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('ANDROID')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="binAndroidReset" type="button" value="Reset" class="btnColor btnReset binAndroidBtn idenReset" />
-	                        <input id="binAndroidSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
-                        </c:if>
+							<input id="binAndroidReset" type="button" value="Reset" class="btnColor btnReset binAndroidBtn idenReset" />
+							<input id="binAndroidSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
+						</c:if>
 						<div class="pop savePop">
 							<div class="popdata">
 								<p>The following open source and license names will be changed to names registered on the system for efficient management.</p>
@@ -763,14 +761,14 @@
 							</div>
 						</div>
                     </span>
-                </div>
+				</div>
 				<div class="jqGridSet binAndroidBtn">
 					<table id="binAndroidList"><tr><td></td></tr></table>
 					<div id="binAndroidPager"></div>
 				</div>
 			</div>
 		</div>
-<!-- BOM Start ************************************************************************************************************ -->
+		<!-- BOM Start ************************************************************************************************************ -->
 		<div id="bomDiv" class="tabContent">
 			<div class="projectContents">
 				<!---->
@@ -779,29 +777,29 @@
 					<c:if test="${autoAnalysisFlag}">
 						<span class="left">
 							<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-								 <input type="button" value="Auto Analysis" class="btnColor red idenAnalysis" onclick="bom_fn.analysisValidation()" style="width:120px;"/>
-								 <input type="button" value="Analysis Result" class="btnColor red idenAnalysisResult" onclick="bom_fn.showAnalysisResult()" style="display:none;width:120px;"/>
-							 </c:if>
+								<input type="button" value="Auto Analysis" class="btnColor red idenAnalysis" onclick="bom_fn.analysisValidation()" style="width:120px;"/>
+								<input type="button" value="Analysis Result" class="btnColor red idenAnalysisResult" onclick="bom_fn.showAnalysisResult()" style="display:none;width:120px;"/>
+							</c:if>
 						</span>
 					</c:if>
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
-                    <span class="right">
+					<span class="right">
                         <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
-	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
-	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>
-                        </c:if>
+							<input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
+							<input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>
+						</c:if>
                     </span>
-                </div>
+				</div>
 				<div class="jqGridSet">
 					<table id="bomList"><tr><td></td></tr></table>
 					<div id="bomPager"></div>
 				</div>
 			</div>
 		</div>
-		
-<!-- BAT ************************************************************************************************************ -->
+
+		<!-- BAT ************************************************************************************************************ -->
 		<c:if test="${batFlag}">
 			<div id="batDiv" class="tabContent">
 				<div class="projectContents">
@@ -841,8 +839,8 @@
 					</div>
 					<!---->
 					<div class="btnLayout">
-	                    <span class="right"></span>
-	                </div>
+						<span class="right"></span>
+					</div>
 					<div class="jqGridSet batBtn">
 						<table id="batList"><tr><td></td></tr></table>
 						<div id="batPager"></div>
@@ -856,7 +854,7 @@
 			</div>
 		</c:if>
 	</div>
-	
+
 </div>
 <!-- //wrap -->
 <div id="blind_wrap"></div>
@@ -888,4 +886,3 @@
 		<input type="button" value="OK" class="btnColor red sheetApply" onclick="src_fn.getSheetData()">
 	</div>
 </div>
-
