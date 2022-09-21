@@ -278,7 +278,6 @@
 			});
 		}, 
 		changeDivisionCancel : function(){
-			$("#partnerChangeDivisionPop select[name=division] option").remove();
 			$('#partnerChangeDivisionPop').hide();
 		}
 	}

@@ -324,7 +324,7 @@
 								<div class="pb5">
 									<span class="selectSet w350">
 										<strong for="division" title="Watcher part selected value">Select Division</strong>
-										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
+										<select id="division" name="division" ${project.viewOnlyFlag eq 'N' ? '' : 'disabled="disabled"'} >
 											${ct:genOptionSelected(ct:getConstDef('CD_USER_DIVISION'), project.division)}
 										</select>
 									</span>
