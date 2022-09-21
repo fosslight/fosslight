@@ -1013,7 +1013,6 @@
 				}
 			});
 		}, changeDivisionCancel : function(){
-			$("#changeDivisionPop select[name=division] option").remove();
 			$('#changeDivisionPop').hide();
 		}, toolTipDoubleclick: function () {
                     return 'title="' + "Double click" + '"';
