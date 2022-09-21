@@ -877,7 +877,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 	}
 
+	@Transactional
 	@Override
+	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registOssMaster(OssMaster ossMaster) {
 		String[] ossNicknames = ossMaster.getOssNicknames();
 		String ossId = ossMaster.getOssId();
@@ -2480,9 +2482,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return map;
 	}
 
-	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public Map<String, Object> saveOss(OssMaster ossMaster) {
 		String resCd = "00";
 		String result = null;
@@ -2669,9 +2669,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			resCd = "10";
 			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
-			throw new RuntimeException();
 		} catch (Exception e) {
 			log.error("OSS " + action + "Failed.", e);
 			log.error(e.getMessage(), e);
