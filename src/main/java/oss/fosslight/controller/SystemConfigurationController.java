@@ -73,6 +73,26 @@ public class SystemConfigurationController extends CoTopComponent {
 			result.put("resMsg", "Error");
 		}
 		
+	return makeJsonResponseHeader(result);
+	}
+
+	@PostMapping(value=SYSTEM_CONFIGURATION.TEST_CONNECTION)
+	public @ResponseBody ResponseEntity<Object> testConnection(
+			@RequestBody HashMap<String, Object> map) throws Exception{
+		Map<String, Object> result = new HashMap<String, Object>();
+
+		String config = (String) map.get("config");
+		Type collectionType = new TypeToken<Map<String, Object>>() {}.getType();
+		Map<String, Object> configMap = (Map<String, Object>) fromJson(config, collectionType);
+
+		try {
+			result = configurationService.ldapTestConnection(configMap);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			result.put("resCd", "00");
+			result.put("resMsg", "Fail to connect LDAP");
+		}
+
 		return makeJsonResponseHeader(result);
 	}
 }

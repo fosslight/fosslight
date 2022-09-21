@@ -5,16 +5,17 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -361,6 +362,83 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		result.put("resCd", resCd);
 		result.put("resMsg", resMsg);
 		
+		return result;
+	}
+
+	@Override
+	public Map<String, Object> ldapTestConnection(Map<String, Object> configurationMap) throws Exception {
+		Map<String, Object> result = new HashMap<>();
+		String resCd = "10";
+		String resMsg = "Success";
+
+		T2CodeDtl loginAuth = new T2CodeDtl(CoConstDef.CD_LOGIN_SETTING);
+		List<T2CodeDtl> loginAuthList = codeMapper.selectCodeDetailList(loginAuth);
+		Map<String, Object> loginDetailMap = (Map<String, Object>) configurationMap.get("loginDetail");
+
+		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+
+
+		if(loginDetailMap != null) {
+			LdapContextSource contextSource = new LdapContextSource();
+
+			loginAuthList.stream().forEach(c -> {
+				switch (c.getCdDtlNo()) {
+					case CoConstDef.CD_LDAP_URL:
+						builder.host((String) loginDetailMap.get(CoConstDef.CD_LDAP_URL));
+
+						break;
+
+					case CoConstDef.CD_LDAP_PROTOCOL:
+						builder.scheme((String) loginDetailMap.get(CoConstDef.CD_LDAP_PROTOCOL));
+
+						break;
+
+					case CoConstDef.CD_LDAP_PORT:
+                        String port = (String) loginDetailMap.get(CoConstDef.CD_LDAP_PORT);
+						if (!StringUtil.isEmptyTrimmed(port)) {
+							builder.port(port);
+						}
+
+						break;
+
+					case CoConstDef.CD_LDAP_SEARCH_ID:
+						contextSource.setUserDn((String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_ID));
+
+						break;
+
+					case CoConstDef.CD_LDAP_SEARCH_PW:
+						contextSource.setPassword((String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_PW));
+
+						break;
+
+					case CoConstDef.CD_LDAP_BASE_DN:
+						contextSource.setBase((String) loginDetailMap.get(CoConstDef.CD_LDAP_BASE_DN));
+
+						break;
+				}
+			});
+
+			String url = builder.build().toUriString();
+			contextSource.setUrl(url);
+
+			contextSource.afterPropertiesSet();
+
+			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+
+			ldapTemplate.getContextSource().getContext(
+					(String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_ID),
+					(String) loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_PW)
+			);
+
+			result.put("resCd", resCd);
+			result.put("resMsg", resMsg);
+		} else {
+			resCd = "00";
+			resMsg = "loginDetail is null";
+			result.put("resCd", resCd);
+			result.put("resMsg", resMsg);
+		}
+
 		return result;
 	}
 }

@@ -8,5 +8,7 @@ package oss.fosslight.service;
 import java.util.Map;
 
 public interface SystemConfigurationService {
-	public Map<String, Object> saveConfiguration(Map<String, Object> configrationMap) throws Exception;
+	Map<String, Object> saveConfiguration(Map<String, Object> configurationMap) throws Exception;
+
+	Map<String, Object> ldapTestConnection(Map<String, Object> configurationMap) throws Exception;
 }

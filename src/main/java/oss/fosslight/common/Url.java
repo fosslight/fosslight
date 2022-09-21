@@ -668,7 +668,8 @@ public final class Url {
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
-	}
+		public static final String TEST_CONNECTION = PATH + "/testConnection";
+    }
 	
 	public static final class MIGRATION {
 		public static final String PATH = "/migration";

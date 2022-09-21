@@ -33,6 +33,9 @@
 									</c:choose>
 								</c:forEach>
 							</dl>
+							<div class="btnLayout">
+								<input id="testConnection" type="button" value="Test Connection" class="btnColor testConnection">
+							</div>
 						</div>
 					</dd>
 					<dd>

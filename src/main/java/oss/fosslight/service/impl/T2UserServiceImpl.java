@@ -396,8 +396,11 @@ public class T2UserServiceImpl implements T2UserService {
     String userId = userInfo.get(idKey);
     String userPw = userInfo.get(pwKey);
 
+    /*
     String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING,
         CoConstDef.CD_LDAP_BASE_DN);
+     */
+
     Hashtable<String, String> properties = new Hashtable<String, String>();
 
     /*
@@ -412,7 +415,7 @@ public class T2UserServiceImpl implements T2UserService {
     properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
     properties.put(Context.PROVIDER_URL, "ldap://127.0.0.1:389");
     properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-    properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
+    properties.put(Context.SECURITY_PRINCIPAL, userId);
     properties.put(Context.SECURITY_CREDENTIALS, userPw);
 
     String[] attrIDs = {"cn", "mail"};

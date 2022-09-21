@@ -111,20 +111,22 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         userService.addNewUsers(vo);
       }
 
+      /*
       String principal = String.format(
               "%s=%s,%s",
               CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID),
               user_id,
               CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_BASE_DN)
               );
+       */
 
       Hashtable<String, String> properties = new Hashtable<>();
 
       properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
       properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
       properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-      properties.put(Context.SECURITY_PRINCIPAL, principal);
-      properties.put(Context.SECURITY_CREDENTIALS, user_pw);
+      properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
+      properties.put(Context.SECURITY_CREDENTIALS, "admin");
 
       DirContext con = null;
       try {

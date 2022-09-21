@@ -220,6 +220,29 @@
 			$(".mainCategory").on("click", function(){
 				$(this).parent(".checkSet").next(".detailArea").fadeToggle(300);
 			});
+
+            $("#testConnection").on("click", function (){
+                var data = config_fn.makeParams();
+
+                $.ajax({
+                    url: '<c:url value="/system/configuration/testConnection"/>',
+                    type: 'POST',
+                    data: JSON.stringify({config : data}),
+                    dataType: 'json',
+                    cache : false,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data.resCd == "10") {
+                            alertify.success('Succeeded')
+                        } else if (data.resCd == "00") {
+                            alertify.error(data.resMsg)
+                        }
+                    },
+                    error: function () {
+                        alertify.error('Fail')
+                    }
+                })
+            })
 			
 			$("#save").on("click", function(){
 				var data = config_fn.makeParams();
