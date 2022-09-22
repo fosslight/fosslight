@@ -1175,7 +1175,8 @@ public class ExcelUtil extends CoTopComponent {
     				}
     				
     				// empty row check
-    				if(isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())) {
+    				if(isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())
+    						&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
     					continue;
     				}
     
@@ -1479,8 +1480,8 @@ public class ExcelUtil extends CoTopComponent {
     			OssComponents bean = new OssComponents();
     			// android bin의 경우 binary name을 무조건 수정할 수 있다.
     			// [MC요청] 2. Project List – OSS List에서 Binary DB 검색 결과 제공
-    			// BIN[Android] binary name 수정 불가(최종변경)
-    			//bean.setCustomBinaryYn(CoConstDef.FLAG_YES);
+    			// BIN[Android] binary name 수정 가능(최종변경)
+    			bean.setCustomBinaryYn(CoConstDef.FLAG_YES);
     			
     			// 기본정보
     			bean.setOssName(ossNameCol < 0 ? "" : getCellData(row.getCell(ossNameCol)));
@@ -1492,10 +1493,6 @@ public class ExcelUtil extends CoTopComponent {
     			bean.setDownloadLocation(downloadLocationCol < 0 ? "" : getCellData(row.getCell(downloadLocationCol)));
     			bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
     			bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
-    			
-    			if(isEmpty(bean.getBinaryName())) {
-    				continue;
-    			}
     			
     			// android 의 경우는 list에는 포함시키고 exclude하는 것으로 변경
     			// 기존 레포트에서 load on product 칼럼이 있는 경우, X선택된 row는 제외
@@ -1526,7 +1523,11 @@ public class ExcelUtil extends CoTopComponent {
     				bean.setCopyrightText("");
     			}
     
-    
+    			if(isEmpty(bean.getBinaryName()) && isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getFilePath()) 
+    					&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
+    				continue;
+    			}
+    			
     			// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌(* download location의 경우 git으로 시작 시 http://를 붙이지 않음.)
 //    			if(!isEmpty(bean.getHomepage()) 
 //    					&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
