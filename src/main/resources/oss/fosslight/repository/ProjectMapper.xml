@@ -2599,7 +2599,7 @@
 		, T1.REFERENCE_DIV
 		, T1.COMPONENT_IDX
 		, T1.OSS_ID
-		, IFNULL((SELECT NICK.OSS_NAME FROM OSS_NICKNAME NICK WHERE NICK.OSS_NICKNAME = T1.OSS_NAME), T1.OSS_NAME) AS OSS_NAME
+		, T1.OSS_NAME
 		, T1.OSS_VERSION
 		, T1.DOWNLOAD_LOCATION
 		, T1.HOMEPAGE
@@ -2868,7 +2868,7 @@
 	
 	<update id="updatePartnerOssList" parameterType="oss.fosslight.domain.OssComponents">
 		/* ProjectMapper.updatePartnerOssList */
-		UPDATE OSS_COMPONENTS SET EXCLUDE_YN = #{excludeYn} WHERE COMPONENT_ID = #{componentId};
+		UPDATE OSS_COMPONENTS SET OSS_NAME = #{ossName}, EXCLUDE_YN = #{excludeYn} WHERE COMPONENT_ID = #{componentId};
 	</update>
 	<delete id="deleteOssComponentsWithIds" parameterType="oss.fosslight.domain.OssComponents">
 	/* ProjectMapper.deleteComponents */
@@ -2942,7 +2942,7 @@
 					, #{referenceDiv}	
 					, (SELECT IFNULL(MAX(COMPONENT_IDX), 0) + 1 FROM OSS_COMPONENTS OC WHERE REFERENCE_ID=#{referenceId} AND REFERENCE_DIV=#{referenceDiv})
 					, OSS_ID
-					, OSS_NAME
+					, #{ossName}
 					, OSS_VERSION	
 					, DOWNLOAD_LOCATION	
 					, HOMEPAGE	
