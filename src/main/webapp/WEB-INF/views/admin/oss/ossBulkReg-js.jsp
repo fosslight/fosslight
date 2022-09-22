@@ -328,7 +328,7 @@
             if(this.isFromProjectIdentification()) {
                 $.ajax({
                     contentType: 'application/json',
-                    url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}`,
+                    url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}&merge=N`,
                     dataType: "json",
                     success: (data) => {
                         if (data.validData) {
@@ -345,7 +345,7 @@
             return referenceId && referenceDiv;
         },
         addRows(data) {
-            const mainDataMap = this.getMapOfMainData(data.mainData);
+            const mainDataMap = this.getMapOfMainData(data.rows);
             const validData = data.validData;
 
             jsonData = [];
@@ -377,14 +377,14 @@
         },
         getMapOfMainData(mainData) {
             return mainData.reduce((obj, x) => {
-                obj[x.gridId] = x;
+                obj[x.componentId] = x;
                 return obj;
             }, {});
         },
         toOssInfo(data) {
             return {
                 //tab datas
-                comment: data.comments,
+                comment: "",
                 copyright: data.copyrightText,
                 downloadLocation: data.downloadLocation,
                 homepage: data.homepage,
