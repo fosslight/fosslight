@@ -165,7 +165,7 @@
         if (isClicked == false) {
             isClicked = true;
             $("#btn").click(() => {
-
+                OssBulkGridStatusMessageManager.cleanStatusMessages();
                 target.jqGrid('saveRow', _mainLastsel);
 
                 // load all rowIds checked in grid
@@ -189,7 +189,7 @@
                         _mainLastsel = -1;
                         if (data['res'] == true && data['value'] != []) {
                             loadedInfo = data['value'];
-                            checkLoaded();
+                            OssBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
                             alertify.alert('<spring:message code="msg.common.success" />', function(){});
                         } else if (data['res'] == false) {
                             showErrorMsg();
@@ -219,7 +219,7 @@
                 { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false},
                 { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false},
                 { name: 'comment', index:'comment', width: 150, align: 'left', editable:false},
-                { name: 'status', index:'status', width: 150, align: 'left'}
+                { name: 'status', index:'status', width: 500, align: 'left'}
             ],
             viewrecords: true,
             rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
@@ -399,4 +399,17 @@
             }
         }
     }
+
+    const OssBulkGridStatusMessageManager = {
+        cleanStatusMessages: function () {
+            $("#list").jqGrid("getGridParam", "data").forEach(row => {
+                row.status = ""
+            });
+        },
+        setStatusMessages: function (results) {
+            for (const result of results)
+                $("#list").jqGrid("getLocalRow", result.gridId).status = result.status;
+            $("#list").trigger('reloadGrid', [{ page: 1}]);
+        }
+    };
 </script>
