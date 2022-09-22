@@ -374,7 +374,6 @@ public class OssController extends CoTopComponent{
 		return OSS.EDIT_JSP;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@ModelAttribute OssMaster ossMaster
@@ -382,6 +381,7 @@ public class OssController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model){
 		Map<String, Object> resMap = ossService.saveOss(ossMaster);
+		resMap = ossService.sendMailForSaveOss(resMap);
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1096,6 +1096,7 @@ public class OssController extends CoTopComponent{
 			}
 			if (checkDuplicated) {
 				Map<String, Object> result = ossService.saveOss(oss);
+				result = ossService.sendMailForSaveOss(result);
 				if (result.get("resCd").equals("10")) {
 					Map<String, String> ossNameMap = new HashMap<>();
 					ossNameMap.put("ossName", oss.getOssName());
