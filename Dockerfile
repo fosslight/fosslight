@@ -10,7 +10,7 @@ RUN gradle build --no-daemon --exclude-task test
 
 
 # Create the containerized app
-FROM adoptopenjdk/openjdk11:jre-11.0.15_10-ubuntu
+FROM openjdk:11-jre-slim-buster
 LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
