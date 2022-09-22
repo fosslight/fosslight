@@ -330,9 +330,6 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-                    	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-	                        <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','11')" class="btnColor red" style="width: 145px;" />
-                    	</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
                     		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
@@ -503,9 +500,6 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-                    	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-	                       <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','15')" class="btnColor red" style="width: 145px;" />
-                    	</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
                     		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
@@ -728,7 +722,6 @@
 	                    	<input type="button" value="Supplement NOTICE.html" onclick="binAndroid_fn.showDialog('NOTICE')" class="btnColor red binAndroidBtn supplementNotice" style="width: 165px;" />
                     	</c:if>
                     	<c:if test="${ct:isAdmin()}">
-	                        <input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','14')" class="btnColor red" style="width: 145px;" />
 	                        <input type="button" value="Check License Text" onclick="fn_grid_com.checkLicenseTextValidation('${project.prjId}')" class="btnColor red" style="width: 130px;" />
                     	</c:if>
                     	<c:if test="${project.dropYn ne 'Y'}">
@@ -772,14 +765,17 @@
 				<!---->
 				<br/>
 				<div class="btnLayout">
-					<c:if test="${autoAnalysisFlag}">
-						<span class="left">
+					<span class="left">
+						<c:if test="${autoAnalysisFlag}">
 							<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
 								 <input type="button" value="Auto Analysis" class="btnColor red idenAnalysis" onclick="bom_fn.analysisValidation()" style="width:120px;"/>
 								 <input type="button" value="Analysis Result" class="btnColor red idenAnalysisResult" onclick="bom_fn.showAnalysisResult()" style="display:none;width:120px;"/>
 							 </c:if>
-						</span>
-					</c:if>
+						</c:if>
+						<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
+							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','13')" class="btnColor red" style="width: 145px;" />
+						</c:if>
+					</span>
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
                     <span class="right">
                         <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
