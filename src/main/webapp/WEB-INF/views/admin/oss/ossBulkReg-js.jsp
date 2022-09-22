@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
+<jsp:useBean id="T2CoValidationConfig" class="oss.fosslight.validation.T2CoValidationConfig" scope="page" />
 <script>
     var jsonData;
     var withStatus;
@@ -13,6 +14,8 @@
     var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','ossCopyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
     var selectedIds = new Set() /**set for selected rowids*/
+    var referenceId = '${projectData.prjId}';
+    var referenceDiv = '${projectData.referenceDiv}';
 
     function refreshGrid($grid, results) {
         $grid.jqGrid('clearGridData')
@@ -309,6 +312,7 @@
                 }
             }
         });
+        IdentificationGridDataExtractor.call();
     });
     var fn = {
         downloadBulkSample : function(type){
@@ -318,4 +322,81 @@
 			location.href = '<c:url value="/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath+'"/>';
 		}
 	}
+
+    const IdentificationGridDataExtractor = {
+        call : function (){
+            if(this.isFromProjectIdentification()) {
+                $.ajax({
+                    contentType: 'application/json',
+                    url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}`,
+                    dataType: "json",
+                    success: (data) => {
+                        if (data.validData) {
+                            this.addRows(data);
+                        }
+                    },
+                    error: (e) => {
+                        console.log(e);
+                    }
+                })
+            }
+        },
+        isFromProjectIdentification : function (){
+            return referenceId && referenceDiv;
+        },
+        addRows(data) {
+            const mainDataMap = this.getMapOfMainData(data.mainData);
+            const validData = data.validData;
+
+            jsonData = [];
+            delete validData.isValid;
+
+            const ids = this.getInValidGridIds(validData);
+
+            for(let i = 0; i < ids.length; ++i) {
+                const newRow = this.toOssInfo(mainDataMap[ids[i]]);
+                newRow.gridId = i;
+                $("#list").jqGrid('addRowData', i, newRow);
+                ossData.push(newRow);
+                jsonData.push({oss: newRow});
+            }
+            $("#list").trigger('reloadGrid');
+        },
+        getInValidGridIds(validData) {
+            let inValidGridId = new Set();
+
+            let ossVersionUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_VERSION.UNCONFIRMED.MSG")%>';
+            let ossNameUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_NAME.UNCONFIRMED.MSG")%>'
+
+            for (let key in validData){
+                if (validData[key] == ossNameUnconfirmedMsg || validData[key] == ossVersionUnconfirmedMsg){
+                    inValidGridId.add(key.split(".")[1])
+                }
+            }
+            return Array.from(inValidGridId);
+        },
+        getMapOfMainData(mainData) {
+            return mainData.reduce((obj, x) => {
+                obj[x.gridId] = x;
+                return obj;
+            }, {});
+        },
+        toOssInfo(data) {
+            return {
+                //tab datas
+                comment: data.comments,
+                copyright: data.copyrightText,
+                downloadLocation: data.downloadLocation,
+                homepage: data.homepage,
+                declaredLicenses: data.licenseName.trim() ? data.licenseName.trim().split(",") : [],
+                ossName: data.ossName,
+                ossVersion: data.ossVersion,
+                //oss datas
+                attribution: "",
+                detectedLicenses: [],
+                summaryDescription: "",
+                ossNicknames: []
+            }
+        }
+    }
 </script>

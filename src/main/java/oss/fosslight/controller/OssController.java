@@ -979,7 +979,8 @@ public class OssController extends CoTopComponent{
 //	}
 
 	@GetMapping(value = OSS.OSS_BULK_REG, produces = "text/html; charset=utf-8")
-	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model) {
+	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model, @ModelAttribute Project projectData) {
+		model.addAttribute("projectData", projectData);
 
 		return OSS.OSS_BULK_REG_JSP;
 	}
