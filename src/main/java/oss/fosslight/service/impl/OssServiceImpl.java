@@ -2554,9 +2554,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					result = registOssMaster(ossMaster);
 				}
 
-				CoCodeManager.getInstance().refreshOssInfo();
-
 				h = work(ossMaster);
+				
+				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = getOssInfo(ossId, true);
 
@@ -2593,9 +2593,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
 				}
 				ossId = registOssMaster(ossMaster);
-				CoCodeManager.getInstance().refreshOssInfo();
-
 				h = work(ossMaster);
+				
+				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_INSERT;
 			}
 
