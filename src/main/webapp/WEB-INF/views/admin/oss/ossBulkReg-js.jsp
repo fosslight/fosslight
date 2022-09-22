@@ -89,7 +89,7 @@
     function stubColData(){
         for(var i=0; i<jsonData.length ; i++ ){
             withStatus = jsonData[i]['oss'];
-            withStatus['status'] = jsonData[i]['status'];
+            withStatus.gridId = i;
             $('#list').jqGrid('addRowData', i, withStatus);
         }
         $("#list").trigger('reloadGrid');
@@ -112,15 +112,15 @@
 
         mainData.forEach((row) => {
             stringDataForValid.forEach((strData) => {
-                ossData[row["id"]][strData] = row[strData].trim();
+                ossData[row["gridId"]][strData] = row[strData].trim();
             })
 
             listDataForValid.forEach((listData) => {
-                ossData[row["id"]][listData] = row[listData].trim()
-                if (ossData[row["id"]][listData] == "") {
-                    ossData[row["id"]][listData] = []
+                ossData[row["gridId"]][listData] = row[listData].trim()
+                if (ossData[row["gridId"]][listData] == "") {
+                    ossData[row["gridId"]][listData] = []
                 } else {
-                    ossData[row["id"]][listData] = ossData[row["id"]][listData].split(",")
+                    ossData[row["gridId"]][listData] = ossData[row["gridId"]][listData].split(",")
                 }
             })
         })
@@ -204,13 +204,13 @@
         $("#list").jqGrid({
             datatype: "local",
             data : jsonData,
-            colNames:['id', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
+            colNames:['gridId', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
                 'Homepage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
             colModel: [
-                { name: 'id', 	index: 'id', width: 75, key:true, hidden: true, editable:false},
-                {name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
-                {name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
-                {name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
+                { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false},
+                { name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
+                { name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
+                { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
                 { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
                 { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
                 { name: 'ossCopyright', index: 'copyright', width: 200, align: 'left', editable:false},
