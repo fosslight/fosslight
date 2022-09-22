@@ -1009,8 +1009,16 @@ public class OssController extends CoTopComponent{
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
-			if (declaredLicenses == null) {
+			if (declaredLicenses == null || declaredLicenses.isEmpty()) {
 				log.warn("DeclaredLicenses is null:" + oss.getOssName());
+				ossDataMap.put("gridId", oss.getGridId());
+				ossDataMap.put("status", "X (Required missing)");
+				ossDataMapList.add(ossDataMap);
+				continue;
+			}
+
+			if (Objects.isNull(oss.getOssName()) || oss.getOssName().isBlank()) {
+				log.warn("OSS name is required.");
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Required missing)");
 				ossDataMapList.add(ossDataMap);
