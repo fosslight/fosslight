@@ -2603,7 +2603,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			h.sethAction(action);
 			historyService.storeData(h);
-
+			resCd = "10";
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);
 			throw new RuntimeException(e.getMessage(), e);
@@ -2622,7 +2622,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(afterBean != null) resMap.put("afterBean", afterBean);
 			if(updateOssNameVersionDiffMergeObject != null) resMap.put("updateOssNameVersionDiffMergeObject", updateOssNameVersionDiffMergeObject);
 		}
-		
+		resMap.put("resCd", resCd);
 		return resMap;
 	}
 
@@ -3611,11 +3611,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
-		
-		resMap.clear();
-		resMap.put("resCd", "10");
 		resMap.put("ossId", ossId);
-		
 		return resMap;
 	}
 }
