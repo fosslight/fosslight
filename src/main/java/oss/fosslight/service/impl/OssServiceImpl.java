@@ -2606,7 +2606,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			resCd = "10";
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);
-			throw new RuntimeException(e.getMessage(), e);
 		} catch (Exception e) {
 			log.error("OSS " + action + "Failed.", e);
 			log.error(e.getMessage(), e);
