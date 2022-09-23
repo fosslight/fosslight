@@ -296,21 +296,14 @@ public class OssController extends CoTopComponent{
 		List<Vulnerability> vulnInfoList = ossService.getOssVulnerabilityList2(ossMaster);
 		
 		if(vulnInfoList != null && !vulnInfoList.isEmpty()) {
-			if(ossMaster.getOssVersion().equals("-") && vulnInfoList.size() >= 2) {
-				List<Vulnerability> newVulnInfoList = new ArrayList<>();
-				for(int i=0; i<2; i++) {
-					newVulnInfoList.add(vulnInfoList.get(i));
-				}
-				model.addAttribute("vulnListMore", "vulnListMore");
-				model.addAttribute("vulnInfoList", toJson(newVulnInfoList));
-			}else if(!ossMaster.getOssVersion().equals("-") && vulnInfoList.size() >= 5) {
+			if(vulnInfoList.size() >= 5) {
 				List<Vulnerability> newVulnInfoList = new ArrayList<>();
 				for(int i=0; i<5; i++) {
 					newVulnInfoList.add(vulnInfoList.get(i));
 				}
 				model.addAttribute("vulnListMore", "vulnListMore");
 				model.addAttribute("vulnInfoList", toJson(newVulnInfoList));
-			}else {
+			} else {
 				model.addAttribute("vulnInfoList", toJson(vulnInfoList));
 			}
 		}
@@ -374,7 +367,6 @@ public class OssController extends CoTopComponent{
 		return OSS.EDIT_JSP;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@PostMapping(value=OSS.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@ModelAttribute OssMaster ossMaster
@@ -382,6 +374,7 @@ public class OssController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model){
 		Map<String, Object> resMap = ossService.saveOss(ossMaster);
+		resMap = ossService.sendMailForSaveOss(resMap);
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1096,6 +1089,7 @@ public class OssController extends CoTopComponent{
 			}
 			if (checkDuplicated) {
 				Map<String, Object> result = ossService.saveOss(oss);
+				result = ossService.sendMailForSaveOss(result);
 				if (result.get("resCd").equals("10")) {
 					Map<String, String> ossNameMap = new HashMap<>();
 					ossNameMap.put("ossName", oss.getOssName());

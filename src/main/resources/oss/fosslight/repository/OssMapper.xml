@@ -2120,7 +2120,12 @@
 	</select>
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
-		SELECT DATA.PRODUCT
+		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
+			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
+			FROM
+			(
+		</if>
+				SELECT DATA.PRODUCT
 					 , DATA.VERSION
 					 , CVE.CVSS_SCORE
 					 , CVE.CVE_ID
@@ -2145,8 +2150,12 @@
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
 				    ON DATA.CVE_ID = CVE.CVE_ID
-		ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
-		LIMIT 5
+		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
+			) T1
+			GROUP BY T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
+		</if>
+			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
+			LIMIT 5
 	</select>
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
