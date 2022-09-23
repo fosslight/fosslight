@@ -129,11 +129,7 @@ var saveFlag = false;
 			
 			$('select[name=userDivision]').trigger('change');
 			$('select[name=division]').trigger('change');
-			
-			$('select[name=division]').on("change", function(){
-				fn.changeDivision()
-			});
-			
+
 			//와쳐 추가 버튼
 			$('#addWatcher').on('click', function(){
 				/* division 정보 */
