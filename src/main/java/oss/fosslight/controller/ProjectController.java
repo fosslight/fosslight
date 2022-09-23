@@ -1749,6 +1749,25 @@ public class ProjectController extends CoTopComponent {
 			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
 			
 			try {
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+						CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+					
+					if (!isEmpty(changedLicenseName)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setExpansion1("3rd party");
+						commentHisBean.setContents(changedLicenseName);
+						commentService.registComment(commentHisBean, false);
+					}
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			try {
 				project.setPrjId(prjId);
 				History h = new History();
 				h = projectService.work(project);
