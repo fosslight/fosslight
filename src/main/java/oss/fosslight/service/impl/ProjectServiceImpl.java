@@ -1545,6 +1545,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bean.setComponentId(bean.getRefComponentId());
 			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			bean.setReferenceId(prjId);
+			bean.setPartnerSaveFlag(CoConstDef.FLAG_YES);
 			
 			projectMapper.insertOssComponentsCopy(bean);
 			projectMapper.insertOssComponentsLicenseCopy(bean);
@@ -1635,6 +1636,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		for(OssComponents bean : ossComponents) {
 			if(ossNickNameConvertMap.containsKey(avoidNull(bean.getOssName()).trim().toUpperCase())) {
 				bean.setOssName(ossNickNameConvertMap.get(avoidNull(bean.getOssName()).trim().toUpperCase()).getOssName());
+			}
+			
+			// license nickname 체크
+			if(!bean.getLicenseName().contains(",")) {
+				String _licenseName = avoidNull(bean.getLicenseName()).trim();
+				
+				if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(_licenseName.toUpperCase())) {
+					LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(_licenseName.toUpperCase());
+					
+					if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+						for(String s : licenseMaster.getLicenseNicknameList()) {
+							if(_licenseName.equalsIgnoreCase(s)) {
+								bean.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+								
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 		
