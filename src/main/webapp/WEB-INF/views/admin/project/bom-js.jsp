@@ -559,8 +559,41 @@ var bom_fn = {
 		}else {
 			alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 		}
-	}
+	},
+    exportList:function(){
+        var buttonId = event.target.id;
+        var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");
+
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        }else{
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function() {
+        var targetFileId = event.target.id;
+        var parentId = $("#" + targetFileId).closest("div").attr("id")
+
+        // download file
+        if (targetFileId === "report_sub") bom_fn.downloadExcel();
+        else if (targetFileId === "Spreadsheet_sub") spdx_fn.downloadSpdxSpreadSheetExcel();
+        else if (targetFileId === "RDF_sub") spdx_fn.downloadSpdxRdf();
+        else if (targetFileId === "TAG_sub") spdx_fn.downloadSpdxTag();
+        else if (targetFileId === "JSON_sub") spdx_fn.downloadSpdxJson();
+        else if (targetFileId === "YAML_sub") spdx_fn.downloadSpdxYaml();
+
+        // hide list
+        $("#" + parentId).hide();
+    }
 }
+
+// close exportlist
+$(document).click(function(e){
+    if(!$("#ExportContainer").has(e.target).length){
+        $("#ExportList").hide();
+    }
+});
 
 var bom_data = {
 		getJqGrid : function(param){
@@ -834,4 +867,149 @@ var bom_data = {
 			});
 		}
 	}
+
+var spdx_fn = {
+    getSpdxDataStr : function() {
+        return {
+            "editNoticeYn":                 "${ossNotice.editNoticeYn}",
+            "editCompanyYn":                "${ossNotice.editCompanyYn}",
+            "editDistributionSiteUrlYn":    "${ossNotice.editDistributionSiteUrlYn}",
+            "editEmailYn":                  "${ossNotice.editEmailYn}",
+            "hideOssVersionYn":             "${ossNotice.hideOssVersionYn}",
+            "editAppendedYn":               "${ossNotice.editAppendedYn}",
+            "prjId":                        "${project.prjId}",
+            "useCustomNoticeYn":            "${project.useCustomNoticeYn}",
+            "noticeHtml":                   "",
+            "noticeType":                   "${project.noticeType}",
+            "packageJson":                  "",
+            "packageFileId":                "",
+            "userComment":                  "",
+            "withoutVerifyYn":              "${project.withoutVerifyYn}",
+            "ignoreBinaryDbFlag":           "",
+            "appended":                     "",
+            "appendedTEXT":                 "",
+            "allowDownloadNoticeHTMLYn":    "${project.allowDownloadNoticeHTMLYn}",
+            "allowDownloadNoticeTextYn":    "${project.allowDownloadNoticeTextYn}",
+            "allowDownloadSimpleHTMLYn":    "${project.allowDownloadSimpleHTMLYn}",
+            "allowDownloadSimpleTextYn":    "${project.allowDownloadSimpleTextYn}",
+            "allowDownloadSPDXSheetYn":     "${project.allowDownloadSPDXSheetYn}",
+            "allowDownloadSPDXRdfYn":       "${project.allowDownloadSPDXRdfYn}",
+            "allowDownloadSPDXTagYn":       "${project.allowDownloadSPDXTagYn}",
+            "allowDownloadSPDXJsonYn":      "${project.allowDownloadSPDXJsonYn}",
+            "allowDownloadSPDXYamlYn":      "${project.allowDownloadSPDXYamlYn}",
+            "isSimpleNotice":               "",
+            "previewOnly":                  "N"
+        }
+    },
+    downloadSpdxSpreadSheetExcel : function(){
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+            data: JSON.stringify({"type":"spdx", "prjId":'${project.prjId}', "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                } else {
+                    window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+                }
+            },
+            error: function(data){
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+        });
+    },
+    downloadSpdxRdf : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+            data: JSON.stringify({"type":"spdxRdf", "prjId":'${project.prjId}', "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                } else {
+                    window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+                }
+            },
+            error: function(data){
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+        });
+    },
+    downloadSpdxTag : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+            data: JSON.stringify({"type":"spdxTag", "prjId":'${project.prjId}', "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                } else {
+                    window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+                }
+            },
+            error: function(data){
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+        });
+    },
+    downloadSpdxJson : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+            data: JSON.stringify({"type":"spdxJson", "prjId":'${project.prjId}', "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                } else {
+                    window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+                }
+            },
+            error: function(data){
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+        })
+    },
+    downloadSpdxYaml : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+            data: JSON.stringify({"type":"spdxYaml", "prjId":'${project.prjId}', "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                } else {
+                    window.location =  '<c:url value="/spdxdownload/getFile?id='+data.validMsg+'"/>';
+                }
+            },
+            error: function(data){
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+        })
+    }
+}
 </script>

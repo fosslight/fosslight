@@ -778,7 +778,17 @@
 					</span>
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
                     <span class="right">
-                        <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
+                        <div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input id="Export" type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList()"/>
+							<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" onclick="bom_fn.selectDownloadFile()">
+								<a id="report_sub" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a id="Spreadsheet_sub" style="display: block;">SPDX (Spreadsheet)</a>
+								<a id="RDF_sub" style="display: block;">SPDX (RDF)</a>
+								<a id="TAG_sub" style="display: block;">SPDX (TAG)</a>
+								<a id="JSON_sub" style="display: block;">SPDX (JSON)</a>
+								<a id="YAML_sub" style="display: block;">SPDX (YAML)</a>
+							</div>
+						</div>
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
