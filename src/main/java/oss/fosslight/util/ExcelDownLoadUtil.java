@@ -1900,7 +1900,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "spdx" :
-				downloadId = getBOM_SPDX_SpreadSheetExcelPost(dataStr);
+				downloadId = getVerificationSPDX_SpreadSheetExcelPost(dataStr);
 
 				break;
 			case "spdx_self" :
@@ -2127,13 +2127,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	}
 
 	/**
-	 * BOM탭 SPDX Spread sheet 생성
+	 * SPDX Spread sheet 생성
 	 * @param dataStr
 	 * @return
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	private static String getBOM_SPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
+	private static String getVerificationSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
 		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
@@ -2240,19 +2240,21 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 			// Package Info
 			{
-				ProjectIdentification ossListParam = new ProjectIdentification();
-				ossListParam.setReferenceId(prjId);
-				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				ossListParam.setMerge(CoConstDef.FLAG_NO);
-				Map<String, Object> listMap = projectService.getIdentificationGridList(ossListParam);
+				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
 
-				List<ProjectIdentification> projectList = (List <ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
+				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
 
 				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
 
+				if(sourceList != null && !sourceList.isEmpty()) {
+					noticeList.addAll(sourceList);
+				}
+
+				noticeList = verificationService.setMergeGridData(noticeList); // merge Data
+
 				int rowIdx = 1;
 
-				for(ProjectIdentification bean: projectList) {
+				for(OssComponents bean : noticeList) {
 					Row row = sheetPackage.getRow(rowIdx);
 
 					if(row == null) {
@@ -2281,7 +2283,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
-					cellPackageVersion.setCellValue(avoidNull(bean.getOssVersion()));
+					cellPackageVersion.setCellValue(hideOssVersionFlag ? "" : avoidNull(bean.getOssVersion()));
 
 					// Package FileName
 					cellIdx++;
@@ -2348,20 +2350,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					// License Concluded
 					Cell cellLicenseConcluded = getCell(row, cellIdx); cellIdx++;
 					String srtLicenseName = "";
-					String [] licenseNames = bean.getLicenseName().split(",");
 
-					for(String licenseName: licenseNames) {
-						if (!isEmpty(srtLicenseName)) {
+					for(OssComponentsLicense liBean : bean.getOssComponentsLicense()) {
+						if(!isEmpty(srtLicenseName)) {
 							srtLicenseName += " AND ";
 						}
 
-						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(licenseName.toUpperCase()))) {
-							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName.toUpperCase()).toUpperCase());
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(liBean.getLicenseName()).toUpperCase())) {
+							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(liBean.getLicenseName()).toUpperCase());
 
 							if(!isEmpty(liMaster.getShortIdentifier())) {
-								licenseName = liMaster.getShortIdentifier();
+								liBean.setLicenseName(liMaster.getShortIdentifier());
 							} else {
-								licenseName = "LicenseRef-" + licenseName;
+								liBean.setLicenseName("LicenseRef-" + liBean.getLicenseName());
 							}
 
 							if(!isEmpty(attributionText)) {
@@ -2371,11 +2372,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							attributionText += avoidNull(liMaster.getAttribution()); // license attribution
 						}
 
-						licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
-						srtLicenseName += licenseName;
+						liBean.setLicenseName(liBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-"));
+						srtLicenseName += liBean.getLicenseName();
 					}
 
-					if(licenseNames.length > 1) {
+					if(!bean.getOssComponentsLicense().isEmpty() && bean.getOssComponentsLicense().size() > 1) {
 						srtLicenseName = "(" + srtLicenseName + ")";
 					}
 
@@ -2413,8 +2414,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Attribution Text
 					Cell attributionInfo = getCell(row, cellIdx); cellIdx++;
-					String ossAttribution = ossMapper.selectOssOne(_ossBean).getAttribution();
-					attributionInfo.setCellValue(hideOssVersionFlag ? ossAttribution.replaceAll("<br>", "\n") : attributionText);
+					attributionInfo.setCellValue(hideOssVersionFlag ? bean.getOssAttribution().replaceAll("<br>", "\n") : attributionText);
 
 					// Files Analyzed
 					Cell filesAnalyzed = getCell(row, cellIdx); cellIdx++;
