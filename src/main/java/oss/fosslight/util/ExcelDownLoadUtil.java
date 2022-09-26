@@ -1899,9 +1899,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getPartnerChecklistReportExcelPost(dataStr);
 				
 				break;
-			case "spdx" :				
+			case "spdx" :
 				downloadId = getVerificationSPDX_SpreadSheetExcelPost(dataStr);
-				
+
 				break;
 			case "spdx_self" :
 				downloadId = getSelfCheckSPDX_SpreadSheetExcelPost(dataStr);
@@ -2125,16 +2125,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 		return makeExcelFileId(wb,downloadFileName);
 	}
-	
+
 	/**
 	 * SPDX Spread sheet 생성
-	 * @param prjId
+	 * @param dataStr
 	 * @return
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
 	private static String getVerificationSPDX_SpreadSheetExcelPost(String dataStr) throws IOException {
-
 		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
@@ -2142,54 +2141,54 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
 		FileInputStream inFile=null;
-		
+
 		// download file name
 		String downloadFileName = "SPDXRdf-"; // Default
-		
+
 		Type ossNoticeType = new TypeToken<OssNotice>(){}.getType();
-		
+
 		OssNotice ossNotice = (OssNotice) fromJson(dataStr, ossNoticeType);
 		ossNotice.setFileType("text");
-		
+
 		String prjId = ossNotice.getPrjId();
-		
+
 		try {
 			inFile= new FileInputStream(new File(downloadpath+"/SPDXRdf_2.2.2.xls"));
-			
+
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
 			sheetLicense = wb.getSheetAt(3);
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
-			
+
 			String createdTime = CommonFunction.getCurrentDateTime("yyyyMMddhhmm");
 			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd hh:mm:ss");
 			Date createdDateTime = DateUtil.getCurrentDate();
-			
+
 			Project projectInfo = new Project();
 			projectInfo.setPrjId(prjId);
 			projectInfo = projectService.getProjectDetail(projectInfo);
 
 			T2Users userInfo = new T2Users();
 			userInfo.setUserId(projectInfo.getCreator());
-			
+
 			Map<String, Object> packageInfo = verificationService.getNoticeHtmlInfo(ossNotice);
-			
+
 			String strPrjName = projectInfo.getPrjName();
-			
+
 			if(!isEmpty(projectInfo.getPrjVersion())) {
 				strPrjName += "-" + projectInfo.getPrjVersion();
 			}
-			
+
 			downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
-			
+
 			List<String> packageInfoidentifierList = new ArrayList<>();
-			
+
 			//Document Info
-			{				
+			{
 				Row row = sheetDoc.getRow(1);
-				
+
 				int cellIdx = 0;
 				// Spreadsheet Version
 				cellIdx ++;
@@ -2197,17 +2196,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				cellIdx ++;
 				// Data License
 				cellIdx ++;
-				
+
 				// SPDX Identifier
 				cellIdx++;
-				
+
 				// License List Version
 				cellIdx ++;
-				
+
 				// Document Name
 				Cell cellDocumentName = getCell(row, cellIdx); cellIdx++;
 				cellDocumentName.setCellValue(strPrjName);
-				
+
 				// Document Namespace
 				Cell cellDocumentNamespace = getCell(row, cellIdx); cellIdx++;
 				String spdxidentifier = "SPDXRef-" + strPrjName.replaceAll(" ", "") + "-" + createdTime;
@@ -2216,62 +2215,60 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					domain += "/";
 				}
 				cellDocumentNamespace.setCellValue(domain + spdxidentifier);
-				
+
 				// Document Contents
 				cellIdx++;
-				
+
 				//External Document References
 				cellIdx ++;
 				// Document Comment
 				cellIdx ++;
-				
+
 				// Creator
 				Cell cellCreator = getCell(row, cellIdx); cellIdx++;
 				String strCreator = "Person: ";
 				userInfo = userService.getUser(userInfo);
 				strCreator += projectInfo.getCreator() + " (" + userInfo.getEmail() + ")";
 				cellCreator.setCellValue(strCreator);
-				
+
 				// Created
 				Cell cellCreated = getCell(row, cellIdx); cellIdx++;
 				cellCreated.setCellValue(createdDateTime);
-				
+
 				// Creator Comment
 			}
-			
+
 			// Package Info
 			{
 				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
-				
+
 				List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
-				
+
 				boolean hideOssVersionFlag = CoConstDef.FLAG_YES.equals(ossNotice.getHideOssVersionYn());
-				
-				// permissive oss와 copyleft oss를 병합
+
 				if(sourceList != null && !sourceList.isEmpty()) {
 					noticeList.addAll(sourceList);
 				}
-				
+
 				noticeList = verificationService.setMergeGridData(noticeList); // merge Data
-				
+
 				int rowIdx = 1;
-				
+
 				for(OssComponents bean : noticeList) {
-					
 					Row row = sheetPackage.getRow(rowIdx);
-					
+
 					if(row == null) {
 						row = sheetPackage.createRow(rowIdx);
 					}
-					
+
 					String attributionText = "";
-					
+
 					int cellIdx = 0;
-					
+
 					// Package Name
 					Cell cellPackageName = getCell(row, cellIdx); cellIdx++;
 					cellPackageName.setCellValue(bean.getOssName());
-					
+
 					// SPDX Identifier
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
 					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
@@ -2283,26 +2280,26 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
 						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
 					}
-					
+
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
 					cellPackageVersion.setCellValue(hideOssVersionFlag ? "" : avoidNull(bean.getOssVersion()));
-					
+
 					// Package FileName
 					cellIdx++;
-					
+
 					// Package Supplier
 					Cell packageSupplier = getCell(row, cellIdx); cellIdx++;
 					packageSupplier.setCellValue("Person: \"\"");
-					
+
 					// Package Originator
 					Cell packageOriginator = getCell(row, cellIdx); cellIdx++;
 					packageOriginator.setCellValue("Organization: \"\"");
-					
+
 					// Home Page
 					Cell cellHomePage = getCell(row, cellIdx); cellIdx++;
 					cellHomePage.setCellValue(avoidNull(bean.getHomepage()));
-					
+
 					// Package Download Location
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
 					String downloadLocation = bean.getDownloadLocation();
@@ -2317,19 +2314,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 
 					cellPackageDownloadLocation.setCellValue(downloadLocation);
-					
+
 					// Package Checksum
 					cellIdx++;
-					
+
 					// Package Verification Code
 					cellIdx++;
-					
+
 					// Verification Code Excluded Files
 					cellIdx++;
-					
+
 					// Source Info
 					cellIdx++;
-					
+
 					// License Declared
 					Cell cellLicenseDeclared = getCell(row, cellIdx); cellIdx++;
 
@@ -2349,42 +2346,42 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						cellLicenseDeclared.setCellValue(licenseStr);
 						attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
 					}
-					
+
 					// License Concluded
 					Cell cellLicenseConcluded = getCell(row, cellIdx); cellIdx++;
 					String srtLicenseName = "";
-					
+
 					for(OssComponentsLicense liBean : bean.getOssComponentsLicense()) {
 						if(!isEmpty(srtLicenseName)) {
 							srtLicenseName += " AND ";
 						}
-						
-						if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(liBean.getLicenseName()).toUpperCase())) {
+
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(liBean.getLicenseName()).toUpperCase())) {
 							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(liBean.getLicenseName()).toUpperCase());
-							
+
 							if(!isEmpty(liMaster.getShortIdentifier())) {
 								liBean.setLicenseName(liMaster.getShortIdentifier());
 							} else {
 								liBean.setLicenseName("LicenseRef-" + liBean.getLicenseName());
 							}
-							
+
 							if(!isEmpty(attributionText)) {
 								attributionText += "\n";
 							}
-							
+
 							attributionText += avoidNull(liMaster.getAttribution()); // license attribution
 						}
-						
+
 						liBean.setLicenseName(liBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-"));
 						srtLicenseName += liBean.getLicenseName();
 					}
-					
+
 					if(!bean.getOssComponentsLicense().isEmpty() && bean.getOssComponentsLicense().size() > 1) {
 						srtLicenseName = "(" + srtLicenseName + ")";
 					}
-					
+
 					cellLicenseConcluded.setCellValue(srtLicenseName);
-					
+
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
@@ -2393,10 +2390,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						licenseInfoFromFiles.setCellValue(CommonFunction.makeLicenseFromFiles(_ossBean, true)); // Declared & Detected License Info (중복제거)
 					}
-					
+
 					// License Comments
 					cellIdx++;
-					
+
 					// Package Copyright Text
 					Cell cellPackageCopyrightText = getCell(row, cellIdx); cellIdx++;
 					String copyrightText = StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762);
@@ -2410,31 +2407,31 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// Summary
 					cellIdx++;
-					
+
 					// Description
 					cellIdx++;
-					
-					
+
+
 					// Attribution Text
 					Cell attributionInfo = getCell(row, cellIdx); cellIdx++;
 					attributionInfo.setCellValue(hideOssVersionFlag ? bean.getOssAttribution().replaceAll("<br>", "\n") : attributionText);
-					
+
 					// Files Analyzed
 					Cell filesAnalyzed = getCell(row, cellIdx); cellIdx++;
 					filesAnalyzed.setCellValue("false");
-					
+
 					// User Defined Columns...
-					
+
 					rowIdx++;
 				}
 			}
-			
+
 			// Extracted License Info
 			{
 				// BOM에 사용된 OSS Info중 License identifier가 설정되어 있지 않은 license 정보만 출력한다.
 				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
 				Map<String, LicenseMaster> nonIdetifierNoticeList = new HashMap<>();
-				
+
 				for(OssComponents ocBean : noticeList) {
 					String ossName = ocBean.getOssName().replace("&#39;", "\'");
 
@@ -2445,7 +2442,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						OssMaster _ossBean = CoCodeManager.OSS_INFO_UPPER.get((ossName + "_" + avoidNull(ocBean.getOssVersion())).toUpperCase());
 						licenseList = Arrays.asList(CommonFunction.makeLicenseFromFiles(_ossBean, false).split(","));
 					}
-					
+
 					for(String licenseNm : licenseList) {
 						LicenseMaster lmBean = CoCodeManager.LICENSE_INFO.get(licenseNm);
 						if(lmBean != null && isEmpty(lmBean.getShortIdentifier()) && !nonIdetifierNoticeList.containsKey(lmBean.getLicenseId())) {
@@ -2453,169 +2450,168 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						}
 					}
 				}
-				
+
 				int rowIdx = 1;
-				
+
 				for(LicenseMaster bean : nonIdetifierNoticeList.values()) {
 					int cellIdx = 0;
-					
+
 					Row row = sheetLicense.getRow(rowIdx);
-					
+
 					if(row == null) {
 						row = sheetLicense.createRow(rowIdx);
 					}
-				
+
 					String _licenseName = bean.getLicenseNameTemp().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-");
-					
+
 					// Identifier
 					Cell cellIdentifier = getCell(row, cellIdx); cellIdx++;
 					cellIdentifier.setCellValue("LicenseRef-" + _licenseName);
-					
+
 					// Extracted Text
 					Cell cellExtractedText = getCell(row, cellIdx); cellIdx++;
 					cellExtractedText.setCellValue(StringUtil.substring(CommonFunction.brReplaceToLine(bean.getLicenseText()), 0, 32762) );
-					
+
 					// License Name
 					Cell cellLicenseName = getCell(row, cellIdx); cellIdx++;
 					cellLicenseName.setCellValue(bean.getLicenseNameTemp());
-					
+
 					// Cross Reference URLs
 					Cell cellCrossReferenceURLs = getCell(row, cellIdx); cellIdx++;
 					boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 					cellCrossReferenceURLs.setCellValue(avoidNull(CommonFunction.makeLicenseInternalUrl(bean, distributionFlag)));
-					
-					// Comment							
+
+					// Comment
 					rowIdx ++;
 				}
 			}
-			
+
 			// Per File Info sheet
 			{
-				// oss name이 "-" 인 case 만 
+				// oss name이 "-" 인 case 만
 				List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("addOssComponentList");
 				List<OssComponents> nonIdetifierNoticeList = new ArrayList<>();
-				
+
 				for(OssComponents bean : noticeList) {
 					// set false because "Per file info sheet" is not currently output
 					if("-".equals(bean.getOssName()) && false) {
 						nonIdetifierNoticeList.add(bean);
 					}
 				}
-				
+
 				int rowIdx = 1;
-				
+
 				for(OssComponents bean : nonIdetifierNoticeList) {
 					int cellIdx = 0;
 					String attributionText = "";
 					Row row = sheetPerFile.getRow(rowIdx);
-					
+
 					if(row == null) {
 						row = sheetPerFile.createRow(rowIdx);
 					}
-				
+
 					// File Name
 					Cell fileName = getCell(row, cellIdx); cellIdx++;
 					fileName.setCellValue(avoidNull(bean.getFilePath(), "./"));
-					
+
 					// SPDX Identifier
 					Cell sPDXIdentifier = getCell(row, cellIdx); cellIdx++;
 					sPDXIdentifier.setCellValue("SPDXRef-File-" + bean.getComponentId());
-					
+
 					// Package Identifier
 					cellIdx++;
-					
+
 					// File Type(s)
 					Cell fileType = getCell(row, cellIdx); cellIdx++;
 					fileType.setCellValue("SOURCE");
-					
+
 					// File Checksum(s)
-					 cellIdx++;
-					
+					cellIdx++;
+
 					// License Concluded
 					Cell cellLicenseConcluded = getCell(row, cellIdx); cellIdx++;
 					String srtLicenseName = "";
-					
+
 					for(OssComponentsLicense liBean : bean.getOssComponentsLicense()) {
 						if(!isEmpty(srtLicenseName)) {
 							srtLicenseName += " AND ";
 						}
-						
 						if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(liBean.getLicenseName()).toUpperCase())) {
 							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(liBean.getLicenseName()).toUpperCase());
-							
+
 							if(!isEmpty(liMaster.getShortIdentifier())) {
 								liBean.setLicenseName(liMaster.getShortIdentifier());
 							} else {
 								liBean.setLicenseName("LicenseRef-" + liBean.getLicenseName());
 							}
-							
+
 							if(!isEmpty(attributionText)) {
 								attributionText += "\n";
 							}
-							
+
 							attributionText += avoidNull(liMaster.getAttribution());
 						}
-						
+
 						liBean.setLicenseName(liBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-"));
-						
+
 						srtLicenseName += liBean.getLicenseName();
 					}
-					
+
 					if(!bean.getOssComponentsLicense().isEmpty() && bean.getOssComponentsLicense().size() > 1) {
 						srtLicenseName = "(" + srtLicenseName + ")";
 					}
-					
+
 					cellLicenseConcluded.setCellValue(srtLicenseName);
-					
+
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 					licenseInfoFromFiles.setCellValue(srtLicenseName); // License Concluded 란과 동일한 값으로 표시
-					
+
 					// License Comments
 					cellIdx++;
-					
+
 					// File Copyright Text
 					Cell fileCopyrightText = getCell(row, cellIdx); cellIdx++;
 					fileCopyrightText.setCellValue(StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762) );
-					
+
 					// Notice Text
 					cellIdx++;
-					
+
 					// Artifact of Project
 					cellIdx++;
-					
+
 					// Artifact of Homepage
 					cellIdx++;
-					
+
 					// Artifact of URL
 					cellIdx++;
-					
+
 					// Contributors
 					cellIdx++;
-					
+
 					// File Comment
 					cellIdx++;
-					
+
 					// File Dependencies
 					cellIdx++;
-					
+
 					// Attrinbution Info
 					Cell attributionInfo = getCell(row, cellIdx); cellIdx++;
 					attributionInfo.setCellValue(attributionText);
-					
+
 					// User Defined Columns...
-					cellIdx++;					
+					cellIdx++;
 					rowIdx ++;
 				}
 			}
-			
+
 			// sheetRelationships
 			{
 				int rowIdx = 1;
-				
+
 				for(String _identifierB : packageInfoidentifierList) {
 					int cellIdx = 0;
-					
+
 					Row row = sheetRelationships.getRow(rowIdx);
 					if(row == null) {
 						row = sheetRelationships.createRow(rowIdx);
@@ -2623,15 +2619,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					// SPDX Identifier A
 					Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
 					spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
-					
+
 					// Relationship
 					Cell relationship = getCell(row, cellIdx); cellIdx++;
 					relationship.setCellValue("DESCRIBES");
-				
+
 					// SPDX Identifier B
 					Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
 					spdxIdentifierB.setCellValue(_identifierB);
-					
+
 					rowIdx++;
 				}
 			}
@@ -2644,7 +2640,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				} catch (Exception e) {}
 			}
 		}
-		
+
 		return makeExcelFileId(wb,downloadFileName, "xls");
 	}
 	
