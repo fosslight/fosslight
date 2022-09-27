@@ -1545,7 +1545,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bean.setComponentId(bean.getRefComponentId());
 			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			bean.setReferenceId(prjId);
-			bean.setPartnerSaveFlag(CoConstDef.FLAG_YES);
 			
 			projectMapper.insertOssComponentsCopy(bean);
 			projectMapper.insertOssComponentsLicenseCopy(bean);

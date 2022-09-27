@@ -104,8 +104,6 @@ public class OssComponents extends ComBean implements Serializable {
 
 	private String ossNickName;
 	
-	private String partnerSaveFlag;
-
 	/* 2018-07-10 choye 추가  */
 	public String getComponentIdx() {
 		return componentIdx;
@@ -602,13 +600,5 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setSpdxIdentifier(String spdxIdentifier) {
 		this.spdxIdentifier = spdxIdentifier;
-	}
-
-	public String getPartnerSaveFlag() {
-		return partnerSaveFlag;
-	}
-
-	public void setPartnerSaveFlag(String partnerSaveFlag) {
-		this.partnerSaveFlag = partnerSaveFlag;
 	}
 }
