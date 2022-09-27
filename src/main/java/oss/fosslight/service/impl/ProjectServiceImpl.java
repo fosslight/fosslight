@@ -4848,6 +4848,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> resultMap = getPartnerOssList(component);
 		List<OssComponents> partnerList = (List<OssComponents>) resultMap.get("rows");
 		
+		partnerList = convertOssNickName3rd(partnerList);
+		
 		// Identification > 3rd Party Tab Insert
 		for(OssComponents bean : partnerList) {
 			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);

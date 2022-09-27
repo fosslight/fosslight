@@ -2942,10 +2942,10 @@
 					, #{referenceDiv}	
 					, (SELECT IFNULL(MAX(COMPONENT_IDX), 0) + 1 FROM OSS_COMPONENTS OC WHERE REFERENCE_ID=#{referenceId} AND REFERENCE_DIV=#{referenceDiv})
 					, OSS_ID
-					<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
+					<if test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
 					, #{ossName}
 					</if>
-					<if test="@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
+					<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
 					, OSS_NAME
 					</if>
 					, OSS_VERSION	
