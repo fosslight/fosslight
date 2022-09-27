@@ -1,79 +1,89 @@
 # 1. Update changelog
 # 2. Build the exe file and upload it in the release assets.
 # 3. Deploy the latest release to demo.fosslight.org
+# 4. Deploy Image to Docker Hub
 
 name: Release FOSSLight
 
 on:
   release:
-    types: [published]
+    types: [ published ]
 
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ref: [main, develop]
+        ref: [ main, develop ]
+
     steps:
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ matrix.ref }}
-    - name: update changelog with gren
-      env:
-        GREN_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        npm install github-release-notes@0.17.3
-        node_modules/.bin/gren changelog --override
-    - name: Commit files
-      run: |
-        git config --local user.name "github-actions[bot]"
-        git add CHANGELOG.md
-        git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ matrix.ref }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.ref }}
+
+      - name: update changelog with gren
+        env:
+          GREN_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm install github-release-notes@0.17.3
+          node_modules/.bin/gren changelog --override
+
+      - name: Commit files
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ matrix.ref }}
+
   build:
     needs: update-changelog
     runs-on: ubuntu-18.04
+
     steps:
-    - uses: actions/checkout@v3
-        
-    - name: Set up JDK 11
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: 'gradle'
+      - uses: actions/checkout@v3
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Build with Gradle
-      run: ./gradlew build --exclude-task test
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'gradle'
 
-    - name: Rename package
-      run: mv build/libs/FOSSLight*.war FOSSLight.war
-      
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./FOSSLight.war
-        asset_name: FOSSLight.war
-        asset_content_type: application/octet-stream
-  deploy:
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build --exclude-task test
+
+      - name: Rename package
+        run: mv build/libs/FOSSLight*.war FOSSLight.war
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./FOSSLight.war
+          asset_name: FOSSLight.war
+          asset_content_type: application/octet-stream
+
+  deploy_demo:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Sleep for 30 seconds
         uses: jakejarvis/wait-action@master
         with:
           time: '30s'
+
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -84,3 +94,28 @@ jobs:
           script: |
             cd /service/deploy/fosslight/
             bash /service/deploy/fosslight/deploy.sh
+
+  deploy_image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:${{ github.event.release.tag_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
