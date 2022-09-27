@@ -1,4 +1,8 @@
 $(document).ready(function () {
+
+  // Tutorial Mode = true
+  if (getCookie("tutorial") != null) {
+
   // Create elements to highlight
   let $button1 = $(document.getElementById("login_space"));
 
@@ -195,4 +199,25 @@ $(document).ready(function () {
     locate_tooltip();
     show_tooltip();
   }
+  }
+
+  // Tutorial Mode = false
+  else{
+        var tutorial_button1 = (document.getElementById("continue_tutorial"));
+        tutorial_button1.style.display = 'none';
+        tutorial_button2.style.display = 'none';
+  }
+
+    function getCookie(cookieName) {
+              var cookieValue = null;
+              if (document.cookie) {
+                  var array = document.cookie.split((escape(cookieName) + '='));
+                  if (array.length >= 2) {
+                      var arraySub = array[1].split(';');
+                      cookieValue = unescape(arraySub[0]);
+                  }
+              }
+              return cookieValue;
+           }
+
 });

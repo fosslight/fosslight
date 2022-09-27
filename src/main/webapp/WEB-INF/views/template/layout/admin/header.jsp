@@ -1,5 +1,4 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
-<script type="text/javascript" src="${ctxPath}/js/tutorial/tutorial-header.js?${jsVersion}"></script>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript">
 	$(document).ready(function() {
@@ -45,7 +44,6 @@
 			<input type="hidden" id="defaultTabAnchorArr" value="${sessUserInfo.defaultTabAnchor}" />
 			<span class="configurationSpan"><a href="#<c:url value="/configuration/edit"/>" class="add-tab" title="User Settings"><span><img src="${ctxPath}/images/settings.png" alt="FOSSLight Hub" width="14" height="14" /></span>&nbsp;&nbsp;${sessUserInfo.userName}</a></span>
 			<span class="userLogoutSpan"><a href="<c:url value="/session/logout-proc"/>" class="userLogoutA">Logout</a></span>
-			<input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
 			<p style="margin-top: 20px;"><marquee behavior="scroll" direction="left">${ct:getCodeExpString(ct:getConstDef('CD_MARQUEE'), ct:getConstDef('CD_DTL_CONTENTS'))}</marquee></p>
 		</div>
 		<div class="gnb">

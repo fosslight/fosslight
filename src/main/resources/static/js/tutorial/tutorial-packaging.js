@@ -1,4 +1,8 @@
 $(document).ready(function () {
+
+  // Tutorial Mode = true
+  if (getCookie("tutorial") != null) {
+
   // Array of elements to highlight
   let array_highlights = [];
   // Array of titles and content to be displayed by the tooltip
@@ -250,4 +254,22 @@ $(document).ready(function () {
     locate_tooltip();
     show_tooltip();
   }
+  }
+  else{
+        var tutorial_button25 = (document.getElementById("continue_tutorial_25"));
+        tutorial_button25.style.display = 'none';
+  }
+
+  function getCookie(cookieName) {
+            var cookieValue = null;
+            if (document.cookie) {
+                var array = document.cookie.split((escape(cookieName) + '='));
+                if (array.length >= 2) {
+                    var arraySub = array[1].split(';');
+                    cookieValue = unescape(arraySub[0]);
+                }
+            }
+            return cookieValue;
+         }
+
 });

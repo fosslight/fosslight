@@ -204,8 +204,6 @@
 			<table id="list"><tr><td></td></tr></table>
 			<div id="pager"></div>
 		</div>
-<<<<<<< HEAD
-=======
 		<!---->
 		<div class="btnLayout">
 			<span class="left">
@@ -223,7 +221,6 @@
 		</div>
 		<button id='continue_tutorial_25'>Continue tutorial (packaging)</button>
 		<!---->
->>>>>>> ca7d516f (튜토리얼 구현 완료 (p25-33))
 	</div>
 	<!---->
 </div>

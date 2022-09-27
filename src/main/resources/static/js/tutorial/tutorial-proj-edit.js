@@ -1,9 +1,19 @@
 $(document).ready(function () {
-  // Array of elements to highlight
-  let array_highlights = [];
+
+  // Tutorial Mode = true
+  if (getCookie("tutorial") != null) {
+  // Create elements to highlight
+  let $button1 = $(document.getElementById("projectForm"));
+
+  // Array of elements to highlight (button 1, 2, 3, 4)
+  let array_highlights = [$button1];
   // Array of titles and content to be displayed by the tooltip
   let array_tooltip_data = [
-    { title: "Start", content: "Packaging Column 내 start 버튼을 클릭합니다." },
+    {
+      title: "Project save",
+      content:
+        "Project 정보를 입력한 후 Save button을 클릭합니다.\n *필수입력:Project Name, Operating System, Distribution Type, Priority ",
+    },
   ];
 
   // create vail
@@ -11,6 +21,8 @@ $(document).ready(function () {
   let $veilDown = $('<div id="veil_down"></div>');
   let $veilLeft = $('<div id="veil_left"></div>');
   let $veilRight = $('<div id="veil_right"></div>');
+
+  $("#next_add").append($button1);
 
   // create tooltip
   let $tooltip = $(
@@ -250,4 +262,22 @@ $(document).ready(function () {
     locate_tooltip();
     show_tooltip();
   }
+  }
+  // Tutorial Mode = false
+  else{
+        var tutorial_button1 = (document.getElementById("continue_tutorial"));
+        tutorial_button1.style.display = 'none';
+  }
+
+  function getCookie(cookieName) {
+              var cookieValue = null;
+              if (document.cookie) {
+                  var array = document.cookie.split((escape(cookieName) + '='));
+                  if (array.length >= 2) {
+                      var arraySub = array[1].split(';');
+                      cookieValue = unescape(arraySub[0]);
+                  }
+              }
+              return cookieValue;
+           }
 });
