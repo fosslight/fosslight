@@ -370,6 +370,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		Map<String, Object> result = new HashMap<>();
 		String resCd = "10";
 		String resMsg = "Success";
+		StringBuilder resAddress = new StringBuilder();
 
 		T2CodeDtl loginAuth = new T2CodeDtl(CoConstDef.CD_LOGIN_SETTING);
 		List<T2CodeDtl> loginAuthList = codeMapper.selectCodeDetailList(loginAuth);
@@ -379,6 +380,14 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 
 
 		if(loginDetailMap != null) {
+			resAddress.append(loginDetailMap.get(CoConstDef.CD_LDAP_PROTOCOL));
+			resAddress.append("://");
+			resAddress.append(loginDetailMap.get(CoConstDef.CD_LDAP_URL));
+			resAddress.append(":");
+			resAddress.append(loginDetailMap.get(CoConstDef.CD_LDAP_PORT));
+			resAddress.append(" ");
+			resAddress.append(loginDetailMap.get(CoConstDef.CD_LDAP_SEARCH_ID));
+
 			LdapContextSource contextSource = new LdapContextSource();
 
 			loginAuthList.stream().forEach(c -> {
@@ -432,6 +441,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 
 			result.put("resCd", resCd);
 			result.put("resMsg", resMsg);
+			result.put("resAddress", resAddress);
 		} else {
 			resCd = "00";
 			resMsg = "loginDetail is null";

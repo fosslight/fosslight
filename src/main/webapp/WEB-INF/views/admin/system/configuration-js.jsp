@@ -233,7 +233,7 @@
                     contentType: 'application/json',
                     success: function (data) {
                         if (data.resCd == "10") {
-                            alertify.success('Succeeded')
+                            alertify.success('Succeeded<br>' + data.resAddress)
                         } else if (data.resCd == "00") {
                             alertify.error(data.resMsg)
                         }
