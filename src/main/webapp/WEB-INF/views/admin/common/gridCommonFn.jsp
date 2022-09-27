@@ -537,7 +537,7 @@ var fn_grid_com = {
 				
 				// 로우 추가
 				var _tempRandId = $.jgrid.randId();
-				target.jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, licenseDiv:"S", excludeYn: "N", customBinaryYn: "Y"}, "last");
+				target.jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, licenseDiv:"S", excludeYn: "N", customBinaryYn: "Y"}, "first");
 				// 경고 클래스 설정
 				fn_grid_com.setWarningClass(target,_tempRandId,["ossName","licenseName"]);
 				// 추가된 로우 에디트 설정
@@ -567,7 +567,6 @@ var fn_grid_com = {
 
 				// 서브 그리드 확장 및 숨기기
 				$("#"+div+" #"+_tempRandId).find("td:first").removeClass("sgcollapsed").find("a").hide();
-				$("#"+div+" #"+_tempRandId).next().hide();
 				
 				// 라스트 셀 설정
 				_mainLastsel=_tempRandId;

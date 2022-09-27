@@ -327,8 +327,7 @@
 								<div class="pb5">
 									<span class="selectSet w600">
 										<strong for="division" title="Watcher part selected value">Select Division</strong>
-										<select id="division" name="division" ${ct:isAdmin() ? '' : 'disabled="disabled"'} >
-											<option value=""></option>
+										<select id="division" name="division" ${detail.viewOnlyFlag eq 'N' ? '' : 'disabled="disabled"'} >
 											${ct:genOptionSelected(ct:getConstDef('CD_USER_DIVISION'), detail.division)}
 										</select>
 									</span>
@@ -364,7 +363,7 @@
 				<c:if test="${not empty detail.partnerId}">
 					<input type="button" value="Share URL" class="btnColor red" onclick="fn.shareUrl();" />
 				</c:if>
-                <c:if test="${not empty detail.partnerId and detail.viewOnlyFlag ne 'Y'}">
+                <c:if test="${not empty detail.partnerId}">
                     <input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>
 					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/
                 </c:if>

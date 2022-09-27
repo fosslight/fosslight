@@ -839,8 +839,7 @@ public class PartnerController extends CoTopComponent{
 				String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PARTER_CONF));
 
 				if(!isEmpty(userComment)) {
-					userComment = avoidNull(userComment) + "<br />" + _tempComment;
-					mailbean.setComment(userComment);
+					mailbean.setComment(avoidNull(userComment) + "<br />" + _tempComment);
 				} else{
 					mailbean.setComment(_tempComment);
 				}

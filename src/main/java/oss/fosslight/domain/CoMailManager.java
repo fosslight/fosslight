@@ -651,7 +651,8 @@ public class CoMailManager extends CoTopComponent {
 						convertDataMap.put("contentsSubTitle", subTitle);
 					}
 				} else if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_COMPLETE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())
-						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())) {
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION.equals(bean.getMsgType()) && !isEmpty(bean.getParamExpansion1())) {
 					String subTitle = "";
 					
 					subTitle += "<br>" + bean.getParamExpansion1();
@@ -724,6 +725,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE:
+    		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT:
@@ -860,6 +862,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMsgType())
@@ -925,6 +928,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED.equals(bean.getMsgType())
@@ -3295,7 +3299,8 @@ public class CoMailManager extends CoTopComponent {
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(coMail.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(coMail.getMsgType()) 
-						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(coMail.getMsgType()) ) {
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE.equals(coMail.getMsgType()) 
+						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION.equals(coMail.getMsgType()) ) {
 				InternetAddress from = new InternetAddress(mailFrom, "FOSSLight Hub" + " (FOSSLight)", "UTF-8");
 				helper.setFrom(from);
 			}

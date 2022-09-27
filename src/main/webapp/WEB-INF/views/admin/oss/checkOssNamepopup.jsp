@@ -18,6 +18,7 @@
 			var commentId = "";
 			var referenceId = '${projectInfo.prjId}';
 			var referenceDiv = '${projectInfo.referenceDiv}';
+			var targetName = '${projectInfo.targetName}';
 			var evt_fn = {
 				init : function(){
 					$("#btnChangeOss").on("click", function(){
@@ -117,15 +118,11 @@
 											if(!failFlag){
 												var successMsg = '<spring:message code="msg.project.check.oss.name.success" />';
 
-												if("20" == rowdata["referenceDiv"]){
-													/**
-													 * reload identication tab you're working on
-													 */
+												if("self" == targetName) {
+													opener.location.href = `/selfCheck/edit/\${rowdata["referenceId"]}`;
+												} else if ("partner" == targetName) {
 													opener.location.href = `/partner/edit/\${rowdata["referenceId"]}`;
 												} else {
-													/**
-													 * identifcaiton tab order you're working on
-													 */
 													var identificationTabOrder;
 
 													/**

@@ -332,9 +332,6 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-                    	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','11')" class="btnColor red" style="width: 145px;" />
-						</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
 							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
@@ -416,7 +413,7 @@
 												</div>
 											</div>
 											<div class="uploadSet">
-												<label>binary.txt :</label>
+												<label>fosslight_binary.txt :</label>
 												<span class="fileex_back" <c:if test="${isCommited}">style="display:none;"</c:if>>
 													<div id="binBinaryFile">upload</div>
 												</span>
@@ -505,9 +502,6 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-                    	<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','15')" class="btnColor red" style="width: 145px;" />
-						</c:if>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
 							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
@@ -616,7 +610,7 @@
 												</div>
 											</div>
 											<div class="uploadSet">
-												<label>result.txt :</label>
+												<label>fosslight_binary.txt :</label>
 												<span class="fileex_back">
 													<div id="androidResultFile">upload</div>
 												</span>
@@ -694,7 +688,7 @@
 													</div>
 												</div>
 												<div class="uploadSet inblock">
-													<label class="left">result.txt :</label>
+													<label class="left">fosslight_binary.txt :</label>
 													<span class="fileex_back">
 														<div id="androidResultFileDummy">upload</div>
 													</span>
@@ -730,9 +724,8 @@
 							<input type="button" value="Supplement NOTICE.html" onclick="binAndroid_fn.showDialog('NOTICE')" class="btnColor red binAndroidBtn supplementNotice" style="width: 165px;" />
 						</c:if>
                     	<c:if test="${ct:isAdmin()}">
-							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','14')" class="btnColor red" style="width: 145px;" />
-							<input type="button" value="Check License Text" onclick="fn_grid_com.checkLicenseTextValidation('${project.prjId}')" class="btnColor red" style="width: 130px;" />
-						</c:if>
+	                        <input type="button" value="Check License Text" onclick="fn_grid_com.checkLicenseTextValidation('${project.prjId}')" class="btnColor red" style="width: 130px;" />
+                    	</c:if>
                     	<c:if test="${project.dropYn ne 'Y'}">
 							<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
 							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 115px;" />
@@ -774,17 +767,35 @@
 				<!---->
 				<br/>
 				<div class="btnLayout">
-					<c:if test="${autoAnalysisFlag}">
-						<span class="left">
+					<span class="left">
+						<c:if test="${autoAnalysisFlag}">
 							<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
-								<input type="button" value="Auto Analysis" class="btnColor red idenAnalysis" onclick="bom_fn.analysisValidation()" style="width:120px;"/>
-								<input type="button" value="Analysis Result" class="btnColor red idenAnalysisResult" onclick="bom_fn.showAnalysisResult()" style="display:none;width:120px;"/>
-							</c:if>
-						</span>
-					</c:if>
+								 <input type="button" value="Auto Analysis" class="btnColor red idenAnalysis" onclick="bom_fn.analysisValidation()" style="width:120px;"/>
+								 <input type="button" value="Analysis Result" class="btnColor red idenAnalysisResult" onclick="bom_fn.showAnalysisResult()" style="display:none;width:120px;"/>
+							 </c:if>
+						</c:if>
+						<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
+							<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${project.prjId}','13')" class="btnColor red" style="width: 145px;" />
+						</c:if>
+					</span>
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
-					<span class="right">
-                        <input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
+                    <span class="right">
+						<c:if test="${project.identificationStatus ne 'CONF'}">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
+						</c:if>
+						<c:if test="${project.identificationStatus eq 'CONF'}">
+							<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+								<input id="Export" type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList()"/>
+								<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" onclick="bom_fn.selectDownloadFile()">
+									<a id="report_sub" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+									<a id="Spreadsheet_sub" style="display: block;">SPDX (Spreadsheet)</a>
+									<a id="RDF_sub" style="display: block;">SPDX (RDF)</a>
+									<a id="TAG_sub" style="display: block;">SPDX (TAG)</a>
+									<a id="JSON_sub" style="display: block;">SPDX (JSON)</a>
+									<a id="YAML_sub" style="display: block;">SPDX (YAML)</a>
+								</div>
+							</div>
+						</c:if>
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 							<input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />

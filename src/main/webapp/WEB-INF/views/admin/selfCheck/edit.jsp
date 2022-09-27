@@ -139,7 +139,17 @@
 	            <input id="delete" type="button" value="Delete" class="btnColor left selfCheckDelete" /><!-- 2018-07-19 choye 추가 class에  selfCheckDelete -->
 	            <span class="right">
 	            <a class="iconSet help left" id="helpLink_vulerabiityExport" style="display: none; position:relative; cursor: pointer; right:10px;"></a>
-	                <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
+	                <div id="ExportContainer" class="inblock " style="vertical-align:top; position: relative;">
+						<input id="Export" type="button" value="Export" class="btnColor red btnExport" onclick="fn.exportList()"/>
+						<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" onclick="fn.selectDownloadFile()">
+							<a id="report_sub" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+							<a id="Spreadsheet_sub" style="display: block;">SPDX (Spreadsheet)</a>
+							<a id="RDF_sub" style="display: block;">SPDX (RDF)</a>
+							<a id="TAG_sub" style="display: block;">SPDX (TAG)</a>
+							<a id="JSON_sub" style="display: block;">SPDX (JSON)</a>
+							<a id="YAML_sub" style="display: block;">SPDX (YAML)</a>
+						</div>
+					</div>
 	                <input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
 	                <input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
 	                <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />

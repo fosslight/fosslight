@@ -187,9 +187,7 @@
 							<tr>
 								<th class="dCase  txStr">Division</th>
 								<td class="dCase">
-									<c:forEach items="${ct:getCodeValues(ct:getConstDef('CD_USER_DIVISION'))}" var="code" varStatus="status">
-										<c:if test="${code[0] eq project.division}">${code[1]}</c:if>
-									</c:forEach>
+									${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), project.division)}
 								</td>
 							</tr>
 	                        <tr>
