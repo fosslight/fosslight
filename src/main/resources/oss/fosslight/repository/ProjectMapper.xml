@@ -2942,10 +2942,10 @@
 					, #{referenceDiv}	
 					, (SELECT IFNULL(MAX(COMPONENT_IDX), 0) + 1 FROM OSS_COMPONENTS OC WHERE REFERENCE_ID=#{referenceId} AND REFERENCE_DIV=#{referenceDiv})
 					, OSS_ID
-					<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
+					<if test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
 					, #{ossName}
 					</if>
-					<if test="@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
+					<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
 					, OSS_NAME
 					</if>
 					, OSS_VERSION	
@@ -2994,26 +2994,42 @@
 			SELECT
 					#{componentId}
 					, LICENSE_ID
-					<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
-					, #{licenseName}
-					</if>
-					<if test="@oss.fosslight.util.StringUtil@isEmpty(partnerSaveFlag)">
+				<if test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
+					, IFNULL(NULLIF((SELECT SHORT_IDENTIFIER FROM LICENSE_MASTER WHERE LICENSE_NAME = T1.LICENSE_NAME), ''), T1.LICENSE_NAME) AS LICENSE_NAME
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
 					, LICENSE_NAME
-					</if>
+				</if>
 					, LICENSE_TEXT
 					, COPYRIGHT_TEXT
 					, EXCLUDE_YN
 			FROM 
-				OSS_COMPONENTS_LICENSE
-			WHERE 
-				COMPONENT_ID = #{refComponentId}
-			<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
-				AND EXCLUDE_YN <![CDATA[<>]]> 'Y'
-				<if test="!@oss.fosslight.util.StringUtil@equals('Y', adminCheckYn)">
-				AND LICENSE_ID NOT IN (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND IFNULL(OBLIGATION_DISCLOSING_SRC_YN,'N') = 'N' AND IFNULL(OBLIGATION_NOTIFICATION_YN, 'N') = 'N' AND IFNULL(OBLIGATION_NEEDS_CHECK_YN,'N') = 'N')
+			(
+				SELECT 
+					COMPONENT_LICENSE_ID
+					, LICENSE_ID
+				<if test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
+					, IFNULL(NULLIF((SELECT LICENSE_NAME FROM LICENSE_NICKNAME WHERE LICENSE_NICKNAME = OCL.LICENSE_NAME), ''), OCL.LICENSE_NAME) AS LICENSE_NAME
 				</if>
-			</if>
-			ORDER BY COMPONENT_LICENSE_ID
+				<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
+					, LICENSE_NAME
+				</if>
+					, LICENSE_TEXT
+					, COPYRIGHT_TEXT
+					, EXCLUDE_YN
+				FROM 
+					OSS_COMPONENTS_LICENSE OCL
+				WHERE 
+					COMPONENT_ID = #{refComponentId}
+				<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
+					AND EXCLUDE_YN <![CDATA[<>]]> 'Y'
+					<if test="!@oss.fosslight.util.StringUtil@equals('Y', adminCheckYn)">
+						AND LICENSE_ID NOT IN (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND IFNULL(OBLIGATION_DISCLOSING_SRC_YN,'N') = 'N' AND IFNULL(OBLIGATION_NOTIFICATION_YN, 'N') = 'N' AND IFNULL(OBLIGATION_NEEDS_CHECK_YN,'N') = 'N')
+					</if>
+				</if>
+			) T1
+			
+			ORDER BY T1.COMPONENT_LICENSE_ID
 	</insert>
 	
 	<update id="updateSrcOssList" parameterType="oss.fosslight.domain.ProjectIdentification" useGeneratedKeys="true" keyProperty="componentId">
