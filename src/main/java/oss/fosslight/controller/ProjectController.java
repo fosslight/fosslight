@@ -2257,8 +2257,13 @@ public class ProjectController extends CoTopComponent {
 		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();
 		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
-
-		List<List<ProjectIdentification>> ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent);
+		
+		List<List<ProjectIdentification>> ossComponentLicense = null;
+		if(code.equals(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
+			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent, true);
+		} else {
+			ossComponentLicense = CommonFunction.setOssComponentLicense(ossComponent);
+		}
 		
 		ossComponentLicense = CommonFunction.mergeGridAndSession(
 				CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense,
