@@ -1010,7 +1010,7 @@ public class OssController extends CoTopComponent{
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
 			if (declaredLicenses == null || declaredLicenses.isEmpty()) {
-				log.warn("DeclaredLicenses is null:" + oss.getOssName());
+				log.debug("DeclaredLicenses is null:" + oss.getOssName());
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Required missing)");
 				ossDataMapList.add(ossDataMap);
@@ -1018,7 +1018,7 @@ public class OssController extends CoTopComponent{
 			}
 
 			if (Objects.isNull(oss.getOssName()) || oss.getOssName().isBlank()) {
-				log.warn("OSS name is required.");
+				log.debug("OSS name is required.");
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Required missing)");
 				ossDataMapList.add(ossDataMap);
@@ -1030,7 +1030,7 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.info("Unconfirmed license:" + licenseName);
+					log.debug("Unconfirmed license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
@@ -1060,13 +1060,13 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.info("Unconfirmed license:" + licenseName);
+					log.debug("Unconfirmed license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
 			}
 			if (licenseCheck) {
-				log.warn("Add failed due to declared license:" + oss.getOssName());
+				log.debug("Add failed due to declared license:" + oss.getOssName());
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Unconfirmed license)");
 				ossDataMapList.add(ossDataMap);
@@ -1086,7 +1086,7 @@ public class OssController extends CoTopComponent{
 
 			boolean checkDuplicated = true;
 			if (ossService.checkExistsOss(oss) != null) {
-				log.warn("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
+				log.debug("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Duplicated Version)");
 				ossDataMapList.add(ossDataMap);
@@ -1097,7 +1097,7 @@ public class OssController extends CoTopComponent{
 				nameCheck.setOssNameTemp(oss.getOssName());
 				OssMaster checkName = ossService.checkExistsOssNickname2(nameCheck);
 				if (checkName != null) {
-					log.warn(oss.getOssName() + " is stored as a nick in " + checkName.getOssName());
+					log.debug(oss.getOssName() + " is stored as a nick in " + checkName.getOssName());
 					ossDataMap.put("gridId", oss.getGridId());
 					ossDataMap.put("status", "X (Duplicated : " + oss.getOssName() + ")");
 					ossDataMapList.add(ossDataMap);
@@ -1112,7 +1112,7 @@ public class OssController extends CoTopComponent{
 					nickCheck.setOssNameTemp(oss.getOssName());
 					OssMaster checkNick = ossService.checkExistsOssNickname(nickCheck);
 					if (checkNick != null) {
-						log.warn(nick + " is stored as a nick or name in " + checkNick.getOssName());
+						log.debug(nick + " is stored as a nick or name in " + checkNick.getOssName());
 						ossDataMap.put("gridId", oss.getGridId());
 						ossDataMap.put("status", "X (Duplicated : " + nick + ")");
 						ossDataMapList.add(ossDataMap);
