@@ -84,41 +84,36 @@
 									</tr>
 									#end
 								</table>
-								#if( $partner_disclose_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; List of OSS to Disclose &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $partner_disclose_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end
-								#if( $partner_oss_info )
+
 								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<tr>
 										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
 										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
 										<th style="padding:5px;background:#f0f0f0;">License Name</th>
+										<th style="padding:5px;background:#f0f0f0;">Need to disclose</th>
 									</tr>
-									#foreach( $oss in $partner_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
+									#if( $partner_disclose_oss_info )
+										#foreach( $oss in $partner_disclose_oss_info )
+										<tr>
+											<td style="padding:5px;">$!oss.ossName</td>
+											<td style="padding:5px;">$!oss.ossVersion</td>
+											<td style="padding:5px;">$!oss.licenseName</td>
+											<td style="padding:5px; text-align: center">O</td>
+										</tr>
+										#end
+									#end
+									#if( $partner_oss_info )
+										#foreach( $oss in $partner_oss_info )
+										<tr>
+											<td style="padding:5px;">$!oss.ossName</td>
+											<td style="padding:5px;">$!oss.ossVersion</td>
+											<td style="padding:5px;">$!oss.licenseName</td>
+											<td style="padding:5px;"></td>
+										</tr>
+										#end
 									#end
 								</table>
-								#end
-
 
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
 								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
