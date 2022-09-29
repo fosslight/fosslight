@@ -124,4 +124,6 @@ public interface OssService extends HistoryConfig{
 	List<String> getOssNicknameListWithoutOwn(OssMaster ossMaster, List<String> checkList, List<String> duplicatedList);
 
 	Map<String, Object> sendMailForSaveOss(Map<String, Object> resMap);
+
+	List<OssMaster> getDeactivateOssList();
 }
