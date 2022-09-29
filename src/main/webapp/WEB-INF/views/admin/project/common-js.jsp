@@ -1243,19 +1243,25 @@ var com_fn = {
         if(rowCheckedArr.length > 0){
             fn_grid_com.totalGridSaveMode(targetGird);
 
-            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=' + targetGird + '"/>';
-
 			var _popup = null;
 			
             if(_popup == null || _popup.closed){
-                _popup = window.open(url, "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+            	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+            	$("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#bulkEditForm > input[name=target]").val(targetGird);
+				$("#bulkEditForm").submit();
 
                 if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
                     alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
                 }
             } else {
                 _popup.close();
-                _popup = window.open(url, "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                $("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#bulkEditForm > input[name=target]").val(targetGird);
+				$("#bulkEditForm").submit();
             }
         }else{
             alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
