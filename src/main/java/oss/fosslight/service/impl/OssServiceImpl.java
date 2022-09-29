@@ -3615,7 +3615,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
-	public List<OssMaster> getDeactivateOssList() {
+	public List<String> getDeactivateOssList() {
 		return ossMapper.getDeactivateOssList();
 	}
 }

@@ -235,5 +235,5 @@ public interface OssMapper {
 
 	List<String> selectMultiOssList(OssMaster ossMaster);
 
-	List<OssMaster> getDeactivateOssList();
+	List<String> getDeactivateOssList();
 }

@@ -125,5 +125,5 @@ public interface OssService extends HistoryConfig{
 
 	Map<String, Object> sendMailForSaveOss(Map<String, Object> resMap);
 
-	List<OssMaster> getDeactivateOssList();
+	List<String> getDeactivateOssList();
 }
