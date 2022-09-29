@@ -6,13 +6,10 @@
 package oss.fosslight.service.impl;
 
 import com.google.gson.JsonObject;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
 import javax.naming.Context;
+import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
@@ -22,6 +19,10 @@ import javax.naming.directory.SearchResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.query.LdapQuery;
+import org.springframework.ldap.query.LdapQueryBuilder;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -79,6 +80,9 @@ public class T2UserServiceImpl implements T2UserService {
   ProjectMapper projectMapper;
   @Autowired
   PartnerMapper partnerMapper;
+
+  @Autowired
+  LdapTemplate ldapTemplate;
 
   @Override
   public List<T2Users> getAllUsers(T2Users t2Users) {
@@ -596,81 +600,41 @@ public class T2UserServiceImpl implements T2UserService {
     return userMapper.updateUserNameDivision(userInfo);
   }
 
-  private Hashtable<String, String> makeLdapProperty() {
-
-    Hashtable<String, String> properties = new Hashtable<>();
-
-    properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
-    properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-    properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-    properties.put(Context.SECURITY_PRINCIPAL, CoConstDef.AD_LDAP_LOGIN.LDAP_PRINCIPAL.getValue());
-    properties.put(Context.SECURITY_CREDENTIALS, CoConstDef.AD_LDAP_LOGIN.LDAP_CREDENTIAL.getValue());
-
-    return properties;
-  }
 
   public String[] checkUserInfo(T2Users userInfo) {
-    return checkUserInfo(userInfo, makeLdapProperty());
-  }
-
-  private String[] checkUserInfo(T2Users userInfo, Hashtable<String, String> property) {
     String[] result = new String[2];
 
-    String[] attrIDs = {"displayName", "mail"};
-    String filter = String.format(
-            "(%s=%s)",
-            CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID), userInfo.getUserId()
-    );
+    String[] attrIDs = {"mail", "displayName"};
 
-    DirContext con = null;
-    SearchControls constraints = new SearchControls();
-    NamingEnumeration<SearchResult> m_ne = null;
-    try {
-      con = new InitialDirContext(property);
-      constraints.setSearchScope(Integer.parseInt(
-              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_SEARCH_SCOPE)
-      ));
+    String uid = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID);
+    LdapQuery query = LdapQueryBuilder.query().where(uid).is(userInfo.getUserId());
 
-      if (attrIDs != null) {
-        constraints.setReturningAttributes(attrIDs);
-      }
+    List<Map<String,String>> searchResult = ldapTemplate.search(
+            query,
+            (AttributesMapper<Map<String, String>>) attr -> {
+                Map<String, String> map = new HashMap<>();
+                for (String id : attrIDs) {
+                  try {
+                      map.put(id, attr.get(id).get().toString());
+                  } catch (NameNotFoundException | NullPointerException e) {
+                      map.put(id, "");
+                  }
+                }
+                return map;
+            });
 
-      String base = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_BASE_DN);
-      m_ne = con.search(base, filter, constraints);
-    } catch (NamingException e) {
-      log.error(e.getMessage(), e);
-    } finally {
-      if (con != null) {
-        try {
-          con.close();
-        } catch (NamingException e) {
-        }
-      }
-    }
-
-    try {
-      SearchResult sr = null;
-
-      while (m_ne.hasMoreElements()) {
-        sr = (SearchResult) m_ne.next();
-        if (sr != null) {
-          // 이름/직책/부서(email)
-          String displayName = (String) sr.getAttributes().get("displayName").get();
-          String email = (String) sr.getAttributes().get("mail").get();
+      for (Map<String, String> map : searchResult) {
+          String displayName = map.get("displayName");
+          String email = map.get("mail");
           log.warn("**" + displayName + ",mail:" + email);
           if (StringUtil.isEmptyTrimmed(displayName)) {
-            result[0] = email.split("@")[0];
+              result[0] = email.split("@")[0];
           } else {
-            result[0] = displayName.replaceAll("\\(" + email + "\\)", "").trim();
+              result[0] = displayName.replaceAll("\\(" + email + "\\)", "").trim();
           }
           result[1] = email;
-        }
       }
-      return result;
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
 
-      return null;
-    }
+      return result;
   }
 }

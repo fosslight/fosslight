@@ -13,9 +13,13 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import javax.persistence.Table;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.query.LdapQuery;
+import org.springframework.ldap.query.LdapQueryBuilder;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,12 +37,17 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 @Component
 @Slf4j
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
   @Autowired
   T2UserService userService;
+
+  @Autowired
+  LdapTemplate ldapTemplate;
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -111,39 +120,17 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         userService.addNewUsers(vo);
       }
 
-      /*
-      String principal = String.format(
-              "%s=%s,%s",
-              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID),
-              user_id,
-              CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_BASE_DN)
-              );
-       */
-
-      Hashtable<String, String> properties = new Hashtable<>();
-
-      properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
-      properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-      properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-      properties.put(Context.SECURITY_PRINCIPAL, "cn=admin,dc=fosslight,dc=org");
-      properties.put(Context.SECURITY_CREDENTIALS, "admin");
-
-      DirContext con = null;
       try {
-        con = new InitialDirContext(properties);
-        log.warn("LDAP LOGIN!! userId : " + user_id);
+        String uid = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_UID);
+
+        ldapTemplate.authenticate(query().where(uid).is(user_id), user_pw);
+
         isAuthenticated = true;
-      } catch (NamingException e) {
-        log.warn("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
-        log.warn(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-      } finally {
-        if (con != null) {
-          try {
-            con.close();
-          } catch (Exception e) {
-          }
-        }
+      } catch (Exception e) {
+        isAuthenticated = false;
       }
+
+
     }
     return isAuthenticated;
   }
