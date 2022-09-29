@@ -234,4 +234,6 @@ public interface OssMapper {
 	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
 
 	List<String> selectMultiOssList(OssMaster ossMaster);
+
+	List<OssMaster> getDeactivateOssList();
 }

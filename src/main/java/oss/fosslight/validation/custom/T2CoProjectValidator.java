@@ -26,6 +26,7 @@ import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.service.OssService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
@@ -34,6 +35,7 @@ import oss.fosslight.validation.T2CoValidator;
 @Slf4j
 public class T2CoProjectValidator extends T2CoValidator {
 	private ProjectService projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
+	private OssService ossService = (OssService) getWebappContext().getBean(OssService.class);
 	private T2UserService userService = (T2UserService) getWebappContext().getBean(T2UserService.class);
 	private List<ProjectIdentification> ossComponetList = null;
 	private List<List<ProjectIdentification>> ossComponentLicenseList = null;
@@ -1645,6 +1647,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 				ossInfo = new HashMap<>();
 			}
 
+			// check deactivate oss info
+			List<OssMaster> deactivateOssList = ossService.getDeactivateOssList();
+			
 			// checkBasicError : REQUIRED, LENGTH, FORMAT 만 체크!
 			for (ProjectIdentification bean : ossComponetList) {
 				boolean hasError = false;
@@ -1799,19 +1804,21 @@ public class T2CoProjectValidator extends T2CoValidator {
 					} else {
 						OssMaster om = null;
 						
-						for(String key : CoCodeManager.OSS_INFO_UPPER.keySet()) {
-							if(key.contains(bean.getOssName().toUpperCase())) {
-								om = CoCodeManager.OSS_INFO_UPPER.get(key);
-								break;
+						if(!isEmpty(bean.getOssName())) {
+							for(OssMaster deactivateOm : deactivateOssList) {
+								if(deactivateOm.getOssName().toUpperCase().equals(bean.getOssName().toUpperCase())) {
+									om = deactivateOm;
+									break;
+								}
 							}
-						}
-						
-						if(om != null) {
-							if(CoConstDef.FLAG_YES.equals(om.getDeactivateFlag())){
-								if (CommonFunction.isAdmin()) {
-									errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-								} else {
-									diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+							
+							if(om != null) {
+								if(CoConstDef.FLAG_YES.equals(om.getDeactivateFlag())){
+									if (CommonFunction.isAdmin()) {
+										errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+									} else {
+										diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+									}
 								}
 							}
 						}

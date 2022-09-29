@@ -2170,4 +2170,8 @@
 		GROUP BY T1.OSS_NAME
 		HAVING COUNT(T1.OSS_NAME) > 1
 	</select>
+	
+	<select id="getDeactivateOssList" resultType="oss.fosslight.domain.OssMaster">
+		SELECT * FROM OSS_MASTER WHERE USE_YN = 'Y' AND DEACTIVATE_FLAG = 'Y'
+	</select>
 </mapper>
