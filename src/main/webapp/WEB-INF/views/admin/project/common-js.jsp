@@ -34,10 +34,10 @@ var com_evt = {
 				e.preventDefault();
 				
 				if(com_fn.isAndroidOnly()) {
-					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData()};
+					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 					
 	 				if($("#ignoreBinaryDbFlag")) {
-						data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
+						data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 					}
 					
 					// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
@@ -67,10 +67,10 @@ var com_evt = {
 							return false;
 						}
 
-						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData()};
+						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 
 	 					if($("#ignoreBinaryDbFlag")) {
-							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
+							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val())};
 						}
 
 	 					com_fn.checkSave(data, "CONF");	
@@ -108,7 +108,7 @@ var com_evt = {
 
 						return false;
 					} else {
-						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "PROG", "userComment" : CKEDITOR.instances['editor2'].getData()};
+						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "PROG", "userComment" : replaceWithLink(CKEDITOR.instances['editor2'].getData())};
 
 						com_fn.checkSave(data, "PROG");
 					}
@@ -161,7 +161,7 @@ var com_evt = {
 								}
 							}
 							
-							var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REQ", "userComment" : CKEDITOR.instances['editor'].getData()};
+							var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REQ", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 
 							com_fn.checkSave(data, "REQ");
 						}
@@ -188,7 +188,7 @@ var com_evt = {
 				}
 				
 				if(Bom_Save_Flg) {
-					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REV", "userComment" : CKEDITOR.instances['editor'].getData()};
+					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "REV", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 
 					com_fn.checkSave(data, "REV");
 				} else {
@@ -534,7 +534,7 @@ var com_fn = {
 	},
 	saveEditor : function(){
 		//코멘트 임시저장
-		var editorVal = CKEDITOR.instances.editor.getData();
+		var editorVal = replaceWithLink(CKEDITOR.instances.editor.getData());
 		var register = '${sessUserInfo.userId}';
 		var param = {referenceId : '${project.prjId}', referenceDiv :'11', contents : editorVal};
 
@@ -559,7 +559,7 @@ var com_fn = {
 		});
 	},
 	sendEditor : function(type){
-		var editorVal = CKEDITOR.instances.editor.getData(); //코멘트 저장
+		var editorVal = replaceWithLink(CKEDITOR.instances.editor.getData()); //코멘트 저장
 
 		if(!editorVal || editorVal == "") {
 			alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
@@ -612,7 +612,7 @@ var com_fn = {
 			});
 		}
 		
-		var editorVal = CKEDITOR.instances.editor.getData();
+		var editorVal = replaceWithLink(CKEDITOR.instances.editor.getData());
 		
 		if(!editorVal || editorVal == "") {
 			alertify.alert("<spring:message code="msg.project.enter.comment" />", function(){});
