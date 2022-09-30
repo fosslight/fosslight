@@ -494,3 +494,7 @@
 		<input type="button" value="OK" class="btnColor red modifyComment" />
 	</div>
 </div>
+<form id="partnerBulkEditForm" method="POST" action="<c:url value="/oss/ossBulkEditPopup"/>" target="bulkEditViewPartnerPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>

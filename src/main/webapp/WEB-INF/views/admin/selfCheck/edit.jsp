@@ -334,4 +334,8 @@
 		<input type="button" value="OK" class="btnColor red sheetApply" onclick="src_fn.getSheetData()">
 	</div>
 </div>
+<form id="selfBulkEditForm" method="POST" action="<c:url value="/oss/ossBulkEditPopup"/>" target="bulkEditViewSelfPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>
 <!-- //wrap -->

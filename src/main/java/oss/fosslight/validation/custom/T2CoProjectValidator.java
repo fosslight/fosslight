@@ -1648,7 +1648,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 			}
 
 			// check deactivate oss info
-			List<OssMaster> deactivateOssList = ossService.getDeactivateOssList();
+			List<String> deactivateOssList = ossService.getDeactivateOssList();
+			deactivateOssList.replaceAll(String::toUpperCase);
 			
 			// checkBasicError : REQUIRED, LENGTH, FORMAT 만 체크!
 			for (ProjectIdentification bean : ossComponetList) {
@@ -1802,23 +1803,18 @@ public class T2CoProjectValidator extends T2CoValidator {
 							}
 						}
 					} else {
-						OssMaster om = null;
+						boolean deactivateFlag = false;
 						
 						if(!isEmpty(bean.getOssName())) {
-							for(OssMaster deactivateOm : deactivateOssList) {
-								if(deactivateOm.getOssName().toUpperCase().equals(bean.getOssName().toUpperCase())) {
-									om = deactivateOm;
-									break;
-								}
+							if(deactivateOssList.contains(bean.getOssName().toUpperCase())) {
+								deactivateFlag = true;
 							}
 							
-							if(om != null) {
-								if(CoConstDef.FLAG_YES.equals(om.getDeactivateFlag())){
-									if (CommonFunction.isAdmin()) {
-										errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-									} else {
-										diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
-									}
+							if(deactivateFlag) {
+								if (CommonFunction.isAdmin()) {
+									errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+								} else {
+									diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
 								}
 							}
 						}
