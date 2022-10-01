@@ -985,7 +985,7 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model) {
-		List<Map<String, String>> ossNameMapList = new ArrayList<>();
+		List<Map<String, String>> ossDataMapList = new ArrayList<>();
 		Map<String, Object> resMap = new HashMap<>();
 
 		if (ossMasters.isEmpty()) {
@@ -994,9 +994,9 @@ public class OssController extends CoTopComponent{
 			return makeJsonResponseHeader(resMap);
 		}
 
-		List<OssMaster> notSavedOss = new ArrayList<>();
 		boolean licenseCheck;
 		for (OssMaster oss : ossMasters) {
+			Map<String, String> ossDataMap = new HashMap<>();
 			oss.setOssCopyFlag(CoConstDef.FLAG_NO);
 			oss.setRenameFlag(CoConstDef.FLAG_NO);
 			oss.setAddNicknameYn(CoConstDef.FLAG_YES); // Append nickname only
@@ -1009,14 +1009,28 @@ public class OssController extends CoTopComponent{
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
-			if (declaredLicenses == null) continue;
+			if (declaredLicenses == null || declaredLicenses.isEmpty()) {
+				log.debug("DeclaredLicenses is null:" + oss.getOssName());
+				ossDataMap.put("gridId", oss.getGridId());
+				ossDataMap.put("status", "X (Required missing)");
+				ossDataMapList.add(ossDataMap);
+				continue;
+			}
+
+			if (Objects.isNull(oss.getOssName()) || oss.getOssName().isBlank()) {
+				log.debug("OSS name is required.");
+				ossDataMap.put("gridId", oss.getGridId());
+				ossDataMap.put("status", "X (Required missing)");
+				ossDataMapList.add(ossDataMap);
+				continue;
+			}
 
 			for (String licenseName : declaredLicenses) {
 				licenseMaster = new LicenseMaster();
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.info("Unconfirmed license:" + licenseName);
+					log.debug("Unconfirmed license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
@@ -1046,13 +1060,16 @@ public class OssController extends CoTopComponent{
 				licenseMaster.setLicenseName(licenseName);
 				LicenseMaster existsLicense = licenseService.checkExistsLicense(licenseMaster);
 				if (existsLicense == null) {
-					log.info("Unconfirmed license:" + licenseName);
+					log.debug("Unconfirmed license:" + licenseName);
 					licenseCheck = true;
 					break;
 				}
 			}
 			if (licenseCheck) {
-				log.warn("Add failed due to declared license:" + oss.getOssName());
+				log.debug("Add failed due to declared license:" + oss.getOssName());
+				ossDataMap.put("gridId", oss.getGridId());
+				ossDataMap.put("status", "X (Unconfirmed license)");
+				ossDataMapList.add(ossDataMap);
 				continue;
 			}
 
@@ -1069,36 +1086,54 @@ public class OssController extends CoTopComponent{
 
 			boolean checkDuplicated = true;
 			if (ossService.checkExistsOss(oss) != null) {
-				log.warn("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
+				log.debug("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
+				ossDataMap.put("gridId", oss.getGridId());
+				ossDataMap.put("status", "X (Duplicated Version)");
+				ossDataMapList.add(ossDataMap);
 				checkDuplicated = false;
 			} else {
-				List<String> nameToCheck = new ArrayList<>();
-				nameToCheck.add(oss.getOssName());
-				if (oss.getOssNicknames() != null) nameToCheck.addAll(Arrays.asList(oss.getOssNicknames()));
-				for (String nick : nameToCheck) {
+				OssMaster nameCheck = new OssMaster();
+				nameCheck.setOssName(oss.getOssName());
+				nameCheck.setOssNameTemp(oss.getOssName());
+				OssMaster checkName = ossService.checkExistsOssNickname2(nameCheck);
+				if (checkName != null) {
+					log.debug(oss.getOssName() + " is stored as a nick in " + checkName.getOssName());
+					ossDataMap.put("gridId", oss.getGridId());
+					ossDataMap.put("status", "X (Duplicated : " + oss.getOssName() + ")");
+					ossDataMapList.add(ossDataMap);
+					checkDuplicated = false;
+				}
+			}
+
+			if (checkDuplicated && oss.getOssNicknames() != null) {
+				for (String nick : oss.getOssNicknames()) {
 					OssMaster nickCheck = new OssMaster();
 					nickCheck.setOssName(nick);
 					nickCheck.setOssNameTemp(oss.getOssName());
-					OssMaster checkNick = ossService.checkExistsOssNickname2(nickCheck);
+					OssMaster checkNick = ossService.checkExistsOssNickname(nickCheck);
 					if (checkNick != null) {
-						log.warn(nick + " is stored as a nick in another " + checkNick.getOssName());
+						log.debug(nick + " is stored as a nick or name in " + checkNick.getOssName());
+						ossDataMap.put("gridId", oss.getGridId());
+						ossDataMap.put("status", "X (Duplicated : " + nick + ")");
+						ossDataMapList.add(ossDataMap);
 						checkDuplicated = false;
 						break;
 					}
 				}
 			}
+
 			if (checkDuplicated) {
 				Map<String, Object> result = ossService.saveOss(oss);
 				result = ossService.sendMailForSaveOss(result);
 				if (result.get("resCd").equals("10")) {
-					Map<String, String> ossNameMap = new HashMap<>();
-					ossNameMap.put("ossName", oss.getOssName());
-					ossNameMapList.add(ossNameMap);
+					ossDataMap.put("gridId", oss.getGridId());
+					ossDataMap.put("status", "O");
+					ossDataMapList.add(ossDataMap);
 				}
 			}
 		}
 		resMap.put("res", true);
-		resMap.put("value", ossNameMapList);
+		resMap.put("value", ossDataMapList);
 		return makeJsonResponseHeader(resMap);
 	}
 	
