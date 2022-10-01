@@ -89,7 +89,7 @@
     function stubColData(){
         for(var i=0; i<jsonData.length ; i++ ){
             withStatus = jsonData[i]['oss'];
-            withStatus['status'] = jsonData[i]['status'];
+            withStatus.gridId = i;
             $('#list').jqGrid('addRowData', i, withStatus);
         }
         $("#list").trigger('reloadGrid');
@@ -112,15 +112,15 @@
 
         mainData.forEach((row) => {
             stringDataForValid.forEach((strData) => {
-                ossData[row["id"]][strData] = row[strData].trim();
+                ossData[row["gridId"]][strData] = row[strData].trim();
             })
 
             listDataForValid.forEach((listData) => {
-                ossData[row["id"]][listData] = row[listData].trim()
-                if (ossData[row["id"]][listData] == "") {
-                    ossData[row["id"]][listData] = []
+                ossData[row["gridId"]][listData] = row[listData].trim()
+                if (ossData[row["gridId"]][listData] == "") {
+                    ossData[row["gridId"]][listData] = []
                 } else {
-                    ossData[row["id"]][listData] = ossData[row["id"]][listData].split(",")
+                    ossData[row["gridId"]][listData] = ossData[row["gridId"]][listData].split(",")
                 }
             })
         })
@@ -165,7 +165,7 @@
         if (isClicked == false) {
             isClicked = true;
             $("#btn").click(() => {
-
+                OssBulkGridStatusMessageManager.cleanStatusMessages();
                 target.jqGrid('saveRow', _mainLastsel);
 
                 // load all rowIds checked in grid
@@ -189,7 +189,7 @@
                         _mainLastsel = -1;
                         if (data['res'] == true && data['value'] != []) {
                             loadedInfo = data['value'];
-                            checkLoaded();
+                            OssBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
                             alertify.alert('<spring:message code="msg.common.success" />', function(){});
                         } else if (data['res'] == false) {
                             showErrorMsg();
@@ -204,13 +204,13 @@
         $("#list").jqGrid({
             datatype: "local",
             data : jsonData,
-            colNames:['id', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
+            colNames:['gridId', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
                 'Homepage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
             colModel: [
-                { name: 'id', 	index: 'id', width: 75, key:true, hidden: true, editable:false},
-                {name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
-                {name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
-                {name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
+                { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false},
+                { name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
+                { name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
+                { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
                 { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
                 { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
                 { name: 'ossCopyright', index: 'copyright', width: 200, align: 'left', editable:false},
@@ -219,7 +219,7 @@
                 { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false},
                 { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false},
                 { name: 'comment', index:'comment', width: 150, align: 'left', editable:false},
-                { name: 'status', index:'status', width: 150, align: 'left'}
+                { name: 'status', index:'status', width: 500, align: 'left'}
             ],
             viewrecords: true,
             rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
@@ -399,4 +399,17 @@
             }
         }
     }
+
+    const OssBulkGridStatusMessageManager = {
+        cleanStatusMessages: function () {
+            $("#list").jqGrid("getGridParam", "data").forEach(row => {
+                row.status = ""
+            });
+        },
+        setStatusMessages: function (results) {
+            for (const result of results)
+                $("#list").jqGrid("getLocalRow", result.gridId).status = result.status;
+            $("#list").trigger('reloadGrid', [{ page: 1}]);
+        }
+    };
 </script>
