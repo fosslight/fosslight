@@ -70,7 +70,7 @@ var com_evt = {
 						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 
 	 					if($("#ignoreBinaryDbFlag")) {
-							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData(), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val())};
+							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 						}
 
 	 					com_fn.checkSave(data, "CONF");	
