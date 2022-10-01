@@ -109,7 +109,6 @@
      * replace stringData wtih listData in 3 rows (ossNicknames, declaredLicenses, detectedLicenses)
      * */
     function dataValidCheck(mainData) {
-
         mainData.forEach((row) => {
             stringDataForValid.forEach((strData) => {
                 ossData[row["gridId"]][strData] = row[strData].trim();
@@ -121,6 +120,7 @@
                     ossData[row["gridId"]][listData] = []
                 } else {
                     ossData[row["gridId"]][listData] = ossData[row["gridId"]][listData].split(",")
+                        .map(item => item.trim()).filter(item => item.length);
                 }
             })
         })
