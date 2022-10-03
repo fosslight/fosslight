@@ -182,7 +182,7 @@ var saveFlag = false;
 
 			//코멘트 임시저장
 			$('.saveEditorDraft').click(function(){
-				var editorVal = CKEDITOR.instances.editor.getData();
+				var editorVal = replaceWithLink(CKEDITOR.instances.editor.getData());
 				var register = '${sessUserInfo.userId}';
 				var param = { referenceId : $('input[name=partnerId]').val(), referenceDiv :'21', contents : editorVal };
 				
@@ -792,7 +792,7 @@ var saveFlag = false;
 			} else {
 				if("10" == data.resCd){
 					if(isStatusChangeFlag) {
-						var param = {status : 'REQ', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor'].getData()};
+						var param = {status : 'REQ', partnerId : '${detail.partnerId}', userComment : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 						checkObligationFlag = false;
 						var _list = $("#list");
 						var mainData = _list.jqGrid('getGridParam','data');
@@ -917,7 +917,7 @@ var saveFlag = false;
 		},
 		sendEditor : function(type){
 			//코멘트 저장
-			var editorVal = CKEDITOR.instances.editor.getData();
+			var editorVal = replaceWithLink(CKEDITOR.instances.editor.getData());
 			var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal, mailSendType : type};
 			
 			$.ajax({
@@ -955,7 +955,7 @@ var saveFlag = false;
 			})
 			
 			$('.modifyComment').click(function(){
-				var editorVal = CKEDITOR.instances.editor3.getData();
+				var editorVal = replaceWithLink(CKEDITOR.instances.editor3.getData());
 				var register = '${sessUserInfo.userId}';
 				var param = {commId : modifyCommentId, referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal};
 
@@ -978,7 +978,7 @@ var saveFlag = false;
 						} else {
 							//코멘트 임시저장
 							$('.modifyComment').click(function(){
-								var editorVal = CKEDITOR.instances.editor3.getData();
+								var editorVal = replaceWithLink(CKEDITOR.instances.editor3.getData());
 								var register = '${sessUserInfo.userId}';
 								var param = {commId : commentIdx, referenceId : $('input[name=partnerId]').val(), referenceDiv :'13', contents : editorVal};
 
@@ -1048,7 +1048,7 @@ var saveFlag = false;
 							type : 'POST',
 							dataType : 'json',
 							cache : false,
-							data : {'partnerId' : partnerId, userComment : CKEDITOR.instances['editor2'].getData()},
+							data : {'partnerId' : partnerId, userComment : replaceWithLink(CKEDITOR.instances['editor2'].getData())},
 							success: function(data){
 								if(partnerId) {
 									deleteTabInFrame('#<c:url value="/partner/edit/'+partnerId+'"/>');			
@@ -1176,7 +1176,7 @@ var saveFlag = false;
 
 						return false;
 					} else {
-						var param = {status : 'PROG', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor2'].getData()};
+						var param = {status : 'PROG', partnerId : '${detail.partnerId}', userComment : replaceWithLink(CKEDITOR.instances['editor2'].getData())};
 
 						$.ajax({
 							url : '<c:url value="/partner/changeStatus"/>',
@@ -1254,7 +1254,7 @@ var saveFlag = false;
 					
 					return false;
 				}
-				var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : CKEDITOR.instances['editor'].getData()};
+				var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 				$.ajax({
 					url : '<c:url value="${suffixUrl}/partner/changeStatus"/>',
 					type : 'POST',
@@ -1917,20 +1917,25 @@ var saveFlag = false;
 	        if(rowCheckedArr.length > 0){
 	            fn_grid_com.totalGridSaveMode(targetGird);
 	            
-	            var bulkEditArr = gridList.jqGrid("getGridParam", "selarrrow");
-	            var url = '<c:url value="/oss/ossBulkEditPopup?rowId=' + rowCheckedArr + '&target=' + targetGird + '"/>';
-	            
 	            var _popup = null;
 
 	            if(_popup == null || _popup.closed){
-	                _popup = window.open(url, "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+	                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
+	                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+					$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+					$("#partnerBulkEditForm").submit();
+	                
 	                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 	                    alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 	                }
 	            } else {
 	                _popup.close();
-	                _popup = window.open(url, "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+	                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+	                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+					$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+					$("#partnerBulkEditForm").submit();
 	            }
 	        }else{
 	            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});

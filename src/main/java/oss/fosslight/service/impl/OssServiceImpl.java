@@ -3613,4 +3613,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		resMap.put("ossId", ossId);
 		return resMap;
 	}
+
+	@Override
+	public List<String> getDeactivateOssList() {
+		return ossMapper.getDeactivateOssList();
+	}
 }

@@ -2,11 +2,12 @@ $(document).ready(function () {
 
   // Tutorial Mode = true
   if (getCookie("tutorial") != null) {
+
   // Create elements to highlight
   let $button1 = $(document.getElementById("projectForm"));
-
-  // Array of elements to highlight (button 1, 2, 3, 4)
+  // Array of elements to highlight
   let array_highlights = [$button1];
+
   // Array of titles and content to be displayed by the tooltip
   let array_tooltip_data = [
     {
@@ -16,45 +17,45 @@ $(document).ready(function () {
     },
   ];
 
-  // create vail
+  // create veil
   let $veilUp = $('<div id="veil_up"></div>');
   let $veilDown = $('<div id="veil_down"></div>');
   let $veilLeft = $('<div id="veil_left"></div>');
   let $veilRight = $('<div id="veil_right"></div>');
 
-  $("#next_add").append($button1);
-
   // create tooltip
   let $tooltip = $(
     `<div id="tooltip">
-            <div id="p_tooltip_title_container">
-              <div id="p_tooltip_title"></div>
-              <button id="p_button_close_tooltip">X</button>
+            <div id="tooltip_title_container">
+              <div id="tooltip_title"></div>
+              <button id="button_close_tooltip">X</button>
             </div>
-            <p id="p_tooltip_content"></p>
+            <p id="tooltip_content"></p>
             <div>
-              <button id="p_button_prev">이전</button>
-              <button id="p_button_next">다음</button>
+              <button id="button_prev">이전</button>
+              <button id="button_next">다음</button>
             </div>
           </div>`
   );
 
-  // Put vail and tooltips in body tag
+  $("#next_add").append($button1);
+
+  // Put veil and tooltips in body tag
   $("body").append($veilUp);
   $("body").append($veilDown);
   $("body").append($veilLeft);
   $("body").append($veilRight);
   $("body").append($tooltip);
 
-  // vail, tooltip default style setting
-  const vails = [$veilUp, $veilDown, $veilLeft, $veilRight];
-  const property_vail = {
+  // veil, tooltip default style setting
+  const veils = [$veilUp, $veilDown, $veilLeft, $veilRight];
+  const property_veil = {
     display: "none",
     background: "rgba(0, 0, 0, 0.2)",
     position: "absolute",
     "z-index": 100,
   };
-  for (const vail of vails) vail.css(property_vail);
+  for (const veil of veils) veil.css(property_veil);
   $tooltip.css({
     display: "none",
     background: "white",
@@ -64,16 +65,16 @@ $(document).ready(function () {
     "box-shadow": "rgb(0 0 0 / 25%) 0px 0px 6px 2px",
     "flex-direction": "column",
   });
-  $("#p_tooltip_title_container").css({
+  $("#tooltip_title_container").css({
     display: "flex",
     "justify-content": "space-between",
     "align-items": "center",
   });
-  $("#p_tooltip_title").css({
+  $("#tooltip_title").css({
     display: "inline-block",
     "font-weight": 600,
   });
-  $("#p_tooltip_content").css({
+  $("#tooltip_content").css({
     "margin-top": "5px",
     "margin-bottom": "15px",
   });
@@ -82,90 +83,30 @@ $(document).ready(function () {
   let elem_index = 0;
   let elem_highlight = array_highlights[elem_index];
 
-  // When 'continue tutorial' is clicked in the project list
-  $("#continue_tutorial_25").on("click", () => {
-    let $element25 = $(document.getElementById("tutorial_25"));
-    array_highlights.push($element25);
-
+  $("#continue_tutorial").on("click", () => {
     elem_index = 0;
     elem_highlight = array_highlights[elem_index];
-    locate_vails();
-    show_vails();
+    locate_veils();
+    show_veils();
     locate_tooltip();
     show_tooltip();
   });
-  // When 'continue tutorial' is clicked in the packaging
-  $("#continue_tutorial_26").on("click", () => {
-    let $element26 = $(document.getElementById("tutorial_26"));
-    let $element27 = $(document.getElementById("tutorial_27"));
-    let $element28 = $(document.getElementById("tutorial_28"));
-    let $element29 = $(document.getElementById("tutorial_29"));
-    let $element30 = $(document.getElementById("tutorial_30"));
-    let $element31 = $(document.getElementById("noticePreview"));
-    let $element32 = $(document.getElementById("packageDocDownload"));
-    let $element33 = $(document.getElementById("save"));
-    array_highlights.push(
-      $element26,
-      $element27,
-      $element28,
-      $element29,
-      $element30,
-      $element31,
-      $element32,
-      $element33
-    );
-    array_tooltip_data = [
-      {
-        title: "Upload",
-        content: "Sample Source Code를 다운로드 후, Upload 합니다.",
-      },
-      {
-        title: "Verify",
-        content:
-          "Verify를 클릭하면 README, File List, Banned List 버튼이 활성화된 것을 확인할 수 있습니다.",
-      },
-      { title: "Notice", content: "Notice Tab으로 이동합니다." },
-      {
-        title: "Notice",
-        content: `"Request to generate a modified OSS Notice.를 체크하여 OSS Notice를 변경할 수 있습니다.`,
-      },
-      {
-        title: "Notice File Format",
-        content: `OSS Notice File Format을 추가적으로 체크할 수 있습니다.`,
-      },
-      {
-        title: "Preview",
-        content: `Preview 버튼을 클릭하여 OSS Notice를 확인한 후 우측 하단 OK 버튼을 클릭합니다.`,
-      },
-      {
-        title: "Download",
-        content: `Download 버튼을 클릭하면 OSS Notice 파일을 미리 다운로드할 수 있습니다.`,
-      },
-      { title: "Save", content: `Save 버튼을 클릭합니다.` },
-    ];
-    elem_index = 0;
-    elem_highlight = array_highlights[elem_index];
-    locate_vails();
-    show_vails();
-    locate_tooltip();
-    show_tooltip();
-  });
-
-  // Changing the browser window size Adjust the position of the vail and tooltip
+  // Changing the browser window size
+  // veil, tooltip default style setting
   $(window).resize(() => {
-    locate_vails();
+    locate_veils();
     locate_tooltip();
   });
 
   // Tutorial - Proper handling of previous, next, and close buttons
-  $("#p_button_prev").on("click", handle_click_prev);
-  $("#p_button_next").on("click", handle_click_next);
-  $("#p_button_close_tooltip").on("click", hide_vails_and_tooltips);
+  $("#button_prev").on("click", handle_click_prev);
+  $("#button_next").on("click", handle_click_next);
+  $("#button_close_tooltip").on("click", hide_veils_and_tooltips);
 
   //////////////////////////////// FUNCTIONS ////////////////////////////////
 
-  // Set the position and size of each of the 4 vails
-  function locate_vails() {
+  // Set the position and size of each of the 4 veils
+  function locate_veils() {
     let offset = elem_highlight.offset();
 
     $veilUp.css({
@@ -194,9 +135,9 @@ $(document).ready(function () {
     });
   }
 
-  // Make all vail visible
-  function show_vails() {
-    for (const vail of vails) vail.css("display", "block");
+  // veil make all visible
+  function show_veils() {
+    for (const veil of veils) veil.css("display", "block");
   }
 
   // Position the tooltip appropriately
@@ -205,8 +146,8 @@ $(document).ready(function () {
     let offset = elem_highlight.offset();
 
     // Edit the title and content to the nth title and content
-    $("#p_tooltip_title").text(array_tooltip_data[elem_index].title);
-    $("#p_tooltip_content").text(array_tooltip_data[elem_index].content);
+    $("#tooltip_title").text(array_tooltip_data[elem_index].title);
+    $("#tooltip_content").text(array_tooltip_data[elem_index].content);
 
     // Adjust the position to match the highlight element
     const tooltip_width = 150;
@@ -214,12 +155,40 @@ $(document).ready(function () {
       offset.left - (tooltip_width - elem_highlight.outerWidth(true)) / 2;
     if (tooltip_left < 0) tooltip_left = offset.left;
 
-    $tooltip.css({
-      position: "absolute",
-      top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
-      left: `${tooltip_left}px`,
-      width: `${tooltip_width}px`,
-    });
+    switch (elem_index) {
+      case 0:
+        $tooltip.css({
+          position: "absolute",
+          top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
+          left: `${tooltip_left - 65}px`,
+          width: `${tooltip_width}px`,
+        });
+        break;
+      case 1:
+        $tooltip.css({
+          position: "absolute",
+          top: `${offset.top + elem_highlight.outerHeight(true) - 439}px`,
+          left: `${tooltip_left - 34.5}px`,
+          width: `${tooltip_width}px`,
+        });
+        break;
+      case 2:
+        $tooltip.css({
+          position: "absolute",
+          top: `${offset.top + elem_highlight.outerHeight(true) - 40.227}px`,
+          left: `${tooltip_left - 119.25}px`,
+          width: `${tooltip_width}px`,
+        });
+        break;
+      default:
+        $tooltip.css({
+          position: "absolute",
+          top: `${offset.top + elem_highlight.outerHeight(true) + 10}px`,
+          left: `${tooltip_left}px`,
+          width: `${tooltip_width}px`,
+        });
+        break;
+    }
   }
 
   // Make the tooltip visible on the screen
@@ -227,8 +196,8 @@ $(document).ready(function () {
     $tooltip.css({ display: "flex" });
   }
 
-  // Make both vail and tooltip invisible on the screen
-  function hide_vails_and_tooltips() {
+  // Make all veil and tooltip invisible on the screen
+  function hide_veils_and_tooltips() {
     $veilUp.css("display", "none");
     $veilDown.css("display", "none");
     $veilLeft.css("display", "none");
@@ -238,13 +207,11 @@ $(document).ready(function () {
 
   // Function executed when 'back' of tooltip is clicked
   function handle_click_prev() {
-    if (elem_index === 0) {
-      return;
-    }
+    if (elem_index === 0) return;
     elem_index -= 1;
     elem_highlight = array_highlights[elem_index];
-    locate_vails();
-    show_vails();
+    locate_veils();
+    show_veils();
     locate_tooltip();
     show_tooltip();
   }
@@ -252,13 +219,13 @@ $(document).ready(function () {
   // Function executed when 'Next' of tooltip is clicked
   function handle_click_next() {
     if (elem_index === array_highlights.length - 1) {
-      hide_vails_and_tooltips();
+      hide_veils_and_tooltips();
       return;
     }
     elem_index += 1;
     elem_highlight = array_highlights[elem_index];
-    locate_vails();
-    show_vails();
+    locate_veils();
+    show_veils();
     locate_tooltip();
     show_tooltip();
   }
@@ -270,14 +237,16 @@ $(document).ready(function () {
   }
 
   function getCookie(cookieName) {
-              var cookieValue = null;
-              if (document.cookie) {
-                  var array = document.cookie.split((escape(cookieName) + '='));
-                  if (array.length >= 2) {
-                      var arraySub = array[1].split(';');
-                      cookieValue = unescape(arraySub[0]);
-                  }
-              }
-              return cookieValue;
-           }
+            var cookieValue = null;
+            if (document.cookie) {
+                var array = document.cookie.split((escape(cookieName) + '='));
+                if (array.length >= 2) {
+                    var arraySub = array[1].split(';');
+                    cookieValue = unescape(arraySub[0]);
+                }
+            }
+            return cookieValue;
+         }
+
+
 });

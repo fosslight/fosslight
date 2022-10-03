@@ -2170,4 +2170,12 @@
 		GROUP BY T1.OSS_NAME
 		HAVING COUNT(T1.OSS_NAME) > 1
 	</select>
+	
+	<select id="getDeactivateOssList" resultType="string">
+		SELECT OSS_NAME 
+		FROM OSS_MASTER 
+		WHERE USE_YN = 'Y' 
+		AND DEACTIVATE_FLAG = 'Y'
+		GROUP BY OSS_NAME
+	</select>
 </mapper>

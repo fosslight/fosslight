@@ -3482,9 +3482,15 @@ public class CommonFunction extends CoTopComponent {
 	}
 	
 	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent) {
+		return setOssComponentLicense(ossComponent, false);
+	}
+	
+	public static List<List<ProjectIdentification>> setOssComponentLicense(List<ProjectIdentification> ossComponent, boolean excludeFlag) {
 		List<List<ProjectIdentification>> ossComponentLicense = new ArrayList<List<ProjectIdentification>>(); 
 		
 		for(ProjectIdentification pi : ossComponent) {
+			if(excludeFlag && CoConstDef.FLAG_YES.equals(pi.getExcludeYn()) && isEmpty(pi.getLicenseName())) continue;
+			
 			String convertLicenseName = pi.getLicenseName();
 			
 			if(convertLicenseName.contains("\n")) { // 사용자가 oss-report를 통해 license 정보를 입력할 경우 개행이 있을 case가 존재하여 추가함. 

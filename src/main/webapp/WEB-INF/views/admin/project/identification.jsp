@@ -897,3 +897,9 @@
 		<input type="button" value="OK" class="btnColor red sheetApply" onclick="src_fn.getSheetData()">
 	</div>
 </div>
+
+<form id="bulkEditForm" method="POST" action="<c:url value="/oss/ossBulkEditPopup"/>" target="bulkEditViewProjectPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>
+

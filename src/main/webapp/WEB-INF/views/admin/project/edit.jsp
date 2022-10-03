@@ -49,10 +49,12 @@
 		</div>
 	</div>
 	</c:if>
+
 	<input type="button" value=" 📢 Continue Tutorial " id="continue_tutorial" />
 	<div class="${not empty project.prjId ? 'projectContents' : ''}">
 		<!---->
-		<div class="tbws1 w1025 mt10">
+		<div id="next_add"></div>
+		<div class="tbws1 w1025 mt10" >
 			<form name="projectForm" id="projectForm" action="" method="post">
 				<input type="hidden" name="prjId" style="display: none;"/>
 				<input type="hidden" name="prjModelJson" style="display: none;"/>

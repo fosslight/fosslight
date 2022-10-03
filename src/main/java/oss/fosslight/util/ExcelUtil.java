@@ -2699,54 +2699,44 @@ public class ExcelUtil extends CoTopComponent {
 	public static OssMaster getOssDataByColumn(Iterator<Cell> cellIterator) {
 		OssMaster ossMaster = new OssMaster();
 		int colIndex = 0;
+		int nullCol = 0;
 		for (; cellIterator.hasNext(); colIndex++) {
 			Cell cell = (Cell) cellIterator.next();
 			String value = getCellData(cell);
+			if (value == null || value.trim().isEmpty()) {
+				nullCol++;
+				continue;
+			}
 			if (colIndex == 0) {
-				if (value == null || value.trim().isEmpty()) {
-					log.debug("OSS Name must not be null.");
-					return null;
-				} else {
-					ossMaster.setOssName(value);
-				}
+				ossMaster.setOssName(value);
 			} else if (colIndex == 1) {
-				if (value == null || value.trim().isEmpty()) continue;
 				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
 				ossMaster.setOssNicknames(nicknames);
 			} else if (colIndex == 2) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setOssVersion(value);
 			} else if (colIndex == 3) {
-				if (value == null || value.trim().isEmpty()) {
-					log.debug("Declared License must not be null.");
-					return null;
-				}
 				ossMaster.setDeclaredLicense(value);
 			} else if (colIndex == 4) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setDetectedLicense(value);
 			} else if (colIndex == 5) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setCopyright(value);
 				ossMaster.setOssCopyright(value);
 			} else if (colIndex == 6) {
-				if (value == null || value.trim().isEmpty()) continue;
 				String homepage = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 				ossMaster.setHomepage(homepage);
 			} else if (colIndex == 7) {
-				if (value == null || value.trim().isEmpty()) continue;
 				String location = value.replaceAll("(\r\n|\r|\n|\n\r)", "");
 				ossMaster.setDownloadLocation(location);
 			} else if (colIndex == 8) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setSummaryDescription(value);
 			} else if (colIndex == 9) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setAttribution(value);
 			} else if (colIndex == 10) {
-				if (value == null || value.trim().isEmpty()) continue;
 				ossMaster.setComment(value);
 			}
+		}
+		if (nullCol == 11) {
+			return null;
 		}
 		return ossMaster;
 	}
