@@ -3556,6 +3556,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
  		if(dbInfoList != null && !dbInfoList.isEmpty()) {
  			for(String key : dbInfoList) {
+ 				key = key.toUpperCase();
  				if(!dbPartnerUseFlag && key.startsWith(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {
  					// 3rd의 경우 라이선스를 무시하고 key를 생성하기 때문에 중복되는 경우가 있음
  					if(!dbPartnerList.contains(key)) {

@@ -2144,6 +2144,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 						} else {
+							String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
+							if(CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
+								continue;
+							}
 //							OssMaster ossBean = new OssMaster();
 //							ossBean.setOssName(bean.getOssName());
 //							if(checkExistsOssByname(ossBean) > 0) {
@@ -2217,7 +2221,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					if(downloadlocationUrl.startsWith("www.")) {
-						downloadlocationUrl = downloadlocationUrl.substring(5, downloadlocationUrl.length());
+						downloadlocationUrl = downloadlocationUrl.substring(4, downloadlocationUrl.length());
 					}
 					
 					if(downloadlocationUrl.contains(".git")) {
