@@ -2144,6 +2144,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 						} else {
+							String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
+							if(CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
+								continue;
+							}
 //							OssMaster ossBean = new OssMaster();
 //							ossBean.setOssName(bean.getOssName());
 //							if(checkExistsOssByname(ossBean) > 0) {
@@ -2217,7 +2221,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					if(downloadlocationUrl.startsWith("www.")) {
-						downloadlocationUrl = downloadlocationUrl.substring(5, downloadlocationUrl.length());
+						downloadlocationUrl = downloadlocationUrl.substring(4, downloadlocationUrl.length());
 					}
 					
 					if(downloadlocationUrl.contains(".git")) {
@@ -2556,8 +2560,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					result = registOssMaster(ossMaster);
 				}
 
-				h = work(ossMaster);
-				
 				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_UPDATE;
 				afterBean = getOssInfo(ossId, true);
@@ -2595,14 +2597,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
 				}
 				ossId = registOssMaster(ossMaster);
-				h = work(ossMaster);
 				
 				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_INSERT;
 			}
 
-			h.sethAction(action);
-			historyService.storeData(h);
+			if (!CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
+				h = work(ossMaster);
+				h.sethAction(action);
+				historyService.storeData(h);
+			}
+			
 			resCd = "10";
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);
@@ -3293,6 +3298,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		Map<String, OssMaster> beforeOssMap = getBasicOssInfoList(ossMaster);
 		
+		History history;
+		
 		for(OssMaster om : beforeOssMap.values()) {
 			if(!ossMaster.getOssVersion().equals(om.getOssVersion())) {
 				beforeOssNameVersionOssIdList.add(om.getOssId());
@@ -3303,6 +3310,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(!beforeOssName.equals(afterOssName)) {
 				om.setOssName(afterOssName);
 				ossMapper.changeOssNameByDelete(om);
+				
+				history = work(om);
+				history.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				historyService.storeData(history);
 			}
 		}
 		
@@ -3589,10 +3600,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 				if (afterOssNameVersionMergeList != null) {
 					for (int i = 0; i < afterOssNameVersionMergeList.size(); i++) {
-						History history = work(afterOssNameVersionMergeList.get(i));
-						history.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-						historyService.storeData(history);
-
 						try {
 							mailType = CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME;
 							CoMail mailBean = new CoMail(mailType);

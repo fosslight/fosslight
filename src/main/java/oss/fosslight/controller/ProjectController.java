@@ -1544,6 +1544,7 @@ public class ProjectController extends CoTopComponent {
 			
 			OssNotice ossNotice = verificationService.selectOssNoticeOne(project.getCopyPrjId());
 			ossNotice.setPrjId(project.getPrjId());
+			ossNotice.setNoticeType(avoidNull(project.getNoticeType(), avoidNull(copyPrjInfo.getNoticeType(), CoConstDef.CD_NOTICE_TYPE_GENERAL)));
 			verificationService.registOssNoticeConfirmStatus(ossNotice);
 			
 			// download flag
@@ -1578,19 +1579,30 @@ public class ProjectController extends CoTopComponent {
 				return returnMap;
 			}
 			
-			ossNotice.setDomain(CommonFunction.getDomain(req));
-			
-			try {
-				verificationService.getNoticeHtmlFile(ossNotice);
-			} catch(Exception e) {
-				log.error(e.getMessage(), e);
-				returnMap.put("result", "false");
-				returnMap.put("step", "verificationProgress");
-				return returnMap;
+			if(CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL.equals(ossNotice.getNoticeType())) {
+				ossNotice.setDomain(CommonFunction.getDomain(req));
+				
+				try {
+					verificationService.getNoticeHtmlFile(ossNotice);
+				} catch(Exception e) {
+					log.error(e.getMessage(), e);
+					returnMap.put("result", "false");
+					returnMap.put("step", "verificationProgress");
+					return returnMap;
+				}
 			}
 			
 			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
-			prjInfo.setDestributionStatus(null);
+			if("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase())
+					|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase()) 
+							&& verificationService.checkNetworkServer(ossNotice.getPrjId())
+					)
+					|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
+					) {
+				prjInfo.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+			} else {
+				prjInfo.setDestributionStatus(null);
+			}
 			prjInfo.setModifier(loginUserName());
 
 			try {

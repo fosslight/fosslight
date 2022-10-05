@@ -43,6 +43,18 @@
 				initParam.ignoreSearchFlag = "Y";
 			}
 
+			var sentMailparam = $('.scrl > ul > li:eq(3) > input', window.parent.document)[0];
+			sentMailParam = $(sentMailparam).val();
+			
+			if(sentMailParam){
+				$("input[name=ossName]").val(sentMailParam.trim());
+				initParam.ignoreSearchFlag = "N";
+				initParam = serializeObjectHelper();
+
+				var sentMailParam2 = $('.scrl > ul > li:eq(3) > input', window.parent.document)[0];
+				$(sentMailParam2).val("");
+			}
+			
 			$('#search').on('click',function(e){
 				e.preventDefault();
 
