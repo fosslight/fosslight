@@ -7,6 +7,7 @@
 	var groupBuffer='';
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
+	var linkFlag = "${searchBean.linkFlag}";
 	
 	$(document).ready(function () {
 		'use strict';
@@ -43,16 +44,10 @@
 				initParam.ignoreSearchFlag = "Y";
 			}
 
-			var sentMailparam = $('.scrl > ul > li:eq(3) > input', window.parent.document)[0];
-			sentMailParam = $(sentMailparam).val();
-			
-			if(sentMailParam){
-				$("input[name=ossName]").val(sentMailParam.trim());
+			var sentMailParam = $("input[name=ossName]").val();
+			if("Y" == linkFlag && sentMailParam){
 				initParam.ignoreSearchFlag = "N";
 				initParam = serializeObjectHelper();
-
-				var sentMailParam2 = $('.scrl > ul > li:eq(3) > input', window.parent.document)[0];
-				$(sentMailParam2).val("");
 			}
 			
 			$('#search').on('click',function(e){
@@ -161,6 +156,20 @@
 			}
 			
 			return flag;
+		},
+		ossNameLinkFormat : function(cellvalue, options, rowObject){
+			var display = cellvalue;
+			var url = '';
+
+			if("${ct:isAdmin()}"){
+				url = '<c:url value="/oss/edit/'+rowObject['ossId']+'"/>';
+			} else {
+				url = '<c:url value="/oss/view/'+rowObject['ossId']+'"/>';
+			}
+
+			display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
+			
+			return display;
 		}
 	}
 	
@@ -203,7 +212,12 @@
 					    }
 					  }
 					, {name: 'ossType', index: 'ossType', width: 70, align: 'center',formatter: 'ossType'}
+					<c:if test="${searchBean.linkFlag == 'N'}">
 					, {name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: 'linkOssName'}
+					</c:if>
+					<c:if test="${searchBean.linkFlag == 'Y'}">
+					, {name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: fn.ossNameLinkFormat}
+					</c:if>
 					, {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
 					, {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
 					, {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
@@ -397,8 +411,17 @@
 				ondblClickRow: function(rowid,iRow,iCol,e) {
 					if(iCol!=0){
 						var rowData = $("#list").jqGrid('getRowData',rowid);
-						
-						createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
+
+						if("Y" != linkFlag) {
+							createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
+						} else {
+							var openNewWindow = window.open("about:blank");
+							if("${ct:isAdmin()}"){
+								openNewWindow.location.href	= '<c:url value="/oss/edit/'+rowData['ossId']+'"/>';
+							} else {
+								openNewWindow.location.href	= '<c:url value="/oss/view/'+rowData['ossId']+'"/>';
+							}
+						}
 					}
 				},
 				postData: initParam

@@ -123,6 +123,7 @@ public final class Url {
 		public static final String PATH = "/oss";
 		
 		public static final String LIST = PATH + "/list";
+		public static final String LIST_LINK = PATH + "/list/{ossName}";
 		public static final String LIST_JSP = TILES_ROOT + PATH + "/list";
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		

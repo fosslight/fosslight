@@ -290,6 +290,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String[] existOssNickNames;
 
 	private List<String> declaredLicenses;
+	private String linkFlag = "N";
 	/**
 	 * Instantiates a new oss master.
 	 */
@@ -1996,5 +1997,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setRenameFlag(String renameFlag) {
 		this.renameFlag = renameFlag;
+	}
+
+	public String getLinkFlag() {
+		return linkFlag;
+	}
+
+	public void setLinkFlag(String linkFlag) {
+		this.linkFlag = linkFlag;
 	}
 }

@@ -1402,7 +1402,9 @@ public class CoMailManager extends CoTopComponent {
 								)
 						)
 				{
-					_s = "<a href='javascript:void(0);' style='font-size:16px;' onclick='fn.sentMailMoveTab(&#39;"+ossInfo.getOssName()+"&#39;);'>" + _s + "</a>";
+					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
+					linkUrl += "/oss/list/" + ossInfo.getOssName();
+					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
 				}
 			}
 			
