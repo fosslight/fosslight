@@ -1017,7 +1017,7 @@ public class OssController extends CoTopComponent{
 				continue;
 			}
 
-			if (Objects.isNull(oss.getOssName()) || oss.getOssName().isBlank()) {
+			if (Objects.isNull(oss.getOssName()) || StringUtil.isBlank(oss.getOssName())) {
 				log.debug("OSS name is required.");
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Required missing)");
