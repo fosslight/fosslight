@@ -216,6 +216,18 @@ $(document).ready(function () {
 
   // Make the tooltip visible on the screen
   function show_tooltip() {
+    // first : hide 'prev' button
+    // last : hide 'next' button
+    if (elem_index === 0) {
+      $("#p_button_prev").css("display", "none");
+    } else {
+      $("#p_button_prev").css("display", "inline-block");
+    }
+    if (elem_index === array_highlights.length - 1) {
+      $("#p_button_next").css("display", "none");
+    } else {
+      $("#p_button_next").css("display", "inline-block");
+    }
     $tooltip.css({ display: "flex" });
   }
 
