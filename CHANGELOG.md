@@ -1,5 +1,88 @@
 # Changelog
 
+## v1.4.10 (07/10/2022)
+## 🚀 Features
+
+- Github actions
+    - Add Slack notification bot @jongwooo (#713)
+    - Deploy image to Docker Hub @jongwooo (#675)
+- OSS Bulk Registration
+    - Show detail failure messages in OSS bulk feature. @FRESH-TUNA (#669)
+    - Move OSS bulk button to BOM tab @FRESH-TUNA (#688)
+    - Automatically load unconfirmed version/oss into bulk registration @MoonDD99 (#652)
+    - Add editable and selectable to ossBulkRegRows @Gseungmin (#656)
+- Mail
+    - In 3rd party confirm mail, add "need to disclose" column @Min-Kyungsun (#698)
+    - When sending 3rd party confirmed mail, attach the list of disclose oss. @Min-Kyungsun (#647)
+- Report
+    - Export button depends on project identification status @70825 (#694)
+    - Support SPDX download in bom tab @70825 (#650)
+    - Add a Yaml button to 3rd Party, Project, Self-check @FOSSLight-dev (#635)
+- Self-check >  Add SPDX as well as FOSSLight Report to the export button download @70825 (#664)
+- Add "search icon" in filter cell of table @Min-Kyungsun (#668)
+- Add project bom tab export json to the API @70825 (#636)
+- Change [PRJ-ID] or [3rd-ID] text to linkable text @Min-Kyungsun (#643)
+- Add 'Share URL' Button in Project, 3rd Party @FOSSLight-dev  (#642)
+
+## 🐛 Hotfixes
+
+- Fix the compilation error - cannot find symbol @soimkim (#714)
+- If permissive OSS list is included, display the information sentence in notice html. @Min-Kyungsun (#712)
+- OSS Bulk Registration > Add triming logic to list attributes. @FRESH-TUNA (#708)
+- OSS Bulk Registration > Fix a bug where copyright is not added @FRESH-TUNA (#707)
+- Fix download location check function @FOSSLight-dev  (#710)
+- Fix the broken identification ui bug @soimkim (#706)
+- In comment mail, activate project/3rd party link  @Min-Kyungsun (#704)
+- Remove the limit on the number of rows for the bulk edit button @FOSSLight-dev (#702)
+- Fix a bug that occurs when saving to 3rd party tab in project @FOSSLight-dev (#697)
+- Fix the bug that the row in which only Homepage or Copyright is entered is not loaded when uploading a report. @FOSSLight-dev (#696)
+- Fix the bug where the license written as nickname does not change to license name when save is clicked @FOSSLight-dev (#693)
+- When division information is changed, do not save automatically. @Min-Kyungsun (#692)
+- Fix a bug where only 1 Vulnerability list is shown when there is no version in OSS detail page @FOSSLight-dev (#689)
+- Fix the bug where the license flag is not saved when saving OSS @FOSSLight-dev (#686)
+- Fix bug where CVE-ID is displayed as duplicate in OSS details tab @FOSSLight-dev (#681)
+- Display division information even if Use YN flag of division is N @Min-Kyungsun (#679)
+- Fix bug where watcher row is duplicated in project basic information @Min-Kyungsun (#651)
+- When sending 3rd party confirmed mail, attach the list of disclose oss. @FOSSLight-dev (#647)
+- Fix the bug where password cannot be set when signing up for non-LDAP @FOSSLight-dev (#645)
+- Fix the bug where the link changes from Check License to https://https:// @FOSSLight-dev (#641)
+- Fix vulnerability list > Undetected nicknames are displayed @FOSSLight-dev (#637)
+- Fix the bug where SPDX download fails @FOSSLight-dev (#634)
+- Fix SPDX download error in Self-check > Notice @FOSSLight-dev (#633)
+- Fix bugs that are invisible even as Watchers in the 3rd party list @FOSSLight-dev (#632)
+
+## 🔧 Maintenance
+
+- Change the link of OSS Name (version) in OSS registration/modification mail. @FOSSLight-dev (#716)
+- Fix typo email template  @70825 (#709)
+- Add license text files to docker image @jongwooo (#700)
+- Improve identification and 3rd party OSS loading speed @FOSSLight-dev (#701)
+- Add license text files @soimkim (#699)
+- Project > 3rd Party tab > Leave a comment on the history of changing nickname. @FOSSLight-dev (#691)
+- Send OSS save failed return code differently @FOSSLight-dev (#690)
+- When click "+" button, insert new row at the top of the table @Min-Kyungsun (#684)
+- Fix the typo in OSS Detail tab. (Atrribution -> Attribution) @70825 (#678)
+- Add oss list in identification confirm mail @Min-Kyungsun (#676)
+- Change the label text to result.txt and binary.txt to fosslight_binary.txt. @soimkim (#674)
+- Change search icon file @Min-Kyungsun (#673)
+- When 3rd party confirm, remove default comment in comment history @Min-Kyungsun (#666)
+- Send email with oss list and disclose oss list @Min-Kyungsun (#663)
+- Change buttons to be top of the table in Binary DB, System > User management @Min-Kyungsun (#662)
+- Fix oss sync function for regist comment @Min-Kyungsun (#661)
+- Change downloaded file name when clicking export button @Min-Kyungsun (#660)
+- Remove buttons at the bottom of the table. @Min-Kyungsun (#659)
+- Add the NPM link pattern @soimkim (#658)
+- Check user permission when changing divisions. @FOSSLight-dev (#657)
+- Increase the height of oss version list table in  oss version list popup @Min-Kyungsun (#655)
+- Remove duplicated oss list in 3rd party mail @Min-Kyungsun (#654)
+- Add logic to validate for download location from input data @Min-Kyungsun (#653)
+- When sending 3rd party confirmed mail, attach the list of disclose oss. @FOSSLight-dev (#647)
+- Change regular expression of project link @Min-Kyungsun (#646)
+- Send an email and leave a comment if additional information is modified in Project > Basic information @FOSSLight-dev (#640)
+- Change the sheet name that is checked when uploading a file in Project Identification @FOSSLight-dev (#639)
+
+---
+
 ## v1.4.9 (12/08/2022)
 ## 🚀 Features
 
@@ -451,14 +534,3 @@
     - When distribution, add a notice when the release date is not set.
     - Fix the bug that when registering or deleting a license, there are multiple websites, but only one is displayed in the email.
 - Update version to 1.2.26 @soimkim (#387)
----
-
-## v1.2.25 (07/01/2022)
-## Changes
-## 🔧 Maintenance
-
-- Remove license duplication in a cell @FOSSLight-dev (#381)
-- Change message from System to Hub @FOSSLight-dev (#378)
-- Support variable context path.  @FOSSLight-dev  (#382)
-- Show progress bar when deleting OSS.  @FOSSLight-dev  (#382)
-- Deduplicate Licenses in one cell.  @FOSSLight-dev  (#382)
