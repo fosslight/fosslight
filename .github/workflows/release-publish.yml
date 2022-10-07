@@ -75,7 +75,7 @@ jobs:
           asset_name: FOSSLight.war
           asset_content_type: application/octet-stream
 
-  deploy_demo:
+  deploy-demo:
     needs: build
     runs-on: ubuntu-latest
 
@@ -96,8 +96,8 @@ jobs:
             cd /service/deploy/fosslight/
             bash /service/deploy/fosslight/deploy.sh
 
-  deploy_image:
-    needs: deploy_demo
+  deploy-image:
+    needs: deploy-demo
     runs-on: ubuntu-latest
 
     steps:
@@ -118,7 +118,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:${{ github.event.release.tag_name }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:${{ github.event.release.tag_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -127,8 +129,8 @@ jobs:
     needs:
       - update-changelog
       - build
-      - deploy_demo
-      - deploy_image
+      - deploy-demo
+      - deploy-image
     runs-on: ubuntu-latest
 
     steps:
