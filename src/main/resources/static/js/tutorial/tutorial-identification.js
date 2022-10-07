@@ -1,4 +1,7 @@
 $(document).ready(function() {
+
+  // Tutorial Mode = true
+  if (getCookie("tutorial") != null) {
   // 하이라이트할 요소들 생성
   let $button1 = $(document.getElementById("third_party"));
   let $button2 = $(document.getElementById("applicableParty"));
@@ -281,4 +284,21 @@ $(document).ready(function() {
     locate_tooltip();
     show_tooltip();
   }
+    }
+    else{
+          var tutorial_button25 = (document.getElementById("continue_tutorial_25"));
+          tutorial_button25.style.display = 'none';
+    }
+
+    function getCookie(cookieName) {
+              var cookieValue = null;
+              if (document.cookie) {
+                  var array = document.cookie.split((escape(cookieName) + '='));
+                  if (array.length >= 2) {
+                      var arraySub = array[1].split(';');
+                      cookieValue = unescape(arraySub[0]);
+                  }
+              }
+              return cookieValue;
+    }
 });

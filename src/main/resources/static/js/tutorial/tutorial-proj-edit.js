@@ -32,8 +32,6 @@ $(document).ready(function () {
             </div>
             <p id="tooltip_content"></p>
             <div>
-              <button id="button_prev">이전</button>
-              <button id="button_next">다음</button>
             </div>
           </div>`
   );
