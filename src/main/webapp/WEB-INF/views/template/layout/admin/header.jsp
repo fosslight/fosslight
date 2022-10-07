@@ -56,7 +56,7 @@
 							<li><a href="#<c:url value="/statistics/view"/>" class="add-tab">Statistics</a></li>
 					</c:if>
 					<li><a href="#<c:url value="/license/list"/>" class="add-tab">License List</a></li>
-					<li><a href="#<c:url value="/oss/list"/>" class="add-tab">OSS List</a><input type="hidden" name="sentMailParam"></li>
+					<li><a href="#<c:url value="/oss/list"/>" class="add-tab">OSS List</a></li>
 					<c:if test="${projectFlag}">
 						<li><a href="#<c:url value="/project/list"/>" class="add-tab">Project List</a></li>
 					</c:if>

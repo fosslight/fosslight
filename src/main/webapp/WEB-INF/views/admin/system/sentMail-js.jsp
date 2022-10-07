@@ -22,12 +22,6 @@
 		},
 		searchDatePick : function(element) {
 		    $(element).datepicker();
-		},
-		sentMailMoveTab : function(data){
-			var leftMenu = $('.scrl > ul > li:eq(3) > a', window.parent.document)[0];
-			var param = $('.scrl > ul > li:eq(3) > input', window.parent.document)[0];
-			$(param).val(data);
-			$(leftMenu)[0].click();
 		}
 	};
 	
