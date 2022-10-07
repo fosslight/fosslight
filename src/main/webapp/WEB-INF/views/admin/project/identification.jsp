@@ -4,6 +4,18 @@
 <jsp:include page="../common/gridCommonFn.jsp" flush="false" />
 <!-- wrap -->
 <c:set var="isCommited" value="${project.verificationStatus eq 'CONF'}"/>
+<script>
+	function requestBtn() {
+		var todayDate = new Date();
+		todayDate.setDate( todayDate.getDate() + 1 );
+		document.cookie = "cur=request" + "; path=/; expires=" + todayDate.toGMTString() + ";"
+	}
+	function reviewBtn() {
+		var todayDate = new Date();
+		todayDate.setDate( todayDate.getDate() + 1 );
+		document.cookie = "cur=review" + "; path=/; expires=" + todayDate.toGMTString() + ";"
+	}
+</script>
 <div id="wrapIframe">
 	<div class="projdecTop">
 		<div class="projectInfo">
@@ -53,8 +65,8 @@
 					<c:when test="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.distributeDeployYn ne 'Y'}">
 						<a class="btnSet confirm" id="confirm"><span id="bomConfirm">Confirm</span></a>
 						<a class="btnSet reject"><span id="bomReject">Reject</span></a>
-						<a class="btnSet review" id="request"><span id="bomRequest">Request</span></a>
-						<a class="btnSet restart" id="reviewStart"><span id="bomReviewStart">Review Start</span></a>
+						<a class="btnSet review" id="request" onclick="requestBtn()"><span id="bomRequest">Request</span></a>
+						<a class="btnSet restart" id="reviewStart" onclick="reviewBtn()"><span id="bomReviewStart">Review Start</span></a>
 					</c:when>
 					<c:otherwise>
 					</c:otherwise>
