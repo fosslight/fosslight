@@ -294,13 +294,11 @@
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else if(rowObject.identificationStatus!="") {
-                                if (options.rowId == 1) {
+
                                     display = `<div class=\"tcenter\">
                                         <a id='tutorial_25' class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a>
                                     </div>`;
-                                } else {
-                                    display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a></div>";
-                                }
+
 							}
 
 							break;

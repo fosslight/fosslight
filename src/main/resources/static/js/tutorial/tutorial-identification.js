@@ -2,7 +2,8 @@ $(document).ready(function() {
 
   // Tutorial Mode = true
   if (getCookie("tutorial") != null) {
-  // 하이라이트할 요소들 생성
+
+  // Create elements to highlight
   let $button1 = $(document.getElementById("third_party"));
   let $button2 = $(document.getElementById("applicableParty"));
   let $button3 = $(document.getElementById("btnPartnerSaveUp"));
@@ -19,7 +20,7 @@ $(document).ready(function() {
   let $button14 = $(document.getElementById("reviewStart"));
   let $button15 = $(document.getElementById("confirm"));
 
-  // 하이라이트할 요소들의 배열
+  // Array of elements to highlight
   let array_highlights = [
     $button1, $button2, $button3,
     $button4, $button5, $button6,
@@ -27,7 +28,7 @@ $(document).ready(function() {
     $button10, $button11, $button12,
     $button13, $button14, $button15];
 
-  // 툴팁이 보여줄 제목 및 내용의 배열
+  // Array of titles and content to be displayed by the tooltip
   let array_tooltip_data = [
     { title: "3rd Party", content: "3rd Party Tab 으로 이동합니다." },
     { title: "Not applicable", content: "Not applicable 을 체크합니다." },
@@ -46,13 +47,13 @@ $(document).ready(function() {
     { title: "Confirm", content: "Confirm 버튼을 클릭합니다." },
   ];
 
-  // veil 생성
+  // create veil
   let $veilUp = $('<div id="veil_up"></div>');
   let $veilDown = $('<div id="veil_down"></div>');
   let $veilLeft = $('<div id="veil_left"></div>');
   let $veilRight = $('<div id="veil_right"></div>');
 
-  // tooltip 생성
+  // create tooltip
   let $tooltip = $(
       `<div id="tooltip">
         <div id="tooltip_title_container">
@@ -72,14 +73,14 @@ $(document).ready(function() {
   $("#btnPartnerSaveUp").append($button3);
   $("#src_tab").append($button4);
 
-  // body 태그 내에 veil, tooltip들 넣기
+  // Put veil and tooltips in body tag
   $("body").append($veilUp);
   $("body").append($veilDown);
   $("body").append($veilLeft);
   $("body").append($veilRight);
   $("body").append($tooltip);
 
-  // veil, tooltip 기본 style 설정
+  // veil, tooltip default style setting
   const veils = [$veilUp, $veilDown, $veilLeft, $veilRight];
   const property_veil = {
     display: "none",
@@ -111,7 +112,7 @@ $(document).ready(function() {
     "margin-bottom": "15px",
   });
 
-  // 하이라이트할 부분 설정
+  // Set the part to highlight
   let elem_index = 0;
   let elem_highlight = array_highlights[elem_index];
   let clickedReview = 0;
@@ -127,21 +128,21 @@ $(document).ready(function() {
     locate_tooltip();
     show_tooltip();
   });
-  // 브라우저 창 크기를 바꿀 시
-  // veil, tooltip의 위치 조절
+  // Changing the browser window size
+  // veil, tooltip default style setting
   $(window).resize(() => {
     locate_veils();
     locate_tooltip();
   });
 
-  // 튜토리얼 - 이전, 다음, 닫기 버튼을 눌렀을 때 적절히 처리
+  // Tutorial - Proper handling of previous, next, and close buttons
   $("#button_prev").on("click", handle_click_prev);
   $("#button_next").on("click", handle_click_next);
   $("#button_close_tooltip").on("click", hide_veils_and_tooltips);
 
   //////////////////////////////// FUNCTIONS ////////////////////////////////
 
-  // 4개 veil 각각의 위치, 크기 설정
+  // Set the position and size of each of the 4 veils
   function locate_veils() {
     let offset = elem_highlight.offset();
 
@@ -171,23 +172,23 @@ $(document).ready(function() {
     });
   }
 
-  // veil 모두 보이게 설정
+  // veil make all visible
   function show_veils() {
     for (const veil of veils) {
       veil.css("display", "block");
     }
   }
 
-  // tooltip의 위치를 적절히 설정
+  // Position the tooltip appropriately
   function locate_tooltip() {
     if (!elem_highlight) return;
     let offset = elem_highlight.offset();
 
-    // 제목, 내용을 n번째 제목, 내용으로 수정
+  // Edit the title and content to the nth title and content
     $("#tooltip_title").text(array_tooltip_data[elem_index].title);
     $("#tooltip_content").text(array_tooltip_data[elem_index].content);
 
-    // 위치를 highlight element에 맞게 수정
+    // Adjust the position to match the highlight element
     const tooltip_width = 150;
     let tooltip_left =
         offset.left - (tooltip_width - elem_highlight.outerWidth(true)) / 2;
@@ -245,12 +246,12 @@ $(document).ready(function() {
     }
   }
 
-  // tooltip을 화면에 보이게 함
+  // Make the tooltip visible on the screen
   function show_tooltip() {
     $tooltip.css({ display: "flex" });
   }
 
-  // veil, tooltip을 모두 화면에 보이지 않게 함
+  // Make all veil and tooltip invisible on the screen
   function hide_veils_and_tooltips() {
     $veilUp.css("display", "none");
     $veilDown.css("display", "none");
@@ -259,7 +260,7 @@ $(document).ready(function() {
     $tooltip.css("display", "none");
   }
 
-  // tooltip의 '이전' 클릭시 실행되는 함수
+  // Function executed when 'back' of tooltip is clicked
   function handle_click_prev() {
     if (elem_index === 0) return;
     elem_index -= 1;
@@ -270,7 +271,7 @@ $(document).ready(function() {
     show_tooltip();
   }
 
-  // tooltip의 '다음' 클릭시 실행되는 함수
+  // Function executed when 'Next' of tooltip is clicked
   function handle_click_next() {
     clickedReview = 1;
     if (elem_index === array_highlights.length - 1) {

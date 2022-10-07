@@ -283,5 +283,4 @@ $(document).ready(function () {
             }
             return cookieValue;
          }
-
 });

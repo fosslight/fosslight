@@ -219,7 +219,9 @@
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
 			</span>
 		</div>
+
 		<button id='continue_tutorial_25'>Continue tutorial (packaging)</button>
+
 		<!---->
 	</div>
 	<!---->
