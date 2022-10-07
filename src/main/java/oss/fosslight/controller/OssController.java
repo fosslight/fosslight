@@ -117,6 +117,30 @@ public class OssController extends CoTopComponent{
 		return OSS.LIST_JSP;
 	}
 	
+	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
+	public String listLink(@PathVariable String ossName, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		OssMaster searchBean = null;
+		
+		if(!isEmpty(ossName)) {
+			if(searchBean == null) {
+				searchBean = new OssMaster();
+			}
+			
+			searchBean.setOssName(ossName);
+			searchBean.setLinkFlag(CoConstDef.FLAG_YES);
+		}
+		
+		if(getSessionObject("defaultLoadYn") != null) {
+			model.addAttribute("defaultLoadYn", CoConstDef.FLAG_YES);
+			
+			deleteSession("defaultLoadYn");
+		}
+		
+		model.addAttribute("searchBean", searchBean);
+		
+		return OSS.LIST_JSP;
+	}
+	
 	@GetMapping(value=OSS.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			OssMaster ossMaster
@@ -1017,7 +1041,7 @@ public class OssController extends CoTopComponent{
 				continue;
 			}
 
-			if (Objects.isNull(oss.getOssName()) || oss.getOssName().isBlank()) {
+			if (Objects.isNull(oss.getOssName()) || StringUtil.isBlank(oss.getOssName())) {
 				log.debug("OSS name is required.");
 				ossDataMap.put("gridId", oss.getGridId());
 				ossDataMap.put("status", "X (Required missing)");

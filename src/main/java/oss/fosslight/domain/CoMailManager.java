@@ -1403,8 +1403,8 @@ public class CoMailManager extends CoTopComponent {
 						)
 				{
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
-					linkUrl += "/oss/edit/" + bean.getParamOssId();
-					_s = "<a href='"+linkUrl+"' target='_blank'>" + _s + "</a>";
+					linkUrl += "/oss/list/" + ossInfo.getOssName();
+					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
 				}
 			}
 			
@@ -1412,7 +1412,27 @@ public class CoMailManager extends CoTopComponent {
 		}
 		
 		if(title.indexOf("${OSS ID}") > -1) {
-			title = StringUtil.replace(title, "${OSS ID}", avoidNull(bean.getParamOssId()));
+			if(isMailBodySubject 
+					&& (
+							CoConstDef.CD_MAIL_TYPE_OSS_REGIST.equals(bean.getMsgType()) 
+							|| CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
+
+							)
+					)
+			{
+				String _s = "OSS-" + avoidNull(bean.getParamOssId());
+				String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
+				linkUrl += "/oss/edit/" + bean.getParamOssId();
+				_s = "<a href='"+linkUrl+"' style='font-size:16px;' target='_blank'>" + _s + "</a>";
+				title = StringUtil.replace(title, "OSS-${OSS ID}", _s);
+			} else {
+				title = StringUtil.replace(title, "${OSS ID}", avoidNull(bean.getParamOssId()));
+			}
 		}
 		
 		// 삭제된 이메일에 대한 정보

@@ -8,10 +8,10 @@
     var ossData = [];
     var isClicked = false;
     var postData; /**list data for sending to server*/
-    var stringDataForValid = ['ossName','ossVersion','ossCopyright','homepage','downloadLocation'
+    var stringDataForValid = ['ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
     var listDataForValid = ["ossNicknames", "declaredLicenses", "detectedLicenses"];
-    var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','ossCopyright','homepage','downloadLocation'
+    var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
     var selectedIds = new Set() /**set for selected rowids*/
     var referenceId = '${projectData.prjId}';
@@ -109,7 +109,6 @@
      * replace stringData wtih listData in 3 rows (ossNicknames, declaredLicenses, detectedLicenses)
      * */
     function dataValidCheck(mainData) {
-
         mainData.forEach((row) => {
             stringDataForValid.forEach((strData) => {
                 ossData[row["gridId"]][strData] = row[strData].trim();
@@ -121,6 +120,7 @@
                     ossData[row["gridId"]][listData] = []
                 } else {
                     ossData[row["gridId"]][listData] = ossData[row["gridId"]][listData].split(",")
+                        .map(item => item.trim()).filter(item => item.length);
                 }
             })
         })
@@ -213,7 +213,7 @@
                 { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
                 { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
                 { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
-                { name: 'ossCopyright', index: 'copyright', width: 200, align: 'left', editable:false},
+                { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false},
                 { name: 'homepage', index:'homepage', width: 250, align: 'left', editable:false},
                 { name: 'downloadLocation', index:'downloadLocation', width: 150, align: 'left', editable:false},
                 { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false},
