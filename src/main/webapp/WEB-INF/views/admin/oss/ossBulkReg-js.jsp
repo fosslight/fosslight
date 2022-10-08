@@ -6,6 +6,7 @@
     var withStatus;
     var loadedInfo;
     var ossData = [];
+    var failOss = [];
     var isClicked = false;
     var postData; /**list data for sending to server*/
     var stringDataForValid = ['ossName','ossVersion','copyright','homepage','downloadLocation'
@@ -186,6 +187,7 @@
                     cache : false,
                     dataType: "json",
                     success: (data) => {
+                        failOss = []
                         _mainLastsel = -1;
                         if (data['res'] == true && data['value'] != []) {
                             loadedInfo = data['value'];
@@ -240,6 +242,7 @@
             loadComplete: function(data) {
                 _mainLastsel = -1;
                 selectMarkWhenPageChange();
+                makeBackGroundColor();
             },
             ondblClickRow: function(rowid,iRow,iCol,e) {
                 if(rowid) {
@@ -297,6 +300,7 @@
                 $("#list").jqGrid('clearGridData');
                 selectedIds = new Set()
                 ossData = []
+                failOss = []
                 if (data['res'] == true){
                     jsonData = data['value'];
                     makeOssDTOList();
@@ -399,6 +403,14 @@
             }
         }
     }
+    /**
+     * change background color of failed oss row
+     * */
+    function makeBackGroundColor(){
+        for (const failOssGridId of failOss) {
+            $("#list").jqGrid("setRowData", failOssGridId, false, {'background' : "rgba(255, 0, 0, 0.3)"});
+        }
+    }
 
     const OssBulkGridStatusMessageManager = {
         cleanStatusMessages: function () {
@@ -407,8 +419,12 @@
             });
         },
         setStatusMessages: function (results) {
-            for (const result of results)
-                $("#list").jqGrid("getLocalRow", result.gridId).status = result.status;
+            for (const result of results){
+                $("#list").jqGrid("getLocalRow", result.gridId).status = result.msg;
+                if (!result.status) {
+                    failOss.push(result.gridId);
+                }
+            }
             $("#list").trigger('reloadGrid', [{ page: 1}]);
         }
     };
