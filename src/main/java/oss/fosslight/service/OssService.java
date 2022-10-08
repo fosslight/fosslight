@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import com.github.jsonldjava.utils.Obj;
 import oss.fosslight.config.HistoryConfig;
 import oss.fosslight.domain.*;
 
@@ -126,4 +127,6 @@ public interface OssService extends HistoryConfig{
 	Map<String, Object> sendMailForSaveOss(Map<String, Object> resMap);
 
 	List<String> getDeactivateOssList();
+
+	Map<String, Object> getOssDataMap(String gridId, boolean status, String msg);
 }
