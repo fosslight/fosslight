@@ -1111,6 +1111,23 @@ var com_fn = {
 			grid.jqGrid('saveRow',_mainLastsel);
 		}
 	},
+	exitRow : function(target){
+		var gridRowData = $("#" + target).jqGrid("getRowData");
+		gridRowData.forEach(function(obj){
+			var gridId = obj["gridId"];
+			var key = Object.keys(obj);
+			key.forEach(function(value){
+				if("gridId" != value){
+					var data = obj[value];
+					if(data.indexOf("<div class") > -1){
+						data = data.split("<")[0];
+					}
+					
+					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+				}
+			});
+		});
+	},
 	setMessage : function(msg){
 		var alertMsg  = msg;
 		<c:if test="${not empty ct:getCodeValues(ct:getConstDef('CD_COLLAB_INFO'))}">

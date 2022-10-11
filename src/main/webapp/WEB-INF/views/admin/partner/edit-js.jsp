@@ -662,6 +662,8 @@ var saveFlag = false;
 							$('#checkbox3').val('Y');
 						}
 						
+						com_fn.exitRow("list");
+						
 						fn_grid_com.totalGridSaveMode('list');
 						
 						var target = $("#list");
@@ -2500,6 +2502,23 @@ var saveFlag = false;
 				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
 				grid.jqGrid('saveRow',_mainLastsel);
 			}
+		},
+		exitRow : function(target){
+			var gridRowData = $("#" + target).jqGrid("getRowData");
+			gridRowData.forEach(function(obj){
+				var gridId = obj["gridId"];
+				var key = Object.keys(obj);
+				key.forEach(function(value){
+					if("gridId" != value){
+						var data = obj[value];
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<")[0];
+						}
+						
+						fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+					}
+				});
+			});
 		},
 		showLicenseInfo : function(obj){
 			var licenseName = $(obj).text();
