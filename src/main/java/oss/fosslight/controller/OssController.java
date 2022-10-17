@@ -1009,7 +1009,7 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model) {
-		List<Map<String, String>> ossDataMapList = new ArrayList<>();
+		List<Map<String, Object>> ossDataMapList = new ArrayList<>();
 		Map<String, Object> resMap = new HashMap<>();
 
 		if (ossMasters.isEmpty()) {
@@ -1020,7 +1020,7 @@ public class OssController extends CoTopComponent{
 
 		boolean licenseCheck;
 		for (OssMaster oss : ossMasters) {
-			Map<String, String> ossDataMap = new HashMap<>();
+			Map<String, Object> ossDataMap = new HashMap<>();
 			oss.setOssCopyFlag(CoConstDef.FLAG_NO);
 			oss.setRenameFlag(CoConstDef.FLAG_NO);
 			oss.setAddNicknameYn(CoConstDef.FLAG_YES); // Append nickname only
@@ -1035,16 +1035,14 @@ public class OssController extends CoTopComponent{
 			int licenseCount = 1;
 			if (declaredLicenses == null || declaredLicenses.isEmpty()) {
 				log.debug("DeclaredLicenses is null:" + oss.getOssName());
-				ossDataMap.put("gridId", oss.getGridId());
-				ossDataMap.put("status", "X (Required missing)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Required missing)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
 
 			if (Objects.isNull(oss.getOssName()) || StringUtil.isBlank(oss.getOssName())) {
 				log.debug("OSS name is required.");
-				ossDataMap.put("gridId", oss.getGridId());
-				ossDataMap.put("status", "X (Required missing)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Required missing)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
@@ -1091,8 +1089,7 @@ public class OssController extends CoTopComponent{
 			}
 			if (licenseCheck) {
 				log.debug("Add failed due to declared license:" + oss.getOssName());
-				ossDataMap.put("gridId", oss.getGridId());
-				ossDataMap.put("status", "X (Unconfirmed license)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Unconfirmed license)");
 				ossDataMapList.add(ossDataMap);
 				continue;
 			}
@@ -1111,8 +1108,7 @@ public class OssController extends CoTopComponent{
 			boolean checkDuplicated = true;
 			if (ossService.checkExistsOss(oss) != null) {
 				log.debug("Same OSS, version already exists.:" + oss.getOssName() + " v" + oss.getOssVersion());
-				ossDataMap.put("gridId", oss.getGridId());
-				ossDataMap.put("status", "X (Duplicated Version)");
+				ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Duplicated Version)");
 				ossDataMapList.add(ossDataMap);
 				checkDuplicated = false;
 			} else {
@@ -1122,8 +1118,7 @@ public class OssController extends CoTopComponent{
 				OssMaster checkName = ossService.checkExistsOssNickname2(nameCheck);
 				if (checkName != null) {
 					log.debug(oss.getOssName() + " is stored as a nick in " + checkName.getOssName());
-					ossDataMap.put("gridId", oss.getGridId());
-					ossDataMap.put("status", "X (Duplicated : " + oss.getOssName() + ")");
+					ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Duplicated : " + oss.getOssName() + ")");
 					ossDataMapList.add(ossDataMap);
 					checkDuplicated = false;
 				}
@@ -1137,8 +1132,7 @@ public class OssController extends CoTopComponent{
 					OssMaster checkNick = ossService.checkExistsOssNickname(nickCheck);
 					if (checkNick != null) {
 						log.debug(nick + " is stored as a nick or name in " + checkNick.getOssName());
-						ossDataMap.put("gridId", oss.getGridId());
-						ossDataMap.put("status", "X (Duplicated : " + nick + ")");
+						ossDataMap = ossService.getOssDataMap(oss.getGridId(), false, "X (Duplicated : " + nick + ")");
 						ossDataMapList.add(ossDataMap);
 						checkDuplicated = false;
 						break;
@@ -1150,8 +1144,7 @@ public class OssController extends CoTopComponent{
 				Map<String, Object> result = ossService.saveOss(oss);
 				result = ossService.sendMailForSaveOss(result);
 				if (result.get("resCd").equals("10")) {
-					ossDataMap.put("gridId", oss.getGridId());
-					ossDataMap.put("status", "O");
+					ossDataMap = ossService.getOssDataMap(oss.getGridId(), true, "O");
 					ossDataMapList.add(ossDataMap);
 				}
 			}

@@ -72,6 +72,7 @@ var binAndroid_evt = {
 				
 				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 					if (e) {
+						com_fn.exitRow("binAndroidList");
 						// 메인, 서브 그리드 세이브 모드
 						fn_grid_com.totalGridSaveMode('binAndroidList');
 						// 닉네임 체크

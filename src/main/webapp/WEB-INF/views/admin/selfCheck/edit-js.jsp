@@ -1690,6 +1690,7 @@
 			
 			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 				if (e) {
+					com_fn.exitRow("srcList");
 					// 메인, 서브 그리드 세이브 모드
 					fn_grid_com.totalGridSaveMode('srcList');
 					// 닉네임 체크
@@ -2267,6 +2268,23 @@
 				fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
 				grid.jqGrid('saveRow',_mainLastsel);
 			}
+		},
+		exitRow : function(target){
+			var gridRowData = $("#" + target).jqGrid("getRowData");
+			gridRowData.forEach(function(obj){
+				var gridId = obj["gridId"];
+				var key = Object.keys(obj);
+				key.forEach(function(value){
+					if("gridId" != value){
+						var data = obj[value];
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<")[0];
+						}
+						
+						fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+					}
+				});
+			});
 		},
 		showLicenseInfo : function(obj){
 			var licenseName = $(obj).text();

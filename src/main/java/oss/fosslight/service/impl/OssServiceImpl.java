@@ -3625,4 +3625,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public List<String> getDeactivateOssList() {
 		return ossMapper.getDeactivateOssList();
 	}
+
+	@Override
+	public Map<String, Object> getOssDataMap(String gridId, boolean status, String msg) {
+		Map<String, Object> ossDataMap = new HashMap<>();
+		ossDataMap.put("gridId", gridId);
+		ossDataMap.put("status", status);
+		ossDataMap.put("msg", msg);
+
+		return ossDataMap;
+	}
+
 }

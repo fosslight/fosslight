@@ -51,6 +51,7 @@ var src_evt = {
 				
 				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 					if (e) {
+						com_fn.exitRow("srcList");
 						// 메인, 서브 그리드 세이브 모드
 						fn_grid_com.totalGridSaveMode('srcList');
 						// 닉네임 체크
