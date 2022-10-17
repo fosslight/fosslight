@@ -7,8 +7,7 @@
 		<div class="projectInfo">
 			<h2>Project Information</h2>
 			<ul>
-				<li class="first"><span>Project Name</span>
-					<strong>${project.prjName }
+				<li class="first"><span>Project</span><strong><label id="ePrjName"></label>
 						<c:if test="${not empty project.prjId}">
 						<span id="identificationTab" class="btnIcon identi" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
 						</c:if>
@@ -20,7 +19,7 @@
 						</c:if>
 					</strong>
 				</li>
-				<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
+				<li><span>Creator</span><strong><label id="eCreator"></label></strong></li>
 			</ul>
 		</div>
 		<!---->

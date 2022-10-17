@@ -83,6 +83,13 @@
 			$("[name='noticeType']").attr("disabled", true);
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
+
+		var ePrjName = "${project.prjName}"+(('${project.prjVersion}'!="")?' ('+'${project.prjVersion}'+')':"");
+		var createdDate = "${ct:formatDateSimple(project.createdDate)}";
+		var eCreator = '${project.prjUserName}'+" "+'${project.prjDivisionName }'+' ('+createdDate+')';
+		
+		$("#ePrjName").text(ePrjName);
+		$("#eCreator").text(eCreator);
 	});
 	
 	// 이벤트
