@@ -236,4 +236,8 @@ public interface OssMapper {
 	List<String> selectMultiOssList(OssMaster ossMaster);
 
 	List<String> getDeactivateOssList();
+
+	List<OssMaster> checkOssNameTotal(ProjectIdentification bean);
+
+	Map<String, Object>  getRecentlyModifiedOss(OssMaster ossMaster);
 }

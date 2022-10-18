@@ -1479,7 +1479,44 @@ public class OssController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(map);
 	}
-	
+
+	@PostMapping(value=OSS.SAVE_OSS_URL_NICKNAME)
+	public @ResponseBody ResponseEntity<Object> saveOssURLNickname(
+			@RequestBody ProjectIdentification paramBean
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+
+		OssMaster beforeBean = ossService.getOssInfo(null, paramBean.getCheckName(), true);
+
+		Map<String, Object> map = ossService.saveOssURLNickname(paramBean);
+		boolean updatedFlag = (boolean) map.get("isValid");
+		if(updatedFlag) {
+			CoCodeManager.getInstance().refreshOssInfo();
+			String action = CoConstDef.ACTION_CODE_UPDATE;
+			OssMaster afterBean = ossService.getOssInfo(null, paramBean.getCheckName(), true);
+
+			History h = ossService.work(afterBean);
+			h.sethAction(action);
+			historyService.storeData(h);
+
+			// history 저장 성공 후 메일 발송
+			try {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_UPDATE);
+				mailBean.setParamOssId(afterBean.getOssId());
+				mailBean.setComment(afterBean.getComment());
+				mailBean.setCompareDataBefore(beforeBean);
+				mailBean.setCompareDataAfter(afterBean);
+
+				CoMailManager.getInstance().sendMail(mailBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+
+		return makeJsonResponseHeader((boolean) map.get("isValid"), (String) map.get("returnType"));
+	}
+
 	@PostMapping(value=OSS.SAVE_OSS_NICKNAME)
 	public @ResponseBody ResponseEntity<Object> saveOssNickname(
 			@RequestBody ProjectIdentification paramBean

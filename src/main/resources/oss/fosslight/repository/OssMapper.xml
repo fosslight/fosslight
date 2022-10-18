@@ -1701,7 +1701,29 @@
 		       )
 		 GROUP BY OM.OSS_NAME
 	</select>
-	
+
+	<select id="checkOssNameTotal" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
+		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+				 LEFT JOIN OSS_DOWNLOADLOCATION DOWN
+						   ON OM.OSS_ID = DOWN.OSS_ID
+		WHERE OM.OSS_NAME != #{ossName}
+		  AND (
+			SUBSTRING_INDEX(SUBSTRING_INDEX(OM.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
+		   OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
+			)
+		GROUP BY OM.OSS_NAME
+		UNION
+		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM OSS_MASTER OM
+		WHERE OM.OSS_NAME = #{ossNickName} AND OM.USE_YN = 'Y'
+		GROUP BY OM.OSS_NAME
+		UNION
+		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM (SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossNickName}) A1
+				 INNER JOIN OSS_MASTER OM WHERE (A1.OSS_NAME=OM.OSS_NAME AND OM.USE_YN = "Y") GROUP BY OM.OSS_NAME
+	</select>
+
 	<update id="updateOssCheckNameBySelfCheck" parameterType="oss.fosslight.domain.ProjectIdentification">
 		UPDATE PRE_OSS_COMPONENTS 
 		   SET OSS_NAME = #{checkName} 
@@ -2178,4 +2200,12 @@
 		AND DEACTIVATE_FLAG = 'Y'
 		GROUP BY OSS_NAME
 	</select>
+
+	<select id="getRecentlyModifiedOss" parameterType="oss.fosslight.domain.OssMaster" resultType="HashMap">
+		SELECT COUNT(*) AS CNT, OSS_ID
+		FROM OSS_DOWNLOADLOCATION
+		WHERE OSS_ID = (SELECT OSS_ID FROM OSS_MASTER WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
+	</select>
+
+
 </mapper>
