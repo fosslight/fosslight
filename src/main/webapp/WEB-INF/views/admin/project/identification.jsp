@@ -8,7 +8,7 @@
 		<div class="projectInfo">
 			<h2>Project Information</h2>
 			<ul>
-				<li class="first"><span>Project Name</span><strong><label id="vPrjName"></label>
+				<li class="first"><span>Project</span><strong><label id="vPrjName"></label>
 					<span id="editTab" class="btnIcon basic" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Basic Info</span>
 					<c:if test="${project.verificationStatus ne 'NA' and (not empty project.verificationStatus or project.identificationStatus eq 'CONF')}">
 					<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
@@ -18,7 +18,7 @@
 					</c:if>
 					</strong>
 				</li>
-				<li><span>Created</span><strong><label id="vCreated"></label></strong></li>
+				<li><span>Creator</span><strong><label id="vCreated"></label></strong></li>
 			</ul>
 			<a class="right" id="helpLink" style="position:relative; cursor: pointer; top:-37px; right:-75px; display: none;"><img alt="" src="${ctxPath}/images/user-guide.png" /></a>
 		</div>

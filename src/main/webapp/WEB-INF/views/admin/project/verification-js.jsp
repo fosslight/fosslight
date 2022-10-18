@@ -2374,6 +2374,13 @@
 	
 	var com_fn = {
 		tabInit : function(){
+			var verifyPrjName = "${project.prjName}"+(('${project.prjVersion}'!="")?' ('+'${project.prjVersion}'+')':"");
+			var createdDate = "${ct:formatDateSimple(project.createdDate)}";
+			var vCreated = '${project.prjUserName}'+" "+'${project.prjDivisionName }'+' ('+createdDate+')';
+
+			$("#verifyPrjName").text(verifyPrjName);
+			$("#verifyCreator").text(vCreated);
+			
 			var initDiv = '${initDiv}';
 			var tabContent = $(".tabContent");
 			var tabMenuA = $(".tabMenu a");

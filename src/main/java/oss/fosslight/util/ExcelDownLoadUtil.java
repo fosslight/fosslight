@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -364,6 +365,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 			}
+			
+			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) list.sort(Comparator.comparing(ProjectIdentification::getGroupingColumn));
 			
 			String currentGroupKey = null;
 			
