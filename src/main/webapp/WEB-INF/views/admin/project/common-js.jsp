@@ -1119,8 +1119,16 @@ var com_fn = {
 			key.forEach(function(value){
 				if("gridId" != value){
 					var data = obj[value];
-					if(data.indexOf("<div class") > -1){
-						data = data.split("<")[0];
+					if(value == "downloadLocation" || value == "homepage"){
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+					} else {
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<")[0];
+						}
 					}
 					
 					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
