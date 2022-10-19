@@ -373,6 +373,39 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			for(ProjectIdentification bean : list) {
 				if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
 					if(currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
+						for(String[] editRow : rows) {
+							if(!isEmpty(editRow[1])	&& !editRow[1].equals("-")
+									&& editRow[1].equals(bean.getOssName()) && editRow[2].equals(bean.getOssVersion())) {
+								String referenceDiv = editRow[8];
+								String referenceDivChk = bean.getRefDiv();
+								
+								if(!isEmpty(referenceDivChk)) {
+									switch (avoidNull(referenceDivChk)) {
+									case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
+										referenceDivChk = "3rd Party";
+										
+										break;
+									case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
+										referenceDivChk = "SRC";
+										
+										break;
+									case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
+										referenceDivChk = "BIN";
+										
+										break;
+									default:
+										break;
+									}
+									
+									if(!referenceDiv.contains(referenceDivChk)) {
+										referenceDiv = referenceDiv + "," + referenceDivChk;
+										editRow[8] = referenceDiv;
+										break;
+									}
+								}
+							}
+						}
+						
 						continue;
 					} else {
 						currentGroupKey = bean.getGroupingColumn();
