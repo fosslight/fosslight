@@ -374,7 +374,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
 					if(currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
 						for(String[] editRow : rows) {
-							if(!isEmpty(editRow[1])	&& !editRow[1].equals("-")
+							if(!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-")
 									&& editRow[1].equals(bean.getOssName()) && editRow[2].equals(bean.getOssVersion())) {
 								String referenceDiv = editRow[8];
 								String referenceDivChk = bean.getRefDiv();
