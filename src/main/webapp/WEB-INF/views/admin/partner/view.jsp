@@ -65,23 +65,23 @@
 						</colgroup>
 						<tbody>
 							<tr>
-								<th class="dCase txStr">3rd Party Name</th>
+								<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.name" /></th>
 								<td class="dCase">${detail.partnerName}</td>
 							</tr>
 							<tr>
-								<th class="dCase txStr">3rd Party Software Name</th>
+								<th class="dCase txStr"><spring:message code="msg.common.field.3rdParty.softwareName" /></th>
 								<td class="dCase">${detail.softwareName}</td>
 							</tr>
 							<tr>
-								<th class="dCase">3rd Party Software Version</th>
+								<th class="dCase"><spring:message code="msg.common.field.3rdParty.softwareVersion" /></th>
 								<td class="dCase">${detail.softwareVersion}</td>
 							</tr>
 							<tr>
-								<th class="dCase">3rd Party Software Status</th>
+								<th class="dCase"><spring:message code="msg.common.field.3rdParty.status" /></th>
 								<td class="dCase"><input type="button" id="partnerStatus" class="w150 mr5"</td>
 							</tr>
 							<tr>
-								<th class="dCase">Delivery Form</th>
+								<th class="dCase"><spring:message code="msg.common.field.deliveryForm" /></th>
 								<td class="dCase">
 									<p class="pd5">If you exist in binary form 3rd party software, You can check opensource information using the <a href="#" class="txBlueIt">Binary Analysis</a></p>
 									<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_PARTNER_DELIVERY_FORM'))}" varStatus="status">
@@ -91,7 +91,7 @@
 							</tr>
 							<c:if test="${project.viewOnlyFlag ne 'Y'}">
 							<tr>
-								<th class="dCase">Permission</th>
+								<th class="dCase"><spring:message code="msg.common.field.permission" /></th>
 								<td class="dCase">
 									<span>View : ${(not empty detail && detail.publicYn ne 'N') || empty detail ? 'EveryOne' : 'Creator & Watcher'}</span><br>
 									<span>Edit : Creator & Watcher only</span>
@@ -99,11 +99,11 @@
 							</tr>
 							</c:if>
 							<tr>
-								<th class="dCase">Description</th>
+								<th class="dCase"><spring:message code="msg.common.field.description" /></th>
 								<td class="dCase">${detail.description}</td>
 							</tr>
 							<tr>
-								<th class="dCase">Open Source Agreement<br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
+								<th class="dCase"><spring:message code="msg.common.field.Agreement" /><br/><c:if test="${checkFlag}"><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('arg')"><span>Sample</span></a></c:if></th>
 								<td class="dCase uploadCase confirmationUpload">
 									<c:if test="${not empty confirmationFile}">
 										<c:choose>
@@ -118,7 +118,7 @@
 								</td>
 							</tr>
 							<tr>
-								<th class="dCase">OSS Checklist (Open Source List)<br/><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('chk')"><span>Sample</span></a></th>
+								<th class="dCase"><spring:message code="msg.common.field.OSSChecklist" /> (Open Source List)<br/><a href="javascript:void(0);" class="sampleDown" onclick="fn.sampleDownload('chk')"><span>Sample</span></a></th>
 								<td class="dCase uploadCase ossUpload">
 									<c:if test="${not empty ossFile}">
 										<c:choose>
@@ -134,7 +134,7 @@
 							</tr>
 						</tr>
 						<tr>
-							<th class="dCase">Related Documents</th>
+							<th class="dCase"><spring:message code="msg.common.field.relatedDocuments" /></th>
 							<td class="dCase uploadCase documentsUpload">
 								<ul class="documentsFileArea">
 								<c:forEach var="documentsFile" items="${detail.documentsFile }" varStatus="vs">
@@ -158,7 +158,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th class="dCase">Watcher</th>
+							<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
 							<td class="dCase watchCase">
 								<div class="multiTxtSet2" id="nameSpace">
 								<c:forEach var="watcher" items="${detail.partnerWatcher }" varStatus="status">
@@ -177,17 +177,17 @@
 							</td>
 						</tr>
 							<tr>
-								<th class="dCase txStr">Creator</th>
+								<th class="dCase txStr"><spring:message code="msg.common.field.creator" /></th>
 								<td class="dCase">${detail.creatorName}</td>
 							</tr>
 							<tr>
-								<th class="dCase  txStr">Division</th>
+								<th class="dCase  txStr"><spring:message code="msg.common.field.division" /></th>
 								<td class="dCase">
 									${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), detail.division)}
 								</td>
 							</tr>
 	                        <tr>
-	                            <th class="dCase  txStr">Reviewer</th>
+	                            <th class="dCase  txStr">><spring:message code="msg.common.field.reviewer" /></th>
 	                            <td class="dCase">${detail.reviewerName}</td>
 	                        </tr>
 						</tbody>

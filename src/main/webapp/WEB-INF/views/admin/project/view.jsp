@@ -8,11 +8,11 @@
 			<div class="projectInfo">
 				<h2>Project Information</h2>
 				<ul>
-					<li class="first"><span>Project Name</span>
+					<li class="first"><span>Project</span>
 						<strong>${project.prjName }
 						</strong>
 					</li>
-					<li><span>Created</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
+					<li><span>Creator</span><strong>${project.prjUserName }&nbsp;${project.prjDivisionName } (${ct:formatDateSimple(project.createdDate)})</strong></li>
 				</ul>
 			</div>
 			<!---->
@@ -60,7 +60,7 @@
 						</colgroup>
 						<tbody>
 							<tr>
-								<th class="dCase txStr">Project Name</th>
+								<th class="dCase txStr"><spring:message code="msg.common.field.project.name" /></th>
 								<td class="dCase">
 									<div class="required">${project.prjName}</div>
 									<c:if test="${empty project.prjId}"><a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:38px; left:1060px; display:none;"><img alt="" src="<c:url value="/images/user-guide.png"/>" /></a></c:if>
@@ -68,11 +68,11 @@
 								</td>
 							</tr>
 							<tr>
-								<th class="dCase">Project Version</th>
+								<th class="dCase"><spring:message code="msg.common.field.project.version" /></th>
 								<td class="dCase">${project.prjVersion}</td>
 							</tr>
 							<tr>
-								<th class="dCase">Project Status</th>
+								<th class="dCase"><spring:message code="msg.common.field.project.status" /></th>
 								<td class="dCase">
 									<div>
 										<input type="button" id="identificationStatus" class="w150 mr5"><input type="button" id="verificationStatus" class="w150 mr5"><input type="button" id="destributionStatus" class="w150 mr5"><span id="downloadBtn"></span>
@@ -81,7 +81,7 @@
 							</tr>
 							<c:if test="${project.viewOnlyFlag ne 'Y'}">
 							<tr>
-								<th class="dCase">Permission</th>
+								<th class="dCase"><spring:message code="msg.common.field.permission" /></th>
 								<td class="dCase">
 									<span>View : ${not empty project && project.publicYn ne 'N' ? 'Everyone' : 'Creator & Watcher'}</span><br>
 									<span>Edit : Creator & Watcher only</span>
@@ -89,7 +89,7 @@
 							</tr>
 							</c:if>
 							<tr>
-								<th class="dCase txStr">Operating System</th>
+								<th class="dCase txStr"><spring:message code="msg.common.field.OS" /></th>
 								<td class="dCase">
 									<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_OS_TYPE'))}" varStatus="status">
 										<c:if test="${code[0] eq project.osType and code[0] ne ct:getConstDef('CD_OS_TYPE_ETC')}">${code[1]}</c:if>
@@ -98,7 +98,7 @@
 								</td>
 							</tr>
 							<tr>
-								<th class="dCase txStr"><a class="iconSet help left" id="helpLink_distributionType" style="display: none; position:relative; cursor: pointer; left:10px;"></a>Distribution Type</th>
+								<th class="dCase txStr"><a class="iconSet help left" id="helpLink_distributionType" style="display: none; position:relative; cursor: pointer; left:10px;"></a><spring:message code="msg.common.field.distributionType" /></th>
 								<td class="dCase">
 									<c:forEach var="code" items="${ct:getCodeValues(ct:getConstDef('CD_DISTRIBUTION_TYPE'))}" varStatus="status">
 										<c:if test="${code[0] eq project.distributionType}">${code[1]}</c:if>
@@ -151,7 +151,7 @@
 								</c:otherwise>
 							</c:choose>
 							<tr>
-								<th class="dCase txStr"><a class="iconSet help left" id="helpLink_priority" style="display: none; position:relative; cursor: pointer; left:10px;"></a>Priority</th>
+								<th class="dCase txStr"><a class="iconSet help left" id="helpLink_priority" style="display: none; position:relative; cursor: pointer; left:10px;"></a><spring:message code="msg.common.field.priority" /></th>
 								<td class="dCase">
 									<c:forEach items="${ct:getCodeValues(ct:getConstDef('CD_PROJECT_PRIORITY'))}" var="code" varStatus="status">
 										<c:if test="${code[0] eq project.priority}">${code[1]}</c:if>
@@ -167,11 +167,11 @@
 								</td>
 							</tr>
 							<tr>
-								<th class="dCase">Additional Information</th>
+								<th class="dCase"><spring:message code="msg.common.field.additionalInformation" /></th>
 								<td class="dCase">${project.comment}</td>
 							</tr>
 							<tr>
-								<th class="dCase">Watcher</th>
+								<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
 								<td class="dCase">
 									<div id="multiDiv" class="multiTxtSet2"></div>
 								</td>
@@ -181,17 +181,17 @@
 							</c:if>
 							<c:if test="${not empty project.prjId and 'Y' ne project.copyFlag}">
 							<tr>
-								<th class="dCase  txStr">Creator</th>
+								<th class="dCase  txStr"><spring:message code="msg.common.field.creator" /></th>
 								<td class="dCase">${project.prjUserName}</td>
 							</tr>
 							<tr>
-								<th class="dCase  txStr">Division</th>
+								<th class="dCase  txStr"><spring:message code="msg.common.field.division" /></th>
 								<td class="dCase">
 									${ct:getCodeString(ct:getConstDef('CD_USER_DIVISION'), project.division)}
 								</td>
 							</tr>
 	                        <tr>
-	                            <th class="dCase  txStr">Reviewer</th>
+	                            <th class="dCase  txStr"><spring:message code="msg.common.field.reviewer" /></th>
 	                            <td class="dCase">${project.reviewerName}</td>
 	                        </tr>
 	                        </c:if>
