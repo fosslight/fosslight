@@ -2605,6 +2605,7 @@ public class CoMailManager extends CoTopComponent {
 				return makePartnerBasicInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_OSSLIST:
 			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO:
+			case CoConstDef.CD_MAIL_COMPONENT_PARTNER_NOT_DISCLOSEOSSINFO:
 				param.add(bean.getParamPartnerId());
 				return makePartnerOssListInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_BATRESULT:
