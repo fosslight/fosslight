@@ -1579,7 +1579,17 @@ public class ProjectController extends CoTopComponent {
 				return returnMap;
 			}
 			
-			if(CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL.equals(ossNotice.getNoticeType())) {
+			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+			prjInfo.setDestributionStatus(null);
+
+/*			if("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType())).trim().toUpperCase())
+					|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType())).trim().toUpperCase()) 
+							&& verificationService.checkNetworkServer(ossNotice.getPrjId())
+					)
+					|| CoConstDef.CD_NOTICE_TYPE_NA.equals(project.getNoticeType())
+					) {
+				prjInfo.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+			} else {
 				ossNotice.setDomain(CommonFunction.getDomain(req));
 				
 				try {
@@ -1590,19 +1600,9 @@ public class ProjectController extends CoTopComponent {
 					returnMap.put("step", "verificationProgress");
 					return returnMap;
 				}
-			}
-			
-			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
-			if("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase())
-					|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase()) 
-							&& verificationService.checkNetworkServer(ossNotice.getPrjId())
-					)
-					|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget())
-					) {
-				prjInfo.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
-			} else {
+				
 				prjInfo.setDestributionStatus(null);
-			}
+			} */
 			prjInfo.setModifier(loginUserName());
 
 			try {
