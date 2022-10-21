@@ -3669,6 +3669,11 @@ public class ProjectController extends CoTopComponent {
 		project.setCopyFlag(CoConstDef.FLAG_YES);
 		project.setCompleteYn(CoConstDef.FLAG_NO);
 		
+		T2Users user = userService.getLoginUserInfo();
+		if(user != null && user.getDivision() != null) {
+			project.setDivision(user.getDivision());
+		}
+		
 		model.addAttribute("project", project);
 		model.addAttribute("copy", toJson(project));
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
