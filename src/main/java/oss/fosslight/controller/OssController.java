@@ -127,6 +127,7 @@ public class OssController extends CoTopComponent{
 			}
 			
 			searchBean.setOssName(ossName);
+			searchBean.setOssNameAllSearchFlag(CoConstDef.FLAG_YES);
 			searchBean.setLinkFlag(CoConstDef.FLAG_YES);
 		}
 		
