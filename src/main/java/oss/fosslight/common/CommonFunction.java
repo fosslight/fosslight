@@ -1260,7 +1260,7 @@ public class CommonFunction extends CoTopComponent {
 										}
 									}
 								}else {
-									if(!duplicateLicense.contains(licenseList.getLicenseName()) && CoConstDef.FLAG_NO.equals(licenseList.getExcludeYn())) {
+									if(!duplicateLicense.contains(licenseList.getLicenseName()) && CoConstDef.FLAG_NO.equals(avoidNull(licenseList.getExcludeYn(), CoConstDef.FLAG_NO))) {
 										resultLicenseList.add(licenseList);
 										duplicateLicense.add(StringUtil.trim(licenseList.getLicenseName()).toUpperCase());
 									}
@@ -3669,13 +3669,13 @@ public class CommonFunction extends CoTopComponent {
 				
 				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
 						, avoidNull(bean.getConcludedLicense(), null), copyright, bean.getDownloadLocation()
-						, userData.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
+						, bean.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
 				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
 						, askalonoLicense, null, bean.getDownloadLocation()
-						, userData.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
+						, bean.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
 				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
 						, scancodeLicense, copyright, bean.getDownloadLocation()
-						, userData.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
+						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
 
 				userData.setResult("true");
 				
