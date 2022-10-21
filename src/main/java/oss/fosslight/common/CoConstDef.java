@@ -621,12 +621,13 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_OSS = "208";
 	public static final String CD_MAIL_COMPONENT_PARTNER_OSSLIST = "209";
 
-	public static final String CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO = "215";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED = "210";
 	public static final String CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL = "211";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_PROJECT_RECALCULATED_ALL = "212";
 	public static final String CD_MAIL_COMPONENT_SELFCHECK_PROJECT_BASICINFO = "213";
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED = "214";
+	public static final String CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO = "215";
+	public static final String CD_MAIL_COMPONENT_PARTNER_NOT_DISCLOSEOSSINFO = "216";
 	
 	/** MAIL 모듈 별 KEY NAME */
 	public static final String CD_MAIL_COMPONENT_NAME = "104";
