@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1145,6 +1146,21 @@ public class ExcelUtil extends CoTopComponent {
     				} else if (licenseName.contains(",")) {
     					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
     				}
+    				
+    				if(!licenseName.matches("\\A\\p{ASCII}*\\z")) {
+						byte[] asciiValues = licenseName.getBytes(StandardCharsets.US_ASCII);
+						byte[] asciiValuesRetry = new byte[asciiValues.length];
+						for(int i=0; i < asciiValues.length ; i++) {
+							if(asciiValues[i] == 63) {
+								asciiValuesRetry[i] = 32;
+							} else {
+								asciiValuesRetry[i] = asciiValues[i];
+							}
+						}
+	    				
+						licenseName = new String(asciiValuesRetry);
+					}
+    				
     				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
     				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				

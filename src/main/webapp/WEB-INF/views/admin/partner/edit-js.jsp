@@ -1869,6 +1869,12 @@ var saveFlag = false;
 			var protocol = window.location.protocol;
 			var host =  window.location.host;
 			copyUrl = protocol + "//" + host + "/partner/view/${detail.partnerId}";
+
+			var langSelect = $('.userLang > select option:selected', window.parent.document)[0];
+			langSelect = $(langSelect).val();
+			if(langSelect){
+				copyUrl += "?lang=" + langSelect;
+			}
 			$("#copyUrl").val(copyUrl);
 			
 			//launch it.
