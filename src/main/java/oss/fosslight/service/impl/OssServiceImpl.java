@@ -954,13 +954,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if(!isEmpty(detectedLicense)) {
 					LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
 					
-					OssMaster om = new OssMaster(
-						  ossMaster.getOssId() // ossId
-						, detectedLicenseInfo.getLicenseId() // licenseId
-						, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
-					);
-					
-					ossMapper.insertOssLicenseDetected(om);
+					if(detectedLicenseInfo != null) {
+						OssMaster om = new OssMaster(
+								  ossMaster.getOssId() // ossId
+								, detectedLicenseInfo.getLicenseId() // licenseId
+								, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
+						);
+						
+						ossMapper.insertOssLicenseDetected(om);
+					}
 				}
 			}
 		}
