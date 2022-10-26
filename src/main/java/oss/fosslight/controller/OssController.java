@@ -398,8 +398,16 @@ public class OssController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		Map<String, Object> resMap = ossService.saveOss(ossMaster);
-		resMap = ossService.sendMailForSaveOss(resMap);
+		Map<String, Object> resMap = new HashMap<String, Object>();
+		
+		try {
+			resMap = ossService.saveOss(ossMaster);
+			resMap = ossService.sendMailForSaveOss(resMap);
+		} catch (Exception e) {
+			resMap.put("resCd", "00");
+			log.error(e.getMessage(), e);
+		}
+		
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1263,7 +1271,16 @@ public class OssController extends CoTopComponent{
 		// editor를 이용하지 않고, textarea로 등록된 코멘트의 경우 br 태그로 변경
 		ossMaster.setComment(CommonFunction.lineReplaceToBR(ossMaster.getComment()));
 		ossMaster.setAddNicknameYn(CoConstDef.FLAG_YES); //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
-		String resultOssId = ossService.registOssMaster(ossMaster);
+		
+		String resultOssId = "";
+		try {
+			resultOssId = ossService.registOssMaster(ossMaster);
+		} catch (Exception e) {
+			resMap.put("resCd", "00");
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false);
+		}
+		
 		CoCodeManager.getInstance().refreshOssInfo();
 		
 		History h = ossService.work(ossMaster);
@@ -1832,6 +1849,7 @@ public class OssController extends CoTopComponent{
 			analysisBean.setReferenceOssId(resultOssId);
 			result = ossService.updateAnalysisComplete(analysisBean); // auto-analysis 완료처리
 		} catch(Exception e) {
+			resMap.put("resCd", "00");
 			log.error(e.getMessage(), e);
 			
 			return makeJsonResponseHeader(false, "Fail");
