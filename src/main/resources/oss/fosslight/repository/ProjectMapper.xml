@@ -269,14 +269,7 @@
 					WHERE T1.PRJ_ID = SUB_B2.PRJ_ID 
 						AND SUB_B1.EXCLUDE_YN != 'Y'
 						AND SUB_B1.REFERENCE_DIV IN ('10','11','12','14','15')
-					<choose>
-						<when test="@oss.fosslight.util.StringUtil@indexOf(schBinaryName, '/') > -1">
-						AND SUB_B1.BINARY_NAME = #{schBinaryName}
-						</when>
-						<otherwise>
-						AND SUBSTRING_INDEX(SUB_B1.BINARY_NAME, '/',-1) = #{schBinaryName}
-						</otherwise>
-					</choose>
+						AND SUB_B1.BINARY_NAME LIKE CONCAT('%', #{schBinaryName},'%')
 				)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
@@ -505,14 +498,7 @@
 					WHERE T1.PRJ_ID = SUB_B2.PRJ_ID 
 						AND SUB_B1.EXCLUDE_YN != 'Y'
 						AND SUB_B1.REFERENCE_DIV IN ('10','11','12','14','15')
-					<choose>
-						<when test="@oss.fosslight.util.StringUtil@indexOf(schBinaryName, '/') > -1">
-						AND SUB_B1.BINARY_NAME = #{schBinaryName}
-						</when>
-						<otherwise>
-						AND SUBSTRING_INDEX(SUB_B1.BINARY_NAME, '/',-1) = #{schBinaryName}
-						</otherwise>
-					</choose>
+						AND SUB_B1.BINARY_NAME LIKE CONCAT('%', #{schBinaryName},'%')
 				)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">

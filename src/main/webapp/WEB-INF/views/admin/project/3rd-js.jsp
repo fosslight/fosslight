@@ -677,7 +677,7 @@ var part_grid = {
 				colModel: [
 					{name: 'gridId', index: 'gridId', key:true, editable:false, hidden:true},
 					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
-					{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int'},
+					{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
 					{name: 'refPartnerId', index: 'refPartnerId', width: 150, align: 'left', formatter:fn.partnerFormat},
 					{name: 'filePath', index: 'filePath', width: 190, align: 'left'},
 					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
@@ -737,6 +737,7 @@ var part_grid = {
 					}				
 				}
 			});
+			$("#list3").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			$("#list3").jqGrid('navGrid',"#pager3",{add:false,edit:false,del:false,search:false,refresh:false});
 		},
 	}

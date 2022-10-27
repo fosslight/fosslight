@@ -881,214 +881,223 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registOssMaster(OssMaster ossMaster) {
-		String[] ossNicknames = ossMaster.getOssNicknames();
-		String ossId = ossMaster.getOssId();
-		boolean isNew = StringUtil.isEmpty(ossId);
-		OssMaster orgMasterInfo = null;
+		try {
+			String[] ossNicknames = ossMaster.getOssNicknames();
+			String ossId = ossMaster.getOssId();
+			boolean isNew = StringUtil.isEmpty(ossId);
+			OssMaster orgMasterInfo = null;
 
-		if(StringUtil.isEmpty(ossId)){
-			ossMaster.setCreator(ossMaster.getLoginUserName());
-		} else {
-			orgMasterInfo = new OssMaster();
-			orgMasterInfo.setOssId(ossId);
-			orgMasterInfo = getOssMasterOne(orgMasterInfo);
-		}
-		
-		// oss name 또는 version이 변경된 경우만 vulnerability recheck 대상으로 업데이트 한다.
-		boolean vulnRecheck = false;
-		
-		// 변경전 oss name에 해당하는 oss_id 목록을 찾는다.
-		if(!isNew) {
-			OssMaster _orgBean = getOssInfo(ossId, false);
-			
-			if(_orgBean != null && !isEmpty(_orgBean.getOssName())) {
-				if(!avoidNull(ossMaster.getOssName()).trim().equalsIgnoreCase(_orgBean.getOssName()) 
-						|| !avoidNull(ossMaster.getOssVersion()).trim().equalsIgnoreCase(avoidNull(_orgBean.getOssVersion()).trim())) {
-					vulnRecheck = true;
-				}
+			if(StringUtil.isEmpty(ossId)){
+				ossMaster.setCreator(ossMaster.getLoginUserName());
+			} else {
+				orgMasterInfo = new OssMaster();
+				orgMasterInfo.setOssId(ossId);
+				orgMasterInfo = getOssMasterOne(orgMasterInfo);
 			}
-
-		}
-		
-		if(vulnRecheck) {
-			ossMaster.setVulnRecheck(CoConstDef.FLAG_YES);
-		}
-		
-		ossMaster.setModifier(ossMaster.getLoginUserName());
-		
-		// trim처리
-		ossMaster.setOssName(avoidNull(ossMaster.getOssName()).trim());
-		
-		checkOssLicenseAndObligation(ossMaster);
-		
-		ossMapper.insertOssMaster(ossMaster);
-		ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
-		
-		// v-Diff 체크를 위해 license list를 생성
-		List<OssLicense> list = ossMaster.getOssLicenses();
-		int ossLicenseDeclaredIdx = 0;
-		
-		for(OssLicense license : list) {
-			ossLicenseDeclaredIdx++;
 			
-			OssMaster om = new OssMaster(
-				  Integer.toString(ossLicenseDeclaredIdx)
-				, ossMaster.getOssId()
-				, license.getLicenseName()
-				, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
-				, license.getOssLicenseText()
-				, license.getOssCopyright()
-				, ossMaster.getLicenseDiv()
-			);
+			// oss name 또는 version이 변경된 경우만 vulnerability recheck 대상으로 업데이트 한다.
+			boolean vulnRecheck = false;
 			
-			ossMapper.insertOssLicenseDeclared(om);
-		}
-		
-		// Detected License Insert / 20210806_Distinct Add
-		List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
-		
-		if(detectedLicenses != null) {
-			int ossLicenseDetectedIdx = 0;
-			
-			for(String detectedLicense : detectedLicenses) {			
-				if(!isEmpty(detectedLicense)) {
-					LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
-					
-					OssMaster om = new OssMaster(
-						  ossMaster.getOssId() // ossId
-						, detectedLicenseInfo.getLicenseId() // licenseId
-						, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
-					);
-					
-					ossMapper.insertOssLicenseDetected(om);
-				}
-			}
-		}
-		
-		if(ossMaster.getOssLicenses() != null) {
-			for(OssLicense license : ossMaster.getOssLicenses()) {
-				// v-Diff check를 위해 만약 license id가 param Bean에 없는 경우, license id를 등록한다.
-				if(isEmpty(license.getLicenseId())) {
-					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
-						license.setLicenseId(CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase()).getLicenseId());
+			// 변경전 oss name에 해당하는 oss_id 목록을 찾는다.
+			if(!isNew) {
+				OssMaster _orgBean = getOssInfo(ossId, false);
+				
+				if(_orgBean != null && !isEmpty(_orgBean.getOssName())) {
+					if(!avoidNull(ossMaster.getOssName()).trim().equalsIgnoreCase(_orgBean.getOssName()) 
+							|| !avoidNull(ossMaster.getOssVersion()).trim().equalsIgnoreCase(avoidNull(_orgBean.getOssVersion()).trim())) {
+						vulnRecheck = true;
 					}
 				}
+
 			}
-		}
-		
-		/*
-		 * 1. 라이센스 닉네임 삭제 
-		 * 2. 라이센스 닉네임 재등록
-		 */
-		if(CoConstDef.FLAG_YES.equals(ossMaster.getAddNicknameYn())) { //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
-			if(ossNicknames != null){
-				List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
+			
+			if(vulnRecheck) {
+				ossMaster.setVulnRecheck(CoConstDef.FLAG_YES);
+			}
+			
+			ossMaster.setModifier(ossMaster.getLoginUserName());
+			
+			// trim처리
+			ossMaster.setOssName(avoidNull(ossMaster.getOssName()).trim());
+			
+			checkOssLicenseAndObligation(ossMaster);
+			
+			ossMapper.insertOssMaster(ossMaster);
+			ossMapper.deleteOssLicense(ossMaster); // Declared, Detected License Delete 처리
+			
+			// v-Diff 체크를 위해 license list를 생성
+			List<OssLicense> list = ossMaster.getOssLicenses();
+			int ossLicenseDeclaredIdx = 0;
+			
+			for(OssLicense license : list) {
+				ossLicenseDeclaredIdx++;
 				
-				for(String nickName : ossNicknames){
-					if(!isEmpty(nickName)) {
-						int duplicateCnt = ossNicknameList.stream().filter(o -> nickName.toUpperCase().equals(o.getOssNickname().toUpperCase())).collect(Collectors.toList()).size();
+				OssMaster om = new OssMaster(
+					  Integer.toString(ossLicenseDeclaredIdx)
+					, ossMaster.getOssId()
+					, license.getLicenseName()
+					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
+					, license.getOssLicenseText()
+					, license.getOssCopyright()
+					, ossMaster.getLicenseDiv()
+				);
+				
+				ossMapper.insertOssLicenseDeclared(om);
+			}
+			
+			// Detected License Insert / 20210806_Distinct Add
+			List<String> detectedLicenses = ossMaster.getDetectedLicenses().stream().distinct().collect(Collectors.toList());
+			
+			if(detectedLicenses != null) {
+				int ossLicenseDetectedIdx = 0;
+				
+				for(String detectedLicense : detectedLicenses) {			
+					if(!isEmpty(detectedLicense)) {
+						LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
 						
-						if(duplicateCnt == 0) {
-							OssMaster ossBean = new OssMaster();
-							ossBean.setOssName(ossMaster.getOssName());
-							ossBean.setOssNickname(nickName.trim());
+						if(detectedLicenseInfo != null) {
+							OssMaster om = new OssMaster(
+									  ossMaster.getOssId() // ossId
+									, detectedLicenseInfo.getLicenseId() // licenseId
+									, Integer.toString(++ossLicenseDetectedIdx) // ossLicenseIdx
+							);
 							
-							ossMapper.insertOssNickname(ossBean);
+							ossMapper.insertOssLicenseDetected(om);
 						}
 					}
 				}
 			}
-		} else { // nickname => clear&insert
-			if(ossNicknames != null) {
-				ossMapper.deleteOssNickname(ossMaster);
-				
-				for(String nickName : ossNicknames){
-					if(!isEmpty(nickName)) {
-						ossMaster.setOssNickname(nickName.trim());
-						ossMapper.insertOssNickname(ossMaster);
-					}
-				}
-			} else {
-				ossMapper.deleteOssNickname(ossMaster);
-			}
-		}
-		
-		//코멘트 등록
-		if(!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
-			CommentsHistory param = new CommentsHistory();
-			param.setReferenceId(ossMaster.getOssId());
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
-			param.setContents(ossMaster.getComment());
 			
-			commentService.registComment(param);
-		}
-		
-		if(isNew || vulnRecheck) {
-			List<String> ossNameArr = new ArrayList<>();
-			ossNameArr.add(ossMaster.getOssName().trim());
-			
-			if(ossNicknames != null) {
-				for(String s : ossNicknames) {
-					if(!isEmpty(s)) {
-						ossNameArr.add(s.trim());
+			if(ossMaster.getOssLicenses() != null) {
+				for(OssLicense license : ossMaster.getOssLicenses()) {
+					// v-Diff check를 위해 만약 license id가 param Bean에 없는 경우, license id를 등록한다.
+					if(isEmpty(license.getLicenseId())) {
+						if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+							license.setLicenseId(CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase()).getLicenseId());
+						}
 					}
 				}
 			}
 			
-			OssMaster nvdParam = new OssMaster();
-			nvdParam.setOssNames(ossNameArr.toArray(new String[ossNameArr.size()]));
-			OssMaster nvdData = null;
-			
-			if(!isEmpty(ossMaster.getOssVersion())) {
-				nvdParam.setOssVersion(ossMaster.getOssVersion());
-				nvdData = ossMapper.getNvdDataByOssName(nvdParam);
-			} else {
-				nvdData = ossMapper.getNvdDataByOssNameWithoutVer(nvdParam);
+			/*
+			 * 1. 라이센스 닉네임 삭제 
+			 * 2. 라이센스 닉네임 재등록
+			 */
+			if(CoConstDef.FLAG_YES.equals(ossMaster.getAddNicknameYn())) { //nickname을 clear&insert 하지 않고, 중복제거를 한 나머지 nickname에 대해서는 add함.
+				if(ossNicknames != null){
+					List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
+					
+					for(String nickName : ossNicknames){
+						if(!isEmpty(nickName)) {
+							int duplicateCnt = ossNicknameList.stream().filter(o -> nickName.toUpperCase().equals(o.getOssNickname().toUpperCase())).collect(Collectors.toList()).size();
+							
+							if(duplicateCnt == 0) {
+								OssMaster ossBean = new OssMaster();
+								ossBean.setOssName(ossMaster.getOssName());
+								ossBean.setOssNickname(nickName.trim());
+								
+								ossMapper.insertOssNickname(ossBean);
+							}
+						}
+					}
+				}
+			} else { // nickname => clear&insert
+				if(ossNicknames != null) {
+					ossMapper.deleteOssNickname(ossMaster);
+					
+					for(String nickName : ossNicknames){
+						if(!isEmpty(nickName)) {
+							ossMaster.setOssNickname(nickName.trim());
+							ossMapper.insertOssNickname(ossMaster);
+						}
+					}
+				} else {
+					ossMapper.deleteOssNickname(ossMaster);
+				}
 			}
 			
-			if(nvdData != null) {
-				ossMaster.setCvssScore(nvdData.getCvssScore());
-				ossMaster.setCveId(nvdData.getCveId());
-				ossMaster.setVulnDate(nvdData.getVulnDate());
-				ossMaster.setVulnYn(CoConstDef.FLAG_YES);
+			//코멘트 등록
+			if(!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
+				CommentsHistory param = new CommentsHistory();
+				param.setReferenceId(ossMaster.getOssId());
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+				param.setContents(ossMaster.getComment());
 				
-				ossMapper.updateNvdData(ossMaster);
-			} else if(!isNew) {
-				OssMaster _orgBean = getOssInfo(ossId, false);
-				if(_orgBean != null && (CoConstDef.FLAG_YES.equals(_orgBean.getVulnYn()) || !isEmpty(_orgBean.getCvssScore()))) {
-					ossMaster.setVulnYn(CoConstDef.FLAG_NO);
+				commentService.registComment(param);
+			}
+			
+			if(isNew || vulnRecheck) {
+				List<String> ossNameArr = new ArrayList<>();
+				ossNameArr.add(ossMaster.getOssName().trim());
+				
+				if(ossNicknames != null) {
+					for(String s : ossNicknames) {
+						if(!isEmpty(s)) {
+							ossNameArr.add(s.trim());
+						}
+					}
+				}
+				
+				OssMaster nvdParam = new OssMaster();
+				nvdParam.setOssNames(ossNameArr.toArray(new String[ossNameArr.size()]));
+				OssMaster nvdData = null;
+				
+				if(!isEmpty(ossMaster.getOssVersion())) {
+					nvdParam.setOssVersion(ossMaster.getOssVersion());
+					nvdData = ossMapper.getNvdDataByOssName(nvdParam);
+				} else {
+					nvdData = ossMapper.getNvdDataByOssNameWithoutVer(nvdParam);
+				}
+				
+				if(nvdData != null) {
+					ossMaster.setCvssScore(nvdData.getCvssScore());
+					ossMaster.setCveId(nvdData.getCveId());
+					ossMaster.setVulnDate(nvdData.getVulnDate());
+					ossMaster.setVulnYn(CoConstDef.FLAG_YES);
 					
 					ossMapper.updateNvdData(ossMaster);
+				} else if(!isNew) {
+					OssMaster _orgBean = getOssInfo(ossId, false);
+					if(_orgBean != null && (CoConstDef.FLAG_YES.equals(_orgBean.getVulnYn()) || !isEmpty(_orgBean.getCvssScore()))) {
+						ossMaster.setVulnYn(CoConstDef.FLAG_NO);
+						
+						ossMapper.updateNvdData(ossMaster);
+					}
 				}
 			}
-		}
-		
-		// Version Flag Setting
-		updateLicenseDivDetail(ossMaster);
-		
-		// download location이 여러건일 경우를 대비해 table을 별도로 관리함.
-		registOssDownloadLocation(ossMaster);
-		
-		// Deactivate Flag Setting
-		if(isEmpty(ossMaster.getDeactivateFlag())) {
-			ossMaster.setDeactivateFlag(CoConstDef.FLAG_NO);
-		}
-
-		ossMapper.setDeactivateFlag(ossMaster);
-		
-		// updated oss info, oss components > ossName update
-		if (!isNew && orgMasterInfo != null){
-			if (!orgMasterInfo.getOssName().equals(ossMaster.getOssName())) {
-				// oss name merge
-				ossMaster.setRegistMergeFlag("Y");
-				ossMaster.setMergeOssName(ossMaster.getOssName());
-				ossMaster.setOssName(orgMasterInfo.getOssName());
-				ossMaster.setMergeOssVersion(ossMaster.getOssVersion());
-				ossMaster.setOssVersion(orgMasterInfo.getOssVersion());
-				ossNameMerge(ossMaster, ossMaster.getMergeOssName(), orgMasterInfo.getOssName());
+			
+			// Version Flag Setting
+			updateLicenseDivDetail(ossMaster);
+			
+			// download location이 여러건일 경우를 대비해 table을 별도로 관리함.
+			registOssDownloadLocation(ossMaster);
+			
+			// Deactivate Flag Setting
+			if(isEmpty(ossMaster.getDeactivateFlag())) {
+				ossMaster.setDeactivateFlag(CoConstDef.FLAG_NO);
 			}
-		}
 
+			ossMapper.setDeactivateFlag(ossMaster);
+			
+			// updated oss info, oss components > ossName update
+			if (!isNew && orgMasterInfo != null){
+				if (!orgMasterInfo.getOssName().equals(ossMaster.getOssName())) {
+					// oss name merge
+					ossMaster.setRegistMergeFlag("Y");
+					ossMaster.setMergeOssName(ossMaster.getOssName());
+					ossMaster.setOssName(orgMasterInfo.getOssName());
+					ossMaster.setMergeOssVersion(ossMaster.getOssVersion());
+					ossMaster.setOssVersion(orgMasterInfo.getOssVersion());
+					ossNameMerge(ossMaster, ossMaster.getMergeOssName(), orgMasterInfo.getOssName());
+				}
+			}
+		} catch (RuntimeException ex) {
+			log.error(ex.getMessage(), ex);
+			throw ex;
+		} catch (Exception ex2) {
+			log.error(ex2.getMessage(), ex2);
+		} 
+		
 		return ossMaster.getOssId();
 	}
 
@@ -2609,8 +2618,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			resCd = "10";
-		} catch (RuntimeException e) {
-			log.error(e.getMessage(), e);
+		} catch (RuntimeException ex) {
+			log.error(ex.getMessage(), ex);
+			throw ex;
 		} catch (Exception e) {
 			log.error("OSS " + action + "Failed.", e);
 			log.error(e.getMessage(), e);

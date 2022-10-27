@@ -1385,9 +1385,6 @@ public class CoMailManager extends CoTopComponent {
 					_s += "(" + bean.getParamOssId() +")";
 				}
 				_s += ossInfo.getOssName();
-				if(!isEmpty(ossInfo.getOssVersion())) {
-					_s += " (" + ossInfo.getOssVersion() +")";
-				}
 				// Admin에게만 발송되는 oss 관련 메일의 경우 바로가기 link 형식으로 발송
 				if(isMailBodySubject 
 						&& (
@@ -1405,6 +1402,10 @@ public class CoMailManager extends CoTopComponent {
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
 					linkUrl += "/oss/list/" + ossInfo.getOssName();
 					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
+					
+					if(!isEmpty(ossInfo.getOssVersion())) {
+						_s += " (" + ossInfo.getOssVersion() +")";
+					}
 				}
 			}
 			

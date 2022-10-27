@@ -204,17 +204,6 @@
 					<table id="list3"><tr><td></td></tr></table>
 					<div id="pager3"></div>
 				</div>
-				<!---->
-				<div class="btnLayout">
-					<span class="right">
-						<c:if test="${project.dropYn ne 'Y'}">
-							<input type="button" value="Reset" class="btnColor btnReset partyBtn idenReset" onclick="party_evt.reset()"/>
-							<input type="button" value="Save" class="btnColor red btnSave idenSave" onclick="party_evt.save()"/>
-						</c:if>
-					</span>
-				</div>
-				<!---->
-
 			</div>
 		</div>
 	</c:if>
