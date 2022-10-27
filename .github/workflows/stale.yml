@@ -1,0 +1,38 @@
+name: Close stalled issues and PRs
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+
+env:
+  STALE_LABEL: stale
+  EXEMPT_LABELS: keep
+  STALE_MESSAGE: |
+    This has been automatically marked as stale because it hasn't had any recent activity. 
+    It will be closed in 5 days if no further activity occurs.
+  CLOSE_MESSAGE: |
+    Closing this because it has been inactive for 5 days since being marked as stale.
+
+jobs:
+  stale:
+    permissions:
+      issues: write
+      pull-requests: write
+    if: ${{ github.repository == 'fosslight/fosslight' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v6
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 30
+          days-before-close: 5
+          operations-per-run: 300
+          remove-stale-when-updated: true
+          stale-issue-label: ${{ env.STALE_LABEL }}
+          exempt-issue-labels: ${{ env.EXEMPT_LABELS }}
+          stale-issue-message: ${{ env.STALE_MESSAGE }}
+          close-issue-message: ${{ env.CLOSE_MESSAGE }}
+          stale-pr-label: ${{ env.STALE_LABEL }}
+          exempt-pr-labels: ${{ env.EXEMPT_LABELS }}
+          stale-pr-message: ${{ env.STALE_MESSAGE }}
+          close-pr-message: ${{ env.CLOSE_MESSAGE }}
