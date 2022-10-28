@@ -143,6 +143,7 @@ public final class Url {
 		public static final String DEL_OSS_VERSION_MERGE_AJAX = PATH +  "/delOssWithVersionMeregeAjax";
 		public static final String URL_DUPLICATE_VALIDATION = PATH + "/urlDuplicateValidation";
 		public static final String VALIDATION = PATH + "/validation";
+		public static final String BULK_VALIDATION = PATH + "/bulkValidation";
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
