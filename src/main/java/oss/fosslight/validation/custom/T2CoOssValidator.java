@@ -6,16 +6,14 @@
 package oss.fosslight.validation.custom;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
 import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.OssService;
@@ -49,7 +47,7 @@ public class T2CoOssValidator extends T2CoValidator {
 		if(VALID_TYPE == VALID_OSSLIST_BULK) {
 			if(ossList != null) {
 				for(OssMaster bean : ossList) {
-					ossValidate(bean, map, errMap, diffMap, infoMap, true);
+					ossBulkValidate(bean, map, errMap, diffMap, infoMap, true);
 				}
 			}
 		} else if(VALID_TYPE == VALID_OSS_BULK) {
@@ -481,6 +479,82 @@ public class T2CoOssValidator extends T2CoValidator {
 				}
 			}				
 		}		
+	}
+
+	private void ossBulkValidate(OssMaster ossBean,
+								 Map<String, String> map,
+								 Map<String, String> errMap,
+								 Map<String, String> diffMap,
+								 Map<String, String> infoMap,
+								 boolean useGridSeq) {
+		/** OSS_NAME */
+		String basicKey = "OSS_NAME";
+		String gridKey = StringUtil.convertToCamelCase(basicKey);
+		String errCd = checkBasicError(basicKey, gridKey, ossBean.getOssName(), false);
+
+		if(!isEmpty(errCd))
+			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
+		else if(ossService.checkExistsOssNickname2(ossBean) != null)
+			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NAME.DUPLICATEDNICK_SHORT");
+		else if(ossService.checkExistsOssByname(ossBean) == 0)
+			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NAME.UNCONFIRMED");
+
+		/** OSS_NICKNAME */
+		basicKey = "OSS_NICKNAMES";
+		OssMaster nicknameCheckBean = new OssMaster();
+		nicknameCheckBean.setOssNameTemp(ossBean.getOssName());
+
+		if(!Objects.isNull(ossBean.getOssNicknames())) {
+			for (String ossNickname : ossBean.getOssNicknames()) {
+				nicknameCheckBean.setOssName(ossNickname);
+				if(!Objects.isNull(ossService.checkExistsOssNickname(nicknameCheckBean))) {
+					errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NICKNAMES.SAME_SHORT");
+					break;
+				}
+			}
+		}
+
+		/** declared licenses */
+		basicKey = "DECLARED_LICENSES";
+		gridKey = StringUtil.convertToCamelCase(basicKey);
+
+		if(Objects.isNull(ossBean.getDeclaredLicenses()) || ossBean.getDeclaredLicenses().isEmpty())
+			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "LICENSE_NAME.REQUIRED");
+		else {
+			for(String license : ossBean.getDeclaredLicenses()) {
+				errCd = checkBasicError(basicKey, gridKey, license, false);
+
+				if(!isEmpty(errCd)) {
+					errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
+					break;
+				}
+
+				if (!CommonFunction.checkLicense(license)) {
+					errMap.put(basicKey + "." + ossBean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
+					break;
+				}
+			}
+		}
+
+		/** detected licenses **/
+		basicKey = "DETECTED_LICENSES";
+		gridKey = StringUtil.convertToCamelCase(basicKey);
+
+		if(!Objects.isNull(ossBean.getDetectedLicenses())) {
+			for(String license : ossBean.getDetectedLicenses()) {
+				errCd = checkBasicError(basicKey, gridKey, license, false);
+
+				if(!isEmpty(errCd)) {
+					errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
+					break;
+				}
+
+				if (!CommonFunction.checkLicense(license)) {
+					errMap.put(basicKey + "." + ossBean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
+					break;
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")

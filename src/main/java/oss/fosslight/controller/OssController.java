@@ -1162,7 +1162,21 @@ public class OssController extends CoTopComponent{
 		resMap.put("value", ossDataMapList);
 		return makeJsonResponseHeader(resMap);
 	}
-	
+
+	@PostMapping(value=Url.OSS.BULK_VALIDATION)
+	public @ResponseBody ResponseEntity<Object> bulkValidation(
+			@RequestBody List<OssMaster> ossMasters){
+		Map<String, Object> resMap = new HashMap<>();
+
+		T2CoOssValidator validator = new T2CoOssValidator();
+		validator.setAppendix("ossList", ossMasters);
+		validator.setVALIDATION_TYPE(validator.VALID_OSSLIST_BULK);
+		T2CoValidationResult vr = validator.validate(new HashMap<>());
+
+		resMap.put("validData", vr.getValidMessageMap());
+		return makeJsonResponseHeader(resMap);
+	}
+
 	@PostMapping(value=OSS.SAVE_OSS_BULK_REG)
 	public @ResponseBody ResponseEntity<Object> saveOssBulkReg(
 			@RequestBody OssMaster ossMaster

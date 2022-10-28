@@ -167,6 +167,7 @@
             isClicked = true;
             $("#btn").click(() => {
                 OssBulkGridStatusMessageManager.cleanStatusMessages();
+                OssBulkGridWarningMessageUtil.cleanMessages();
                 target.jqGrid('saveRow', _mainLastsel);
 
                 // load all rowIds checked in grid
@@ -192,13 +193,15 @@
                         if (data['res'] == true && data['value'] != []) {
                             loadedInfo = data['value'];
                             OssBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
+                            OssBulkGridWarningMessageUtil.call();
                             alertify.alert('<spring:message code="msg.common.success" />', function(){});
                         } else if (data['res'] == false) {
                             showErrorMsg();
+                            OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                         }
                     },
                     error: (e) => {
-                        console.log(e);
+                        OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                     }
                 })
             })
@@ -243,12 +246,15 @@
                 _mainLastsel = -1;
                 selectMarkWhenPageChange();
                 makeBackGroundColor();
+                OssBulkGridWarningMessageUtil.setMessagesToCurPage();
             },
             ondblClickRow: function(rowid,iRow,iCol,e) {
                 if(rowid) {
                     if (rowid != _mainLastsel) {
                         $("#list").jqGrid('saveRow', _mainLastsel);
+                        OssBulkGridWarningMessageUtil.setMessageToRow(_mainLastsel);
                     }
+                    OssBulkGridWarningMessageUtil.cleanMessageOfRow(rowid);
                     editable()
                     $("#list").jqGrid('editRow', rowid);
                     _mainLastsel = rowid;
@@ -267,6 +273,8 @@
             },
             /** save data edited when move page */
             onPaging: function() {
+                OssBulkGridWarningMessageUtil.cleanMessages();
+
                 $("#list").jqGrid('saveRow', _mainLastsel);
 
                 var mainData = $("#list").jqGrid('getRowData');
@@ -305,6 +313,7 @@
                     jsonData = data['value'];
                     makeOssDTOList();
                     stubColData();
+                    OssBulkGridWarningMessageUtil.call();
                     loading.hide();
                 }
                 else if(data['res'] == false){
@@ -337,6 +346,7 @@
                     success: (data) => {
                         if (data.validData) {
                             this.addRows(data);
+                            OssBulkGridWarningMessageUtil.call();
                         }
                     },
                     error: (e) => {
@@ -428,4 +438,49 @@
             $("#list").trigger('reloadGrid', [{ page: 1}]);
         }
     };
+
+    const OssBulkGridWarningMessageUtil = (function() {
+        let validData = {};
+        const gridStr = "list";
+        return {
+            call: function () {
+                this.cleanMessages();
+                return this.requestMessages()
+                    .then(response => {
+                        this.setValidData(response);
+                        this.setMessagesToCurPage();
+                    });
+            },
+            requestMessages: function() {
+                return $.ajax({
+                    type: "POST",
+                    contentType: 'application/json',
+                    url: "/oss/bulkValidation",
+                    data: JSON.stringify(this.requestBody()),
+                    cache : false,
+                    dataType: "json"
+                })
+            },
+            requestBody: function() {
+                ossData.forEach((row) => {
+                    stringDataForValid.forEach((strData) => {
+                        if(row[strData] === null || row[strData] === undefined)
+                            row[strData] = "";
+                    })
+                    listDataForValid.forEach((listData) => {
+                        if(row[listData] === null || row[listData] === undefined)
+                            row[listData] = [];
+                    })
+                })
+                return ossData;
+            },
+            setValidData: (response) => { validData = response.validData; },
+            setMessagesToCurPage: function () {
+                gridValidMsgNew(validData, gridStr, "NORMAL");
+            },
+            cleanMessages: function() { gridCleanErrMsg(gridStr); },
+            cleanMessageOfRow: function(rowId) { cleanErrMsg(gridStr, rowId) },
+            setMessageToRow: function(rowId) { gridValidMsgRowId(validData, gridStr, rowId); }
+        }
+    })();
 </script>
