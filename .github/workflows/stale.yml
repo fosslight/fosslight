@@ -26,11 +26,10 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 30
           days-before-close: 5
+          days-before-issue-stale: -1
           operations-per-run: 300
           remove-stale-when-updated: true
           stale-issue-label: ${{ env.STALE_LABEL }}
-          exempt-issue-labels: ${{ env.EXEMPT_LABELS }}
-          stale-issue-message: ${{ env.STALE_MESSAGE }}
           close-issue-message: ${{ env.CLOSE_MESSAGE }}
           stale-pr-label: ${{ env.STALE_LABEL }}
           exempt-pr-labels: ${{ env.EXEMPT_LABELS }}
