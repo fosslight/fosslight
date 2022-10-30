@@ -122,6 +122,9 @@ dependencies {
 
 	implementation group: 'com.navercorp.lucy', name: 'lucy-xss', version: '1.6.3'
 
+	implementation 'com.itextpdf:itext7-core:7.2.3'
+	implementation 'com.itextpdf:html2pdf:4.0.3'
+
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.10.7'
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	
