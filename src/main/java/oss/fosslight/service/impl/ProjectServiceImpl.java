@@ -3465,6 +3465,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							if (!apex_name.isEmpty()) {
 								apex_name_to_search.add(apex_name + ".apex");
 								apex_name_to_search.add(apex_name + ".capex");
+								apex_name_to_search.add(apex_name + "_compressed.apex");
 							}
 							break;
 						}
