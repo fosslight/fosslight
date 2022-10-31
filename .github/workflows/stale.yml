@@ -7,11 +7,13 @@ on:
 env:
   STALE_LABEL: stale
   EXEMPT_LABELS: keep
-  STALE_MESSAGE: |
-    This has been automatically marked as stale because it hasn't had any recent activity. 
+  STALE_PR_MESSAGE: |
+    This PR has been automatically marked as stale because it hasn't had any recent activity. 
     It will be closed in 5 days if no further activity occurs.
-  CLOSE_MESSAGE: |
-    Closing this because it has been inactive for 5 days since being marked as stale.
+  CLOSE_PR_MESSAGE: |
+    This PR was closed because it has been inactive for 5 days since being marked as stale.
+  CLOSE_ISSUE_MESSAGE: |
+    This issue was closed because it has been inactive for 5 days since being marked as stale.
 
 jobs:
   stale:
@@ -29,9 +31,9 @@ jobs:
           days-before-issue-stale: -1
           operations-per-run: 300
           remove-stale-when-updated: true
-          stale-issue-label: ${{ env.STALE_LABEL }}
-          close-issue-message: ${{ env.CLOSE_MESSAGE }}
           stale-pr-label: ${{ env.STALE_LABEL }}
           exempt-pr-labels: ${{ env.EXEMPT_LABELS }}
-          stale-pr-message: ${{ env.STALE_MESSAGE }}
-          close-pr-message: ${{ env.CLOSE_MESSAGE }}
+          stale-pr-message: ${{ env.STALE_PR_MESSAGE }}
+          close-pr-message: ${{ env.CLOSE_PR_MESSAGE }}
+          stale-issue-label: ${{ env.STALE_LABEL }}
+          close-issue-message: ${{ env.CLOSE_ISSUE_MESSAGE }}
