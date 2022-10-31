@@ -147,6 +147,8 @@ public class CoMail extends ComBean {
 	
 	private String binaryCommitResult;
 	
+	private String paramStandardScore;
+	
 	private boolean toIdsCheckDivision = false;
 	
 	/**
@@ -982,4 +984,11 @@ public class CoMail extends ComBean {
 		this.toIdsCheckDivision = toIdsCheckDivision;
 	}
 
+	public String getParamStandardScore() {
+		return paramStandardScore;
+	}
+
+	public void setParamStandardScore(String paramStandardScore) {
+		this.paramStandardScore = paramStandardScore;
+	}
  } 
