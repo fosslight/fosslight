@@ -2621,6 +2621,8 @@ public class CoMailManager extends CoTopComponent {
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_RECALCULATED:
 			case CoConstDef.CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED:
 				param.add(bean.getParamPrjId());
+				param.add(bean.getParamStandardScore());
+				param.add(bean.getParamStandardScore());
 				return makeVulnerabilityInfo(getMailComponentData(param, component));
 			case CoConstDef.CD_MAIL_COMPONENT_PACKAGING_REQUESTED_URL:
 				return CoCodeManager.getCodeExpString(CoConstDef.CD_COLLAB_INFO, CoConstDef.CD_PACKAGING_REQUESTED_URL);

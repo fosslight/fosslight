@@ -177,6 +177,8 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
+		CommonFunction.setProjectService(projectService);
+		
 		return PROJECT.LIST_JSP;
 	}
 	
@@ -293,7 +295,24 @@ public class ProjectController extends CoTopComponent {
 		}
 
 		Map<String, Object> map = projectService.getProjectList(project);
-		CustomXssFilter.projectFilter((List<Project>) map.get("rows"));
+		
+		@SuppressWarnings("unchecked")
+		List<Project> list = (List<Project>) map.get("rows");
+		
+		for(Project prj : list) {
+			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "project");
+			if(permissionCheckList != null) {
+				if(prj.getPublicYn().equals(CoConstDef.FLAG_NO)
+						&& !CommonFunction.isAdmin() 
+						&& !permissionCheckList.contains(loginUserName())) {
+					prj.setPermission(0);
+				} else {
+					prj.setPermission(1);
+				}
+			}
+		}
+		
+		CustomXssFilter.projectFilter(list);
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -367,15 +386,35 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
-		if (CommonFunction.isAdmin()) {
-			List<T2Users> userList = userService.selectAllUsers();
-			
-			if (userList != null) {
-				model.addAttribute("userWithDivisionList", userList);
+		List<String> permissionCheckList = null;
+		boolean permissionFlag = false;
+		
+		if(!CommonFunction.isAdmin()) {
+			CommonFunction.setProjectService(projectService);
+			project.setPrjIds(new String[] {prjId});
+			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
+			if(permissionCheckList.contains(loginUserName())) {
+				permissionFlag = true;
 			}
 		}
 		
-		return PROJECT.EDIT_JSP;
+		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
+				&& !CommonFunction.isAdmin()
+				&& !permissionFlag) {
+			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
+			
+			return PROJECT.VIEW_JSP;
+		} else {
+			if(!permissionFlag) {
+				List<T2Users> userList = userService.selectAllUsers();
+				
+				if (userList != null) {
+					model.addAttribute("userWithDivisionList", userList);
+				}
+			}
+			
+			return PROJECT.EDIT_JSP;
+		}
 	}
 	
 	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET,

@@ -824,6 +824,6 @@ public class CoConstDef {
 	public static final String CD_SPDX_YAML										= "spdxYaml";
 	
 	/* SCORE CODE */
-	public static final String CD_VULNERABILITY_MAILING_SCORE					= "980";
+	public static final String CD_VULNERABILITY_MAILING_SCORE					= "750";
 	public static final String CD_VULNERABILITY_MAILING_SCORE_STANDARD			= "100";
 }
