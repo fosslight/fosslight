@@ -174,20 +174,20 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
 			AND T1.IDENTIFICATION_STATUS = #{identificationStatus}
 			</if>
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!--		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1
-						  FROM PROJECT_WATCHER A1 
+						  FROM PROJECT_WATCHER A1 -->
 						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
+<!--					 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 						)
 					<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('Y', publicYn)">
 						OR PUBLIC_YN = 'Y'
 					</if>
 				)
-			</if>
+			</if> -->
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
@@ -376,6 +376,7 @@
 					, T1.STATUS_REQUEST_YN
 					, T5.NOTICE_TYPE
 					, T5.NOTICE_TYPE_ETC
+					, T1.PUBLIC_YN
 			FROM PROJECT_MASTER T1
 							LEFT JOIN T2_FILE T3 ON T3.FILE_ID = T1.SRC_ANDROID_NOTICE_FILE_ID
 							LEFT JOIN T2_FILE T4 ON T4.FILE_ID = T1.SRC_ANDROID_RESULT_FILE_ID
@@ -400,14 +401,14 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
 			AND T1.IDENTIFICATION_STATUS = #{identificationStatus}
 			</if>
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1
-						  FROM PROJECT_WATCHER A1 
+						  FROM PROJECT_WATCHER A1 --> 
 						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-						 WHERE A1.PRJ_ID = T1.PRJ_ID 
+<!--					 WHERE A1.PRJ_ID = T1.PRJ_ID 
 						   AND (A1.USER_ID = #{loginUserName}
 						   		OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 						)
@@ -415,7 +416,7 @@
 						OR PUBLIC_YN = 'Y'
 					</if>
 				)
-			</if>
+			</if> --> 
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
@@ -655,6 +656,7 @@
 					ELSE 'PROG' 
 				END STATUS
 		   , A.PRIORITY
+		   , A.PUBLIC_YN
 		FROM
 			PROJECT_MASTER A 
 			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID

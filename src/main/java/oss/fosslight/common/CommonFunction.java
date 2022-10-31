@@ -4594,8 +4594,12 @@ public class CommonFunction extends CoTopComponent {
 				}
 				
 				userIdList = userIdList.stream().distinct().collect(Collectors.toList());
-				if(!userIdList.contains(userId)) {
-					notPermissionList.add(prjIds[i]);
+				if(!isEmpty(userId)) {
+					if(!userIdList.contains(userId)) {
+						notPermissionList.add(prjIds[i]);
+					}
+				} else {
+					notPermissionList = userIdList;
 				}
 			}
 			break;
@@ -4615,8 +4619,12 @@ public class CommonFunction extends CoTopComponent {
 				}
 				
 				userIdList = userIdList.stream().distinct().collect(Collectors.toList());
-				if(!userIdList.contains(userId)) {
-					notPermissionList.add(prjIds[i]);
+				if(!isEmpty(userId)) {
+					if(!userIdList.contains(userId)) {
+						notPermissionList.add(prjIds[i]);
+					}
+				} else {
+					notPermissionList = userIdList;
 				}
 			}
 			break;

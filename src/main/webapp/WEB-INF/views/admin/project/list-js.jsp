@@ -183,9 +183,9 @@
 						display = "<div class=\"tcenter\">Drop</div>";
 					} else {
 						if("Y" == rowObject.androidFlag) {
-							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",3)\">Start</a></div>";
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">Start</a></div>";
 						} else {
-							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0)\">Start</a></div>";
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Start</a></div>";
 						}
 					}
 					
@@ -206,49 +206,49 @@
 						// 2018-08-28 choye 수정
 						<c:if test="${partnerFlag}">
 						if(rowObject.identificationSubStatusPartner =="Y" ) {
-							display += "<a class='btnPG on3rd' onclick=\"fn.mvIdentification("+options.rowId+",0)\">3rd</a>"; hasOss = true;
+							display += "<a class='btnPG on3rd' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusPartner == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",0)\">3rd</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0)\">3rd</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
 						}
 						</c:if>
 					
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusSrc =="Y" ) {
-							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",1)\">SRC</a>"; hasOss = true;
+							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusSrc == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1)\">SRC</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1)\">SRC</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
 						}
 
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusBin =="Y" ) {
-							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",2)\">BIN</a>"; hasOss = true;
+							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusBin == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2)\">BIN</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2)\">BIN</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
 						}
 
 						if(rowObject.identificationSubStatusBom == 0) {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",4)\">BOM</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",4)\">BOM</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
 						}
 					} else if("Y" == rowObject.androidFlag) {
 						if(rowObject.identificationSubStatusAndroid =="Y" ) {
-							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",3)\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else if(rowObject.identificationSubStatusAndroid == "N") {
-							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",3)\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else {
-							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",3)\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						}
 					}
 					
 					if(rowObject.identificationSubStatusBat =="Y" ) {
-						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",5)\">BAT</a>";
+						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BAT</a>";
 					}
 					
 					break;
@@ -292,7 +292,7 @@
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else if(rowObject.identificationStatus!="") {
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Start</a></div>";
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Start</a></div>";
 							}
 							
 							break;
@@ -301,7 +301,7 @@
 								|| rowObject.statusRequestYn == "Y" ) {
 								display = "N/A";
 							} else {
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">Progress</a></div>";
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Progress</a></div>";
 							}
 							
 							break;
@@ -321,7 +321,7 @@
 							if(rowObject.distributeTarget == "N/A"){
 								display = "N/A";
 							} else{
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+")\">"+cellvalue+"</a></div>";
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">"+cellvalue+"</a></div>";
 							}
 							break;
 					}
@@ -366,7 +366,7 @@
 					switch(cellvalue){
 						case "":
 							if(rowObject.status != "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}"){
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+")\">Start</a></div>";
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Start</a></div>";
 							} else {
 								display = "N/A";
 							}
@@ -384,7 +384,7 @@
 							if(rowObject.distributeTarget == "N/A"){
 								display = "N/A";
 							} else{
-								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+")\">"+cellvalue+"</a></div>";
+								display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">"+cellvalue+"</a></div>";
 							}
 						
 							break;
@@ -399,38 +399,38 @@
 			var display = "";
 			
 			if(rowObject.identificationStatus == "Confirm"){
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this)\" title=\"FOSSLight Report\">";
+				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
 			} else {
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this)\" disabled>";
+				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
 			}
 			
 			if(rowObject.verificationStatus == "Confirm"){
 				if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
-					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this)\" disabled>";	
+					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";	
 				} else {
-					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice\" onclick=\"fn.downloadNotice(this)\" title=\"OSS Notice\">";
+					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" title=\"OSS Notice\">";
 				}
 				
 				if(rowObject.packageFileId!=""){
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackage(this)\" title=\"Packaging File1\">";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" title=\"Packaging File1\">";
 				} else {
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this)\" disabled>";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" disabled>";
 				}
 				
 				if(rowObject.packageFileId2!=""){
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'2\')\" title=\"Packaging File2\">";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'2\',"+rowObject.permission+")\" title=\"Packaging File2\">";
 				} else {
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'2\')\" disabled>";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'2\',"+rowObject.permission+")\" disabled>";
 				}
 				
 				if(rowObject.packageFileId3!=""){
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'3\')\" title=\"Packaging File3\">";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'3\',"+rowObject.permission+")\" title=\"Packaging File3\">";
 				} else {
-					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'3\')\" disabled>";
+					display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'3\',"+rowObject.permission+")\" disabled>";
 				}
 			} else {
-				display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this)\" disabled>";
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this)\" disabled>"
+				display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";
+				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" disabled>"
 			}
 			
 			return display;
@@ -468,16 +468,28 @@
 			return display;
 		},
 		// Grid identification display event
-		mvIdentification : function(prjId, initDiv){
-			createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/'+initDiv+'"/>');
+		mvIdentification : function(prjId, initDiv, permission){
+			if(parseInt(permission) > 0){
+				createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/'+initDiv+'"/>');
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
 		// Grid veritification display event
-		mvVerification : function(prjId){
-			createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
+		mvVerification : function(prjId, permission){
+			if(parseInt(permission) > 0){
+				createTabInFrame(prjId+'_Packaging', '#<c:url value="/project/verification/'+prjId+'"/>');
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
 		// Grid distribution display event
-		mvDistribution : function(prjId){
-			createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
+		mvDistribution : function(prjId, permission){
+			if(parseInt(permission) > 0){
+				createTabInFrame(prjId+'_Distribute', '#<c:url value="/project/distribution/'+prjId+'"/>');
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
 		// Grid reviewer change event
 		reviewerChg : function(){
@@ -535,43 +547,59 @@
 				});
 			}
 		},
-		downloadReport : function(obj){
-			var prjId = $(obj).closest('tr').attr('id'); 
-			
-			$.ajax({
-				type: "POST",
-				url: '<c:url value="/exceldownload/getExcelPost"/>',
-				data: JSON.stringify({"type":"report", "parameter":prjId}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function (data) {
-					if("false" == data.isValid) {
+		downloadReport : function(obj, permission){
+			if(parseInt(permission) > 0){
+				var prjId = $(obj).closest('tr').attr('id'); 
+				
+				$.ajax({
+					type: "POST",
+					url: '<c:url value="/exceldownload/getExcelPost"/>',
+					data: JSON.stringify({"type":"report", "parameter":prjId}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+						}
+					},
+					error: function(data){
 						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					} else {
-						window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
 					}
-				},
-				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
-				}
-			});
+				});
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
-		downloadNotice : function(obj){
-			var prjId = $(obj).closest('tr').attr('id'); 
-			
-			//파일 이름 임시
-			location.href = '<c:url value="/project/verification/downloadNotice?prjId='+prjId+'"/>';
+		downloadNotice : function(obj, permission){
+			if(parseInt(permission) > 0){
+				var prjId = $(obj).closest('tr').attr('id'); 
+				
+				//파일 이름 임시
+				location.href = '<c:url value="/project/verification/downloadNotice?prjId='+prjId+'"/>';
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
-		downloadPackage : function(obj){
-			var prjId = $(obj).closest('tr').attr('id');
-			
-			location.href = '<c:url value="/project/verification/downloadPackage?prjId='+prjId+'"/>';
+		downloadPackage : function(obj, permission){
+			if(parseInt(permission) > 0){
+				var prjId = $(obj).closest('tr').attr('id');
+				
+				location.href = '<c:url value="/project/verification/downloadPackage?prjId='+prjId+'"/>';
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
-		downloadPackageMulti : function(obj, fileIdx){
-			var prjId = $(obj).closest('tr').attr('id');
-			
-			location.href = '<c:url value="/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx+'"/>';
+		downloadPackageMulti : function(obj, fileIdx, permission){
+			if(parseInt(permission) > 0){
+				var prjId = $(obj).closest('tr').attr('id');
+				
+				location.href = '<c:url value="/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx+'"/>';
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
 		},
 		setGridParam : function(){
 			var paramData=$('#projectSearch').serializeObject();
@@ -616,36 +644,47 @@
 		checkProjectStatus : function(){
 			if(fn.checkProjectCnt()) {
 				var prjId = $("#list").getGridParam("selrow");
-				var rtnParameter = {};
-				
-				$.ajax({
-					url : '<c:url value="/project/getProjectStatus"/>',
-					type : 'POST',
-					data : JSON.stringify({"prjId" : prjId}),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-					success: function(data){
-						var distributionStatus = data.distributionStatus;
-						
-						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
-							return false;
+				var rowData = $("#list").getRowData(prjId);
+
+				if(parseInt(rowData["permission"]) > 0) {
+					var rtnParameter = {};
+					
+					$.ajax({
+						url : '<c:url value="/project/getProjectStatus"/>',
+						type : 'POST',
+						data : JSON.stringify({"prjId" : prjId}),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(data){
+							var distributionStatus = data.distributionStatus;
+							
+							if((distributionStatus||"").toUpperCase() == "PROC"){
+								alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
+								return false;
+							}
+							
+							fn.showChangeStatus(data);
+						},
+						error: function(data){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
-						
-						fn.showChangeStatus(data);
-					},
-					error: function(data){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
-					}
-				});
+					});
+				} else {
+					alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+				}
 			}
 		},
 		copy : function(){
 			if(fn.checkProjectCnt()){
 				var prjId = $("#list").getGridParam("selrow");
-				
-				createTabInFrame(prjId+'copy_Project', '#<c:url value="/project/copy/'+prjId+'"/>');
+				var rowData = $("#list").getRowData(prjId);
+
+				if(parseInt(rowData["permission"]) > 0) {
+					createTabInFrame(prjId+'copy_Project', '#<c:url value="/project/copy/'+prjId+'"/>');
+				} else {
+					alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+				}
 			}
 		},
 		showChangeStatus : function(paramObj){
@@ -1035,7 +1074,7 @@
 				},
 				colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
 				           , 'Packaging', 'Distribution', 'Download', 'Distribution Type', 'CVE ID'
-				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority'],
+				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
 					{name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick},
@@ -1086,7 +1125,8 @@
 					{name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true},
 					{name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50,hidden:true},
 					{name: 'statusRequestYn', index: 'statusRequestYn', width: 50,hidden:true},
-					{name: 'priority', index: 'priority', width: 50,hidden:true}
+					{name: 'priority', index: 'priority', width: 50,hidden:true},
+					{name: 'permission', index: 'permission', width: 50,hidden:true}
 				],
 				rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
 				rowList: [${ct:getConstDef("DISP_PAGENATION_LIST_STR")}],
@@ -1214,13 +1254,13 @@
 						if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
 							
 						} else {
-							fn.mvVerification(rowData['prjId']);
+							fn.mvVerification(rowData['prjId'], rowData['permission']);
 						}
 					} else if(isAdmin && iCol == 7 || !isAdmin && iCol == 6) {
 						if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
 							
 						} else {						
-							fn.mvDistribution(rowData['prjId']);
+							fn.mvDistribution(rowData['prjId'], rowData['permission']);
 						}
 					} else if(iCol != 0 && iCol != 5 && iCol != 14) {
 						createTabInFrame(rowData['prjId']+'_Project', '#<c:url value="/project/edit/'+rowData['prjId']+'"/>');

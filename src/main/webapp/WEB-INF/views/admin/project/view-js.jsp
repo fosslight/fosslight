@@ -16,6 +16,7 @@
 	var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 	var osTypeEtc = "${ct:getConstDef('CD_OS_TYPE_ETC')}";
 	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+	var permission = "${projectPermission}";
 	
 	$(document).ready(function() {
 		'use strict';
@@ -300,8 +301,10 @@
 				downloadBtnTarget += "<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice()\" disabled>";
 				downloadBtnTarget += "<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage()\" disabled>"
 			}
-			
-			$("#downloadBtn").append(downloadBtnTarget);
+
+			if("N" != permission){
+				$("#downloadBtn").append(downloadBtnTarget);
+			}
 		},
 		downloadReport : function(){
 			$.ajax({

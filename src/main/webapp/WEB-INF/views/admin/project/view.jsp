@@ -23,9 +23,11 @@
 					</div>
 				</div>
 				<c:if test="${ct:isAdmin() or project.publicYn eq 'Y' or project.viewOnlyFlag ne 'Y'}">
-					<span style="right: 0px; position: absolute; bottom: -23px; font-size: 11px;" >
-						<input type="button" value="Show Comment History" class="btnColor purple btnCommentHistory" style="width: 160px; height: 18px;"/>
-					</span>
+					<c:if test="${empty projectPermission}">
+						<span style="right: 0px; position: absolute; bottom: -23px; font-size: 11px;" >
+							<input type="button" value="Show Comment History" class="btnColor purple btnCommentHistory" style="width: 160px; height: 18px;"/>
+						</span>
+					</c:if>
 				</c:if>
 			</div>
 		</div>

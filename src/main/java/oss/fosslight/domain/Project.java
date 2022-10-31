@@ -342,6 +342,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String verificationStatusConfFlag = "N";
 	
+	private int permission;
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4144,5 +4146,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setVerificationStatusConfFlag(String verificationStatusConfFlag) {
 		this.verificationStatusConfFlag = verificationStatusConfFlag;
+	}
+
+	public int getPermission() {
+		return permission;
+	}
+
+	public void setPermission(int permission) {
+		this.permission = permission;
 	}
 }
