@@ -129,4 +129,6 @@ public interface OssService extends HistoryConfig{
 	List<String> getDeactivateOssList();
 
 	Map<String, Object> getOssDataMap(String gridId, boolean status, String msg);
+	
+	Map<String, Object> saveOssURLNickname(ProjectIdentification paramBean);
 }

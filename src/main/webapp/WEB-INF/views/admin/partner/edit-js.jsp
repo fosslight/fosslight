@@ -1806,7 +1806,7 @@ var saveFlag = false;
 					_popupCheckOssName.close();
 				}
 				
-				_popupCheckOssName = window.open("/oss/checkOssName?prjId=${detail.partnerId}&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+				_popupCheckOssName = window.open("/oss/checkOssName?prjId=${detail.partnerId}&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});

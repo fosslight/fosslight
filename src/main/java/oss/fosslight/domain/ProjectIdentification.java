@@ -327,6 +327,26 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** Check whether the Object is included in the oss list */
 	private String checkOssList = "N";
 
+	public String getRedirectLocation() {
+		return redirectLocation;
+	}
+
+	public void setRedirectLocation(String redirectLocation) {
+		this.redirectLocation = redirectLocation;
+	}
+
+	private String redirectLocation;
+
+	public String getRecommendedNickname() {
+		return recommendedNickname;
+	}
+
+	public void setRecommendedNickname(String recommendedNickname) {
+		this.recommendedNickname = recommendedNickname;
+	}
+
+	private String recommendedNickname;
+
 	public String getGuireportFlag() {
 		return guireportFlag;
 	}

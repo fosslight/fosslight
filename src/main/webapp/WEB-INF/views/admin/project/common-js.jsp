@@ -1167,7 +1167,7 @@ var com_fn = {
 			_popupCheckOssName.close();
 		}
 		
-		_popupCheckOssName = window.open('<c:url value="/oss/checkOssName?prjId=${project.prjId}&referenceDiv='+referenceDiv+'-${initDiv}&targetName=identification"/>', 'Check OSS Name', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+		_popupCheckOssName = window.open('<c:url value="/oss/checkOssName?prjId=${project.prjId}&referenceDiv='+referenceDiv+'-${initDiv}&targetName=identification"/>', 'Check OSS Name', 'width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 		if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
