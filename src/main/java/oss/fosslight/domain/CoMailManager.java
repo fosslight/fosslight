@@ -251,8 +251,10 @@ public class CoMailManager extends CoTopComponent {
     				// 정보 변경 사용자
     				if(userInfo.containsKey("beforeUserName")) {
     					String userName  = (String) userInfo.get("beforeUserName");
-    						   userName += " -> ";
-    						   userName += (String) userInfo.get("afterUserName");
+    					if(!userInfo.containsKey("newcomer")) {
+    						userName += " -> ";
+    						userName += (String) userInfo.get("afterUserName");
+    					}
     						   
     					t2user.setUserName(userName);
     					
