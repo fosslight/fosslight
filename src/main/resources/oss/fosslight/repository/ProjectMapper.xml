@@ -188,6 +188,18 @@
 					</if>
 				)
 			</if> -->
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						T1.CREATOR = #{loginUserName} 
+						OR EXISTS (
+						SELECT 1
+						  FROM PROJECT_WATCHER A1
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+						)
+					)
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
@@ -417,6 +429,18 @@
 					</if>
 				)
 			</if> --> 
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						T1.CREATOR = #{loginUserName} 
+						OR EXISTS (
+						SELECT 1
+						  FROM PROJECT_WATCHER A1
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+						)
+					)
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
