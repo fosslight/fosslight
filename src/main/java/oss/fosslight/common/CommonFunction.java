@@ -1790,23 +1790,28 @@ public class CommonFunction extends CoTopComponent {
 		// html 파일내에서 binary name 영역만 찾는다.
 		Document doc = Jsoup.parse(noticeContents);
 		Elements binaryEmList = doc.select("div.toc ul li");
+		binaryEmList.addAll(doc.select("ul[class=file-list] li"));
+		binaryEmList.addAll(doc.select("strong"));
 		
 		for (Element em : binaryEmList) {
-			noticeBinaryList.add(em.text());
+			String binaryName = em.text();
+			binaryName = binaryName.replaceAll("//", "/");
+			noticeBinaryList.add(binaryName);
 			
-			if (em.text().startsWith("/")) {
-				noticeBinaryList.add(em.text().substring(1));
+			if (binaryName.startsWith("/")) {
+				noticeBinaryList.add(binaryName.substring(1));
 			} else {
-				noticeBinaryList.add("/" + em.text());
+				noticeBinaryList.add("/" + binaryName);
 			}
 			
 			// path 정보를 무시하고 binary 파일명만 추가 (binary file은 사전에 중복 제거되어 유니크하다)
-			if(em.text().indexOf("/") > -1) {
-				noticeBinaryList.add(em.text().substring(em.text().lastIndexOf("/")));
-				noticeBinaryList.add(em.text().substring(em.text().lastIndexOf("/") + 1));
+			noticeBinaryList.add(FilenameUtils.getName(binaryName));
+			if(binaryName.indexOf("/") > -1) {
+				noticeBinaryList.add(binaryName.substring(binaryName.lastIndexOf("/")));
+				noticeBinaryList.add(binaryName.substring(binaryName.lastIndexOf("/") + 1));
 			} else {
-				if(!noticeBinaryList.contains( ("/" + em.text()) )) {
-					noticeBinaryList.add("/" + em.text());
+				if(!noticeBinaryList.contains( ("/" + binaryName) )) {
+					noticeBinaryList.add("/" + binaryName);
 				}
 			}
 		}
