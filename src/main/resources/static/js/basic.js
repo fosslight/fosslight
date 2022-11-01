@@ -1341,7 +1341,7 @@ var autoComplete = {
 	    $(".autoComProjectVersion").autocomplete({source: autoComplete.projectVersionTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 	    
-	    $(".autoComProjectModel").autocomplete({source: autoComplete.projectModelTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
+	    $(".autoComProjectModel").autocomplete({source: autoComplete.projectModelTags, minLength: 3,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 
 	    $(".autoComParty").autocomplete({source: autoComplete.partyNameTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
