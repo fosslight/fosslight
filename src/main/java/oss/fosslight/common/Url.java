@@ -177,6 +177,7 @@ public final class Url {
 		public static final String CHECK_OSS_NAME_AJAX = PATH + "/getCheckOssNameAjax/{targetName}";
 		public static final String SAVE_OSS_CHECK_NAME = PATH + "/saveOssCheckName/{targetName}";
 		public static final String SAVE_OSS_NICKNAME = PATH + "/saveOssNickname";
+		public static final String SAVE_OSS_URL_NICKNAME = PATH + "/saveOssURLNickName";
 
 		public static final String CHECK_OSS_LICENSE = PATH + "/checkOssLicense";
 		public static final String CHECK_OSS_LICENSE_JSP = TILES_ROOT + PATH + "/checkOssLicensepopup";

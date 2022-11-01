@@ -28,6 +28,11 @@
 					$("#btnAddNickname").on("click", function(){
 						Ctrl_fn.addProc();				
 					});
+
+					$("#btnAddURLNickname").on("click", function(){
+						Ctrl_fn.addURLNicknameProc();
+					});
+
 				}
 			};
 			
@@ -61,6 +66,71 @@
 						}
 					});	
 				},
+				addURLNicknameProc : function(){
+					$('#loading_wrap_popup').show();
+					var target = $("#ossList");
+					var result = [];
+					var failFlag = false;
+					var idArry = grid_fn.getCheckedRow("URL");
+
+					var idArryOnlyInOssList = grid_fn.getCheckedRow("URL").filter(i => {
+						let input = $("#ossList").getRowData(i)['checkName'];
+						let regexp = /^(<a).*(<\/a>)/;
+						return regexp.test(input);
+					});
+
+					if(idArryOnlyInOssList.length > 0){
+						window.setTimeout(function(){
+							for(var i = 0 ; i < idArryOnlyInOssList.length ; i++) {
+								var rowId = idArryOnlyInOssList[i];
+
+								cleanErrMsg("ossList", rowId);
+
+								var rowdata = target.getRowData(rowId);
+								rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
+								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig, "");
+								rowdata["recommendedNickname"] = rowdata["recommendedNickname"].replace(/(<([^>]+)>)/ig, "");
+								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
+
+								$.ajax({
+									url: '<c:url value="/oss/saveOssURLNickName"/>',
+									type: 'POST',
+									data: JSON.stringify(rowdata),
+									dataType: 'json',
+									cache: false,
+									async: false,
+									contentType: 'application/json',
+									success: function (resultData) {
+										if(resultData.isValid == "true"){
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'urlFlag', 'Y');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'Y');
+										} else {
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'urlFlag', 'N');
+											$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'N');
+											failFlag = true;
+										}
+										result.push(resultData);
+										if(result.length == idArryOnlyInOssList.length){
+											if(!failFlag){
+												alertify.success('<spring:message code="msg.oss.change.success" />');
+											}
+											$('#loading_wrap_popup').hide();
+										}
+									},
+									error: function () {
+										$('#loading_wrap_popup').hide();
+									}
+								});
+							}
+						},0);
+					} else if(idArry.length > 0){
+						alertify.error('<spring:message code="msg.oss.warn.unregistered" />');
+						$('#loading_wrap_popup').hide();
+					} else {
+						alertify.alert('<spring:message code="msg.oss.required.change" />', function(){});
+						$('#loading_wrap_popup').hide();
+					}
+				},
 				changeProc : function(){
 					$('#loading_wrap_popup').show();
 					
@@ -77,6 +147,7 @@
 								cleanErrMsg("ossList", rowId);
 								
 								var rowdata = target.getRowData(rowId);
+								rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
 								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
 								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
 								<c:if test="${projectInfo.targetName eq 'identification'}">
@@ -159,7 +230,7 @@
 							}
 						}, 0);
 					} else {
-						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
+						alertify.alert('<spring:message code="msg.oss.required.change" />', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},
@@ -173,7 +244,7 @@
 
 					var idArryOnlyInOssList = grid_fn.getCheckedRow("ADD").filter(i => {
 						let input = $("#ossList").getRowData(i)['checkName'];
-						let regexp = /^(<a).*(<\/a>)$/;
+						let regexp = /^(<a).*(<\/a>)/;
 						return regexp.test(input);
 					});
 
@@ -185,8 +256,10 @@
 								cleanErrMsg("ossList", rowId);
 								
 								var rowdata = target.getRowData(rowId);
+								rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
 								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
-								
+								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
+
 								$.ajax({
 									url : '<c:url value="/oss/saveOssNickname"/>',
 									type : 'POST',
@@ -211,7 +284,7 @@
 																
 										if(result.length == idArryOnlyInOssList.length){
 											if(!failFlag){
-												alertify.success('<spring:message code="msg.selfcheck.nickname.success" />');
+												alertify.success('<spring:message code="msg.oss.change.success" />');
 												opener.location.reload();
 											}
 											
@@ -226,7 +299,7 @@
 						alertify.error('<spring:message code="msg.oss.warn.unregistered" />');
 						$('#loading_wrap_popup').hide();
 					} else {
-						alertify.alert('<spring:message code="msg.oss.required.select" />', function(){});
+						alertify.alert('<spring:message code="msg.oss.required.change" />', function(){});
 						$('#loading_wrap_popup').hide();
 					}
 				},
@@ -277,18 +350,21 @@
 						$('#ossList').jqGrid({
 							datatype: 'local',
 							data : ossDataList,
-							colNames: ['ID','Result','Download location','OSS name (now)', 'Registered OSS name<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList'],
+							colNames: ['ID','Result','Download location','OSS name (now)', 'Registered OSS name<br>(to be changed)', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList', 'redirectLocation', 'urlFlag', 'recommendedNickname'],
 							colModel: [
 								{name: 'gridId', index: 'gridId', hidden:true, key:true},
-								{name: 'result', index: 'result', <c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">width: 20</c:if><c:if test="${sessUserInfo.authority ne 'ROLE_ADMIN'}">width:12</c:if>, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
+								{name: 'result', index: 'result', <c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">width: 35</c:if><c:if test="${sessUserInfo.authority ne 'ROLE_ADMIN'}">width:12</c:if>, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
 								{name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:grid_fn.displayDownloadLocation, sortable:false},
 								{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
-								{name: 'checkName', index: 'checkName', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckName, sortable:false},
+								{name: 'checkName', index: 'checkName', width: 90, align: 'left',editable: false, formatter:grid_fn.displayCheckName, sortable:false},
 								{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
 								{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
 								{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
 								{name: 'referenceDiv', index: 'referenceDiv', width: 50, hidden: true, sortable: false},
-								{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false}
+								{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false},
+								{name: 'redirectLocation', index: 'redirectLocation', width: 50, hidden: true, sortable: false},
+								{name: 'urlFlag', index: 'urlFlag', width: 50, hidden: true, sortable: false},
+								{name: 'recommendedNickname', index: 'recommendedNickname', width: 50, hidden: true, sortable: false}
 							],
 							autoencode: true,
 							autowidth: true,
@@ -302,6 +378,7 @@
 								if(data.total > 0){
 									$("#btnChangeOss").show();
 									$("#btnAddNickname").show();
+									$("#btnAddURLNickname").show();
 									
 									var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 									for(var _idx=0;_idx<rowsCount;_idx++) {
@@ -367,18 +444,19 @@
 						var display = "";
 						var changeFlag = rowObject.changeFlag || rowObject[6];
 						var addFlag = rowObject.addFlag || rowObject[7];
+						var urlFlag = rowObject.urlFlag || rowObject[12];
 						
 						if(changeFlag =="Y"){
-							display += "<a class='btnPG wAnd onAnd'>Change</a>";
-						} else {
-							display += "<a class='btnPG wAnd off'>Change</a>";
+							display += "<a class='btnPG wAnd onAnd'>Changed</a>";
 						}
 
 						if('${sessUserInfo.authority}' == 'ROLE_ADMIN'){
 							if(addFlag =="Y" ){
-								display += "<a class='btnPG onBin'>Add</a>";
-							} else {
-								display += "<a class='btnPG off'>Add</a>";
+								display += "<a class='btnPG wAnd onAnd'>Added N</a>";
+							}
+
+							if(urlFlag == "Y"){
+								display += "<a class='btnPG wAnd onAnd'>Added U</a>";
 							}
 						}
 						
@@ -396,8 +474,11 @@
 								"<a href='#' onclick='Ctrl_fn.showOssViewPage(\""+display[i]+"\")' style='color:#2883f3;text-decoration:underline;'>"+display[i]+"</a>"
 								: display[i];
 						}
-						
-						return display.join("<br>");
+
+						var returnValue = typeof rowObject["redirectLocation"] == "undefined" ? display.join("<br>")
+								: display.join("<br>") + "<div style='color: blue !important; font-size: 11px; padding-top: 2px; white-space: pre-wrap'>" + "redirect url:\n" +
+								"https://" + rowObject["redirectLocation"] + "</div>";
+						return returnValue;
 					},
 					displayDownloadLocation : function(cellvalue, options, rowObject){
 						var display = "";
@@ -411,7 +492,18 @@
 						return cellvalue;
 					},
 					getCheckedRow : function(processType){
-						var seq = processType.toUpperCase() == "CHANGE" ? 6 : 7;
+						var seq;
+						switch(processType) {
+							case "CHANGE" :
+								seq = 6;
+								break;
+							case "ADD" :
+								seq = 7;
+								break;
+							case "URL" :
+								seq = 12;
+								break;
+						}
 						return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
 						    if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
 						        arr.push(item);
@@ -464,7 +556,8 @@
 					<div align="left" style="padding-top: 10px;">
 						<input type="button" value="Change OSS Name" id="btnChangeOss" class="btnColor red" style="display: none; width:150px;" />
 						<c:if test="${sessUserInfo.authority eq 'ROLE_ADMIN'}">
-							<input type="button" value="Add Nickname" id="btnAddNickname" class="btnColor red" style="display: none; width:120px;" />
+							<input type="button" value="Add Nickname - OSS name(now)" id="btnAddNickname" class="btnColor red" style="display: none; width:220px;" />
+							<input type="button" value="Add URL, Recommended Nickname" id="btnAddURLNickname" class="btnColor red" style="display: none; width:230px;" />
 						</c:if>
 					</div>
 				</div>

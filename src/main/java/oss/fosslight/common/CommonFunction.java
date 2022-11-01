@@ -1982,9 +1982,9 @@ public class CommonFunction extends CoTopComponent {
 	}
 
 	public static String convertUrlLinkFormat(String url) {
-		if(!isEmpty(url) && url.startsWith("www")) {
-			return "http://" + url;
-		}
+//		if(!isEmpty(url) && url.startsWith("www")) {
+//			return "http://" + url;
+//		}
 		
 		return url;
 	}
