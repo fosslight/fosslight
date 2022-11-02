@@ -644,35 +644,33 @@
 		checkProjectStatus : function(){
 			if(fn.checkProjectCnt()) {
 				var prjId = $("#list").getGridParam("selrow");
-				var rowData = $("#list").getRowData(prjId);
-
-				if(parseInt(rowData["permission"]) > 0) {
-					var rtnParameter = {};
-					
-					$.ajax({
-						url : '<c:url value="/project/getProjectStatus"/>',
-						type : 'POST',
-						data : JSON.stringify({"prjId" : prjId}),
-						dataType : 'json',
-						cache : false,
-						contentType : 'application/json',
-						success: function(data){
-							var distributionStatus = data.distributionStatus;
+				var rtnParameter = {};
+				
+				$.ajax({
+					url : '<c:url value="/project/getProjectStatus"/>',
+					type : 'POST',
+					data : JSON.stringify({"prjId" : prjId}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(data){
+						if("true" == data.isValid) {
+							var distributionStatus = data.resultData.distributionStatus;
 							
 							if((distributionStatus||"").toUpperCase() == "PROC"){
 								alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
 								return false;
 							}
 							
-							fn.showChangeStatus(data);
-						},
-						error: function(data){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							fn.showChangeStatus(data.resultData);
+						} else {
+							alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
 						}
-					});
-				} else {
-					alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-				}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
 			}
 		},
 		copy : function(){
