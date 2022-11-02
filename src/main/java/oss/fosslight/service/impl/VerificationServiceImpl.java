@@ -1944,10 +1944,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<OssComponents> addOssComponentList = verificationMapper.selectVerificationNoticeClassAppend(ossNotice);
 		
 		if(addOssComponentList != null) {
+			List<String> checkKeyInfo = new ArrayList<>();
+			
 			for(OssComponents bean : addOssComponentList) {
 				String componentKey = (hideOssVersionFlag
 											? bean.getOssName() 
 											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				
+				String checkKey = (hideOssVersionFlag
+										? bean.getOssName() + "|" + bean.getLicenseName()
+										: bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName()).toUpperCase();
+				
+				if(checkKeyInfo.contains(checkKey)) {
+					continue;
+				}
 				
 				if("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -1960,9 +1970,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				license.setAttribution(bean.getAttribution());
 				bean.addOssComponentsLicense(license);
 				
-				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
-						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
+				if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(bean.getLicenseType())) {
+//				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
+//						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
+//						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
@@ -1971,6 +1982,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if(!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(componentKey, license);
 				}
+				
+				checkKeyInfo.add(checkKey);
 			}
 		}
 		
