@@ -4261,32 +4261,21 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value=PROJECT.PROJECT_STATUS)
 	public @ResponseBody ResponseEntity<Object> getProjectStatus(@RequestBody Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
-		List<String> permissionCheckList = null;
+		Map<String, String> map = new HashMap<String, String>();
+		Project prjBean = projectService.getProjectDetail(project);
 		
-		if(!CommonFunction.isAdmin()) {
-			CommonFunction.setProjectService(projectService);
-			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), new String[] {project.getPrjId()}, "project");
-		}
+		map.put("projectStatus", prjBean.getStatus());
+		map.put("identificationStatus", prjBean.getIdentificationStatus());
+		map.put("verificationStatus", prjBean.getVerificationStatus());
+		map.put("distributionStatus", prjBean.getDestributionStatus());
+		map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
+		map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
+		map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
+		map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
+		map.put("commId", avoidNull(prjBean.getCommId(), ""));
+		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
 		
-		if(permissionCheckList == null || permissionCheckList.isEmpty()){
-			Map<String, String> map = new HashMap<String, String>();
-			Project prjBean = projectService.getProjectDetail(project);
-			
-			map.put("projectStatus", prjBean.getStatus());
-			map.put("identificationStatus", prjBean.getIdentificationStatus());
-			map.put("verificationStatus", prjBean.getVerificationStatus());
-			map.put("distributionStatus", prjBean.getDestributionStatus());
-			map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
-			map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
-			map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
-			map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
-			map.put("commId", avoidNull(prjBean.getCommId(), ""));
-			map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
-			
-			return makeJsonResponseHeader(true, null, map);
-		} else {
-			return makeJsonResponseHeader(false, null);
-		}
+		return makeJsonResponseHeader(map);
 	}
 	
 	@PostMapping(value=PROJECT.MAKE_YAML)
