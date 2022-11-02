@@ -1970,10 +1970,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				license.setAttribution(bean.getAttribution());
 				bean.addOssComponentsLicense(license);
 				
-				if(!CoConstDef.CD_LICENSE_TYPE_PMS.equals(bean.getLicenseType())) {
-//				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
-//						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())
-//						|| hideOssVersionFlag) { // Accompanied with source code 의 경우 source 공개 의무
+				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
+						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
