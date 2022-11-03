@@ -74,9 +74,11 @@
 					var idArry = grid_fn.getCheckedRow("URL");
 
 					var idArryOnlyInOssList = grid_fn.getCheckedRow("URL").filter(i => {
-						let input = $("#ossList").getRowData(i)['checkName'];
-						let regexp = /^(<a).*(<\/a>)/;
-						return regexp.test(input);
+						if($("#ossList").getRowData(i)['redirectLocation'] != "") {
+							let input = $("#ossList").getRowData(i)['checkName'];
+							let regexp = /^(<a).*(<\/a>)/;
+							return regexp.test(input);
+						}
 					});
 
 					if(idArryOnlyInOssList.length > 0){
