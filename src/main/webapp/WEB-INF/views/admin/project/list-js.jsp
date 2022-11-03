@@ -646,7 +646,7 @@
 				var prjId = $("#list").getGridParam("selrow");
 				var rowData = $("#list").getRowData(prjId);
 
-				if(parseInt(rowData["permission"]) > 0) {
+				if(parseInt(rowData["statusPermission"]) > 0) {
 					var rtnParameter = {};
 					
 					$.ajax({
@@ -1074,7 +1074,7 @@
 				},
 				colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
 				           , 'Packaging', 'Distribution', 'Download', 'Distribution Type', 'CVE ID'
-				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission'],
+				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
 					{name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick},
@@ -1126,7 +1126,8 @@
 					{name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50,hidden:true},
 					{name: 'statusRequestYn', index: 'statusRequestYn', width: 50,hidden:true},
 					{name: 'priority', index: 'priority', width: 50,hidden:true},
-					{name: 'permission', index: 'permission', width: 50,hidden:true}
+					{name: 'permission', index: 'permission', width: 50,hidden:true},
+					{name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true}
 				],
 				rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
 				rowList: [${ct:getConstDef("DISP_PAGENATION_LIST_STR")}],
