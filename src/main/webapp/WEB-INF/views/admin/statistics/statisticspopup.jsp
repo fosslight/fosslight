@@ -308,34 +308,29 @@
 						, sortorder: 'asc'
 						, viewrecords: true
 						, height: 'auto'
+						, footerrow: true
 						, loadonce: false
 						, loadComplete: function(data) { // After data loading
-							var totalData = $("#chartRawData").jqGrid("getRowData").filter(function(cur){ 
-								return cur.columnName == "Total" || cur.divisionNm == "Total";
-							}).length > 0;
+							var footerRow = $(".ui-jqgrid-ftable > tr > td:eq()").find('tr');
 
-							if(!totalData){
-								var rowId = $("#chartRawData").getGridParam("reccount");
-								var rowObject = $("#chartRawData").getRowData(rowId);
-								rowObject[colModel[0].name] = 'Total';
-								
-								if(chartType == "PIE"){
-									rowObject['columnCnt'] = $("#chartRawData").jqGrid('getCol', 'columnCnt', false, 'sum');
-								} else {
-									for(var idx in colModel){
-										if(idx == 0){
-											continue;
-										}
-										
-										if(colModel[idx].name == "total"){
-											rowObject.total = $("#chartRawData").jqGrid('getCol', 'total', false, 'sum');
-										}else {
-											rowObject['category'+(idx-1)+'Cnt'] = $("#chartRawData").jqGrid('getCol', 'category'+(idx-1)+'Cnt', false, 'sum');
-										}
+							if(chartType == "PIE"){
+								$("#chartRawData").jqGrid("footerData", "set", {
+									columnName : 'Total', columnCnt : $("#chartRawData").jqGrid('getCol', 'columnCnt', false, 'sum')
+								});
+							} else {
+								for(var idx in colModel){
+									if(colModel[idx].name == "divisionNm"){
+										$(".ui-jqgrid-ftable").find('td').eq(parseInt(idx)+1).text('Total');
+									} else if(colModel[idx].name == "columnName"){
+										$(".ui-jqgrid-ftable").find('td').eq(parseInt(idx)+1).text('Total');
+									} else if(colModel[idx].name == "total"){
+										var totalCnt = $("#chartRawData").jqGrid('getCol', 'total', false, 'sum');
+										$(".ui-jqgrid-ftable").find('td').eq(parseInt(idx)+1).text(totalCnt);
+									} else {
+										var categoryCnt = $("#chartRawData").jqGrid('getCol', 'category'+(parseInt(idx)-1)+'Cnt', false, 'sum');
+										$(".ui-jqgrid-ftable").find('td').eq(parseInt(idx)+1).text(categoryCnt);
 									}
 								}
-
-								$("#chartRawData").jqGrid("addRowData", rowId+1, rowObject, 'last');
 							}
 						}
 					});
