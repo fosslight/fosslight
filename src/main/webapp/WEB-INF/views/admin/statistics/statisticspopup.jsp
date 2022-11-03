@@ -58,6 +58,7 @@
 									  , index: data.titleArray.length-1 == idx ? 'total' : 'category'+idx+'Cnt'
 									  , width: 50
 									  , align: 'center'
+									  , sorttype: 'int'
 									};
 									
 									colModel.push(obj);
@@ -89,7 +90,7 @@
 								var colNames = ['OSS Name', 'OSS Cnt'];
 								var colModel = [
 									{name: 'columnName', index: 'columnName', width: 50, align: 'center', key:true},
-									{name: 'columnCnt', index: 'columnCnt', width: 50, align: 'center'}
+									{name: 'columnCnt', index: 'columnCnt', width: 50, align: 'center', sorttype: 'int'}
 								];
 								
 								grid_fn.chartRawDataOpen(data.chartData, colNames, colModel, "PIE");
@@ -118,7 +119,7 @@
 								var colNames = ['License Name', 'License Cnt'];
 								var colModel = [
 									{name: 'columnName', index: 'columnName', width: 50, align: 'center', key:true},
-									{name: 'columnCnt', index: 'columnCnt', width: 50, align: 'center'}
+									{name: 'columnCnt', index: 'columnCnt', width: 50, align: 'center', sorttype: 'int'}
 								];
 								
 								grid_fn.chartRawDataOpen(data.chartData, colNames, colModel, "PIE");
@@ -155,6 +156,7 @@
 									  , index: data.titleArray.length-1 == idx ? 'total' : 'category'+idx+'Cnt'
 									  , width: 50
 									  , align: 'center'
+									  , sorttype: 'int'
 									};
 									colModel.push(obj);
 								}
@@ -193,6 +195,7 @@
 									  , index: data.titleArray.length-1 == idx ? 'total' : 'category'+idx+'Cnt'
 									  , width: 50
 									  , align: 'center'
+									  , sorttype: 'int'
 									};
 									
 									colModel.push(obj);
@@ -232,6 +235,7 @@
 									  , index: data.titleArray.length-1 == idx ? 'total' : 'category'+idx+'Cnt'
 									  , width: 50
 									  , align: 'center'
+									  , sorttype: 'int'
 									};
 									
 									colModel.push(obj);
@@ -270,6 +274,7 @@
 									  , index: data.titleArray.length-1 == idx ? 'total' : 'category'+idx+'Cnt'
 									  , width: 50
 									  , align: 'center'
+									  , sorttype: 'int'
 									};
 									
 									colModel.push(obj);
@@ -305,27 +310,33 @@
 						, height: 'auto'
 						, loadonce: false
 						, loadComplete: function(data) { // After data loading
-							var rowId = $("#chartRawData").getGridParam("reccount");
-							var rowObject = $("#chartRawData").getRowData(rowId);
-							rowObject[colModel[0].name] = 'Total';
-							
-							if(chartType == "PIE"){
-								rowObject['columnCnt'] = $("#chartRawData").jqGrid('getCol', 'columnCnt', false, 'sum');
-							} else {
-								for(var idx in colModel){
-									if(idx == 0){
-										continue;
-									}
-									
-									if(colModel[idx].name == "total"){
-										rowObject.total = $("#chartRawData").jqGrid('getCol', 'total', false, 'sum');
-									}else {
-										rowObject['category'+(idx-1)+'Cnt'] = $("#chartRawData").jqGrid('getCol', 'category'+(idx-1)+'Cnt', false, 'sum');
+							var totalData = $("#chartRawData").jqGrid("getRowData").filter(function(cur){ 
+								return cur.columnName == "Total" || cur.divisionNm == "Total";
+							}).length > 0;
+
+							if(!totalData){
+								var rowId = $("#chartRawData").getGridParam("reccount");
+								var rowObject = $("#chartRawData").getRowData(rowId);
+								rowObject[colModel[0].name] = 'Total';
+								
+								if(chartType == "PIE"){
+									rowObject['columnCnt'] = $("#chartRawData").jqGrid('getCol', 'columnCnt', false, 'sum');
+								} else {
+									for(var idx in colModel){
+										if(idx == 0){
+											continue;
+										}
+										
+										if(colModel[idx].name == "total"){
+											rowObject.total = $("#chartRawData").jqGrid('getCol', 'total', false, 'sum');
+										}else {
+											rowObject['category'+(idx-1)+'Cnt'] = $("#chartRawData").jqGrid('getCol', 'category'+(idx-1)+'Cnt', false, 'sum');
+										}
 									}
 								}
-							}
 
-							$("#chartRawData").jqGrid("addRowData", rowId+1, rowObject, 'last');
+								$("#chartRawData").jqGrid("addRowData", rowId+1, rowObject, 'last');
+							}
 						}
 					});
 				}	
