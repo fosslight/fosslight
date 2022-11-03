@@ -344,6 +344,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private int permission;
 	
+	private int statusPermission;
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4154,5 +4156,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPermission(int permission) {
 		this.permission = permission;
+	}
+
+	public int getStatusPermission() {
+		return statusPermission;
+	}
+
+	public void setStatusPermission(int statusPermission) {
+		this.statusPermission = statusPermission;
 	}
 }

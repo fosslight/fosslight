@@ -306,7 +306,13 @@ public class ProjectController extends CoTopComponent {
 						&& !CommonFunction.isAdmin() 
 						&& !permissionCheckList.contains(loginUserName())) {
 					prj.setPermission(0);
+					prj.setStatusPermission(0);
 				} else {
+					if(!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+						prj.setStatusPermission(0);
+					} else {
+						prj.setStatusPermission(1);
+					}
 					prj.setPermission(1);
 				}
 			}

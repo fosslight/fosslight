@@ -1835,8 +1835,8 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+		int rowIdx = Integer.parseInt(avoidNull(modelSeq, "0"));
 		for (String[] model : models) {
-			int rowIdx = Integer.parseInt(avoidNull(modelSeq, "0"));
 			Project param = new Project();
 			for (int colIdx = 0; colIdx < model.length; colIdx++) {
 				String value = model[colIdx];
