@@ -665,13 +665,26 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		List<String> ossCheckParam = new ArrayList<>();
 		List<OssMaster> ossNickNameList = null;
 		Map<String, OssMaster> ossNickNameConvertMap = new HashMap<>();
+		String ossInfoKey = "";
 		
 		for(ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
+			if("N/A".equals(bean.getOssVersion())) {
+				bean.setOssVersion("");
+			}
+			
+			ossInfoKey = (bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
+			OssMaster masterBean = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
+			if(masterBean != null) {
+				bean.setOssId(masterBean.getOssId());
+				bean.setOssName(masterBean.getOssName());
+			}
 			
 			if(!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName)) {
 				ossCheckParam.add(_ossName);
 			}
+			
+			if(!isEmpty(ossInfoKey)) ossInfoKey = "";
 		}
 		if(!ossCheckParam.isEmpty()) {
 			OssMaster param = new OssMaster();
