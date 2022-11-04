@@ -466,7 +466,16 @@ var chart_fn = {
 					break;
 				case "mostUsedOssChart":
 				case "mostUsedLicenseChart":
-					var divisionData = $("#"+chartName+"Division").val();
+					var checkDivisionData = [];
+					$("input[type=checkbox][name="+chartName+"Division]:checked").filter(function(){
+						checkDivisionData.push($(this).val());
+					});
+					var divisionData = "";
+					if(checkDivisionData.length > 0){
+						divisionData = checkDivisionData
+					} else {
+						divisionData = $("#"+chartName+"Division").val();
+					}
 					var pieSize = $("#"+chartName+"PieSize").val();
 					var chartType = chartName.replace(/mostUsed(.+)Chart/, "$1").toUpperCase();
 					url += "&divisionNo=" + divisionData + "&pieSize=" + pieSize + "&chartType=" + chartType;
