@@ -570,6 +570,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				boolean isFirst = true;
 				
 				for(String s : result) {
+					if(s.contains("?")) s = s.replaceAll("[?]", "0x3F");
 					if(!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
 
