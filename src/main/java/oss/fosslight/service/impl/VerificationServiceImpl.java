@@ -672,6 +672,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> pathCheckList46 = new ArrayList<>();
 			
 			for (String path : deCompResultMap.keySet()) {
+				if(path.contains("?")) path = path.replaceAll("[?]", "0x3F");
+				
 				pathCheckList1.add(path);
 				pathCheckList2.add("/" + path);
 				pathCheckList3.add(path + "/");
@@ -823,6 +825,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.info("VERIFY Path Check START -----------------");
 			
 			for(String gridPath : gridFilePaths){
+				if(gridPath.contains("?")) gridPath = gridPath.replaceAll("[?]", "0x3F");
+				
 				if(!separatorErrFlag) {
 					separatorErrFlag = gridPath.contains("\\") ? true : false;
 				}
