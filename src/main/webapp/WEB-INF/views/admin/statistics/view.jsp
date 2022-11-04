@@ -22,6 +22,7 @@
 								<input name="schEndDate" id="schEndDate" type="text" class="cal" title="Search End Date" value="${endDate}" maxlength="8"/>
 							</dd>
 						</dl>
+						<input id="schStatistics" type="submit" value="Search" class="btnColor search" />
 					</fieldset>
 					<a href="#none" class="btnSet excel" onclick="chart_fn.downloadExcel()"><span>현재 화면 Excel download</span></a>
 				</div>

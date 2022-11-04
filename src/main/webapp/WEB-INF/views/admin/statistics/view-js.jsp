@@ -62,15 +62,22 @@ var common_fn = {
 			}
 		});
 		
-		$("#schStartDate").blur(function(){
-			$("#startDate").val($(this).val());
-			if(common_fn.validation("MAIN")){
-				common_fn.chartReload();
-			}
+		$("#schStartDate").datepicker({
+			dateFormat:"yymmdd",
+			onSelect: function(dateString) {
+				$("#startDate").val(dateString);
+		    }
 		});
 
-		$("#schEndDate").blur(function(){
-			$("#endDate").val($(this).val());
+		$("#schEndDate").datepicker({
+			dateFormat:"yymmdd",
+			onSelect: function(dateString) {
+				$("#endDate").val(dateString);
+		    }
+		});
+
+		$("#schStatistics").on('click',function(e){
+			e.preventDefault();
 			if(common_fn.validation("MAIN")){
 				common_fn.chartReload();
 			}
