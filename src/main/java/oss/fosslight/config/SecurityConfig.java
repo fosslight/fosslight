@@ -50,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired private T2UserService userService;
 	
 	@Autowired private CustomAuthenticationProvider customAuthenticationProvider;
+	@Autowired private CustomWebAuthenticationDetailsSource customWebAuthenticationDetailsSource;
 	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -77,6 +78,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.loginPage(AppConstBean.SECURITY_LOGIN_PAGE)
 			.usernameParameter(AppConstBean.SECURITY_USERNAME_PARAMETER)
 			.passwordParameter(AppConstBean.SECURITY_PASSWORD_PARAMETER)
+			.authenticationDetailsSource(customWebAuthenticationDetailsSource)
 			.defaultSuccessUrl(AppConstBean.SECURITY_DEFAULT_SUCCESS_URL)
             .loginProcessingUrl(AppConstBean.SECURITY_LOGIN_PROCESSING_URL)
             .failureHandler(failureHandler())
@@ -202,6 +204,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			String accept = request.getHeader("accept");
 			String error = "true";
 			String message = "Invalid ID or password. Please try again.";
+			
+			if(exception.getMessage().equals("enter email")) {
+				message = exception.getMessage();
+			}
 			
 			if( StringUtil.indexOf(accept, "html") > -1 ) {
 				String redirectUrl = request.getParameter(this.targetUrlParameter);
