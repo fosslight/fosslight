@@ -38,14 +38,15 @@ public class Project extends ComBean implements Serializable {
 				+ distributeDeployTime + ", licenseFileName=" + licenseFileName + ", openSourceFileName="
 				+ openSourceFileName + ", srcCsvFileId=" + srcCsvFileId + ", srcAndroidCsvFileId=" + srcAndroidCsvFileId
 				+ ", srcAndroidNoticeFileId=" + srcAndroidNoticeFileId + ", noticeFileId=" + noticeFileId
-				+ ", srcAndroidResultFileId=" + srcAndroidResultFileId
-				+ ", packageFileId=" + packageFileId + ", noticeFile=" + noticeFile + ", packageFile=" + packageFile
-				+ ", csvFile=" + csvFile + ", androidCsvFile=" + androidCsvFile + ", androidNoticeFile="
-				+ androidNoticeFile + ", ossId=" + ossId + ", ossName=" + ossName + ", licenseName=" + licenseName
-				+ ", status=" + status + ", refPartnerId=" + refPartnerId + ", readmeContent=" + readmeContent
-				+ ", readmeYn=" + readmeYn + ", verifyFileContent=" + verifyFileContent + ", exceptFileContent="
-				+ exceptFileContent + ", schStartDate=" + schStartDate + ", schEndDate=" + schEndDate
-				+ ", prjModelJson=" + prjModelJson + ", division=" + division + ", vulnYn=" + vulnYn + ", ossReportFlag=" + ossReportFlag +"]";
+				+ ", reviewReportFileId=" + reviewReportFileId + ", srcAndroidResultFileId=" + srcAndroidResultFileId
+				+ ", packageFileId=" + packageFileId + ", noticeFile=" + noticeFile + ", reviewReportFile="
+				+ reviewReportFile + ", packageFile=" + packageFile + ", csvFile=" + csvFile + ", androidCsvFile="
+				+ androidCsvFile + ", androidNoticeFile=" + androidNoticeFile + ", ossId=" + ossId + ", ossName="
+				+ ossName + ", licenseName=" + licenseName + ", status=" + status + ", refPartnerId=" + refPartnerId
+				+ ", readmeContent=" + readmeContent + ", readmeYn=" + readmeYn + ", verifyFileContent="
+				+ verifyFileContent + ", exceptFileContent=" + exceptFileContent + ", schStartDate=" + schStartDate
+				+ ", schEndDate=" + schEndDate + ", prjModelJson=" + prjModelJson + ", division=" + division
+				+ ", vulnYn=" + vulnYn + ", ossReportFlag=" + ossReportFlag +"]";
 	}
 
 	/** The Constant serialVersionUID. */
@@ -392,6 +393,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The notice file id. */
 	private String noticeFileId; // 라이센스 파일ID
+
+	/** The review report file id. */
+	private String reviewReportFileId;
 	
 	/** The package file id. */
 	private String packageFileId; // 오픈소스 파일ID
@@ -400,6 +404,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
+
+	/** The review report file. */
+	private List<T2File> reviewReportFile;
 	
 	/** The package file. */
 	private List<T2File> packageFile; // 오픈소스 파일객체
@@ -1517,6 +1524,24 @@ public class Project extends ComBean implements Serializable {
 	}
 
 	/**
+	 * Gets the review report file id.
+	 *
+	 * @return the review report file id
+	 */
+	public String getReviewReportFileId() {
+		return reviewReportFileId;
+	}
+
+	/**
+	 * Sets the review report file id.
+	 *
+	 * @param reviewReportFileId the new review report file id
+	 */
+	public void setReviewReportFileId(String reviewReportFileId) {
+		this.reviewReportFileId = reviewReportFileId;
+	}
+
+	/**
 	 * Gets the package file id.
 	 *
 	 * @return the package file id
@@ -1550,6 +1575,24 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setNoticeFile(List<T2File> noticeFile) {
 		this.noticeFile = noticeFile;
+	}
+
+	/**
+	 * Get the review report file.
+	 *
+	 * @return the review report file
+	 */
+	public List<T2File> getReviewReportFile() {
+		return this.reviewReportFile;
+	}
+
+	/**
+	 * Set the review report file.
+	 *
+	 * @param reviewReportFile the new review report file
+	 */
+	public void setReviewReportFile(List<T2File> reviewReportFile) {
+		this.reviewReportFile = reviewReportFile;
 	}
 
 	/**

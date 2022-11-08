@@ -648,6 +648,7 @@
 			, A.PACKAGE_FILE_ID2
 			, A.PACKAGE_FILE_ID3
 			, A.NOTICE_FILE_ID
+			, A.REVIEW_REPORT_FILE_ID
 			, A.ZIP_FILE_ID
 			, A.BIN_CSV_FILE_ID
 			, A.BIN_BINARY_FILE_ID
@@ -2161,6 +2162,7 @@
 					, SPDX_TAG_FILE_ID = NULL
 					, SPDX_JSON_FILE_ID = NULL
 					, SPDX_YAML_FILE_ID = NULL
+					, REVIEW_REPORT_FILE_ID = NULL
 					, ZIP_FILE_ID = NULL
 				</when>
 				<when test="!@oss.fosslight.util.StringUtil@isEmpty(verificationStatus)">
@@ -2273,6 +2275,9 @@
 			</choose>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeFileId)">
 			, NOTICE_FILE_ID = #{noticeFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewReportFileId)">
+			, REVIEW_REPORT_FILE_ID = #{reviewReportFileId}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(useCustomNoticeYn)">
 			, USE_CUSTOM_NOTICE_YN = #{useCustomNoticeYn}
@@ -2432,6 +2437,7 @@
 						, SPDX_TAG_FILE_ID = NULL
 						, SPDX_JSON_FILE_ID = NULL
 						, SPDX_YAML_FILE_ID = NULL
+						, REVIEW_REPORT_FILE_ID = NULL
 						, ZIP_FILE_ID = NULL
 					</if>
 				</when>
