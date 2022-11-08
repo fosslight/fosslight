@@ -29,6 +29,10 @@ public interface VerificationService {
 	boolean getNoticeHtmlFile(OssNotice ossNotice) throws IOException;
 	
 	boolean getNoticeHtmlFile(OssNotice ossNotice, String html) throws IOException;
+
+	boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException;
+
+	boolean getReviewReportPdfFile(OssNotice ossNotice, String html) throws IOException;
 	
 	ResponseEntity<FileSystemResource> getNotice(String fileName, String rESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX) throws IOException;
 	

@@ -354,6 +354,10 @@ public class CoTopComponent {
 	    
 	    return responseEntity;
 	}
+
+	public static ResponseEntity<FileSystemResource> reviewReportToResponseEntity(String filePath, String downFileName) throws IOException {
+		return noticeToResponseEntity(filePath, downFileName);
+	}
 	
 	public static String avoidNull(String s) {
 		return avoidNull(s, "");

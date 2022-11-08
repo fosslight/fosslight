@@ -42,6 +42,8 @@ public interface VerificationMapper {
 	void deletePackagingComponents(OssNotice ossNotice);
 	
 	void updateNoticeFileInfo(Project projectParam);
+
+	void updateReviewReportFileInfo(Project projectParam);
 	
 	List<OssComponents> selectVerificationNoticeClassAppend(OssNotice ossNotice);
 	

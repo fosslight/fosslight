@@ -4071,6 +4071,31 @@ public class CommonFunction extends CoTopComponent {
 		
 		return fileName;
 	}
+
+	public static String getReviewReportFileName(String prjId, String prjName, String prjVersion, String dateStr, String fileType) {
+		return getReviewReportFileName(prjId, prjName, prjVersion, null, dateStr, fileType);
+	}
+
+	public static String getReviewReportFileName(String prjId, String prjName, String prjVersion, String fileName, String dateStr, String fileType) {
+		if(isEmpty(fileName)) {
+			fileName = "FOSSLight-Review-";
+			fileName += prjId + "_" + prjName;
+
+			if(!isEmpty(prjVersion)) {
+				fileName += "_" + prjVersion;
+			}
+		}
+
+		// file명에 사용할 수 없는 특수문자 체크
+		if(!FileUtil.isValidFileName(fileName)) {
+			fileName = FileUtil.makeValidFileName(fileName, "_");
+		}
+
+		fileName += "_" + dateStr;
+		fileName += ".pdf";
+
+		return fileName;
+	}
 	
 	public static String mergedString(String fromStr, String toStr, int compareTo, String separator) {
 		if(compareTo >= 0){
