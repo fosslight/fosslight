@@ -1785,6 +1785,31 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
+	public ResponseEntity<FileSystemResource> getReviewReport(String prjId,
+			String rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX) throws IOException {
+		String fileName = "";
+		String filePath = rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX;
+
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = projectMapper.selectProjectMaster(project);
+
+		oss.fosslight.domain.File reviewReportFile = null;
+
+		if(!isEmpty(project.getZipFileId())) {
+			reviewReportFile = verificationMapper.selectVerificationFile(project.getZipFileId());
+			fileName =  reviewReportFile.getOrigNm();
+			filePath += File.separator+fileName;
+		} else {
+			reviewReportFile = verificationMapper.selectVerificationFile(project.getReviewReportFileId());
+			fileName =  reviewReportFile.getOrigNm();
+			filePath += File.separator+prjId+File.separator+fileName;
+		}
+
+		return reviewReportToResponseEntity(filePath, fileName);
+	};
+
+	@Override
 	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice) {
 		Map<String, Object> model = new HashMap<String, Object>();
 		

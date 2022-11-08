@@ -367,6 +367,7 @@ public final class Url {
 		
 		public static final String DOWNLOAD_PACKAGE = PATH + "/downloadPackage";
 		public static final String DOWNLOAD_NOTICE = PATH + "/downloadNotice";
+		public static final String DOWNLOAD_REVIEW_REPORT = PATH + "/downloadReviewReport";
 		
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 

@@ -887,6 +887,20 @@ public class VerificationController extends CoTopComponent {
 
 		return result;
 	}
+
+	@ResponseBody
+	@GetMapping(value = VERIFICATION.DOWNLOAD_REVIEW_REPORT)
+	public ResponseEntity<FileSystemResource> downloadReviewReport(
+			HttpServletRequest req,
+			HttpServletResponse res, Model model) throws Exception {
+		log.info("URI: " + "/project/verification/downloadReviewReport");
+
+		ResponseEntity<FileSystemResource> result = null;
+		String prjId = req.getParameter("prjId");
+		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("notice.path", "/notice"));
+
+		return result;
+	}
 	
 	@PostMapping(value=VERIFICATION.SEND_COMMENT)
 	public @ResponseBody ResponseEntity<Object> sendComment(
