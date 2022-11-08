@@ -44,6 +44,7 @@
 	                   +"</div>",
 	    tooltipCont1 : "<div class=\"tooltipData\">"
 		               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
+		               +"<dl><dt><span class=\"downSet btnReviewReport\">Summary Report</span>Summary Report</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
 		               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
 		               +"</div>",
@@ -400,13 +401,15 @@
 			
 			if(rowObject.identificationStatus == "Confirm"){
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
+				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
 			} else {
 				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
+				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport dis\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
 			}
 			
 			if(rowObject.verificationStatus == "Confirm"){
 				if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
-					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";	
+					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";
 				} else {
 					display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" title=\"OSS Notice\">";
 				}
@@ -579,6 +582,15 @@
 				
 				//파일 이름 임시
 				location.href = '<c:url value="/project/verification/downloadNotice?prjId='+prjId+'"/>';
+			} else {
+				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			}
+		},
+		downloadReviewReport : function(obj, permission){
+			if(parseInt(permission) > 0){
+				var prjId = $(obj).closest('tr').attr('id');
+
+				location.href = '<c:url value="/project/verification/downloadReviewReport?prjId='+prjId+'"/>';
 			} else {
 				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
 			}

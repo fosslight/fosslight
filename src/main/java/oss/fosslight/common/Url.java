@@ -344,6 +344,7 @@ public final class Url {
 		public static final String SAVE_PATH = PATH + "/savePath";
 		
 		public static final String NOTICE_AJAX = PATH + "/noticeAjax";
+		public static final String REVIEW_REPORT_AJAX = PATH + "/reviewReportAjax";
 		public static final String DOWNLOAD_FILE = PATH + "/downloadFile";
 		
 		public static final String WGET_URL = PATH + "/wgetUrl";

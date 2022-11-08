@@ -63,6 +63,7 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.SPDXUtil2;
 import oss.fosslight.util.StringUtil;
+import oss.fosslight.util.PdfUtil;
 
 @Service
 @Slf4j
@@ -274,6 +275,30 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			return getNoticeVelocityTemplateFile(contents, prjInfo);	
 		}
 	}
+
+	@Override
+	public boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException {
+		return getReviewReportPdfFile(ossNotice, null);
+	}
+
+	@Override
+	public boolean getReviewReportPdfFile(OssNotice ossNotice, String contents) throws IOException {
+		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
+
+		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
+		if(CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
+			return true;
+		}
+
+		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
+
+		if("binAndroid".equals(contents)) {
+			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
+		} else {
+			return getReviewReportVelocityTemplateFile(contents, prjInfo);
+		}
+	}
 	
 	private boolean getAndroidNoticeVelocityTemplateFile(Project project) {
 		boolean procResult = true;
@@ -347,22 +372,25 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
 			
 			String filePath = NOTICE_PATH + "/" + project.getPrjId();
-			// 이전에 생성된 파일은 모두 삭제한다.
+			// 이전에 생성된 html 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
 			if(rootPath.toFile().exists()) {
 				for(String _fName : rootPath.toFile().list()) {
-					Files.deleteIfExists(rootPath.resolve(_fName));
-					
-					T2File file = new T2File();
-					file.setLogiNm(_fName);
-					file.setLogiPath(filePath);
-					
-					int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
-					
-					if(returnSuccess > 0){
-						log.debug(filePath + "/" + _fName + " is delete success.");
-					}else{
-						log.debug(filePath + "/" + _fName + " is delete failed.");
+					String[] fNameList = _fName.split("\\.");
+					if (fNameList[fNameList.length - 1].equals("html")) {
+						Files.deleteIfExists(rootPath.resolve(_fName));
+
+						T2File file = new T2File();
+						file.setLogiNm(_fName);
+						file.setLogiPath(filePath);
+
+						int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
+
+						if (returnSuccess > 0) {
+							log.debug(filePath + "/" + _fName + " is delete success.");
+						} else {
+							log.debug(filePath + "/" + _fName + " is delete failed.");
+						}
 					}
 				}
 			}			
@@ -389,6 +417,62 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			procResult = false;
 		}
 		
+		return procResult;
+	}
+
+	public boolean getReviewReportVelocityTemplateFile(String contents, Project project) {
+		boolean procResult = true;
+
+		try {
+			// file path and name 설정
+			// 파일 path : <upload_home>/notice/
+			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
+			String filePath = NOTICE_PATH + "/" + project.getPrjId();
+
+			// 이전에 생성된 pdf 파일은 모두 삭제한다.
+			Path rootPath = Paths.get(filePath);
+			if(rootPath.toFile().exists()) {
+				for(String _fName : rootPath.toFile().list()) {
+					String[] fNameList = _fName.split("\\.");
+					if (fNameList[fNameList.length - 1].equals("pdf")) {
+						Files.deleteIfExists(rootPath.resolve(_fName));
+
+						T2File file = new T2File();
+						file.setLogiNm(_fName);
+						file.setLogiPath(filePath);
+
+						int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
+
+						if(returnSuccess > 0){
+							log.debug(filePath + "/" + _fName + " is delete success.");
+						}else{
+							log.debug(filePath + "/" + _fName + " is delete failed.");
+						}
+					}
+				}
+			}
+
+			String fileName = CommonFunction.getReviewReportFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), ".pdf");
+
+			if(oss.fosslight.util.FileUtil.writeReviewReportFile(filePath, fileName, contents)) {
+				// 파일 등록
+				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
+
+				// project 정보 업데이트
+				Project projectParam = new Project();
+				projectParam.setPrjId(project.getPrjId());
+				projectParam.setReviewReportFileId(FileSeq);
+
+				verificationMapper.updateReviewReportFileInfo(projectParam);
+			} else {
+				procResult = false;
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+
+			procResult = false;
+		}
+
 		return procResult;
 	}
 	

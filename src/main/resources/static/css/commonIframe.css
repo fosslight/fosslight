@@ -272,6 +272,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 /**/
 .downSet {display:inline-block;margin:0 3px !important;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat -275px -150px;}
 .downSet.btnReport {width:15px;height:15px;background-position:-275px -150px;}
+.downSet.btnReviewReport {width:15px;height:15px;background: url("../images/btn_pdf.png") no-repeat;}
 .downSet.btnNotice {width:14px;height:14px;background-position:-275px -180px;}
 .downSet.btnPackage {width:14px;height:13px;background-position:-275px -210px;}
 .downSet.dis {cursor: default;background:none;}
