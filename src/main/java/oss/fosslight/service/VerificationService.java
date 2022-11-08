@@ -35,6 +35,8 @@ public interface VerificationService {
 	boolean getReviewReportPdfFile(OssNotice ossNotice, String html) throws IOException;
 	
 	ResponseEntity<FileSystemResource> getNotice(String fileName, String rESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX) throws IOException;
+
+	ResponseEntity<FileSystemResource> getReviewReport(String fileName, String rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX) throws IOException;
 	
 	ResponseEntity<FileSystemResource> getPackage(String prjId, String rESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX) throws IOException;
 	
