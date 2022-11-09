@@ -1183,6 +1183,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 		if( urlSearchSeq > -1 ) {
 			switch(urlSearchSeq) {
 				case 0: // github
+					if(checkVal.contains("www.")) {
+						checkVal = checkVal.replace("www.", "");
+					}
 					p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
 				
 					break;
@@ -1207,6 +1210,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 					break;
 				case 5: // cocoapods
 					p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
+					break;
+				case 7:
+					p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 					break;
 				default:
 					break;

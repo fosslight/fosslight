@@ -2360,6 +2360,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('903', '005', 'pub.dev/packages/', '', 'pub url', 5, 'Y'),
 	('903', '006', 'cocoapods.org/pods/', '', 'cocoapods url', 6, 'Y'),
 	('903', '007', 'www.npmjs.org/package/', '', 'npm url', 7, 'Y'),
+	('903', '008', 'android.googlesource.com/platform', '', 'android url', 8, 'Y'),
 	('904', '100', 'server url', '', '180', 1, 'Y'),
 	('904', '200', 'download url', '', '180', 2, 'Y'),
 	('905', '100', 'idleTime', '', '180', 1, 'Y'),
