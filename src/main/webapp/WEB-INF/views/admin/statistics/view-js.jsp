@@ -62,15 +62,22 @@ var common_fn = {
 			}
 		});
 		
-		$("#schStartDate").blur(function(){
-			$("#startDate").val($(this).val());
-			if(common_fn.validation("MAIN")){
-				common_fn.chartReload();
-			}
+		$("#schStartDate").datepicker({
+			dateFormat:"yymmdd",
+			onSelect: function(dateString) {
+				$("#startDate").val(dateString);
+		    }
 		});
 
-		$("#schEndDate").blur(function(){
-			$("#endDate").val($(this).val());
+		$("#schEndDate").datepicker({
+			dateFormat:"yymmdd",
+			onSelect: function(dateString) {
+				$("#endDate").val(dateString);
+		    }
+		});
+
+		$("#schStatistics").on('click',function(e){
+			e.preventDefault();
 			if(common_fn.validation("MAIN")){
 				common_fn.chartReload();
 			}
@@ -466,7 +473,16 @@ var chart_fn = {
 					break;
 				case "mostUsedOssChart":
 				case "mostUsedLicenseChart":
-					var divisionData = $("#"+chartName+"Division").val();
+					var checkDivisionData = [];
+					$("input[type=checkbox][name="+chartName+"Division]:checked").filter(function(){
+						checkDivisionData.push($(this).val());
+					});
+					var divisionData = "";
+					if(checkDivisionData.length > 0){
+						divisionData = checkDivisionData
+					} else {
+						divisionData = $("#"+chartName+"Division").val();
+					}
 					var pieSize = $("#"+chartName+"PieSize").val();
 					var chartType = chartName.replace(/mostUsed(.+)Chart/, "$1").toUpperCase();
 					url += "&divisionNo=" + divisionData + "&pieSize=" + pieSize + "&chartType=" + chartType;

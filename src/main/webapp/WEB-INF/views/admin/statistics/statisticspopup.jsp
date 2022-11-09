@@ -16,6 +16,10 @@
 			var pieSize = "${pieSize}";
 			var chartType = "${chartType}";
 			
+			$(window).on('resize.jqGrid', function(){
+				$("#chartRawData").jqGrid('setGridWidth', $(".jqGridSet").width());
+			});
+			
 			$(document).ready(function() {
 				common_fn.init();
 			});

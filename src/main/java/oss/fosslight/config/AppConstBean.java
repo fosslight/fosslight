@@ -55,6 +55,7 @@ public class AppConstBean {
 	
 	public static final String SECURITY_USERNAME_PARAMETER = "un";
 	public static final String SECURITY_PASSWORD_PARAMETER = "up";
+	public static final String SECURITY_EMAIL_PARAMETER = "em";
 	
 	public static final String SECURITY_DEFAULT_SUCCESS_URL = "/index";
 

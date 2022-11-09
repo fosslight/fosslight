@@ -3742,6 +3742,15 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(newestOssInfo != null) {
 						changeAnalysisResultList.add(newestOssInfo); // seq 3 : 최신등록 정보
+						
+						if(newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
+							if(newestOssInfo.getOssNickname() != null) {
+								userData.setOssNickname(CommonFunction.mergeNickname(userData, newestOssInfo.getOssNickname()));
+							}
+							if(userData.getOssNickname() != null) {
+								newestOssInfo.setOssNickname(CommonFunction.mergeNickname(newestOssInfo, userData.getOssNickname()));
+							}
+						}
 					}
 					
 					changeAnalysisResultList.add(askalono);		 // seq 4 : askalono 정보

@@ -616,7 +616,7 @@ public class T2UserServiceImpl implements T2UserService {
 	}
 
 	private String[] checkUserInfo(T2Users userInfo, Hashtable<String, String> property) {
-		String[] result = new String[2];
+		String[] result = new String[3];
 
 		String[] attrIDs = { "distinguishedName", "displayName", "title", "mail", "cn" };
 		String filter = "(cn=" + userInfo.getUserId() + ")";
@@ -646,7 +646,7 @@ public class T2UserServiceImpl implements T2UserService {
 
 		try {
 			SearchResult sr = null;
-
+			int cnt = 1;
 			while (m_ne.hasMoreElements()) {
 				sr = (SearchResult) m_ne.next();
 				if(sr != null) {
@@ -658,7 +658,20 @@ public class T2UserServiceImpl implements T2UserService {
 					} else{
 						result[0] = displayName.replaceAll("\\("+email+"\\)", "").trim();
 					}
-					result[1] = email;
+					
+					if(!StringUtil.isEmptyTrimmed(userInfo.getEmail())) {
+						if(email.equals(userInfo.getEmail().trim())) {
+							result[1] = email;
+							result[2] = String.valueOf(cnt);
+							break;
+						} else {
+							result[1] = "";
+							result[2] = String.valueOf(cnt);
+						}
+					} else {
+						result[1] = email;
+						result[2] = String.valueOf(cnt++);
+					}
 				}
 			}
 			return result;
