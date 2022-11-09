@@ -126,4 +126,5 @@ dependencies {
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+	implementation 'org.jsoup:jsoup:1.15.3'
 }

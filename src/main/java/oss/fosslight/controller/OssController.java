@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -1494,7 +1495,17 @@ public class OssController extends CoTopComponent{
 		
 		if(result.size() > 0) {
 			result = ossService.checkOssName(result);
-			resMap.put("list", result);
+			List<ProjectIdentification> valid = new ArrayList<ProjectIdentification>();
+			List<ProjectIdentification> invalid = new ArrayList<ProjectIdentification>();
+			for(ProjectIdentification prj : result){
+				if(prj.getCheckOssList().equals("I")){
+					invalid.add(prj);
+				} else{
+					valid.add(prj);
+				}
+			}
+			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
+					.collect(Collectors.toList()));
 		}
 		
 		return makeJsonResponseHeader(resMap);

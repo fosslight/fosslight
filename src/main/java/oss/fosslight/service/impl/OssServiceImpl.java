@@ -31,6 +31,11 @@ import java.util.stream.Collectors;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.beanutils.BeanUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -1792,36 +1797,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				if( urlSearchSeq > -1 ) {
-					Pattern p = null;
-					
-					switch(urlSearchSeq) {
-						case 0: // github
-							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-							break;
-						case 1: // npm
-						case 6: // npm
-							if(ossMaster.getDownloadLocation().contains("/package/@")) {
-								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+)/([^/]+))");
-							}else {
-								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
-							}
-							break;
-						case 2: // pypi
-							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-							break;
-						case 3: // maven
-							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-							break;
-						case 4: // pub
-							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-							break;
-						case 5: // cocoapods
-							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-							break;
-						default:
-							break;
-					}
-					
+					Pattern p = generatePattern(urlSearchSeq, ossMaster.getDownloadLocation());
 					Matcher m = p.matcher(ossMaster.getDownloadLocation());
 					
 					while(m.find()) {
@@ -1910,36 +1886,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				if( urlSearchSeq > -1 ) {
-					Pattern p = null;
-					
-					switch(urlSearchSeq) {
-						case 0: // github
-							p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-							break;
-						case 1: // npm
-						case 6: // npm
-							if(ossMaster.getHomepage().contains("/package/@")) {
-								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+)/([^/]+))");
-							}else {
-								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
-							}
-							break;
-						case 2: // pypi
-							p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-							break;
-						case 3: // maven
-							p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-							break;
-						case 4: // pub
-							p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-							break;
-						case 5: // cocoapods
-							p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-							break;
-						default:
-							break;
-					}
-					
+					Pattern p = generatePattern(urlSearchSeq, ossMaster.getHomepage());
 					Matcher m = p.matcher(ossMaster.getHomepage());
 					
 					while(m.find()) {
@@ -2000,6 +1947,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public int checkExistsOssByname(OssMaster bean) {
 		return ossMapper.checkExistsOssByname(bean);
+	}
+
+	private String generateCheckOSSName(String downloadlocationUrl, Pattern p, List<String> androidPlatformList) {
+		String checkName = "";
+		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
+		while(ossNameMatcher.find()) {
+			for(String list : androidPlatformList){
+				if(ossNameMatcher.group(3).contains(list)){
+					String[] android = list.split("/");
+					checkName = "android-";
+					for (String name : android) {
+						checkName += name + "-";
+					}
+					checkName = checkName.substring(0, checkName.length()-1);
+					break;
+				}
+			}
+		}
+		return checkName;
 	}
 
 	private String generateCheckOSSName(int urlSearchSeq, String downloadlocationUrl, Pattern p) {
@@ -2069,19 +2035,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 2: // pypi
 				p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-
 				break;
 			case 3: // maven
 				p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-
 				break;
 			case 4: // pub
 				p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
 				break;
 			case 5: // cocoapods
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
+				break;
+			case 7:
+				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
 			default:
 				break;
@@ -2140,12 +2105,29 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return bean;
 	}
 
+	private List<String> getAndroidPlatformList(){
+		List<String> list = new ArrayList<String>();
+		Connection conn = Jsoup.connect("https://android.googlesource.com/platform/");
+		try{
+			Document document = conn.get();
+			Elements parsingDiv = document.getElementsByClass("RepoList-itemName");
+			for(Element element : parsingDiv) {
+				if(!element.text().equals("Name")){
+					list.add(element.text());
+				}
+			}
+		} catch(IOException e){
+
+		}
+		return list;
+	}
 
 	@Override
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		int urlSearchSeq = -1;
+		List<String> androidPlatformList = getAndroidPlatformList();
 
 		// oss name과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
 		list = list.stream()
@@ -2198,43 +2180,54 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					String downloadlocationUrl = bean.getDownloadLocation();
 					Pattern p = generatePattern(urlSearchSeq, downloadlocationUrl);
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
-
 					if(cnt == 0) {
 						bean.setOssNickName(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
 						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
 						if(!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 							bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
+
 						} else {
-							String redirectlocationUrl = "";
-							String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
-							if(CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
-								continue;
-							}
-							try {
-								URL checkUrl = new URL("https://" + downloadlocationUrl);
-								HttpURLConnection oc = (HttpURLConnection) checkUrl.openConnection();
-								oc.setUseCaches(false);
-								oc.setConnectTimeout(1500);
-								if (200 == oc.getResponseCode()) {
-									if (oc.getURL().toString().equals("https://" + downloadlocationUrl)) {
-										checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
-									} else {
-										redirectlocationUrl = oc.getURL().toString().split("//")[1];
-										bean.setDownloadLocation(redirectlocationUrl);
-										bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-										checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
-										if(!isEmpty(checkName)) {
-											bean.setCheckOssList("Y");
-											bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p) + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-										} else {
-											checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
-										}
-										bean.setRedirectLocation(redirectlocationUrl);
-									}
+							if(urlSearchSeq != 7){
+								String redirectlocationUrl = "";
+								String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
+								if (CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
+									continue;
 								}
-							} catch (IOException e){
-								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+								try {
+									URL checkUrl = new URL("https://" + downloadlocationUrl);
+									HttpURLConnection oc = (HttpURLConnection) checkUrl.openConnection();
+									oc.setUseCaches(false);
+									oc.setConnectTimeout(1500);
+									if (200 == oc.getResponseCode()) {
+										if (oc.getURL().toString().equals("https://" + downloadlocationUrl)) {
+											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+										} else {
+											redirectlocationUrl = oc.getURL().toString().split("//")[1];
+											bean.setDownloadLocation(redirectlocationUrl);
+											bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
+											if (!isEmpty(checkName)) {
+												bean.setCheckOssList("Y");
+												bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p) + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+											} else {
+												checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
+											}
+											bean.setRedirectLocation(redirectlocationUrl);
+										}
+									} else {
+										checkName = "Invalid download location.";
+										bean.setCheckOssList("I");
+									}
+								} catch (IOException e) {
+									checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+								}
+							} else {
+								checkName = generateCheckOSSName(downloadlocationUrl, p, androidPlatformList);
+								if(isEmpty(checkName)){
+									checkName = "Invalid download location.";
+									bean.setCheckOssList("I");
+								}
 							}
 						}
 
@@ -2375,40 +2368,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 
 					if( urlSearchSeq > -1 ) {
-						Pattern p = null;
-
-						switch(urlSearchSeq) {
-							case 0: // github
-								p = Pattern.compile("((http|https)://github.com/([^/]+)/([^/]+))");
-
-								break;
-							case 1: // npm
-							case 6: // npm
-								p = Pattern.compile("((http|https)://www.npmjs.(org|com)/package/([^/]+))");
-
-								break;
-							case 2: // pypi
-								p = Pattern.compile("((http|https)://pypi.org/project/([^/]+))");
-
-								break;
-							case 3: // maven
-								p = Pattern.compile("((http|https)://mvnrepository.com/artifact/([^/]+)/([^/]+))");
-
-								break;
-							case 4: // pub
-								p = Pattern.compile("((http|https)://pub.dev/packages/([^/]+))");
-
-								break;
-							case 5: // cocoapods
-								p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
-
-								break;
-							default:
-								break;
-						}
-
+						Pattern p = generatePattern(urlSearchSeq, downloadLocation);
 						Matcher m = p.matcher(downloadLocation);
-
 						while(m.find()) {
 							paramBean.setDownloadLocation(m.group(0));
 						}
