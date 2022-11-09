@@ -79,6 +79,11 @@ public final class Url {
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
 		
 		public static final String LICENSE_ID = PATH + "/getLicenseId";
+
+		/**Add LicenseBulkReg path*/
+		public static final String LICENSE_BULK_REG = PATH + "/licenseBulkReg";
+		public static final String LICENSE_BULK_REG_JSP = TILES_ROOT + PATH + "/licenseBulkReg";
+		public static final String CSV_FILE = PATH + "/csvFile";
 	}
 	
 	public static final class EXCELDOWNLOAD {
