@@ -1,0 +1,157 @@
+<html lang="ko">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=euc-kr">
+    <style>
+        th {
+            background-color: #d9d9d9;
+            font-weight: bold;
+            padding: 10px 5px;
+        }
+
+        td {
+            padding: 10px;
+        }
+
+        table {
+            border-color: #ddd;
+            border-collapse: collapse;
+            word-break: break-all;
+            font-size: 12px;
+            width: 100%;
+            border-right: 1px solid #ddd;
+        }
+
+        #report-wrapper {
+            width: 600px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin: 0 auto;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        #intro {
+            border-right: 5px solid #c00c3f;
+        }
+
+        #intro h1, h2 {
+            padding-right: 20px;
+        }
+
+        #logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        #logo img {
+            vertical-align: bottom;
+            height: 26px;
+        }
+
+        hr {
+            background-color: #ddd;
+            height: 1px;
+            border: 0;
+        }
+    </style>
+    <title>FOSSLight Hub</title>
+</head>
+<body>
+<div id="report-wrapper">
+    <div id="intro">
+        <div id="logo">
+            <img src="https://fosslight.org/assets/img/logo5.png">
+            FOSSLight
+        </div>
+        <h1 class="text-right">FOSSLight Review Report</h1>
+        <h2 class="text-right">$!project.getPrjName() $!project.getPrjVersion()</h2>
+        <hr>
+    </div>
+
+    <!--  Report Summary table -->
+    <h3>Report Summary</h3>
+    <table border="1">
+        <tr>
+            <th>Requestor</th>
+            <td>$!project.getCreator()</td>
+        </tr>
+        <tr>
+            <th>Project</th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>Reviewer</th>
+            <td>$!project.getReviewer()</td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td>$!date</td>
+        </tr>
+    </table>
+
+    <!--  OSS Review Table  -->
+    <h3>OSS Review</h3>
+    <table border="1">
+        <thead>
+        <th>OSS Name</th>
+        <th>OSS Version</th>
+        <th>Summary Description</th>
+        </thead>
+        <tbody>
+        #foreach ($ossReview in $!OssReview)
+        <tr>
+            <td>$!ossReview.getOssName()</td>
+            <td>$!ossReview.getOssVersion()</td>
+            <td>$!ossReview.getSummaryDescription()</td>
+        </tr>
+        #end
+        </tbody>
+    </table>
+
+    <!--  License Review Table  -->
+    <h3>License Review</h3>
+    <table border="1">
+        <thead>
+        <th>License Name</th>
+        <th>License Type</th>
+        <th>User Guide</th>
+        <th>Restriction</th>
+        </thead>
+        <tbody>
+        #foreach ($licenseReview in $!LicenseReview)
+        <tr>
+            <td>$!licenseReview.getLicenseName()</td>
+            <td>$!licenseReview.getLicenseType()</td>
+            <td>$!licenseReview.getDescription()</td>
+            <td>$!licenseReview.getRestriction()</td>
+        </tr>
+        #end
+        </tbody>
+    </table>
+
+    <!--  Vulnerability Table-->
+    <h3>Vulnerability</h3>
+    <table border="1">
+        <thead>
+        <th>OSS Name</th>
+        <th>OSS Version</th>
+        <th>Max Score</th>
+        <th>Vulnerability Link</th>
+        </thead>
+        <tbody>
+        #foreach ($vulnerabilityReview in $!VulnerabilityReview)
+        <tr>
+            <td>$!vulnerabilityReview.getOssName()</td>
+            <td>$!vulnerabilityReview.getVersion()</td>
+            <td>$!vulnerabilityReview.getCvssScore()</td>
+            <td>$!vulnerabilityReview.getVulnerabilityLink()</td>
+        </tr>
+        #end
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>
