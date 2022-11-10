@@ -58,6 +58,8 @@ import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
 
+import static oss.fosslight.common.CoConstDef.*;
+
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
 public class ExcelUtil extends CoTopComponent {
@@ -2865,7 +2867,176 @@ public class ExcelUtil extends CoTopComponent {
 		}
 		return ossMasterList;
 	}
-	
+
+	/**Excel 헤더 체크*/
+	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator) {
+		String[] definedColData = new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
+				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE",
+				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"};
+		boolean allColumnsExist = true;
+
+		List<String> firstRowColData = new ArrayList<>();
+		while (cellIterator.hasNext()) {
+			Cell cell = (Cell) cellIterator.next();
+			firstRowColData.add(getCellData(cell));
+		}
+
+		for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
+			String colData = firstRowColData.get(cIdx);
+			if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
+				continue;
+			} else {
+				allColumnsExist = false;
+				break;
+			}
+		}
+		return allColumnsExist;
+	}
+
+	/**make Grid data to return UI*/
+	public static List<LicenseMaster> readLicenseList(MultipartHttpServletRequest req, String excelLocalPath) throws InvalidFormatException, IOException {
+		Iterator<String> fileNames = req.getFileNames();
+		List<LicenseMaster> licenseMasterList = new ArrayList<>();
+
+		while (fileNames.hasNext()) {
+
+			MultipartFile multipart = req.getFile(fileNames.next());
+			String fileName = multipart.getOriginalFilename();
+			String[] fileNameArray = StringUtil.split(fileName, File.separator);
+			fileName = fileNameArray[fileNameArray.length - 1];
+			File file = new File( "."+excelLocalPath +fileName);
+			FileUtil.transferTo(multipart, file);
+			HSSFWorkbook wbHSSF = null;
+			XSSFWorkbook wbXSSF = null;
+			String[] ext = StringUtil.split(fileName, ".");
+			String extType = ext[ext.length - 1];
+			String codeExt[] = StringUtil.split(codeMapper.selectExtType("11"), ","); // The codeExt array contains the allowed extension types.
+			int count = 0;
+
+			for (int i = 0; i < codeExt.length; i++) {
+				if (codeExt[i].equalsIgnoreCase(extType)) {
+					count++;
+				}
+			}
+
+			if (count != 1) {
+				return null;
+			} else if ("xls".equals(extType) || "XLS".equals(extType)) {
+				try {
+					wbHSSF = new HSSFWorkbook(new FileInputStream(file));
+					HSSFSheet sheet = wbHSSF.getSheetAt(0);
+					int rowSize = sheet.getPhysicalNumberOfRows();
+					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+						HSSFRow row = sheet.getRow(rowIndex);
+						if (rowIndex == 0) {
+							//check header in here
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
+							if (!validHeader){
+								log.info("The order and content of header columns must match.");
+								return null;
+							}
+						} else {
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							if (licenseMaster != null)
+								licenseMasterList.add(licenseMaster);
+						}
+					}
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				} finally {
+					try {
+						wbHSSF.close();
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}
+				}
+			} else if ("xlsx".equals(extType) || "XLSX".equals(extType)) {
+				try {
+					wbXSSF = new XSSFWorkbook(new FileInputStream(file));
+					XSSFSheet sheet = wbXSSF.getSheetAt(0);
+					int rowSize = sheet.getPhysicalNumberOfRows();
+					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
+						XSSFRow row = sheet.getRow(rowIndex);
+						if (rowIndex == 0) {
+							boolean validHeader = checkHeaderColumnValidate(row.cellIterator());
+							if (!validHeader) {
+								log.info("The order and content of header columns must match.");
+								return null;
+							}
+						} else {
+							//licenseMaster Object
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							if (licenseMaster != null)
+								licenseMasterList.add(licenseMaster);
+						}
+					}
+				} catch (IOException e) {
+					log.error(e.getMessage(), e);
+				} finally {
+					try {
+						wbXSSF.close();
+					} catch (Exception e2) {
+						log.error(e2.getMessage(), e2);
+					}
+				}
+			}
+		}
+		return licenseMasterList;
+	}
+
+	public static LicenseMaster getLicenseDataByColumn(Iterator<Cell> cellIterator) {
+		LicenseMaster licenseMaster = new LicenseMaster();
+		int colIndex = 0;
+		for (; cellIterator.hasNext(); colIndex++) {
+			Cell cell = (Cell) cellIterator.next();
+			String value = getCellData(cell);
+			if (colIndex == 0) {
+				if (value == null || value.trim().isEmpty()) {
+					log.debug("License Name must not be null.");
+					return null;
+				} else {
+					licenseMaster.setLicenseName(value);
+				}
+			} else if (colIndex == 1) {
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setLicenseType(value);
+			} else if (colIndex == 2) {
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setObligationNotificationYn(value);
+			} else if (colIndex == 3) {
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setObligationDisclosingSrcYn(value);
+			} else if (colIndex == 4) {
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setShortIdentifier(value);
+			} else if (colIndex == 5) {
+				if (value == null || value.trim().isEmpty()) continue;
+				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
+				licenseMaster.setLicenseNicknames(nicknames);
+			} else if (colIndex == 6) {
+				if (value == null || value.trim().isEmpty()) continue;
+				String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
+				Arrays.stream(webpages).forEach((webpage)->{
+					webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
+				});
+				licenseMaster.setWebpages(webpages);
+			} else if (colIndex == 7) { //userGuide string
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setDescription(value);
+			} else if (colIndex == 8) { //licenseText string
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setLicenseText(value);
+			} else if (colIndex == 9) { //attribute string
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setAttribution(value);
+			} else if (colIndex == 10) { //comment string
+				if (value == null || value.trim().isEmpty()) continue;
+				licenseMaster.setComment(value);
+			}
+		}
+		return licenseMaster;
+	}
+
 	private static void readAndroidBuildFindHeaderRowIndex(Sheet sheet, Map<String, Object> checkHeaderSheetName) {
 		int DefaultHeaderRowIndex = 2; // default header index
 		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
