@@ -3,6 +3,7 @@
     <meta http-equiv="content-type" content="text/html; charset=euc-kr">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400&display=swap');
+
         th {
             background-color: #d9d9d9;
             font-weight: bold;
@@ -84,7 +85,7 @@
         </tr>
         <tr>
             <th>Project</th>
-            <td></td>
+            <td>$!project.getPrjName()</td>
         </tr>
         <tr>
             <th>Reviewer</th>
@@ -100,9 +101,9 @@
     <h3>OSS Review</h3>
     <table border="1">
         <thead>
-        <th>OSS Name</th>
-        <th>OSS Version</th>
-        <th>Summary Description</th>
+        <th width="150">OSS Name</th>
+        <th width="100">OSS Version</th>
+        <th width="350">Summary Description</th>
         </thead>
         <tbody>
         #foreach ($ossReview in $!OssReview)
@@ -119,10 +120,10 @@
     <h3>License Review</h3>
     <table border="1">
         <thead>
-        <th>License Name</th>
-        <th>License Type</th>
-        <th>User Guide</th>
-        <th>Restriction</th>
+        <th width="150">License Name</th>
+        <th width="50">License Type</th>
+        <th width="330">User Guide</th>
+        <th width="70">Restriction</th>
         </thead>
         <tbody>
         #foreach ($licenseReview in $!LicenseReview)
@@ -140,10 +141,10 @@
     <h3>Vulnerability</h3>
     <table border="1">
         <thead>
-        <th>OSS Name</th>
-        <th>OSS Version</th>
-        <th>Max Score</th>
-        <th>Vulnerability Link</th>
+        <th width="110">OSS Name</th>
+        <th width="70">OSS Version</th>
+        <th width="70">Max Score</th>
+        <th width="350">Vulnerability Link</th>
         </thead>
         <tbody>
         #foreach ($vulnerabilityReview in $!VulnerabilityReview)
