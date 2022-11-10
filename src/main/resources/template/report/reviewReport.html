@@ -22,6 +22,10 @@
             border-right: 1px solid #ddd;
         }
 
+        #report-summary-table th {
+            width: 100px;
+        }
+
         #report-wrapper {
             font-family: 'Archivo', sans-serif;
             width: 600px;
@@ -73,7 +77,7 @@
 
     <!--  Report Summary table -->
     <h3>Report Summary</h3>
-    <table border="1">
+    <table id="report-summary-table" border="1">
         <tr>
             <th>Requestor</th>
             <td>$!project.getCreator()</td>
