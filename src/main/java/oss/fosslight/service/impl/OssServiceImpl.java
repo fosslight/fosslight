@@ -2049,6 +2049,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
 			default:
+				p = Pattern.compile("(.*)");
 				break;
 		}
 		return p;
@@ -2200,7 +2201,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 									oc.setUseCaches(false);
 									oc.setConnectTimeout(1500);
 									if (200 == oc.getResponseCode()) {
-										if (oc.getURL().toString().equals("https://" + downloadlocationUrl)) {
+										if (oc.getURL().toString().equals("https://" + downloadlocationUrl) || oc.getURL().toString().equals("https://" + downloadlocationUrl + "/")) {
 											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 										} else {
 											redirectlocationUrl = oc.getURL().toString().split("//")[1];
