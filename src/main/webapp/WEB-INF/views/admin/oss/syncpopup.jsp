@@ -127,7 +127,6 @@
 													for (var i=0; i<sameList.length; i++) {
 														if (id == sameList[i]){
 															row.className = className + ' excludeRow';
-															$(row).attr("onclick", "event.cancelBubble=true;").find("input[type=checkbox]").attr("disabled", true);
 														}
 													}
 												}
@@ -168,17 +167,7 @@
 
 		var fn = {
 			syncSave : function(){
-				var unCheckedList = [];
-				var excludeList = $("#_ossList").find(".excludeRow");
-				for(var i=0; i<excludeList.length; i++){
-					unCheckedList.push(excludeList[i].id);
-				}
-				
-				var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow").filter(function(element){
-					if (unCheckedList.indexOf(element) === -1){
-						return element;
-					}
-				});
+				var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow");
 				
 				var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
 				

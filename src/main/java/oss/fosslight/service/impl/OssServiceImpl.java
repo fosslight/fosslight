@@ -2221,7 +2221,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										bean.setCheckOssList("I");
 									}
 								} catch (IOException e) {
-									checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+									checkName = "Invalid download location.";
+									bean.setCheckOssList("I");
 								}
 							} else {
 								checkName = generateCheckOSSName(downloadlocationUrl, p, androidPlatformList);
