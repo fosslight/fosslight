@@ -84,6 +84,7 @@
 				<input type="hidden" id="ossComponentsStr" name="ossComponentsStr"/>
 				<input type="hidden" id="ossComponentsLicenseStr" name="ossComponentsLicenseStr"/>
 				<input type="hidden" id="userComment" name="userComment"/>
+				<input type="hidden" id="description" name="description"/>
 				<input type="hidden" id="delDocumentsFile" name="delDocumentsFile"/>
 				<table class="dCase">
 					<colgroup>
