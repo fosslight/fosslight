@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -695,6 +696,9 @@ public class NvdDataService {
 			}else{
 				log.warn("connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
 			}
+		} catch(UnknownHostException e) {
+			log.error("unknownHost connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
+			return metaInfo;
 		} finally {
 			if(s != null) {
 				try {s.close();} catch (Exception e) {}
