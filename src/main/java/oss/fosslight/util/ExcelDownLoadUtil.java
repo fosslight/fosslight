@@ -16,14 +16,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -3488,6 +3481,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String getVulnerabilityExcel(List<Vulnerability> vulnerabilityList) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
+		String fileName = "VulnerabilityList";
 		
 		try(
 			FileInputStream inFile= new FileInputStream(new File(downloadpath+"/VulnerabilityReport.xlsx"));
@@ -3497,6 +3491,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			wb.setSheetName(0, "vulnerabilityList");
 			
 			List<String[]> rows = new ArrayList<>();
+			Set<String> ossName = new HashSet<>();
 
 			for(Vulnerability param : vulnerabilityList){
 				String[] rowParam = {
@@ -3508,16 +3503,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, param.getPublDate()
 					, param.getModiDate()
 				};
-				
+				ossName.add(param.getProduct());
 				rows.add(rowParam);
 			}
-			
 			//시트 만들기
 			makeSheet(sheet, rows);
+			if(ossName.size() == 1) {
+				fileName += "_" + ossName.toString().substring(1,ossName.toString().length()-1);
+			}
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
 		}
-		return makeExcelFileId(wb,"VulnerabilityList");
+		return makeExcelFileId(wb, fileName);
 	}
 	
 	private static boolean isMaximumRowCheck(int totalRow){
