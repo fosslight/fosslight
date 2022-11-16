@@ -248,9 +248,12 @@
 			});
 			
 			$("#copy").on('click',function(){
-				activeDeleteTabInFrame();
-				var ossId = $('input[name=ossId]').val();
-				createTabInFrame('copy_'+ossId+'_Opensource', '#<c:url value="/oss/copy/'+ossId+'"/>');
+				if(opener == null) {
+					activeDeleteTabInFrame();
+					createTabInFrame('copy_'+ossId+'_Opensource', '#<c:url value="/oss/copy/'+ossId+'"/>');
+				} else{
+					window.location.href = '<c:url value="/oss/copy/'+ossId+'"/>';
+				}
 			});
 			
 			//라이센스 삭제

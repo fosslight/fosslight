@@ -3694,6 +3694,8 @@ public class CommonFunction extends CoTopComponent {
 						List<OssMaster> ossInfoByNickList = ossService.getOssListByName(param);
 						
 						if(ossInfoByNickList != null) {
+							if(ossInfoByNickList.get(0).getOssName().equals(bean.getOssName())) break; 
+							
 							final Comparator<OssMaster> comp = Comparator.comparing((OssMaster o) -> o.getModifiedDate()).reversed();
 							ossInfoByNickList = ossInfoByNickList.stream().sorted(comp).collect(Collectors.toList());
 							
