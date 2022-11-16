@@ -2041,12 +2041,7 @@ public class OssController extends CoTopComponent{
 				downloadLocationCheckFlag = false;
 				ossMasterCheclFlag = false;
 				onlyCommentRegistFlag = false;
-				
-				if(syncItemArr.length == 1 && isEmpty(syncItemArr[0])) {
-					if(!isEmpty(comment)) {
-						onlyCommentRegistFlag = true;
-					}
-				} else {
+
 					for (int j=0; j<syncItemArr.length; j++) {
 						switch(syncItemArr[j]) {
 							case "Declared License" :
@@ -2061,7 +2056,7 @@ public class OssController extends CoTopComponent{
 									declaredLicenseCheckFlag = true;
 								}
 								break;
-								
+
 							case "Detected License" :
 								if (syncBean.getDetectedLicenses() == null) {
 									if (standardOss.getDetectedLicenses() != null) {
@@ -2080,14 +2075,14 @@ public class OssController extends CoTopComponent{
 									}
 								}
 								break;
-								
+
 							case "Copyright" :
 								if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
 									syncBean.setCopyright(standardOss.getCopyright());
 									ossMasterCheclFlag = true;
 								}
 								break;
-								
+
 							case "Download Location" :
 								if (standardOss.getDownloadLocations() != null) {
 									if (syncBean.getDownloadLocations() == null) {
@@ -2109,21 +2104,21 @@ public class OssController extends CoTopComponent{
 									}
 								}
 								break;
-							
+
 							case "Home Page" :
 								if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
 									syncBean.setHomepage(standardOss.getHomepage());
 									ossMasterCheclFlag = true;
 								}
 								break;
-							
+
 							case "Summary Description" :
 								if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
 									syncBean.setSummaryDescription(standardOss.getSummaryDescription());
 									ossMasterCheclFlag = true;
 								}
 								break;
-							
+
 							case "Attribution" :
 								if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
 									syncBean.setAttribution(standardOss.getAttribution());
@@ -2131,7 +2126,9 @@ public class OssController extends CoTopComponent{
 								}
 								break;
 						}
-					}
+				}
+				if(!ossMasterCheclFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !downloadLocationCheckFlag){
+					if(!isEmpty(comment)) onlyCommentRegistFlag = true;
 				}
 								
 				if ((ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) || onlyCommentRegistFlag) {

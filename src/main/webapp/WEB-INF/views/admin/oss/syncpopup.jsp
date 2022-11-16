@@ -174,7 +174,7 @@
 				if (checkedOssList.length > 0) { 
 					var dataLength = CKEDITOR.instances['syncPopupEditor'].getData().length;
 					
-					if ((checkedSyncList.length > 0) || (dataLength > 0 && checkedSyncList.length == 0)) {
+					if ((checkedSyncList.length > 0) || dataLength > 0) {
 						$(".loading").show();
 						
 						$("input[name=ossIds]").val(checkedOssList);
