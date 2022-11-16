@@ -17,6 +17,7 @@
 			var commentId = "";
 			var referenceId = '${projectInfo.prjId}';
 			var referenceDiv = '${projectInfo.referenceDiv}';
+			var targetName = '${projectInfo.targetName}';
 			var evt_fn = {
 				init : function(){
 					$("#btnChangeOss").on("click", function(){
@@ -33,9 +34,9 @@
 					params["referenceId"] = referenceId;
 					params["referenceDiv"] = referenceDiv;
 					
-					<c:if test="${projectInfo.targetName eq 'identification'}">
-					params["referenceDiv"] = params["referenceDiv"].split("-")[0];
-					</c:if>
+					if('identification' == targetName) {
+						params["referenceDiv"] = params["referenceDiv"].split("-")[0];
+					}
 					
 					$.ajax({
 						url : '/oss/getCheckOssLicenseAjax/${projectInfo.targetName}',
@@ -143,16 +144,15 @@
 								var rowdata = target.getRowData(rowId);
 								rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
 								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");							
-								<c:if test="${projectInfo.targetName eq 'identification'}">
-								rowdata["refPrjId"] = rowdata["referenceId"];
-								rowdata["referenceId"] = commentId;
-								rowdata["referenceDiv"] = referenceDiv.split("-")[0];
-								</c:if>
-								<c:if test="${projectInfo.targetName eq 'partner'}">
-								rowdata["referenceId"] = rowdata["referenceId"];
-								rowdata["refPrjId"] = commentId;
-								rowdata["referenceDiv"] = referenceDiv;
-								</c:if>
+								if("identification" == targetName) {
+									rowdata["refPrjId"] = rowdata["referenceId"];
+									rowdata["referenceId"] = commentId;
+									rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+								} else if("partner" == targetName) {
+									rowdata["referenceId"] = rowdata["referenceId"];
+									rowdata["refPrjId"] = commentId;
+									rowdata["referenceDiv"] = referenceDiv;
+								}
 
 								$.ajax({
 									url : '/oss/saveOssCheckLicense/${projectInfo.targetName}',
@@ -174,18 +174,17 @@
 										}
 
 										result.push(resultData);
-										<c:if test="${projectInfo.targetName eq 'identification' || projectInfo.targetName eq 'partner'}">
-										commentId = resultData.commentId;
-										</c:if>
+										if("identification" == targetName || "partner" == targetName) {
+											commentId = resultData.commentId;
+										}
 
 										if(result.length == idArry.length){
 											if(!failFlag){
 												var successMsg = '<spring:message code="msg.project.check.license.success" />';
 
-												if("20" == rowdata["referenceDiv"]){
-													/**
-													 * reload identication tab you're working on
-													 */
+												if("self" == targetName) {
+													opener.location.href = `/selfCheck/edit/\${rowdata["referenceId"]}`;
+												} else if ("partner" == targetName) {
 													opener.location.href = `/partner/edit/\${rowdata["referenceId"]}`;
 												} else {
 													/**

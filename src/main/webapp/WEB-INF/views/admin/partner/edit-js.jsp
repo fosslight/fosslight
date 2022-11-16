@@ -686,7 +686,8 @@ var saveFlag = false;
 				 		});
 				 		
 						$('#ossComponentsStr').val(JSON.stringify(mainData));
-						$('#userComment').val(JSON.stringify(CKEDITOR.instances['editor'].getData()));
+						$('#userComment').val(replaceWithLink(CKEDITOR.instances['editor'].getData()));
+						$('#description').val(replaceWithLink(CKEDITOR.instances['editor4'].getData()));
 						
 						var prjId = '${detail.partnerId}';
 						var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
