@@ -3683,6 +3683,7 @@ public class CommonFunction extends CoTopComponent {
 						, scancodeLicense, copyright, bean.getDownloadLocation()
 						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
 				
+				List<OssAnalysis> ossAnalysisByNickList = new ArrayList<>();
 				OssAnalysis ossInfoByNick = null;
 				int idx = 1;
 				OssMaster param = new OssMaster();
@@ -3712,14 +3713,14 @@ public class CommonFunction extends CoTopComponent {
 							}
 							
 							String analysisTitle = ossInfoByNickList.get(0).getOssName();
-							if(!isEmpty(ossInfoByNickList.get(0).getOssVersion())) analysisTitle += " (" + ossInfoByNickList.get(0).getOssVersion() + ") ";
+							if(!isEmpty(ossInfoByNickList.get(0).getOssVersion())) analysisTitle += " (" + ossInfoByNickList.get(0).getOssVersion() + ")";
 							
 							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), ossInfoByNickList.get(0).getOssVersion(), ossInfoByNickList.get(0).getOssNickname().replaceAll("<br>", ",")
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
-									, ossInfoByNickList.get(0).getHomepage(), null, null, "", analysisTitle + "최신 등록 정보"); // nick oss 최신정보
+									, ossInfoByNickList.get(0).getHomepage(), null, null, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
 							ossInfoByNick.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + idx);
 							
-							break;
+							ossAnalysisByNickList.add(ossInfoByNick);
 						}
 					}
 				}
@@ -3778,8 +3779,10 @@ public class CommonFunction extends CoTopComponent {
 					
 					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
 					
-					if(ossInfoByNick != null) {
-						changeAnalysisResultList.add(ossInfoByNick); // seq 2 : oss 최신등록 정보
+					if(ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
+						for(OssAnalysis oa : ossAnalysisByNickList) {
+							changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+						}
 					}
 					
 					if(totalNewestOssInfo != null) {
@@ -3827,8 +3830,10 @@ public class CommonFunction extends CoTopComponent {
 					
 					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
 					
-					if(ossInfoByNick != null) {
-						changeAnalysisResultList.add(ossInfoByNick); // seq 2 : oss 최신등록 정보
+					if(ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
+						for(OssAnalysis oa : ossAnalysisByNickList) {
+							changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+						}
 					}
 					
 					if(totalNewestOssInfo != null) {
