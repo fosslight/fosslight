@@ -338,6 +338,14 @@
 		WHERE
 			PRJ_ID = #{prjId} 
 	</update>
+	<update id="updateReviewReportFileInfo" parameterType="oss.fosslight.domain.Project">
+	UPDATE
+		PROJECT_MASTER
+	SET
+		REVIEW_REPORT_FILE_ID = #{reviewReportFileId}
+	WHERE
+		PRJ_ID = #{prjId}
+	</update>
 	<update id="updateVerifyFilePath" parameterType="oss.fosslight.domain.OssComponents">
 	UPDATE OSS_COMPONENTS SET FILE_PATH = #{filePath} WHERE COMPONENT_ID = #{componentId}
 	</update>

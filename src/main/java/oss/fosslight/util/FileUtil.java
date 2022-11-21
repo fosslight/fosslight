@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -155,6 +156,26 @@ public class FileUtil {
 			}
 		}
 		
+		return true;
+	}
+
+	public static boolean writeReviewReportFile(String filePath, String fileName, String contents) {
+		try {
+			File dir = new File(filePath);
+
+			if(!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			ByteArrayInputStream inputStream = PdfUtil.html2pdf(contents);
+
+			FileUtils.copyInputStreamToFile(inputStream, new File(filePath + "/" + fileName));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+
+			return false;
+		}
+
 		return true;
 	}
 	

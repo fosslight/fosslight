@@ -73,6 +73,20 @@ var com_evt = {
 							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 						}
 
+						loading.show();
+						$.ajax({
+							url :'<c:url value="/project/verification/reviewReportAjax?prjId=${project.prjId}"/>',
+							type : 'POST',
+							cache : false,
+							success: function(data){
+								loading.hide();
+							},
+							error : function(data){
+								loading.hide();
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							}
+						});
+
 	 					com_fn.checkSave(data, "CONF");	
 					} else {
 						alertify.alert('<spring:message code="msg.project.check.save" />', function(){});

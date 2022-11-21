@@ -349,6 +349,7 @@ public final class Url {
 		public static final String SAVE_PATH = PATH + "/savePath";
 		
 		public static final String NOTICE_AJAX = PATH + "/noticeAjax";
+		public static final String REVIEW_REPORT_AJAX = PATH + "/reviewReportAjax";
 		public static final String DOWNLOAD_FILE = PATH + "/downloadFile";
 		
 		public static final String WGET_URL = PATH + "/wgetUrl";
@@ -366,6 +367,7 @@ public final class Url {
 		
 		public static final String DOWNLOAD_PACKAGE = PATH + "/downloadPackage";
 		public static final String DOWNLOAD_NOTICE = PATH + "/downloadNotice";
+		public static final String DOWNLOAD_REVIEW_REPORT = PATH + "/downloadReviewReport";
 		
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 

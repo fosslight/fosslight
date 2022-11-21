@@ -660,6 +660,8 @@ public class T2CoOssValidator extends T2CoValidator {
 				String upperOssName = analysisBean.getOssName().trim().toUpperCase();
 				List<String> dupCheckList = new ArrayList<>();
 				
+				String sameMsg = "The same OSS ";
+				
 				for(String s : nickList) {
 					if(isEmpty(s)) {
 						continue;
@@ -681,7 +683,14 @@ public class T2CoOssValidator extends T2CoValidator {
 						OssMaster result = ossService.checkExistsOssNickname(param);
 						
 						if(result != null) {
-							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".SAME");
+							if(sameMsg.contains(") exists.")) {
+								sameMsg = sameMsg.substring(0, sameMsg.indexOf(") exists.")).trim() + ",";
+								sameMsg += s.trim() + ") exists.";
+							} else {
+								sameMsg += "(" + s.trim() + ") exists.";
+							}
+							
+							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), sameMsg);
 						}
 					}
 					
