@@ -3695,8 +3695,8 @@ public class CommonFunction extends CoTopComponent {
 						List<OssMaster> ossInfoByNickList = ossService.getOssListByName(param);
 						
 						if(ossInfoByNickList != null) {
-							ossInfoByNickList = ossInfoByNickList.stream().filter(e -> !e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList());
-							if(ossInfoByNickList.size() == 0 || ossInfoByNickList.get(0).getOssName().equals(bean.getOssName())) break;
+							int deactivateCnt = ossInfoByNickList.stream().filter(e -> e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList()).size();
+							if(deactivateCnt > 0) continue;
 							
 							final Comparator<OssMaster> comp = Comparator.comparing((OssMaster o) -> o.getModifiedDate()).reversed();
 							ossInfoByNickList = ossInfoByNickList.stream().sorted(comp).collect(Collectors.toList());
