@@ -2452,6 +2452,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if(mergeListMap != null && mergeListMap.get("rows") != null) {
 			for(ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
+				
+				if((isEmpty(bean.getOssName()) || "-".equals(bean.getOssName())) // ossName이 공란이거나 '-' 일때 license가 multi license일때는 bom에 merge하지 않음. 
+					&& bean.getOssComponentsLicenseList().size() > 1) {
+					continue;
+				}
+				
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
