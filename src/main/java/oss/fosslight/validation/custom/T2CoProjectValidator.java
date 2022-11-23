@@ -733,29 +733,19 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(bean.getLicenseName().split(",").length > 1){
-							errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
-						} else {
-							// 기본체크
-							String errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
-
-							if (!isEmpty(errCd)) {
-								errMap.put(basicKey + "." + bean.getComponentId(), errCd);
-							} else if (isEmpty(bean.getLicenseName())) {
-								errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.REQUIRED");
-							} else if (!CommonFunction.checkLicense(bean.getLicenseName())) {
-								if (CommonFunction.isAdmin()) {
-									errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
-								} else {
-									diffMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
-									diffMapLicense = true;
-								}
-							} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
-								LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
-										.get(bean.getLicenseName().trim().toUpperCase());
-								if (master.getObligationDisclosingSrcYn() != null && master.getObligationDisclosingSrcYn().equals("Y")) {
-									diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.REQUIRED2");
-								}
+						// 기본체크
+						String errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
+						
+						if (!isEmpty(errCd)) {
+							errMap.put(basicKey + "." + bean.getComponentId(), errCd);
+						} else if (isEmpty(bean.getLicenseName())) {
+							errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.REQUIRED");
+						} else if (!CommonFunction.checkLicense(bean.getLicenseName())) {
+							if (CommonFunction.isAdmin()) {
+								errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+							} else {
+								diffMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.UNCONFIRMED");
+								diffMapLicense = true;
 							}
 						}
 					}
@@ -1700,27 +1690,22 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(licenseList.size() > 1) {
-							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
-						} else {
-							// 기본체크
-							String errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
-							if (!isEmpty(errCd)) {
-								errMap.put(basicKey + "." + bean.getGridId(), errCd);
-							} else if (isEmpty(bean.getLicenseName())) {
-								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.REQUIRED");
-							} else if (!CommonFunction.checkLicense(bean.getLicenseName())) {
-								if (CommonFunction.isAdmin()) {
-									errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
-								} else {
-									diffMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
-								}
-							} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
-								LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
-										.get(bean.getLicenseName().trim().toUpperCase());
-								if (master.getObligationDisclosingSrcYn() != null && master.getObligationDisclosingSrcYn().equals("Y")) {
-									diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.REQUIRED2");
-								}
+						// 기본체크
+						String errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
+						
+						if (!isEmpty(errCd)) {
+							errMap.put(basicKey + "." + bean.getGridId(), errCd);
+						} else if (isEmpty(bean.getLicenseName())) {
+							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.REQUIRED");
+						} else if (!CommonFunction.checkLicense(bean.getLicenseName())) {
+							if (CommonFunction.isAdmin()) {
+								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
+							} else {
+								diffMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
+							}
+						} else if(bean.getComponentLicenseList() != null) {
+							if(bean.getComponentLicenseList().size() > 1) {
+								errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 							}
 						}
 					}
