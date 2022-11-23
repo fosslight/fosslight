@@ -1074,11 +1074,11 @@ public class OssController extends CoTopComponent{
 				else convert.setOssLicenseComb("");
 				convert.setLicenseNameEx(existsLicense.getLicenseNameTemp());
 				convert.setLicenseType(existsLicense.getLicenseType());
-				if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationNeedsCheckYn())) {
+				if (CoConstDef.FLAG_YES.equals(avoidNull(existsLicense.getObligationNeedsCheckYn()))) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationDisclosingSrcYn())) {
+				} else if (CoConstDef.FLAG_YES.equals(avoidNull(existsLicense.getObligationDisclosingSrcYn()))) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if (CoConstDef.FLAG_YES.equals(existsLicense.getObligationNotificationYn())) {
+				} else if (CoConstDef.FLAG_YES.equals(avoidNull(existsLicense.getObligationNotificationYn()))) {
 					convert.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				} else {
 					convert.setObligation("");

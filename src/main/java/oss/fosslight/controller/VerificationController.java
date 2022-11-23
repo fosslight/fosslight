@@ -115,7 +115,7 @@ public class VerificationController extends CoTopComponent {
 						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
 						if(licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
 								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())
-								&& CoConstDef.FLAG_YES.equals(licenseBean.getObligationDisclosingSrcYn())) {
+								&& CoConstDef.FLAG_YES.equals(avoidNull(licenseBean.getObligationDisclosingSrcYn()))) {
 							userGuideLicenseList.add(licenseBean);
 							duplLicenseCheckList.add(licenseBean.getLicenseId());
 						}

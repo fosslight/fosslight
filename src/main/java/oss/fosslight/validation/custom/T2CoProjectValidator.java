@@ -298,8 +298,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					
 					if (master != null 
-							&& !CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())
-							&& !CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+							&& !CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))
+							&& !CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn()))) {
 						return true;
 					}
 				}
@@ -1814,9 +1814,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 					}
 					
-					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get(checkKey);
-					if(ossBean != null) {
-						if(CoConstDef.FLAG_YES.equals(ossBean.getDeactivateFlag())){
+					if(ossmaster != null) {
+						if(CoConstDef.FLAG_YES.equals(ossmaster.getDeactivateFlag())){
 							if (CommonFunction.isAdmin()) {
 								errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
 							} else {
@@ -2411,11 +2410,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 				
 				if (!isEmpty(license.getLicenseName())
-						&& CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+						&& CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					
-					if (master != null && (CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())
-							|| CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn()))) {
+					if (master != null && (CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))
+							|| CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn())))) {
 						return true;
 					}
 				}

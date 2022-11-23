@@ -1700,11 +1700,11 @@ public class CommonFunction extends CoTopComponent {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(obligationLicense.getLicenseName()).toUpperCase());
 					
 					if(master != null) {
-						if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -1947,11 +1947,11 @@ public class CommonFunction extends CoTopComponent {
 					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
 						LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().toUpperCase());
 						
-						if(CoConstDef.FLAG_YES.equals(license.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -1972,11 +1972,11 @@ public class CommonFunction extends CoTopComponent {
 					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
 						LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().toUpperCase());
 						
-						if(CoConstDef.FLAG_YES.equals(license.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -3025,11 +3025,11 @@ public class CommonFunction extends CoTopComponent {
 				LicenseMaster license = CoCodeManager.LICENSE_INFO_BY_ID.get(bean.getLicenseId());
 				
 				if(license != null) {
-					if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+					if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 						sourceCode = true;
 					}
 					
-					if(CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+					if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 						notice = true;
 					}
 				}

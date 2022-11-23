@@ -1648,11 +1648,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			license.setLicenseType(master.getLicenseType());
 			
 			// obligation 설정
-			if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+			if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNeedsCheckYn()))) {
 				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+			} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
 				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-			} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+			} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn()))) {
 				license.setObligation(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 			}
 			
