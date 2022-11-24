@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,11 +24,14 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,7 +88,21 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	@Autowired LicenseMapper licenseMapper;
 	@Autowired CommentMapper commentMapper;
 	
-
+	@Autowired Environment env;
+	
+	private String JDBC_DRIVER;
+	private String DB_URL;
+	private String USERNAME;
+	private String PASSWORD;
+	
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
+		DB_URL = env.getRequiredProperty("spring.datasource.url");
+		USERNAME = env.getRequiredProperty("spring.datasource.username");
+		PASSWORD = env.getRequiredProperty("spring.datasource.password");
+	}
+	
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("selfcheck.notice.path", "/selfcheck/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	
@@ -218,25 +239,43 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				
 			List<ProjectIdentification> licenseList = selfCheckMapper.identificationSubGrid(param);
 			
-			for(ProjectIdentification licenseBean : licenseList) {
-				for(ProjectIdentification bean : list) {
-					if(licenseBean.getComponentId().equals(bean.getComponentId())) {
-						// 수정가능 여부 초기설정
-						licenseBean.setEditable(CoConstDef.FLAG_YES);
-						bean.addComponentLicenseList(licenseBean);
-						
-						if(!unconfirmedLicenseList.contains(avoidNull(licenseBean.getLicenseName()))) {
-							if(CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) 
-									&& isEmpty(licenseBean.getLicenseId())) {
-								unconfirmedLicenseList.add(licenseBean.getLicenseName());
+			Map<String, List<ProjectIdentification>> reconstLicenseList = new HashMap<>();
+			List<ProjectIdentification> reconstAddComponentLicenseList = null;
+			String licenseComponentId = "";
+			
+			for(ProjectIdentification liObj : licenseList) {
+				if(!licenseComponentId.equals(liObj.getComponentId())) {
+					licenseComponentId = liObj.getComponentId();
+					reconstAddComponentLicenseList = new ArrayList<>();
+				} else {
+					reconstAddComponentLicenseList = (List<ProjectIdentification>) reconstLicenseList.get(licenseComponentId);
+				}
+				
+				reconstAddComponentLicenseList.add(liObj);
+				reconstLicenseList.put(licenseComponentId, reconstAddComponentLicenseList);
+			}
+			
+			for(ProjectIdentification bean : list) {
+				if(reconstLicenseList.containsKey(bean.getComponentId())) {
+					List<ProjectIdentification> reconstLicense = (List<ProjectIdentification>) reconstLicenseList.get(bean.getComponentId());
+					if(reconstLicense != null) {
+						for(ProjectIdentification reLi : reconstLicense) {
+							bean.addComponentLicenseList(reLi);
+							
+							if(!unconfirmedLicenseList.contains(avoidNull(reLi.getLicenseName()))) {
+								if(CoConstDef.FLAG_NO.equals(bean.getExcludeYn()) 
+										&& isEmpty(reLi.getLicenseId())) {
+									unconfirmedLicenseList.add(reLi.getLicenseName());
+								}
 							}
 						}
-						
-						break;
 					}
 				}
 			}
 
+			reconstLicenseList.clear();
+			reconstAddComponentLicenseList.clear();
+			
 			// license 정보 등록
 			for(ProjectIdentification bean : list) {
 				if(bean.getComponentLicenseList()!=null){
@@ -486,9 +525,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		prj.setReferenceDiv(refDiv);
 		List<OssComponents> componentId = selfCheckMapper.selectComponentId(prj);
 		
-		for (int i = 0; i < componentId.size(); i++) {
-			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
-		}
+		deletePreparedStatement(componentId);
+//		for (int i = 0; i < componentId.size(); i++) {
+//			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
+//		}
 				
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if(ossComponent.size()==0){
@@ -503,9 +543,32 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		ossComponent = convertOssNickName(ossComponent);
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		
+		Map<String, List<ProjectIdentification>> reconstOssComponentLicenseList = new HashMap<>();
+		List<ProjectIdentification> reconstAddOssComponentLicenseList = null;
+		String licenseComponentId = "";
+		
+		for(List<ProjectIdentification> ocList : ossComponentLicense) {
+			for(ProjectIdentification pi : ocList) {
+				licenseComponentId = isEmpty(pi.getComponentId()) ? pi.getGridId() : pi.getComponentId();
+				reconstAddOssComponentLicenseList = new ArrayList<>();
+				
+				if(reconstOssComponentLicenseList.containsKey(licenseComponentId)) {
+					reconstAddOssComponentLicenseList = (List<ProjectIdentification>) reconstOssComponentLicenseList.get(licenseComponentId);
+				}
+				
+				reconstAddOssComponentLicenseList.add(pi);
+				reconstOssComponentLicenseList.put(licenseComponentId, reconstAddOssComponentLicenseList);
+			}
+		}
+		
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
-
+		List<ProjectIdentification> updateOssComponentList = new ArrayList<>();
+		List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+		List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+		
+		String ossInfoKey = "";
+		int componentIdx = Integer.parseInt(selfCheckMapper.selectComponentIdx(prj));
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			String downloadLocation = ossComponent.get(i).getDownloadLocation();
@@ -514,51 +577,61 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				ossComponent.get(i).setDownloadLocation(downloadLocation.substring(0, downloadLocation.length()-1));
 			}
 			
+			int componentLicenseId = 1;
 			//update
 			if(!StringUtil.contains(ossComponent.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
 				//ossComponents 등록
-				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
-				
+//				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
+				updateOssComponentList.add(ossComponent.get(i));
 				deleteRows.add(ossComponent.get(i).getComponentIdx());
 				
 				//멀티라이센스일 경우
 				if(CoConstDef.LICENSE_DIV_MULTI.equals(ossComponent.get(i).getLicenseDiv())){
-					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+					if(reconstOssComponentLicenseList.containsKey(ossComponent.get(i).getComponentId())) {
+						List<ProjectIdentification> comLicenseList = (List<ProjectIdentification>) reconstOssComponentLicenseList.get(ossComponent.get(i).getComponentId());
 						for (ProjectIdentification comLicense : comLicenseList) {
-							if(ossComponent.get(i).getComponentId().equals(comLicense.getComponentId())){
-								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
-								
-								// 라이센스 등록
-								selfCheckMapper.registComponentLicense(license);
-							}
+							OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
+							license.setComponentLicenseId(String.valueOf(componentLicenseId));
+							// 라이센스 등록
+//							selfCheckMapper.registComponentLicense(license);
+							insertOssComponentLicenseList.add(license);
+							componentLicenseId++;
 						}
 					}
 				} else { //싱글라이센스일경우
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossComponent.get(i), CoConstDef.LICENSE_DIV_SINGLE);
+					license.setComponentLicenseId(String.valueOf(componentLicenseId));
 					// 라이센스 등록
-					selfCheckMapper.registComponentLicense(license);
+//					selfCheckMapper.registComponentLicense(license);
+					insertOssComponentLicenseList.add(license);
 				}
 			} else { // insert
 				//ossComponents 등록
 				String exComponentId = ossComponent.get(i).getGridId();
 				//component_idx key
-				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
+//				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
+				
 				ossComponent.get(i).setReferenceId(project.getPrjId());
 				ossComponent.get(i).setReferenceDiv(refDiv);
-				ossComponent.get(i).setComponentIdx(componentIdx);
+				ossComponent.get(i).setComponentIdx(String.valueOf(componentIdx));
 				String _componentId = ossComponent.get(i).getReferenceId() + "-" + ossComponent.get(i).getReferenceDiv() + "-" + ossComponent.get(i).getComponentIdx();
 				
-				OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get((ossComponent.get(i).getOssName() +"_"+ avoidNull(ossComponent.get(i).getOssVersion())).toUpperCase());
-				if(ossInfo != null) {
+				ossInfoKey = (ossComponent.get(i).getOssName() +"_"+ avoidNull(ossComponent.get(i).getOssVersion())).toUpperCase();
+				
+				if(CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoKey)) {
+					OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
 					ossComponent.get(i).setObligationType(ossInfo.getObligationType());
 				}
 				
-				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
-				deleteRows.add(componentIdx);
+//				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
+				insertOssComponentList.add(ossComponent.get(i));
+				deleteRows.add(String.valueOf(componentIdx));
 				
 				//멀티라이센스일 경우
 				if(CoConstDef.LICENSE_DIV_MULTI.equals(ossComponent.get(i).getLicenseDiv())){
-					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+					if(reconstOssComponentLicenseList.containsKey(exComponentId)) {
+						List<ProjectIdentification> comLicenseList = (List<ProjectIdentification>) reconstOssComponentLicenseList.get(exComponentId);
+						
 						for (ProjectIdentification comLicense : comLicenseList) {
 							// null point
 							if(isEmpty(comLicense.getGridId())) {
@@ -572,19 +645,28 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
 								// 컴포넌트 ID 설정
 								license.setComponentId(_componentId);
-								
-								selfCheckMapper.registComponentLicense(license);
+								license.setComponentLicenseId(String.valueOf(componentLicenseId));
+								insertOssComponentLicenseList.add(license);
+//								selfCheckMapper.registComponentLicense(license);
 							}
+							componentLicenseId++;
 						}
 					}
 				} else { //싱글라이센스일경우
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossComponent.get(i), CoConstDef.LICENSE_DIV_SINGLE);
 					// 라이센스 등록
 					license.setComponentId(_componentId);
-					
-					selfCheckMapper.registComponentLicense(license);
+					license.setComponentLicenseId(String.valueOf(componentLicenseId));
+					insertOssComponentLicenseList.add(license);
+//					selfCheckMapper.registComponentLicense(license);
 				}
+				
+				componentIdx++;
 			}
+		}
+		
+		{
+			updatePreparedStatement(updateOssComponentList, insertOssComponentList, insertOssComponentLicenseList);
 		}
 		
 		{
@@ -658,6 +740,234 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			vnlnUpdBean.setModifier(vnlnUpdBean.getLoginUserName());
 			
 			selfCheckMapper.updateProjectMaster(vnlnUpdBean);
+		}
+	}
+	
+	private void updatePreparedStatement(List<ProjectIdentification> updateOssComponentList, List<ProjectIdentification> insertOssComponentList, List<OssComponentsLicense> insertOssComponentLicenseList) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
+		String query = "";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			int idx = 1;
+			if(updateOssComponentList != null && updateOssComponentList.size() > 0) {
+				query = "UPDATE PRE_OSS_COMPONENTS SET OSS_ID = (CASE WHEN ? = '' THEN NULL ELSE ? END), OSS_NAME = ?, OSS_VERSION = REPLACE(?, 'N/A',''), FILE_PATH = ?, DOWNLOAD_LOCATION = ?, COPYRIGHT = ?, EXCLUDE_YN = ?, OBLIGATION_TYPE = ?"
+						+ " WHERE REFERENCE_ID = ? AND REFERENCE_DIV = ? AND COMPONENT_IDX = ?";
+				stmt = conn.prepareStatement(query);
+				
+				for(ProjectIdentification item : updateOssComponentList) {
+					stmt.setString(1, item.getOssId());
+					stmt.setString(2, item.getOssId());
+					stmt.setString(3, item.getOssName());
+					stmt.setString(4, item.getOssVersion());
+					stmt.setString(5, item.getFilePath());
+					stmt.setString(6, item.getDownloadLocation());
+					stmt.setString(7, item.getCopyrightText());
+					stmt.setString(8, item.getExcludeYn());
+					stmt.setString(9, item.getObligationType());
+					stmt.setString(10, item.getReferenceId());
+					stmt.setString(11, item.getReferenceDiv());
+					stmt.setString(12, item.getComponentIdx());
+					stmt.addBatch();
+					stmt.clearParameters();
+					
+					if((idx % 1000) == 0) {
+						stmt.executeBatch();
+						stmt.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt.executeBatch() ;
+				conn.commit();
+			}
+			
+			if(insertOssComponentList != null && insertOssComponentList.size() > 0) {
+				query = "INSERT INTO PRE_OSS_COMPONENTS (REFERENCE_ID, REFERENCE_DIV, COMPONENT_IDX, OSS_ID, OSS_NAME, OSS_VERSION, DOWNLOAD_LOCATION, HOMEPAGE, FILE_PATH, EXCLUDE_YN, COPYRIGHT, BINARY_NAME, BINARY_SIZE, BINARY_NOTICE, CUSTOM_BINARY_YN, REF_PARTNER_ID"
+						+ ", REF_PRJ_ID, REF_BAT_ID, REF_COMPONENT_ID, REPORT_FILE_ID, BAT_STRING_MATCH_PERCENTAGE, BAT_PERCENTAGE, BAT_SCORE, OBLIGATION_TYPE) "
+						+ "VALUES (?,?,?,(CASE WHEN ? = '' THEN NULL ELSE ? END),?, REPLACE(?, 'N/A',''),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				stmt2 = conn.prepareStatement(query);
+				
+				idx = 1;
+				for(ProjectIdentification item : insertOssComponentList) {
+					stmt2.setString(1, item.getReferenceId());
+					stmt2.setString(2, item.getReferenceDiv());
+					stmt2.setString(3, item.getComponentIdx());
+					stmt2.setString(4, item.getOssId());
+					stmt2.setString(5, item.getOssId());
+					stmt2.setString(6, item.getOssName());
+					stmt2.setString(7, item.getOssVersion());
+					stmt2.setString(8, item.getDownloadLocation());
+					stmt2.setString(9, item.getHomepage());
+					stmt2.setString(10, item.getFilePath());
+					stmt2.setString(11, item.getExcludeYn());
+					stmt2.setString(12, item.getCopyrightText());
+					stmt2.setString(13, isEmpty(item.getBinaryName()) ? null : item.getBinaryName());
+					stmt2.setString(14, isEmpty(item.getBinarySize()) ? null : item.getBinarySize());
+					stmt2.setString(15, isEmpty(item.getBinaryNotice()) ? null : item.getBinaryNotice());
+					stmt2.setString(16, isEmpty(item.getCustomBinaryYn()) ? null : item.getCustomBinaryYn());
+					stmt2.setString(17, isEmpty(item.getRefPartnerId()) ? null : item.getRefPartnerId());
+					stmt2.setString(18, isEmpty(item.getRefPrjId()) ? null : item.getRefPrjId());
+					stmt2.setString(19, isEmpty(item.getRefBatId()) ? null : item.getRefBatId());
+					stmt2.setString(20, isEmpty(item.getRefComponentId()) ? null : item.getRefComponentId());
+					stmt2.setString(21, isEmpty(item.getReportFileId()) ? null : item.getReportFileId());
+					stmt2.setString(22, isEmpty(item.getBatStringMatchPercentage()) ? null : item.getBatStringMatchPercentage());
+					stmt2.setString(23, isEmpty(item.getBatPercentage()) ? null : item.getBatPercentage());
+					stmt2.setString(24, isEmpty(item.getBatScore()) ? null : item.getBatScore());
+					stmt2.setString(25, item.getObligationType());
+					stmt2.addBatch();
+					stmt2.clearParameters();
+					
+					if((idx % 1000) == 0) {
+						stmt2.executeBatch();
+						stmt2.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt2.executeBatch() ;
+				conn.commit();
+			}
+
+			
+			if(insertOssComponentLicenseList != null && insertOssComponentLicenseList.size() > 0) {
+				query = "INSERT INTO PRE_OSS_COMPONENTS_LICENSE (COMPONENT_ID, COMPONENT_LICENSE_IDX, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN) VALUES (?,?,?,?,?,'N');";
+				stmt3 = conn.prepareStatement(query);
+				
+				idx = 1;
+				for(OssComponentsLicense item : insertOssComponentLicenseList) {
+					stmt3.setString(1, item.getComponentId());
+					stmt3.setString(2, item.getComponentLicenseId());
+					stmt3.setString(3, item.getLicenseId());
+					stmt3.setString(4, item.getLicenseName());
+					stmt3.setString(5, item.getCopyrightText());
+					stmt3.addBatch();
+					stmt3.clearParameters();
+					
+					if((idx % 1000) == 0) {
+						stmt3.executeBatch();
+						stmt3.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt3.executeBatch() ;
+				conn.commit();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException se){}
+			
+			try{
+				if(stmt2!=null)
+					stmt2.close();
+			}catch(SQLException se){}
+			
+			try{
+				if(stmt3!=null)
+					stmt3.close();
+			}catch(SQLException se){}
+			
+			if(conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException e){}
+			
+			try{
+				if(stmt2!=null)
+					stmt2.close();
+			}catch(SQLException e){}
+			
+			try{
+				if(stmt3!=null)
+					stmt3.close();
+			}catch(SQLException e){}
+			
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException e){}
+		}
+	}
+
+	private void deletePreparedStatement(List<OssComponents> componentIdList) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		String query = "DELETE FROM PRE_OSS_COMPONENTS_LICENSE WHERE COMPONENT_ID = ?";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			stmt = conn.prepareStatement(query);
+			
+			int idx = 1;
+			for(OssComponents item : componentIdList) {
+				stmt.setString(1, item.getComponentId());
+				stmt.addBatch();
+				stmt.clearParameters();
+				
+				if((idx % 1000) == 0) {
+					stmt.executeBatch();
+					stmt.clearBatch();
+		            conn.commit();
+				}
+				
+				idx++;
+			}
+
+			stmt.executeBatch() ;
+			conn.commit();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException e1){}
+			
+			if(conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException e){}
+			
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException e){}
 		}
 	}
 	
