@@ -3613,6 +3613,9 @@ public class CommonFunction extends CoTopComponent {
 		
 		int gridSeq = 1; 
 		
+		List<String> deactivateOssList = ossService.getDeactivateOssList();
+		deactivateOssList.replaceAll(String::toUpperCase);
+		
 		for(OssAnalysis bean : analysisResultList) {
 			OssAnalysis userData = analysisList
 										.stream()
@@ -3697,6 +3700,12 @@ public class CommonFunction extends CoTopComponent {
 						if(ossInfoByNickList != null) {
 							int deactivateCnt = ossInfoByNickList.stream().filter(e -> e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList()).size();
 							if(deactivateCnt > 0) continue;
+							
+							if(ossAnalysisByNickList.size() > 0) {
+								String checkDuplicateOssName = ossInfoByNickList.get(0).getOssName();
+								int checkDuplicateCnt = ossAnalysisByNickList.stream().filter(e -> e.getOssName().equalsIgnoreCase(checkDuplicateOssName)).collect(Collectors.toList()).size();
+								if(checkDuplicateCnt > 0) continue;
+							}
 							
 							final Comparator<OssMaster> comp = Comparator.comparing((OssMaster o) -> o.getModifiedDate()).reversed();
 							ossInfoByNickList = ossInfoByNickList.stream().sorted(comp).collect(Collectors.toList());
@@ -3785,11 +3794,11 @@ public class CommonFunction extends CoTopComponent {
 						}
 					}
 					
-					if(totalNewestOssInfo != null) {
+					if(totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
 					}
 					
-					if(newestOssInfo != null) {
+					if(newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(newestOssInfo); // seq 4 : 최신등록 정보
 						
 						if(newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
@@ -3836,7 +3845,7 @@ public class CommonFunction extends CoTopComponent {
 						}
 					}
 					
-					if(totalNewestOssInfo != null) {
+					if(totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
 					}
 					
@@ -3865,10 +3874,12 @@ public class CommonFunction extends CoTopComponent {
 					try {
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
-						newestOssInfo.setGridId(""+gridSeq++);
-						newestOssInfo.setOssVersion(userData.getOssVersion());
-						
-						changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						if(newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
+							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setOssVersion(userData.getOssVersion());
+							
+							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						}
 					} catch (Exception newestException) {
 						log.error(newestException.getMessage());
 					}
