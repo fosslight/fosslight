@@ -659,6 +659,16 @@ var party_evt = {
 	    	.forEach(function(cur,idx){
 	    		$('#list3').jqGrid('delRowData', cur.gridId);
 	    	});
+
+        var gridData = $('#list3').jqGrid('getGridParam', 'data').filter(function(a){
+            if(a.refPartnerId != refPartnerId){
+                return a;
+            }
+        });
+
+        partMainData = gridData;
+        $("#list3").jqGrid('GridUnload');
+        part_grid.load();
     }
 }
 
