@@ -1878,7 +1878,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			//update
-			if(!StringUtil.contains(ossBean.getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+			if(!ossBean.getGridId().contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
 				//ossComponents 등록
 				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
 				if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
@@ -1919,7 +1919,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										&& isEmpty(comLicense.getLicenseText()) 
 										&& isEmpty(comLicense.getOssCopyright())) 
 									|| duplicateLicense.contains(comLicense.getLicenseId())) {
-									continue;
+									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+									projectMapper.registComponentLicense(license);
+									break;
 								}
 								
 								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
@@ -1995,7 +1997,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 									&& isEmpty(comLicense.getLicenseText()) 
 									&& isEmpty(comLicense.getOssCopyright())) 
 										|| duplicateLicense.contains(comLicense.getLicenseName())) {
-									continue;
+									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+									projectMapper.registComponentLicense(license);
+									break;
 								}
 								
 								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
