@@ -281,12 +281,12 @@ var party_evt = {
 		if (com_fn.checkStatus()){
 			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 				if (e) {
-					var mainDiv = $('#list3').jqGrid('getRowData');
+					var mainData = $('#list3').jqGrid('getGridParam','data');
 					var thirdPartyDiv = $('#_3rdAddList').jqGrid('getRowData');
 					var finalData = {
 						referenceId : '${project.prjId}',
 						identificationSubStatusPartner : $("#applicableParty:checked").val(),
-						mainData : JSON.stringify(mainDiv),
+						mainData : JSON.stringify(mainData),
 						thirdPartyData : JSON.stringify(thirdPartyDiv)
 					}
 					
@@ -650,7 +650,7 @@ var party_evt = {
     },
     removeList : function(removeRow, refPartnerId){
     	$('#_3rdAddList').jqGrid('delRowData', removeRow); // Loaded List - delete row
-    	var mainData = $('#list3').jqGrid('getRowData');
+    	var mainData = $('#list3').jqGrid(('getGridParam','data'));
     	
     	mainData
 	    	.filter(function(a){ 
@@ -659,6 +659,16 @@ var party_evt = {
 	    	.forEach(function(cur,idx){
 	    		$('#list3').jqGrid('delRowData', cur.gridId);
 	    	});
+
+        var gridData = $('#list3').jqGrid('getGridParam', 'data').filter(function(a){
+            if(a.refPartnerId != refPartnerId){
+                return a;
+            }
+        });
+
+        partMainData = gridData;
+        $("#list3").jqGrid('GridUnload');
+        part_grid.load();
     }
 }
 

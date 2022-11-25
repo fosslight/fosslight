@@ -408,11 +408,11 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		
 		if(list != null) {
 			for(LicenseMaster bean : list) {
-				if(CoConstDef.FLAG_YES.equals(bean.getObligationNeedsCheckYn())) {
+				if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNeedsCheckYn()))) {
 					bean.setObligationCode(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK);
-				} else if(CoConstDef.FLAG_YES.equals(bean.getObligationDisclosingSrcYn())) {
+				} else if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationDisclosingSrcYn()))) {
 					bean.setObligationCode(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-				} else if(CoConstDef.FLAG_YES.equals(bean.getObligationNotificationYn())) {
+				} else if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNotificationYn()))) {
 					bean.setObligationCode(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				}
 			}

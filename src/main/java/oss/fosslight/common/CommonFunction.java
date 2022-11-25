@@ -1700,11 +1700,11 @@ public class CommonFunction extends CoTopComponent {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(obligationLicense.getLicenseName()).toUpperCase());
 					
 					if(master != null) {
-						if(CoConstDef.FLAG_YES.equals(master.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -1947,11 +1947,11 @@ public class CommonFunction extends CoTopComponent {
 					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
 						LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().toUpperCase());
 						
-						if(CoConstDef.FLAG_YES.equals(license.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -1972,11 +1972,11 @@ public class CommonFunction extends CoTopComponent {
 					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
 						LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().toUpperCase());
 						
-						if(CoConstDef.FLAG_YES.equals(license.getObligationNeedsCheckYn())) {
+						if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNeedsCheckYn()))) {
 							return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-						} else if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+						} else if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+						} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 							rtnVal = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 						}
 					}
@@ -3025,11 +3025,11 @@ public class CommonFunction extends CoTopComponent {
 				LicenseMaster license = CoCodeManager.LICENSE_INFO_BY_ID.get(bean.getLicenseId());
 				
 				if(license != null) {
-					if(CoConstDef.FLAG_YES.equals(license.getObligationDisclosingSrcYn())) {
+					if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationDisclosingSrcYn()))) {
 						sourceCode = true;
 					}
 					
-					if(CoConstDef.FLAG_YES.equals(license.getObligationNotificationYn())) {
+					if(CoConstDef.FLAG_YES.equals(avoidNull(license.getObligationNotificationYn()))) {
 						notice = true;
 					}
 				}
@@ -3613,6 +3613,9 @@ public class CommonFunction extends CoTopComponent {
 		
 		int gridSeq = 1; 
 		
+		List<String> deactivateOssList = ossService.getDeactivateOssList();
+		deactivateOssList.replaceAll(String::toUpperCase);
+		
 		for(OssAnalysis bean : analysisResultList) {
 			OssAnalysis userData = analysisList
 										.stream()
@@ -3695,8 +3698,14 @@ public class CommonFunction extends CoTopComponent {
 						List<OssMaster> ossInfoByNickList = ossService.getOssListByName(param);
 						
 						if(ossInfoByNickList != null) {
-							ossInfoByNickList = ossInfoByNickList.stream().filter(e -> !e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList());
-							if(ossInfoByNickList.size() == 0 || ossInfoByNickList.get(0).getOssName().equals(bean.getOssName())) break;
+							int deactivateCnt = ossInfoByNickList.stream().filter(e -> e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList()).size();
+							if(deactivateCnt > 0) continue;
+							
+							if(ossAnalysisByNickList.size() > 0) {
+								String checkDuplicateOssName = ossInfoByNickList.get(0).getOssName();
+								int checkDuplicateCnt = ossAnalysisByNickList.stream().filter(e -> e.getOssName().equalsIgnoreCase(checkDuplicateOssName)).collect(Collectors.toList()).size();
+								if(checkDuplicateCnt > 0) continue;
+							}
 							
 							final Comparator<OssMaster> comp = Comparator.comparing((OssMaster o) -> o.getModifiedDate()).reversed();
 							ossInfoByNickList = ossInfoByNickList.stream().sorted(comp).collect(Collectors.toList());
@@ -3715,7 +3724,7 @@ public class CommonFunction extends CoTopComponent {
 							String analysisTitle = ossInfoByNickList.get(0).getOssName();
 							if(!isEmpty(ossInfoByNickList.get(0).getOssVersion())) analysisTitle += " (" + ossInfoByNickList.get(0).getOssVersion() + ")";
 							
-							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), ossInfoByNickList.get(0).getOssVersion(), ossInfoByNickList.get(0).getOssNickname().replaceAll("<br>", ",")
+							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), bean.getOssVersion(), ossInfoByNickList.get(0).getOssNickname().replaceAll("<br>", ",")
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
 									, ossInfoByNickList.get(0).getHomepage(), null, null, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
 							ossInfoByNick.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + idx);
@@ -3781,15 +3790,27 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for(OssAnalysis oa : ossAnalysisByNickList) {
-							changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+							if(totalNewestOssInfo != null) {
+								if(!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !totalNewestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+								}
+							} else {
+								if(newestOssInfo != null) {
+									if(!newestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !newestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+										changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+									}
+								} else {
+									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+								}
+							}
 						}
 					}
 					
-					if(totalNewestOssInfo != null) {
+					if(totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
 					}
 					
-					if(newestOssInfo != null) {
+					if(newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(newestOssInfo); // seq 4 : 최신등록 정보
 						
 						if(newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
@@ -3832,11 +3853,17 @@ public class CommonFunction extends CoTopComponent {
 					
 					if(ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for(OssAnalysis oa : ossAnalysisByNickList) {
-							changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+							if(totalNewestOssInfo != null) {
+								if(!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !totalNewestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+								}
+							} else {
+								changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+							}
 						}
 					}
 					
-					if(totalNewestOssInfo != null) {
+					if(totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
 						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
 					}
 					
@@ -3865,10 +3892,12 @@ public class CommonFunction extends CoTopComponent {
 					try {
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
-						newestOssInfo.setGridId(""+gridSeq++);
-						newestOssInfo.setOssVersion(userData.getOssVersion());
-						
-						changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						if(newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
+							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setOssVersion(userData.getOssVersion());
+							
+							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						}
 					} catch (Exception newestException) {
 						log.error(newestException.getMessage());
 					}

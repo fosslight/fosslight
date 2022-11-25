@@ -298,8 +298,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					
 					if (master != null 
-							&& !CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())
-							&& !CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn())) {
+							&& !CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))
+							&& !CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn()))) {
 						return true;
 					}
 				}
@@ -733,7 +733,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(bean.getLicenseName().split(",").length > 1){
+						if(bean.getLicenseName().split(",").length > 1) {
 							errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 						} else {
 							// 기본체크
@@ -753,7 +753,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
 								LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
 										.get(bean.getLicenseName().trim().toUpperCase());
-								if (master.getObligationDisclosingSrcYn() != null && master.getObligationDisclosingSrcYn().equals("Y")) {
+								if (master != null && CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
 									diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.REQUIRED2");
 								}
 							}
@@ -1700,11 +1700,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(licenseList.size() > 1) {
+						if(bean.getLicenseName().split(",").length > 1) {
 							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 						} else {
 							// 기본체크
 							String errCd = checkBasicError(basicKey, gridKey, bean.getLicenseName());
+
 							if (!isEmpty(errCd)) {
 								errMap.put(basicKey + "." + bean.getGridId(), errCd);
 							} else if (isEmpty(bean.getLicenseName())) {
@@ -1715,10 +1716,14 @@ public class T2CoProjectValidator extends T2CoValidator {
 								} else {
 									diffMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.UNCONFIRMED");
 								}
+							} else if (bean.getComponentLicenseList() != null) {
+								if (bean.getComponentLicenseList().size() > 1) {
+									errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
+								}
 							} else if (CommonFunction.checkLicense(bean.getLicenseName())) {
 								LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
 										.get(bean.getLicenseName().trim().toUpperCase());
-								if (master.getObligationDisclosingSrcYn() != null && master.getObligationDisclosingSrcYn().equals("Y")) {
+								if (master != null && CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))) {
 									diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.REQUIRED2");
 								}
 							}
@@ -1814,9 +1819,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 						}
 					}
 					
-					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get(checkKey);
-					if(ossBean != null) {
-						if(CoConstDef.FLAG_YES.equals(ossBean.getDeactivateFlag())){
+					if(ossmaster != null) {
+						if(CoConstDef.FLAG_YES.equals(ossmaster.getDeactivateFlag())){
 							if (CommonFunction.isAdmin()) {
 								errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
 							} else {
@@ -2411,11 +2415,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 				
 				if (!isEmpty(license.getLicenseName())
-						&& CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().toUpperCase())) {
+						&& CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license.getLicenseName()).toUpperCase())) {
 					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					
-					if (master != null && (CoConstDef.FLAG_YES.equals(master.getObligationDisclosingSrcYn())
-							|| CoConstDef.FLAG_YES.equals(master.getObligationNotificationYn()))) {
+					if (master != null && (CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationDisclosingSrcYn()))
+							|| CoConstDef.FLAG_YES.equals(avoidNull(master.getObligationNotificationYn())))) {
 						return true;
 					}
 				}

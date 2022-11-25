@@ -1402,7 +1402,7 @@
 			   </choose>
 			   ORDER BY COMPONENT_ID, (CASE WHEN S.LICENSE_ID IS NULL THEN 99999 ELSE 1 END), COMPONENT_LICENSE_IDX ASC
 		) RESULT
-		ORDER BY COMPONENT_ID, RNUM ASC 
+		ORDER BY COMPONENT_IDX, RNUM ASC 
 	</select>
 	
 	<select id="getLicensesId" parameterType="String" resultType="String">

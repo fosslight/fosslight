@@ -2452,6 +2452,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if(mergeListMap != null && mergeListMap.get("rows") != null) {
 			for(ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
+				
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
