@@ -733,7 +733,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(bean.getOssComponentsLicenseList().size() > 1) {
+						if(bean.getLicenseName().split(",").length > 1) {
 							errMap.put(basicKey + "." + bean.getComponentId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 						} else {
 							// 기본체크
@@ -1700,7 +1700,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					{
 						basicKey = "LICENSE_NAME";
 						gridKey = StringUtil.convertToCamelCase(basicKey);
-						if(bean.getComponentLicenseList().size() > 1) {
+						if(bean.getLicenseName().split(",").length > 1) {
 							errMap.put(basicKey + "." + bean.getGridId(), "LICENSE_NAME.INCLUDE_MULTI_OPERATE");
 						} else {
 							// 기본체크
