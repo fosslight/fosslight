@@ -254,6 +254,8 @@ public class CoMailManager extends CoTopComponent {
     					if(!userInfo.containsKey("newcomer")) {
     						userName += " -> ";
     						userName += (String) userInfo.get("afterUserName");
+    					} else {
+    						t2user.setModifiedDate((String) userInfo.get("createdDate"));
     					}
     						   
     					t2user.setUserName(userName);

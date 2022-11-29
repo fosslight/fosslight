@@ -66,6 +66,26 @@ public class T2Users extends ComBean implements Serializable{
 	private String token;
 	
 	private String expireDate;
+	
+	private String expireFlag;
+	
+	private String modifiedFlag;
+
+	public String getModifiedFlag() {
+		return modifiedFlag;
+	}
+
+	public void setModifiedFlag(String modifiedFlag) {
+		this.modifiedFlag = modifiedFlag;
+	}
+
+	public String getExpireFlag() {
+		return expireFlag;
+	}
+
+	public void setExpireFlag(String expireFlag) {
+		this.expireFlag = expireFlag;
+	}
 
 	public T2Users() {}
 	

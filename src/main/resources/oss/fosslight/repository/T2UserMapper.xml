@@ -207,6 +207,12 @@
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
             , MODIFIER = #{modifier}
         </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFlag) and @oss.fosslight.util.StringUtil@equals('Y', modifiedFlag)">
+            , MODIFIED_DATE = now()
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(expireFlag) and @oss.fosslight.util.StringUtil@equals('Y', expireFlag)">
+            , EXPIRE_DATE = now()
+        </if>
         	, USE_YN = #{useYn}
         WHERE 
         	USER_ID = #{userId}
