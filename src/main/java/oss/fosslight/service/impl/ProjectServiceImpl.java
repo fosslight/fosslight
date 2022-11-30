@@ -1914,11 +1914,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
 						for (ProjectIdentification comLicense : comLicenseList) {
 							if(ossBean.getComponentId().equals(comLicense.getComponentId())){
+								if(!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+									continue;
+								}
+								
 								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
 								if((isEmpty(comLicense.getLicenseName()) 
 										&& isEmpty(comLicense.getLicenseText()) 
-										&& isEmpty(comLicense.getOssCopyright())) 
-									|| duplicateLicense.contains(comLicense.getLicenseId())) {
+										&& isEmpty(comLicense.getOssCopyright()))) {
 									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
 									projectMapper.registComponentLicense(license);
 									break;
@@ -1992,11 +1995,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							gridId = gridId.split("-")[0];
 							
 							if(exComponentId.equals(comLicense.getComponentId()) || exComponentId.equals(gridId)){
+								if(!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+									continue;
+								}
+								
 								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
 								if((isEmpty(comLicense.getLicenseName()) 
 									&& isEmpty(comLicense.getLicenseText()) 
-									&& isEmpty(comLicense.getOssCopyright())) 
-										|| duplicateLicense.contains(comLicense.getLicenseName())) {
+									&& isEmpty(comLicense.getOssCopyright()))) {
 									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
 									projectMapper.registComponentLicense(license);
 									break;
