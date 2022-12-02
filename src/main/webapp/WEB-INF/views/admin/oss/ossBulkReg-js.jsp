@@ -11,6 +11,8 @@
     var postData; /**list data for sending to server*/
     var stringDataForValid = ['ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
+    var inputStringDataForValid = ['ossName','ossVersion','homepage','downloadLocation'];
+    var textAreaStringDataForValid = ['copyright', 'summaryDescription', 'attribution', 'comment'];
     var listDataForValid = ["ossNicknames", "declaredLicenses", "detectedLicenses"];
     var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
@@ -111,8 +113,12 @@
      * */
     function dataValidCheck(mainData) {
         mainData.forEach((row) => {
-            stringDataForValid.forEach((strData) => {
+            inputStringDataForValid.forEach((strData) => {
                 ossData[row["gridId"]][strData] = row[strData].trim();
+            })
+
+            textAreaStringDataForValid.forEach((strData) => {
+                ossData[row["gridId"]][strData] = row[strData];
             })
 
             listDataForValid.forEach((listData) => {
