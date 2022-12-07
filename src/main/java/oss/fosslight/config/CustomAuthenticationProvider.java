@@ -102,7 +102,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				con = new InitialDirContext(properties);
 				rtnMap.put("isAuthenticated", true);
 			}catch (NamingException e) {
-				log.warn("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
+				log.debug("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
 				rtnMap.put("isAuthenticated", false);
 				return rtnMap;
 			} finally {
