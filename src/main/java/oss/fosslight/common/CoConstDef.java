@@ -604,6 +604,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL = "93";
 	/** vulnerability score가 9.0 이상에서 삭제되어 recalculated 대상이 된 경우 */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED = "94";
+	/* nvd data 중 vendor-product 가 다른 경우 */
+	public static final String CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF = "95";
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
 	
 	/** Mail Type엥 따른 공통 Components 구성 */
