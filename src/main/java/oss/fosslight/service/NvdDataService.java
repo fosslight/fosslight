@@ -6,12 +6,20 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -46,10 +54,23 @@ public class NvdDataService {
 	
 	private final int BATCH_SIZE = 1000;
 	
+	private String JDBC_DRIVER;  
+	private String DB_URL;
+	private String USERNAME;
+	private String PASSWORD;
+	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
 	@Autowired SqlSessionFactory sqlSessionFactory;
+	
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
+		DB_URL = env.getRequiredProperty("spring.datasource.url");
+		USERNAME = env.getRequiredProperty("spring.datasource.username");
+		PASSWORD = env.getRequiredProperty("spring.datasource.password");
+	}
 	
 	public String executeNvdDataSync() throws IOException {
 		
@@ -105,7 +126,7 @@ public class NvdDataService {
 	@Transactional
 	private String nvdCveDataSyncJob() throws JsonParseException, JsonMappingException, IOException {
 		String resCd = "00";
-
+		log.info("Start CVE Data Sync Job");
 		// 1. Wait Job 데이터 조회
 		HashMap<String, Object> param = new HashMap<String, Object>();
 		param.put("fileType", "CVE");
@@ -139,27 +160,118 @@ public class NvdDataService {
 		// 위험성 : truncate는 transaction 으로 관리 할 수 없다. truncate이후에 insert 실패시 data 없을 수 있음
 		
 		if(updateFlag){
+			String insertQuery = "INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, VENDOR, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE ) VALUES (?,?,?,?,?,?,?) "
+					+ "ON DUPLICATE KEY UPDATE PRODUCT = values(PRODUCT), VERSION = values(VERSION), VENDOR = values(VENDOR), CVE_ID = values(CVE_ID), CVSS_SCORE = values(CVSS_SCORE), VULN_SUMMARY = values(VULN_SUMMARY), MODI_DATE = values(MODI_DATE)";
+			
+			String selectQuery = "SELECT NVD.PRODUCT, NVD.VERSION, GROUP_CONCAT(DISTINCT(NVD.VENDOR)) AS VENDOR FROM (SELECT T2.* FROM (SELECT @ROWNUM:=@ROWNUM+1 AS SEQ, T1.PRODUCT FROM ("
+					+ "SELECT PRODUCT FROM NVD_DATA_V3 GROUP BY PRODUCT ORDER BY PRODUCT ) T1, (SELECT @ROWNUM:=0) AS R ) T2 WHERE T2.SEQ BETWEEN ? AND ? ) NVD_PRODUCT JOIN NVD_DATA_V3 NVD ON NVD_PRODUCT.PRODUCT = NVD.PRODUCT GROUP BY NVD.PRODUCT, NVD.VERSION";
+			
+			String selectQuery2 = "SELECT T2.PRODUCT, T2.VERSION, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE FROM NVD_CVE_V3 T1, NVD_DATA_V3 T2 WHERE T1.CVE_ID = T2.CVE_ID AND T2.PRODUCT = ? AND T2.VERSION = ? "
+					+ "AND T1.CVSS_SCORE = (SELECT MAX(CVSS_SCORE) AS CVSS_SCORE  FROM NVD_CVE_V3 WHERE CVE_ID IN (SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = ? AND VERSION = ?)) ORDER BY CVE_ID DESC LIMIT 1";
 			// temp table에 data insert 이후, real table로 copy
 			nvdDataMapper.deleteNvdDataTempV3();
 			
 			int cnt = nvdDataMapper.getProducVerCnt();
 			List<Map<String, Object>> itemList = new ArrayList<>();
 			List<Map<String, Object>> params = new ArrayList<>();
-			for(int idx = 0; idx < cnt; ) {
-				itemList = nvdDataMapper.getProducVerList(idx, BATCH_SIZE);
-				params.clear();
-				for(Map<String, Object> item : itemList) {
-					params.add(nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION")));
-				}
-				nvdDataMapper.insertNvdDataListTempV3(params);
+			int endIdx = BATCH_SIZE;
+						
+			Connection conn = null;
+			Connection conn1 = null;
+			Connection conn2 = null;
+			
+			PreparedStatement getProductStmt = null;
+			PreparedStatement getMaxScoreProductVerStmt = null;
+			PreparedStatement insertStmt = null;
+			
+			try {
+				Class.forName(JDBC_DRIVER);
 				
-				idx = idx+BATCH_SIZE;
-				itemList.clear();
+				conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+				conn.setAutoCommit(false);
+				
+				conn1 = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+				conn1.setAutoCommit(false);
+				
+				conn2 = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+				conn2.setAutoCommit(false);
+				
+				getProductStmt = conn.prepareStatement(selectQuery);
+				getMaxScoreProductVerStmt = conn1.prepareStatement(selectQuery2);
+				insertStmt = conn2.prepareStatement(insertQuery);
+				
+				for(int idx = 0; idx < cnt; ) {
+					if(endIdx >= cnt) endIdx = cnt;
+					preparedStatementGetProductList(conn2, itemList, params, getProductStmt, getMaxScoreProductVerStmt, insertStmt, idx, endIdx);
+					
+					idx = idx+BATCH_SIZE;
+					endIdx = idx+BATCH_SIZE;
+					
+					if(idx % 10000 == 0) {
+						log.info("NVD_DATA_TEMP_V3 process : " + idx + " / " + cnt);
+					}
+				}
+				log.info("NVD_DATA_TEMP_V3 process : " + cnt + " / " + cnt);
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+				
+				try{
+					if(insertStmt!=null)
+						insertStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(getMaxScoreProductVerStmt!=null)
+						getMaxScoreProductVerStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(getMaxScoreProductVerStmt!=null)
+						getMaxScoreProductVerStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn2!=null)
+						conn2.rollback();
+						conn2.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn1!=null)
+						conn1.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn!=null)
+						conn.close();
+				}catch(SQLException e1){}
+			} finally {
+				try{
+					if(insertStmt!=null)
+						insertStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(getMaxScoreProductVerStmt!=null)
+						getMaxScoreProductVerStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(getMaxScoreProductVerStmt!=null)
+						getMaxScoreProductVerStmt.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn2!=null)
+						conn2.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn1!=null)
+						conn1.close();
+				}catch(SQLException e1){}
+				try{
+					if(conn!=null)
+						conn.close();
+				}catch(SQLException e1){}
 			}
-
+			
 			nvdDataMapper.deleteNvdDataScoreV3();
 			nvdDataMapper.insertNvdDataScoreV3();
 			nvdDataMapper.deleteNvdDataTempV3();
+
+			log.info("End CVE Data Sync Job");
 		}
 		
 		int nickNameMgrCnt = nvdDataMapper.selectNickNameMgrtNvdDataScoreV3();
@@ -193,7 +305,164 @@ public class NvdDataService {
 		return resCd;
 	}
 	
+	private void preparedStatementGetProductList(Connection conn2, List<Map<String, Object>> itemList, List<Map<String, Object>> params, 
+			PreparedStatement getProductStmt, PreparedStatement getMaxScoreProductVerStmt, PreparedStatement insertStmt, int batchIdx, int batchEndIdx) {
+		ResultSet rs = null;
+		Map<String, Object> itemMap = null;
+		
+		try {
+			getProductStmt.setInt(1, batchIdx);
+			getProductStmt.setInt(2, batchEndIdx);
+			
+			rs = getProductStmt.executeQuery();
+			
+			getProductStmt.clearParameters();
+			
+			while (rs.next()) {
+				itemMap = new HashMap<>();
+				itemMap.put("ossName", rs.getString(1));
+				itemMap.put("ossVersion", rs.getString(2));
+				itemMap.put("vendor", rs.getString(3));
+				
+				itemList.add(itemMap);
+				
+				if(itemList.size() % BATCH_SIZE == 0) {
+					preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
+					itemList.clear();
+				}
+			}
+			
+			if(itemList.size() > 0) {
+				preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
+			}
+		} catch(Exception e) {
+			itemList.clear();
+			log.error(e.getMessage(), e);
+			try{
+				if(rs!=null)
+					rs.close();
+			}catch(SQLException e1){}
+		} finally {
+			itemList.clear();
+			try{
+				if(rs!=null)
+					rs.close();
+			}catch(SQLException e1){}
+		}
+	}
 	
+	private void preparedStatementGetMaxScoreProductVer(Connection conn2, PreparedStatement getMaxScoreProductVerStmt, PreparedStatement insertStmt, List<Map<String, Object>> itemList, List<Map<String, Object>> params) {
+		ResultSet getMaxScoreProductVerRs = null;
+		Map<String, Object> paramMap = null;
+		
+		try {
+			String vendor = "";
+			List<String> vendorList = new ArrayList<>();
+			
+			for(Map<String, Object> item : itemList) {
+				vendor = (String) item.get("vendor");
+				for(String chk : vendor.split(",")) {
+					if(!StringUtil.isEmpty(chk)) {
+						vendorList.add(chk);
+					}
+				}
+				
+				getMaxScoreProductVerStmt.setString(1, (String) item.get("ossName"));
+				getMaxScoreProductVerStmt.setString(2, (String) item.get("ossVersion"));
+				getMaxScoreProductVerStmt.setString(3, (String) item.get("ossName"));
+				getMaxScoreProductVerStmt.setString(4, (String) item.get("ossVersion"));
+				
+				getMaxScoreProductVerRs = getMaxScoreProductVerStmt.executeQuery();
+				
+				getMaxScoreProductVerStmt.clearParameters();
+				
+				if(vendorList.size() > 0) {
+					while (getMaxScoreProductVerRs.next()) {
+						for(String vn : vendorList) {
+							paramMap = new HashMap<>();
+							paramMap.put("PRODUCT", getMaxScoreProductVerRs.getString(1));
+							paramMap.put("VERSION", getMaxScoreProductVerRs.getString(2));
+							paramMap.put("VENDOR", vn);
+							paramMap.put("CVE_ID", getMaxScoreProductVerRs.getString(3));
+							paramMap.put("CVSS_SCORE", getMaxScoreProductVerRs.getFloat(4));
+							paramMap.put("VULN_SUMMARY", getMaxScoreProductVerRs.getString(5));
+							paramMap.put("MODI_DATE", getMaxScoreProductVerRs.getTimestamp(6));
+							
+							params.add(paramMap);
+							
+							if(params.size() % BATCH_SIZE == 0) {
+								preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
+								params.clear();
+							}
+						}
+					}
+				} else {
+					while (getMaxScoreProductVerRs.next()) {
+						paramMap = new HashMap<>();
+						paramMap.put("PRODUCT", getMaxScoreProductVerRs.getString(1));
+						paramMap.put("VERSION", getMaxScoreProductVerRs.getString(2));
+						paramMap.put("VENDOR", "");
+						paramMap.put("CVE_ID", getMaxScoreProductVerRs.getString(3));
+						paramMap.put("CVSS_SCORE", getMaxScoreProductVerRs.getFloat(4));
+						paramMap.put("VULN_SUMMARY", getMaxScoreProductVerRs.getString(5));
+						paramMap.put("MODI_DATE", getMaxScoreProductVerRs.getTimestamp(6));
+						
+						params.add(paramMap);
+						
+						if(params.size() % BATCH_SIZE == 0) {
+							preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
+							params.clear();
+						}
+					}
+				}
+			}
+			
+			if(params.size() > 0) {
+				preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
+				params.clear();
+			}
+		} catch(Exception e) {
+			params.clear();
+			log.error(e.getMessage(), e);
+			try{
+				if(getMaxScoreProductVerRs!=null)
+					getMaxScoreProductVerRs.close();
+			}catch(SQLException e1){}
+			try{
+				if(getMaxScoreProductVerStmt!=null)
+					getMaxScoreProductVerStmt.close();
+			}catch(SQLException e1){}
+		} finally {
+			params.clear();
+			try{
+				if(getMaxScoreProductVerRs!=null)
+					getMaxScoreProductVerRs.close();
+			}catch(SQLException e){}
+		}
+	}
+	
+	private void preparedStatementInsertNvdDataListTempV3(Connection conn2, PreparedStatement insertStmt, List<Map<String, Object>> params) {
+		try{
+			for(Map<String, Object> item : params) {
+				insertStmt.setString(1, (String) item.get("PRODUCT"));
+				insertStmt.setString(2, (String) item.get("VERSION"));
+				insertStmt.setString(3, (String) item.get("VENDOR"));
+				insertStmt.setString(4, (String) item.get("CVE_ID"));
+				insertStmt.setFloat(5, (float) item.get("CVSS_SCORE"));
+				insertStmt.setString(6, (String) item.get("VULN_SUMMARY"));
+				insertStmt.setTimestamp(7, Timestamp.valueOf(item.get("MODI_DATE").toString()));
+				insertStmt.addBatch();
+				insertStmt.clearParameters();
+			}
+
+			// 커밋되지 못한 나머지 구문에 대하여 커밋
+			insertStmt.executeBatch() ;
+			conn2.commit();
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	private boolean updateNvdData(String cpeFileRootPath, String cpeFileName) throws JsonParseException, JsonMappingException, IOException {
 
@@ -270,7 +539,8 @@ public class NvdDataService {
 
 						Map<String, String> _productInfo = new HashMap<>();
 						_productInfo.put("cveId", cveId);
-						_productInfo.put("product", cpeInfoArr[4].replaceAll("_", " "));
+						_productInfo.put("vendor", cpeInfoArr[3]);
+						_productInfo.put("product", cpeInfoArr[4]);
 						_productInfo.put("version", cpeInfoArr[5]);
 
 						ossList.add(_productInfo);
@@ -283,19 +553,7 @@ public class NvdDataService {
 					nvdDataMapper.insertCveInfoV3(cveInfo);
 					
 					if(!ossList.isEmpty()) {
-						insertDataList.clear();
-						for(Map<String, String> item : ossList){
-							insertDataList.add(item);
-							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
-								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList.clear();
-							}
-						}
-						// 미등록 data가 존재하는 경우 나머지를 등록한다.
-						if( !insertDataList.isEmpty() ) {
-							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-							insertDataList.clear();
-						}
+						insertDataList.addAll(ossList);
 					}
 					
 					updateFlag = true;
@@ -309,45 +567,84 @@ public class NvdDataService {
 					// 변경 데이터 등록
 					nvdDataMapper.insertCveInfoV3(cveInfo);
 					if(!ossList.isEmpty()) {
-						insertDataList.clear();
-						for(Map<String, String> item : ossList){
-							insertDataList.add(item);
-							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
-								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList.clear();
-							}
-						}
-						// 미등록 data가 존재하는 경우 나머지를 등록한다.
-						if( !insertDataList.isEmpty() ) {
-							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-							insertDataList.clear();
-						}
+						insertDataList.addAll(ossList);
 					}
 				} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
 						&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
 					// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
 					
 					if(!ossList.isEmpty()) {
-						insertDataList.clear();
-						for(Map<String, String> item : ossList){
-							insertDataList.add(item);
-							if( (insertDataList.size() % BATCH_SIZE) == 0 ) {
-								nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-								insertDataList.clear();
-							}
-						}
-						// 미등록 data가 존재하는 경우 나머지를 등록한다.
-						if( !insertDataList.isEmpty() ) {
-							nvdDataMapper.insertBulkNvdDataV3(insertDataList);
-							insertDataList.clear();
-						}
+						insertDataList.addAll(ossList);
 					}
 				}
-				updateFlag = true;
+				
+				if(insertDataList.size() % BATCH_SIZE == 0) {
+					prepareStatementUpdateNvdData(insertDataList);
+					insertDataList.clear();
+				}
+			}
+			
+			if(insertDataList.size() > 0) {
+				prepareStatementUpdateNvdData(insertDataList);
 			}
 		}
 	
 		return updateFlag;
+	}
+
+	private void prepareStatementUpdateNvdData(List<Map<String, String>> insertDataList) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			String SQL_INSERT = "INSERT INTO NVD_DATA_V3 (CVE_ID, PRODUCT, VERSION, VENDOR) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE CVE_ID = values(cve_id), PRODUCT = values(product), VERSION = values(version), VENDOR = values(vendor)";
+			stmt = conn.prepareStatement(SQL_INSERT);
+			
+			int seq = 1;
+			
+			for(Map<String, String> item : insertDataList){
+				stmt.setString(1, (String) item.get("cveId"));
+				stmt.setString(2, (String) item.get("product"));
+				stmt.setString(3, (String) item.get("version"));
+				stmt.setString(4, (String) item.get("vendor"));
+				stmt.addBatch();
+				stmt.clearParameters();
+				
+				if((seq % BATCH_SIZE) == 0 ) {
+					stmt.executeBatch();
+					stmt.clearBatch();
+					conn.commit();
+				}
+				
+				seq++;
+			}
+			
+			stmt.executeBatch();
+			conn.commit();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if(stmt!=null)
+					stmt.close();
+			}catch(SQLException e){}
+			
+			try{
+				if(conn!=null)
+					conn.close();
+			}catch(SQLException e){}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -471,7 +768,7 @@ public class NvdDataService {
 	private boolean nvdMetaRetryCheckJob(String FILE_NM, String FILE_TYPE, boolean fileCheck, int cnt) {
 		int maxCnt = 3;
 		
-		log.debug("5초후 재시도합니다.");
+		log.warn("5초후 재시도합니다.");
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
@@ -544,8 +841,14 @@ public class NvdDataService {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
 		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-		
 
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+
+		String SQL_INSERT = "INSERT INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) VALUES (?,?,?,?,?,?)";
+		String SQL_INSERT2 = "INSERT INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI) VALUES (?,?,?)";
+		
 		// 2. Json File -> DB Insert
 		for (Map<String, Object> wMetaMap : waitList) {
 			param.put("fileNm", wMetaMap.get("fileNm"));
@@ -557,8 +860,6 @@ public class NvdDataService {
 			
 			nvdDataMapper.updateJobStatus(param);
 
-			List<Map<String, Object>> cpeMetaList = new ArrayList<>();
-			List<Map<String, Object>> cpeNameList = new ArrayList<>();
 			int totSize = 0;
 			try {
 				log.info("Read NVD Meta Data, fileName: " + wMetaMap.get("fileNm"));
@@ -580,73 +881,102 @@ public class NvdDataService {
 					nvdDataMapper.truncateCpeMatchTemp();
 					nvdDataMapper.truncateCpeMatchNameTemp();
 					
-					for (Map<String, Object> matchItem : matchItems) {
+					try {
+						Class.forName(JDBC_DRIVER);
+						conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+						conn.setAutoCommit(false);
+						stmt = conn.prepareStatement(SQL_INSERT);
+						stmt2 = conn.prepareStatement(SQL_INSERT2);
 						
-						// cpe23uri (key)
-						String cpe23Uri = (String) matchItem.get("cpe23Uri");
-						// version range conditions
-						String versionStartIncluding = null;
-						String versionEndIncluding = null;
-						String versionStartExcluding = null;
-						String versionEndExcluding = null;
-
-						if (matchItem.containsKey("versionStartIncluding")) {
-							versionStartIncluding = (String) matchItem.get("versionStartIncluding");
-						}
-						if (matchItem.containsKey("versionEndIncluding")) {
-							versionEndIncluding = (String) matchItem.get("versionEndIncluding");
-						}
-						if (matchItem.containsKey("versionStartExcluding")) {
-							versionStartExcluding = (String) matchItem.get("versionStartExcluding");
-						}
-						if (matchItem.containsKey("versionEndExcluding")) {
-							versionEndExcluding = (String) matchItem.get("versionEndExcluding");
-						}
-
-						Map<String, Object> cpeMetaMap = new HashMap<>();
-						cpeMetaMap.put("cpeSeq", seq);
-						cpeMetaMap.put("cpe23Uri", cpe23Uri);
-						cpeMetaMap.put("versionStartIncluding", versionStartIncluding);
-						cpeMetaMap.put("versionEndIncluding", versionEndIncluding);
-						cpeMetaMap.put("versionStartExcluding", versionStartExcluding);
-						cpeMetaMap.put("versionEndExcluding", versionEndExcluding);
+						int seq2 = 1;
 						
-						cpeMetaList.add(cpeMetaMap);
-						
-						if(cpeMetaList.size() % BATCH_SIZE == 0) {
-							nvdDataMapper.insertBulkCpeMatchData(cpeMetaList);
-							cpeMetaList.clear();
-						}
+						for (Map<String, Object> matchItem : matchItems) {
+							
+							// cpe23uri (key)
+							String cpe23Uri = (String) matchItem.get("cpe23Uri");
+							// version range conditions
+							String versionStartIncluding = null;
+							String versionEndIncluding = null;
+							String versionStartExcluding = null;
+							String versionEndExcluding = null;
 
-						// CPE Names
-						if(matchItem.containsKey("cpe_name")) {
-							int nameIdx = 0;
-							for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
-								cpe_name.put("cpeSeq", seq);
-								cpe_name.put("idx", nameIdx);
-								cpeNameList.add(cpe_name);
-								if(cpeNameList.size() % BATCH_SIZE == 0) {
-									nvdDataMapper.insertBulkCpeMatchNameData(cpeNameList);
-									cpeNameList.clear();
+							if (matchItem.containsKey("versionStartIncluding")) {
+								versionStartIncluding = (String) matchItem.get("versionStartIncluding");
+							}
+							if (matchItem.containsKey("versionEndIncluding")) {
+								versionEndIncluding = (String) matchItem.get("versionEndIncluding");
+							}
+							if (matchItem.containsKey("versionStartExcluding")) {
+								versionStartExcluding = (String) matchItem.get("versionStartExcluding");
+							}
+							if (matchItem.containsKey("versionEndExcluding")) {
+								versionEndExcluding = (String) matchItem.get("versionEndExcluding");
+							}
+
+							stmt.setInt(1, seq);
+							stmt.setString(2, cpe23Uri);
+							stmt.setString(3, versionStartIncluding);
+							stmt.setString(4, versionEndIncluding);
+							stmt.setString(5, versionStartExcluding);
+							stmt.setString(6, versionEndExcluding);
+							stmt.addBatch();
+							stmt.clearParameters();
+
+							// CPE Names
+							if(matchItem.containsKey("cpe_name")) {
+								int nameIdx = 0;
+								for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
+									stmt2.setInt(1, seq);
+									stmt2.setInt(2, nameIdx);
+									stmt2.setString(3, (String) cpe_name.get("cpe23Uri"));
+									stmt2.addBatch();
+									stmt2.clearParameters();
+									
+									if(seq2 % BATCH_SIZE == 0) {
+										stmt2.executeBatch(); // Batch 실행
+										stmt2.clearBatch(); // Batch 초기화
+					                    conn.commit(); // 커밋
+									}
+									nameIdx++;
+									seq2++;
 								}
-								nameIdx++;
+							}
+							
+							if(seq % BATCH_SIZE == 0) {
+								stmt.executeBatch(); // Batch 실행
+			                    stmt.clearBatch(); // Batch 초기화
+			                    conn.commit(); // 커밋
+								log.info("In progress : " + seq + "/" + totSize);
+							}
+
+							seq++;
+						}
+						
+						stmt.executeBatch(); // Batch 실행
+						stmt2.executeBatch(); // Batch 실행
+						conn.commit();
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+						if(conn != null) {
+							try {
+								conn.rollback();
+							} catch (Exception e2) {
+								log.error(e2.getMessage(), e2);
 							}
 						}
-						
-//						if(seq % 10000 == 0) {
-//							log.info("In progress : " + seq + "/" + totSize);
-//						}
-
-						seq++;
-					}
-
-					if(!cpeMetaList.isEmpty()) {
-						nvdDataMapper.insertBulkCpeMatchData(cpeMetaList);
-						cpeMetaList.clear();
-					}
-					if(!cpeNameList.isEmpty()) {
-						nvdDataMapper.insertBulkCpeMatchNameData(cpeNameList);
-						cpeNameList.clear();
+					} finally {
+						try{
+							if(stmt!=null)
+								stmt.close();
+						}catch(SQLException e){}
+						try{
+							if(stmt2!=null)
+								stmt2.close();
+						}catch(SQLException e){}
+						try{
+							if(conn!=null)
+								conn.close();
+						}catch(SQLException e){}
 					}
 				}
 
