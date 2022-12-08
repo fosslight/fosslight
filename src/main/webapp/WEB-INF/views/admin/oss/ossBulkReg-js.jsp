@@ -11,6 +11,8 @@
     var postData; /**list data for sending to server*/
     var stringDataForValid = ['ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
+    var inputStringDataForValid = ['ossName','ossVersion','homepage','downloadLocation'];
+    var textAreaStringDataForValid = ['copyright', 'summaryDescription', 'attribution', 'comment'];
     var listDataForValid = ["ossNicknames", "declaredLicenses", "detectedLicenses"];
     var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','copyright','homepage','downloadLocation'
         ,'summaryDescription','attribution', 'comment'];
@@ -111,8 +113,12 @@
      * */
     function dataValidCheck(mainData) {
         mainData.forEach((row) => {
-            stringDataForValid.forEach((strData) => {
+            inputStringDataForValid.forEach((strData) => {
                 ossData[row["gridId"]][strData] = row[strData].trim();
+            })
+
+            textAreaStringDataForValid.forEach((strData) => {
+                ossData[row["gridId"]][strData] = row[strData];
             })
 
             listDataForValid.forEach((listData) => {
@@ -218,12 +224,12 @@
                 { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
                 { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
                 { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
-                { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false},
+                { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
                 { name: 'homepage', index:'homepage', width: 250, align: 'left', editable:false},
                 { name: 'downloadLocation', index:'downloadLocation', width: 150, align: 'left', editable:false},
-                { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false},
-                { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false},
-                { name: 'comment', index:'comment', width: 150, align: 'left', editable:false},
+                { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+                { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+                { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
                 { name: 'status', index:'status', width: 500, align: 'left'}
             ],
             viewrecords: true,
