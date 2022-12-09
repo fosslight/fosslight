@@ -2195,7 +2195,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 									checkName = "Invalid download location.";
 									bean.setCheckOssList("I");
 								}
-							} else if (urlSearchSeq == 3){
+							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 							} else {
 								String redirectlocationUrl = "";
