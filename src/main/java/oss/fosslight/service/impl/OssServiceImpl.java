@@ -2189,7 +2189,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
 
 						} else {
-							if(urlSearchSeq != 7){
+							if (urlSearchSeq == 7) {
+								checkName = generateCheckOSSName(downloadlocationUrl, p, androidPlatformList);
+								if(isEmpty(checkName)){
+									checkName = "Invalid download location.";
+									bean.setCheckOssList("I");
+								}
+							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
+								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
+							} else {
 								String redirectlocationUrl = "";
 								String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
 								if (CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
@@ -2221,12 +2229,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 										bean.setCheckOssList("I");
 									}
 								} catch (IOException e) {
-									checkName = "Invalid download location.";
-									bean.setCheckOssList("I");
-								}
-							} else {
-								checkName = generateCheckOSSName(downloadlocationUrl, p, androidPlatformList);
-								if(isEmpty(checkName)){
 									checkName = "Invalid download location.";
 									bean.setCheckOssList("I");
 								}

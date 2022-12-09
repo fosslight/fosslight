@@ -234,6 +234,10 @@ public class CoMailManager extends CoTopComponent {
     			
     		}
     		
+    		if(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF.equals(bean.getMsgType())) {
+    			convertDataMap.put("vulnerability_diff_vendor_info", bean.getParamList());
+    		}
+    		
     		// ldap Search시 사용자 정보가 변경된 경우
     		if(CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO.equals(bean.getMsgType()) && bean.getParamList() != null) {
     			List<Map<String, Object>> userList = bean.getParamList();
@@ -711,6 +715,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
+    		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
     			bean.setToIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
@@ -2992,11 +2997,11 @@ public class CoMailManager extends CoTopComponent {
 			bean.setObligationNotificationYn(avoidNull((String) dataMap.get("OBLIGATION_NOTIFICATION_YN"))); 
 			bean.setObligationNeedsCheckYn(avoidNull((String) dataMap.get("OBLIGATION_NEEDS_CHECK_YN"))); 
 			
-			if(CoConstDef.FLAG_YES.equals(bean.getObligationNeedsCheckYn())) {
+			if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNeedsCheckYn()))) {
 				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK)); 
-			} else if(CoConstDef.FLAG_YES.equals(bean.getObligationDisclosingSrcYn())) {
+			} else if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationDisclosingSrcYn()))) {
 				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE));
-			} else if(CoConstDef.FLAG_YES.equals(bean.getObligationNotificationYn())) {
+			} else if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNotificationYn()))) {
 				bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, CoConstDef.CD_DTL_OBLIGATION_NOTICE));
 			}
 			

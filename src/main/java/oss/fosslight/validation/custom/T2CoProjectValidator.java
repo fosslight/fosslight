@@ -1312,7 +1312,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 			// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
 			String licenseName = avoidNull(license.getLicenseName()).trim().toUpperCase();
 			
-			if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName)) {
+			if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName) && !checkLicenseNameList.contains(licenseName)) {
 				continue;
 			}
 			
@@ -1483,7 +1483,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				// 포함되어 있지 않은 라이선스가 하나라도 존재한다면 false
 				String licenseName = avoidNull(license.getLicenseName()).trim().toUpperCase();
 				
-				if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName)) {
+				if(!detectedLicenseCheck && detectedLicenseList.contains(licenseName) && !checkLicenseNameList.contains(licenseName)) {
 					continue;
 				}
 				

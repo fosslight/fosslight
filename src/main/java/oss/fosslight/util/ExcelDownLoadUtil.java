@@ -3502,6 +3502,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, convertPipeToLineSeparator(param.getVulnSummary())
 					, param.getPublDate()
 					, param.getModiDate()
+					, param.getVendor()
 				};
 				ossName.add(param.getProduct());
 				rows.add(rowParam);
