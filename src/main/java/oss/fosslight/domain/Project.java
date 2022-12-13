@@ -672,6 +672,7 @@ public class Project extends ComBean implements Serializable {
 	
 	private String changeStatusFlag;
 
+	private String ossNameTemp;
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -4207,5 +4208,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setStatusPermission(int statusPermission) {
 		this.statusPermission = statusPermission;
+	}
+
+	public String getOssNameTemp() {
+		return ossNameTemp;
+	}
+
+	public void setOssNameTemp(String ossNameTemp) {
+		this.ossNameTemp = ossNameTemp;
 	}
 }

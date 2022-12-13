@@ -732,6 +732,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if(!isEmpty(max_vuln_ossName)) {
 				vnlnUpdBean.setOssName(max_vuln_ossName);
 				vnlnUpdBean.setOssVersion(avoidNull(max_vuln_ossVersion));
+				if(max_vuln_ossName.contains(" ")) vnlnUpdBean.setOssNameTemp(max_vuln_ossName.replaceAll(" ", "_"));
 				vnlnUpdBean = selfCheckMapper.getMaxVulnByOssName(vnlnUpdBean);				
 			}
 			
@@ -1091,6 +1092,31 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if(list2 != null) {
 			for(Vulnerability bean : list2) {
+				String key = avoidNull(avoidNull(bean.getVendor()) + "_" + avoidNull(bean.getProduct()) + "_" + avoidNull(bean.getVersion()) + "_" + bean.getCveId());
+				if(!duplCheck.containsKey(key)) {
+					duplCheck.put(key, bean);
+				}
+			}
+		}
+		
+		List<Vulnerability> list3 = selfCheckMapper.getAllVulnListWithProject2(param);
+		
+		if(list3 != null) {
+			for(Vulnerability bean : list3) {
+				if(vulnList.contains(bean.getProduct())) {
+					String key = avoidNull(avoidNull(bean.getVendor()) + "_" + avoidNull(bean.getProduct()) + "_" + avoidNull(bean.getVersion()) + "_" + bean.getCveId());
+					
+					if(!duplCheck.containsKey(key)) {
+						duplCheck.put(key, bean);
+					}
+				}
+			}
+		}
+		
+		List<Vulnerability> list4 = selfCheckMapper.getAllVulnListWithProjectByNickName2(param);
+		
+		if(list4 != null) {
+			for(Vulnerability bean : list4) {
 				String key = avoidNull(avoidNull(bean.getVendor()) + "_" + avoidNull(bean.getProduct()) + "_" + avoidNull(bean.getVersion()) + "_" + bean.getCveId());
 				if(!duplCheck.containsKey(key)) {
 					duplCheck.put(key, bean);
