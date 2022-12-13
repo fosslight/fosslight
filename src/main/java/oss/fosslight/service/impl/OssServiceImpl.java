@@ -585,7 +585,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				boolean isDel = false;
 				
 				OssMaster mergeBean = new OssMaster();
-
+				History h = null;
+				
 				// 신규 version의 등록이 필요한 경우
 				if("Added".equalsIgnoreCase(bean.getMergeStr())) {
 					CommentsHistory historyBean = new CommentsHistory();
@@ -606,7 +607,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					// Duplicated
 					bean.setNewOssId(bean.getOssId());
 					bean.setOssId(bean.getDelOssId());
-
+					
+					h = work(bean);
+					
 					CommentsHistory historyBean = new CommentsHistory();
 					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
 					historyBean.setReferenceId(bean.getDelOssId());
@@ -628,11 +631,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				//1. 기존 OssId를 사용중인 프로젝트의 OssId , Version 를 새로운 OssId로 교체				
-				if(isDel) {
+				if(isDel && h != null) {
 					try{
-						History h = work(ossMaster);
 						h.sethAction(CoConstDef.ACTION_CODE_DELETE);
-						
 						historyService.storeData(h);
 					}catch(Exception e){
 						log.error(e.getMessage(), e);
@@ -1037,6 +1038,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if(isNew || vulnRecheck) {
 				List<String> ossNameArr = new ArrayList<>();
 				ossNameArr.add(ossMaster.getOssName().trim());
+				
+				if(ossMaster.getOssName().contains(" ")) {
+					ossNameArr.add(ossMaster.getOssName().replaceAll(" ", "_"));
+				}
 				
 				if(ossNicknames != null) {
 					for(String s : ossNicknames) {
@@ -3487,9 +3492,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String[] nicknameList = null;
 		
 		try {
+			if(ossMaster.getOssName().contains(" ")) {
+				ossMaster.setOssNameTemp(ossMaster.getOssName().replaceAll(" ", "_"));
+			}
+			
 			nicknameList = getOssNickNameListByOssName(ossMaster.getOssName());
 			ossMaster.setOssNicknames(nicknameList);
 			list = ossMapper.getOssVulnerabilityList2(ossMaster);
+			ossMaster.setOssNameTemp(null);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
