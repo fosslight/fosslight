@@ -513,7 +513,13 @@ var saveFlag = false;
 			});
 
 			$("#createProject").on("click", function(){
-				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', encodeURIComponent("${detail.partnerId}||${detail.partnerName}||${detail.softwareName}"));
+				var partnerId = "${detail.partnerId}";
+				var partnerName = "${detail.partnerName}";
+				var softwareName = "${detail.softwareName}";
+				if(softwareName.indexOf("/") > -1){
+					softwareName = softwareName.replace("/", "[]");
+				}
+				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', encodeURIComponent(partnerId "||" + partnerName + "||" + softwareName));
 			});
 		},
 		tabInit: function(){

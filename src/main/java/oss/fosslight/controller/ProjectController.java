@@ -351,7 +351,7 @@ public class ProjectController extends CoTopComponent {
 				
 				project.setRefPartnerId(refPartnerId); // refPartnerId
 				
-				String comment = "Copied from [3rd-" + refPartnerId + "] " + partnerName + " (" + softwareName + ")";
+				String comment = "Copied from [3rd-" + refPartnerId + "] " + partnerName + " (" + softwareName.replace("[]", "/") + ")";
 				project.setComment(comment);
 				model.addAttribute("createThird", toJson(comment));
 			}
