@@ -519,7 +519,7 @@ var saveFlag = false;
 				if(softwareName.indexOf("/") > -1){
 					softwareName = softwareName.replace("/", "[]");
 				}
-				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', encodeURIComponent(partnerId "||" + partnerName + "||" + softwareName));
+				createTabInFrameWithCondition("New_Project", '#<c:url value="/project/edit"/>', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
 			});
 		},
 		tabInit: function(){
