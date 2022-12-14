@@ -2719,7 +2719,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						prjId = "3rd_" + prjId;
 					}
 					
-					int analysisListCnt = ossMapper.ossAnalysisListCnt(prjId, ossBean.getStartAnalysisFlag());
+					int analysisListCnt = ossMapper.ossAnalysisListCnt(prjId, ossBean.getStartAnalysisFlag(), ossBean.getCsvComponentIdList());
 					
 					if(analysisListCnt > 0) {
 						ossMapper.deleteOssAnalysisList(prjId);
@@ -2768,7 +2768,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		if(CoConstDef.FLAG_YES.equals(ossMaster.getStartAnalysisFlag())) {
-			int records = ossMapper.ossAnalysisListCnt(ossMaster.getPrjId(), ossMaster.getStartAnalysisFlag());
+			int records = ossMapper.ossAnalysisListCnt(ossMaster.getPrjId(), ossMaster.getStartAnalysisFlag(), ossMaster.getCsvComponentIdList());
 			ossMaster.setTotListSize(records);
 			
 			list = ossMapper.selectOssAnalysisList(ossMaster);

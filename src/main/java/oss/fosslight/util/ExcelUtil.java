@@ -3083,4 +3083,60 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 	}
+	
+	public static Map<String, Object> getCsvData(Map<String, Object> map, OssMaster ossMaster) {
+		String analysisResultListPath = (String) map.get("analysisResultListPath");
+		File file = new File(analysisResultListPath);
+		
+		if(!file.exists()) {
+			log.error("파일정보를 찾을 수 없습니다. file path : " + analysisResultListPath);
+			map.clear();
+			return map;
+		}
+		
+		for(File f : file.listFiles()) {
+			if(f.isFile()) {
+				String[] fileName = f.getName().split("\\.");
+				String fileExt = (fileName[fileName.length-1]).toUpperCase();
+				
+				switch(fileExt) {
+					case "CSV":	
+						file = f;	
+						
+						break;
+					default:  // 기존 생성되어있던 file은 삭제하지 않고 존재여부만 log로 기록함.
+						log.debug("File Name : " + f.getName() + " , File Ext : " + fileExt);	
+						
+						break;
+				}
+			}
+		}
+
+		try(
+			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
+			CSVReader csvReader = new CSVReader(csvFile, '|');
+		) {
+			List<String[]> allData = csvReader.readAll();
+			if(allData != null) {
+				map.put("csvData", allData);
+				List<String> componentIdsForCsvData = new ArrayList<>();
+				
+				int idx = 0;
+				for(String[] csvArr : allData) {
+					if(idx < 2) {
+						idx++;
+						continue;
+					}
+					
+					componentIdsForCsvData.add(csvArr[0].trim().replaceAll("\t", ""));
+				}
+				
+				if(componentIdsForCsvData.size() > 0) ossMaster.setCsvComponentIdList(componentIdsForCsvData);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return map;
+	}
 }
