@@ -274,4 +274,8 @@ public interface SelfCheckMapper {
 	int insertOssNotice(OssNotice ossNotice);
 	
 	int updateOssNotice(OssNotice ossNotice);
+
+	List<Vulnerability> getAllVulnListWithProject2(Project param);
+	
+	List<Vulnerability> getAllVulnListWithProjectByNickName2(Project project);
 }
