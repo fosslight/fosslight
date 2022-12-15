@@ -1821,9 +1821,11 @@
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
 			AND ANALYSIS_YN = #{startAnalysisFlag}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(csvComponentIdList)">
-		   		<foreach item="id" index="index" collection="csvComponentIdList" open=" AND COMPONENT_ID IN (" separator="," close=")">
+				AND COMPONENT_ID IN (
+		   		<foreach item="id" index="index" collection="csvComponentIdList" separator=",">
 					#{id}
 				</foreach>
+				)
 			</if>
 		</if>
 	</select>
@@ -1888,9 +1890,11 @@
 		 <if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(startAnalysisFlag,'Y')">
 		   AND ANALYSIS_YN = #{startAnalysisFlag}
 		   	<if test="!@oss.fosslight.util.StringUtil@isEmpty(csvComponentIdList)">
-		   		<foreach item="id" index="index" collection="csvComponentIdList" open=" AND COMPONENT_ID IN (" separator="," close=")">
+		   		AND COMPONENT_ID IN (
+		   		<foreach item="id" index="index" collection="csvComponentIdList" separator=",">
 					#{id}
 				</foreach>
+				)
 			</if>
 		 ORDER BY COMPONENT_ID ASC
 			 <include refid="limitPage"/>

@@ -3119,8 +3119,9 @@ public class ExcelUtil extends CoTopComponent {
 			List<String[]> allData = csvReader.readAll();
 			if(allData != null) {
 				map.put("csvData", allData);
-				List<String> componentIdsForCsvData = new ArrayList<>();
+				List<Integer> componentIdsForCsvData = new ArrayList<>();
 				
+				String componentId = "";
 				int idx = 0;
 				for(String[] csvArr : allData) {
 					if(idx < 2) {
@@ -3128,10 +3129,14 @@ public class ExcelUtil extends CoTopComponent {
 						continue;
 					}
 					
-					componentIdsForCsvData.add(csvArr[0].trim().replaceAll("\t", ""));
+					componentId = csvArr[0].trim().replaceAll("\t", "");
+					componentIdsForCsvData.add(Integer.parseInt(componentId));
 				}
 				
-				if(componentIdsForCsvData.size() > 0) ossMaster.setCsvComponentIdList(componentIdsForCsvData);
+				if(componentIdsForCsvData.size() > 0) {
+					int[] csvComponentIdList = componentIdsForCsvData.stream().mapToInt(Integer::intValue).toArray();
+					ossMaster.setCsvComponentIdList(csvComponentIdList);
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
