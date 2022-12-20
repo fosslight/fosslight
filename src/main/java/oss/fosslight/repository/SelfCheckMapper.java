@@ -278,4 +278,8 @@ public interface SelfCheckMapper {
 	List<Vulnerability> getAllVulnListWithProject2(Project param);
 	
 	List<Vulnerability> getAllVulnListWithProjectByNickName2(Project project);
+	
+	List<Vulnerability> getAllVulnListWithProject3(Project param);
+	
+	List<Vulnerability> getAllVulnListWithProjectByNickName3(Project project);
 }

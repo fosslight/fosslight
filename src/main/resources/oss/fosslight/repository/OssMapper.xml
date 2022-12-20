@@ -2184,6 +2184,12 @@
 										OR PRODUCT = #{item}
 									</foreach>
 								</if>
+								<if test="!@oss.fosslight.util.StringUtil@isEmpty(dashOssNameList)">
+									<foreach item="dashItem" index="index" collection="dashOssNameList">
+										OR (PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(#{dashItem}, '-', 2), '-', -1)
+										AND VENDOR = SUBSTRING_INDEX(#{dashItem}, '-', 1))
+									</foreach>
+								</if>
 				 				)
 				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 				 		   AND VERSION = #{ossVersion}

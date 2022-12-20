@@ -415,6 +415,8 @@ public class NvdDataService {
 						}
 					}
 				}
+				
+				vendorList.clear();
 			}
 			
 			if(params.size() > 0) {

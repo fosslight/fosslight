@@ -1124,6 +1124,31 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		}
 		
+		List<Vulnerability> list5 = selfCheckMapper.getAllVulnListWithProject3(param);
+		
+		if(list3 != null) {
+			for(Vulnerability bean : list5) {
+				if(vulnList.contains(bean.getProduct())) {
+					String key = avoidNull(avoidNull(bean.getVendor()) + "_" + avoidNull(bean.getProduct()) + "_" + avoidNull(bean.getVersion()) + "_" + bean.getCveId());
+					
+					if(!duplCheck.containsKey(key)) {
+						duplCheck.put(key, bean);
+					}
+				}
+			}
+		}
+		
+		List<Vulnerability> list6 = selfCheckMapper.getAllVulnListWithProjectByNickName3(param);
+		
+		if(list4 != null) {
+			for(Vulnerability bean : list6) {
+				String key = avoidNull(avoidNull(bean.getVendor()) + "_" + avoidNull(bean.getProduct()) + "_" + avoidNull(bean.getVersion()) + "_" + bean.getCveId());
+				if(!duplCheck.containsKey(key)) {
+					duplCheck.put(key, bean);
+				}
+			}
+		}
+		
 		// sort by key
 		Map<String, Vulnerability> sortMap = new TreeMap<>(duplCheck);
 
