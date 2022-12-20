@@ -291,6 +291,15 @@ public class OssMaster extends ComBean implements Serializable{
 
 	private List<String> declaredLicenses;
 	private String linkFlag = "N";
+	private int[] csvComponentIdList;
+	
+	public int[] getCsvComponentIdList() {
+		return csvComponentIdList;
+	}
+
+	public void setCsvComponentIdList(int[] csvComponentIdList) {
+		this.csvComponentIdList = csvComponentIdList;
+	}
 	/**
 	 * Instantiates a new oss master.
 	 */

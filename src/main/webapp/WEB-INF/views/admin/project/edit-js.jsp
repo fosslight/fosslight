@@ -1657,6 +1657,7 @@
 		modelValues:'',
 		detail : ${empty detail ? 'null':detail},
 		copy : ${empty copy ? 'null' :copy},
+		createThird : ${empty createThird ? 'null':createThird},
 		init : function(){
 			if(data.detail){
 				$('input[name=prjId]').val(data.detail.prjId);
@@ -1803,6 +1804,10 @@
 						$(this).trigger('click');
 					}
 				});
+			} else if(data.createThird) {
+				$('#editor').css("width", $(".miCase").width());
+				$('#editor').html(data.createThird);
+				$('textarea[name=comment]').val(data.createThird);
 			} else {
 				$("#complete").hide(); 
 				$("#copy").hide();

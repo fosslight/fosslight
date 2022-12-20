@@ -1656,6 +1656,7 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@GetMapping(value=OSS.ANALYSIS_RESULT_LIST)
 	public @ResponseBody ResponseEntity<Object> getAnalysisResultList(
 			HttpServletRequest req, 
@@ -1679,13 +1680,34 @@ public class OssController extends CoTopComponent{
 		ossMaster.setCurPage(page);
 		ossMaster.setPageListSize(rows);
 		
-		Map<String, Object> result = ossService.getOssAnalysisList(ossMaster);
+		Map<String, Object> result = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
 		
 		String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "/autoanalysis/out/dev") + "/" + ossMaster.getPrjId() + "/result";
 		
-		result.put("analysisResultListPath", analysisResultListPath);
+		map.put("analysisResultListPath", analysisResultListPath);
 		
-		result = ExcelUtil.getAnalysisResultList(result);
+		map = ExcelUtil.getCsvData(map, ossMaster);
+		
+		if(map == null || map.isEmpty()) {
+			return makeJsonResponseHeader(result);
+		}
+		
+		List<String[]> allData = (List<String[]>) map.get("csvData");
+		map = ossService.getOssAnalysisList(ossMaster);
+		result = ExcelUtil.readAnalysisList(allData, (List<OssAnalysis>) map.get("rows"));
+		
+		if(!result.isEmpty()) {
+			// isValid - false(throws 발생) || true(data 조합)
+			if((boolean) result.get("isValid")) {
+				CommonFunction.setAnalysisResultList(result);
+				result.put("page", (int) map.get("page"));
+				result.put("total", (int) map.get("total"));
+				result.put("records", (int) map.get("records"));
+			} else {
+				result.put("rows", new ArrayList<OssAnalysis>());
+			}
+		}
 		
 		return makeJsonResponseHeader(result);
 	}
