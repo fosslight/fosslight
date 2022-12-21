@@ -14,6 +14,7 @@
 <c:set var="ctxPath" value="${pageContext.request.contextPath eq '/' ? '' : pageContext.request.contextPath}" />
 <c:set var="remoteURI" value="${ctxPath}${requestScope['javax.servlet.forward.servlet_path']}" />
 <c:set var="now" value="<%=new java.util.Date()%>" />
+<spring:eval expression="@environment.getProperty('adminuser.lock.flag')" var="adminLockFlag" />
 <fmt:formatDate value='${now}' pattern='yyyyMMdd' var="today"/>
 
 <%-- Javascript Cache를 막기위한 Version 추가 --%>
