@@ -353,11 +353,12 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossCopyright the oss copyright
 	 * @param licenseDiv the license div
 	 */
-	public OssMaster(String ossLicenseIdx, String ossId, String licenseName, String ossLicenseComb, String ossLicenseText,
+	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossLicenseText,
 			String ossCopyright, String licenseDiv) {
 		super();
 		this.ossLicenseIdx = ossLicenseIdx;
 		this.ossId = ossId;
+		this.licenseId = licenseId;
 		this.licenseName = licenseName;
 		this.ossLicenseComb = ossLicenseComb;
 		this.ossLicenseText = ossLicenseText;
