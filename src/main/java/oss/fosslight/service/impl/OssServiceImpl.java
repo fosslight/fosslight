@@ -937,13 +937,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			// v-Diff 체크를 위해 license list를 생성
 			List<OssLicense> list = ossMaster.getOssLicenses();
 			int ossLicenseDeclaredIdx = 0;
+			String licenseId = ""; 
 			
 			for(OssLicense license : list) {
 				ossLicenseDeclaredIdx++;
+				licenseId = CommonFunction.getLicenseIdByName(license.getLicenseName());
 				
 				OssMaster om = new OssMaster(
 					  Integer.toString(ossLicenseDeclaredIdx)
 					, ossMaster.getOssId()
+					, licenseId
 					, license.getLicenseName()
 					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()//ossLicenseIdx가 1일때 Comb 입력안함
 					, license.getOssLicenseText()
@@ -3163,13 +3166,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			List<OssLicense> list = ossMaster.getOssLicenses();
 			int ossLicenseDeclaredIdx = 0;
-
+			String licenseId = "";
+			
 			for(OssLicense license : list) {
 				ossLicenseDeclaredIdx++;
-
+				licenseId = CommonFunction.getLicenseIdByName(license.getLicenseName());
+				
 				OssMaster om = new OssMaster(
 					  Integer.toString(ossLicenseDeclaredIdx)
 					, ossMaster.getOssId()
+					, licenseId
 					, license.getLicenseName()
 					, ossLicenseDeclaredIdx == 1 ? "" : license.getOssLicenseComb()
 					, license.getOssLicenseText()
@@ -3490,14 +3496,30 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		List<Vulnerability> list = null;
 		String[] nicknameList = null;
+		List<String> dashOssNameList = new ArrayList<>();
 		
 		try {
 			if(ossMaster.getOssName().contains(" ")) {
 				ossMaster.setOssNameTemp(ossMaster.getOssName().replaceAll(" ", "_"));
 			}
 			
+			if(ossMaster.getOssName().contains("-")) {
+				dashOssNameList.add(ossMaster.getOssName());
+			}
+			
 			nicknameList = getOssNickNameListByOssName(ossMaster.getOssName());
 			ossMaster.setOssNicknames(nicknameList);
+			
+			for(String nick : nicknameList) {
+				if(nick.contains("-")) {
+					dashOssNameList.add(nick);
+				}
+			}
+			
+			if(dashOssNameList.size() > 0) {
+				ossMaster.setDashOssNameList(dashOssNameList.toArray(new String[dashOssNameList.size()]));
+			}
+			
 			list = ossMapper.getOssVulnerabilityList2(ossMaster);
 			ossMaster.setOssNameTemp(null);
 		} catch (Exception e) {

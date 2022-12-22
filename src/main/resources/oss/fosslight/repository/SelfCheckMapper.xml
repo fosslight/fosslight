@@ -2184,6 +2184,24 @@
 		ORDER BY PRODUCT, VERSION DESC, CVSS_SCORE DESC
 	</select>
 	
+	<select id="getAllVulnListWithProject3" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT DISTINCT T1.* 
+		  FROM PRE_OSS_COMPONENTS T2 
+		 INNER JOIN (SELECT PRODUCT
+						  , VERSION
+						  , VENDOR
+						  , CVSS_SCORE
+					   FROM NVD_DATA_SCORE_V3
+					  WHERE CVSS_SCORE > 0) T1 
+			ON T1.PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(T2.OSS_NAME, '-', 2), '-', -1) 
+		   AND T1.VENDOR = SUBSTRING_INDEX(T2.OSS_NAME, '-', 1)
+		   AND T1.VERSION <![CDATA[>=]]> T2.OSS_VERSION
+		WHERE T2.REFERENCE_DIV = '10' 
+		  AND T2.REFERENCE_ID = #{prjId} 
+		  AND IFNULL(T2.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
+		ORDER BY PRODUCT, VERSION DESC, CVSS_SCORE DESC
+	</select>
+	
 	<select id="getAllVulnListWithProjectByNickName" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Vulnerability">
 		SELECT DISTINCT T1.*
 		     , T2.OSS_NAME 
@@ -2219,6 +2237,31 @@
 		        ON T1.PRODUCT = REPLACE(T2.OSS_NICKNAME, ' ', '_') AND T1.VERSION <![CDATA[>=]]> T2.OSS_VERSION
 		 ORDER BY PRODUCT, VERSION DESC, CVSS_SCORE DESC
 	</select>
+	
+	<select id="getAllVulnListWithProjectByNickName3" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Vulnerability">
+		SELECT DISTINCT T1.*
+		     , T2.OSS_NAME 
+		  FROM (SELECT A1.OSS_VERSION
+		  			 , A2.OSS_NICKNAME
+		  			 , A1.OSS_NAME
+		  		  FROM PRE_OSS_COMPONENTS A1 
+		   		 INNER JOIN OSS_NICKNAME A2 
+		   		    ON REPLACE(A1.OSS_NAME, ' ', '-') = A2.OSS_NICKNAME
+		   		 WHERE A1.REFERENCE_DIV = '10' 
+		   		   AND A1.REFERENCE_ID = #{prjId} 
+		   		   AND IFNULL(A1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y') T2
+		 INNER JOIN (SELECT PRODUCT
+						  , VERSION
+						  , VENDOR
+						  , CVSS_SCORE
+					   FROM NVD_DATA_SCORE_V3 
+					  WHERE CVSS_SCORE > 0) T1
+		        ON T1.PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(T2.OSS_NICKNAME, '-', 2), '-', -1) 
+		       AND T1.VENDOR = SUBSTRING_INDEX(T2.OSS_NICKNAME, '-', 1)
+		       AND T1.VERSION <![CDATA[>=]]> T2.OSS_VERSION
+		 ORDER BY PRODUCT, VERSION DESC, CVSS_SCORE DESC
+	</select>
+	
 	<!-- selfcheck export시 oss version이 설정되지 않은 경우 Max score와 동일한 모든 CVE 정보를 반환 -->
 	<select id="getAllVulnListWithProjectEmptyVersion" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Vulnerability">
 		SELECT DISTINCT T1.*, '-' AS VERSION FROM PRE_OSS_COMPONENTS T2 

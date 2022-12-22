@@ -292,6 +292,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private List<String> declaredLicenses;
 	private String linkFlag = "N";
 	private int[] csvComponentIdList;
+	private String[] dashOssNameList;
 	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -352,11 +353,12 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossCopyright the oss copyright
 	 * @param licenseDiv the license div
 	 */
-	public OssMaster(String ossLicenseIdx, String ossId, String licenseName, String ossLicenseComb, String ossLicenseText,
+	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossLicenseText,
 			String ossCopyright, String licenseDiv) {
 		super();
 		this.ossLicenseIdx = ossLicenseIdx;
 		this.ossId = ossId;
+		this.licenseId = licenseId;
 		this.licenseName = licenseName;
 		this.ossLicenseComb = ossLicenseComb;
 		this.ossLicenseText = ossLicenseText;
@@ -2014,5 +2016,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setLinkFlag(String linkFlag) {
 		this.linkFlag = linkFlag;
+	}
+	
+	public String[] getDashOssNameList() {
+		return dashOssNameList;
+	}
+
+	public void setDashOssNameList(String[] dashOssNameList) {
+		this.dashOssNameList = dashOssNameList;
 	}
 }

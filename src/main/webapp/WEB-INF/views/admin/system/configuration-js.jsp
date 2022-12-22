@@ -64,6 +64,7 @@
 				params["loginFlag"] = "N";
 			}
 			
+			/*
 			// SMTP Setting
 			var smtpFlag = $("#smtpFlag").prop("checked");
 
@@ -95,6 +96,7 @@
 			} else {
 				params["externalServiceFlag"] = "N";
 			}
+			*/
 
             // External Analysis Setting
             var externalAnalysisFlag = $("#externalAnalysisFlag").prop("checked");

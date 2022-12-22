@@ -84,6 +84,10 @@
 							}					
 						});
 					}
+
+					if("" != $('input[name="downloadLocations"]').val()){
+						fn.urlDuplicationAll();
+					}
 				}
 			}
 			

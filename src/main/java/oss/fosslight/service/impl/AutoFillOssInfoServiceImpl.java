@@ -434,7 +434,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	}
 
 	private Boolean isExternalServiceEnable() {
-		return CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_EXTERNAL_SERVICE_USED_FLAG).equals("Y");
+		return "Y".equalsIgnoreCase(CommonFunction.getProperty("external.service.useflag"));
 	}
 
 	private boolean isGitHubApiHealth() throws HttpServerErrorException {
@@ -516,7 +516,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 	@Override
 	public Mono<Object> requestGithubLicense(String location) {
-		String githubToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_SERVICE_SETTING, CoConstDef.CD_DTL_GITHUB_TOKEN);
+		String githubToken = CommonFunction.getProperty("external.service.github.token");
 
 		return webClient.get()
 			.uri(location)

@@ -26,6 +26,7 @@
 							</dl>
 						</div>
 					</dd>
+					<%-- 
 					<dd>
 						<span class="checkSet"><input type="checkbox" id="smtpFlag" name="smtpFlag" class="mainCategory" <c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_SMTP_USED_FLAG')) eq 'Y'}">checked</c:if> /><label for="smtpFlag">SMTP Setting</label></span>
 						<div class="detailArea">
@@ -62,6 +63,7 @@
 							</dl>
 						</div>
 					</dd>
+					 --%>
 					<dd id="projectConfig">
 						<span class="checkSet"><label>Notice Setting</label></span>
 						<div class="detailArea">
@@ -101,7 +103,7 @@
 											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="externalAnalysis${code[0]}" <c:if test="${code[3] eq 'Y'}">checked</c:if> /></dd>
 										</c:when>
 										<c:otherwise>
-											<dd><label>${code[1]}</label><input type="${code[1] eq "Admin Token" ? "password" : "text"}" id="externalAnalysis${code[0]}" value="${code[0] eq '401' ? '' : code[3]}"/></dd>
+											<dd><label>${code[1]}</label><input type="${code[1] eq 'Admin Token' ? 'password' : 'text'}" id="externalAnalysis${code[0]}" value="${code[0] eq '401' ? '' : code[3]}"/></dd>
 										</c:otherwise>
 									</c:choose>
 								</c:forEach>

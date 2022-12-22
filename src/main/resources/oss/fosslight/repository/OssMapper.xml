@@ -157,20 +157,14 @@
 			, OSS_COPYRIGHT
 		)VALUES(
 			#{ossId}
-			,(SELECT LICENSE_ID FROM LICENSE_MASTER A 
-			  WHERE A.USE_YN = 'Y' AND  (A.LICENSE_NAME = #{licenseName}
-						  OR SHORT_IDENTIFIER = #{licenseName}
-						  OR EXISTS (SELECT 1 
-										     FROM LICENSE_NICKNAME B
-										   WHERE A.LICENSE_NAME = B.LICENSE_NAME
-											   AND B.LICENSE_NICKNAME = #{licenseName})))
+			,#{licenseId}
 			, #{ossLicenseIdx}  
 			, #{ossLicenseComb} 
 			, #{ossLicenseText} 
 			, #{ossCopyright}
 		) ON DUPLICATE KEY UPDATE
 			OSS_ID = #{ossId}
-			, LICENSE_ID = (SELECT LICENSE_ID FROM LICENSE_MASTER WHERE USE_YN = 'Y' AND LICENSE_NAME = #{licenseName}) 	
+			, LICENSE_ID = #{licenseId}
 			, OSS_LICENSE_IDX 	= #{ossLicenseIdx}
 			, OSS_LICENSE_COMB 	= #{ossLicenseComb}
 			, OSS_LICENSE_TEXT 	= #{ossLicenseText}
@@ -2182,6 +2176,12 @@
 				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
 					  			    <foreach item="item" index="index" collection="ossNicknames">
 										OR PRODUCT = #{item}
+									</foreach>
+								</if>
+								<if test="!@oss.fosslight.util.StringUtil@isEmpty(dashOssNameList)">
+									<foreach item="dashItem" index="index" collection="dashOssNameList">
+										OR (PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(#{dashItem}, '-', 2), '-', -1)
+										AND VENDOR = SUBSTRING_INDEX(#{dashItem}, '-', 1))
 									</foreach>
 								</if>
 				 				)

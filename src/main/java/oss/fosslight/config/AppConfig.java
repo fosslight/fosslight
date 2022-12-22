@@ -18,10 +18,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import lombok.extern.slf4j.Slf4j;
-import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.util.CryptUtil;
 import oss.fosslight.util.StringUtil;
 
 @Configuration
@@ -33,15 +31,15 @@ public class AppConfig {
 	@Bean(name={"mailSender"})
 	public JavaMailSenderImpl mailSender(){
 		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
-		String smtpUseFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_SMTP_USED_FLAG);
+		String smtpUseFlag = CommonFunction.getProperty("mail.smtp.useflag");
 		
 		if(CoConstDef.FLAG_YES.equals(smtpUseFlag)) {
 			try {
-				final String	MAIL_SERVICE_HOST		= CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_HOST);
-				final int		MAIL_SERVICE_PORT		= Integer.parseInt(StringUtil.avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_PORT), "25"));
-				final String	MAIL_SERVICE_ENCODING	= StringUtil.avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_ENCODING), "UTF-8");
-				final String	MAIL_SERVICE_USERNAME	= CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_USERNAME);
-				final String	MAIL_SERVICE_PASSWORD	= CryptUtil.decryptAES256(CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_SERVICE_PASSWORD), CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
+				final String	MAIL_SERVICE_HOST		= CommonFunction.getProperty("mail.smtp.host");
+				final int		MAIL_SERVICE_PORT		= Integer.parseInt(StringUtil.avoidNull(CommonFunction.getProperty("mail.smtp.port"), "25"));
+				final String	MAIL_SERVICE_ENCODING	= StringUtil.avoidNull(CommonFunction.getProperty("mail.smtp.encoding"), "UTF-8");
+				final String	MAIL_SERVICE_USERNAME	= CommonFunction.getProperty("mail.smtp.username");
+				final String	MAIL_SERVICE_PASSWORD	= CommonFunction.getProperty("mail.smtp.password");
 				final boolean checkFlag = CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES);
 				
 				final Properties MAIL_SERVICE_PROP = new Properties() {

@@ -112,7 +112,7 @@ public class CoMailManager extends CoTopComponent {
 	public boolean sendMail(CoMail bean) {
     	boolean procResult = true;
     	
-    	boolean EMAIL_USE_FLAG = CoConstDef.FLAG_YES.equals(CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_SMTP_USED_FLAG));
+    	boolean EMAIL_USE_FLAG = CoConstDef.FLAG_YES.equals(CommonFunction.getProperty("mail.smtp.useflag"));
     	
     	if(!EMAIL_USE_FLAG) {
     		return procResult;
@@ -3328,7 +3328,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			
-			String mailFrom = CoCodeManager.getCodeExpString(CoConstDef.CD_SMTP_SETTING, CoConstDef.CD_SMTP_EMAIL_ADDRESS);
+			String mailFrom = avoidNull(CommonFunction.getProperty("mail.smtp.email"), CommonFunction.getProperty("mail.smtp.username"));
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED.equals(coMail.getMsgType()) 
 						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE.equals(coMail.getMsgType()) 

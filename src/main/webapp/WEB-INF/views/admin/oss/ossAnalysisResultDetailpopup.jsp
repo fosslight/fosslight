@@ -119,6 +119,14 @@
 					}
 				});
 
+				if(selectData.downloadLocation){
+					Ctrl_fn.urlDuplication($("#ossForm"+seq+" input[name=downloadLocations]"));
+				}
+				
+				if(selectData.homepage){
+					Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
+				}
+				
 				var replaceLicenseData = selectData.licenseName.replace(/\,/gi, ' AND ');
 				var licenseData = replaceLicenseData.split(/\s(?=AND|OR)/g);
 				var licenseDiv = licenseData.length > 1 ? "M" : "S";

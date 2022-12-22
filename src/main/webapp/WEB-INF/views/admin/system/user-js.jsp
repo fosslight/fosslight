@@ -190,6 +190,10 @@
 			}
 		},
 		resetPassword : function(rowId){
+			if("${'Y' eq adminLockFlag}" && rowId == 'admin') {
+				alert("Changing admin information is blocked.");
+				return false;
+			}
 				$.ajax({
 					type: 'POST',
 					url: '<c:url value="/system/user/changePassword"/>',

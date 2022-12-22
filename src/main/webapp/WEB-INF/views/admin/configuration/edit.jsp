@@ -32,7 +32,16 @@
 					</tr>
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 						<tr>
-							<th class="dCase"><span class="radioSet"><input type="checkbox" id="passwordEnabled" /><label for="single">Password</label></span></th>
+							<th class="dCase"><span class="radioSet">
+								<c:choose>
+									<c:when test="${userInfo.userId eq 'admin' and 'Y' eq adminLockFlag}">
+										<input type="checkbox" id="passwordEnabled" onclick="alert('Changing admin information is blocked.'); return false;"/>
+									</c:when>
+									<c:otherwise>
+										<input type="checkbox" id="passwordEnabled"/>
+									</c:otherwise>
+								</c:choose>
+								<label for="single">Password</label></span></th>
 							<td class="dCase">
 								<input type="password" name="password" id="password" value="" style="width: 200px;" disabled="disabled" />
 							</td>
