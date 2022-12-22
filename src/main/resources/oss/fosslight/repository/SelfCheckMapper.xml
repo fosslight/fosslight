@@ -2252,6 +2252,7 @@
 		   		   AND IFNULL(A1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y') T2
 		 INNER JOIN (SELECT PRODUCT
 						  , VERSION
+						  , VENDOR
 						  , CVSS_SCORE
 					   FROM NVD_DATA_SCORE_V3 
 					  WHERE CVSS_SCORE > 0) T1
