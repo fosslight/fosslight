@@ -292,6 +292,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			bean = CommonFunction.findOssIdAndName(bean);
+			if(isEmpty(bean.getOssId())) {
+				bean.setOssId(null);
+			}
 			
 			String downloadLocationUrl = bean.getDownloadLocation();
 			String homepageUrl = bean.getHomepage();

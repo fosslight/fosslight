@@ -1861,6 +1861,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
+			if(isEmpty(ossBean.getOssId())) {
+				ossBean.setOssId(null);
+			}
 			
 			String downloadLocationUrl = ossBean.getDownloadLocation();
 			String homepageUrl = ossBean.getHomepage();
@@ -3142,6 +3145,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
+			if(isEmpty(ossBean.getOssId())) {
+				ossBean.setOssId(null);
+			}
 			
 			// BAT STATUS 등록
 			if(i==0 && prjYn){
