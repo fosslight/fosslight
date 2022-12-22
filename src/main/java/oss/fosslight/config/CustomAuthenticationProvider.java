@@ -7,19 +7,11 @@ package oss.fosslight.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.List;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.persistence.Table;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.query.LdapQuery;
-import org.springframework.ldap.query.LdapQueryBuilder;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,7 +20,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;

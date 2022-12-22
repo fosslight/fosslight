@@ -6,8 +6,12 @@
 package oss.fosslight.service.impl;
 
 import com.google.gson.JsonObject;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
