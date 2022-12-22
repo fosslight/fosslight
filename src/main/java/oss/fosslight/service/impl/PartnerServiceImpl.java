@@ -288,32 +288,37 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 
 		// 컴포넌트 등록
 		for (int i = 0; i < ossComponents.size(); i++) {
-			String downloadLocationUrl = ossComponents.get(i).getDownloadLocation();
-			String homepageUrl = ossComponents.get(i).getHomepage();
+			ProjectIdentification bean = ossComponents.get(i);
+			
+			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
+			bean = CommonFunction.findOssIdAndName(bean);
+			
+			String downloadLocationUrl = bean.getDownloadLocation();
+			String homepageUrl = bean.getHomepage();
 			
 			if(!isEmpty(downloadLocationUrl)) {
 				if(downloadLocationUrl.endsWith("/")) {
-					ossComponents.get(i).setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+					bean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
 				}
 			}
 			
 			if(!isEmpty(homepageUrl)) {
 				if(homepageUrl.endsWith("/")) {
-					ossComponents.get(i).setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+					bean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
 				}
 			}
 			
 			//update
-			if(!StringUtil.contains(ossComponents.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+			if(!StringUtil.contains(bean.getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
 				//ossComponents 등록
-				projectMapper.updateSrcOssList(ossComponents.get(i));
-				deleteRows.add(ossComponents.get(i).getComponentId());
+				projectMapper.updateSrcOssList(bean);
+				deleteRows.add(bean.getComponentId());
 				
 				//멀티라이센스일 경우
-				if("M".equals(ossComponents.get(i).getLicenseDiv())){
+				if("M".equals(bean.getLicenseDiv())){
 					for (List<ProjectIdentification> comLicenseList : ossComponentsLicense) {
 						for (ProjectIdentification comLicense : comLicenseList) {
-							if(ossComponents.get(i).getComponentId().equals(comLicense.getComponentId())){
+							if(bean.getComponentId().equals(comLicense.getComponentId())){
 								OssComponentsLicense license = new OssComponentsLicense();
 								// 컴포넌트 ID 설정
 								license.setComponentId(comLicense.getComponentId());
@@ -339,19 +344,19 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				} else { //싱글라이센스일경우
 					OssComponentsLicense license = new OssComponentsLicense();
 					// 컴포넌트 ID 설정
-					license.setComponentId(ossComponents.get(i).getComponentId());
+					license.setComponentId(bean.getComponentId());
 					
 					// 라이센스 ID 설정
-					if (StringUtil.isEmpty(ossComponents.get(i).getLicenseId())) {
-						license.setLicenseId(CommonFunction.getLicenseIdByName(ossComponents.get(i).getLicenseName()));
+					if (StringUtil.isEmpty(bean.getLicenseId())) {
+						license.setLicenseId(CommonFunction.getLicenseIdByName(bean.getLicenseName()));
 					} else {
-						license.setLicenseId(ossComponents.get(i).getLicenseId());
+						license.setLicenseId(bean.getLicenseId());
 					}
 					
 					// 기타 설정
-					license.setLicenseName(ossComponents.get(i).getLicenseName());
-					license.setLicenseText(ossComponents.get(i).getLicenseText());
-					license.setCopyrightText(ossComponents.get(i).getCopyrightText());
+					license.setLicenseName(bean.getLicenseName());
+					license.setLicenseText(bean.getLicenseText());
+					license.setCopyrightText(bean.getCopyrightText());
 					license.setExcludeYn(CoConstDef.FLAG_NO);
 					
 					// 라이센스 등록
@@ -359,16 +364,16 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				}
 			} else { //insert
 				//ossComponents 등록
-				String exComponentId = ossComponents.get(i).getGridId();
-				ossComponents.get(i).setReferenceId(partnerMaster.getPartnerId());
-				ossComponents.get(i).setReferenceDiv("20");
-				ossComponents.get(i).setComponentIdx(Integer.toString(ossComponentIdx++));
-				projectMapper.insertSrcOssList(ossComponents.get(i));
+				String exComponentId = bean.getGridId();
+				bean.setReferenceId(partnerMaster.getPartnerId());
+				bean.setReferenceDiv("20");
+				bean.setComponentIdx(Integer.toString(ossComponentIdx++));
+				projectMapper.insertSrcOssList(bean);
 				
-				deleteRows.add(ossComponents.get(i).getComponentId());
+				deleteRows.add(bean.getComponentId());
 				
 				//멀티라이센스일 경우
-				if("M".equals(ossComponents.get(i).getLicenseDiv())){
+				if("M".equals(bean.getLicenseDiv())){
 					for (List<ProjectIdentification> comLicenseList : ossComponentsLicense) {
 						for (ProjectIdentification comLicense : comLicenseList) {
 							String gridId = comLicense.getGridId();
@@ -409,16 +414,16 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					license.setComponentId(projectMapper.selectLastComponent());
 					
 					// 라이센스 ID 설정
-					if (StringUtil.isEmpty(ossComponents.get(i).getLicenseId())) {
-						license.setLicenseId(CommonFunction.getLicenseIdByName(ossComponents.get(i).getLicenseName()));
+					if (StringUtil.isEmpty(bean.getLicenseId())) {
+						license.setLicenseId(CommonFunction.getLicenseIdByName(bean.getLicenseName()));
 					} else {
-						license.setLicenseId(ossComponents.get(i).getLicenseId());
+						license.setLicenseId(bean.getLicenseId());
 					}
 					
 					// 기타 설정
-					license.setLicenseName(ossComponents.get(i).getLicenseName());
-					license.setLicenseText(ossComponents.get(i).getLicenseText());
-					license.setCopyrightText(ossComponents.get(i).getCopyrightText());
+					license.setLicenseName(bean.getLicenseName());
+					license.setLicenseText(bean.getLicenseText());
+					license.setCopyrightText(bean.getCopyrightText());
 					license.setExcludeYn(CoConstDef.FLAG_NO);
 					
 					// 라이센스 등록

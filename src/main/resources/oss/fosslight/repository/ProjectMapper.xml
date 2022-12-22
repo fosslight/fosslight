@@ -3168,7 +3168,7 @@
 	/* ProjectMapper.updateSrcOssList */
 		UPDATE 
 			OSS_COMPONENTS 
-		SET OSS_ID = (SELECT (CASE WHEN CONCAT(OSS_ID) = '' THEN NULL ELSE OSS_ID END) FROM OSS_MASTER WHERE OSS_NAME = TRIM(#{ossName}) AND OSS_VERSION = TRIM(REPLACE(#{ossVersion}, 'N/A','')) AND USE_YN = 'Y')
+		SET OSS_ID = #{ossId}
 			, OSS_NAME = TRIM(#{ossName})
 			, OSS_VERSION = TRIM(REPLACE(#{ossVersion}, 'N/A',''))
 			, DOWNLOAD_LOCATION = #{downloadLocation}
