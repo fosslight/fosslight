@@ -51,6 +51,9 @@ Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
 ecj  (EPL-2.0)
 Copyright (c) 2000, 2005-2006, 2015-2019 IBM Corporation and others.
 
+FOSSLight Hub  (AGPL-3.0)
+Copyright (c) 2021 LG Electronics Inc.
+
 Hibernate Commons Annotations  (LGPL-2.1)
 
 
@@ -2445,6 +2448,7 @@ ________________________________________________________________________________
 
 The source code for the above may be obtained from each download location.
 
+FOSSLight Hub     https://github.com/fosslight/fosslight
 AspectJ Weaver    https://eclipse.org/aspectj
 Hibernate Commons Annotations    http://hibernate.org
 Jakarta Annotations API    https://projects.eclipse.org/projects/ee4j.ca
