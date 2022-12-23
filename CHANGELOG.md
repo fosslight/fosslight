@@ -1,5 +1,71 @@
 # Changelog
 
+## v1.5.0 (23/12/2022)
+## 🚀 Features
+
+- OSS Bulk Registration > Fix type of some fields to textarea @FRESH-TUNA (#771)
+- Display "Required oss name" warning message when oss name is "-" and license has source obligation. @FOSSLight-dev (#763)
+- Display "Required oss name" warning message  @Min-Kyungsun (#761)
+- Upload review report html template @swa07016 (#751)
+- Create and download review report @70825 (#748)
+- Convert html to pdf for review report @70825 (#736)
+- License bulk registration @Gseungmin (#667)
+- Add Android format(android.googlesource.com/platform/) to change oss name. @Min-Kyungsun (#749)
+- Check OSS Name > Change the redirect url automatically. @FOSSLight-dev (#740)
+- When "Change OSS Name" button is clicked, internal logic has been modified and added. @Min-Kyungsun (#727)
+- OSS Bulk Registration > Show warning messages @FRESH-TUNA (#715)
+- Automatically close stalled issues and pull requests @jongwooo (#725)
+- Use setup-qemu-action to build multi-arch images @jongwooo (#723)
+- Highlight Oss data failed to save in red @yujung7768903 (#721)
+
+## 🐛 Hotfixes
+
+- Fix vulnerability search condition and when save vendor data @FOSSLight-dev(#779)
+- Fix bug with create project for OSS Notice @FOSSLight-dev (#778)
+- Fix bug where vulnerability cannot be found if there is a space in the OSS Name. @FOSSLight-dev (#776)
+- LDAP > Fix a bug that caused an error when the password was incorrect. @FOSSLight-dev (#772)
+- Fix license name saved redundantly @FOSSLight-dev (#767)
+- Fix bug where license is not merged in BOM if it is blank @FOSSLight-dev (#764)
+- Display "Required oss name" warning message when oss name is "-" and license has source obligation. @FOSSLight-dev (#763)
+- In oss detail popoup, it is available to copy oss  @Min-Kyungsun (#757)
+- Display the latest oss information which has nickname or oss name of auto analysis result  @Min-Kyungsun (#755)
+- Add check email when login new user @FOSSLight-dev (#747)
+- Fix issuance of notice for permissive license @FOSSLight-dev (#745)
+- Project List > Fix a bug that caused a permission error when clicking on an empty space in Identification. @FOSSLight-dev (#744)
+- Project List > Fix bugs related to View my project only @FOSSLight-dev (#741)
+- Fix link in registration mail OSS Name (version) @Min-Kyungsun (#731)
+- Modify oss list table in 3rd party mail @Min-Kyungsun (#730)
+- Display all referenceDiv like bom tab in "From column" of exported excel file @FOSSLight-dev (#729)
+- Fix a bug where the Homepage/Download Location is saved with a warning message included. @FOSSLight-dev (#728)
+- Fix the bug where it is not merged when exporting in BOM tab. @FOSSLight-dev (#726)
+- Fix grid data save function @FOSSLight-dev (#724)
+
+## 🔧 Maintenance
+
+- Update 3rd party licenses @soimkim (#780)
+- Vulnerability > Change OSS Name matching method (improved accuracy) @FOSSLight-dev (#775)
+- Change the LDAP login failure log level to debug @Min-Kyungsun (#773)
+- chore: Configure Dependabot for GitHub Actions @jongwooo (#766)
+- LDAP > Modify the updated date to be displayed in user information when sending mail. @FOSSLight-dev (#765)
+- Display "Required oss name" warning message when oss name is "-" and license has source obligation. @FOSSLight-dev (#763)
+- Exclude deactivated OSS from analysis results @FOSSLight-dev (#758)
+- When sync oss, it is also possible to update only comment. @Min-Kyungsun (#756)
+- Display the latest oss information which has nickname or oss name of auto analysis result  @Min-Kyungsun (#755)
+- When export the specific oss name of vulnerablity, append oss name to exported file name  @Min-Kyungsun (#754)
+- Possible to select other version of oss even if the information is same in oss sync @Min-Kyungsun (#753)
+- Add defensive code in check oss name @Min-Kyungsun (#752)
+- Add code for Vulnerability Notification Score to code management (Code No. 750) @FOSSLight-dev (#746)
+- (Experimental) Add file extraction tag in Notice of Android @soimkim (#742)
+- When "Change OSS Name" button is clicked, internal logic has been modified and added. @Min-Kyungsun (#727)
+- Show projects regardless of permissions in the project list. @FOSSLight-dev (#739)
+- Separate messages of issue and pull request @jongwooo (#735)
+- Add the file name for apex in NOTICE @soimkim (#737)
+- Remove issue auto-close @soimkim (#734)
+- Fix link in registration mail OSS Name (version) @Min-Kyungsun (#731)
+- Add latest tag to docker image @jongwooo (#719)
+
+---
+
 ## v1.4.10 (07/10/2022)
 ## 🚀 Features
 
@@ -513,24 +579,3 @@
 - Add a default value for server domain @FOSSLight-dev (#392)
 - Add a shortcut link when sending a license email @soimkim (#390)
 - Delete the arrow from the left menu @FOSSLight-dev (#388)
-
----
-
-## v1.2.26 (14/01/2022)
-## Changes
-## 🐛 Hotfixes
-
-- Fix bugs related to Auto ID, mailing, and check license. @FOSSLight-dev  (#386)
-    - API > Fix the bug that the admin account does not have permission to the project.
-    - Auto ID > Fix the bug where the license is not automatically selected according to the license type priority for OSS with OR.
-    - Mailing (License) > Fix the bug where the email arrives as if it was fixed even if the license website was not modified.
-- Fix project version not displayed bug @FOSSLight-dev (#384)
-
-## 🔧 Maintenance
-
-- Fix the bug that the written License is not included in the Check License related to the Proprietary License @FOSSLight-dev (#385)
-    - License modification email > If there are multiple websites, separate them with line breaks.
-    - Check License > If the written license is a Proprietary License, even though there is a warning message of Declared, it is not included in the Check License.
-    - When distribution, add a notice when the release date is not set.
-    - Fix the bug that when registering or deleting a license, there are multiple websites, but only one is displayed in the email.
-- Update version to 1.2.26 @soimkim (#387)
