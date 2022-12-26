@@ -530,6 +530,12 @@ public class ApiProjectController extends CoTopComponent {
 			
 			Map<String, Object> paramMap = new HashMap<>();
 		
+			if(!isEmpty(beforePrjId) && beforePrjId.equals(afterPrjId)) {
+				paramMap.put("status", "same");
+				resultMap.put("contents", paramMap);
+				return responseService.getSingleResult(resultMap);
+			}
+			
 			List<String> prjIdList = new ArrayList<String>();
 			prjIdList.add(beforePrjId);
 			prjIdList.add(afterPrjId);
