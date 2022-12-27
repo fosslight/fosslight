@@ -20,6 +20,8 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	
 	private LicenseService 	licenseService 	= (LicenseService) getWebappContext().getBean(LicenseService.class);
 	private String licenseId = null;
+	private String VALID_TYPE = null;
+	public final String VALID_LICNESELIST_BULK = "LICENSELIST_BULK";
 
 	private String PROC_TYPE = null;
 	public final String PROC_TYPE_DELETE				 		= "DEL";
@@ -70,7 +72,7 @@ public class T2CoLicenseValidator extends T2CoValidator {
 			
 			// 2. SHORT_IDENTIFIER
 			targetName = "SHORT_IDENTIFIER";
-			
+
 			if(!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				// 2-1 license name 과 같은 경우
 				if(map.get(targetName).contains(CoConstDef.CD_COMMA_CHAR)) {
@@ -91,7 +93,7 @@ public class T2CoLicenseValidator extends T2CoValidator {
 			
 			// 3. NICK NAME
 			targetName = "LICENSE_NICKNAMES";
-			
+
 			if(!errMap.containsKey(targetName) && (map.containsKey(targetName + ".1") || map.containsKey(targetName) )) {
 	        	List<String> nickNameKeyList = new ArrayList<>();
 	        	
@@ -109,7 +111,7 @@ public class T2CoLicenseValidator extends T2CoValidator {
 
 	private void checkLicenseNickName(Map<String, String> errMap, Map<String, String> map, List<String> nickNameKeyList, String _seqkey, String licenseId) {
 		String targetName = "LICENSE_NICKNAMES";
-		
+
 		if(isEmpty(map.get(_seqkey))) {
 			return;
 		}
@@ -155,6 +157,8 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	protected String treatment(String paramvalue) {
 		return paramvalue;
 	}
-	
 
+	public void setVALIDATION_TYPE(String vALID_TYPE) {
+		VALID_TYPE = vALID_TYPE;
+	}
 }

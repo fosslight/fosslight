@@ -33,10 +33,8 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.LicenseMapper;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.LicenseService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.T2UserService;
+import oss.fosslight.service.*;
+import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 
@@ -48,6 +46,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	@Autowired T2UserService userService;
 	@Autowired OssService ossService;
 	@Autowired CommentService commentService;
+	@Autowired HistoryService historyService;
 	
 	//Mapper
 	@Autowired LicenseMapper licenseMapper;
@@ -309,7 +308,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	public String registLicenseMaster(LicenseMaster licenseMaster) {
 		String[] licenseNicknames = licenseMaster.getLicenseNicknames();
 		String licenseId = licenseMaster.getLicenseId();
-		
+
 		if(StringUtil.isEmpty(licenseId)){
 			licenseMaster.setCreator(licenseMaster.getLoginUserName());
 		}
@@ -317,13 +316,13 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		licenseMaster.setModifier(licenseMaster.getLoginUserName());
 		// trim 처리
 		licenseMaster.setLicenseName(licenseMaster.getLicenseName().trim());
-		
+
 		if(StringUtil.isEmpty(licenseId)){
 			licenseMapper.insertLicenseMaster(licenseMaster);
 		} else {
 			licenseMapper.updateLicenseMaster(licenseMaster);
 		}
-		
+
 		registLicenseWebPage(licenseMaster); // license_webpage table data insert
 
 		/*
@@ -331,7 +330,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		 * 2. 라이센스 닉네임 재등록
 		 */
 		licenseMapper.deleteLicenseNickname(licenseMaster);
-		
+
 		if(licenseNicknames != null){
 			for(String nickName : licenseNicknames){
 				if(!isEmpty(nickName)) {
@@ -340,7 +339,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				}
 			}
 		}
-		
+
 		//코멘트 등록
 		if(!isEmpty(licenseMaster.getComment())) {
 			CommentsHistory param = new CommentsHistory();
@@ -350,7 +349,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			
 			commentService.registComment(param);
 		}
-		
+
 		// code refresh
 		CoCodeManager.getInstance().refreshLicenseInfo();
 
@@ -545,5 +544,173 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	@Override
 	public LicenseMaster getLicenseId(LicenseMaster licenseMaster) {
 		return CoCodeManager.LICENSE_INFO_UPPER.get(licenseMaster.getLicenseName().toUpperCase());
+	}
+
+	/**
+	 * for return err message
+	 * */
+	@Override
+	public Map<String, Object> getLicenseDataMap(String gridId, boolean status, String msg) {
+		Map<String, Object> licenseDataMap = new HashMap<>();
+		licenseDataMap.put("gridId", gridId);
+		licenseDataMap.put("status", status);
+		licenseDataMap.put("msg", msg);
+
+		return licenseDataMap;
+	}
+
+	@Override
+	public Map<String, Object> saveLicense(LicenseMaster licenseMaster) {
+		String resCd="00";	//비정상
+		String result="";
+		LicenseMaster beforeBean = null;
+		LicenseMaster afterBean = null;
+
+		HashMap<String,Object> resMap = new HashMap<>();
+		String licenseId = licenseMaster.getLicenseId();
+		boolean isNew = isEmpty(licenseId);
+		boolean isChangeName = false;
+		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+		List<OssMaster> typeChangeOssIdList = null;
+
+		if(!isNew) {
+			beforeBean = getLicenseMasterOne(licenseMaster);
+			System.out.println("beforeBean = " + beforeBean);
+		}
+
+		// webpages이 n건일때 0번째 값은 oss Master로 저장.
+		String[] webpages = licenseMaster.getWebpages();
+		if(webpages != null){
+			if(webpages.length >= 1){
+				for(String url : webpages){
+					if(!isEmpty(url)){
+						licenseMaster.setWebpage(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
+						break;
+					}
+				}
+			}
+		} else if(webpages == null){
+			licenseMaster.setWebpage("");
+		}
+
+		result = registLicenseMaster(licenseMaster);
+
+		if(!isNew) {
+			afterBean =  getLicenseMasterOne(licenseMaster);
+
+			// licnese type이 변경된 경우, 해당 라이선스를 사용하는 oss의 license type을 재확인 한다.
+			if(!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
+				typeChangeOssIdList = updateOssLicenseType(result);
+			}
+
+			isChangeName = !beforeBean.getLicenseName().equalsIgnoreCase(afterBean.getLicenseName());
+		}
+
+		// 싱글톤 정보 refresh
+		resCd="10";		//정상
+		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+
+		try{
+			History h = work(licenseMaster);
+			h.sethAction(isEmpty(licenseId) ? CoConstDef.ACTION_CODE_INSERT : CoConstDef.ACTION_CODE_UPDATE);
+			historyService.storeData(h);
+		}catch(Exception e){
+			log.error(e.getMessage(), e);
+		}
+
+		// osdd 연동
+		boolean successType = false;
+
+		try {
+			if(isNew) {
+				successType = distributeLicense(result, distributionFlag);
+			} else if(beforeBean != null && afterBean != null) {
+				if(!avoidNull(beforeBean.getLicenseName()).equals(afterBean.getLicenseName())
+						|| !avoidNull(beforeBean.getShortIdentifier()).equals(afterBean.getShortIdentifier())
+						|| !avoidNull(beforeBean.getLicenseText()).equals(afterBean.getLicenseText())) {
+					successType = distributeLicense(result, distributionFlag);
+				} else {
+					successType = true; // license > update 일 경우에 internal url 생성과 상관없는 항목이 update될 경우는 comment를 남기지 않음.
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		try {
+			CoMail mailBean = new CoMail(isNew ? CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST : isChangeName ? CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME : CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE);
+			mailBean.setParamLicenseId(result);
+			String comment = licenseMaster.getComment();
+
+			if(!successType) { // internal url 생성 실패시 comment 남김
+				comment += (isEmpty(comment) ? "" : "<br>") + "[Error] An error occurred when creating an internal URL file.";
+			}
+
+			mailBean.setComment(comment);
+
+			if(!isNew) {
+
+				mailBean.setParamOssList(typeChangeOssIdList);
+
+				// code convert
+				if(beforeBean != null) {
+					beforeBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, beforeBean.getLicenseType()));
+					beforeBean.setObligation(CommonFunction.makeLicenseObligationStr(beforeBean.getObligationNotificationYn(), beforeBean.getObligationDisclosingSrcYn(), beforeBean.getObligationNeedsCheckYn()));
+					beforeBean.setModifiedDate(DateUtil.dateFormatConvert(beforeBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+					beforeBean.setModifier(CoMailManager.getInstance().makeUserNameFormat(beforeBean.getModifier()));
+					beforeBean.setDescription(CommonFunction.lineReplaceToBR(beforeBean.getDescription()));
+					beforeBean.setLicenseText(CommonFunction.lineReplaceToBR(beforeBean.getLicenseText()));
+					beforeBean.setAttribution(CommonFunction.lineReplaceToBR(beforeBean.getAttribution()));
+					if(beforeBean.getWebpages().length > 0) beforeBean.setWebpage(webPageStringFormat(beforeBean.getWebpages()));
+				}
+
+				if(afterBean != null) {
+					afterBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, afterBean.getLicenseType()));
+					afterBean.setObligation(CommonFunction.makeLicenseObligationStr(afterBean.getObligationNotificationYn(), afterBean.getObligationDisclosingSrcYn(), afterBean.getObligationNeedsCheckYn()));
+					afterBean.setModifiedDate(DateUtil.dateFormatConvert(afterBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+					afterBean.setModifier(CoMailManager.getInstance().makeUserNameFormat(afterBean.getModifier()));
+					afterBean.setDescription(CommonFunction.lineReplaceToBR(afterBean.getDescription()));
+					afterBean.setLicenseText(CommonFunction.lineReplaceToBR(afterBean.getLicenseText()));
+					afterBean.setAttribution(CommonFunction.lineReplaceToBR(afterBean.getAttribution()));
+					if(afterBean.getWebpages().length > 0) afterBean.setWebpage(webPageStringFormat(afterBean.getWebpages()));
+				}
+
+				mailBean.setCompareDataBefore(beforeBean);
+				mailBean.setCompareDataAfter(afterBean);
+			}
+
+			CoMailManager.getInstance().sendMail(mailBean);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+
+		try{
+			// RESTRICTION(2) => Network Redistribution
+			String netWorkRestriction = CoConstDef.CD_LICENSE_NETWORK_RESTRICTION;
+
+			if(isNew) {
+				if(licenseMaster.getRestriction().contains(netWorkRestriction)){
+					registNetworkServerLicense(licenseMaster.getLicenseId(), "NEW");
+				}
+			} else {
+				String type = "";
+
+				if(beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
+					type = "";
+				}else if(beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
+					type = "DEL";
+				}else if(!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
+					type = "INS";
+				}
+
+				registNetworkServerLicense(licenseMaster.getLicenseId(), type);
+			}
+		} catch (Exception e){
+
+		}
+
+		resMap.put("resCd", resCd);
+		resMap.put("licenseId", result);
+		return resMap;
 	}
 }
