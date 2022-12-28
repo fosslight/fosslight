@@ -91,6 +91,9 @@ public final class PdfUtil extends CoTopComponent {
                 ossReview.add(oss);
             }
 
+            if(oss.getOssVersion().equals("N/A") || oss.getOssVersion().equals("")){
+                oss.setOssVersion("-");
+            }
             //VulnerabilityReview
             List<Map<String, Object>> _list = vulnerabilityService.selectMaxScoreNvdInfo(oss.getOssName(), oss.getOssVersion());
             for (Map<String, Object> m : _list) {
