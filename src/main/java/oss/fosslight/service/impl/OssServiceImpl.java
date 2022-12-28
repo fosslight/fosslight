@@ -916,6 +916,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							|| !avoidNull(ossMaster.getOssVersion()).trim().equalsIgnoreCase(avoidNull(_orgBean.getOssVersion()).trim())) {
 						vulnRecheck = true;
 					}
+					if(!avoidNull(ossMaster.getOssName()).trim().equalsIgnoreCase(_orgBean.getOssName())) {
+						// 변경 전 oss name 에 등록된 nickname 삭제
+						_orgBean.setOssId(null);
+						List<OssMaster> beforeOssNameList = ossMapper.getOssListByName(_orgBean);
+						if(beforeOssNameList != null) {
+							int ossIdCnt = beforeOssNameList.stream().map(e -> e.getOssId()).distinct().collect(Collectors.toList()).size();
+							if(ossIdCnt == 1) {
+								ossMapper.deleteOssNickname(_orgBean);
+							}
+						}
+					}
 				}
 
 			}
