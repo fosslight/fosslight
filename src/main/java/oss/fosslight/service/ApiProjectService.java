@@ -63,4 +63,6 @@ public interface ApiProjectService {
 	public List<String> getPackageFileList(String prjId);
 
 	public void registBom(String prjId, String string);
+
+	public int existProjectCntBomCompare(Map<String, Object> paramMap);
 }

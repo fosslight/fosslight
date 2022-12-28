@@ -544,9 +544,9 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("distributionType", "normal");
 			
-			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
+			int records = apiProjectService.existProjectCntBomCompare(paramMap);
 			
-			if(searchFlag) {
+			if(records > 0) {
 				List<Map<String, Object>> beforeBomList = apiProjectService.getBomList(beforePrjId);
 				List<Map<String, Object>> afterBomList = apiProjectService.getBomList(afterPrjId);
 				
@@ -559,8 +559,10 @@ public class ApiProjectController extends CoTopComponent {
 				
 				return responseService.getSingleResult(resultMap);
 			} else {
-				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+				paramMap.clear();
+				paramMap.put("status", "not exist project");
+				resultMap.put("contents", paramMap);
+				return responseService.getSingleResult(resultMap);
 			}
 		} catch (Exception e) {
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
