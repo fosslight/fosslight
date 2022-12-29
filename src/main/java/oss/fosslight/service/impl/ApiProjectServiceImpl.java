@@ -2668,4 +2668,23 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		return returnOssComponentsLicenseList;
 	}
+
+	@Override
+	public int existProjectCntBomCompare(Map<String, Object> paramMap) {
+		String ossReportFlag = (String) paramMap.get("ossReportFlag");
+		@SuppressWarnings("unchecked")
+		List<String> prjIdList = (List<String>) paramMap.get("prjId");
+		
+		if(prjIdList != null) {
+			if(isEmpty(ossReportFlag)) {
+				ossReportFlag = CoConstDef.FLAG_NO;
+				
+				paramMap.put("ossReportFlag", ossReportFlag);
+			}
+			
+			return apiProjectMapper.selectProjectCount(paramMap);
+		}
+		
+		return 0;
+	}
 }
