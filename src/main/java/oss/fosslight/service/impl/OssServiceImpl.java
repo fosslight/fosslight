@@ -976,7 +976,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				for(String detectedLicense : detectedLicenses) {			
 					if(!isEmpty(detectedLicense)) {
-						LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase());
+						LicenseMaster detectedLicenseInfo = CoCodeManager.LICENSE_INFO_UPPER.get(detectedLicense.toUpperCase().trim());
 						
 						if(detectedLicenseInfo != null) {
 							OssMaster om = new OssMaster(
