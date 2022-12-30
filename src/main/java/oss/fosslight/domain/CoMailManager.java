@@ -1825,11 +1825,13 @@ public class CoMailManager extends CoTopComponent {
 			after.setCopyright(appendChangeStyleMultiLine(before.getCopyright(), after.getCopyright(), true));
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
 			
+			before.setDownloadLocationLinkFormat(appendChangeStyleLinkFormatArray(before.getDownloadLocation()));
 			String[] beforeUrl = before.getDownloadLocation().split(",");
 			String[] afterUrl = after.getDownloadLocation().split(",");
 			String resultDownloadLocation = appendChangeStyleLinkFormatArray(beforeUrl, afterUrl, 0);
 			after.setDownloadLocationLinkFormat(resultDownloadLocation);
 			isModified = checkEquals(before.getDownloadLocation(), after.getDownloadLocation(), isModified);
+			before.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage()));
 			after.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage(), after.getHomepage()));
 			isModified = checkEquals(before.getHomepage(), after.getHomepage(), isModified);
 			after.setSummaryDescription(appendChangeStyleMultiLine(before.getSummaryDescription(), after.getSummaryDescription(), true));
