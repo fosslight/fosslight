@@ -257,7 +257,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<ProjectIdentification> list = null;
 		List<OssComponentsLicense> listLicense = null;
-		
+
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
 		if(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
@@ -280,8 +280,38 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
 			Map<String, String> obligationTypeMergeMap = new HashMap<>();
 			String reqMergeFlag = identification.getMerge();
-			
+
 			list = projectMapper.selectBomList(identification);
+
+			// For loading 3rd Party ID
+			ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
+			thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
+			thirdPartyOssListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+
+			List<ProjectIdentification> thirdList = null;
+			Map<String, Object> thirdlistMap = getIdentificationGridList(thirdPartyOssListParam);
+			Map<String, String> thirdPartyNameListByOssMap = new HashMap<>();
+			String keySeparater = ":::";
+			if (thirdlistMap != null && (thirdlistMap.containsKey("mainData") || thirdlistMap.containsKey("rows"))) {
+				thirdList = (List<ProjectIdentification>) thirdlistMap.get(thirdlistMap.containsKey("mainData") ? "mainData" : "rows");
+				if (thirdList != null) {
+					for (ProjectIdentification bean : thirdList) {
+						if (CoConstDef.FLAG_NO.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
+							String value = bean.getRefPartnerId();
+							if (value != null) {
+								String rowOssName = avoidNull(bean.getOssName()).toUpperCase();
+								String rowOssVersion = avoidNull(bean.getOssVersion()).toUpperCase();
+								String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
+								if (isEmpty(rowOssName) || rowOssName.equals("-")) {
+									String rowOssLicense = avoidNull(bean.getLicenseName()).toUpperCase();
+									strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
+								}
+								thirdPartyNameListByOssMap.put(strKey, thirdPartyNameListByOssMap.containsKey(strKey) ? thirdPartyNameListByOssMap.get(strKey) + "," + value : value);
+							}
+						}
+					}
+				}
+			}
 			
 			// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
 			// need check의 저장값을 유지하기 위함
@@ -304,7 +334,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
   				ll.setCopyrightText(ll.getCopyrightText());
 				ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
-				
+
+
 				listLicense = projectMapper.selectBomLicense(ll);
 				ll.setOssComponentsLicenseList(listLicense);
 				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
@@ -355,6 +386,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<String> egnoreList = new ArrayList<>();
 			
 			for (ProjectIdentification ll : list) {
+
 				// 이미 추가된 oss의 경우
 				if(egnoreList.contains(ll.getComponentId())) {
 					continue;
@@ -409,7 +441,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						} else if( batMergePartnerMap.containsKey(mergeKey)) {
 							// 3rd => bat
 							refBean = batMergePartnerMap.get(mergeKey);
-							
+
 							// 3rd에 같은 그룹으로 묶여 있는 모든 oss list를 취득
 							ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
 							ll.setOssName(refBean.getOssName());
@@ -451,6 +483,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							continue;
 						}
 					}
+				}
+
+				// Set 3rd Party IDs
+				String rowOssName = avoidNull(ll.getOssName()).toUpperCase();
+				String rowOssVersion = avoidNull(ll.getOssVersion()).toUpperCase();
+				String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
+				if (isEmpty(rowOssName) || rowOssName.equals("-")) {
+					String rowOssLicense = avoidNull(ll.getLicenseName()).toUpperCase();
+					strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
+				}
+				if (thirdPartyNameListByOssMap.containsKey(strKey)) {
+					ll.setRefPartnerId(thirdPartyNameListByOssMap.get(strKey));
 				}
 				// License Restriction 저장
 				ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId()));
@@ -3975,14 +4019,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	 * 분석결과서 다운로드 3rd party 명칭 반환
 	 */
 	@Override
-	public String getPartnerFormatName(String partnerId) {
-		if(!isEmpty(partnerId)) {
+	public String getPartnerFormatName(String partnerId, boolean onlyName) {
+		if (!isEmpty(partnerId)) {
 			PartnerMaster param = new PartnerMaster();
 			param.setPartnerId(partnerId);
 			param = partnerMapper.selectPartnerMaster(param);
-			
-			if(param != null) {
-				return "("+partnerId+") "+ avoidNull(param.getPartnerName());
+
+			if (param != null) {
+				if (onlyName) {
+					return avoidNull(param.getPartnerName());
+				} else {
+					return "(" + partnerId + ") " + avoidNull(param.getPartnerName());
+				}
 			}
 		}
 		return "";
@@ -4067,7 +4115,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public List<ProjectIdentification> setMergeGridData(List<ProjectIdentification> gridData) {
 		List<ProjectIdentification> tempData = new ArrayList<ProjectIdentification>();
 		List<ProjectIdentification> resultGridData = new ArrayList<ProjectIdentification>();
-		
 		String groupColumn = "";
 		boolean ossNameEmptyFlag = false;
 		
@@ -4081,7 +4128,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					ossNameEmptyFlag = true;
 				}
 			}
-			
 			if(groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
 					&& !("-".equals(info.getOssName()) 
 					&& !"NA".equals(info.getLicenseType()))
@@ -4172,7 +4218,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if(!rtnBean.getRefDiv().contains(temp.getRefDiv())) {
 					rtnBean.setRefDiv(rtnBean.getRefDiv() + "," + temp.getRefDiv());
 				}
-				
+
 				if(!isEmpty(temp.getRestriction())) {
 					for(String restriction : temp.getRestriction().split("\\n")) {
 						if(!rtnBean.getRestriction().contains(restriction)) {

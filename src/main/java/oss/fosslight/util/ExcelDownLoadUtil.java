@@ -251,13 +251,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	private static void reportIdentificationSheet(String type, Sheet sheet, Map<String, Object> listMap, Project projectInfo, boolean isSelfCheck) {
 		List<ProjectIdentification> list = null;
-		
 		if(listMap != null && (listMap.containsKey("mainData") || listMap.containsKey("rows") )) {
 			list = (List<ProjectIdentification>) listMap.get(listMap.containsKey("mainData") ? "mainData" : "rows");
 			List<String[]> rows = new ArrayList<>();
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
-			
+
 			if(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
 				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 				pv.setAppendix("mainList", list);
@@ -359,7 +358,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) list.sort(Comparator.comparing(ProjectIdentification::getGroupingColumn));
+			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				list.sort(Comparator.comparing(ProjectIdentification::getGroupingColumn));
+			} 
 			
 			String currentGroupKey = null;
 			
@@ -375,12 +376,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 								if(!isEmpty(referenceDivChk)) {
 									switch (avoidNull(referenceDivChk)) {
 									case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-										referenceDivChk = "3rd Party";
-										
+										referenceDivChk = "3rd";
 										break;
 									case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
 										referenceDivChk = "SRC";
-										
 										break;
 									case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
 										referenceDivChk = "BIN";
@@ -442,23 +441,34 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					params.add(licenseTextUrl); //license text => license homepage
 					
 					String refSrcTab = "";
+					String thirdKey = "3rd";
 					switch (avoidNull(bean.getRefDiv())) {
 						case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-							refSrcTab = "3rd Party";
-							
+							refSrcTab = thirdKey;
 							break;
 						case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
 							refSrcTab = "SRC";
-							
 							break;
 						case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
 							refSrcTab = "BIN";
-							
 							break;
 						default:
 							break;
 					}
-					
+					if (refSrcTab.contains(thirdKey)) {
+						String[] thirdIds = avoidNull(bean.getRefPartnerId(), "").split(",");
+						List<String> thirdNames = new ArrayList<String>();
+						for (String thirdId : thirdIds) {
+							String thirdPartyName = projectService.getPartnerFormatName(thirdId, true);
+							if (!isEmpty(thirdPartyName) && !thirdNames.contains(thirdKey + "-" + thirdPartyName)) {
+								thirdNames.add(thirdKey + "-" + thirdPartyName);
+							}
+						}
+						if (thirdNames.size() > 0) {
+							String thirdName = String.join(",", thirdNames);
+							refSrcTab = refSrcTab.replace(thirdKey, thirdName);
+						}
+					}
 					// from
 					params.add(isMainRow ? refSrcTab : "");
 					// main 정보 (license 정보 후처리)
@@ -489,7 +499,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					// TODO 3rd party 이름 가져올 수 있나?
 					if(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)) {
-						params.add(projectService.getPartnerFormatName(bean.getRefPartnerId())); //3rd Party
+
+						params.add(projectService.getPartnerFormatName(bean.getRefPartnerId(), false)); //3rd Party
 					}
 
 					if(CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)
