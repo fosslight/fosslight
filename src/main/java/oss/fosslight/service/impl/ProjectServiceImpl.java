@@ -542,8 +542,28 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				_list = _tmp;
 			}
 
-			map.put("rows", _list);
-			
+			Project param = new Project();
+			param.setPrjId(identification.getReferenceId());
+
+			if(avoidNull(getProjectDetail(param).getIdentificationStatus()).equals("CONF")){
+				List<ProjectIdentification> confList = new ArrayList<>();
+				for(ProjectIdentification bean : _list) {
+					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
+					if(!isEmpty(ossCopyright)){
+						String addCopyright = avoidNull(bean.getCopyrightText());
+						if(!isEmpty(bean.getCopyrightText())) {
+							addCopyright += "\n";
+						}
+						addCopyright += ossCopyright;
+						bean.setCopyrightText(addCopyright);
+					}
+					confList.add(bean);
+				}
+				map.put("rows", confList);
+			} else{
+				map.put("rows", _list);
+			}
+
 			if(adminCheckList.size() > 0) {
 				map.put("adminCheckList", adminCheckList);
 			}
@@ -861,7 +881,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		return map;
-	}	
+	}
+
+	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
+		if(!isEmpty(ossId) && !isEmpty(licenseId)) {
+			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
+			if (bean != null) {
+				for(OssLicense license : bean.getOssLicenses()) {
+					if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
+						return license.getOssCopyright();
+					}
+				}
+			}
+		}
+
+		return ossCopyright;
+	}
 	
 	/**
 	 * BAT와 동일한 OSS, license를 가지는 SRC 정보가 있는지 확인
@@ -2759,6 +2794,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					|| (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType()) && !hasSourceOss)) { // OSS Notice가 N/A이면서 packaging이 필요 없는 경우
 				// do nothing
 				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY;
+				userComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY));
 			} else {
 				String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF));
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
