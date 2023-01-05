@@ -19,7 +19,10 @@ public abstract class T2BasicValidator extends T2CoValidator{
     }
     
     protected String treatment(String paramvalue){
-        if(paramvalue == null) return null;
+        if(paramvalue == null) {
+          return null;
+        }
+
         return paramvalue;
     }
     

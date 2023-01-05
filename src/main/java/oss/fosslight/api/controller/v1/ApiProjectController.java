@@ -223,10 +223,13 @@ public class ApiProjectController extends CoTopComponent {
 						List<String[]> models = new ArrayList<>();
 						for (String strModel : modelListToUpdate) {
 							String[] model = strModel.split("\\|");
-							if (model.length > 2) models.add(model);
+							if (model.length > 2) {
+								models.add(model);
+							}
 						}
-						if (models.size() > 0)
+						if (models.size() > 0) {
 							modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
+						}
 					} else {
 						errorCode = CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE;
 					}

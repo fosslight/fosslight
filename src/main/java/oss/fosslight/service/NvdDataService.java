@@ -78,7 +78,9 @@ public class NvdDataService {
 		// 작업등록
 		try {
 			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
-			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			if(!fileCheck) {
+				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			}
 			
 			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
@@ -108,7 +110,9 @@ public class NvdDataService {
 
 		try {
 			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE");
-			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			if(!fileCheck) {
+				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			}
 			
 			if(fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_NVDCVE);
@@ -201,7 +205,9 @@ public class NvdDataService {
 				insertStmt = conn2.prepareStatement(insertQuery);
 				
 				for(int idx = 0; idx < cnt; ) {
-					if(endIdx >= cnt) endIdx = cnt;
+					if (endIdx >= cnt) {
+						endIdx = cnt;
+					}
 					preparedStatementGetProductList(conn2, itemList, params, getProductStmt, getMaxScoreProductVerStmt, insertStmt, idx, endIdx);
 					
 					idx = idx+BATCH_SIZE;
@@ -215,56 +221,68 @@ public class NvdDataService {
 			} catch(Exception e) {
 				log.error(e.getMessage(), e);
 				
-				try{
-					if(insertStmt!=null)
+				try {
+					if (insertStmt != null) {
 						insertStmt.close();
-				}catch(SQLException e1){}
-				try{
-					if(getMaxScoreProductVerStmt!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn2!=null)
+					if (conn2 != null) {
 						conn2.rollback();
 						conn2.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn1!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn1 != null) {
 						conn1.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn!=null)
+					if (conn != null) {
 						conn.close();
+					}
 				}catch(SQLException e1){}
 			} finally {
 				try{
-					if(insertStmt!=null)
+					if (insertStmt != null) {
 						insertStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn2!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn2 != null) {
 						conn2.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn1!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn1 != null) {
 						conn1.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn!=null)
+					if (conn != null) {
 						conn.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 			}
 			
 			nvdDataMapper.deleteNvdDataScoreV3();
@@ -339,15 +357,17 @@ public class NvdDataService {
 			itemList.clear();
 			log.error(e.getMessage(), e);
 			try{
-				if(rs!=null)
+				if (rs != null) {
 					rs.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		} finally {
 			itemList.clear();
 			try{
-				if(rs!=null)
+				if (rs != null) {
 					rs.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		}
 	}
 	
@@ -426,20 +446,23 @@ public class NvdDataService {
 		} catch(Exception e) {
 			params.clear();
 			log.error(e.getMessage(), e);
-			try{
-				if(getMaxScoreProductVerRs!=null)
+			try {
+				if (getMaxScoreProductVerRs != null) {
 					getMaxScoreProductVerRs.close();
-			}catch(SQLException e1){}
-			try{
-				if(getMaxScoreProductVerStmt!=null)
+				}
+			} catch(SQLException e1) {}
+			try {
+				if (getMaxScoreProductVerStmt != null) {
 					getMaxScoreProductVerStmt.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		} finally {
 			params.clear();
 			try{
-				if(getMaxScoreProductVerRs!=null)
+				if (getMaxScoreProductVerRs != null) {
 					getMaxScoreProductVerRs.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 		}
 	}
 	
@@ -638,14 +661,16 @@ public class NvdDataService {
 			}
 		} finally {
 			try{
-				if(stmt!=null)
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e){}
 			
 			try{
-				if(conn!=null)
+				if (conn != null) {
 					conn.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e){}
 		}
 	}
 
@@ -967,18 +992,21 @@ public class NvdDataService {
 							}
 						}
 					} finally {
-						try{
-							if(stmt!=null)
+						try {
+							if (stmt != null) {
 								stmt.close();
-						}catch(SQLException e){}
-						try{
-							if(stmt2!=null)
+							}
+						} catch(SQLException e) {}
+						try {
+							if (stmt2 != null) {
 								stmt2.close();
-						}catch(SQLException e){}
+							}
+						} catch(SQLException e) {}
 						try{
-							if(conn!=null)
+							if (conn != null) {
 								conn.close();
-						}catch(SQLException e){}
+							}
+						} catch(SQLException e) {}
 					}
 				}
 

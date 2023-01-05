@@ -4417,8 +4417,9 @@ public final class StringUtil {
     }
 
 	public static String convert2CamelCase(String underScore) {
-		if (underScore.indexOf('_') < 0	&& Character.isLowerCase(underScore.charAt(0)))
+		if (underScore.indexOf('_') < 0	&& Character.isLowerCase(underScore.charAt(0))) {
 			return underScore;
+		}
 
 		StringBuilder result = new StringBuilder();
 		boolean nextUpper = false;

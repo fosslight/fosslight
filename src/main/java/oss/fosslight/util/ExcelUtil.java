@@ -1794,9 +1794,13 @@ public class ExcelUtil extends CoTopComponent {
 					for (colindex = 0; colindex < maxcols; colindex++) {
 						Cell cell = row.getCell(colindex);
 						String value = getCellData(cell);
-						if (colindex < model.length && value != null) model[colindex] = value;
+						if (colindex < model.length && value != null) {
+							model[colindex] = value;
+						}
 					}
-					if (!model[0].isEmpty() && !model[1].isEmpty() && !model[2].isEmpty()) models.add(model);
+					if (!model[0].isEmpty() && !model[1].isEmpty() && !model[2].isEmpty()) {
+						models.add(model);
+					}
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
@@ -2824,8 +2828,9 @@ public class ExcelUtil extends CoTopComponent {
 							}
 						} else {
 							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
-							if (ossMaster != null)
+							if (ossMaster != null) {
 								ossMasterList.add(ossMaster);
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -2851,8 +2856,9 @@ public class ExcelUtil extends CoTopComponent {
 							}
 						} else {
 							OssMaster ossMaster = getOssDataByColumn(row.cellIterator());
-							if (ossMaster != null)
+							if (ossMaster != null) {
 								ossMasterList.add(ossMaster);
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -2937,8 +2943,9 @@ public class ExcelUtil extends CoTopComponent {
 							}
 						} else {
 							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
-							if (licenseMaster != null)
+							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -2966,8 +2973,9 @@ public class ExcelUtil extends CoTopComponent {
 						} else {
 							//licenseMaster Object
 							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
-							if (licenseMaster != null)
+							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
+							}
 						}
 					}
 				} catch (IOException e) {
@@ -2998,39 +3006,59 @@ public class ExcelUtil extends CoTopComponent {
 					licenseMaster.setLicenseName(value);
 				}
 			} else if (colIndex == 1) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setLicenseType(value);
 			} else if (colIndex == 2) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setObligationNotificationYn(value);
 			} else if (colIndex == 3) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setObligationDisclosingSrcYn(value);
 			} else if (colIndex == 4) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setShortIdentifier(value);
 			} else if (colIndex == 5) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
 				licenseMaster.setLicenseNicknames(nicknames);
 			} else if (colIndex == 6) {
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
 				Arrays.stream(webpages).forEach((webpage)->{
 					webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
 				});
 				licenseMaster.setWebpages(webpages);
 			} else if (colIndex == 7) { //userGuide string
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setDescription(value);
 			} else if (colIndex == 8) { //licenseText string
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setLicenseText(value);
 			} else if (colIndex == 9) { //attribute string
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setAttribution(value);
 			} else if (colIndex == 10) { //comment string
-				if (value == null || value.trim().isEmpty()) continue;
+				if (value == null || value.trim().isEmpty()) {
+					continue;
+				}
 				licenseMaster.setComment(value);
 			}
 		}

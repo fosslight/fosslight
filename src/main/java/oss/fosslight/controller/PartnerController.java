@@ -748,8 +748,9 @@ public class PartnerController extends CoTopComponent{
 						for(PartnerMaster pm : result) {
 							pm.setPartnerId(project.getPartnerId());
 							
-							if(existPartnerWatcher)
+							if(existPartnerWatcher) {
 								partnerService.addWatcher(pm);
+							}
 						}
 					}
 				}

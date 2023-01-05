@@ -83,12 +83,14 @@ public class T2CoValidationResult {
     }
     
     void validate(String key){
-        if(dataMap == null) throw new IllegalStateException("no dataMap");
+        if (dataMap == null) {
+          throw new IllegalStateException("no dataMap");
+        }
         
-        if(dataMap.containsKey(key)){
-            validDataMap.put(key, dataMap.get(key));
-        }else{
-            throw new IllegalArgumentException("invalid key. Entry not found in dataMap.");
+        if (dataMap.containsKey(key)) {
+          validDataMap.put(key, dataMap.get(key));
+        } else {
+          throw new IllegalArgumentException("invalid key. Entry not found in dataMap.");
         }
     }
     
@@ -101,7 +103,9 @@ public class T2CoValidationResult {
     }
     
     public boolean isValid(){
-        if(errMap == null) throw new IllegalStateException("Not validated yet.");
+        if (errMap == null) {
+          throw new IllegalStateException("Not validated yet.");
+        }
         
         return errMap.isEmpty();
     }

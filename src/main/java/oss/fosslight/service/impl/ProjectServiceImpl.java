@@ -1822,7 +1822,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		if(fileDeleteCheckFlag) projectMapper.updateFileId2(project);
+		if(fileDeleteCheckFlag) {
+			projectMapper.updateFileId2(project);
+		}
 	}
 	
 	@Override

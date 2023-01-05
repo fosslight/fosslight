@@ -1038,8 +1038,9 @@ public class OssController extends CoTopComponent{
 			LicenseMaster licenseMaster;
 			List<String> declaredLicenses = oss.getDeclaredLicenses();
 			String downloadLocation = oss.getDownloadLocation();
-			if (downloadLocation != null)
+			if (downloadLocation != null) {
 				oss.setDownloadLocations(downloadLocation.split(","));
+			}
 			boolean[] check = new boolean[declaredLicenses.size() + 1];
 			List<OssLicense> ossLicenses = new ArrayList<>();
 			int licenseCount = 1;
@@ -1070,8 +1071,11 @@ public class OssController extends CoTopComponent{
 				OssLicense convert = new OssLicense();
 				convert.setLicenseId(existsLicense.getLicenseId());
 				convert.setLicenseName(existsLicense.getLicenseName());
-				if (licenseCount > 1) convert.setOssLicenseComb("AND");
-				else convert.setOssLicenseComb("");
+				if (licenseCount > 1) {
+					convert.setOssLicenseComb("AND");
+				} else {
+					convert.setOssLicenseComb("");
+				}
 				convert.setLicenseNameEx(existsLicense.getLicenseNameTemp());
 				convert.setLicenseType(existsLicense.getLicenseType());
 				if (CoConstDef.FLAG_YES.equals(avoidNull(existsLicense.getObligationNeedsCheckYn()))) {
@@ -1106,14 +1110,22 @@ public class OssController extends CoTopComponent{
 
 			for (int i = 0; i < ossLicenses.size(); i++) {
 				OssLicense ossLicense = ossLicenses.get(i);
-				if (!check[i]) continue;
-				if (licenseCount <= 2) ossLicense.setLicenseType("S");
-				else ossLicense.setLicenseType("M");
+				if (!check[i]) {
+					continue;
+				}
+				if (licenseCount <= 2) {
+					ossLicense.setLicenseType("S");
+				} else {
+					ossLicense.setLicenseType("M");
+				}
 			}
 			oss.setOssLicenses(ossLicenses);
 
-			if (licenseCount > 2) oss.setLicenseDiv("M");
-			else oss.setLicenseDiv("S");
+			if (licenseCount > 2) {
+				oss.setLicenseDiv("M");
+			} else {
+				oss.setLicenseDiv("S");
+			}
 
 			boolean checkDuplicated = true;
 			if (ossService.checkExistsOss(oss) != null) {
@@ -2150,7 +2162,9 @@ public class OssController extends CoTopComponent{
 						}
 				}
 				if(!ossMasterCheclFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !downloadLocationCheckFlag){
-					if(!isEmpty(comment)) onlyCommentRegistFlag = true;
+					if(!isEmpty(comment)) {
+						onlyCommentRegistFlag = true;
+					}
 				}
 								
 				if ((ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) || onlyCommentRegistFlag) {
