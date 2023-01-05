@@ -732,7 +732,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if(!isEmpty(max_vuln_ossName)) {
 				vnlnUpdBean.setOssName(max_vuln_ossName);
 				vnlnUpdBean.setOssVersion(avoidNull(max_vuln_ossVersion));
-				if(max_vuln_ossName.contains(" ")) vnlnUpdBean.setOssNameTemp(max_vuln_ossName.replaceAll(" ", "_"));
+				if(max_vuln_ossName.contains(" ")) {
+					vnlnUpdBean.setOssNameTemp(max_vuln_ossName.replaceAll(" ", "_"));
+				}
 				vnlnUpdBean = selfCheckMapper.getMaxVulnByOssName(vnlnUpdBean);				
 			}
 			
@@ -870,19 +872,22 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			try{
-				if(stmt!=null)
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException se){}
+				}
+			} catch(SQLException se) {}
 			
 			try{
-				if(stmt2!=null)
+				if (stmt2 != null) {
 					stmt2.close();
-			}catch(SQLException se){}
+				}
+			} catch(SQLException se) {}
 			
 			try{
-				if(stmt3!=null)
+				if (stmt3 != null) {
 					stmt3.close();
-			}catch(SQLException se){}
+				}
+			} catch(SQLException se) {}
 			
 			if(conn != null) {
 				try {
@@ -894,24 +899,28 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 		} finally {
 			try{
-				if(stmt!=null)
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 			
-			try{
-				if(stmt2!=null)
+			try {
+				if (stmt2 != null) {
 					stmt2.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 			
 			try{
-				if(stmt3!=null)
+				if (stmt3 != null) {
 					stmt3.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 			
 			try{
-				if(conn!=null)
+				if (conn != null) {
 					conn.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 		}
 	}
 
@@ -936,7 +945,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				if((idx % 1000) == 0) {
 					stmt.executeBatch();
 					stmt.clearBatch();
-		            conn.commit();
+					conn.commit();
 				}
 				
 				idx++;
@@ -947,9 +956,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			try{
-				if(stmt!=null)
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 			
 			if(conn != null) {
 				try {
@@ -960,15 +970,17 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 			}
 		} finally {
-			try{
-				if(stmt!=null)
+			try {
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 			
 			try{
-				if(conn!=null)
+				if (conn != null) {
 					conn.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 		}
 	}
 	
@@ -995,7 +1007,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				ossCheckParam.add(_ossName);
 			}
 			
-			if(!isEmpty(ossInfoKey)) ossInfoKey = "";
+			if(!isEmpty(ossInfoKey)) {
+				ossInfoKey = "";
+			}
 		}
 		if(!ossCheckParam.isEmpty()) {
 			OssMaster param = new OssMaster();
@@ -1710,7 +1724,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				switch(CommonFunction.checkObligationSelectedLicense(ossComponent.getOssComponentsLicense())){
 					case CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE: 
 						if(hideOssVersionFlag) {
-							if(!srcInfo.containsKey(componentKey)) srcInfo.put(componentKey, ossComponent);
+							if(!srcInfo.containsKey(componentKey)) {
+								srcInfo.put(componentKey, ossComponent);
+							}
 						} else {
 							srcInfo.put(componentKey, ossComponent);
 						}
@@ -1718,7 +1734,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 						break;
 					case CoConstDef.CD_DTL_OBLIGATION_NOTICE: 
 						if(hideOssVersionFlag) {
-							if(!noticeInfo.containsKey(componentKey)) noticeInfo.put(componentKey, ossComponent);
+							if(!noticeInfo.containsKey(componentKey)) {
+								noticeInfo.put(componentKey, ossComponent);
+							}
 						} else {
 							noticeInfo.put(componentKey, ossComponent);
 						}

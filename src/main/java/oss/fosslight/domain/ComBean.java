@@ -390,7 +390,9 @@ public class ComBean extends CoTopComponent implements Serializable {
 		this.startIndex = (curPage-1)*pageListSize;
 		
 		int totBlockPage = (totBlockSize / blockSize);
-		if(totBlockSize != blockSize) totBlockPage++;
+		if(totBlockSize != blockSize) {
+			totBlockPage++;
+		}
 		this.totBlockPage = totBlockPage;
 		
 		int blockPage = ((curPage-1) / blockSize) + 1;
@@ -398,7 +400,9 @@ public class ComBean extends CoTopComponent implements Serializable {
 		
 		int blockStart = ((blockPage-1) * blockSize) + 1;
 		int blockEnd = blockStart+blockSize-1;
-		if(blockEnd > totBlockSize) blockEnd = totBlockSize;
+		if(blockEnd > totBlockSize) {
+			blockEnd = totBlockSize;
+		}
 		
 		this.blockStart = blockStart;
 		this.blockEnd = blockEnd;

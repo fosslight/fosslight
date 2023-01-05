@@ -492,12 +492,14 @@ public class T2CoOssValidator extends T2CoValidator {
 		String gridKey = StringUtil.convertToCamelCase(basicKey);
 		String errCd = checkBasicError(basicKey, gridKey, ossBean.getOssName(), false);
 
-		if(!isEmpty(errCd))
-			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
-		else if(ossService.checkExistsOssNickname2(ossBean) != null)
-			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NAME.DUPLICATEDNICK_SHORT");
-		else if(ossService.checkExistsOssByname(ossBean) == 0)
-			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NAME.UNCONFIRMED");
+		if (!isEmpty(errCd)) {
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
+		} else if(ossService.checkExistsOssNickname2(ossBean) != null) {
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""),
+					"OSS_NAME.DUPLICATEDNICK_SHORT");
+		} else if(ossService.checkExistsOssByname(ossBean) == 0) {
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_NAME.UNCONFIRMED");
+		}
 
 		/** OSS_NICKNAME */
 		basicKey = "OSS_NICKNAMES";
@@ -518,9 +520,9 @@ public class T2CoOssValidator extends T2CoValidator {
 		basicKey = "DECLARED_LICENSES";
 		gridKey = StringUtil.convertToCamelCase(basicKey);
 
-		if(Objects.isNull(ossBean.getDeclaredLicenses()) || ossBean.getDeclaredLicenses().isEmpty())
-			errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "LICENSE_NAME.REQUIRED");
-		else {
+		if (Objects.isNull(ossBean.getDeclaredLicenses()) || ossBean.getDeclaredLicenses().isEmpty()) {
+			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "LICENSE_NAME.REQUIRED");
+		} else {
 			for(String license : ossBean.getDeclaredLicenses()) {
 				errCd = checkBasicError(basicKey, gridKey, license, false);
 
