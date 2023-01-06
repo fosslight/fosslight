@@ -1968,23 +1968,29 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return ossMapper.checkExistsOssByname(bean);
 	}
 
-	private String generateCheckOSSName(String downloadlocationUrl, Pattern p, List<String> androidPlatformList) {
+	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList) {
 		String checkName = "";
-		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
+		boolean isValid = false;
+		Matcher ossNameMatcher = p.matcher("https://" + bean.getDownloadLocation());
 		while(ossNameMatcher.find()) {
 			for(String list : androidPlatformList){
-				if(ossNameMatcher.group(3).contains(list)){
-					String[] android = list.split("/");
-					checkName = "android-";
-					for (String name : android) {
-						checkName += name + "-";
-					}
-					checkName = checkName.substring(0, checkName.length()-1);
+				if(ossNameMatcher.group(3).equals(list)){
+					isValid = true;
 					break;
 				}
 			}
+			String[] android = ossNameMatcher.group(3).split("/");
+			checkName = "android-";
+			for (String name : android) {
+				checkName += name + "-";
+			}
+			checkName = checkName.substring(0, checkName.length()-1);
 		}
-		return checkName;
+		bean.setCheckName(checkName);
+		if(!isValid) {
+			bean.setCheckOssList("I");
+		}
+		return bean;
 	}
 
 	private String generateCheckOSSName(int urlSearchSeq, String downloadlocationUrl, Pattern p) {
@@ -2209,11 +2215,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 						} else {
 							if (urlSearchSeq == 7) {
-								checkName = generateCheckOSSName(downloadlocationUrl, p, androidPlatformList);
-								if(isEmpty(checkName)){
-									checkName = "Invalid download location.";
-									bean.setCheckOssList("I");
-								}
+								generateCheckOSSName(bean, p, androidPlatformList);
+								checkName = bean.getCheckName();
 							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 							} else {
@@ -2244,11 +2247,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 											bean.setRedirectLocation(redirectlocationUrl);
 										}
 									} else {
-										checkName = "Invalid download location.";
+										checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 										bean.setCheckOssList("I");
 									}
 								} catch (IOException e) {
-									checkName = "Invalid download location.";
+									checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 									bean.setCheckOssList("I");
 								}
 							}
