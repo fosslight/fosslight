@@ -1717,7 +1717,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			// license nickname 체크
-			if(!bean.getLicenseName().contains(",")) {
+			if(!avoidNull(bean.getLicenseName()).contains(",")) {
 				String _licenseName = avoidNull(bean.getLicenseName()).trim();
 				
 				if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(_licenseName.toUpperCase())) {

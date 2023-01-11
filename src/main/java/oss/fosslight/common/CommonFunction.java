@@ -1796,7 +1796,7 @@ public class CommonFunction extends CoTopComponent {
 		
 		for (Element em : binaryEmList) {
 			String binaryName = em.text();
-			binaryName = binaryName.replaceAll("//", "/");
+			binaryName = binaryName.replaceAll("//", "/").replaceAll("\\u0000", "");
 			noticeBinaryList.add(binaryName);
 			
 			if (binaryName.startsWith("/")) {
@@ -1804,7 +1804,10 @@ public class CommonFunction extends CoTopComponent {
 			} else {
 				noticeBinaryList.add("/" + binaryName);
 			}
-			
+
+			//if ( binaryName.equals('/')) {
+				//log.info("abcde---" + binaryName);
+			//}
 			// path 정보를 무시하고 binary 파일명만 추가 (binary file은 사전에 중복 제거되어 유니크하다)
 			noticeBinaryList.add(FilenameUtils.getName(binaryName));
 			if(binaryName.indexOf("/") > -1) {

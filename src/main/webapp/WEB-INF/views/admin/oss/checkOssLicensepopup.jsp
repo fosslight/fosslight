@@ -234,14 +234,11 @@
 			var grid_fn = {
 					displayStatus : function(cellvalue, options, rowObject){
 						var display = "";
-						var changeFlag = rowObject.changeFlag || rowObject[8];
+						var changeFlag = rowObject.changeFlag || rowObject[9];
 
 						if(changeFlag =="Y"){
-							display += "<a class='btnPG wAnd onAnd'>Change</a>";
-						} else {
-							display += "<a class='btnPG wAnd off'>Change</a>";
+							display += "<a class='btnPG wAnd onAnd'>Changed</a>";
 						}
-						
 						return display;
 					},
 					displayDownloadLocation : function(cellvalue, options, rowObject){
