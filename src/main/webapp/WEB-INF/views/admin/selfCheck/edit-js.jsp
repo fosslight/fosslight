@@ -175,7 +175,13 @@
 		// 성공 콜백
 		onRegistSuccess : function(json, status){
 			if(json.isValid == 'false') {
-				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				var _errMsg = '<spring:message code="msg.common.valid" />';
+
+				if(json.validMsg && json.validMsg != "") {
+					_errMsg += "</br>" + json.validMsg;
+				}
+				alertify.error(_errMsg, 0);
+				createValidMsgComplex(json);
 			} else {
 				var prjId = $('input[name=prjId]').val();
 				alertify.alert('<spring:message code="msg.common.success" />', function(){

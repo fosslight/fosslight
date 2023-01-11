@@ -448,6 +448,7 @@ public class SelfCheckController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> saveAjax(@ModelAttribute Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		project.setWatchers(req.getParameterValues("watchers"));
+		List<Project> list = new ArrayList<Project>();
 
 		Boolean isNew = StringUtil.isEmpty(project.getPrjId());
 		String copy = req.getParameter("copy");
@@ -471,6 +472,20 @@ public class SelfCheckController extends CoTopComponent {
 					}
 				}
 			}
+		}
+
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_SELFCHECK);
+		Map<String, String> reqMap = new HashMap<>();
+		pv.saveRequest(req, reqMap);
+
+		if (!isEmpty(creatorIdByName)) {
+			reqMap.put("CREATOR_NM", creatorIdByName);
+		}
+		T2CoValidationResult vr = pv.validateObject(reqMap, list);
+
+		if (!vr.isValid()) {
+			return makeJsonResponseHeader(vr.getValidMessageMap());
 		}
 
 		project.setCopy(copy);

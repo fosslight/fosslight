@@ -2146,4 +2146,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		// 미사용
 		return new History();
 	}
+
+	@Override
+	public boolean existProjectData(Project project){
+		int result = selfCheckMapper.selectDuplicatedProject(project);
+		return result > 0 ? true : false;
+	}
 }

@@ -28,12 +28,14 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidator;
 
 @Slf4j
 public class T2CoProjectValidator extends T2CoValidator {
+	private SelfCheckService selfcheckService = (SelfCheckService) getWebappContext().getBean(SelfCheckService.class);
 	private ProjectService projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
 	private OssService ossService = (OssService) getWebappContext().getBean(OssService.class);
 	private T2UserService userService = (T2UserService) getWebappContext().getBean(T2UserService.class);
@@ -58,6 +60,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	public final String PROC_TYPE_IDENTIFICATION_BAT = "BAT";
 	public final String PROC_TYPE_IDENTIFICATION_BIN = "BIN";
 	public final String PROC_TYPE_IDENTIFICATION_ANDROID = "ANDROID";
+	public final String PROC_TYPE_SELFCHECK = "SELF";
 	public final String PROC_TYPE_IDENTIFICATION_BOM = "BOM";
 	public final String PROC_TYPE_IDENTIFICATION_BOM_MERGE = "BOM_MERGE";
 	public final String PROC_TYPE_PACKAGING = "PACKAGING";
@@ -119,6 +122,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 					case PROC_TYPE_IDENTIFICATION_BOM_MERGE:
 						validateProjectBomMerge(map, errMap, diffMap);
 						
+						break;
+					case PROC_TYPE_SELFCHECK :
+						validateSelfCheck(map, errMap);
+
 						break;
 				}
 			}
@@ -1538,6 +1545,24 @@ public class T2CoProjectValidator extends T2CoValidator {
 	private void validateProjectPartner(Map<String, String> map, Map<String, String> errMap,
 			Map<String, String> diffMap, Map<String, String> infoMap) {
 		validateProjectGrid(map, errMap, diffMap, infoMap);
+	}
+
+	private void validateSelfCheck(Map<String, String> map, Map<String, String> errMap){
+		String targetName = "";
+		Project prj = new Project();
+		String prjId = map.get("PRJ_ID");
+		String prjName = map.get("PRJ_NAME");
+		String prjVersion = map.get("PRJ_VERSION");
+		targetName = "PRJ_NAME";
+		if (!errMap.containsKey(targetName)) {
+			prj.setPrjId(prjId);
+			prj.setPrjName(prjName);
+			prj.setPrjVersion(prjVersion);
+			boolean exist = selfcheckService.existProjectData(prj);
+			if (exist) {
+				errMap.put(targetName, targetName + ".DUPLICATED");
+			}
+		}
 	}
 	
 	private void validateProjectBasicInfo(Map<String, String> map, Map<String, String> errMap) {

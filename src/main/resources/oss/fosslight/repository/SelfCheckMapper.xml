@@ -961,7 +961,7 @@
 		SELECT 
 			COUNT(*) 
 		FROM 
-			PROJECT_MASTER 
+			PRE_PROJECT_MASTER
 		WHERE USE_YN ='Y'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 		AND PRJ_ID <![CDATA[<>]]> #{prjId}
