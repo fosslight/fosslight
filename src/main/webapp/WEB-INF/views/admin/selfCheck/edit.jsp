@@ -46,13 +46,6 @@
 								</div>
 							</td>
 						</tr>
-						<tr style="display:none">
-							<th class="dCase  txStr">Creator</th>
-							<td class="dCase">
-								<input type="text" name="creatorNm" class="autoComCreatorDivision" value=""/>
-								<input type="hidden" name="creator" <c:if test="${not empty project }">value='${project.creator}'</c:if>/>
-							</td>
-						</tr>
 					</tbody>
 				</table>
 			</form>

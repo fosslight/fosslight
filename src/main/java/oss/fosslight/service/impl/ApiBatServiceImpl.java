@@ -137,13 +137,13 @@ public class ApiBatServiceImpl implements ApiBatService {
 				} catch (Exception e) {}
 			}
 			
-			if(stmt!=null) {
+			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {}
 			}
 			
-			if(conn!=null) {
+			if (conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {}

@@ -72,5 +72,7 @@ public interface SelfCheckService extends HistoryConfig{
 	public String getNoticeHtmlFileForPreview(OssNotice ossNotice) throws IOException;
 
 	public String getNoticeTextFileForPreview(OssNotice ossNotice) throws IOException;
+
+	public boolean existProjectData(Project project);
 	
 }

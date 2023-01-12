@@ -654,7 +654,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				boolean isFirst = true;
 				
 				for(String s : result) {
-					if(s.contains("?")) s = s.replaceAll("[?]", "0x3F");
+					if(s.contains("?")) {
+						s = s.replaceAll("[?]", "0x3F");
+					}
 					if(!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
 
@@ -757,7 +759,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> pathCheckList46 = new ArrayList<>();
 			
 			for (String path : deCompResultMap.keySet()) {
-				if(path.contains("?")) path = path.replaceAll("[?]", "0x3F");
+				if (path.contains("?")) {
+					path = path.replaceAll("[?]", "0x3F");
+				}
 				
 				pathCheckList1.add(path);
 				pathCheckList2.add("/" + path);
@@ -910,7 +914,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.info("VERIFY Path Check START -----------------");
 			
 			for(String gridPath : gridFilePaths){
-				if(gridPath.contains("?")) gridPath = gridPath.replaceAll("[?]", "0x3F");
+				if (gridPath.contains("?")) {
+					gridPath = gridPath.replaceAll("[?]", "0x3F");
+				}
 				
 				if(!separatorErrFlag) {
 					separatorErrFlag = gridPath.contains("\\") ? true : false;

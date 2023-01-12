@@ -3498,7 +3498,9 @@ public class CommonFunction extends CoTopComponent {
 		List<List<ProjectIdentification>> ossComponentLicense = new ArrayList<List<ProjectIdentification>>(); 
 		
 		for(ProjectIdentification pi : ossComponent) {
-			if(excludeFlag && CoConstDef.FLAG_YES.equals(pi.getExcludeYn()) && isEmpty(pi.getLicenseName())) continue;
+			if(excludeFlag && CoConstDef.FLAG_YES.equals(pi.getExcludeYn()) && isEmpty(pi.getLicenseName())) {
+				continue;
+			}
 			
 			String convertLicenseName = pi.getLicenseName();
 			
@@ -3702,12 +3704,16 @@ public class CommonFunction extends CoTopComponent {
 						
 						if(ossInfoByNickList != null) {
 							int deactivateCnt = ossInfoByNickList.stream().filter(e -> e.getDeactivateFlag().equals(CoConstDef.FLAG_YES)).collect(Collectors.toList()).size();
-							if(deactivateCnt > 0) continue;
+							if(deactivateCnt > 0) {
+								continue;
+							}
 							
 							if(ossAnalysisByNickList.size() > 0) {
 								String checkDuplicateOssName = ossInfoByNickList.get(0).getOssName();
 								int checkDuplicateCnt = ossAnalysisByNickList.stream().filter(e -> e.getOssName().equalsIgnoreCase(checkDuplicateOssName)).collect(Collectors.toList()).size();
-								if(checkDuplicateCnt > 0) continue;
+								if(checkDuplicateCnt > 0) {
+									continue;
+								}
 							}
 							
 							final Comparator<OssMaster> comp = Comparator.comparing((OssMaster o) -> o.getModifiedDate()).reversed();
@@ -3725,7 +3731,9 @@ public class CommonFunction extends CoTopComponent {
 							}
 							
 							String analysisTitle = ossInfoByNickList.get(0).getOssName();
-							if(!isEmpty(ossInfoByNickList.get(0).getOssVersion())) analysisTitle += " (" + ossInfoByNickList.get(0).getOssVersion() + ")";
+							if(!isEmpty(ossInfoByNickList.get(0).getOssVersion())) {
+								analysisTitle += " (" + ossInfoByNickList.get(0).getOssVersion() + ")";
+							}
 							
 							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), bean.getOssVersion(), ossInfoByNickList.get(0).getOssNickname().replaceAll("<br>", ",")
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
@@ -4313,13 +4321,17 @@ public class CommonFunction extends CoTopComponent {
 		int startIndex = (curPage-1)*pageListSize;
 		
 		int totBlockPage = (totBlockSize / blockSize);
-		if(totBlockSize != blockSize) totBlockPage++;
+		if (totBlockSize != blockSize) {
+			totBlockPage++;
+		}
 		
 		int blockPage = ((curPage-1) / blockSize) + 1;
 		
 		int blockStart = ((blockPage-1) * blockSize) + 1;
 		int blockEnd = blockStart+blockSize-1;
-		if(blockEnd > totBlockSize) blockEnd = totBlockSize;
+		if (blockEnd > totBlockSize) {
+			blockEnd = totBlockSize;
+		}
 		
 		map.put("totBlockSize", totBlockSize);
 		map.put("startIndex", startIndex);

@@ -2260,7 +2260,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if(!isEmpty(checkName)){
 							bean.setCheckName(checkName);
 							bean.setDownloadLocation(downloadLocation);
-							if(!bean.getOssName().equals(bean.getCheckName())) result.add(bean);
+							if(!bean.getOssName().equals(bean.getCheckName())) {
+								result.add(bean);
+							}
 						}
 					}
 				} else {
@@ -2655,9 +2657,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			resMap.put("isChangedName", isChangedName);
 			resMap.put("isDeactivateFlag", isDeactivateFlag);
 			resMap.put("isActivateFlag", isActivateFlag);
-			if(beforeBean != null) resMap.put("beforeBean", beforeBean);
-			if(afterBean != null) resMap.put("afterBean", afterBean);
-			if(updateOssNameVersionDiffMergeObject != null) resMap.put("updateOssNameVersionDiffMergeObject", updateOssNameVersionDiffMergeObject);
+			if(beforeBean != null) {
+				resMap.put("beforeBean", beforeBean);
+			}
+			if(afterBean != null) {
+				resMap.put("afterBean", afterBean);
+			}
+			if(updateOssNameVersionDiffMergeObject != null) {
+				resMap.put("updateOssNameVersionDiffMergeObject", updateOssNameVersionDiffMergeObject);
+			}
 		}
 		resMap.put("resCd", resCd);
 		return resMap;
@@ -3144,26 +3152,40 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> checkList = new ArrayList<String>();
 				
 		if (!Arrays.equals(standardOss.getOssLicenses().toArray(), selectOss.getOssLicenses().toArray())) {
-			if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) checkList.add("Declared License");
+			if (!standardOss.getLicenseName().equals(selectOss.getLicenseName())) {
+				checkList.add("Declared License");
+			}
 		}
 		if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), selectOss.getDetectedLicenses().toArray())) {
-			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) checkList.add("Detected License");
+			if (!standardOss.getDetectedLicense().equals(selectOss.getDetectedLicense())) {
+				checkList.add("Detected License");
+			}
 		}
-		if (!avoidNull(standardOss.getCopyright(), "").equals(avoidNull(selectOss.getCopyright(), ""))) checkList.add("Copyright");
+		if (!avoidNull(standardOss.getCopyright(), "").equals(avoidNull(selectOss.getCopyright(), ""))) {
+			checkList.add("Copyright");
+		}
 		if (standardOss.getDownloadLocations() != null) {
 			if (selectOss.getDownloadLocations() != null) {
-				if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(selectOss.getDownloadLocations()).toArray())) checkList.add("Download Location");
-			}else {
+				if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(selectOss.getDownloadLocations()).toArray())) {
+					checkList.add("Download Location");
+				}
+			} else {
 				checkList.add("Download Location");
 			}
-		}else {
+		} else {
 			if (selectOss.getDownloadLocations() != null) {
 				checkList.add("Download Location");
 			}
 		}
-		if (!avoidNull(standardOss.getHomepage(), "").equals(avoidNull(selectOss.getHomepage(), ""))) checkList.add("Home Page");
-		if (!avoidNull(standardOss.getSummaryDescription(), "").equals(avoidNull(selectOss.getSummaryDescription(), ""))) checkList.add("Summary Description");
-		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) checkList.add("Attribution");
+		if (!avoidNull(standardOss.getHomepage(), "").equals(avoidNull(selectOss.getHomepage(), ""))) {
+			checkList.add("Home Page");
+		}
+		if (!avoidNull(standardOss.getSummaryDescription(), "").equals(avoidNull(selectOss.getSummaryDescription(), ""))) {
+			checkList.add("Summary Description");
+		}
+		if (!avoidNull(standardOss.getAttribution(), "").equals(avoidNull(selectOss.getAttribution(), ""))) {
+			checkList.add("Attribution");
+		}
 		
 		return checkList;
 	}
@@ -3610,7 +3632,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		boolean isActivateFlag = (boolean) resMap.get("isActivateFlag");
 		
 		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
-		if(resMap.containsKey("updateOssNameVersionDiffMergeObject")) updateOssNameVersionDiffMergeObject = (Map<String, List<OssMaster>>) resMap.get("updateOssNameVersionDiffMergeObject");
+		if (resMap.containsKey("updateOssNameVersionDiffMergeObject")) {
+			updateOssNameVersionDiffMergeObject = (Map<String, List<OssMaster>>) resMap.get(
+					"updateOssNameVersionDiffMergeObject");
+		}
 		
 		String mailType = "";
 		
