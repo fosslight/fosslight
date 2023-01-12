@@ -416,7 +416,7 @@ public class BinaryAnalysisResult extends ComBean implements Serializable {
 	 * @param batKey the bat key
 	 */
 	public void addBatKey(String batKey) {
-		if(this.batKeyList == null) {
+		if (this.batKeyList == null) {
 			this.batKeyList = new ArrayList<>();
 		}
 		this.batKeyList.add(batKey);

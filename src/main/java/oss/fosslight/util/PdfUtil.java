@@ -39,7 +39,7 @@ public final class PdfUtil extends CoTopComponent {
     private static ProjectMapper projectMapper;
 
     public static PdfUtil getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new PdfUtil();
             licenseMapper = (LicenseMapper) getWebappContext().getBean(LicenseMapper.class);
             ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
@@ -82,7 +82,7 @@ public final class PdfUtil extends CoTopComponent {
 
         Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
         List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
-        for(ProjectIdentification projectIdentification : list) {
+        for (ProjectIdentification projectIdentification : list) {
             //OssMasterReview
             OssMaster ossMaster = new OssMaster();
             ossMaster.setOssId(projectIdentification.getOssId());
@@ -129,7 +129,7 @@ public final class PdfUtil extends CoTopComponent {
                 licenseMasterMap.put(license.getLicenseName(), license);
             }
         }
-        for(LicenseMaster licenseMaster : licenseMasterMap.values()) {
+        for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
             licenseReview.add(licenseMaster);
         }
 
@@ -153,8 +153,8 @@ public final class PdfUtil extends CoTopComponent {
         VelocityEngine vf = new VelocityEngine();
         Properties props = new Properties();
 
-        for(String key : model.keySet()) {
-            if(!"templateUrl".equals(key)) {
+        for (String key : model.keySet()) {
+            if (!"templateUrl".equals(key)) {
                 context.put(key, model.get(key));
             }
         }

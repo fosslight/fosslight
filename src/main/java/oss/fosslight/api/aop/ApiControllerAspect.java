@@ -87,7 +87,7 @@ public class ApiControllerAspect {
 	
 	private String paramMapToString(Map<String, String[]> paramMap) {
 
-		if(CoConstDef.FLAG_YES.equals(convertParamJson)) {
+		if (CoConstDef.FLAG_YES.equals(convertParamJson)) {
 			JSONObject jsonObject = new JSONObject();
 			List<String> ignoreParamList = new ArrayList<>();
 			

@@ -21,7 +21,7 @@ import oss.fosslight.domain.PartnerMaster;
 public class CustomXssFilter {
 
     public static void licenseMasterFilter(List<LicenseMaster> list) {
-        for(LicenseMaster licenseMaster : list) {
+        for (LicenseMaster licenseMaster : list) {
 
             licenseMasterFilter(licenseMaster);
         }
@@ -42,7 +42,7 @@ public class CustomXssFilter {
     }
 
     public static void ossMasterFilter(List<OssMaster> list) {
-        for(OssMaster ossMaster : list) {
+        for (OssMaster ossMaster : list) {
 
             ossMasterFilter(ossMaster);
         }
@@ -63,7 +63,7 @@ public class CustomXssFilter {
     }
 
     public static void projectFilter(List<Project> list) {
-        for(Project project : list) {
+        for (Project project : list) {
 
             projectFilter(project);
         }
@@ -76,7 +76,7 @@ public class CustomXssFilter {
     }
 
     public static void partnerFilter(List<PartnerMaster> list) {
-        for(PartnerMaster partner : list) {
+        for (PartnerMaster partner : list) {
 
             partnerFilter(partner);
         }

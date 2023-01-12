@@ -197,9 +197,9 @@ public class ComBean extends CoTopComponent implements Serializable {
      */
     public String getSidx() {
     	
-		if(!isEmpty(sidx) && CoConstDef.VALIDATION_USE_CAMELCASE) {
+		if (!isEmpty(sidx) && CoConstDef.VALIDATION_USE_CAMELCASE) {
 			String _sidx = StringUtil.convertToUnderScore(sidx).toUpperCase();
-			if(CoCodeManager.getCodeNames(CoConstDef.CD_SYSTEM_GRID_SORT_CAST).contains(_sidx)) {
+			if (CoCodeManager.getCodeNames(CoConstDef.CD_SYSTEM_GRID_SORT_CAST).contains(_sidx)) {
 				_sidx = "CAST("+ _sidx +" AS SIGNED)";
 			}
 			return _sidx;
@@ -207,7 +207,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 		return sidx;
 	}
     public String getSidxEx() {
-		if(StringUtils.isEmpty(sidx)) {
+		if (StringUtils.isEmpty(sidx)) {
 			return sidx;
 		}
 
@@ -390,7 +390,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 		this.startIndex = (curPage-1)*pageListSize;
 		
 		int totBlockPage = (totBlockSize / blockSize);
-		if(totBlockSize != blockSize) {
+		if (totBlockSize != blockSize) {
 			totBlockPage++;
 		}
 		this.totBlockPage = totBlockPage;
@@ -400,7 +400,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 		
 		int blockStart = ((blockPage-1) * blockSize) + 1;
 		int blockEnd = blockStart+blockSize-1;
-		if(blockEnd > totBlockSize) {
+		if (blockEnd > totBlockSize) {
 			blockEnd = totBlockSize;
 		}
 		
@@ -683,7 +683,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 	 * @return the 등록일
 	 */
 	public String getCreatedDate() {
-		if(this.createdDate == null){
+		if (this.createdDate == null){
 			Date now = new Date();
 			SimpleDateFormat sdf = new SimpleDateFormat(CoConstDef.DATABASE_FORMAT_DATE_ALL);
 			this.createdDate = sdf.format(now);
@@ -965,9 +965,9 @@ public class ComBean extends CoTopComponent implements Serializable {
 	protected static String getBitArraySum(String value){
 		int sum = 0;
 		
-		if(value != null){
+		if (value != null){
 			String arr[] = value.split(",");
-			if(arr.length > 1){
+			if (arr.length > 1){
 				
 				for (String s : arr) {
 					try{
@@ -1004,15 +1004,15 @@ public class ComBean extends CoTopComponent implements Serializable {
 		Type collectionType1 = new TypeToken<Map<String, Object>>() {}.getType();
 		String[] dateField = {"creationDate", "publDate", "modiDate", "regDt"};
 
-		if(filters != null) {
+		if (filters != null) {
 			filtersMap = (Map<String, Object>) fromJson(filters, collectionType1);
-			if(filtersMap.containsKey("rules")) {
-				for(Map<String, String> ruleMap : (List<LinkedTreeMap<String, String>>)filtersMap.get("rules")) {
+			if (filtersMap.containsKey("rules")) {
+				for (Map<String, String> ruleMap : (List<LinkedTreeMap<String, String>>)filtersMap.get("rules")) {
 					String field = ruleMap.get("field");
 					String data = ruleMap.get("data");
 					
-					for(String date : dateField) {
-						if(date.equalsIgnoreCase(field)) {
+					for (String date : dateField) {
+						if (date.equalsIgnoreCase(field)) {
 							ruleMap.put("data", CommonFunction.formatDateSimple(data));
 						}
 					}

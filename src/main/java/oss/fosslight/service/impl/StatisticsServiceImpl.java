@@ -43,41 +43,41 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> titleList = new ArrayList<Statistics>();
 		List<String> titleArray = new ArrayList<String>();
 		
-		if(!"NET".equals(statistics.getCategoryType())) {
+		if (!"NET".equals(statistics.getCategoryType())) {
 			titleList = statisticsMapper.getChartTitle(statistics);
 		}
 		
-		if("REV".equals(statistics.getCategoryType())) {
+		if ("REV".equals(statistics.getCategoryType())) {
 			titleArray.add("unassigned");
 			statistics.setNoneUser(statisticsMapper.getNoneUser());
 		}
 		
-		for(Statistics title : titleList) {
+		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
 		}
 		
-		if("NET".equals(statistics.getCategoryType())) {
+		if ("NET".equals(statistics.getCategoryType())) {
 			titleArray.add("Network Service");
 			titleArray.add("Others");
 		} 
 		
 		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
-		if("REV".equals(statistics.getCategoryType())) {
+		if ("REV".equals(statistics.getCategoryType())) {
 			statistics.setCategorySize(titleArray.size());
 		}
 		statistics.setTitleArray(titleArray); // Chart Title
 		
 		List<Statistics> list = statisticsMapper.getDivisionalProjectChartData(statistics);
 		
-		if("REV".equals(statistics.getCategoryType())) {
+		if ("REV".equals(statistics.getCategoryType())) {
 			// Reviewer None Statistic Sum Check
 			if (noneCheck(titleArray, list) > 0) {
 				titleArray.add("NONE");
 			}
 		}
 				
-		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for(Statistics stat : list) {
+		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
+			for (Statistics stat : list) {
 				stat.setTotal();
 			}
 			
@@ -85,42 +85,42 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for(Statistics data : list) {
+			for (Statistics data : list) {
 				int categoryIdx = 0;
 				
-				if(data.getCategory0Cnt() > -1) {
+				if (data.getCategory0Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory1Cnt() > -1) {
+				if (data.getCategory1Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory2Cnt() > -1) {
+				if (data.getCategory2Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory3Cnt() > -1) {
+				if (data.getCategory3Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory4Cnt() > -1) {
+				if (data.getCategory4Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory5Cnt() > -1) {
+				if (data.getCategory5Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory6Cnt() > -1) {
+				if (data.getCategory6Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory7Cnt() > -1) {
+				if (data.getCategory7Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory8Cnt() > -1) {
+				if (data.getCategory8Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
 				}
 			}
@@ -137,9 +137,9 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> list = statisticsMapper.getMostUsedChartData(statistics);
 		
 		/*
-		if("OSS".equals(statistics.getChartType())) {
+		if ("OSS".equals(statistics.getChartType())) {
 			list = statisticsMapper.getMostUsedOssChartData(statistics);
-		} else if("LICENSE".equals(statistics.getChartType())) {			
+		} else if ("LICENSE".equals(statistics.getChartType())) {			
 			list = statisticsMapper.getMostUsedLicenseChartData(statistics);
 		}
 		*/
@@ -157,7 +157,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		
 		List<String> titleArray = new ArrayList<String>();
 		
-		for(Statistics title : titleList) {
+		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
 		}
 		
@@ -181,8 +181,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add("NONE");
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for(Statistics stat : list) {
+		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
+			for (Statistics stat : list) {
 				stat.setTotal();
 			}
 			
@@ -190,43 +190,43 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for(Statistics data : list) {
+			for (Statistics data : list) {
 				int categoryIdx = 0;
 				chartData.addCategoryList(data.getColumnName());
 				
-				if(data.getCategory0Cnt() > -1) {
+				if (data.getCategory0Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory1Cnt() > -1) {
+				if (data.getCategory1Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory2Cnt() > -1) {
+				if (data.getCategory2Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory3Cnt() > -1) {
+				if (data.getCategory3Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory4Cnt() > -1) {
+				if (data.getCategory4Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory5Cnt() > -1) {
+				if (data.getCategory5Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory6Cnt() > -1) {
+				if (data.getCategory6Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory7Cnt() > -1) {
+				if (data.getCategory7Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory8Cnt() > -1) {
+				if (data.getCategory8Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
 				}
 			}
@@ -246,7 +246,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
 		List<String> titleArray = new ArrayList<String>();
 		
-		for(Statistics title : titleList) {
+		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
 		}
 		
@@ -270,8 +270,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add("NONE");
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for(Statistics stat : list) {
+		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
+			for (Statistics stat : list) {
 				stat.setTotal();
 			}
 			
@@ -279,43 +279,43 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for(Statistics data : list) {
+			for (Statistics data : list) {
 				int categoryIdx = 0;
 				chartData.addCategoryList(data.getColumnName());
 				
-				if(data.getCategory0Cnt() > -1) {
+				if (data.getCategory0Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory1Cnt() > -1) {
+				if (data.getCategory1Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory2Cnt() > -1) {
+				if (data.getCategory2Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory3Cnt() > -1) {
+				if (data.getCategory3Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory4Cnt() > -1) {
+				if (data.getCategory4Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory5Cnt() > -1) {
+				if (data.getCategory5Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory6Cnt() > -1) {
+				if (data.getCategory6Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory7Cnt() > -1) {
+				if (data.getCategory7Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory8Cnt() > -1) {
+				if (data.getCategory8Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
 				}
 			}
@@ -335,12 +335,12 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
 		List<String> titleArray = new ArrayList<String>();
 		
-		if("REV".equals(statistics.getCategoryType())) {
+		if ("REV".equals(statistics.getCategoryType())) {
 			titleArray.add("unassigned");
 			statistics.setNoneUser(statisticsMapper.getNoneUser());
 		}
 		
-		for(Statistics title : titleList) {
+		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
 		}
 		
@@ -351,15 +351,15 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		
 		List<Statistics> list = statisticsMapper.getTrdPartyRelatedChartData(statistics);
 		
-		if("REV".equals(statistics.getCategoryType())) {
+		if ("REV".equals(statistics.getCategoryType())) {
 			// Reviewer None Statistic Sum Check
 			if (noneCheck(titleArray, list) > 0) {
 				titleArray.add("NONE");
 			}
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for(Statistics stat : list) {
+		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
+			for (Statistics stat : list) {
 				stat.setTotal();
 			}
 			
@@ -367,42 +367,42 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for(Statistics data : list) {
+			for (Statistics data : list) {
 				int categoryIdx = 0;
 				
-				if(data.getCategory0Cnt() > -1) {
+				if (data.getCategory0Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory1Cnt() > -1) {
+				if (data.getCategory1Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory2Cnt() > -1) {
+				if (data.getCategory2Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory3Cnt() > -1) {
+				if (data.getCategory3Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory4Cnt() > -1) {
+				if (data.getCategory4Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory5Cnt() > -1) {
+				if (data.getCategory5Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory6Cnt() > -1) {
+				if (data.getCategory6Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory7Cnt() > -1) {
+				if (data.getCategory7Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
 				}
 				
-				if(data.getCategory8Cnt() > -1) {
+				if (data.getCategory8Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
 				}
 			}
@@ -425,8 +425,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		titleList.add("Total");
 		titleList.add("Activator");
 		
-		if(CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for(Statistics stat : list) {
+		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
+			for (Statistics stat : list) {
 				stat.setTotal();
 			}
 			
@@ -434,7 +434,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleList);
 		} else {
-			for(Statistics data : list) {
+			for (Statistics data : list) {
 				int categoryIdx = 0;
 				chartData.addCategoryCnt(data.getCategory0Cnt()-data.getCategory1Cnt(), categoryIdx++); // total Cnt = 부서원 - activator
 				chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++); // activator Cnt

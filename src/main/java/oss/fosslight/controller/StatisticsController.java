@@ -69,7 +69,7 @@ public class StatisticsController extends CoTopComponent{
 		Statistics stat = new Statistics();
 		stat.setStartDate(startDate);
 		stat.setEndDate(endDate);
-		if(divisionNo.contains(",")) {
+		if (divisionNo.contains(",")) {
 			String[] divisionNums = divisionNo.split(",");
 			stat.setDivisionNums(divisionNums);
 		}else {
@@ -99,7 +99,7 @@ public class StatisticsController extends CoTopComponent{
 		stat.setChartType(chartType);
 		stat.setIsRawData(isRawData);
 		
-		if("OSS".equals(chartType)) {
+		if ("OSS".equals(chartType)) {
 			return makeJsonResponseHeader(statisticsService.getUpdatedOssChartData(stat));
 		} else { // LICENSE
 			return makeJsonResponseHeader(statisticsService.getUpdatedLicenseChartData(stat));
@@ -115,7 +115,7 @@ public class StatisticsController extends CoTopComponent{
 		String type = req.getParameter("categoryType");
 		String isRawData = req.getParameter("isRawData");
 		
-		if("STT".equals(type)) {
+		if ("STT".equals(type)) {
 			type = "3rd" + type;
 		}
 		
@@ -159,27 +159,27 @@ public class StatisticsController extends CoTopComponent{
 		
 		model.addAttribute("chartName", req.getParameter("chartName"));
 		
-		if(!StringUtil.isEmpty(startDate)) {
+		if (!StringUtil.isEmpty(startDate)) {
 			model.addAttribute("startDate", startDate);
 		}
 		
-		if(!StringUtil.isEmpty(endDate)) {
+		if (!StringUtil.isEmpty(endDate)) {
 			model.addAttribute("endDate", endDate);
 		}
 		
-		if(!StringUtil.isEmpty(categoryType)) {
+		if (!StringUtil.isEmpty(categoryType)) {
 			model.addAttribute("categoryType", categoryType);
 		}
 		
-		if(!StringUtil.isEmpty(divisionNo)) {
+		if (!StringUtil.isEmpty(divisionNo)) {
 			model.addAttribute("divisionNo", divisionNo);
 		}
 		
-		if(!StringUtil.isEmpty(pieSize)) {
+		if (!StringUtil.isEmpty(pieSize)) {
 			model.addAttribute("pieSize", pieSize);
 		}
 		
-		if(!StringUtil.isEmpty(chartType)) {
+		if (!StringUtil.isEmpty(chartType)) {
 			model.addAttribute("chartType", chartType);
 		}
 		

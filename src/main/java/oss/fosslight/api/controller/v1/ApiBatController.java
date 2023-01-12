@@ -65,7 +65,7 @@ public class ApiBatController extends CoTopComponent {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		
 		// 전부 null이면 parameter error return
-		if(!isEmpty(fileName) 
+		if (!isEmpty(fileName) 
 				|| !isEmpty(tlsh) 
 				|| !isEmpty(checksum)) {
 			paramMap.put("fileName", 		fileName);
@@ -77,7 +77,7 @@ public class ApiBatController extends CoTopComponent {
 			
 			List<Map<String, Object>> contents = apibatService.getBatList(paramMap);
 			
-			if(contents != null) {
+			if (contents != null) {
 				resultMap.put("content", contents);
 			}
 			

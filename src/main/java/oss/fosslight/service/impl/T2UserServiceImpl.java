@@ -141,20 +141,20 @@ public class T2UserServiceImpl implements T2UserService {
 			List<PartnerMaster> partnerList = null;
 //			List<Map<String, Object>> batList = null;
 			
-			if(CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES)) {
+			if (CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES)) {
 				// project watcher 초대여부
 				prjList = projectMapper.getWatcherListByEmail(t2Users.getEmail());
 				userMapper.updateProjectWatcherUserInfo(t2Users);		
 			}
 			
-			if(CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES)) {
+			if (CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES)) {
 				partnerList = partnerMapper.getWatcherListByEmail(t2Users.getEmail());
 				userMapper.updatePartnerWatcherUserInfo(t2Users);
 			}
 			
-			if(prjList != null) {
+			if (prjList != null) {
 				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
-				for(Project bean : prjList) {
+				for (Project bean : prjList) {
 					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED);
 					mailBean.setParamPrjId(bean.getPrjId());
 					mailBean.setParamUserId(t2Users.getUserId());
@@ -163,9 +163,9 @@ public class T2UserServiceImpl implements T2UserService {
 				}
 			}
 			
-			if(partnerList != null) {
+			if (partnerList != null) {
 				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
-				for(PartnerMaster bean : partnerList) {
+				for (PartnerMaster bean : partnerList) {
 					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED);
 					mailBean.setParamPartnerId(bean.getPartnerId());
 					mailBean.setParamUserId(t2Users.getUserId());
@@ -174,9 +174,9 @@ public class T2UserServiceImpl implements T2UserService {
 				}
 			}
 			
-//			if(batList != null) {
+//			if (batList != null) {
 //				// 진행중인 프로젝트에 대해서 creator에세 메일을 발송
-//				for(Map<String, Object> bean : batList) {
+//				for (Map<String, Object> bean : batList) {
 //					String batId = (String) bean.get("baId");
 //					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_BAT_WATCHER_REGISTED);
 //					mailBean.setParamBatId(batId);
@@ -282,7 +282,7 @@ public class T2UserServiceImpl implements T2UserService {
 	public String getPassword(T2Users user) {
 		T2Users result = userMapper.getPassword(user);
 		
-		if(result != null) {
+		if (result != null) {
 			return result.getPassword();
 		}
 		
@@ -326,16 +326,16 @@ public class T2UserServiceImpl implements T2UserService {
 
 	@Override
 	public void modUser(List<T2Users> vo) {
-		for(int i = 0;i<vo.size();i++) {
+		for (int i = 0;i<vo.size();i++) {
 			vo.get(i).setModifier(vo.get(i).getUserId());
 			vo.get(i).setPassword("");
-			if(vo.get(i).getDivision().trim().equals("")){
+			if (vo.get(i).getDivision().trim().equals("")){
 				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
 			
 			userMapper.updateUsers(vo.get(i));	
 			
-			if("V".equals(vo.get(i).getAuthority())) {
+			if ("V".equals(vo.get(i).getAuthority())) {
 				vo.get(i).setAuthority("ROLE_ADMIN");
 				userMapper.updateAuthorities(vo.get(i));
 			} else {
@@ -357,11 +357,11 @@ public class T2UserServiceImpl implements T2UserService {
 	public List<T2Users> getUserListExcel() throws Exception {
 		List<T2Users> result = userMapper.selectUserList();
 		
-		for(int i = 0; i< result.size(); i++){
+		for (int i = 0; i< result.size(); i++){
 			String userId = result.get(i).getUserId();
 			String userAuth = userMapper.selectAuthority(userId);
 			
-			if("ROLE_ADMIN".equals(userAuth)){
+			if ("ROLE_ADMIN".equals(userAuth)){
 				userAuth = "V";
 			} else {
 				userAuth = "";
@@ -378,7 +378,7 @@ public class T2UserServiceImpl implements T2UserService {
 		String duplicate = userMapper.checkDuplicateId(vo);
 		boolean result;
 		
-		if("DUPLICATE".equals(duplicate)) {
+		if ("DUPLICATE".equals(duplicate)) {
 			result = true;
 		} else {
 			result = false;
@@ -419,7 +419,7 @@ public class T2UserServiceImpl implements T2UserService {
 		properties.put(Context.SECURITY_CREDENTIALS, userPw);
 		
 		String[] attrIDs = { "cn", "mail" };
-		if(StringUtil.isEmpty(filter)) {
+		if (StringUtil.isEmpty(filter)) {
 			filter = "(cn=" + userId + ")";
 		}
 		
@@ -433,7 +433,7 @@ public class T2UserServiceImpl implements T2UserService {
 			
 			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
 			
-			if(attrIDs != null) {
+			if (attrIDs != null) {
 				constraints.setReturningAttributes(attrIDs);
 			}
 			
@@ -442,7 +442,7 @@ public class T2UserServiceImpl implements T2UserService {
 		} catch (NamingException e) {
 			log.error(e.getMessage(), e);
 		} finally {
-			if(con != null) {
+			if (con != null) {
 				try {
 					con.close();
 				} catch (NamingException e) {}
@@ -454,10 +454,10 @@ public class T2UserServiceImpl implements T2UserService {
 
 			while (m_ne.hasMoreElements()) {
 				sr = (SearchResult) m_ne.next();
-				if(sr != null) {
+				if (sr != null) {
 					String email = (String) sr.getAttributes().get("mail").get();
 					
-					if(!StringUtil.isEmpty(email)) {
+					if (!StringUtil.isEmpty(email)) {
 						userInfo.put("EMAIL", email);
 					}
 				}
@@ -517,13 +517,13 @@ public class T2UserServiceImpl implements T2UserService {
 		params.setToken(_token);
 		params = getUser(params); // 등록된 token 여부 확인
 		
-		if(params == null) {
+		if (params == null) {
 			// 미등록 token
 			throw new CUserNotFoundException();
 		}
 		
 		// Token 인증
-		if(checkToken(params, _token)) { // 추출된 USER 정보로 동일한 token이 생성이 되는지 확인.
+		if (checkToken(params, _token)) { // 추출된 USER 정보로 동일한 token이 생성이 되는지 확인.
             return getUserAndAuthorities(params);
         } else {
             throw new CSigninFailedException();
@@ -538,8 +538,8 @@ public class T2UserServiceImpl implements T2UserService {
 	@Transactional
 	public boolean procToken(T2Users vo) {
 		try {
-			if(CoConstDef.CD_TOKEN_CREATE_TYPE.equals(vo.getTokenType())) {
-				if(StringUtil.isEmpty(vo.getExpireDate())) {
+			if (CoConstDef.CD_TOKEN_CREATE_TYPE.equals(vo.getTokenType())) {
+				if (StringUtil.isEmpty(vo.getExpireDate())) {
 					vo.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
 				}
 				
@@ -550,7 +550,7 @@ public class T2UserServiceImpl implements T2UserService {
 				vo.setToken(tokenKey);
 			}
 			
-			if(!StringUtil.isEmpty(vo.getToken())) {
+			if (!StringUtil.isEmpty(vo.getToken())) {
 				int successCnt = userMapper.procToken(vo);
 				
 				return successCnt != 1 ? false : true;
@@ -574,7 +574,7 @@ public class T2UserServiceImpl implements T2UserService {
 	
 	public boolean checkPassword(String rawPassword, T2Users bean) {
 		T2Users userInfo = userMapper.getPassword(bean);
-		if(userInfo == null) {
+		if (userInfo == null) {
 			return false;
 		}
 		String encPassword = userInfo.getPassword();
@@ -628,7 +628,7 @@ public class T2UserServiceImpl implements T2UserService {
 			con = new InitialDirContext(property);
 			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-			if(attrIDs != null) {
+			if (attrIDs != null) {
 				constraints.setReturningAttributes(attrIDs);
 			}
 
@@ -637,7 +637,7 @@ public class T2UserServiceImpl implements T2UserService {
 		} catch (NamingException e) {
 			log.error(e.getMessage(), e);
 		} finally {
-			if(con != null) {
+			if (con != null) {
 				try {
 					con.close();
 				} catch (NamingException e) {}
@@ -649,18 +649,18 @@ public class T2UserServiceImpl implements T2UserService {
 			int cnt = 1;
 			while (m_ne.hasMoreElements()) {
 				sr = (SearchResult) m_ne.next();
-				if(sr != null) {
+				if (sr != null) {
 					// 이름/직책/부서(email)
 					String displayName = (String) sr.getAttributes().get("displayName").get();
 					String email = (String) sr.getAttributes().get("mail").get();
-					if(StringUtil.isEmptyTrimmed(displayName)) {
+					if (StringUtil.isEmptyTrimmed(displayName)) {
 						result[0] = email.split("@")[0];
 					} else{
 						result[0] = displayName.replaceAll("\\("+email+"\\)", "").trim();
 					}
 					
-					if(!StringUtil.isEmptyTrimmed(userInfo.getEmail())) {
-						if(email.equals(userInfo.getEmail().trim())) {
+					if (!StringUtil.isEmptyTrimmed(userInfo.getEmail())) {
+						if (email.equals(userInfo.getEmail().trim())) {
 							result[1] = email;
 							result[2] = String.valueOf(cnt);
 							break;

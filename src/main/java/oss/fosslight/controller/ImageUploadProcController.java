@@ -39,18 +39,18 @@ public class ImageUploadProcController extends CoTopComponent {
 		fileInfo.setGubn(CoConstDef.FILE_GUBUN_EDITOR_IMAGE);
 		List<UploadFile> fList = fileService.uploadFile(req, fileInfo);
 		
-		if(fList != null && !fList.isEmpty()) {
-			for(UploadFile f : fList) {
-				if(f.isUploadSucc()) {
+		if (fList != null && !fList.isEmpty()) {
+			for (UploadFile f : fList) {
+				if (f.isUploadSucc()) {
 					res.setCharacterEncoding("utf-8");
 					res.setContentType("text/html;charset=utf-8");
 					printWriter = res.getWriter();
 					String _host = req.getScheme() + "://" + req.getServerName();
 					
-					if(req.getServerPort() > 0) {
+					if (req.getServerPort() > 0) {
 						int _port = req.getServerPort();
 						
-						if(80 != _port && 443 != _port) {
+						if (80 != _port && 443 != _port) {
 							_host += ":" + String.valueOf(_port);
 						}
 					}
@@ -74,17 +74,17 @@ public class ImageUploadProcController extends CoTopComponent {
 		List<UploadFile> fList = fileService.uploadFile(req, fileInfo);
 		Map<String, Object> resultMap = new HashMap<>();
 		
-		if(fList != null && !fList.isEmpty()) {
-			for(UploadFile f : fList) {
-				if(f.isUploadSucc()) {
+		if (fList != null && !fList.isEmpty()) {
+			for (UploadFile f : fList) {
+				if (f.isUploadSucc()) {
 					resultMap.put("uploaded", 1);
 					resultMap.put("fileName", f.getOriginalFilename());
 					String _host = req.getScheme() + "://" + req.getServerName();
 					
-					if(req.getServerPort() > 0) {
+					if (req.getServerPort() > 0) {
 						int _port = req.getServerPort();
 						
-						if(80 != _port && 443 != _port) {
+						if (80 != _port && 443 != _port) {
 							_host += ":" + String.valueOf(_port);
 						}
 					}
@@ -96,7 +96,7 @@ public class ImageUploadProcController extends CoTopComponent {
 			}
 		}
 		
-		if(resultMap.isEmpty()) {
+		if (resultMap.isEmpty()) {
 			resultMap.put("uploaded", 0);
 		}
 		

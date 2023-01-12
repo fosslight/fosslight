@@ -62,7 +62,7 @@ public class NoticeController extends CoTopComponent {
 			, Model model) throws Exception{
 		T2CoValidationResult vResult = validateWithAppendix(req, "PROC_MODE", "ADD");
 		
-		if(!vResult.isValid()) {
+		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		

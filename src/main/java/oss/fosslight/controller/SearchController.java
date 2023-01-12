@@ -164,7 +164,7 @@ public class SearchController extends CoTopComponent {
     public String getSidx(HttpServletRequest req){
 
         String sidx = req.getParameter("sidx");
-        if(sidx != null) {
+        if (sidx != null) {
             sidx = sidx.split("[,]")[1].trim();
         }
         return sidx;
@@ -173,7 +173,7 @@ public class SearchController extends CoTopComponent {
 
     public String getHttpPrefix(String homepage){
         List<String> httpPrefixs = Arrays.asList("https://", "http://", "www.");
-        if(!httpPrefixs.contains(homepage)){
+        if (!httpPrefixs.contains(homepage)){
             homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
         }
         return homepage;

@@ -180,12 +180,12 @@ public class BinaryMaster extends ComBean implements Serializable{
 	}
 	
 	public void addBatWatcher(String division, String userId) {
-		if(!isEmpty(division)) {
+		if (!isEmpty(division)) {
 			BatWatcher bean = new BatWatcher();
 			bean.setDivision(division);
 			bean.setUserId(userId);
 			bean.setBatId(this.batId);
-			if(this.batWatcher == null) {
+			if (this.batWatcher == null) {
 				this.batWatcher = new ArrayList<BatWatcher>();
 			}
 			this.batWatcher.add(bean);

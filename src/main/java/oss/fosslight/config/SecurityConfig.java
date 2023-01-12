@@ -151,7 +151,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             T2Users userInfo = userService.getUserAndAuthorities(user);
             
             HashMap<String, Object> info = new HashMap<String, Object>();
-			if(StringUtil.isEmptyTrimmed(userInfo.getDivision())){
+			if (StringUtil.isEmptyTrimmed(userInfo.getDivision())){
 				userInfo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
             info.put("sessUserInfo", userInfo);
@@ -205,11 +205,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			String error = "true";
 			String message = "Invalid ID or password. Please try again.";
 			
-			if(exception.getMessage().equals("enter email")) {
+			if (exception.getMessage().equals("enter email")) {
 				message = exception.getMessage();
 			}
 			
-			if( StringUtil.indexOf(accept, "html") > -1 ) {
+			if ( StringUtil.indexOf(accept, "html") > -1 ) {
 				String redirectUrl = request.getParameter(this.targetUrlParameter);
 			   
 				if (redirectUrl != null) {
@@ -235,7 +235,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				out.print(data);
 				out.flush();
 				out.close();
-			} else if( StringUtil.indexOf(accept, "json") > -1 ) {
+			} else if ( StringUtil.indexOf(accept, "json") > -1 ) {
 				response.setContentType("application/json");
 				response.setCharacterEncoding("utf-8");
 				

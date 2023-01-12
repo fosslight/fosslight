@@ -388,10 +388,10 @@ public class OssComponents extends ComBean implements Serializable {
 	}
 	
 	public void addOssComponentsIdList(String s) {
-		if(this.ossComponentsIdList == null) {
+		if (this.ossComponentsIdList == null) {
 			this.ossComponentsIdList = new ArrayList<>();
 		}
-		if(!isEmpty(s)) {
+		if (!isEmpty(s)) {
 			this.ossComponentsIdList.add(s);
 		}
 	}

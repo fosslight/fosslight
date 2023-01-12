@@ -1308,7 +1308,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 * @param s the s
 	 */
 	public void addComponentIdList(String s) {
-		if(this.componentIdList == null) {
+		if (this.componentIdList == null) {
 			this.componentIdList = new ArrayList<>();
 		}
 		this.componentIdList.add(s);
@@ -1338,7 +1338,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 * @param license the license
 	 */
 	public void addComponentLicenseList(ProjectIdentification license) {
-		if(this.componentLicenseList == null) {
+		if (this.componentLicenseList == null) {
 			this.componentLicenseList = new ArrayList<>();
 		}
 		this.componentLicenseList.add(license);
@@ -1368,7 +1368,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 * @param bean the bean
 	 */
 	public void addOssComponentsLicense(OssComponentsLicense bean) {
-		if(this.ossComponentsLicenseList == null) {
+		if (this.ossComponentsLicenseList == null) {
 			this.ossComponentsLicenseList = new ArrayList<>();
 		}
 		this.ossComponentsLicenseList.add(bean);

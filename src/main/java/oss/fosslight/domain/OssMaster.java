@@ -769,7 +769,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 */
 	public void setCopyrights(String copyrights) {
 		String[] copys = copyrights.split("\r\n");
-		if(copys[0].equals("") && copys.length == 1){
+		if (copys[0].equals("") && copys.length == 1){
 			this.copyrights = null; 
 		}else{
 			this.copyrights = copys;
@@ -863,15 +863,15 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossType the new oss type
 	 */
 	public void setOssType(String ossType) {
-		if(ossType != null && ossType.length() == 3) {
+		if (ossType != null && ossType.length() == 3) {
 			String _rtn = "";
-			if("1".equals(ossType.substring(0, 1))) {
+			if ("1".equals(ossType.substring(0, 1))) {
 				_rtn += "M";
 			}
-			if("1".equals(ossType.substring(1,2))) {
+			if ("1".equals(ossType.substring(1,2))) {
 				_rtn += "D";
 			}
-			if("1".equals(ossType.substring(2, 3))) {
+			if ("1".equals(ossType.substring(2, 3))) {
 				_rtn += "V";
 			}
 			ossType = _rtn;
@@ -921,8 +921,8 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param bean the bean
 	 */
 	public void addOssLicense(OssLicense bean) {
-		if(bean != null) {
-			if(this.ossLicenses == null) {
+		if (bean != null) {
+			if (this.ossLicenses == null) {
 				this.ossLicenses = new ArrayList<>();
 			}
 			this.ossLicenses.add(bean);
@@ -970,16 +970,16 @@ public class OssMaster extends ComBean implements Serializable{
 	public void setCvssScoreIcon() {
 		String convertCvssScore = cvssScore;
 		
-		if(!StringUtil.isEmpty(convertCvssScore)){
-			if(convertCvssScore.indexOf("->") > -1) {
+		if (!StringUtil.isEmpty(convertCvssScore)){
+			if (convertCvssScore.indexOf("->") > -1) {
 				convertCvssScore = convertCvssScore.split("->")[1].trim();
 			}
 			
-			if(Double.parseDouble(convertCvssScore) <= 3.9){
+			if (Double.parseDouble(convertCvssScore) <= 3.9){
 				cvssScoreIcon = "L";
-			}else if(Double.parseDouble(convertCvssScore) <= 6.9){
+			}else if (Double.parseDouble(convertCvssScore) <= 6.9){
 				cvssScoreIcon = "M";
-			}else if(Double.parseDouble(convertCvssScore) <= 10.0){
+			}else if (Double.parseDouble(convertCvssScore) <= 10.0){
 				cvssScoreIcon = "H";
 			}
 		}
@@ -1025,8 +1025,8 @@ public class OssMaster extends ComBean implements Serializable{
 	 * Sets the cve id text.
 	 */
 	public void setCveIdText() {
-		if(!StringUtil.isEmpty(cveId)){
-			if(cveId.indexOf("CVE-") == -1){
+		if (!StringUtil.isEmpty(cveId)){
+			if (cveId.indexOf("CVE-") == -1){
 				cveId = "CVE-"+cveId;
 			}
 		}
@@ -1074,7 +1074,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the license opr exp
 	 */
 	public String getLicenseOprExp() {
-		if(isEmpty(licenseOprExp) && this.ossLicenses != null && !this.ossLicenses.isEmpty()) {
+		if (isEmpty(licenseOprExp) && this.ossLicenses != null && !this.ossLicenses.isEmpty()) {
 			return CommonFunction.makeLicenseExpression(getOssLicenses());
 		}
 		return licenseOprExp;
@@ -1149,10 +1149,10 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param s the s
 	 */
 	public void addOssIdList(String s) {
-		if(this.ossIdList == null) {
+		if (this.ossIdList == null) {
 			this.ossIdList = new ArrayList<>();
 		}
-		if(!isEmpty(s) && !ossIdList.contains(s)) {
+		if (!isEmpty(s) && !ossIdList.contains(s)) {
 			this.ossIdList.add(s);
 		}
 	}
@@ -1163,7 +1163,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param s the s
 	 */
 	public void addLicenseIdList(String s) {
-		if(this.licenseIdList == null) {
+		if (this.licenseIdList == null) {
 			this.licenseIdList = new ArrayList<>();
 		}
 		this.licenseIdList.add(s);
@@ -1211,7 +1211,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param s the s
 	 */
 	public void addLicenseCombList(String s) {
-		if(this.licenseCombList == null) {
+		if (this.licenseCombList == null) {
 			this.licenseCombList = new ArrayList<>();
 		}
 		this.licenseCombList.add(s);
@@ -1241,7 +1241,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param s the s
 	 */
 	public void appendOssType(String s) {
-		if(this.ossType == null){
+		if (this.ossType == null){
 			this.ossType="";
 		}
 		this.ossType += s;
@@ -1550,13 +1550,13 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the download location link format
 	 */
 	public String getDownloadLocationLinkFormat() {
-		if(StringUtil.isEmpty(this.downloadLocationLinkFormat) && !StringUtil.isEmpty(this.downloadLocation)) {
-			if(this.downloadLocation.contains(",")){
+		if (StringUtil.isEmpty(this.downloadLocationLinkFormat) && !StringUtil.isEmpty(this.downloadLocation)) {
+			if (this.downloadLocation.contains(",")){
 				String[] downloadLocations = this.downloadLocation.split(",");
 				String result = "";
 				
-				for(int i = 0 ; i < downloadLocations.length ; i++){
-					if(i > 0){ result += "<br>"; }
+				for (int i = 0 ; i < downloadLocations.length ; i++){
+					if (i > 0){ result += "<br>"; }
 					
 					result += "<a href='"+downloadLocations[i]+"' target='_blank'>" + downloadLocations[i] + "</a>";
 				}
@@ -1584,7 +1584,7 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @return the homepage link format
 	 */
 	public String getHomepageLinkFormat() {
-		if(StringUtil.isEmpty(this.homepageLinkFormat) && !StringUtil.isEmpty(this.homepage)) {
+		if (StringUtil.isEmpty(this.homepageLinkFormat) && !StringUtil.isEmpty(this.homepage)) {
 			return "<a href='"+this.homepage+"' target='_blank'>" + this.homepage + "</a>";
 		}
 		return homepageLinkFormat;
@@ -1761,7 +1761,7 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDownloadLocationGroup(String downloadLocationGroup) {
 		// OSS를 삭제하면서 다른 OSS로 rename시, "This oss has multiple version"이라 뜨며 에러 발생. / NullPointException
-		if(!isEmpty(downloadLocationGroup)){
+		if (!isEmpty(downloadLocationGroup)){
 			this.downloadLocations = downloadLocationGroup.split(",");
 		}
 		
@@ -1841,8 +1841,8 @@ public class OssMaster extends ComBean implements Serializable{
 		
 		this.detectedLicenses = null; // clear
 		
-		for(String s : list) {
-			if(!isEmpty(s)) {
+		for (String s : list) {
+			if (!isEmpty(s)) {
 				this.addDetectedLicense(s.trim());
 			}
 		}
@@ -1863,7 +1863,7 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 	
 	public void addDetectedLicense(String s) {
-		if(this.detectedLicenses == null) {
+		if (this.detectedLicenses == null) {
 			this.detectedLicenses = new ArrayList<>();
 		}
 		
@@ -1977,7 +1977,7 @@ public class OssMaster extends ComBean implements Serializable{
 	}
 
 	public void addDeclaredLicense(String s) {
-		if(this.declaredLicenses == null) {
+		if (this.declaredLicenses == null) {
 			this.declaredLicenses = new ArrayList<>();
 		}
 		this.declaredLicenses.add(s);
@@ -1987,8 +1987,8 @@ public class OssMaster extends ComBean implements Serializable{
 		String[] list = declaredLicense.split(",");
 
 		this.declaredLicenses = null; // clear
-		for(String s : list) {
-			if(!isEmpty(s)) {
+		for (String s : list) {
+			if (!isEmpty(s)) {
 				this.addDeclaredLicense(s.trim());
 			}
 		}
