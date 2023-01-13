@@ -68,7 +68,7 @@ public class ConfigurationController extends CoTopComponent {
 
         Object searchFilter = searchService.getSearchFilter(configuration.getDefaultSearchType(), loginUserName());
 
-        if(searchFilter != null) {
+        if (searchFilter != null) {
 			model.addAttribute("searchBean", searchFilter);
         } else {
 			switch (SearchType.valueOf(configuration.getDefaultSearchType())) {
@@ -101,14 +101,14 @@ public class ConfigurationController extends CoTopComponent {
 			
 			// Check Comma separated Multiple Checkbox values
 			List<String> unnecessaryKeys = new ArrayList<>();
-			for(String key : params.keySet()) {
-				if(key.startsWith("chk_")) {
+			for (String key : params.keySet()) {
+				if (key.startsWith("chk_")) {
 					params.put(key.replaceFirst("chk_", ""), params.get(key));
 					unnecessaryKeys.add(key);
 				}
 			}
-			if(!unnecessaryKeys.isEmpty()) {
-				for(String key : unnecessaryKeys) {
+			if (!unnecessaryKeys.isEmpty()) {
+				for (String key : unnecessaryKeys) {
 					params.remove(key);
 				}
 			}

@@ -29,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
 	public List<CommentsHistory> getCommentListHis(CommentsHistory bean) {
 		List<CommentsHistory> commentsHistoryList = commentMapper.getCommentListHis(bean);
 		
-		for(CommentsHistory commentsHistory : commentsHistoryList) {
+		for (CommentsHistory commentsHistory : commentsHistoryList) {
 			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		
@@ -52,13 +52,13 @@ public class CommentServiceImpl implements CommentService {
 	public CommentsHistory registComment(CommentsHistory bean, boolean deleteUserComment) {
 		boolean isNew = StringUtil.isEmpty(bean.getCommId());
 		
-		if(!StringUtil.isEmpty(bean.getContents()) || !StringUtil.isEmpty(bean.getStatus())){
+		if (!StringUtil.isEmpty(bean.getContents()) || !StringUtil.isEmpty(bean.getStatus())){
 			commentMapper.registComment(bean);
 		}
 		
 		boolean isPartner = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv());
 		
-		if(deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
+		if (deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) 
 				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv()))) {
@@ -87,12 +87,12 @@ public class CommentServiceImpl implements CommentService {
 					break;
 			}
 			
-			if(!StringUtil.isEmpty(bean.getReferenceDiv())) {
+			if (!StringUtil.isEmpty(bean.getReferenceDiv())) {
 				commentMapper.deleteCommentUserTemp(bean);
 			}
 		}
 		
-		if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMailType()) 
+		if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT.equals(bean.getMailType()) 
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT.equals(bean.getMailType())
 			|| CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT.equals(bean.getMailType())
@@ -100,7 +100,7 @@ public class CommentServiceImpl implements CommentService {
 			|| CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT.equals(bean.getMailType())) {
 			CoMail mailBean = new CoMail(bean.getMailType());
 			
-			if(isPartner) {
+			if (isPartner) {
 				mailBean.setParamPartnerId(bean.getReferenceId());
 			} else {
 				mailBean.setParamPrjId(bean.getReferenceId());
@@ -108,17 +108,17 @@ public class CommentServiceImpl implements CommentService {
 			
 			mailBean.setComment(bean.getContents());
 			
-			if(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())) {
+			if (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Identificaiton");
-			} else if(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())) {
+			} else if (CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Packaging");
-			} else if(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())) {
+			} else if (CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Distribution");
 			}
 			
 			mailBean.setReceiveFlag(bean.getMailSendType());
 			
-			if(!StringUtil.isEmpty(bean.getContents())){//comment 내용이 있을시만 메일 발송
+			if (!StringUtil.isEmpty(bean.getContents())){//comment 내용이 있을시만 메일 발송
 				CoMailManager.getInstance().sendMail(mailBean);
 			}
 		}
@@ -153,8 +153,8 @@ public class CommentServiceImpl implements CommentService {
 		CommentsHistory before = commentMapper.getCommentInfo(bean.getCommId());
 		int rtn = commentMapper.updateComment(bean);
 		
-		if(emailSendFlag) {
-			if(rtn > 0 && bean.getReferenceDiv() != null) {
+		if (emailSendFlag) {
+			if (rtn > 0 && bean.getReferenceDiv() != null) {
 				boolean isPartner = false;
 				String paramOssId = null;
 				String paramLicenseId = null;
@@ -205,11 +205,11 @@ public class CommentServiceImpl implements CommentService {
 				mailBean.setComment(bean.getContents());
 				mailBean.setReceiveFlag(bean.getMailSendType());
 				
-				if(isPartner) {
+				if (isPartner) {
 					mailBean.setParamPartnerId(bean.getReferenceId());
-				} else if(!StringUtil.isEmpty(paramLicenseId)) {
+				} else if (!StringUtil.isEmpty(paramLicenseId)) {
 					mailBean.setParamLicenseId(paramLicenseId);
-				} else if(!StringUtil.isEmpty(paramOssId)) {
+				} else if (!StringUtil.isEmpty(paramOssId)) {
 					mailBean.setParamOssId(paramOssId);
 				} else {
 					mailBean.setParamPrjId(bean.getReferenceId());
@@ -231,7 +231,7 @@ public class CommentServiceImpl implements CommentService {
 	public List<CommentsHistory> getMoreCommentListHis(CommentsHistory bean) {
 		List<CommentsHistory> commentsHistoryList = commentMapper.getMoreCommentListHis(bean);
 		
-		for(CommentsHistory commentsHistory : commentsHistoryList) {
+		for (CommentsHistory commentsHistory : commentsHistoryList) {
 			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		

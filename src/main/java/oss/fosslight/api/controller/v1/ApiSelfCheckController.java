@@ -83,7 +83,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 			
 			int createCnt = apiSelfCheckService.getCreateProjectCnt(userInfo.getUserId());
 			
-			if(CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
+			if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
 				Map<String, Object> paramMap = new HashMap<String, Object>();
 				
 				paramMap.put("prjName", prjName);
@@ -93,7 +93,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 				result = apiSelfCheckService.createSelfCheck(paramMap);
 				String prjId = (String) result.get("prjId");
 				
-				if(isEmpty(prjId)) {
+				if (isEmpty(prjId)) {
 					throw new Exception(); // parameter Error -> create Failure
 				}
 			} else {
@@ -129,9 +129,9 @@ public class ApiSelfCheckController extends CoTopComponent {
 			paramMap.put("prjId", prjId);
 			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
-			if(searchFlag) {
-				if(ossReport != null) {
-					if(ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
+			if (searchFlag) {
+				if (ossReport != null) {
+					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
 						
 						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
@@ -141,7 +141,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if(!isEmpty(errorMsg)) {
+						if (!isEmpty(errorMsg)) {
 							throw new Exception(); // readData시 문제가 발생할 경우 parameter error로 return 함.
 						}
 						
@@ -152,7 +152,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 						pv.setAppendix("subList", ossComponentsLicense);
 						T2CoValidationResult vr = pv.validate(new HashMap<>());
 						
-						if(!vr.isValid()) {
+						if (!vr.isValid()) {
 							return responseService.getFailResult(getMessage("api.dataValidationError.code"), getMessage("api.dataValidationError.msg")); // data validation error
 						} else {
 							Project project = new Project();

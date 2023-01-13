@@ -46,11 +46,11 @@ public class ApiFileServiceImpl implements ApiFileService {
 		UploadFile upFile = new UploadFile();
 		T2File registFile = new T2File();
 		
-		if(StringUtil.isEmpty(mFile.getOriginalFilename())) {
+		if (StringUtil.isEmpty(mFile.getOriginalFilename())) {
 			throw new RuntimeException("File Name is empty");
 		}
 		
-		if(mFile.getSize() <= 0) {
+		if (mFile.getSize() <= 0) {
 			throw new RuntimeException("File Size is 0");
 		}
 		
@@ -59,12 +59,12 @@ public class ApiFileServiceImpl implements ApiFileService {
 		// originalFileName에 경로가 포함되어 있는 경우 처리
 		log.debug("File upload OriginalFileName : " + originalFileName);
 		
-		if(originalFileName.indexOf("/") > -1) {
+		if (originalFileName.indexOf("/") > -1) {
 			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
 			
 			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
 		}
-		if(originalFileName.indexOf("\\") > -1) {
+		if (originalFileName.indexOf("\\") > -1) {
 			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
 			
 			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
@@ -72,11 +72,11 @@ public class ApiFileServiceImpl implements ApiFileService {
 		
 		String fileExt = FilenameUtils.getExtension(originalFileName);
 		
-		if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 			fileExt = "tar.bz2";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 			fileExt = "tar.gz";
 		}
 		
@@ -84,7 +84,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 		String uploadThumbFilePath = "";
 		
 		try {
-			if(StringUtil.isEmpty(filePath)) {
+			if (StringUtil.isEmpty(filePath)) {
 				uploadFilePath = CommonFunction.emptyCheckProperty("upload.path", "/upload");
 				uploadThumbFilePath = CommonFunction.emptyCheckProperty("image.path", "/image");
 			} else {
@@ -93,7 +93,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 				
 				File packagingFile = new File(filePath);
 				
-				if(!packagingFile.exists()) {
+				if (!packagingFile.exists()) {
 					packagingFile.mkdirs();
 				}
 			}
@@ -135,13 +135,13 @@ public class ApiFileServiceImpl implements ApiFileService {
 		upFile.setRegistSeq(registFile(registFile));
 		upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
 		
-		if(mFile.getSize()!=0) { //File Null Check
-			if(! file.exists()) { //경로상에 파일이 존재하지 않을 경우
+		if (mFile.getSize()!=0) { //File Null Check
+			if (! file.exists()) { //경로상에 파일이 존재하지 않을 경우
 				try {
-					if(file.getParentFile() != null && file.getParentFile().mkdirs()) { //경로에 해당하는 디렉토리들을 생성
+					if (file.getParentFile() != null && file.getParentFile().mkdirs()) { //경로에 해당하는 디렉토리들을 생성
 						boolean upSucc = file.createNewFile(); //이후 파일 생성
 						
-						if(!upSucc) {
+						if (!upSucc) {
 							uploadSucc=false;
 						}
 					}
@@ -171,11 +171,11 @@ public class ApiFileServiceImpl implements ApiFileService {
 		boolean uploadSucc = true;
 		String fileName = mFile.getOriginalFilename();
 		
-		if(StringUtil.isEmpty(mFile.getOriginalFilename())) {
+		if (StringUtil.isEmpty(mFile.getOriginalFilename())) {
 			throw new RuntimeException("File Name is empty");
 		}
 		
-		if(mFile.getSize() <= 0) {
+		if (mFile.getSize() <= 0) {
 			throw new RuntimeException("File Size is 0");
 		}
 		
@@ -184,12 +184,12 @@ public class ApiFileServiceImpl implements ApiFileService {
 		// originalFileName에 경로가 포함되어 있는 경우 처리
 		log.debug("File upload OriginalFileName : " + originalFileName);
 		
-		if(originalFileName.indexOf("/") > -1) {
+		if (originalFileName.indexOf("/") > -1) {
 			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
 			
 			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
 		}
-		if(originalFileName.indexOf("\\") > -1) {
+		if (originalFileName.indexOf("\\") > -1) {
 			originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
 			
 			log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
@@ -197,11 +197,11 @@ public class ApiFileServiceImpl implements ApiFileService {
 		
 		String fileExt = FilenameUtils.getExtension(originalFileName);
 		
-		if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 			fileExt = "tar.bz2";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 			fileExt = "tar.gz";
 		}
 		
@@ -249,12 +249,12 @@ public class ApiFileServiceImpl implements ApiFileService {
 		upFile.setRegistSeq(registFile(registFile));
 		upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
 		
-		if(mFile.getSize()!=0){ //File Null Check
-			if(! file.exists()){ //경로상에 파일이 존재하지 않을 경우
+		if (mFile.getSize()!=0){ //File Null Check
+			if (! file.exists()){ //경로상에 파일이 존재하지 않을 경우
 				try {
-					if(file.getParentFile() != null && file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
+					if (file.getParentFile() != null && file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
 							boolean upSucc = file.createNewFile(); //이후 파일 생성
-							if(!upSucc){
+							if (!upSucc){
 								uploadSucc=false;
 							}
 						}
@@ -276,20 +276,20 @@ public class ApiFileServiceImpl implements ApiFileService {
 		try {
 			File convertHTMLFile = null;
 			
-			if("XML".equals(fileExt.toUpperCase())) {
+			if ("XML".equals(fileExt.toUpperCase())) {
 				convertHTMLFile = CommonFunction.convertXMLToHTML(file, false);
-			} else if("ZIP".equals(fileExt.toUpperCase())) {
+			} else if ("ZIP".equals(fileExt.toUpperCase())) {
 				FileUtil.decompress(uploadFilePath + "/" + file.getName(), uploadFilePath + "/" + randomUUID);
 				convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
-			} else if("TAR.GZ".equals(fileExt.toUpperCase())) {
+			} else if ("TAR.GZ".equals(fileExt.toUpperCase())) {
 				CompressUtil.decompressTarGZ(file, uploadFilePath + "/" + randomUUID);
 				convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
 			}
 			
-			if(convertHTMLFile != null) {
+			if (convertHTMLFile != null) {
 				long convertHTMLFileSize = convertHTMLFile.length();
 				
-				if(convertHTMLFileSize > 0){
+				if (convertHTMLFileSize > 0){
 					UploadFile convertNoticeFile = new UploadFile();
 					String convertFileId = fileMapper.getFileId();
 					String convertNoticeFileName = "Notice-"+prjId+"_"+DateUtil.getCurrentDateTime(DateUtil.DATE_PATTERN)+".html";
@@ -334,7 +334,7 @@ public class ApiFileServiceImpl implements ApiFileService {
 	public String registFile(T2File file) {
 		int result = fileMapper.insertFile(file);
 		
-		if(result<=0){
+		if (result<=0){
 			return null;
 		}
 		

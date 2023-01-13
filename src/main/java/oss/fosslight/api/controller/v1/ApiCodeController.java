@@ -60,7 +60,7 @@ public class ApiCodeController extends CoTopComponent {
 		try {
 			List<Map<String, Object>> contents = apiCodeService.getCodeList(codeType, detailValue);
 			
-			if(contents.size() > 0) {
+			if (contents.size() > 0) {
 				result.put("content", contents);
 			}
 			

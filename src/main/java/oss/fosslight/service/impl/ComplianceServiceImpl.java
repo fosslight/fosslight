@@ -38,14 +38,14 @@ public class ComplianceServiceImpl implements ComplianceService {
 			project.setModelFlag(CoConstDef.FLAG_NO);
 			List<Project> projectNameList = projectMapper.selectModelInfoList(project);
 			
-			if(projectNameList != null && projectNameList.size() > 0) {
+			if (projectNameList != null && projectNameList.size() > 0) {
 				list.addAll(projectNameList);
 			}
 			
 			project.setModelFlag(CoConstDef.FLAG_YES);
 			List<Project> modelNameList = projectMapper.selectModelInfoList(project);
 			
-			if(modelNameList != null && modelNameList.size() > 0) {
+			if (modelNameList != null && modelNameList.size() > 0) {
 				list.addAll(modelNameList);
 			}
 			
@@ -53,13 +53,13 @@ public class ComplianceServiceImpl implements ComplianceService {
 						.filter(CommonFunction.distinctByKey(p -> p.getModelName()+"-"+p.getPrjId()))
 						.collect(Collectors.toList());
 			
-			for(String modelName : project.getModelListInfo()) {
+			for (String modelName : project.getModelListInfo()) {
 				int duplicateCnt = list.stream()
 										.filter(p -> modelName.equals(p.getModelName()))
 										.collect(Collectors.toList())
 										.size();
 				
-				if(duplicateCnt == 0) {
+				if (duplicateCnt == 0) {
 					Project prj = new Project();
 					prj.setModelName(modelName);
 					
@@ -68,12 +68,12 @@ public class ComplianceServiceImpl implements ComplianceService {
 			}
 			
 			
-			if(list != null) {
+			if (list != null) {
 				final Comparator<Project> comp = Comparator.comparing((Project p) -> p.getModelName());
 				list = list.stream().sorted(comp).collect(Collectors.toList());
 				
 				// 코드변환처리
-				for(Project bean : list) {
+				for (Project bean : list) {
 					// DISTRIBUTION_TYPE
 					bean.setDistributionType(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, bean.getDistributionType()));
 					// Project Status - delay 기능이 삭제됨. 기존에도 delay를 표시하지 않았으므로 priority도 표시하지 않게 처리함.

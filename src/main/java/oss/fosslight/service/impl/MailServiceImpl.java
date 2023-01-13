@@ -55,11 +55,11 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		
 		receiverInfo.setToIds(selectMailAddrFromIds(receiverId));					// 수신인 메일 주소
 		
-		if(ccIds != null && ccIds.length != 0) {
+		if (ccIds != null && ccIds.length != 0) {
 			selectMailAddrFromIds(ccIds);		// 참조 메일 주소
 		}
 		
-		if(bccIds != null && bccIds.length != 0) {
+		if (bccIds != null && bccIds.length != 0) {
 			selectMailAddrFromIds(bccIds);		// 숨은참조 메일 주소
 		}
 		
@@ -81,7 +81,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 //		Map<String, Object> mailData = new HashMap<String, Object>();
 //		
 //		// 수정의 경우 비교데이터
-//		if("UPDATE".equals(mailInfo.gethAction())){
+//		if ("UPDATE".equals(mailInfo.gethAction())){
 //			mailData = getAsToBeHistoryData(mailInfo);
 //		} else {
 //			mailData = toMailData(mailInfo);
@@ -116,12 +116,12 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
         // Result : Vector [ String CD_DTL_NO, String CD_DTL_NM(Key), String CD_SUB_NO(Ref Entity) ] 
 		String cdNm = afterData != null ? afterData.gethType() : null; 
 		
-		for(String[] dtlCd : CoCodeManager.getValues(cdNm)){
+		for (String[] dtlCd : CoCodeManager.getValues(cdNm)){
 			Object beforeD_ = getDataForType(cdNm, dtlCd, beforeMap);
 			Object afterD_ = getDataForType(cdNm, dtlCd, afterMap);
 			
 			// main data
-			if(beforeD_ instanceof String && afterD_ instanceof String) {
+			if (beforeD_ instanceof String && afterD_ instanceof String) {
 				log.debug("String value : " + dtlCd[1]);
 				String bStr = beforeD_.toString();
 				String aStr = afterD_.toString();
@@ -149,7 +149,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		dataMap.put("bModifiedDate", beforeData != null ? beforeData.getModifiedDate() : "");
 		dataMap.put("aModifiedDate", afterData != null ? afterData.getModifiedDate() : "");
 		
-		if(!StringUtil.isEmpty(beforeData != null ? beforeData.getModifier() : "")) {
+		if (!StringUtil.isEmpty(beforeData != null ? beforeData.getModifier() : "")) {
 			T2Users param = new T2Users();
 			param.setUserId(beforeData.getModifier());
 			T2Users modifier = userService.getUser(param);
@@ -158,7 +158,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 			dataMap.put("bModifierMail", modifier.getEmail());
 		}
 		
-		if(!StringUtil.isEmpty(beforeData != null ? afterData.getModifier() : "")) {
+		if (!StringUtil.isEmpty(beforeData != null ? afterData.getModifier() : "")) {
 			T2Users param = new T2Users();
 			param.setUserId(afterData.getModifier());
 			T2Users modifier = userService.getUser(param);
@@ -191,7 +191,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 			Object d = getDataForType(cdNm, dtlCd, hMap);
 			
 			// main data
-			if(d instanceof String) { // d의 Type이 String일 경우
+			if (d instanceof String) { // d의 Type이 String일 경우
 				mTbl.put(dtlCd[1], !StringUtil.isEmpty(d.toString()) ? d : "");
 			} else { // sub list obj
 				mTbl.put(dtlCd[1], "");
@@ -210,7 +210,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		dataMap.put("modifier", history != null ? history.getModifier() : "");
 		dataMap.put("modifiedDate", history != null ? history.getModifiedDate() : "");
 		
-		if(!StringUtil.isEmpty(history != null ? history.getModifier() : "")) {
+		if (!StringUtil.isEmpty(history != null ? history.getModifier() : "")) {
 			T2Users param = new T2Users();
 			param.setUserId(history.getModifier());
 			T2Users modifier = userService.getUser(param);
@@ -230,14 +230,14 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 		// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 		String[] inf = CoCodeManager.getCodeExpString(cdNm, dtlCd[0]).split("\\|");
 		
-		if(inf[0].equals("String")) {
+		if (inf[0].equals("String")) {
 			ret = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
-		} else if(inf[0].equals("Code")) {
+		} else if (inf[0].equals("Code")) {
 			ret = dMap != null ? nvl(CoCodeManager.getCodeString(inf[2], (String)dMap.get(dtlCd[1])), inf[2]) : "";
-		} else if(inf[0].equals("Array") && dtlCd[2] == null) {
+		} else if (inf[0].equals("Array") && dtlCd[2] == null) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join(", ", asArr) : "";
-		} else if(inf[0].equals("Array") && dtlCd[2] != null) {
+		} else if (inf[0].equals("Array") && dtlCd[2] != null) {
 			String sCdNm = dtlCd[2]; // CD_SUB_NO(Ref Entity) 
 			HashMap<String, Object> sTblMap = new HashMap<String, Object>();
 			// colNames 생성
@@ -251,7 +251,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 			colInfo.put("order", "0");
 			colNames.add(colInfo);
 			
-			for(String[] v : CoCodeManager.getAllValues(sCdNm)){
+			for (String[] v : CoCodeManager.getAllValues(sCdNm)){
 				 colInfo =  new HashMap<String, Object>();
 				 colInfo.put("key", v[2]);
 				 colInfo.put("name", v[4].split("\\|")[1]);
@@ -266,21 +266,21 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 			// colModel 생성
 			List<Map<String, Object>> subList = new ArrayList<Map<String, Object>>();
 			
-			if(dMap != null && dMap.get(dtlCd[1]) != null){
+			if (dMap != null && dMap.get(dtlCd[1]) != null){
 				// sub list 생성
 				int sCnt = 1;
 				
-				for(Map<String, Object> sMap : (List<Map<String, Object>>) dMap.get(dtlCd[1])){
+				for (Map<String, Object> sMap : (List<Map<String, Object>>) dMap.get(dtlCd[1])){
 					Map<String, Object> sDataMap = new HashMap<String, Object>();
 					sDataMap.put("no", sCnt++);
 					
 					// row data 생성
-					for(String[] sDtlCd : CoCodeManager.getValues(sCdNm)){
+					for (String[] sDtlCd : CoCodeManager.getValues(sCdNm)){
 						String[] sInf = CoCodeManager.getCodeExpString(sCdNm, sDtlCd[0]).split("\\|");	// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 						
-						if(sInf[0].equals("String")) {
+						if (sInf[0].equals("String")) {
 							sDataMap.put(sDtlCd[1], escapeSql(nvl((String)sMap.get(sDtlCd[1]))) );
-						} else if(sInf[0].equals("Code")) {
+						} else if (sInf[0].equals("Code")) {
 							sDataMap.put(sDtlCd[1], CoCodeManager.getCodeString(sInf[1], (String)sMap.get(sDtlCd[1])) );
 						}	
 					}
@@ -332,7 +332,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 	public void sendTempMail() {
 		List<Map<String, Object>> tempMailList = mailManagerMapper.getTempMail();
 		
-		for(Map<String, Object> mailMap : tempMailList) {
+		for (Map<String, Object> mailMap : tempMailList) {
 			String mailType = (String) mailMap.get("mailType");
 			String mailSeq = (String) mailMap.get("mailSeq");
 			CoMail mailBean = new CoMail(mailType);

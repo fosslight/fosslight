@@ -31,15 +31,15 @@ public class NoticeServiceImpl extends CoTopComponent implements NoticeService {
 		Map<String, Object> map = null;
 		int records = noticeMapper.selectNoticeTotalCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			vo.setTotListSize(records);
 			// Grid paging 처리를 위한 기본 param 설정 Map 생성(반드시 totlistsize를 set 하고 나서 생성해야함)
 			map = getGridPagerMap(vo);
 			List<Notice> noticeList =  noticeMapper.selectNoticeList(vo);
 			
 	        // 테그 치환
-	        if(noticeList != null) {
-				for(Notice item : noticeList) {
+	        if (noticeList != null) {
+				for (Notice item : noticeList) {
 					item.setReplaceNotice(item.getNotice().replaceAll("<br>", "\n\r"));
 					item.setReplaceNotice(item.getNotice().replaceAll("<(/)?([a-zA-Z]*)(\\\\s[a-zA-Z]*=[^>]*)?(\\\\s)*(/)?>", ""));
 				}
@@ -53,9 +53,9 @@ public class NoticeServiceImpl extends CoTopComponent implements NoticeService {
 	
 	@Override
 	public void setNotice(Notice vo) throws Exception {
-		if(CoConstDef.GRID_OPERATION_ADD.equals(vo.getOper())) { // 추가
+		if (CoConstDef.GRID_OPERATION_ADD.equals(vo.getOper())) { // 추가
 			noticeMapper.insertNotice(vo);
-		} else if(CoConstDef.GRID_OPERATION_EDIT.equals(vo.getOper())) { // 수정
+		} else if (CoConstDef.GRID_OPERATION_EDIT.equals(vo.getOper())) { // 수정
 			noticeMapper.updateNotice(vo);
 		} else { // 삭제
 			noticeMapper.deleteNotice(vo);
@@ -68,12 +68,12 @@ public class NoticeServiceImpl extends CoTopComponent implements NoticeService {
 		
 		int records = noticeMapper.selectPublishedNoticeCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			List<Notice> noticeList = noticeMapper.selectPublishedNotice(vo);
 			
 			map = getGridPagerMap(vo);
 	
-	        if(noticeList != null) {
+	        if (noticeList != null) {
 				map.put("noticeList", noticeList);
 	        }
 		}

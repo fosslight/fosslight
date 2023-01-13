@@ -61,7 +61,7 @@ public class FileUtil {
 	public static File writeFile(MultipartFile multipart, String fPath, String fName) {
 		File file = null;
 		
-		if(multipart != null && fPath != null && fName != null) {
+		if (multipart != null && fPath != null && fName != null) {
 			try {
 				file = new File(fPath+ "/" + fName);
 				
@@ -82,7 +82,7 @@ public class FileUtil {
 	}
 
 	public static boolean transferTo(MultipartFile multipart, File file) {
-		if(multipart != null && file != null) {
+		if (multipart != null && file != null) {
 			try {
 				multipart.transferTo(file);
 				
@@ -105,13 +105,13 @@ public class FileUtil {
 	}
 	
 	public static boolean moveTo(String srcFilePath, String copyFilePath, String copyFileName) {
-		if(!StringUtil.isEmpty(srcFilePath) && !StringUtil.isEmpty(copyFilePath)) {
+		if (!StringUtil.isEmpty(srcFilePath) && !StringUtil.isEmpty(copyFilePath)) {
 			try {
 				Path srcFile = Paths.get(srcFilePath);
 				Path copyPath = Paths.get(copyFilePath);
 				
-				if(!StringUtil.isEmpty(copyFileName)) {
-					if(!Files.exists(copyPath)) {
+				if (!StringUtil.isEmpty(copyFileName)) {
+					if (!Files.exists(copyPath)) {
 						Files.createDirectory(copyPath);
 					}
 					
@@ -135,7 +135,7 @@ public class FileUtil {
 		try {
 			File dir = new File(filePath);
 			
-			if(!dir.exists()) {
+			if (!dir.exists()) {
 				dir.mkdirs();
 			}
 			
@@ -149,7 +149,7 @@ public class FileUtil {
 			
 			return false;
 		} finally {
-			if(fw != null) {
+			if (fw != null) {
 				try {
 					fw.close();
 				} catch (Exception e) {}
@@ -163,7 +163,7 @@ public class FileUtil {
 		try {
 			File dir = new File(filePath);
 
-			if(!dir.exists()) {
+			if (!dir.exists()) {
 				dir.mkdirs();
 			}
 
@@ -186,7 +186,7 @@ public class FileUtil {
      * @return
      */
     public static boolean isValidFileName(String fileName) {
-        if(fileName == null || fileName.trim().length() == 0) {
+        if (fileName == null || fileName.trim().length() == 0) {
         	return false;
         }
         
@@ -201,7 +201,7 @@ public class FileUtil {
      * @return
      */
     public static String makeValidFileName(String fileName, String replaceStr) {
-        if(fileName == null || fileName.trim().length() == 0 || replaceStr == null) {
+        if (fileName == null || fileName.trim().length() == 0 || replaceStr == null) {
             return String.valueOf(System.currentTimeMillis());      
         }
  
@@ -211,7 +211,7 @@ public class FileUtil {
 	public static void zip(String inputFolder, String filePath, String zipName, String zipRootEntryName) throws Exception {
 		// 압축파일을 저장할 파일을 선언한다.
 		File file = new File(filePath + File.separator + zipName);
-		try(			
+		try (			
 			FileOutputStream fileOutputStream = new FileOutputStream(file);
 			// ZipOutputStream 선언
 			ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
@@ -234,19 +234,19 @@ public class FileUtil {
 	public static void zipFolder(ZipOutputStream zipOutputStream, File inputFile, String parentName, String zipEntryName) throws Exception {
 		String myName = parentName + inputFile.getName() + File.separator;
 		
-		if(zipEntryName != null && zipEntryName.trim().length() > 0) {
+		if (zipEntryName != null && zipEntryName.trim().length() > 0) {
 			myName = zipEntryName + File.separator;
 		}
 		
 		// ZipEntry를 생성 후 zip 메소드에서 인자값으로 받은 파일의 구성 정보를 생성한다.
-		ZipEntry folderZipEntry = new ZipEntry(myName);
-		zipOutputStream.putNextEntry(folderZipEntry);
+		ZipEntry folderZipEntry = new ZipEntry (myName);
+		zipOutputStream.putNextEntry (folderZipEntry);
 		// zip 메소드에서 인자값으로 전달받은 파일의 구성파일들을 list형식으로 저장한다.
 		File[] contents = inputFile.listFiles();
 		
 		// inputFolder의 구성파일이 파일이면 zipFile 메소드를 호출하고,
 		// 폴더일 경우 현재 zipFolder 메소드를 재귀호출
-		if(contents != null) {
+		if (contents != null) {
 			for (File file : contents) {
 				if (file.isFile()) {
 					zipFile(zipOutputStream, file, myName);
@@ -254,18 +254,18 @@ public class FileUtil {
 					zipFolder(zipOutputStream, file, myName, "");
 				}
 				
-				zipOutputStream.closeEntry();
+				zipOutputStream.closeEntry ();
 			}
 		}
 	}
 
 	public static void zipFile(ZipOutputStream zipOutputStream, File inputFile, String parentName) throws Exception {
-		ZipEntry zipEntry = new ZipEntry(parentName + inputFile.getName());
-		try(
+		ZipEntry zipEntry = new ZipEntry (parentName + inputFile.getName());
+		try (
 			FileInputStream fileInputStream = new FileInputStream(inputFile);
 		){
 			// ZipEntry생성 후 zip 메소드에서 인자값으로 전달받은 파일의 구성 정보를 생성한다.
-			zipOutputStream.putNextEntry(zipEntry);
+			zipOutputStream.putNextEntry (zipEntry);
 			byte[] buf = new byte[4096];
 			int byteRead;
 			// 압축대상 파일을 설정된 사이즈만큼 읽어들인다.
@@ -279,18 +279,18 @@ public class FileUtil {
 	}
 	
 	public static boolean copyFile(String srcFilePath, String copyFilePath, String copyFileName) {
-		if(!StringUtil.isEmpty(srcFilePath) && !StringUtil.isEmpty(copyFilePath)) {
+		if (!StringUtil.isEmpty(srcFilePath) && !StringUtil.isEmpty(copyFilePath)) {
 			try {
 				File dir = new File(copyFilePath);
 				
-				if(!dir.exists()) {
+				if (!dir.exists()) {
 					dir.mkdirs();
 				}
 				
 				Path srcFile = Paths.get(srcFilePath);
 				Path copyPath = Paths.get(copyFilePath);
 				
-				if(!StringUtil.isEmpty(copyFileName)) {
+				if (!StringUtil.isEmpty(copyFileName)) {
 					copyPath = copyPath.resolve(copyFileName);
 				}
 				
@@ -343,7 +343,7 @@ public class FileUtil {
                 inputStream = httpConn.getInputStream();
                 String saveFilePath = saveDir + File.separator + fileName;
 
-                if(!Files.exists(Paths.get(saveDir))) {
+                if (!Files.exists(Paths.get(saveDir))) {
                     Files.createDirectories(Paths.get(saveDir));
                 }
 
@@ -359,18 +359,18 @@ public class FileUtil {
             	throw new Exception("No file to download. Server replied HTTP code: " + responseCode);
             }			
 		} finally {
-			if(httpConn != null) {
+			if (httpConn != null) {
 				try {
 					httpConn.disconnect();
 				} catch (Exception e) {}
 			}
 
-			if(outputStream != null) {
+			if (outputStream != null) {
 				try {
 					outputStream.close();
 				} catch (Exception e) {}
 			}
-			if(inputStream != null) {
+			if (inputStream != null) {
 				try {
 					inputStream.close();
 				} catch (Exception e) {}
@@ -395,7 +395,7 @@ public class FileUtil {
             fis = new FileInputStream(zipFile);
             zis = new ZipInputStream(fis);
             
-            while ((zipentry = zis.getNextEntry()) != null) {
+            while ((zipentry = zis.getNextEntry ()) != null) {
                 String filename = zipentry.getName();
                 File file = new File(directory, filename);
                 
@@ -451,11 +451,11 @@ public class FileUtil {
 			Path zipPath = Paths.get(sourceFilePath);
 			Path movePath = Paths.get(destPath);
 			
-			if(!Files.exists(movePath)) {
+			if (!Files.exists(movePath)) {
 				Files.createDirectories(movePath);
 			}
 			
-			if(Files.exists(zipPath)) {
+			if (Files.exists(zipPath)) {
 				Files.move(zipPath, movePath.resolve(zipPath.getFileName() + "_" + CommonFunction.getCurrentDateTime("yyyyMMddHHmmss")));
 			}
 		} catch (Exception e) {

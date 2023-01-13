@@ -48,7 +48,7 @@ public class DownloadProcController extends CoTopComponent {
 		fileVo.setFileSeq(seq);
 		fileVo = fileMapper.getFileInfo(fileVo);
 		
-		if(fileVo == null){
+		if (fileVo == null){
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.add(HttpHeaders.CONTENT_LENGTH, Long.toString(0));
 			responseEntity = new ResponseEntity<FileSystemResource>(null, responseHeaders, HttpStatus.NOT_FOUND);
@@ -58,11 +58,11 @@ public class DownloadProcController extends CoTopComponent {
 			String downName = "";
 			
 			// 파일명이 같을 경우만 다운로드되도록 한다.
-			if(logiNm.equals(fName)){
+			if (logiNm.equals(fName)){
 				//파일 인코딩
 				String browser = req.getHeader("User-Agent");
 				
-		        if(browser.contains("MSIE") || browser.contains("Trident") || browser.contains("Chrome")){
+		        if (browser.contains("MSIE") || browser.contains("Trident") || browser.contains("Chrome")){
 		            downName = URLEncoder.encode(origNm,"UTF-8").replaceAll("\\+", "%20");
 		        } else {
 		            downName = new String(origNm.getBytes("UTF-8"), "ISO-8859-1");
@@ -103,7 +103,7 @@ public class DownloadProcController extends CoTopComponent {
 		ResponseEntity<FileSystemResource> responseEntity = null;
 		String baseImageUrl = "http://" + req.getServerName();
 		
-		if(req.getServerPort() != 80) {
+		if (req.getServerPort() != 80) {
 			baseImageUrl += ":" + Integer.toString(req.getServerPort());
 		}
 		
@@ -115,13 +115,13 @@ public class DownloadProcController extends CoTopComponent {
 		File file = new File(filePath);
 		
 		// 파일명이 같을 경우만 다운로드되도록 한다.
-		if(file.exists() && file.isFile()){
+		if (file.exists() && file.isFile()){
 			fileName+=".html";
 		    String encodedFilename = URLEncoder.encode(fileName,"UTF-8").replace("+", "%20");
 		    File tempFile = Paths.get(CommonFunction.emptyCheckProperty("image.temp.path", "/imagetemp")).resolve("BAT").resolve(batId).resolve(file.getName()).toFile();
 		   
 		    try {
-		    	if(!tempFile.exists()) {
+		    	if (!tempFile.exists()) {
 		    		String content = FileUtils.readFileToString(file, "UTF-8");
 		    		content = content.replaceAll("img src=\"../images/", "img src=\""+baseImageUrl+"");
 		    		

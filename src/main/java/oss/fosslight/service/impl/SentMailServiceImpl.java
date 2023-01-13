@@ -28,13 +28,13 @@ public class SentMailServiceImpl extends CoTopComponent implements SentMailServi
 		
 		String filterCondition = CommonFunction.getFilterToString(vo.getFilters());
 		
-		if(!isEmpty(filterCondition)) {
+		if (!isEmpty(filterCondition)) {
 			vo.setFilterCondition(filterCondition);
 		}
 		
 		int records = sentMailMapper.selectSentMailTotalCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			vo.setTotListSize(records);
 			
 			// Grid paging 처리를 위한 기본 param 설정 Map 생성(반드시 totlistsize를 set 하고 나서 생성해야함)

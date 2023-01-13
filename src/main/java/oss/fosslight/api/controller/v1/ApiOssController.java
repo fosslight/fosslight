@@ -64,7 +64,7 @@ public class ApiOssController extends CoTopComponent {
 			paramMap.put("ossVersion", ossVersion);
 			List<Map<String, Object>> content = apiOssService.getOssInfo(paramMap);
 			
-			if(content.size() > 0) {
+			if (content.size() > 0) {
 				resultMap.put("content", content);
 			}
 			
@@ -91,7 +91,7 @@ public class ApiOssController extends CoTopComponent {
 		try {
 			List<Map<String, Object>> content = apiOssService.getOssInfoByDownloadLocation(downloadLocation);
 			
-			if(content.size() > 0) {
+			if (content.size() > 0) {
 				resultMap.put("content", content);
 			}
 			
@@ -119,7 +119,7 @@ public class ApiOssController extends CoTopComponent {
 			List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
 		
 			
-			if(content.size() > 0) {
+			if (content.size() > 0) {
 				resultMap.put("content", content);
 			}
 			

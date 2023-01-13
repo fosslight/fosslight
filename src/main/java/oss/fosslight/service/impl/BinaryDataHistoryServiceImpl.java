@@ -37,13 +37,13 @@ public class BinaryDataHistoryServiceImpl extends CoTopComponent implements Bina
 		
 		String filterCondition = CommonFunction.getFilterToString(bean.getFilters(), null, exceptionMap);
 		
-		if(!isEmpty(filterCondition)) {
+		if (!isEmpty(filterCondition)) {
 			bean.setFilterCondition(filterCondition);
 		}
 		
 		int records = binaryDataHistoryMapper.selectBinaryDataHistoryTotalCount(bean);
 		
-		if(records > 0) {
+		if (records > 0) {
 			bean.setTotListSize(records);
 			
 			map = getGridPagerMap(bean);

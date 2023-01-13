@@ -40,12 +40,12 @@ public class ScannerController {
 			log.info("fl scanner start pid : " + prjId + ", url:" + wgetUrl);
 			String scannServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
 			String adminToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_ADMIN_TOKEN);
-			if(StringUtil.isEmpty(scannServiceUrl) || StringUtil.isEmpty(adminToken)) {
+			if (StringUtil.isEmpty(scannServiceUrl) || StringUtil.isEmpty(adminToken)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "FL Scanner Url or Admin token is not configured");
 			}
 			
 			T2Users user = userService.getLoginUserInfo();
-			if(user == null || StringUtil.isEmpty(user.getEmail())) {
+			if (user == null || StringUtil.isEmpty(user.getEmail())) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "Login User Email is not configured");
 			}
 			

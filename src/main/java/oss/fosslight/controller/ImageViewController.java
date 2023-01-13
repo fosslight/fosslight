@@ -54,7 +54,7 @@ public class ImageViewController extends CoTopComponent {
 		Path reportImagePath = Paths.get(dirPath).resolve(imageName);
 		File reportImageFile = reportImagePath.toFile();
 		
-		if(reportImageFile.exists()) {
+		if (reportImageFile.exists()) {
 			T2File f = new T2File();
 			
 			try {

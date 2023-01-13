@@ -92,7 +92,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		// login detail setting
 		Map<String, Object> loginDetailMap = (Map<String, Object>) configurationMap.get("loginDetail");
 		
-		if(loginDetailMap != null) {
+		if (loginDetailMap != null) {
 			loginAuthList.stream().map(c -> {
 				switch (c.getCdDtlNo()) {
 					case CoConstDef.CD_LDAP_SERVER_URL:
@@ -110,7 +110,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		// smtp detail setting
 //		Map<String, Object> smtpDetailMap = (Map<String, Object>) configurationMap.get("smtpDetail");
 //		
-//		if(smtpDetailMap != null) {
+//		if (smtpDetailMap != null) {
 //			smtpAuthList.stream().map(c -> {
 //				switch(c.getCdDtlNo()) {
 //					case CoConstDef.CD_SMTP_SERVICE_HOST:
@@ -135,14 +135,14 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 //						break;
 //					case CoConstDef.CD_SMTP_SERVICE_PASSWORD:
 //						String _pw = (String) smtpDetailMap.get(CoConstDef.CD_SMTP_SERVICE_PASSWORD);
-//						if(!StringUtil.isEmpty(_pw)) {
+//						if (!StringUtil.isEmpty(_pw)) {
 //							String _encPw = null;
 //							try {
 //								_encPw = CryptUtil.encryptAES256(_pw, CoConstDef.ENCRYPT_DEFAULT_SALT_KEY);
 //							} catch (Exception e) {
 //								log.error(e.getMessage());
 //							}
-//							if(!StringUtil.isEmpty(_encPw)) {
+//							if (!StringUtil.isEmpty(_encPw)) {
 //								c.setCdDtlExp(_encPw);
 //							}
 //						}
@@ -158,12 +158,12 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		// External Service setting
 //		Map<String, Object> tokenDetailMap = (Map<String, Object>) configurationMap.get("externalServiceDetail");
 //
-//		if(tokenDetailMap != null) {
+//		if (tokenDetailMap != null) {
 //			tokenAuthList.stream().map(c -> {
 //				switch (c.getCdDtlNo()) {
 //					case CoConstDef.CD_DTL_GITHUB_TOKEN:
 //						String token = (String) tokenDetailMap.get(CoConstDef.CD_DTL_GITHUB_TOKEN);
-//						if(!token.isEmpty()) {
+//						if (!token.isEmpty()) {
 //							c.setCdDtlExp(token);
 //						}
 //						break;
@@ -178,7 +178,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		// External Analysis detail setting
 		Map<String, Object> externalAnalysisDetailMap = (Map<String, Object>) configurationMap.get("externalAnalysisDetail");
 
-		if(externalAnalysisDetailMap != null) {
+		if (externalAnalysisDetailMap != null) {
 			externalAnalysisAuthList.stream().map(c -> {
 				switch(c.getCdDtlNo()) {
 
@@ -232,7 +232,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		
 		Map<String, Object> projectDetailMap = (Map<String, Object>) configurationMap.get("projectDetail");
 		
-		if(projectDetailMap != null) {
+		if (projectDetailMap != null) {
 			projectDetailList.stream().map(c -> {
 				switch(c.getCdDtlNo()) {
 					case CoConstDef.CD_AUTO_ANALYSIS_FLAG:
@@ -258,7 +258,7 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		
 		Map<String, Object> noticeDetailMap = (Map<String, Object>) configurationMap.get("noticeDetail");
 		
-		if(noticeDetailMap != null) {
+		if (noticeDetailMap != null) {
 			noticeDetailList.stream().map(c -> {
 				switch(c.getCdDtlNo()) {
 					case CoConstDef.CD_DTL_NOTICE_HTML:
@@ -284,10 +284,10 @@ public class SystemConfigurationServiceImpl extends CoTopComponent implements Sy
 		Map<String, Object> externalDetailMap = (Map<String, Object>) configurationMap.get("externalDetail");
 		List<T2CodeDtl> externalList = new ArrayList<T2CodeDtl>();
 		
-		if(externalDetailMap != null) {
+		if (externalDetailMap != null) {
 			int seq = 1;
 			
-			for(String key : externalDetailMap.keySet()) {
+			for (String key : externalDetailMap.keySet()) {
 				T2CodeDtl externalItem = new T2CodeDtl();
 				Map<String, Object> value = (Map<String, Object>) externalDetailMap.get((String) key);
 				

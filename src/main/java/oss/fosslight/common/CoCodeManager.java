@@ -79,11 +79,11 @@ public class CoCodeManager extends CoTopComponent {
         try {
             list = codeManagerMapper.getCodeListAll();
            
-            if(list == null) {
+            if (list == null) {
                 throw new RuntimeException("SYSTEM ERR GET CODE INFO FAIL");
             }
             
-            for(CodeDtlBean vo : list) {
+            for (CodeDtlBean vo : list) {
                 String s = vo.getCdNo();
                 code = (CoCode) codes.get(s);
                 
@@ -124,26 +124,26 @@ public class CoCodeManager extends CoTopComponent {
 			Map<String, OssMaster> _ossMap = new HashMap<>();
 			Map<String, String> _ossNamesMap = new HashMap<>();
 			
-			if(nickNameList != null) {
-				for(OssMaster bean : nickNameList) {
-					if(bean.getOssNickname() != null) {
+			if (nickNameList != null) {
+				for (OssMaster bean : nickNameList) {
+					if (bean.getOssNickname() != null) {
 						nickNameMap.put(bean.getOssName(), bean.getOssNickname().split(","));
 					}
 				}
 			}
 			
-			if(list != null) {
-				for(OssMaster bean : list) {
+			if (list != null) {
+				for (OssMaster bean : list) {
 					OssMaster targetBean = null;
 					String key = bean.getOssName() +"_"+ avoidNull(bean.getOssVersion()); // oss name을 nick name으로 가져온다.
 					key = key.toUpperCase();
 					
-					if(_ossMap.containsKey(key)) {
+					if (_ossMap.containsKey(key)) {
 						targetBean = _ossMap.get(key);
 					} else {
 						targetBean = bean;
 						
-						if(nickNameMap.containsKey(targetBean.getOssNameTemp())) {
+						if (nickNameMap.containsKey(targetBean.getOssNameTemp())) {
 							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssNameTemp()));
 						}
 					}
@@ -163,35 +163,35 @@ public class CoCodeManager extends CoTopComponent {
 					
 					targetBean.addOssLicense(subBean);
 					
-					if(_ossMap.containsKey(key)) {
+					if (_ossMap.containsKey(key)) {
 						_ossMap.replace(key, targetBean);
 					} else {
 						_ossMap.put(key, targetBean);
 					}
 					
-					if(!_ossNamesMap.containsKey(bean.getOssName().toUpperCase())) {
+					if (!_ossNamesMap.containsKey(bean.getOssName().toUpperCase())) {
 						_ossNamesMap.put(bean.getOssName().toUpperCase(), bean.getOssName());
 					}
 				}
 			}
 			
 			Map<String, OssMaster> _idMasterMap = new HashMap<>();
-			for(OssMaster bean : _ossMap.values()) {
-				if(!_idMasterMap.containsKey(bean.getOssId())) {
+			for (OssMaster bean : _ossMap.values()) {
+				if (!_idMasterMap.containsKey(bean.getOssId())) {
 					_idMasterMap.put(bean.getOssId(), bean);
 				}
 			}
 			
 			OSS_INFO_BY_ID = _idMasterMap;
 			
-			if(listNick != null) {
+			if (listNick != null) {
 
-				for(OssMaster bean : listNick) {
+				for (OssMaster bean : listNick) {
 					//OssMaster targetBean = null;
 					String key = bean.getOssName() +"_"+ avoidNull(bean.getOssVersion()); // oss name을 nick name으로 가져온다.
 					String ossNickNameKey = bean.getOssName().toUpperCase();
 
-					if(!_ossNamesMap.containsKey(ossNickNameKey)) {
+					if (!_ossNamesMap.containsKey(ossNickNameKey)) {
 						_ossNamesMap.put(ossNickNameKey, bean.getOssNameTemp());
 					}
 					
@@ -222,11 +222,11 @@ public class CoCodeManager extends CoTopComponent {
 			
 			}
 			
-			if(!_ossMap.isEmpty()) {
+			if (!_ossMap.isEmpty()) {
 				OSS_INFO_UPPER = _ossMap;
 			}
 			
-			if(!_ossNamesMap.isEmpty()) {
+			if (!_ossNamesMap.isEmpty()) {
 				OSS_INFO_UPPER_NAMES = _ossNamesMap;
 			}
 		} catch(Exception e) {
@@ -243,21 +243,21 @@ public class CoCodeManager extends CoTopComponent {
             List<LicenseMaster> list = licenseMapper.getLicenseInfoInit();
             List<LicenseMaster> nickList = licenseMapper.getLicenseInfoInitNick();
             
-            if(list == null) {
+            if (list == null) {
                 throw new RuntimeException("SYSTEM ERR GET CODE LICENSE MASTER INFO");
             }
             
             Map<String, LicenseMaster> license_info_map = new HashMap<>();
             Map<String, LicenseMaster> license_info_upper_map = new HashMap<>();
             Map<String, LicenseMaster> license_info_by_id_map = new HashMap<>();
-            for(LicenseMaster vo : list) {
-            	if(!isEmpty(vo.getLicenseNicknameStr())) {
-            		for(String nick : vo.getLicenseNicknameStr().split("\\|")) {
+            for (LicenseMaster vo : list) {
+            	if (!isEmpty(vo.getLicenseNicknameStr())) {
+            		for (String nick : vo.getLicenseNicknameStr().split("\\|")) {
             			vo.addLicenseNicknameList(nick);
             		}
             	}
             	
-            	if(!isEmpty(vo.getRestriction())) {
+            	if (!isEmpty(vo.getRestriction())) {
             		vo.setRestrictionStr(CommonFunction.setLicenseRestrictionList(vo.getRestriction()));
             	}
             	
@@ -265,12 +265,12 @@ public class CoCodeManager extends CoTopComponent {
             	license_info_upper_map.put(vo.getLicenseName().toUpperCase(),vo);
             	
             	//SHORT_IDENTIFIER
-            	if(!isEmpty(vo.getShortIdentifier())) {
-            		if(!license_info_map.containsKey(vo.getShortIdentifier())) {
+            	if (!isEmpty(vo.getShortIdentifier())) {
+            		if (!license_info_map.containsKey(vo.getShortIdentifier())) {
                     	license_info_map.put(vo.getShortIdentifier(),vo);
             		}
             		
-            		if(!license_info_upper_map.containsKey(vo.getShortIdentifier().toUpperCase())) {
+            		if (!license_info_upper_map.containsKey(vo.getShortIdentifier().toUpperCase())) {
             			license_info_upper_map.put(vo.getShortIdentifier().toUpperCase(), vo);
             		}
             	}
@@ -278,7 +278,7 @@ public class CoCodeManager extends CoTopComponent {
             	license_info_by_id_map.put(vo.getLicenseId(), vo);
             }
             
-            for(LicenseMaster vo : nickList) {
+            for (LicenseMaster vo : nickList) {
             	
             	LicenseMaster sourceBean = license_info_by_id_map.get(vo.getLicenseId());
             	vo.setLicenseNicknameList(sourceBean.getLicenseNicknameList());
@@ -288,15 +288,15 @@ public class CoCodeManager extends CoTopComponent {
             	license_info_upper_map.put(vo.getLicenseName().toUpperCase(),vo);
             }
             
-            if(!license_info_map.isEmpty()) {
+            if (!license_info_map.isEmpty()) {
             	LICENSE_INFO = license_info_map;
             }
             
-            if(!license_info_upper_map.isEmpty()) {
+            if (!license_info_upper_map.isEmpty()) {
             	LICENSE_INFO_UPPER = license_info_upper_map;
             }
             
-            if(!license_info_by_id_map.isEmpty()) {
+            if (!license_info_by_id_map.isEmpty()) {
             	LICENSE_INFO_BY_ID = license_info_by_id_map;
             }
 
@@ -305,21 +305,21 @@ public class CoCodeManager extends CoTopComponent {
             List<LicenseMaster> roleOutLicenseList = licenseMapper.getRoleOutLicense();
             List<String> roleOutLicenseNames = new ArrayList<>();
             List<String> roleOutLicenseIds = new ArrayList<>();
-            if(roleOutLicenseList != null) {
-            	for(LicenseMaster bean : roleOutLicenseList) {
-            		if(!roleOutLicenseNames.contains(bean.getLicenseName())) {
+            if (roleOutLicenseList != null) {
+            	for (LicenseMaster bean : roleOutLicenseList) {
+            		if (!roleOutLicenseNames.contains(bean.getLicenseName())) {
             			roleOutLicenseNames.add(bean.getLicenseName());
             		}
             		
-            		if(!roleOutLicenseIds.contains(bean.getLicenseId())) {
+            		if (!roleOutLicenseIds.contains(bean.getLicenseId())) {
             			roleOutLicenseIds.add(bean.getLicenseId());
             		}
             	}
             }
             
             String noOpensourceStr = "";
-            for(String s : roleOutLicenseNames) { 
-            	if(!isEmpty(noOpensourceStr)) {
+            for (String s : roleOutLicenseNames) { 
+            	if (!isEmpty(noOpensourceStr)) {
             		noOpensourceStr += "|";
             	}
             	
@@ -332,17 +332,17 @@ public class CoCodeManager extends CoTopComponent {
         	log.error(e.getMessage(), e);
         }
         
-        if(LICENSE_INFO_UPPER != null) {
+        if (LICENSE_INFO_UPPER != null) {
         	List<String> _licenseUserGuideList = new ArrayList<>();
         	
-        	for(String s : LICENSE_INFO_UPPER.keySet()) {
+        	for (String s : LICENSE_INFO_UPPER.keySet()) {
         		LicenseMaster _license = LICENSE_INFO_UPPER.get(s);
-        		if(_license != null && !isEmptyWithLineSeparator(_license.getDescription())) {
+        		if (_license != null && !isEmptyWithLineSeparator(_license.getDescription())) {
         			_licenseUserGuideList.add(s);
         		}
         	}
         	
-        	if(!_licenseUserGuideList.isEmpty()) {
+        	if (!_licenseUserGuideList.isEmpty()) {
         		LICENSE_USER_GUIDE_LIST = _licenseUserGuideList;
         	}
         }
@@ -355,7 +355,7 @@ public class CoCodeManager extends CoTopComponent {
 	private CoCodeManager() {}
     
     public static CoCodeManager getInstance() {
-    	if(instance == null) {
+    	if (instance == null) {
     		instance = new CoCodeManager();
     	}
     	
@@ -672,7 +672,7 @@ public class CoCodeManager extends CoTopComponent {
     public static String genCommonCheckbox(String s, String name, String val, Boolean NAExceptionFlag) {
     	CoCode code = getCodeInstance(s);
 		
-    	if(!StringUtils.isEmpty(code)) {
+    	if (!StringUtils.isEmpty(code)) {
     		return code.createCommonCheckboxString(val, name, NAExceptionFlag);
     	} else {
     		return null;
@@ -699,11 +699,11 @@ public class CoCodeManager extends CoTopComponent {
         try {
 			list = codeManagerMapper.getCodeListAll();
 			
-	        if(list == null) {
+	        if (list == null) {
 	            throw new RuntimeException("SYSTEM ERR GET CODE INFO FAIL");
 	        }
 	        
-	        for(CodeDtlBean vo : list) {
+	        for (CodeDtlBean vo : list) {
 	            String s = vo.getCdNo();
 	            code = (CoCode) hashmap.get(s);
 	            
@@ -751,16 +751,16 @@ public class CoCodeManager extends CoTopComponent {
              CoCode code = getCodeInstance(s);
              codes = code != null ? code.getCdDtlNoVector(false) : new Vector<String>();
              
-             while(i < codes.size()){
-        		 if(!("").equals(codes.get(i))){
+             while (i < codes.size()){
+        		 if (!("").equals(codes.get(i))){
         			 String temp = code != null ? code.getCdDtlExp(codes.get(i)) : "";
         			 
-        			 if(!temp.equals("")){
+        			 if (!temp.equals("")){
         				 exps.add(temp);
         				 CoCode code_ = getCodeInstance(temp);
         				 Vector<String> temps = code_ != null ? code_.getCdDtlNoVector(false) : null;
         				 
-        				 if(temps != null && temps.size() > size){
+        				 if (temps != null && temps.size() > size){
         					 size = temps.size();
         					
         					 j++;
@@ -771,7 +771,7 @@ public class CoCodeManager extends CoTopComponent {
         		 i++;
         	 }
              
-             if(size > 0){
+             if (size > 0){
             	 code = getCodeInstance(exps.get(j-1));
 				 ret = code != null ? code.getCdDtlNoVector(false) : null;
              }
@@ -783,7 +783,7 @@ public class CoCodeManager extends CoTopComponent {
     public static String getLicenseUserGuideJsonString() {
     	String jsonStr = null;
     	
-    	if(LICENSE_USER_GUIDE_LIST != null) {
+    	if (LICENSE_USER_GUIDE_LIST != null) {
             Gson gson = new Gson();
             jsonStr = gson.toJson(LICENSE_USER_GUIDE_LIST);
     	}

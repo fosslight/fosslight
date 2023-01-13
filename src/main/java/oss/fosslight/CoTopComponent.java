@@ -92,7 +92,7 @@ public class CoTopComponent {
 	}
     
     public static Boolean isEmptyWithLineSeparator(String s) {
-    	if(s != null) {
+    	if (s != null) {
     		s = s.replaceAll(System.lineSeparator(), "");
     	}
     	
@@ -130,7 +130,7 @@ public class CoTopComponent {
     	try {
 	    	Collection<GrantedAuthority> authorities = (Collection<GrantedAuthority>) SecurityContextHolder.getContext().getAuthentication().getAuthorities();
 	    	
-	    	if(!authorities.isEmpty()) {
+	    	if (!authorities.isEmpty()) {
 	    		for (GrantedAuthority authority : authorities) {
 	    			result = (authority.getAuthority()).replaceFirst(AppConstBean.SECURITY_ROLE_PREFIX, "");
 	    			
@@ -144,11 +144,11 @@ public class CoTopComponent {
     
     protected static String userRole(T2Users userInfo) {
     	String result = "anonymousUser";
-    	if(!isEmpty(userInfo.getAuthority())) {
+    	if (!isEmpty(userInfo.getAuthority())) {
     		return userInfo.getAuthority();
     	}
     	List<T2Authorities> authList = userInfo.getAuthoritiesList();
-    	if(authList != null && !authList.isEmpty()) {
+    	if (authList != null && !authList.isEmpty()) {
     		result = authList.get(0).getAuthority();
     	}
     	return result;
@@ -221,23 +221,23 @@ public class CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("isValid", isValid ? "true" : "false");
 		
-		if(!isEmpty(alertMsg)) {
+		if (!isEmpty(alertMsg)) {
 			resultMap.put("validMsg", alertMsg);
 		}
 		
-		if(obj != null) {
+		if (obj != null) {
 			resultMap.put("resultData", obj);
 		}
 		
-		if(extObj != null) {
+		if (extObj != null) {
 			resultMap.put("externalData", extObj);
 		}
 		
-		if(extObj2 != null){
+		if (extObj2 != null){
 			resultMap.put("externalData2", extObj2);
 		}
 		
-		if(extObj3 != null) {
+		if (extObj3 != null) {
 			resultMap.put("externalData3", extObj3);
 		}
 		
@@ -271,15 +271,15 @@ public class CoTopComponent {
 	protected T2CoValidationResult validate(HttpServletRequest req, String ignore, String hint, String appendixKey, Object appendixObj) {
 		T2CoAdminValidator validator = new T2CoAdminValidator();
 		
-		if(!isEmpty(ignore)) {
+		if (!isEmpty(ignore)) {
 			validator.setIgnore(ignore);
 		}
 		
-		if(!isEmpty(hint)) {
+		if (!isEmpty(hint)) {
 			validator.setHint(hint);
 		}
 		
-		if(!isEmpty(appendixKey) && appendixObj != null) {
+		if (!isEmpty(appendixKey) && appendixObj != null) {
 			validator.setAppendix(appendixKey, appendixObj);
 		}
 		
@@ -324,7 +324,7 @@ public class CoTopComponent {
 	    
 	    HttpHeaders responseHeaders = new HttpHeaders();
 	    
-	    if(!isEmpty(contentType)) {
+	    if (!isEmpty(contentType)) {
 	    	responseHeaders.add(HttpHeaders.CONTENT_TYPE, contentType);
 	    }
 	    
@@ -371,10 +371,10 @@ public class CoTopComponent {
 	public static boolean putSessionObject(String key, Object obj) {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		
-		if(request != null) {
+		if (request != null) {
 			HttpSession session = request.getSession();
 			
-			if(session != null) {
+			if (session != null) {
 				session.setAttribute(key, obj);
 				
 				return true;
@@ -395,13 +395,13 @@ public class CoTopComponent {
 	public static Object getSessionObject(String key, boolean oneTimeFlag) {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		
-		if(request != null) {
+		if (request != null) {
 			HttpSession session = request.getSession();
 			
-			if(session != null) {
+			if (session != null) {
 				Object sessionObj = session.getAttribute(key);
 				
-				if(oneTimeFlag) {
+				if (oneTimeFlag) {
 					try {
 						session.removeAttribute(key);
 					} catch (Exception e) {
@@ -420,10 +420,10 @@ public class CoTopComponent {
 		try {
 			HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 			
-			if(request != null) {
+			if (request != null) {
 				HttpSession session = request.getSession();
 				
-				if(session != null) {
+				if (session != null) {
 					session.removeAttribute(key);
 				}
 			}			

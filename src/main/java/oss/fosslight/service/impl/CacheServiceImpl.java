@@ -40,7 +40,7 @@ public class CacheServiceImpl implements CacheService {
 	@Cacheable(value="licenseInfoCache")
 	public Set<String> getLicenseUpperNames() {
 		Set<String> list = new HashSet<>();
-		for(String s : getLicenseNames()) {
+		for (String s : getLicenseNames()) {
 			list.add(s.toUpperCase());
 		}
 		return list;

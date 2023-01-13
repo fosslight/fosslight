@@ -73,10 +73,10 @@ public class ComplianceController extends CoTopComponent {
 		partnerMaster.setSortField(sidx);
 		partnerMaster.setSortOrder(sord);
 		
-		if(partnerMaster.getStatus() != null) {
+		if (partnerMaster.getStatus() != null) {
 			String statuses = partnerMaster.getStatus();
 			
-			if(!isEmpty(statuses)) {
+			if (!isEmpty(statuses)) {
 				String[] arrStatuses = statuses.split(",");
 				partnerMaster.setArrStatuses(arrStatuses);
 			}
@@ -98,12 +98,12 @@ public class ComplianceController extends CoTopComponent {
 	@PostMapping(value = COMPLIANCE.MODEL_LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> modelListAjax(@RequestBody Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
-		if(!isEmpty(project.getModelName())){
+		if (!isEmpty(project.getModelName())){
 			String[] modelNames = project.getModelName().split(",");
 			List<String> modelListInfo = new ArrayList<String>();
 			
-			for(String modelName : modelNames){
-				if(modelListInfo.indexOf(modelName) == -1){
+			for (String modelName : modelNames){
+				if (modelListInfo.indexOf(modelName) == -1){
 					modelListInfo.add(modelName);
 				}
 			}
@@ -123,7 +123,7 @@ public class ComplianceController extends CoTopComponent {
 		//엑셀 분석
 		List<Project> modelList = ExcelUtil.getModelList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		
-		if(modelList == null) {
+		if (modelList == null) {
 			return makeJsonResponseHeader(false, "");
 		}
 		

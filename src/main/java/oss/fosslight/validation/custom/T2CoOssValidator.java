@@ -44,44 +44,44 @@ public class T2CoOssValidator extends T2CoValidator {
 		String ossId = avoidNull(map.get("OSS_ID"));
 		// oss 일괄등록 validator
 
-		if(VALID_TYPE == VALID_OSSLIST_BULK) {
-			if(ossList != null) {
-				for(OssMaster bean : ossList) {
+		if (VALID_TYPE == VALID_OSSLIST_BULK) {
+			if (ossList != null) {
+				for (OssMaster bean : ossList) {
 					ossBulkValidate(bean, map, errMap, diffMap, infoMap, true);
 				}
 			}
-		} else if(VALID_TYPE == VALID_OSS_BULK) {
+		} else if (VALID_TYPE == VALID_OSS_BULK) {
 			ossValidate(ossMaster, map, errMap, diffMap, infoMap, false);
-		} else if(VALID_TYPE == VALID_OSSANALYSIS) {
+		} else if (VALID_TYPE == VALID_OSSANALYSIS) {
 			ossAnalysisValidate(ossAnalysis, map, errMap, diffMap, infoMap, false);
-		} else if(VALID_TYPE == VALID_OSSANALYSIS_LIST) {
-			if(analysisList != null) {
-				for(OssAnalysis bean : analysisList) {
+		} else if (VALID_TYPE == VALID_OSSANALYSIS_LIST) {
+			if (analysisList != null) {
+				for (OssAnalysis bean : analysisList) {
 					ossAnalysisValidate(bean, map, errMap, diffMap, infoMap, true);
 				}
 			}
-		} else if(VALID_TYPE == VALID_DOWNLOADLOCATION){ // DOWNLOAD LOCATION URL을 중복으로 작성한 경우
+		} else if (VALID_TYPE == VALID_DOWNLOADLOCATION){ // DOWNLOAD LOCATION URL을 중복으로 작성한 경우
 			targetName = "DOWNLOAD_LOCATION";
 			
-			if(isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				OssMaster param = new OssMaster();
 				param.setDownloadLocation(map.get(targetName));
 				param.setOssName((String) map.get("OSS_NAME"));
 				Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 				List<OssMaster> downLoadLocationList = (List<OssMaster>) paramMap.get("downloadLocation");
 				
-				if(!downLoadLocationList.isEmpty()) {
+				if (!downLoadLocationList.isEmpty()) {
 					String sortOrder = downLoadLocationList.get(0).getSOrder();
 					String msg = "";
 					
-					if("1".equals(sortOrder)) {
+					if ("1".equals(sortOrder)) {
 						msg = MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), "");
 					} else {
 						msg = MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 					}
 					
-					for(int i = 0 ; i < downLoadLocationList.size() ; i++) {
-						if("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
+					for (int i = 0 ; i < downLoadLocationList.size() ; i++) {
+						if ("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
 							msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 						} else {
@@ -93,33 +93,33 @@ public class T2CoOssValidator extends T2CoValidator {
 					diffMap.put(targetName, msg);
 				}
 			}
-		} else if(VALID_TYPE == VALID_DOWNLOADLOCATIONS){
+		} else if (VALID_TYPE == VALID_DOWNLOADLOCATIONS){
 			targetName = "DOWNLOAD_LOCATIONS";
 			
-			if(isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				String[] downloadLocations = map.get(targetName).split("\t");
 				targetName = "DOWNLOAD_LOCATION";
 				List<String> result = new ArrayList<String>();
 				
-				for(String downloadLocation : downloadLocations){
+				for (String downloadLocation : downloadLocations){
 					OssMaster param = new OssMaster();
 					param.setDownloadLocation(downloadLocation);
 					param.setOssName((String) map.get("OSS_NAME"));
 					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 					List<OssMaster> downLoadLocationList = (List<OssMaster>) paramMap.get("downloadLocation");
 					
-					if(!downLoadLocationList.isEmpty()) {
+					if (!downLoadLocationList.isEmpty()) {
 						String sortOrder = downLoadLocationList.get(0).getSOrder();
 						String msg = "";
 						
-						if("1".equals(sortOrder)) {
+						if ("1".equals(sortOrder)) {
 							msg = MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), "");
 						} else {
 							msg = MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 						}
 						
-						for(int i = 0 ; i < downLoadLocationList.size() ; i++) {
-							if("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
+						for (int i = 0 ; i < downLoadLocationList.size() ; i++) {
+							if ("1".equals(sortOrder) && !"1".equals(downLoadLocationList.get(i).getSOrder())) {
 								msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 								msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), downLoadLocationList.get(i).getOssName(), downLoadLocationList.get(i).getOssName());
 							} else {
@@ -132,31 +132,31 @@ public class T2CoOssValidator extends T2CoValidator {
 					}
 				}
 				
-				if(result.size() > 0){
+				if (result.size() > 0){
 					diffMap.put("DOWNLOAD_LOCATIONS", StringUtils.join(result, "||"));
 				}
 			}
-		} else if(VALID_TYPE == VALID_HOMEPAGE){ // HOMEPAGE URL을 중복으로 작성한 경우
+		} else if (VALID_TYPE == VALID_HOMEPAGE){ // HOMEPAGE URL을 중복으로 작성한 경우
 			targetName = "HOMEPAGE";
-			if(isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				OssMaster param = new OssMaster();
 				param.setHomepage(map.get(targetName));
 				param.setOssName((String) map.get("OSS_NAME"));
 				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> homepageList = (List<OssMaster>) paramMap.get("homepage");
 				
-				if(!homepageList.isEmpty()) {
+				if (!homepageList.isEmpty()) {
 					String sortOrder = homepageList.get(0).getSOrder();
 					String msg = "";
 					
-					if("1".equals(sortOrder)) {
+					if ("1".equals(sortOrder)) {
 						msg = MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), "");
 					} else {
 						msg = MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 					}
 					
-					for(int i = 0 ; i < homepageList.size() ; i++) {
-						if("1".equals(sortOrder) && !"1".equals(homepageList.get(i).getSOrder())) {
+					for (int i = 0 ; i < homepageList.size() ; i++) {
+						if ("1".equals(sortOrder) && !"1".equals(homepageList.get(i).getSOrder())) {
 							msg += "<br>" + MessageFormat.format(getCustomMessage(targetName + ".PARTIAL_DUPLICATED"), "");
 							msg += MessageFormat.format(getCustomMessage(targetName + ".LIST_LINK"), homepageList.get(i).getOssName(), homepageList.get(i).getOssName());
 						} else {
@@ -172,14 +172,14 @@ public class T2CoOssValidator extends T2CoValidator {
 			// 1. version
 			targetName = "OSS_VERSION";
 			
-			if(!errMap.containsKey(targetName) && map.containsKey(targetName)) {
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName)) {
 				// DB체크만
 				OssMaster param = new OssMaster(ossId);
 				param.setOssVersion(map.get(targetName));
 				param.setOssName(map.get("OSS_NAME"));
 				OssMaster result = ossService.checkExistsOss(param);
 				
-				if(result != null) {
+				if (result != null) {
 					errMap.put(targetName, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), map.get(targetName), result.getOssId(), result.getOssId(), result.getOssName()));
 				}
 			}
@@ -187,65 +187,65 @@ public class T2CoOssValidator extends T2CoValidator {
 			// 2. NICK NAME
 			targetName = "OSS_NICKNAMES";
 			
-			if(!errMap.containsKey(targetName) && (map.containsKey(targetName + ".1") || map.containsKey(targetName)) ) {
+			if (!errMap.containsKey(targetName) && (map.containsKey(targetName + ".1") || map.containsKey(targetName)) ) {
 	        	List<String> nickNameKeyList = new ArrayList<>();
 	        	
-	        	if(!map.containsKey(targetName + ".1") && map.containsKey(targetName)) {
+	        	if (!map.containsKey(targetName + ".1") && map.containsKey(targetName)) {
 	        		String _seqkey = targetName;
 	        		
-	        		if(!errMap.containsKey(_seqkey) && !StringUtil.isEmpty(map.get(_seqkey))) {
+	        		if (!errMap.containsKey(_seqkey) && !StringUtil.isEmpty(map.get(_seqkey))) {
 	        			// 3-1 동일한 닉네임을 입력한 경우
-	        			if(nickNameKeyList.contains(map.get(_seqkey).trim().toUpperCase())) {
+	        			if (nickNameKeyList.contains(map.get(_seqkey).trim().toUpperCase())) {
 	        				errMap.put(_seqkey, targetName + ".SAME");
 	        			} else {
 	        				nickNameKeyList.add(map.get(_seqkey).trim().toUpperCase());
 	        				
 	        				// 3-2 oss name 과 같은 경우
-	        				if(map.get(_seqkey).trim().equalsIgnoreCase(avoidNull(map.get("OSS_NAME")).trim())) {
+	        				if (map.get(_seqkey).trim().equalsIgnoreCase(avoidNull(map.get("OSS_NAME")).trim())) {
 	        					errMap.put(_seqkey, targetName + ".SAME");
 	        				// 3-3 db 에 존재하는 경우
 	        				} else {
 	        					OssMaster param = new OssMaster(ossId);
 	        					param.setOssName(map.get(_seqkey).trim());
 	        					
-	        					if(!isEmpty(map.get("OSS_NAME"))) {
+	        					if (!isEmpty(map.get("OSS_NAME"))) {
 	        						param.setOssNameTemp(map.get("OSS_NAME"));
 	        					}
 	        					
 	        					OssMaster result = ossService.checkExistsOssNickname(param);
 	        					
-	        					if(result != null) {
+	        					if (result != null) {
 	        						errMap.put(_seqkey, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), map.get(_seqkey), result.getOssId(), result.getOssId(), result.getOssName()));
 	        					}
 	        				}
 	        			}
 	        		}
 	        	}else{
-		        	for(int i = 1; map.containsKey(targetName + "." + i); i++){
+		        	for (int i = 1; map.containsKey(targetName + "." + i); i++){
 		        		String _seqkey = targetName + "." + i;
 		        		
-		        		if(!errMap.containsKey(_seqkey) && !StringUtil.isEmpty(map.get(_seqkey))) {
+		        		if (!errMap.containsKey(_seqkey) && !StringUtil.isEmpty(map.get(_seqkey))) {
 		        			// 3-1 동일한 닉네임을 입력한 경우
-		        			if(nickNameKeyList.contains(map.get(_seqkey).trim().toUpperCase())) {
+		        			if (nickNameKeyList.contains(map.get(_seqkey).trim().toUpperCase())) {
 		        				errMap.put(_seqkey, targetName + ".SAME");
 		        			} else {
 		        				nickNameKeyList.add(map.get(_seqkey).trim().toUpperCase());
 		        				
 		        				// 3-2 oss name 과 같은 경우
-		        				if(map.get(_seqkey).trim().equalsIgnoreCase(avoidNull(map.get("OSS_NAME")).trim())) {
+		        				if (map.get(_seqkey).trim().equalsIgnoreCase(avoidNull(map.get("OSS_NAME")).trim())) {
 		        					errMap.put(_seqkey, targetName + ".SAME");
 		        				// 3-3 db 에 존재하는 경우
 		        				} else {
 		        					OssMaster param = new OssMaster(ossId);
 		        					param.setOssName(map.get(_seqkey).trim());
 		        					
-		        					if(!isEmpty(map.get("OSS_NAME"))) {
+		        					if (!isEmpty(map.get("OSS_NAME"))) {
 		        						param.setOssNameTemp(map.get("OSS_NAME"));
 		        					}
 		        					
 		        					OssMaster result = ossService.checkExistsOssNickname(param);
 		        					
-		        					if(result != null) {
+		        					if (result != null) {
 		        						errMap.put(_seqkey, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATED"), map.get(_seqkey), result.getOssId(), result.getOssId(), result.getOssName()));
 		        					}
 		        				}
@@ -259,12 +259,12 @@ public class T2CoOssValidator extends T2CoValidator {
 			// OSS NAME이 이미 등록되어 있는 경우 체크 추가
 			targetName = "OSS_NAME";
 			
-			if(!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				OssMaster param = new OssMaster(ossId);
 				param.setOssName(map.get(targetName));
 				OssMaster result = ossService.checkExistsOssNickname2(param);
 				
-				if(result != null) {
+				if (result != null) {
 					errMap.put(targetName, MessageFormat.format(getCustomMessage(targetName + ".DUPLICATEDNICK"), map.get(targetName), result.getOssId(), result.getOssId(), result.getOssName()));
 				}
 			}
@@ -274,19 +274,19 @@ public class T2CoOssValidator extends T2CoValidator {
 	@SuppressWarnings("unchecked")
 	private void ossValidate(OssMaster ossBean, Map<String, String> map, Map<String, String> errMap,
 			Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
-		if(ossBean != null) {
+		if (ossBean != null) {
 			// OSS Name
 			// 이미등록된 경우 체크
 			String basicKey = "OSS_NAME";
 			String gridKey = StringUtil.convertToCamelCase(basicKey);
 			String errCd = checkBasicError(basicKey, gridKey, ossBean.getOssName(), false);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
 			} else {
 				// 초기표시인 경우, Identification과 동일
-				if(useGridSeq) {
-					if(!CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
+				if (useGridSeq) {
+					if (!CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().toUpperCase())) {
 						errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 					}
 				} else {
@@ -294,7 +294,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					param.setOssName(ossBean.getOssName());
 					OssMaster result = ossService.checkExistsOssNickname2(param);
 					
-					if(result != null) {
+					if (result != null) {
 						errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATEDNICK2");
 					}
 				}
@@ -306,13 +306,13 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, ossBean.getOssVersion(), true);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
 			} else {
 				// OSS Name에 에러가 있는 경우 version의 유효성 체크할 필요 없음
-				if(!hasError(errMap, "OSS_NAME", ossBean.getGridId(), useGridSeq)) {
-					if(useGridSeq) {
-						if(!CoCodeManager.OSS_INFO_UPPER.containsKey( (ossBean.getOssName() + "_" + ossBean.getOssVersion()).toUpperCase() )) {
+				if (!hasError(errMap, "OSS_NAME", ossBean.getGridId(), useGridSeq)) {
+					if (useGridSeq) {
+						if (!CoCodeManager.OSS_INFO_UPPER.containsKey( (ossBean.getOssName() + "_" + ossBean.getOssVersion()).toUpperCase() )) {
 							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 						}
 					} else {
@@ -323,7 +323,7 @@ public class T2CoOssValidator extends T2CoValidator {
 						param.setOssName(ossBean.getOssName());
 						OssMaster result = ossService.checkExistsOss(param);
 						
-						if(result != null) {
+						if (result != null) {
 							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED2");
 						}
 					}
@@ -335,34 +335,34 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, ossBean.getLicenseName(), false);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
 			} else {
 				boolean breakPoint = false;
 				String chkStr = ossBean.getLicenseName().replaceAll("\\(", " ").replaceAll("\\)", " ").toUpperCase();
 				
-				for(String s1 : chkStr.split(" OR ")) {
-					for(String s2 : s1.split(" AND ")) {
-						if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
+				for (String s1 : chkStr.split(" OR ")) {
+					for (String s2 : s1.split(" AND ")) {
+						if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
 							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 							breakPoint = true;
 							
 							break;
 						}
 					}
-					if(breakPoint) {
+					if (breakPoint) {
 						break;
 					}
 				}
 				
 				// error가 없다면, 괄호안에 OR 조건이 포함되어 있는지 체크
 				// 괄호 안에는 OR Operator가 존재할 수 없음 (AND만)
-				if(!breakPoint) {
+				if (!breakPoint) {
 					Pattern p = Pattern.compile("\\(([^()]*)\\)");
 					Matcher m = p.matcher(ossBean.getLicenseName());
 					
 					while (m.find()) {
-						if(m.group().toUpperCase().indexOf(" OR ") > -1) {
+						if (m.group().toUpperCase().indexOf(" OR ") > -1) {
 							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".ORCONDITIONS");
 							
 							break;
@@ -375,22 +375,22 @@ public class T2CoOssValidator extends T2CoValidator {
 			basicKey = "OSS_NICKNAME";
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			
-			if(!isEmpty(ossBean.getOssNickname())) {
+			if (!isEmpty(ossBean.getOssNickname())) {
 				List<String> nickList = Arrays.asList(ossBean.getOssNickname().split(","));
 				String upperOssName = ossBean.getOssName().trim().toUpperCase();
 				List<String> dupCheckList = new ArrayList<>();
 				
-				for(String s : nickList) {
-					if(isEmpty(s)) {
+				for (String s : nickList) {
+					if (isEmpty(s)) {
 						continue;
 					}
 					
 					String upperNick = s.trim().toUpperCase();
 					
 					// oss name과 동일한 경우
-					if(upperNick.equalsIgnoreCase(upperOssName)) {
+					if (upperNick.equalsIgnoreCase(upperOssName)) {
 						errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED");
-					} else if(dupCheckList.contains(upperNick)) {
+					} else if (dupCheckList.contains(upperNick)) {
 						// 동일한 nick name을 두번이상 설정한 경우
 						errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {
@@ -400,7 +400,7 @@ public class T2CoOssValidator extends T2CoValidator {
 						param.setOssNameTemp(upperOssName);
 						OssMaster result = ossService.checkExistsOssNickname(param);
 						
-						if(result != null) {
+						if (result != null) {
 							errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".SAME");
 						}
 					}
@@ -414,22 +414,22 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			String[] downloadLocation = ossBean.getDownloadLocation().split(",");
 			
-			for(String location : downloadLocation){
+			for (String location : downloadLocation){
 				errCd = checkBasicError(basicKey, gridKey, location.trim(), true);
 				
-				if(!isEmpty(errCd)){
+				if (!isEmpty(errCd)){
 					break;
 				}
 			}
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
-			} else if(!isEmpty(ossBean.getDownloadLocation())){
-				for(String location : downloadLocation){
+			} else if (!isEmpty(ossBean.getDownloadLocation())){
+				for (String location : downloadLocation){
 					OssMaster param = new OssMaster();
 					
 					// version up 인 경우, 해당 oss name을 제외하고 검증
-					if(!isEmpty(ossBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().trim().toUpperCase())) {
+					if (!isEmpty(ossBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().trim().toUpperCase())) {
 						param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossBean.getOssName().trim().toUpperCase()));
 					}
 					
@@ -437,9 +437,9 @@ public class T2CoOssValidator extends T2CoValidator {
 					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 					List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
 					
-					if(list != null && !list.isEmpty()) {
+					if (list != null && !list.isEmpty()) {
 						String sortOrder = list.get(0).getSOrder();
-						if("1".equals(sortOrder)) {
+						if ("1".equals(sortOrder)) {
 							diffMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED");
 						} else {
 							diffMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".PARTIAL_DUPLICATED");
@@ -454,13 +454,13 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, ossBean.getHomepage().trim(), true);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), errCd);
-			} else if(!isEmpty(ossBean.getHomepage())) {
+			} else if (!isEmpty(ossBean.getHomepage())) {
 				OssMaster param = new OssMaster();
 				
 				// version up 인 경우, 해당 oss name을 제외하고 검증
-				if(!isEmpty(ossBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().trim().toUpperCase())) {
+				if (!isEmpty(ossBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossBean.getOssName().trim().toUpperCase())) {
 					param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossBean.getOssName().trim().toUpperCase()));
 				}
 				
@@ -468,10 +468,10 @@ public class T2CoOssValidator extends T2CoValidator {
 				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				
-				if(list != null && !list.isEmpty()) {
+				if (list != null && !list.isEmpty()) {
 					String sortOrder = list.get(0).getSOrder();
 					
-					if("1".equals(sortOrder)) {
+					if ("1".equals(sortOrder)) {
 						diffMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {
 						diffMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), basicKey+".PARTIAL_DUPLICATED");
@@ -494,10 +494,10 @@ public class T2CoOssValidator extends T2CoValidator {
 
 		if (!isEmpty(errCd)) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
-		} else if(ossService.checkExistsOssNickname2(ossBean) != null) {
+		} else if (ossService.checkExistsOssNickname2(ossBean) != null) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""),
 					"OSS_NAME.DUPLICATEDNICK_SHORT");
-		} else if(ossService.checkExistsOssByname(ossBean) == 0) {
+		} else if (ossService.checkExistsOssByname(ossBean) == 0) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "OSS_NAME.UNCONFIRMED");
 		}
 
@@ -506,10 +506,10 @@ public class T2CoOssValidator extends T2CoValidator {
 		OssMaster nicknameCheckBean = new OssMaster();
 		nicknameCheckBean.setOssNameTemp(ossBean.getOssName());
 
-		if(!Objects.isNull(ossBean.getOssNicknames())) {
+		if (!Objects.isNull(ossBean.getOssNicknames())) {
 			for (String ossNickname : ossBean.getOssNicknames()) {
 				nicknameCheckBean.setOssName(ossNickname);
-				if(!Objects.isNull(ossService.checkExistsOssNickname(nicknameCheckBean))) {
+				if (!Objects.isNull(ossService.checkExistsOssNickname(nicknameCheckBean))) {
 					errMap.put(basicKey + (useGridSeq ? "."+ossBean.getGridId() : ""), "OSS_NICKNAMES.SAME_SHORT");
 					break;
 				}
@@ -523,10 +523,10 @@ public class T2CoOssValidator extends T2CoValidator {
 		if (Objects.isNull(ossBean.getDeclaredLicenses()) || ossBean.getDeclaredLicenses().isEmpty()) {
 			errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), "LICENSE_NAME.REQUIRED");
 		} else {
-			for(String license : ossBean.getDeclaredLicenses()) {
+			for (String license : ossBean.getDeclaredLicenses()) {
 				errCd = checkBasicError(basicKey, gridKey, license, false);
 
-				if(!isEmpty(errCd)) {
+				if (!isEmpty(errCd)) {
 					errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
 					break;
 				}
@@ -542,11 +542,11 @@ public class T2CoOssValidator extends T2CoValidator {
 		basicKey = "DETECTED_LICENSES";
 		gridKey = StringUtil.convertToCamelCase(basicKey);
 
-		if(!Objects.isNull(ossBean.getDetectedLicenses())) {
-			for(String license : ossBean.getDetectedLicenses()) {
+		if (!Objects.isNull(ossBean.getDetectedLicenses())) {
+			for (String license : ossBean.getDetectedLicenses()) {
 				errCd = checkBasicError(basicKey, gridKey, license, false);
 
-				if(!isEmpty(errCd)) {
+				if (!isEmpty(errCd)) {
 					errMap.put(basicKey + (useGridSeq ? "." + ossBean.getGridId() : ""), errCd);
 					break;
 				}
@@ -562,19 +562,19 @@ public class T2CoOssValidator extends T2CoValidator {
 	@SuppressWarnings("unchecked")
 	private void ossAnalysisValidate(OssAnalysis analysisBean, Map<String, String> map, Map<String, String> errMap,
 			Map<String, String> diffMap, Map<String, String> infoMap, boolean useGridSeq) {
-		if(analysisBean != null) {
+		if (analysisBean != null) {
 			// OSS Name
 			// 이미등록된 경우 체크
 			String basicKey = "OSS_NAME";
 			String gridKey = StringUtil.convertToCamelCase(basicKey);
 			String errCd = checkBasicError(basicKey, gridKey, analysisBean.getOssName(), false);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else {
 				// 초기표시인 경우, Identification과 동일
-				if(useGridSeq) {
-					if(!CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase())) {
+				if (useGridSeq) {
+					if (!CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().toUpperCase())) {
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 					}
 				} else {
@@ -582,7 +582,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					param.setOssName(analysisBean.getOssName());
 					OssMaster result = ossService.checkExistsOssNickname2(param);
 					
-					if(result != null) {
+					if (result != null) {
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATEDNICK2");
 					}
 				}
@@ -593,13 +593,13 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, analysisBean.getOssVersion(), true);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else {
 				// OSS Name에 에러가 있는 경우 version의 유효성 체크할 필요 없음
-				if(!hasError(errMap, "OSS_NAME", analysisBean.getGridId(), useGridSeq)) {
-					if(useGridSeq) {
-						if(!CoCodeManager.OSS_INFO_UPPER.containsKey( (analysisBean.getOssName() + "_" + avoidNull(analysisBean.getOssVersion())).toUpperCase() )) {
+				if (!hasError(errMap, "OSS_NAME", analysisBean.getGridId(), useGridSeq)) {
+					if (useGridSeq) {
+						if (!CoCodeManager.OSS_INFO_UPPER.containsKey( (analysisBean.getOssName() + "_" + avoidNull(analysisBean.getOssVersion())).toUpperCase() )) {
 							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 						}
 					} else {
@@ -610,7 +610,7 @@ public class T2CoOssValidator extends T2CoValidator {
 						param.setOssName(analysisBean.getOssName());
 						OssMaster result = ossService.checkExistsOss(param);
 						
-						if(result != null) {
+						if (result != null) {
 							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED2");
 						}
 					}
@@ -622,13 +622,13 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, analysisBean.getLicenseName(), false);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
 			} else {
 				boolean breakPoint = false;
 				
-				for(String s2 : analysisBean.getLicenseName().split(",")) {
-					if(!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
+				for (String s2 : analysisBean.getLicenseName().split(",")) {
+					if (!CoCodeManager.LICENSE_INFO_UPPER.containsKey(s2.trim().toUpperCase())) {
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".UNCONFIRMED");
 						breakPoint = true;
 						
@@ -638,12 +638,12 @@ public class T2CoOssValidator extends T2CoValidator {
 								
 				// error가 없다면, 괄호안에 OR 조건이 포함되어 있는지 체크
 				// 괄호 안에는 OR Operator가 존재할 수 없음 (AND만)
-				if(!breakPoint) {
+				if (!breakPoint) {
 					Pattern p = Pattern.compile("\\(([^()]*)\\)");
 					Matcher m = p.matcher(analysisBean.getLicenseName());
 					
 					while (m.find()) {
-						if(m.group().toUpperCase().indexOf(" OR ") > -1) {
+						if (m.group().toUpperCase().indexOf(" OR ") > -1) {
 							errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".ORCONDITIONS");
 							
 							break;
@@ -656,7 +656,7 @@ public class T2CoOssValidator extends T2CoValidator {
 			basicKey = "OSS_NICKNAME";
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			
-			if(!isEmpty(analysisBean.getOssNickname())) {
+			if (!isEmpty(analysisBean.getOssNickname())) {
 				List<String> nickList = Arrays.asList(analysisBean.getOssNickname().split(","));
 				
 				String upperOssName = analysisBean.getOssName().trim().toUpperCase();
@@ -664,17 +664,17 @@ public class T2CoOssValidator extends T2CoValidator {
 				
 				String sameMsg = "The same OSS ";
 				
-				for(String s : nickList) {
-					if(isEmpty(s)) {
+				for (String s : nickList) {
+					if (isEmpty(s)) {
 						continue;
 					}
 					
 					String upperNick = s.trim().toUpperCase();
 					
 					// oss name과 동일한 경우
-					if(upperNick.equalsIgnoreCase(upperOssName)) {
+					if (upperNick.equalsIgnoreCase(upperOssName)) {
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
-					} else if(dupCheckList.contains(upperNick)) {
+					} else if (dupCheckList.contains(upperNick)) {
 						// 동일한 nick name을 두번이상 설정한 경우
 						errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {
@@ -684,8 +684,8 @@ public class T2CoOssValidator extends T2CoValidator {
 						param.setOssNameTemp(upperOssName);
 						OssMaster result = ossService.checkExistsOssNickname(param);
 						
-						if(result != null) {
-							if(sameMsg.contains(") exists.")) {
+						if (result != null) {
+							if (sameMsg.contains(") exists.")) {
 								sameMsg = sameMsg.substring(0, sameMsg.indexOf(") exists.")).trim() + ",";
 								sameMsg += s.trim() + ") exists.";
 							} else {
@@ -705,22 +705,22 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			String[] downloadLocation = analysisBean.getDownloadLocation().split(",");
 			
-			for(String location : downloadLocation){
+			for (String location : downloadLocation){
 				errCd = checkBasicError(basicKey, gridKey, location.trim(), true);
 				
-				if(!isEmpty(errCd)){
+				if (!isEmpty(errCd)){
 					break;
 				}
 			}
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
-			} else if(!isEmpty(analysisBean.getDownloadLocation())){
-				for(String location : downloadLocation){
+			} else if (!isEmpty(analysisBean.getDownloadLocation())){
+				for (String location : downloadLocation){
 					OssMaster param = new OssMaster();
 					
 					// version up 인 경우, 해당 oss name을 제외하고 검증
-					if(!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
+					if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
 						param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
 					}
 					
@@ -728,10 +728,10 @@ public class T2CoOssValidator extends T2CoValidator {
 					Map<String, Object> paramMap = ossService.checkExistsOssDownloadLocation(param);
 					List<OssMaster> list = (List<OssMaster>) paramMap.get("downloadLocation");
 					
-					if(list != null && !list.isEmpty()) {
+					if (list != null && !list.isEmpty()) {
 						String sortOrder = list.get(0).getSOrder();
 						
-						if("1".equals(sortOrder)) {
+						if ("1".equals(sortOrder)) {
 							diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 						} else {
 							diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".PARTIAL_DUPLICATED");
@@ -747,13 +747,13 @@ public class T2CoOssValidator extends T2CoValidator {
 			gridKey = StringUtil.convertToCamelCase(basicKey);
 			errCd = checkBasicError(basicKey, gridKey, analysisBean.getHomepage().trim(), true);
 			
-			if(!isEmpty(errCd)) {
+			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
-			} else if(!isEmpty(analysisBean.getHomepage())) {
+			} else if (!isEmpty(analysisBean.getHomepage())) {
 				OssMaster param = new OssMaster();
 				
 				// version up 인 경우, 해당 oss name을 제외하고 검증
-				if(!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
+				if (!isEmpty(analysisBean.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(analysisBean.getOssName().trim().toUpperCase())) {
 					param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
 				}
 				
@@ -761,10 +761,10 @@ public class T2CoOssValidator extends T2CoValidator {
 				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				
-				if(list != null && !list.isEmpty()) {
+				if (list != null && !list.isEmpty()) {
 					String sortOrder = list.get(0).getSOrder();
 					
-					if("1".equals(sortOrder)) {
+					if ("1".equals(sortOrder)) {
 						diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".DUPLICATED");
 					} else {
 						diffMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), basicKey+".PARTIAL_DUPLICATED");
@@ -783,7 +783,7 @@ public class T2CoOssValidator extends T2CoValidator {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setAppendix(String key, Object obj) {
-		if("ossMaster".equals(key)) {
+		if ("ossMaster".equals(key)) {
 			this.ossMaster = (OssMaster) obj;
 		} else if ("ossList".equals(key)) {
 			this.ossList = (List<OssMaster>) obj;

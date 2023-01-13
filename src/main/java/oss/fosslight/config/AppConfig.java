@@ -33,7 +33,7 @@ public class AppConfig {
 		JavaMailSenderImpl mailSenderImpl = new JavaMailSenderImpl();
 		String smtpUseFlag = CommonFunction.getProperty("mail.smtp.useflag");
 		
-		if(CoConstDef.FLAG_YES.equals(smtpUseFlag)) {
+		if (CoConstDef.FLAG_YES.equals(smtpUseFlag)) {
 			try {
 				final String	MAIL_SERVICE_HOST		= CommonFunction.getProperty("mail.smtp.host");
 				final int		MAIL_SERVICE_PORT		= Integer.parseInt(StringUtil.avoidNull(CommonFunction.getProperty("mail.smtp.port"), "25"));
@@ -45,7 +45,7 @@ public class AppConfig {
 				final Properties MAIL_SERVICE_PROP = new Properties() {
 					private static final long serialVersionUID = 1L;
 					{
-						if(checkFlag) {
+						if (checkFlag) {
 							setProperty("mail.smtp.host", MAIL_SERVICE_HOST);
 							setProperty("mail.smtp.user", MAIL_SERVICE_USERNAME);
 							setProperty("mail.smtp.port", String.valueOf(MAIL_SERVICE_PORT));
@@ -62,7 +62,7 @@ public class AppConfig {
 				mailSenderImpl.setDefaultEncoding(MAIL_SERVICE_ENCODING);
 				mailSenderImpl.setJavaMailProperties(MAIL_SERVICE_PROP);
 				
-				if(!checkFlag) {
+				if (!checkFlag) {
 					mailSenderImpl.setUsername(MAIL_SERVICE_USERNAME);
 					mailSenderImpl.setPassword(MAIL_SERVICE_PASSWORD);
 				}
