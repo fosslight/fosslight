@@ -372,25 +372,22 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
 			
 			String filePath = NOTICE_PATH + "/" + project.getPrjId();
-			// 이전에 생성된 html 파일은 모두 삭제한다.
+			// 이전에 생성된 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
 			if(rootPath.toFile().exists()) {
 				for(String _fName : rootPath.toFile().list()) {
-					String[] fNameList = _fName.split("\\.");
-					if (fNameList[fNameList.length - 1].equals("html")) {
-						Files.deleteIfExists(rootPath.resolve(_fName));
+					Files.deleteIfExists(rootPath.resolve(_fName));
 
-						T2File file = new T2File();
-						file.setLogiNm(_fName);
-						file.setLogiPath(filePath);
+					T2File file = new T2File();
+					file.setLogiNm(_fName);
+					file.setLogiPath(filePath);
 
-						int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
+					int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
 
-						if (returnSuccess > 0) {
-							log.debug(filePath + "/" + _fName + " is delete success.");
-						} else {
-							log.debug(filePath + "/" + _fName + " is delete failed.");
-						}
+					if (returnSuccess > 0) {
+						log.debug(filePath + "/" + _fName + " is delete success.");
+					} else {
+						log.debug(filePath + "/" + _fName + " is delete failed.");
 					}
 				}
 			}			
