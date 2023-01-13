@@ -226,7 +226,7 @@ public class CodeBean extends ComBean implements Serializable{
      * @return
      */
     public List<CodeDtlBean> getDtlList() {
-        if(getCdNo() == null || getCdDtlNo() == null || getCdDtlNo().length == 0) {
+        if (getCdNo() == null || getCdDtlNo() == null || getCdDtlNo().length == 0) {
             return null;
         }
         
@@ -234,15 +234,15 @@ public class CodeBean extends ComBean implements Serializable{
         
         CodeDtlBean dtlBean = null;
         int cnt = 0;
-        for(String s : getCdDtlNo()) {
-            if(s.isEmpty()) {
+        for (String s : getCdDtlNo()) {
+            if (s.isEmpty()) {
                 continue;
             }
             dtlBean = new CodeDtlBean();
             dtlBean.setCdNo(this.getCdNo());
             dtlBean.setCdDtlNo(s);
             dtlBean.setCdDtlNm(this.getCdDtlNm()[cnt]);
-            if(this.getCdDtlExp() == null || this.getCdDtlExp().length < cnt+1) {
+            if (this.getCdDtlExp() == null || this.getCdDtlExp().length < cnt+1) {
             } else {
                 dtlBean.setCdDtlExp(this.getCdDtlExp()[cnt]);
             }

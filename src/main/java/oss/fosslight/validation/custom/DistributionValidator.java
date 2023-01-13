@@ -20,7 +20,7 @@ public class DistributionValidator extends T2CoValidator {
 	
 	@Override
 	protected void customValidation(Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap) {
-		if(dataBean != null) {
+		if (dataBean != null) {
 			// basic validation
 			String basicKey = "";
 			boolean isMod = !isEmpty(dataBean.getDistributeDeployTime());
@@ -30,7 +30,7 @@ public class DistributionValidator extends T2CoValidator {
 				basicKey = "DISTRIBUTE_NAME";
 				String errCd = checkBasicError(basicKey, dataBean.getDistributeName(), isMod);
 				
-				if(!isEmpty(errCd)) {
+				if (!isEmpty(errCd)) {
 					errMap.put(basicKey, errCd);
 				}
 			}
@@ -40,48 +40,48 @@ public class DistributionValidator extends T2CoValidator {
 				basicKey = "DISTRIBUTE_MASTER_CATEGORY";
 				String errCd = checkBasicError(basicKey, dataBean.getDistributeMasterCategory(), isMod);
 				
-				if(!isEmpty(errCd)) {
+				if (!isEmpty(errCd)) {
 					errMap.put(basicKey, errCd);
 				}
 			}
 			
 			// model info
-			if(dataBean.getModelList() != null && !dataBean.getModelList().isEmpty()) {
+			if (dataBean.getModelList() != null && !dataBean.getModelList().isEmpty()) {
 				// 중복체크
 				List<String> modelDuplCheckList = new ArrayList<>();
 				List<String> dupKeyList = new ArrayList<>();
 				
-				for(Project bean : dataBean.getModelList()) {
+				for (Project bean : dataBean.getModelList()) {
 					String key = avoidNull(bean.getCategory()) + "|" + avoidNull(bean.getModelName()).trim().toUpperCase();
 					
-					if(dupKeyList.contains(key)) {
+					if (dupKeyList.contains(key)) {
 						modelDuplCheckList.add(key);
 					} else {
 						dupKeyList.add(key);
 					}
 				}
 				
-				for(Project bean : dataBean.getModelList()) {
+				for (Project bean : dataBean.getModelList()) {
 					// model name
 					basicKey = "MODEL_NAME";
 					
 					String errCd = checkBasicError(basicKey, bean.getModelName());
-					if(!isEmpty(errCd)) {
+					if (!isEmpty(errCd)) {
 						errMap.put(basicKey + "." + bean.getGridId(), errCd);
-					} else if(modelDuplCheckList.contains(avoidNull(bean.getCategory()) + "|" + avoidNull(bean.getModelName()).trim().toUpperCase())){
+					} else if (modelDuplCheckList.contains(avoidNull(bean.getCategory()) + "|" + avoidNull(bean.getModelName()).trim().toUpperCase())){
 						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".DUPLICATED");
-					} else if(avoidNull(bean.getModelName()).trim().length() < 2) {
+					} else if (avoidNull(bean.getModelName()).trim().length() < 2) {
 						errMap.put(basicKey + "." + bean.getGridId(), basicKey + ".MINLENGTH");
 					}
 					
 					basicKey = "RELEASE_DATE";
 					errCd = checkBasicError(basicKey, bean.getReleaseDate());
 					
-					if(!isEmpty(errCd)) {
+					if (!isEmpty(errCd)) {
 						errMap.put(basicKey + "." + bean.getGridId(), errCd);
 					}
 				}
-			} else if("Distribution".equalsIgnoreCase(validType)) {
+			} else if ("Distribution".equalsIgnoreCase(validType)) {
 				errMap.put("VALID_MSG_MODEL_LIST", "MODEL_NAME.REQUIRED_INFO");
 			}
 			
@@ -95,7 +95,7 @@ public class DistributionValidator extends T2CoValidator {
 
 	@Override
 	public void setAppendix(String key, Object obj) {
-		if("project".equals(key)) {
+		if ("project".equals(key)) {
 			this.dataBean = (Project) obj;
 		}
  	}

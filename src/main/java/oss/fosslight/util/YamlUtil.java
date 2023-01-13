@@ -81,7 +81,7 @@ public class YamlUtil extends CoTopComponent {
 		_param.setReferenceDiv(type);
 		_param.setReferenceId(projectBean.getPrjId());
 		
-		if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
 			_param.setMerge(CoConstDef.FLAG_NO);
 		}
 		
@@ -90,8 +90,8 @@ public class YamlUtil extends CoTopComponent {
 		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? "rows" : "mainData");
 		String jsonStr = "";
 		
-		if(list != null) {
-			if(CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+		if (list != null) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
 				jsonStr = toJson(checkYamlFormat(projectService.setMergeGridData(list), type));
 			} else {
 				jsonStr = toJson(checkYamlFormat(setMergeData(list, type)));
@@ -118,7 +118,7 @@ public class YamlUtil extends CoTopComponent {
 		list = (List<ProjectIdentification>) map.get("mainData");
 		
 		String jsonStr = "";
-		if(list != null) {
+		if (list != null) {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
@@ -142,7 +142,7 @@ public class YamlUtil extends CoTopComponent {
 		list = (List<ProjectIdentification>) map.get("mainData");
 		
 		String jsonStr = "";
-		if(list != null) {
+		if (list != null) {
 			jsonStr = toJson(checkYamlFormat(setMergeData(list, typeCode)));
 		}
 		
@@ -158,21 +158,21 @@ public class YamlUtil extends CoTopComponent {
 	public static LinkedHashMap<String, List<Map<String, Object>>> checkYamlFormat(List<ProjectIdentification> list, String typeCode) {
 		LinkedHashMap<String, List<Map<String, Object>>> result = new LinkedHashMap<>();
 		
-		for(ProjectIdentification bean : list) {
+		for (ProjectIdentification bean : list) {
 			List<Map<String, Object>> ossNameResult = new ArrayList<>();
 			LinkedHashMap<String, Object> yamlFormat = new LinkedHashMap<>();
 				
-			if(!isEmpty(bean.getOssVersion())) {
+			if (!isEmpty(bean.getOssVersion())) {
 				yamlFormat.put("version", bean.getOssVersion());
 			} else{
 				yamlFormat.put("version", "");
 			}
 
-			if(isEmpty(typeCode)) {
-				if(!isEmpty(bean.getBinaryName())) {
+			if (isEmpty(typeCode)) {
+				if (!isEmpty(bean.getBinaryName())) {
 					String binaryNameStr = bean.getBinaryName();
 					yamlFormat.put("source name or path", binaryNameStr.contains("\n") ? binaryNameStr.split("\n") : binaryNameStr);
-				} else if(!isEmpty(bean.getFilePath())) {
+				} else if (!isEmpty(bean.getFilePath())) {
 					String filePathStr = bean.getFilePath();
 					yamlFormat.put("source name or path", filePathStr.contains("\n") ? filePathStr.split("\n") : filePathStr);
 				}
@@ -181,31 +181,31 @@ public class YamlUtil extends CoTopComponent {
 			String licenseNameStr = bean.getLicenseName();
 			yamlFormat.put("license",	licenseNameStr.contains(",") ? licenseNameStr.split(",") : licenseNameStr);
 
-			if(!isEmpty(bean.getDownloadLocation())) {
+			if (!isEmpty(bean.getDownloadLocation())) {
 				yamlFormat.put("download location", bean.getDownloadLocation());
 			}
 
-			if(!isEmpty(bean.getHomepage())) {
+			if (!isEmpty(bean.getHomepage())) {
 				yamlFormat.put("homepage", 	bean.getHomepage());
 			}
 
-			if(!isEmpty(bean.getCopyrightText())) {
+			if (!isEmpty(bean.getCopyrightText())) {
 				String copyrightStr = bean.getCopyrightText();
 				yamlFormat.put("copyright text", copyrightStr.contains("\n") ? Arrays.asList(copyrightStr.split("\n")) : copyrightStr);
 			}
 			
-			if(CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
+			if (CoConstDef.FLAG_YES.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
 				yamlFormat.put("exclude", true);
 			}
 			
-			if(!isEmpty(bean.getComments())) {
+			if (!isEmpty(bean.getComments())) {
 				yamlFormat.put("comment", bean.getComments());
 			}
 			String ossNameStr = bean.getOssName();
-			if(ossNameStr.length() == 0) {
+			if (ossNameStr.length() == 0) {
 				ossNameStr = "-";
 			}
-			if(result.containsKey(ossNameStr)) {
+			if (result.containsKey(ossNameStr)) {
 				ossNameResult = result.get(ossNameStr);
 			}
 			ossNameResult.add(yamlFormat);
@@ -222,13 +222,13 @@ public class YamlUtil extends CoTopComponent {
 		String yamlStr = "";
 		
 		try {
-			if(!isEmpty(jsonStr)) {
+			if (!isEmpty(jsonStr)) {
 				JsonNode jsonNodeTree = new ObjectMapper().readTree(jsonStr);
 		        // save it as YAML
 				yamlStr = new YAMLMapper().writeValueAsString(jsonNodeTree);
 				yamlStr = yamlStr.replaceAll("---","").trim();
 				// 접두사 존재시 추가
-				if(!isEmpty(suffix)) {
+				if (!isEmpty(suffix)) {
 					yamlStr = suffix + yamlStr;
 				}
 			}
@@ -243,7 +243,7 @@ public class YamlUtil extends CoTopComponent {
 		String jsonStr = "";
 		
 		try {
-			if(!isEmpty(yamlStr)) {
+			if (!isEmpty(yamlStr)) {
 			
 				ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
 			    Object obj = yamlReader.readValue(yamlStr, Object.class);
@@ -267,7 +267,7 @@ public class YamlUtil extends CoTopComponent {
 		FileOutputStream outFile = null;
 		
 		try {
-			if(!Files.exists(Paths.get(filePath))) {
+			if (!Files.exists(Paths.get(filePath))) {
 				Files.createDirectories(Paths.get(filePath));
 			}
 			outFile = new FileOutputStream(filePath + logiFileName);
@@ -278,7 +278,7 @@ public class YamlUtil extends CoTopComponent {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
-			if(outFile != null) {
+			if (outFile != null) {
 				try {
 					outFile.close();
 				} catch (Exception e2) {}
@@ -305,18 +305,18 @@ public class YamlUtil extends CoTopComponent {
 			}
 		});
 		
-		for(ProjectIdentification info : list) {
-			if(isEmpty(groupColumn)) {
+		for (ProjectIdentification info : list) {
+			if (isEmpty(groupColumn)) {
 				groupColumn = makeMergeKey(info, typeCode);
 			}
 			
-			if("-".equals(groupColumn)) {
-				if("NA".equals(info.getLicenseType())) {
+			if ("-".equals(groupColumn)) {
+				if ("NA".equals(info.getLicenseType())) {
 					ossNameEmptyFlag = true;
 				}
 			}
 			
-			if(groupColumn.equals(makeMergeKey(info, typeCode)) // 같은 groupColumn이면 데이터를 쌓음
+			if (groupColumn.equals(makeMergeKey(info, typeCode)) // 같은 groupColumn이면 데이터를 쌓음
 					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
 			} else { // 다른 grouping
@@ -335,11 +335,11 @@ public class YamlUtil extends CoTopComponent {
 	}
 	
 	public static void setMergeData(List<ProjectIdentification> tempData, List<ProjectIdentification> resultGridData){
-		if(tempData.size() > 0) {
+		if (tempData.size() > 0) {
 			Collections.sort(tempData, new Comparator<ProjectIdentification>() {
 				@Override
 				public int compare(ProjectIdentification o1, ProjectIdentification o2) {
-					if(o1.getLicenseName().length() >= o2.getLicenseName().length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
+					if (o1.getLicenseName().length() >= o2.getLicenseName().length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
 						return 1;
 					}else {
 						return -1;
@@ -349,16 +349,16 @@ public class YamlUtil extends CoTopComponent {
 			
 			ProjectIdentification rtnBean = null;
 			
-			for(ProjectIdentification temp : tempData) {
-				if(rtnBean == null) {
+			for (ProjectIdentification temp : tempData) {
+				if (rtnBean == null) {
 					rtnBean = temp;
 					continue;
 				}
 				
 				String key = temp.getOssName() + "-" + temp.getLicenseType();
 				
-				if("--NA".equals(key)) {
-					if(!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
+				if ("--NA".equals(key)) {
+					if (!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						continue;
@@ -366,17 +366,17 @@ public class YamlUtil extends CoTopComponent {
 				}
 				
 				// 동일한 oss name과 version일 경우 license 정보를 중복제거하여 merge 함.
-				for(String licenseName : temp.getLicenseName().split(",")) {
+				for (String licenseName : temp.getLicenseName().split(",")) {
 					boolean equalFlag = false;
 					
-					for(String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
-						if(rtnLicenseName.equals(licenseName)) {
+					for (String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
+						if (rtnLicenseName.equals(licenseName)) {
 							equalFlag = true;
 							break;
 						}
 					}
 					
-					if(!equalFlag) {
+					if (!equalFlag) {
 						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
 					}
 				}

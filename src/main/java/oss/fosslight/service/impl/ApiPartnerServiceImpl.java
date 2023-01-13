@@ -27,7 +27,7 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		
 		int partnerCnt = apiPartnerMapper.selectPartnerMasterCount(paramMap);
 		
-		if(partnerCnt > 0) {
+		if (partnerCnt > 0) {
 			list = apiPartnerMapper.selectPartnerMaster(paramMap);
 		}
 		

@@ -51,17 +51,17 @@ public class LicenseController extends CoTopComponent{
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		LicenseMaster searchBean = null;
 		
-		if(!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 			deleteSession(SESSION_KEY_SEARCH);
 			searchBean = searchService.getLicenseSearchFilter(loginUserName());
-			if(searchBean == null) {
+			if (searchBean == null) {
 				searchBean = new LicenseMaster();
 			}
-		} else if(getSessionObject(SESSION_KEY_SEARCH) != null) {
+		} else if (getSessionObject(SESSION_KEY_SEARCH) != null) {
 			searchBean = (LicenseMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}
 		
-		if(getSessionObject("defaultLoadYn") != null) {
+		if (getSessionObject("defaultLoadYn") != null) {
 			model.addAttribute("defaultLoadYn", CoConstDef.FLAG_YES);
 			
 			deleteSession("defaultLoadYn");
@@ -79,7 +79,7 @@ public class LicenseController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model){
 		
-		if("Y".equals(req.getParameter("ignoreSearchFlag"))) {
+		if ("Y".equals(req.getParameter("ignoreSearchFlag"))) {
 			return makeJsonResponseHeader(new HashMap<String, Object>());
 		}
 		
@@ -93,17 +93,17 @@ public class LicenseController extends CoTopComponent{
 		licenseMaster.setSortField(sidx);
 		licenseMaster.setSortOrder(sord);
 
-		if("search".equals(req.getParameter("act"))) {
+		if ("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
 			putSessionObject(SESSION_KEY_SEARCH, licenseMaster);
-		} else if(getSessionObject(SESSION_KEY_SEARCH) != null) {
+		} else if (getSessionObject(SESSION_KEY_SEARCH) != null) {
 			licenseMaster = (LicenseMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}
 		
 		Map<String, Object> map = null;
 		
 		try {
-			if(isEmpty(licenseMaster.getLicenseNameAllSearchFlag())) {
+			if (isEmpty(licenseMaster.getLicenseNameAllSearchFlag())) {
 				licenseMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
 			}
 			
@@ -128,11 +128,11 @@ public class LicenseController extends CoTopComponent{
 		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		
-		if(licenseMaster != null) {
+		if (licenseMaster != null) {
 			licenseMaster.setDomain(CommonFunction.getDomain(req));
 			licenseMaster.setInternalUrl(CommonFunction.makeLicenseInternalUrl(licenseMaster, distributionFlag));
 
-			if(!"ROLE_ADMIN".equals(loginUserRole())) {
+			if (!"ROLE_ADMIN".equals(loginUserRole())) {
 				// html link 형식으로 변환
 				licenseMaster.setDescription(CommonFunction.makeHtmlLinkTagWithText(licenseMaster.getDescription()));
 			}
@@ -141,7 +141,7 @@ public class LicenseController extends CoTopComponent{
 		
 		model.addAttribute("detail", toJson(licenseMaster));
 		
-		if("ROLE_ADMIN".equals(loginUserRole())) {
+		if ("ROLE_ADMIN".equals(loginUserRole())) {
 			return LICENSE.EDIT_JSP;
 		} else {
 			return LICENSE.LICENSE_VIEW_JSP;
@@ -172,7 +172,7 @@ public class LicenseController extends CoTopComponent{
 		lv.setAppendix("licenseId", licenseMaster.getLicenseId());
 		T2CoValidationResult vr = lv.validate(new HashMap<>());
 		
-		if(!vr.isValid()) {
+		if (!vr.isValid()) {
 			return makeJsonResponseHeader(false, vr.getValidMessage("LICENSE_NAME"));
 		}
 		
@@ -230,32 +230,32 @@ public class LicenseController extends CoTopComponent{
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		List<OssMaster> typeChangeOssIdList = null;
 
-		if(!isNew) {
+		if (!isNew) {
 			beforeBean =  licenseService.getLicenseMasterOne(licenseMaster);
 		}
 		
 		// webpages이 n건일때 0번째 값은 oss Master로 저장.
 		String[] webpages = licenseMaster.getWebpages();
-		if(webpages != null){
-			if(webpages.length >= 1){
-				for(String url : webpages){
-					if(!isEmpty(url)){
+		if (webpages != null){
+			if (webpages.length >= 1){
+				for (String url : webpages){
+					if (!isEmpty(url)){
 						licenseMaster.setWebpage(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
 						break;
 					}
 				}
 			}
-		} else if(webpages == null){
+		} else if (webpages == null){
 			licenseMaster.setWebpage("");
 		}
 		
 		result = licenseService.registLicenseMaster(licenseMaster);
 		
-		if(!isNew) {
+		if (!isNew) {
 			afterBean =  licenseService.getLicenseMasterOne(licenseMaster);
 
 			// licnese type이 변경된 경우, 해당 라이선스를 사용하는 oss의 license type을 재확인 한다.
-			if(!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
+			if (!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
 				typeChangeOssIdList = licenseService.updateOssLicenseType(result);
 			}
 			
@@ -278,10 +278,10 @@ public class LicenseController extends CoTopComponent{
 		boolean successType = false;
 		
 		try {			
-			if(isNew) {
+			if (isNew) {
 				successType = licenseService.distributeLicense(result, distributionFlag);
-			} else if(beforeBean != null && afterBean != null) {
-				if(!avoidNull(beforeBean.getLicenseName()).equals(afterBean.getLicenseName())
+			} else if (beforeBean != null && afterBean != null) {
+				if (!avoidNull(beforeBean.getLicenseName()).equals(afterBean.getLicenseName())
 						|| !avoidNull(beforeBean.getShortIdentifier()).equals(afterBean.getShortIdentifier())
 						|| !avoidNull(beforeBean.getLicenseText()).equals(afterBean.getLicenseText())) {
 					successType = licenseService.distributeLicense(result, distributionFlag);
@@ -298,18 +298,18 @@ public class LicenseController extends CoTopComponent{
 			mailBean.setParamLicenseId(result);
 			String comment = licenseMaster.getComment();
 			
-			if(!successType) { // internal url 생성 실패시 comment 남김
+			if (!successType) { // internal url 생성 실패시 comment 남김
 				comment += (isEmpty(comment) ? "" : "<br>") + "[Error] An error occurred when creating an internal URL file.";
 			}
 			
 			mailBean.setComment(comment);
 			
-			if(!isNew) {
+			if (!isNew) {
 				
 				mailBean.setParamOssList(typeChangeOssIdList);
 				
 				// code convert
-				if(beforeBean != null) {
+				if (beforeBean != null) {
 					beforeBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, beforeBean.getLicenseType()));
 					beforeBean.setObligation(CommonFunction.makeLicenseObligationStr(beforeBean.getObligationNotificationYn(), beforeBean.getObligationDisclosingSrcYn(), beforeBean.getObligationNeedsCheckYn()));
 					beforeBean.setModifiedDate(DateUtil.dateFormatConvert(beforeBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
@@ -317,10 +317,10 @@ public class LicenseController extends CoTopComponent{
 					beforeBean.setDescription(CommonFunction.lineReplaceToBR(beforeBean.getDescription()));
 					beforeBean.setLicenseText(CommonFunction.lineReplaceToBR(beforeBean.getLicenseText()));
 					beforeBean.setAttribution(CommonFunction.lineReplaceToBR(beforeBean.getAttribution()));
-					if(beforeBean.getWebpages().length > 0) beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
+					if (beforeBean.getWebpages().length > 0) beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
 				}
 				
-				if(afterBean != null) {
+				if (afterBean != null) {
 					afterBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, afterBean.getLicenseType()));
 					afterBean.setObligation(CommonFunction.makeLicenseObligationStr(afterBean.getObligationNotificationYn(), afterBean.getObligationDisclosingSrcYn(), afterBean.getObligationNeedsCheckYn()));
 					afterBean.setModifiedDate(DateUtil.dateFormatConvert(afterBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
@@ -328,7 +328,7 @@ public class LicenseController extends CoTopComponent{
 					afterBean.setDescription(CommonFunction.lineReplaceToBR(afterBean.getDescription()));
 					afterBean.setLicenseText(CommonFunction.lineReplaceToBR(afterBean.getLicenseText()));
 					afterBean.setAttribution(CommonFunction.lineReplaceToBR(afterBean.getAttribution()));
-					if(afterBean.getWebpages().length > 0) afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
+					if (afterBean.getWebpages().length > 0) afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
 				}
 				
 				mailBean.setCompareDataBefore(beforeBean);
@@ -344,18 +344,18 @@ public class LicenseController extends CoTopComponent{
 			// RESTRICTION(2) => Network Redistribution
 			String netWorkRestriction = CoConstDef.CD_LICENSE_NETWORK_RESTRICTION;
 			
-			if(isNew) {
-				if(licenseMaster.getRestriction().contains(netWorkRestriction)){
+			if (isNew) {
+				if (licenseMaster.getRestriction().contains(netWorkRestriction)){
 					licenseService.registNetworkServerLicense(licenseMaster.getLicenseId(), "NEW");
 				}
 			} else {
 				String type = "";
 				
-				if(beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
+				if (beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
 					type = "";
-				}else if(beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
+				}else if (beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
 					type = "DEL";
-				}else if(!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
+				}else if (!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
 					type = "INS";
 				}
 				
@@ -386,7 +386,7 @@ public class LicenseController extends CoTopComponent{
 			log.error(e.getMessage());
 		}
 		
-		if(!vResult.isValid()){
+		if (!vResult.isValid()){
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		try{
@@ -433,7 +433,7 @@ public class LicenseController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model){
 		try{
-			if(!isEmpty(licenseMaster.getLicenseName()) && CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseMaster.getLicenseName().trim().toUpperCase())) {
+			if (!isEmpty(licenseMaster.getLicenseName()) && CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseMaster.getLicenseName().trim().toUpperCase())) {
 				return makeJsonResponseHeader(true, CommonFunction.lineReplaceToBR(avoidNull(CoCodeManager.LICENSE_INFO_UPPER.get(licenseMaster.getLicenseName().trim().toUpperCase()).getLicenseText())));
 			}
 		}catch(Exception e){

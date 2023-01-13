@@ -116,7 +116,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public List<OssComponents> getVerifyOssList(Project projectMaster) {
 		List<OssComponents> componentList = verificationMapper.selectVerifyOssList(projectMaster);
 		
-		if(componentList != null && !componentList.isEmpty() && componentList.get(0) == null) {
+		if (componentList != null && !componentList.isEmpty() && componentList.get(0) == null) {
 			componentList = new ArrayList<>();
 		}
 		
@@ -131,7 +131,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		int result = verificationMapper.checkPackagingFileId(prjId,packageFileId, packageFileId2, packageFileId3);
 		
-		if(result > 0){
+		if (result > 0){
 			return false;
 		}else{
 			return true;
@@ -154,15 +154,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String uploadComment = "";
 			
 			// verify 버튼 클릭시 file path를 저장한다.
-			if(gridComponentIds != null && !gridComponentIds.isEmpty()) {
+			if (gridComponentIds != null && !gridComponentIds.isEmpty()) {
 				int idx = 0;
 				
-				for(String s : gridComponentIds){
+				for (String s : gridComponentIds){
 					OssComponents param = new OssComponents();
 					param.setComponentId(s);
 					param.setFilePath(gridFilePaths.get(idx++));
 					
-					if(verifyFlag.equals(CoConstDef.FLAG_YES)){
+					if (verifyFlag.equals(CoConstDef.FLAG_YES)){
 						param.setVerifyFileCount("");
 						
 						verificationMapper.updateVerifyFileCount(param);
@@ -172,7 +172,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 			}
 			
-			if(!isEmpty(prjId)) {
+			if (!isEmpty(prjId)) {
 				Project prjParam = new Project();
 				prjParam.setPrjId(prjId);
 				ArrayList<String> newPackagingFileIdList = new ArrayList<String>();
@@ -183,7 +183,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 				
-				if(deleteFiles.equals(CoConstDef.FLAG_YES)){
+				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
 				}			
 				
@@ -199,22 +199,22 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					
 					int idx = 0;
 					
-					for(String fileId : origPackagingFileIdList){
+					for (String fileId : origPackagingFileIdList){
 						T2File fileInfo = new T2File();
 						
-						if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+						if (!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
 							deleteFileList.add(fileInfo);
 						}
 						
-						if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
 							fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							oss.fosslight.domain.File result = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
 							
-							if(CoConstDef.FLAG_YES.equals(result.getReuseFlag())){
+							if (CoConstDef.FLAG_YES.equals(result.getReuseFlag())){
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+result.getRefPrjId()+" by "+loginUserName()+". <br>";
 							}else{
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
@@ -238,11 +238,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				verificationMapper.updatePackageFile(prjParam);
 				
 				// delete physical file
-				for(T2File delFile : deleteFileList){
+				for (T2File delFile : deleteFileList){
 					fileService.deletePhysicalFile(delFile, "VERIFY");
 				}
 				
-				if(CoConstDef.FLAG_YES.equals(deleteFlag)){
+				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
 				}
@@ -262,14 +262,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 		
 		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if(CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
+		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
 			return true;
 		}
 		
 		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 		contents = avoidNull(contents, getNoticeHtml(ossNotice));
 		
-		if("binAndroid".equals(contents)) {
+		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
 		} else {
 			return getNoticeVelocityTemplateFile(contents, prjInfo);	
@@ -286,14 +286,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 
 		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if(CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
+		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
 			return true;
 		}
 
 		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
 
-		if("binAndroid".equals(contents)) {
+		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
 		} else {
 			return getReviewReportVelocityTemplateFile(contents, prjInfo);
@@ -310,7 +310,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			T2File baseFile = null;
 			String basePath = null;
 			
-			if(isEmpty(project.getSrcAndroidNoticeXmlId()) && !isEmpty(project.getSrcAndroidNoticeFileId())) {
+			if (isEmpty(project.getSrcAndroidNoticeXmlId()) && !isEmpty(project.getSrcAndroidNoticeFileId())) {
 				baseFile = fileMapper.selectFileInfoById(project.getSrcAndroidNoticeFileId());
 				basePath = CommonFunction.emptyCheckProperty("upload.path", "/upload") + "/" + baseFile.getLogiNm();
 			} else {
@@ -321,8 +321,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 이전에 생성된 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
 			
-			if(rootPath.toFile().exists()) {
-				for(String _fName : rootPath.toFile().list()) {
+			if (rootPath.toFile().exists()) {
+				for (String _fName : rootPath.toFile().list()) {
 					Files.deleteIfExists(rootPath.resolve(_fName));
 					
 					T2File file = new T2File();
@@ -331,7 +331,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					
 					int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
 					
-					if(returnSuccess > 0){
+					if (returnSuccess > 0){
 						log.debug(filePath + "/" + _fName + " is delete success.");
 					}else{
 						log.debug(filePath + "/" + _fName + " is delete failed.");
@@ -341,7 +341,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
 			
-			if(oss.fosslight.util.FileUtil.copyFile(basePath, filePath, fileName)) {
+			if (oss.fosslight.util.FileUtil.copyFile(basePath, filePath, fileName)) {
 				// 파일 등록
 				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
 				
@@ -374,8 +374,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String filePath = NOTICE_PATH + "/" + project.getPrjId();
 			// 이전에 생성된 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
-			if(rootPath.toFile().exists()) {
-				for(String _fName : rootPath.toFile().list()) {
+			if (rootPath.toFile().exists()) {
+				for (String _fName : rootPath.toFile().list()) {
 					Files.deleteIfExists(rootPath.resolve(_fName));
 
 					T2File file = new T2File();
@@ -394,7 +394,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String fileName = CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "html");
 			
-			if(oss.fosslight.util.FileUtil.writeFile(filePath, fileName, contents)) {
+			if (oss.fosslight.util.FileUtil.writeFile(filePath, fileName, contents)) {
 				// 파일 등록
 				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
 				
@@ -428,8 +428,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
-			if(rootPath.toFile().exists()) {
-				for(String _fName : rootPath.toFile().list()) {
+			if (rootPath.toFile().exists()) {
+				for (String _fName : rootPath.toFile().list()) {
 					String[] fNameList = _fName.split("\\.");
 					if (fNameList[fNameList.length - 1].equals("pdf")) {
 						Files.deleteIfExists(rootPath.resolve(_fName));
@@ -440,7 +440,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 						int returnSuccess = fileMapper.updateFileDelYnByFilePathNm(file);
 
-						if(returnSuccess > 0){
+						if (returnSuccess > 0){
 							log.debug(filePath + "/" + _fName + " is delete success.");
 						}else{
 							log.debug(filePath + "/" + _fName + " is delete failed.");
@@ -451,7 +451,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 			String fileName = CommonFunction.getReviewReportFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), ".pdf");
 
-			if(oss.fosslight.util.FileUtil.writeReviewReportFile(filePath, fileName, contents)) {
+			if (oss.fosslight.util.FileUtil.writeReviewReportFile(filePath, fileName, contents)) {
 				// 파일 등록
 				String FileSeq = fileService.registFileWithFileName(filePath, fileName);
 
@@ -478,10 +478,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 		String androidNoticeContents = getAndroidNotice(prjInfo);
 		
-		if(CoConstDef.FLAG_YES.equals(ossNotice.getPreviewOnly()) && !isEmpty(androidNoticeContents)) {
+		if (CoConstDef.FLAG_YES.equals(ossNotice.getPreviewOnly()) && !isEmpty(androidNoticeContents)) {
 			return androidNoticeContents;
 		} else {
-			if(!isEmpty(androidNoticeContents)) {
+			if (!isEmpty(androidNoticeContents)) {
 				return "binAndroid"; 
 			} else {
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
@@ -499,7 +499,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// 이슈로 인해 android project 기준이 변경이 되었으며 NoticeType이 20인 경우는 전부 Android Project형태를 띄고 있도록 변경이 되었음.
 		Map<String, Object> NoticeInfo = projectMapper.getNoticeType(prjInfo.getPrjId());
 		
-		if(prjInfo != null 
+		if (prjInfo != null 
 				&& CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull((String) NoticeInfo.get("noticeType"), CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL)) 
 				&& !isEmpty(prjInfo.getSrcAndroidNoticeFileId())) {
 			T2File androidFile = fileService.selectFileInfoById(prjInfo.getSrcAndroidNoticeFileId());
@@ -545,14 +545,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			{
 				prjInfo = projectService.getProjectBasicInfo(prjId);
 				
-				if(prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(prjInfo.getVerificationStatus())) {
+				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(prjInfo.getVerificationStatus())) {
 					doUpdate = false;
 				}
 			}
 			
 			File chk_list_file = new File(VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list_"+packagingFileIdx);
 			
-			if(!chk_list_file.exists()) {
+			if (!chk_list_file.exists()) {
 				isChangedPackageFile = true;
 			}
 			
@@ -562,16 +562,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.debug("VERIFY TARGET FILE : " + filePath);
 			
-			if(packagingFileIdx == 1 && isChangedPackageFile) {
+			if (packagingFileIdx == 1 && isChangedPackageFile) {
 				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 			}
 			
 			String exceptionWordsPatten = "proprietary\\|commercial";
-			if(checkExceptionWordsList != null && !checkExceptionWordsList.isEmpty()) {
+			if (checkExceptionWordsList != null && !checkExceptionWordsList.isEmpty()) {
 				exceptionWordsPatten = "";
 				
-				for(String s : checkExceptionWordsList) {
-					if(!isEmpty(exceptionWordsPatten)) {
+				for (String s : checkExceptionWordsList) {
+					if (!isEmpty(exceptionWordsPatten)) {
 						exceptionWordsPatten += "\\|";
 					}
 					
@@ -583,7 +583,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			log.info("VERIFY OrigNm : " + file.getOrigNm());
 			String projectNm = (prjInfo.getPrjName()).replace(" ", "@@");
 			
-			if(!isEmpty(prjInfo.getPrjVersion())){
+			if (!isEmpty(prjInfo.getPrjVersion())){
 				projectNm +="_"+(prjInfo.getPrjVersion()).replace(" ", "@@");
 			}
 			
@@ -594,7 +594,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 			log.info("VERIFY START : " + prjId);
 			
-			if(isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
+			if (isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
 				ShellCommander.shellCommandWaitFor(commandStr);
 			}
 			
@@ -604,14 +604,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			//STEP 3 : 결과 문자열 리스트값을 배열로 변환 		
 			String chk_list_file_path = null;
 			
-			if(packagingFileIdx == 1) {
+			if (packagingFileIdx == 1) {
 				chk_list_file_path = VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list_1";
 			} else {
 				chk_list_file_path = VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list";
 			}
 			
 			String verify_chk_list = CommonFunction.getStringFromFile(chk_list_file_path).replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId + "/", "");
-			if(verify_chk_list.contains(VERIFY_PATH_DECOMP +"/"+ prjId)) {
+			if (verify_chk_list.contains(VERIFY_PATH_DECOMP +"/"+ prjId)) {
 				verify_chk_list = verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/"+ prjId, "");
 			}
 			log.info("VERIFY Read verify_chk_list END : " + prjId);
@@ -634,7 +634,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.debug("rePath : " + rePath);
 			
-			if(rePath.indexOf(".tar") > -1){
+			if (rePath.indexOf(".tar") > -1){
 				rePath = rePath.substring(0, rePath.lastIndexOf(".tar"));
 			}
 			
@@ -647,34 +647,34 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
 			List<String> readmePathList = new ArrayList<String>();
-			if(result != null) {
+			if (result != null) {
 				boolean isFirst = true;
 				
-				for(String s : result) {
-					if(s.contains("?")) {
+				for (String s : result) {
+					if (s.contains("?")) {
 						s = s.replaceAll("[?]", "0x3F");
 					}
-					if(!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
+					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
 
 						boolean isFile = s.endsWith("*");
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
 						
-						if(s.startsWith("/")) {
+						if (s.startsWith("/")) {
 							s = s.substring(1);
 						}
 						
-						if(s.endsWith("*")) {
+						if (s.endsWith("*")) {
 							s = s.substring(0, s.length()-1);
 						}
 						
-						if(s.endsWith("/")) {
+						if (s.endsWith("/")) {
 							s = s.substring(0, s.length() -1);
 						}
 						
-						if(isFirst) {
-							if(!isFile) {
+						if (isFirst) {
+							if (!isFile) {
 								// 첫번째 path를 압축을 푼 처번째 dir로 사용
 								decompressionRootPath = s;
 								
@@ -685,18 +685,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						int cnt = 0;
 						
 						//파일 path인 경우, 상위 dir의 파일 count를 +1 한다.
-						if(isFile){
+						if (isFile){
 							String _dir = s;
 							
-							if(s.toUpperCase().indexOf("README") > -1) {
+							if (s.toUpperCase().indexOf("README") > -1) {
 								readmePathList.add(s);
 							}
 							
-							if(s.indexOf("/") > -1) {
+							if (s.indexOf("/") > -1) {
 								_dir = s.substring(0, s.lastIndexOf("/"));
 							}
 							
-							if(deCompResultMap.containsKey(_dir)) {
+							if (deCompResultMap.containsKey(_dir)) {
 								cnt = deCompResultMap.get(_dir);
 							}
 							
@@ -712,8 +712,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			List<String> paths = sortByValue(deCompResultMap);
 			
-			for(String path : paths){
-				if(deCompResultMap.get(path) != null){
+			for (String path : paths){
+				if (deCompResultMap.get(path) != null){
 					deCompResultMap = setAddFileCount(deCompResultMap, path, (int)deCompResultMap.get(path));
 				}
 			}
@@ -767,11 +767,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
-				if(replaceFilePath.startsWith("/")) {
+				if (replaceFilePath.startsWith("/")) {
 					replaceFilePath = replaceFilePath.substring(1);
 				}
 				
-				if(replaceFilePath.endsWith("/")) {
+				if (replaceFilePath.endsWith("/")) {
 					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
 				}
 				
@@ -782,11 +782,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				String addRootDir = decompressionDirName + "/" + path;
 				
-				if(addRootDir.startsWith("/")) {
+				if (addRootDir.startsWith("/")) {
 					addRootDir = addRootDir.substring(1);
 				}
 				
-				if(addRootDir.endsWith("/")) {
+				if (addRootDir.endsWith("/")) {
 					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
 				}
 				
@@ -797,11 +797,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
-				if(addRootDirReplaceFilePath.startsWith("/")) {
+				if (addRootDirReplaceFilePath.startsWith("/")) {
 					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
 				}
 				
-				if(addRootDirReplaceFilePath.endsWith("/")) {
+				if (addRootDirReplaceFilePath.endsWith("/")) {
 					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
 				}
 				
@@ -811,11 +811,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
 
 				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
-				if(replaceRootDir.startsWith("/")) {
+				if (replaceRootDir.startsWith("/")) {
 					replaceRootDir = replaceRootDir.substring(1);
 				}
 				
-				if(replaceRootDir.endsWith("/")) {
+				if (replaceRootDir.endsWith("/")) {
 					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
 				}
 				
@@ -826,11 +826,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				String replaceRootDirReplaceFilePath = replaceRootDir;
 				
-				if(replaceRootDirReplaceFilePath.endsWith("*")) {
+				if (replaceRootDirReplaceFilePath.endsWith("*")) {
 					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
 				}
 				
-				if(replaceRootDirReplaceFilePath.endsWith("/")) {
+				if (replaceRootDirReplaceFilePath.endsWith("/")) {
 					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
 				}
 				
@@ -841,11 +841,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
 				
-				if(replaceDecomFileRootDir.startsWith("/")) {
+				if (replaceDecomFileRootDir.startsWith("/")) {
 					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
 				}
 				
-				if(replaceDecomFileRootDir.endsWith("/")) {
+				if (replaceDecomFileRootDir.endsWith("/")) {
 					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
 				}
 				
@@ -858,7 +858,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 통합 Map 에 모든 허용 패턴을 저장
 			int idx = 0;
 			
-			for(String s : pathCheckList1) {
+			for (String s : pathCheckList1) {
 				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
 				checkResultMap.put(pathCheckList2.get(idx), deCompResultMap.containsKey(pathCheckList2.get(idx)) ? deCompResultMap.get(pathCheckList2.get(idx)) : 0);
 				checkResultMap.put(pathCheckList3.get(idx), deCompResultMap.containsKey(pathCheckList3.get(idx)) ? deCompResultMap.get(pathCheckList3.get(idx)) : 0);
@@ -910,28 +910,28 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.info("VERIFY Path Check START -----------------");
 			
-			for(String gridPath : gridFilePaths){
+			for (String gridPath : gridFilePaths){
 				if (gridPath.contains("?")) {
 					gridPath = gridPath.replaceAll("[?]", "0x3F");
 				}
 				
-				if(!separatorErrFlag) {
+				if (!separatorErrFlag) {
 					separatorErrFlag = gridPath.contains("\\") ? true : false;
 				}
 				
 				//사용자가 * 입력했을때
-				if(!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
-					if(gridPath.endsWith("*")) {
+				if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
+					if (gridPath.endsWith("*")) {
 						gridPath = gridPath.substring(0, gridPath.length()-1);
 					}
-					if(gridPath.startsWith(".")) {
+					if (gridPath.startsWith(".")) {
 						gridPath = gridPath.substring(1, gridPath.length());
 					}
 					// 앞뒤 path구분 제거
-					if(gridPath.endsWith("/")) {
+					if (gridPath.endsWith("/")) {
 						gridPath = gridPath.substring(0, gridPath.length()-1);
 					}
-					if(gridPath.startsWith("/")) {
+					if (gridPath.startsWith("/")) {
 						gridPath = gridPath.substring(1);
 					}
 					
@@ -943,17 +943,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 */
 					boolean resultFlag = false;
 					
-					if(checkResultMap.containsKey(gridPath)) {
+					if (checkResultMap.containsKey(gridPath)) {
 						resultFlag = true;
 						gFileCount = checkResultMap.get(gridPath);
 					}
 					
-					if(!resultFlag) {//path가 존재하지않을 때
+					if (!resultFlag) {//path가 존재하지않을 때
 						gValidIdxlist.add(gridComponentIds.get(gridIdx));
 					} else {//path가 존재할 때
 						// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
 						// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
-						if(gFileCount == 0) {
+						if (gFileCount == 0) {
 							gFileCount = 1;
 						}
 						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
@@ -970,15 +970,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			//STEP 4 : README 파일 존재 유무 확인(README 여러개 일경우도 생각해야함 ---차후)
 			
 			// depth가 낮은 readme 파일을 구하기 위해 sort
-			if(packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
+			if (packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
 //				List<String> sortList = new ArrayList<>(deCompResultMap.keySet());
 				Collections.sort(readmePathList, new Comparator<String>() {
 
 					@Override
 					public int compare(String arg1, String arg2) {
-						if(arg1.split("\\/").length > arg2.split("\\/").length) {
+						if (arg1.split("\\/").length > arg2.split("\\/").length) {
 							return 1;
-						} else if(arg1.split("\\/").length < arg2.split("\\/").length) {
+						} else if (arg1.split("\\/").length < arg2.split("\\/").length) {
 							return -1;
 						} else {
 							return arg1.compareTo(arg2);
@@ -987,33 +987,33 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				});
 				
 //				String lastReadmeFilePath = "";
-				for(String r : readmePathList) {
+				for (String r : readmePathList) {
 					String _upperPath = avoidNull(r).toUpperCase();
 					
-					if(_upperPath.endsWith("/")) {
+					if (_upperPath.endsWith("/")) {
 						continue;
 					}
 					
 //					String _currentReadmeFilePath = _upperPath.indexOf("/") < 0 ? _upperPath : _upperPath.substring(0,_upperPath.lastIndexOf("/"));
 //					
-//					if(!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
-//						if(!isEmpty(readmePath)) {
+//					if (!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
+//						if (!isEmpty(readmePath)) {
 //							break;
 //						}
 //						
 //						lastReadmeFilePath = _currentReadmeFilePath;
 //					}
 					
-					if(_upperPath.indexOf("/") > -1) {
+					if (_upperPath.indexOf("/") > -1) {
 						_upperPath = _upperPath.substring(_upperPath.lastIndexOf("/"), _upperPath.length());
 					}
 					
-					if(_upperPath.indexOf("README") > -1){
+					if (_upperPath.indexOf("README") > -1){
 						String _readmePath = r.replaceAll("\\n", "");
 						
 						int afterDepthCnt = StringUtils.countMatches(_readmePath, "/");
 						int beforeDepthCnt = StringUtils.countMatches(readmePath, "/");
-						if(isEmpty(readmePath) || beforeDepthCnt > afterDepthCnt) {
+						if (isEmpty(readmePath) || beforeDepthCnt > afterDepthCnt) {
 							readmePath = _readmePath;
 						}
 					}
@@ -1023,18 +1023,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String readmeFileName = "";
 			//STEP 6 : README 파일 내용 출력
-			if(!StringUtil.isEmpty(readmePath)){
-				if(readmePath.indexOf("*") > -1){
+			if (!StringUtil.isEmpty(readmePath)){
+				if (readmePath.indexOf("*") > -1){
 					readmePath = readmePath.substring(0, readmePath.length()-1);
 				}
 				
 				readmeFileName = readmePath;
 				
-				if(readmeFileName.indexOf("/") > -1) {
+				if (readmeFileName.indexOf("/") > -1) {
 					readmeFileName = readmeFileName.substring(readmeFileName.lastIndexOf("/") + 1);
 				}
 				
-				if(readmePath.indexOf(" ") > -1) {
+				if (readmePath.indexOf(" ") > -1) {
 					log.info("do space replase ok");
 					
 					readmePath = readmePath.replaceAll(" ", "*");
@@ -1045,7 +1045,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY Copy Readme file START -----------------");
 				log.info("VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
-				if(isChangedPackageFile){
+				if (isChangedPackageFile){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
@@ -1053,7 +1053,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			//STEP 7 : README 파일 내용 DB 에 저장
-			if(doUpdate && packagingFileIdx == 1) {
+			if (doUpdate && packagingFileIdx == 1) {
 				log.debug("VERIFY readme 등록");
 				
 				project.setPrjId(prjId);
@@ -1076,14 +1076,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			project.setExceptFileContent(!isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
 			project.setVerifyFileContent(!isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
 			
-			if(doUpdate) {
+			if (doUpdate) {
 				projectService.registVerifyContents(project);
 			}
 			
 			log.debug("VERIFY 파일내용 등록 완료");
 			
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
-			if(!isEmpty(exceptFileContent)) {
+			if (!isEmpty(exceptFileContent)) {
 				log.info("VERIFY writeFile exceptFileContent file START -----------------");
 				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
@@ -1091,7 +1091,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				log.info("VERIFY writeFile exceptFileContent file END -----------------");
 			}
 			
-			if(!isEmpty(verify_chk_list)) {
+			if (!isEmpty(verify_chk_list)) {
 				log.info("VERIFY writeFile verify_chk_list file START -----------------");
 				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
@@ -1100,7 +1100,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			resCd="10";
-			if(separatorErrFlag) {
+			if (separatorErrFlag) {
 				resMsg = getMessage("verify.path.error");
 			} else {
 				resMsg= getMessage(gValidIdxlist.isEmpty() ? "msg.common.success" : "msg.common.valid");
@@ -1115,12 +1115,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			//path not found.가 1건이라도 있으면 status_verify_yn의 flag는 N으로 저장함.
 			// packagingFileId, filePath는 1번만 저장하며, gValidIdxlist의 값때문에 마지막 fileSeq일때 저장함.
-			if(doUpdate && packagingFileIdx == fileSeqs.size()) {
+			if (doUpdate && packagingFileIdx == fileSeqs.size()) {
 				// verify 버튼 클릭시 file path를 저장한다.
-				if(gridComponentIds != null && !gridComponentIds.isEmpty()) {
+				if (gridComponentIds != null && !gridComponentIds.isEmpty()) {
 					int seq = 0;
 					
-					for(String s : gridComponentIds){
+					for (String s : gridComponentIds){
 						OssComponents param = new OssComponents();
 						param.setComponentId(s);
 						param.setFilePath(gridFilePaths.get(seq++));
@@ -1136,7 +1136,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId2(fileSeqs.size() >= 2 ? fileSeqs.get(1) : null);
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
 
-					if(!isEmpty(prjInfo.getDestributionStatus())){
+					if (!isEmpty(prjInfo.getDestributionStatus())){
 						prjParam.setStatusVerifyYn("C");
 					} else {
 						prjParam.setStatusVerifyYn(CoConstDef.FLAG_YES);
@@ -1159,7 +1159,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			resMsg="process failed. (server error)";
 		} finally {
 			try {
-				if(isChangedPackageFile){
+				if (isChangedPackageFile){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 				}
 				
@@ -1184,7 +1184,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 	@Override
 	public void updateVerifyFileCount(HashMap<String,Object> fileCounts) {
-		for(String componentId : fileCounts.keySet()){
+		for (String componentId : fileCounts.keySet()){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
 			param.setVerifyFileCount((String) fileCounts.get(componentId));
@@ -1195,7 +1195,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	
 	@Override
 	public void updateVerifyFileCount(ArrayList<String> fileCounts) {
-		for(String componentId : fileCounts){
+		for (String componentId : fileCounts){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
 			param.setVerifyFileCount(" ");
@@ -1231,7 +1231,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	@Transactional
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
-		if(copyConfirmFlag) {
+		if (copyConfirmFlag) {
 			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
 		}else {
 			updateProjectStatus(project);
@@ -1241,7 +1241,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String spdxComment = "";
 		
 		// html simple
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
 			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES);
 			ossNotice.setFileType("html");
 			project.setSimpleHtmlFileId(getNoticeTextFileForPreview(ossNotice, true));
@@ -1249,7 +1249,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 
 		// text
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
 			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_NO);
 			ossNotice.setFileType("text");
 			project.setNoticeTextFileId(getNoticeTextFileForPreview(ossNotice, true));
@@ -1257,7 +1257,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		// text simple
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
 			ossNotice.setSimpleNoticeFlag(CoConstDef.FLAG_YES);
 			ossNotice.setFileType("text");
 			project.setSimpleTextFileId(getNoticeTextFileForPreview(ossNotice, true));
@@ -1266,11 +1266,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		// SPDX
 		String spdxSheetFileId = null;
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
 			Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
 			String dataStr = toJson(data);
 			spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
-			if(!isEmpty(spdxSheetFileId)) {
+			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 				String fileName = "spdx_" + CommonFunction.getNoticeFileName(prjInfo.getPrjId(), prjInfo.getPrjName(), prjInfo.getPrjVersion(), CommonFunction.getCurrentDateTime("yyMMdd"), "");
@@ -1284,18 +1284,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
-			if(isEmpty(spdxSheetFileId)) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
+			if (isEmpty(spdxSheetFileId)) {
 				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
 				String dataStr = toJson(data);
 				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 			
-			if(!isEmpty(spdxSheetFileId)) {
+			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				String sheetFullPath = spdxFileInfo.getLogiPath();
 				
-				if(!sheetFullPath.endsWith("/")) {
+				if (!sheetFullPath.endsWith("/")) {
 					sheetFullPath += "/";
 				}
 				
@@ -1304,7 +1304,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".rdf";
 				String tagFullPath = spdxFileInfo.getLogiPath();
 				
-				if(!tagFullPath.endsWith("/")) {
+				if (!tagFullPath.endsWith("/")) {
 					tagFullPath += "/";
 				}
 				
@@ -1312,8 +1312,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				File spdxRdfFile = new File(tagFullPath);
 				
-				if(spdxRdfFile.exists() && spdxRdfFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
+				if (spdxRdfFile.exists() && spdxRdfFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
 						spdxComment += "<br>";
 					}
 					
@@ -1328,19 +1328,19 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
-			if(isEmpty(spdxSheetFileId)) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
+			if (isEmpty(spdxSheetFileId)) {
 				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
 				String dataStr = toJson(data);
 				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 			
-			if(!isEmpty(spdxSheetFileId)) {
+			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				
 				String sheetFullPath = spdxFileInfo.getLogiPath();
 				
-				if(!sheetFullPath.endsWith("/")) {
+				if (!sheetFullPath.endsWith("/")) {
 					sheetFullPath += "/";
 				}
 				
@@ -1349,7 +1349,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".tag";
 				String tagFullPath = spdxFileInfo.getLogiPath();
 				
-				if(!tagFullPath.endsWith("/")) {
+				if (!tagFullPath.endsWith("/")) {
 					tagFullPath += "/";
 				}
 				
@@ -1358,8 +1358,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				File spdxTafFile = new File(tagFullPath);
 				
-				if(spdxTafFile.exists() && spdxTafFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
+				if (spdxTafFile.exists() && spdxTafFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
 						spdxComment += "<br>";
 					}
 					
@@ -1374,18 +1374,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
-			if(isEmpty(spdxSheetFileId)) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+			if (isEmpty(spdxSheetFileId)) {
 				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
 				String dataStr = toJson(data);
 				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 
-			if(!isEmpty(spdxSheetFileId)) {
+			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				String sheetFullPath = spdxFileInfo.getLogiPath();
 
-				if(!sheetFullPath.endsWith("/")) {
+				if (!sheetFullPath.endsWith("/")) {
 					sheetFullPath += "/";
 				}
 
@@ -1394,7 +1394,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".json";
 				String tagFullPath = spdxFileInfo.getLogiPath();
 
-				if(!tagFullPath.endsWith("/")) {
+				if (!tagFullPath.endsWith("/")) {
 					tagFullPath += "/";
 				}
 
@@ -1402,8 +1402,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				File spdxJsonFile = new File(tagFullPath);
 
-				if(spdxJsonFile.exists() && spdxJsonFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
+				if (spdxJsonFile.exists() && spdxJsonFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
 						spdxComment += "<br>";
 					}
 
@@ -1418,18 +1418,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
-			if(isEmpty(spdxSheetFileId)) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+			if (isEmpty(spdxSheetFileId)) {
 				Map<String, String> data = new HashMap<>(); data.put("prjId", project.getPrjId());
 				String dataStr = toJson(data);
 				spdxSheetFileId = ExcelDownLoadUtil.getExcelDownloadId("spdx", dataStr, EXPORT_TEMPLATE_PATH);
 			}
 
-			if(!isEmpty(spdxSheetFileId)) {
+			if (!isEmpty(spdxSheetFileId)) {
 				T2File spdxFileInfo = fileService.selectFileInfo(spdxSheetFileId);
 				String sheetFullPath = spdxFileInfo.getLogiPath();
 
-				if(!sheetFullPath.endsWith("/")) {
+				if (!sheetFullPath.endsWith("/")) {
 					sheetFullPath += "/";
 				}
 
@@ -1438,7 +1438,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String resultFileName = FilenameUtils.getBaseName(spdxFileInfo.getOrigNm())+".yaml";
 				String tagFullPath = spdxFileInfo.getLogiPath();
 
-				if(!tagFullPath.endsWith("/")) {
+				if (!tagFullPath.endsWith("/")) {
 					tagFullPath += "/";
 				}
 
@@ -1446,8 +1446,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				SPDXUtil2.convert(project.getPrjId(), sheetFullPath, tagFullPath);
 				File spdxYamlFile = new File(tagFullPath);
 
-				if(spdxYamlFile.exists() && spdxYamlFile.length() <= 0) {
-					if(!isEmpty(spdxComment)) {
+				if (spdxYamlFile.exists() && spdxYamlFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
 						spdxComment += "<br>";
 					}
 
@@ -1463,7 +1463,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		// zip파일 생성
-		if(makeZipFile) {
+		if (makeZipFile) {
 			String noticeRootDir = NOTICE_PATH;
 			ossNotice.setFileType(".zip");
 			Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
@@ -1476,7 +1476,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		verificationMapper.updateNoticeFileInfoEtc(project); // file info update
 		
-		if(!isEmpty(spdxComment)) { // spdx failure => comment regist
+		if (!isEmpty(spdxComment)) { // spdx failure => comment regist
 			try {
 				CommentsHistory commHisBean = new CommentsHistory();
 				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
@@ -1499,26 +1499,26 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		prjBean = projectMapper.selectProjectMaster2(prjBean);
 		List<String> packageFileIds = new ArrayList<String>();
 		
-		if(!isEmpty(prjBean.getPackageFileId())) {
+		if (!isEmpty(prjBean.getPackageFileId())) {
 			packageFileIds.add(prjBean.getPackageFileId());
 		}
 		
-		if(!isEmpty(prjBean.getPackageFileId2())) {
+		if (!isEmpty(prjBean.getPackageFileId2())) {
 			packageFileIds.add(prjBean.getPackageFileId2());
 		}
 		
-		if(!isEmpty(prjBean.getPackageFileId3())) {
+		if (!isEmpty(prjBean.getPackageFileId3())) {
 			packageFileIds.add(prjBean.getPackageFileId3());
 		}
 		
 		int fileSeq = 1;
 		
-		for(String packageFileId : packageFileIds){
+		for (String packageFileId : packageFileIds){
 			T2File packageFileInfo = new T2File();
 			packageFileInfo.setFileSeq(packageFileId);
 			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
 			
-			if(packageFileInfo != null) {
+			if (packageFileInfo != null) {
 				String orgFileName = packageFileInfo.getOrigNm();
 				// Packaging > Confirm시 Packaging 파일명 변경 건
 				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : ""); 
@@ -1542,30 +1542,30 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
 		String fileName = prjName;
 		
-		if(!isEmpty(prjVersion)) {
+		if (!isEmpty(prjVersion)) {
 			fileName += "_" + prjVersion;
 		}
 		
-		if(!isEmpty(fileSeq)){
+		if (!isEmpty(fileSeq)){
 			fileName += "_" + fileSeq;
 		}
 		
 		// file명에 사용할 수 없는 특수문자 체크
-		if(!FileUtil.isValidFileName(fileName)) {
+		if (!FileUtil.isValidFileName(fileName)) {
 			fileName = FileUtil.makeValidFileName(fileName, "_");
 		}
 		
 		String fileExt = FilenameUtils.getExtension(orgFileName);
 		
-		if(orgFileName.toLowerCase().endsWith(".tgz.gz")) {
+		if (orgFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
-		} else if(orgFileName.toLowerCase().endsWith(".tar.bz2")) {
+		} else if (orgFileName.toLowerCase().endsWith(".tar.bz2")) {
 			fileExt = "tar.bz2";
-		} else if(orgFileName.toLowerCase().endsWith(".tar.gz")) {
+		} else if (orgFileName.toLowerCase().endsWith(".tar.gz")) {
 			fileExt = "tar.gz";
 		}
 		
-		if(fileExt.startsWith(".")) {
+		if (fileExt.startsWith(".")) {
 			fileExt = fileExt.substring(1);
 		}
 		
@@ -1587,10 +1587,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			Map<String, Object> result = projectMapper.getNoticeType(ossNotice.getPrjId());
 			
 			// android project는 notice를 사용하지 않음.
-			if(!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull((String) result.get("noticeType")))) {
-				if(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn())){
+			if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull((String) result.get("noticeType")))) {
+				if (CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn())){
 					verificationMapper.insertOssNotice(ossNotice);
-				}else if(CoConstDef.FLAG_NO.equals(ossNotice.getEditNoticeYn())){
+				}else if (CoConstDef.FLAG_NO.equals(ossNotice.getEditNoticeYn())){
 					verificationMapper.updateOssNotice(ossNotice);
 				}
 			}
@@ -1598,7 +1598,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			projectMapper.updateWithoutVerifyYn(ossNotice);
 			
 			
-			if(isEmpty(project.getVerificationStatus())){
+			if (isEmpty(project.getVerificationStatus())){
 				verificationMapper.updateVerificationStatusProgress(ossNotice);
 			}
 			
@@ -1634,7 +1634,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// System.getProperty("line.separator") => "\n" => "\r\n" 변경 
 		String line = "\r\n";
 		
-		if(fileType == "text"){
+		if (fileType == "text"){
 			fileId = "";
 			filePath = NOTICE_PATH + ( isConfirm ? "/" : "/preview/") + project.getPrjId();
 			fileName = (CoConstDef.FLAG_YES.equals(simpleFlag) ? "simple_" : "") + CommonFunction.getNoticeFileName(project.getPrjId(), project.getPrjName(), project.getPrjVersion(), ( isConfirm ? CommonFunction.getCurrentDateTime("yyMMdd") : DateUtil.getCurrentDateTime(DateUtil.DATE_HMS_PATTERN) ), fileType);
@@ -1646,13 +1646,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			// custom edit를 사용하고, packaging confirm 인 경우 이면서 simple인 경우
 			// license text 부분만 다시 변경한다.
-			if(isConfirm && CoConstDef.FLAG_YES.equals(simpleFlag) && CoConstDef.FLAG_YES.equals(project.getUseCustomNoticeYn())) {
+			if (isConfirm && CoConstDef.FLAG_YES.equals(simpleFlag) && CoConstDef.FLAG_YES.equals(project.getUseCustomNoticeYn())) {
 				// 이미 생성된 고지문구 파일의 내용을 가져온다.
 				T2File defaultNoticeFileInfo = fileService.selectFileInfo(project.getNoticeFileId());
 				
-				if(defaultNoticeFileInfo != null) {
+				if (defaultNoticeFileInfo != null) {
 					File noticeFile = new File(defaultNoticeFileInfo.getLogiPath() + "/" + defaultNoticeFileInfo.getLogiNm());
-					if(noticeFile.exists()) {
+					if (noticeFile.exists()) {
 						Document doc = Jsoup.parse(noticeFile, "UTF8");
 						Document doc2 = Jsoup.parse(contents);
 						
@@ -1666,7 +1666,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 
-		if(FileUtil.writeFile(filePath, fileName, contents)) {
+		if (FileUtil.writeFile(filePath, fileName, contents)) {
 			// 파일 등록
 			fileId = fileService.registFileDownload(filePath, fileName, fileName);
 		}
@@ -1697,7 +1697,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			int records = projectMapper.selectReuseProjectTotalCount(project);
 			project.setTotListSize(records);
 			
-			if(records > 0){
+			if (records > 0){
 				list = projectMapper.selectReuseProject(project);
 			}
 			
@@ -1719,7 +1719,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<T2File> list = null;
 
 		try {
-			if(!isEmpty(project.getPrjId())){
+			if (!isEmpty(project.getPrjId())){
 				list = projectMapper.selectReusePackagingFileList(project.getPrjId());
 			}
 			
@@ -1774,7 +1774,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		oss.fosslight.domain.File noticeFile = null;
 		
-		if(!isEmpty(project.getZipFileId())) {
+		if (!isEmpty(project.getZipFileId())) {
 			noticeFile = verificationMapper.selectVerificationFile(project.getZipFileId());
 			fileName =  noticeFile.getOrigNm();
 			filePath += File.separator+fileName;
@@ -1799,7 +1799,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		oss.fosslight.domain.File reviewReportFile = null;
 
-		if(!isEmpty(project.getZipFileId())) {
+		if (!isEmpty(project.getZipFileId())) {
 			reviewReportFile = verificationMapper.selectVerificationFile(project.getZipFileId());
 			fileName =  reviewReportFile.getOrigNm();
 			filePath += File.separator+fileName;
@@ -1831,20 +1831,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		project = projectMapper.getProjectBasicInfo(project);
 		
-		if(project != null){
-			if(isEmpty(prjName)) {
+		if (project != null){
+			if (isEmpty(prjName)) {
 				prjName = project.getPrjName();
 			}
 			
-			if(isEmpty(prjId)) {
+			if (isEmpty(prjId)) {
 				prjId = project.getPrjId();
 			}
 			
-			if(isEmpty(prjVersion)) {
+			if (isEmpty(prjVersion)) {
 				prjVersion = project.getPrjVersion();
 			}
 			
-			if(isEmpty(distributeSite)) {
+			if (isEmpty(distributeSite)) {
 				distributeSite = project.getDistributeTarget();
 			}
 		}
@@ -1860,17 +1860,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		OssComponents ossComponent;
 		
-		for(OssComponents bean : ossComponentList) {
+		for (OssComponents bean : ossComponentList) {
 			OssComponents oc = verificationMapper.checkOssNickName2(bean);
-			if(oc != null) {
+			if (oc != null) {
 				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getCopyright();
 				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getHomepage();
 				
-				if(isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
 					bean.setCopyrightText(copyright);
 				}
 				
-				if(isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
 					bean.setHomepage(homepage);
 				}
 			}
@@ -1879,7 +1879,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 									? bean.getOssName() 
 									: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 			
-			if("-".equals(bean.getOssName())) {
+			if ("-".equals(bean.getOssName())) {
 				componentKey += dashSeq++;
 			}
 			
@@ -1890,14 +1890,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// confirm 처리에서 obligation이 고지의무가 있거나 소스코드 공개의무가 있는 경우만 '50'으로 copy되도록 수정하였으나, 여기서 한번도 필터링함
 			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
 			
-			if(!isDisclosure && !isNotice) {
+			if (!isDisclosure && !isNotice) {
 				continue;
 			}
 			
 			// 2017.07.05
 			// Accompanied with source code 의 경우
 			// 소스공개여부와 상관없이 모두 소스공개가 필요한 oss table에 표시
-			if(CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
+			if (CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
 				isDisclosure = true;
 			}
 			
@@ -1906,15 +1906,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
 			
 			
-			if(addDisclosure) {
+			if (addDisclosure) {
 				ossComponent = srcInfo.get(componentKey);
-			} else if(addNotice) {
+			} else if (addNotice) {
 				ossComponent = noticeInfo.get(componentKey);
 			} else {
 				ossComponent = bean;
 			}
 			
-			if(hideOssVersionFlag) {
+			if (hideOssVersionFlag) {
 				
 				List<String> copyrightList = componentCopyright.containsKey(componentKey) 
 						? (List<String>) componentCopyright.get(componentKey) 
@@ -1924,13 +1924,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						? (List<String>) componentAttribution.get(componentKey) 
 						: new ArrayList<>();
 						
-				if(!isEmpty(bean.getCopyrightText())) {
-					for(String copyright : bean.getCopyrightText().split("\n")) {
+				if (!isEmpty(bean.getCopyrightText())) {
+					for (String copyright : bean.getCopyrightText().split("\n")) {
 						copyrightList.add(copyright);
 					}
 				}
 				
-				if(!isEmpty(bean.getOssAttribution())) {
+				if (!isEmpty(bean.getOssAttribution())) {
 					attributionList.add(bean.getOssAttribution());
 				}
 
@@ -1941,16 +1941,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				license.setLicenseText(bean.getLicenseText());
 				license.setAttribution(bean.getAttribution());
 
-				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+				if (!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
 					ossComponent.addOssComponentsLicense(license);
 				}
 				
-				if(CoConstDef.FLAG_NO.equals(bean.getAdminCheckYn())) {
+				if (CoConstDef.FLAG_NO.equals(bean.getAdminCheckYn())) {
 					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
 					
 					// multi license 추가 copyright
-					if(!isEmpty(ossCopyright)) {
-						for(String copyright : ossCopyright.split("\n")) {
+					if (!isEmpty(ossCopyright)) {
+						for (String copyright : ossCopyright.split("\n")) {
 							copyrightList.add(copyright);
 						}
 					}
@@ -1969,21 +1969,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				ossComponent.setOssAttribution(String.join("\r\n", attributionList));
 				componentAttribution.put(componentKey, attributionList);
 				
-				if(isDisclosure) {
-					if(addDisclosure) {
+				if (isDisclosure) {
+					if (addDisclosure) {
 						srcInfo.replace(componentKey, ossComponent);
 					} else {
 						srcInfo.put(componentKey, ossComponent);
 					}
 				} else {
-					if(addNotice) {
+					if (addNotice) {
 						noticeInfo.replace(componentKey, ossComponent);
 					} else {
 						noticeInfo.put(componentKey, ossComponent);
 					}
 				}
 				
-				if(!licenseInfo.containsKey(license.getLicenseName())) {
+				if (!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(license.getLicenseName(), license);
 				}
 			} else {
@@ -1997,7 +1997,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
 				// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
-				if(!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+				if (!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
 					ossComponent.addOssComponentsLicense(license);
 					
 					// OSS의 Copyright text를 수정하였음에도 Packaging > Notice Preview에 업데이트 안 됨.
@@ -2005,14 +2005,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					// verification단계에서의 oss_component_license는 oss_license의 license등록 순번을 가지고 있지 않기 때문에 (exclude된 license는 이관하지 않음)
 					// 여기서 oss id와 license id를 이용하여 찾는다.
 					// 동이한 라이선스를 or 구분으로 여러번 정의한 경우 문제가 될 수 있으나, 동일한 oss의 동일한 license의 경우 같은 copyright를 추가한다는 전제하에 적용함 (이부분에서 추가적인 이슉가 발생할 경우 대응방법이 복잡해짐)
-					if(CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
+					if (CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
 						bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
 						
 						// multi license 추가 copyright
-						if(!isEmpty(bean.getOssCopyright())) {
+						if (!isEmpty(bean.getOssCopyright())) {
 							String addCopyright = avoidNull(ossComponent.getCopyrightText());
 							
-							if(!isEmpty(ossComponent.getCopyrightText())) {
+							if (!isEmpty(ossComponent.getCopyrightText())) {
 								addCopyright += "\r\n";
 							}
 							 
@@ -2022,33 +2022,33 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					}
 				}
 				
-				if(isDisclosure) {
-					if(addDisclosure) {
+				if (isDisclosure) {
+					if (addDisclosure) {
 						srcInfo.replace(componentKey, ossComponent);
 					} else {
 						srcInfo.put(componentKey, ossComponent);
 					}
 				} else {
-					if(addNotice) {
+					if (addNotice) {
 						noticeInfo.replace(componentKey, ossComponent);
 					} else {
 						noticeInfo.put(componentKey, ossComponent);
 					}
 				}
 				
-				if(!licenseInfo.containsKey(license.getLicenseName())) {
+				if (!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(license.getLicenseName(), license);
 				}
 			}
 		}
 		
 		// copyleft에 존재할 경우 notice에서는 출력하지 않고 copyleft로 merge함.
-		if(hideOssVersionFlag) {
+		if (hideOssVersionFlag) {
 			Map<String, OssComponents> hideOssVersionMergeNoticeInfo = new HashMap<>();
 			Set<String> noticeKeyList = noticeInfo.keySet();
 			
-			for(String key : noticeKeyList) {
-				if(!srcInfo.containsKey(key)) {
+			for (String key : noticeKeyList) {
+				if (!srcInfo.containsKey(key)) {
 					hideOssVersionMergeNoticeInfo.put(key, noticeInfo.get(key));
 				}
 			}
@@ -2060,10 +2060,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// OSS NAME을 하이픈 ('-') 으로 등록한 경우 (고지문구에 라이선스만 추가)
 		List<OssComponents> addOssComponentList = verificationMapper.selectVerificationNoticeClassAppend(ossNotice);
 		
-		if(addOssComponentList != null) {
+		if (addOssComponentList != null) {
 			List<String> checkKeyInfo = new ArrayList<>();
 			
-			for(OssComponents bean : addOssComponentList) {
+			for (OssComponents bean : addOssComponentList) {
 				String componentKey = (hideOssVersionFlag
 											? bean.getOssName() 
 											: bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
@@ -2072,11 +2072,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 										? bean.getOssName() + "|" + bean.getLicenseName()
 										: bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName()).toUpperCase();
 				
-				if(checkKeyInfo.contains(checkKey)) {
+				if (checkKeyInfo.contains(checkKey)) {
 					continue;
 				}
 				
-				if("-".equals(bean.getOssName())) {
+				if ("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
 				}
 				
@@ -2087,14 +2087,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				license.setAttribution(bean.getAttribution());
 				bean.addOssComponentsLicense(license);
 				
-				if(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
+				if (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())
 						|| CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) { // Accompanied with source code 의 경우 source 공개 의무
 					srcInfo.put(componentKey, bean);
 				} else {
 					noticeInfo.put(componentKey, bean);
 				}
 				
-				if(!licenseInfo.containsKey(license.getLicenseName())) {
+				if (!licenseInfo.containsKey(license.getLicenseName())) {
 					licenseInfo.put(componentKey, license);
 				}
 				
@@ -2108,8 +2108,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// 개행처리 및 velocity용 list 생성
 		List<OssComponents> noticeList = new ArrayList<>();
 		
-		for(OssComponents bean : noticeInfo.values()) {
-			if(isTextNotice) {
+		for (OssComponents bean : noticeInfo.values()) {
+			if (isTextNotice) {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
@@ -2119,11 +2119,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
 			}
 
-			if(!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
+			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
 			
-			if(!isEmpty(bean.getOssName())) {
+			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
@@ -2139,8 +2139,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		List<OssComponents> srcList = new ArrayList<>();
 		
-		for(OssComponents bean : srcInfo.values()) {
-			if(isTextNotice) {
+		for (OssComponents bean : srcInfo.values()) {
+			if (isTextNotice) {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
 				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
@@ -2151,11 +2151,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 
-			if(!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
+			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
 				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
 			}
 			
-			if(!isEmpty(bean.getOssName())) {
+			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
@@ -2177,8 +2177,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// 정렬
 		TreeMap<String, OssComponentsLicense> licenseTreeMap = new TreeMap<>( licenseInfo );
 		
-		for(OssComponentsLicense bean : licenseTreeMap.values()) {
-			if(isTextNotice) {
+		for (OssComponentsLicense bean : licenseTreeMap.values()) {
+			if (isTextNotice) {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
 			} else {
@@ -2189,10 +2189,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 배포사이트 license text url
 			licenseList.add(bean);
 			
-			if(CoConstDef.FLAG_YES.equals(ossNotice.getSimpleNoticeFlag())) {
+			if (CoConstDef.FLAG_YES.equals(ossNotice.getSimpleNoticeFlag())) {
 				LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_BY_ID.get(bean.getLicenseId());
 				
-				if(licenseBean != null) {
+				if (licenseBean != null) {
 //					String simpleLicenseFileName = !isEmpty(licenseBean.getShortIdentifier()) ? licenseBean.getShortIdentifier() : licenseBean.getLicenseNameTemp();
 //					String distributeUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTE_CODE, CoConstDef.CD_DTL_DISTRIBUTE_LGE);
 //					simpleLicenseFileName = simpleLicenseFileName.replaceAll(" ", "_").replaceAll("/", "_") + ".html";
@@ -2205,7 +2205,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 			}
 
-			if(!isEmpty(bean.getAttribution())) {
+			if (!isEmpty(bean.getAttribution())) {
 				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getAttribution()))));
 				attributionList.add(bean);
 			}
@@ -2225,7 +2225,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String appendedContentsTEXT = ossNotice.getAppendedTEXT();
 		String appendedContents = ossNotice.getAppended();
 		
-		if(!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
+		if (!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
 			distributionSiteUrl = "http://" + distributionSiteUrl;
 		}
 		model.put("noticeType", noticeType);
@@ -2246,7 +2246,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		model.put("editAppendedYn", ossNotice.getEditAppendedYn());
 		
 		/*//ui 개선버전으로 신규 추가된 flag */
-		if(CoConstDef.FLAG_YES.equals(ossNotice.getSimpleNoticeFlag())) {
+		if (CoConstDef.FLAG_YES.equals(ossNotice.getSimpleNoticeFlag())) {
 			model.put("licenseListUrls", licenseListUrls);
 		} else {
 			model.put("licenseList", licenseList);
@@ -2255,13 +2255,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		model.put("attributionList", attributionList.isEmpty() ? null : attributionList);
 		model.put("ossAttributionList", ossAttributionList.isEmpty() ? null : ossAttributionList);
 		
-		if("text".equals(ossNotice.getFileType())){
+		if ("text".equals(ossNotice.getFileType())){
 			model.put("appended", avoidNull(appendedContentsTEXT, "").replaceAll("&nbsp;", " "));
 		} else {
 			model.put("appended", appendedContents);
 		}
 
-		if("text".equals(ossNotice.getFileType())){
+		if ("text".equals(ossNotice.getFileType())){
 			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_NOTICE_TEXT_TEMPLATE));
 		} else {
 			model.put("templateURL", CoCodeManager.getCodeExpString(noticeInfoCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_TEMPLATE));
@@ -2275,9 +2275,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	
 	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense,
 			OssComponentsLicense license) {
-		if(ossComponentsLicense != null) {
-			for(OssComponentsLicense bean : ossComponentsLicense) {
-				if(bean.getLicenseId().equals(license.getLicenseId())) {
+		if (ossComponentsLicense != null) {
+			for (OssComponentsLicense bean : ossComponentsLicense) {
+				if (bean.getLicenseId().equals(license.getLicenseId())) {
 					return true;
 				}
 			}
@@ -2294,11 +2294,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	 * @return
 	 */
 	private String findAddedOssCopyright(String ossId, String licenseId, String ossCopyright) {
-		if(!isEmpty(ossId) && !isEmpty(licenseId)) {
+		if (!isEmpty(ossId) && !isEmpty(licenseId)) {
 			OssMaster bean = CoCodeManager.OSS_INFO_BY_ID.get(ossId);
 			if (bean != null) {
-				for(OssLicense license : bean.getOssLicenses()) {
-					if(licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
+				for (OssLicense license : bean.getOssLicenses()) {
+					if (licenseId.equals(license.getLicenseId()) && !isEmpty(license.getOssCopyright())) {
 						return license.getOssCopyright();
 					}
 				}
@@ -2316,7 +2316,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			int pFileCnt = deCompResultMap.get(url);
 			deCompResultMap.put(url, fileCnt + pFileCnt);
 			
-			if(deCompResultMap.get(url.substring(0, url.lastIndexOf("/"))) != null){
+			if (deCompResultMap.get(url.substring(0, url.lastIndexOf("/"))) != null){
 				setAddFileCount(deCompResultMap, url, fileCnt);
 			}
 			
@@ -2353,12 +2353,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		final Comparator<OssComponents> comp = Comparator.comparing((OssComponents o) -> o.getOssName()+"|"+o.getOssVersion());
 		gridData = gridData.stream().sorted(comp).collect(Collectors.toList());
 		
-		for(OssComponents info : gridData) {
-			if(isEmpty(groupColumn)) {
+		for (OssComponents info : gridData) {
+			if (isEmpty(groupColumn)) {
 				groupColumn = info.getOssName() + "-" + info.getOssVersion();
 			}
 						
-			if(groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
+			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
 					&& !("-".equals(info.getOssName()) 
 					&& !"NA".equals(info.getLicenseType()))) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
@@ -2377,11 +2377,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}	
 	
 	public static void setMergeData(List<OssComponents> tempData, List<OssComponents> resultGridData){
-		if(tempData.size() > 0) {
+		if (tempData.size() > 0) {
 			Collections.sort(tempData, new Comparator<OssComponents>() {
 				@Override
 				public int compare(OssComponents o1, OssComponents o2) {
-					if(o1.getLicenseName().length() >= o2.getLicenseName().length()) {
+					if (o1.getLicenseName().length() >= o2.getLicenseName().length()) {
 						return 1;
 					}else {
 						return -1;
@@ -2391,8 +2391,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			OssComponents rtnBean = null;
 			
-			for(OssComponents temp : tempData) {
-				if(rtnBean == null) {
+			for (OssComponents temp : tempData) {
+				if (rtnBean == null) {
 					rtnBean = temp;
 					
 					continue;
@@ -2400,8 +2400,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				String key = temp.getOssName() + "-" + temp.getLicenseType();
 				
-				if("--NA".equals(key)) {
-					if(!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
+				if ("--NA".equals(key)) {
+					if (!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						
@@ -2409,18 +2409,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					}
 				}
 				
-				for(String licenseName : temp.getLicenseName().split(",")) {
+				for (String licenseName : temp.getLicenseName().split(",")) {
 					boolean equalFlag = false;
 					
-					for(String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
-						if(rtnLicenseName.equals(licenseName)) {
+					for (String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
+						if (rtnLicenseName.equals(licenseName)) {
 							equalFlag = true;
 							
 							break;
 						}
 					}
 					
-					if(!equalFlag) {
+					if (!equalFlag) {
 						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
 					}
 				}
@@ -2498,39 +2498,39 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public int allowDownloadMultiFlagToBitFlag(Project project) {
 		int bitFlag = 1;
 		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeHTMLYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeHTMLYn())) {
 			bitFlag |= CoConstDef.FLAG_A;
 		}
 			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
 			bitFlag |= CoConstDef.FLAG_B;
 		}
 		
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
 			bitFlag |= CoConstDef.FLAG_C;
 		}
 			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
 			bitFlag |= CoConstDef.FLAG_D;
 		}
 			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
 			bitFlag |= CoConstDef.FLAG_E;
 		}
 			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
 			bitFlag |= CoConstDef.FLAG_F;
 		}
 			
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
 			bitFlag |= CoConstDef.FLAG_G;
 		}
 
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
 			bitFlag |= CoConstDef.FLAG_H;
 		}
 
-		if(CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
 			bitFlag |= CoConstDef.FLAG_I;
 		}
 		
@@ -2545,11 +2545,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			project = projectMapper.selectProjectMaster(project);
 			
 			// android project는 notice를 사용하지 않음.
-			if(!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {
+			if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {
 				verificationMapper.insertOssNotice(ossNotice);
 			}
 			
-			if(isEmpty(project.getVerificationStatus())){
+			if (isEmpty(project.getVerificationStatus())){
 				verificationMapper.updateVerificationStatusProgress(ossNotice);
 			}
 		}catch(Exception e){

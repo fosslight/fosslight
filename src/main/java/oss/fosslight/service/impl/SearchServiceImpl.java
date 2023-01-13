@@ -48,7 +48,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     @Override
     public OssMaster getOssSearchFilter(String userId) {
         String filterString = searchMapper.selectOssSearchFilter(userId);
-        if(filterString == null) {
+        if (filterString == null) {
             return null;
         }
         return new Gson().fromJson(filterString, OssMaster.class);
@@ -67,7 +67,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     @Override
     public Project getProjectSearchFilter(String userId) {
         String filterString = searchMapper.selectProjectSearchFilter(userId);
-        if(filterString == null) {
+        if (filterString == null) {
             return null;
         }
         return new Gson().fromJson(filterString, Project.class);
@@ -78,7 +78,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     public void saveLicenseSearchFilter(LicenseMaster licenseMaster, String userId) {
 
         try {
-            if(isEmpty(licenseMaster.getLicenseNameAllSearchFlag())) {
+            if (isEmpty(licenseMaster.getLicenseNameAllSearchFlag())) {
                 licenseMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
             }
             licenseMaster.setTotListSize(licenseService.selectLicenseMasterTotalCount(licenseMaster));
@@ -97,7 +97,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     @Override
     public LicenseMaster getLicenseSearchFilter(String userId) {
         String filterString = searchMapper.selectLicenseSearchFilter(userId);
-        if(filterString == null) {
+        if (filterString == null) {
             return null;
         }
         return new Gson().fromJson(filterString, LicenseMaster.class);
@@ -116,7 +116,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     @Override
     public Project getSelfCheckSearchFilter(String userId) {
         String filterString = searchMapper.selectSelfCheckSearchFilter(userId);
-        if(filterString == null) {
+        if (filterString == null) {
             return null;
         }
         return new Gson().fromJson(filterString, Project.class);
@@ -142,7 +142,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
     @Override
     public PartnerMaster getPartnerSearchFilter(String userId) {
         String filterString = searchMapper.selectPartnerSearchFilter(userId);
-        if(filterString == null) {
+        if (filterString == null) {
             return null;
         }
         return new Gson().fromJson(filterString, PartnerMaster.class);
@@ -206,9 +206,9 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 
 
     private String hasSearchCondition(Map<String, Object> params) {
-    	for(Object obj : params.values()) {
-    		if(obj instanceof String) {
-    			if(!StringUtil.isEmpty((String)obj)) {
+    	for (Object obj : params.values()) {
+    		if (obj instanceof String) {
+    			if (!StringUtil.isEmpty((String)obj)) {
     				return "Y";
     			}
     		}

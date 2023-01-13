@@ -13,7 +13,7 @@ public class T2CoValidMap<K,V> extends HashMap<K, V> {
     public V get(Object o){
         V v = (V)super.get(o);
         
-        if(v == null) {
+        if (v == null) {
         	throw new IllegalArgumentException("key " + o + " doesn't exist");
         }
         

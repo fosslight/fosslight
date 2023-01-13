@@ -77,10 +77,10 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
 		
-		if(projectCnt > 0) {
+		if (projectCnt > 0) {
 			list = apiProjectMapper.selectProject(paramMap);
 			
-			for(Map<String, Object> map : list) {
+			for (Map<String, Object> map : list) {
 				String prjId = (String) map.get("prjId").toString();
 				String status = (String) map.get("status");
 				String distributionStatus = (String) map.get("distributionStatus");
@@ -114,8 +114,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String ossReportFlag = (String) paramMap.get("ossReportFlag");
 		List<String> prjIdList = (List<String>) paramMap.get("prjId");
 		
-		if(prjIdList != null) {
-			if(isEmpty(ossReportFlag)) {
+		if (prjIdList != null) {
+			if (isEmpty(ossReportFlag)) {
 				ossReportFlag = CoConstDef.FLAG_NO;
 				
 				paramMap.put("ossReportFlag", ossReportFlag);
@@ -150,12 +150,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		try {
 			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList)) {
-				for(String s : errMsgList) { // error 처리
-					if(isEmpty(s)) {
+				for (String s : errMsgList) { // error 처리
+					if (isEmpty(s)) {
 						continue;
 					}
 					
-					if(!isEmpty(errMsg)) {
+					if (!isEmpty(errMsg)) {
 						errMsg += "<br/>";
 					}
 					
@@ -167,19 +167,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			errMsg = e.getMessage();
 		}
 		
-		for(String s : errMsgList) {
-			if(isEmpty(s)) {
+		for (String s : errMsgList) {
+			if (isEmpty(s)) {
 				continue;
 			}
 			
-			if(!isEmpty(errMsg)) {
+			if (!isEmpty(errMsg)) {
 				errMsg += "<br/>";
 			}
 			
 			errMsg += s;
 		}
 		
-		if(isEmpty(errMsg)) {
+		if (isEmpty(errMsg)) {
 			 // Excel file Data를 duplicate Data에대해 merge하고 reset & Load 함.
 			Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(null, null, null, reportData, ufile.getRegistSeq(), readType);
 			List<ProjectIdentification> OssComponents = (List<ProjectIdentification>) resultMap.get("mainData");
@@ -209,18 +209,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> checkHeaderSheetName = new HashMap<String, Object>();
 		
 		try {
-			if(resultTxtBean != null) {
+			if (resultTxtBean != null) {
 				resultFileId = resultTxtBean.getRegistFileId();
 			}
 			
 			// 1) build image를 기준으로 oss data mapping (공통)
 			if (!ExcelUtil.readAndroidBuildImage("BIN (Android)", true, sheet, ossReportfileId, resultFileId, reportData, errMsgList, checkHeaderSheetName)) {
-				for(String s : errMsgList) { // error 처리
-					if(isEmpty(s)) {
+				for (String s : errMsgList) { // error 처리
+					if (isEmpty(s)) {
 						continue;
 					}
 					
-					if(!isEmpty(errMsg)) {
+					if (!isEmpty(errMsg)) {
 						errMsg += "<br/>";
 					}
 					
@@ -231,19 +231,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			log.error(e.getMessage(), e);
 		}
 		
-		for(String s : errMsgList) {
-			if(isEmpty(s)) {
+		for (String s : errMsgList) {
+			if (isEmpty(s)) {
 				continue;
 			}
 			
-			if(!isEmpty(errMsg)) {
+			if (!isEmpty(errMsg)) {
 				errMsg += "<br/>";
 			}
 			
 			errMsg += s;
 		}
 		
-		if(isEmpty(errMsg)) {
+		if (isEmpty(errMsg)) {
 			// result.text에 의해 변경된 내용이 있을 경우 사용자 표시
 			// validator에서 session에 격납한다.
 			String resultTextChangeHisStr = "";
@@ -271,7 +271,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			try {
 	            String fullName = noticeHtmlBean.getFilePath() + "/" + noticeHtmlBean.getFileName();
 	            
-	            if("xml".equalsIgnoreCase(FilenameUtils.getExtension(noticeHtmlBean.getFileName()))) {
+	            if ("xml".equalsIgnoreCase(FilenameUtils.getExtension(noticeHtmlBean.getFileName()))) {
 	                noticeBinaryList = CommonFunction.getAndroidNoticeBinaryXmlList(fullName);
 	            } else {
 	                noticeBinaryList = CommonFunction.getAndroidNoticeBinaryList(FileUtils.readFileToString(new File(fullName)));
@@ -280,7 +280,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	            Map<String, Object> convertObj = CommonFunction.convertToProjectIdentificationList(reportData, ossReportfileId);
 				noticeCheckResultMap = projectService.applySrcAndroidModel((List<ProjectIdentification>)convertObj.get("resultList"), noticeBinaryList);
 				
-				if(convertObj.containsKey("versionChangeList")) {
+				if (convertObj.containsKey("versionChangeList")) {
 					versionChangedList = (List<String>) convertObj.get("versionChangeList");
 				}
 			} catch (IOException ioe) {
@@ -298,28 +298,28 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			String systemChangeHisStr = "";
 			
-			if(!isEmpty(resultTextChangeHisStr)) {
+			if (!isEmpty(resultTextChangeHisStr)) {
 				systemChangeHisStr = resultTextChangeHisStr;
 			}
 			
-			if(!isEmpty(licenseNameChangeHisStr)) {
-				if(!isEmpty(systemChangeHisStr)) {
+			if (!isEmpty(licenseNameChangeHisStr)) {
+				if (!isEmpty(systemChangeHisStr)) {
 					systemChangeHisStr += "<br><br>";
 				}
 				
 				systemChangeHisStr += licenseNameChangeHisStr;
 			}
 			
-			if(versionChangedList != null) {
+			if (versionChangedList != null) {
 				String versionChangedStr = "<b>The following open source version below has been changed to a registered version</b><br><br>";
 				
-				for(String s : versionChangedList) {
+				for (String s : versionChangedList) {
 					versionChangedStr += "<br>" + s;
 				}
 				
 				putSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, ossReportfileId), versionChangedStr);
 				
-				if(!isEmpty(systemChangeHisStr)) {
+				if (!isEmpty(systemChangeHisStr)) {
 					systemChangeHisStr += "<br><br>";
 				}
 				
@@ -347,7 +347,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> result = new HashMap<String, Object>();
 		int duplicateCnt = apiProjectMapper.checkProject(paramMap);
 		
-		if(duplicateCnt == 0) {
+		if (duplicateCnt == 0) {
 			apiProjectMapper.createProject(paramMap);
 			
 			result.put("prjId", (String) paramMap.get("prjId").toString());
@@ -374,7 +374,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		paramMap.put("prjId", prjId);
 		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
-		if(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
+		if (CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
 			paramMap.put("roleOutLicenseIdList", CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST);
 		}
 		
@@ -382,7 +382,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		List<Map<String, Object>> list = apiProjectMapper.selectBomList(paramMap);
 		
-		for(Map<String, Object> li : list) {
+		for (Map<String, Object> li : list) {
 			String licenseId = CommonFunction.removeDuplicateStringToken(avoidNull((String) li.get("licenseId")).toString(), ",");
 			String licenseName = CommonFunction.removeDuplicateStringToken((String) li.get("licenseName"), ",");
 			String componentId = String.valueOf(li.get("componentId"));
@@ -404,13 +404,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String groupColumn = "";
 		boolean ossNameEmptyFlag = false;
 		
-		for(Map<String, Object> li : list) {
-			if(isEmpty(groupColumn)) {
+		for (Map<String, Object> li : list) {
+			if (isEmpty(groupColumn)) {
 				groupColumn = (String) li.get("ossName") + "-" + avoidNull((String) li.get("ossVersion"));
 			}
 			
-			if("-".equals(groupColumn)) {
-				if("NA".equals((String) li.get("licenseType"))) {
+			if ("-".equals(groupColumn)) {
+				if ("NA".equals((String) li.get("licenseType"))) {
 					ossNameEmptyFlag = true;
 				}
 			}
@@ -418,7 +418,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			String ossVersion = avoidNull((String) li.get("ossVersion"));
 			String licenseType = avoidNull((String) li.get("licenseType"));
 			
-			if(groupColumn.equals((String) li.get("ossName") + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
+			if (groupColumn.equals((String) li.get("ossName") + "-" + ossVersion) // 같은 groupColumn이면 데이터를 쌓음
 					&& !("-".equals((String) li.get("ossName")) 
 					&& !"NA".equals(licenseType))
 					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
@@ -438,11 +438,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	@SuppressWarnings("unchecked")
 	public static void setMergeData(List<Map<String, Object>> tempData, List<Map<String, Object>> resultGridData){
-		if(tempData.size() > 0) {
+		if (tempData.size() > 0) {
 			Collections.sort(tempData, new Comparator<Map<String, Object>>() {
 				@Override
 				public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-					if(((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
+					if (((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) { // license name이 같으면 bomList조회해온 순서 그대로 유지함. license name이 다르면 순서변경
 						return 1;
 					}else {
 						return -1;
@@ -451,8 +451,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			});
 			
 			Map<String, Object> rtnBean = null;
-			for(Map<String, Object> temp : tempData) {
-				if(rtnBean == null) {
+			for (Map<String, Object> temp : tempData) {
+				if (rtnBean == null) {
 					rtnBean = temp;
 					
 					continue;
@@ -462,8 +462,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				String rtnLicenseName = (String) rtnBean.get("licenseName");
 				String key = (String) temp.get("ossName") + "-" + (String) temp.get("licenseType");
 				
-				if("--NA".equals(key)) {
-					if(!rtnLicenseName.contains(tempLicenseName)) {
+				if ("--NA".equals(key)) {
+					if (!rtnLicenseName.contains(tempLicenseName)) {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						
@@ -472,18 +472,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 				
 				// 동일한 oss name과 version일 경우 license 정보를 중복제거하여 merge 함.
-				for(String tempStr : tempLicenseName.split(",")) {
+				for (String tempStr : tempLicenseName.split(",")) {
 					boolean equalFlag = false;
 					
-					for(String rtnStr : rtnLicenseName.split(",")) {
-						if(rtnStr.equals(tempStr)) {
+					for (String rtnStr : rtnLicenseName.split(",")) {
+						if (rtnStr.equals(tempStr)) {
 							equalFlag = true;
 							
 							break;
 						}
 					}
 					
-					if(!equalFlag) {
+					if (!equalFlag) {
 						rtnBean.replace("LICENSE_NAME", rtnLicenseName + "," + tempStr);
 					}
 				}
@@ -492,14 +492,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				List<Map<String, Object>> tempOssComponentsLicenseList = (List<Map<String, Object>>) temp.get("ossComponentsLicenseList");
 				List<Map<String, Object>> rtnOssComponentsLicenseList = (List<Map<String, Object>>) rtnBean.get("ossComponentsLicenseList");
 				
-				for(Map<String, Object> list : tempOssComponentsLicenseList) {
+				for (Map<String, Object> list : tempOssComponentsLicenseList) {
 					int equalsItemList = (int) rtnOssComponentsLicenseList
 														.stream()
 														.filter(e -> ((String) list.get("licenseName")).equals((String) e.get("licenseName"))) // 동일한 licenseName을 filter
 														.collect(Collectors.toList()) // return을 list로변환
 														.size(); // 해당 list의 size
 					
-					if(equalsItemList == 0) {
+					if (equalsItemList == 0) {
 						rtnComponentLicenseList.add(list);
 					}
 				}
@@ -544,9 +544,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		// Integrate Yaml Format, Vulnerability
-		for(String resultYamlFormatKey: resultYamlFormat.keySet()){
+		for (String resultYamlFormatKey: resultYamlFormat.keySet()){
 			List<Map<String, Object>> yamlFormatList = resultYamlFormat.get(resultYamlFormatKey);
-			for(Map<String, Object> yamlFormatMap: yamlFormatList) {
+			for (Map<String, Object> yamlFormatMap: yamlFormatList) {
 				String version = (String) yamlFormatMap.get("version");
 				List<Map<String, Object>> maxScoreNvdInfoList = apiVulnerabilityService.selectMaxScoreNvdInfo(resultYamlFormatKey, version);
 
@@ -589,11 +589,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				).collect(Collectors.toList());
 		
 		// status > add
-		for(Map<String, Object> after : filteredAfterBomList) {
+		for (Map<String, Object> after : filteredAfterBomList) {
 			String ossName = (String) after.get("ossName");
 			int addTargetCnt = filteredBeforeBomList.stream().filter(before -> ((String)before.get("ossName")).equals(ossName)).collect(Collectors.toList()).size();
 			
-			if(addTargetCnt == 0) {
+			if (addTargetCnt == 0) {
 				Map<String, Object> addMap = new LinkedHashMap<String, Object>();
 				
 				addMap.put("name", (String) after.get("ossName"));
@@ -605,11 +605,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		// status > delete
-		for(Map<String, Object> before : filteredBeforeBomList) {
+		for (Map<String, Object> before : filteredBeforeBomList) {
 			String ossName = (String) before.get("ossName");
 			List<Map<String, Object>> afterList = filteredAfterBomList.stream().filter(after -> ((String)after.get("ossName")).equals(ossName)).collect(Collectors.toList());
 			
-			if(afterList.size() == 0) {
+			if (afterList.size() == 0) {
 				Map<String, Object> deleteMap = new LinkedHashMap<String, Object>();
 				
 				deleteMap.put("name", (String) before.get("ossName"));
@@ -620,19 +620,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		// status > change
-		if(!filteredBeforeBomList.isEmpty() && !filteredAfterBomList.isEmpty()) {
+		if (!filteredBeforeBomList.isEmpty() && !filteredAfterBomList.isEmpty()) {
 			List<Map<String, Object>> deduplicatedBeforeBomList = new ArrayList<>();
 			List<Map<String, Object>> deduplicatedAfterBomList = new ArrayList<>();
 			
 			boolean firstFlag = true;
 			boolean deduplicateFlag = false;
 			
-			for(Map<String, Object> filteredBeforeBom : filteredBeforeBomList) {
+			for (Map<String, Object> filteredBeforeBom : filteredBeforeBomList) {
 				String ossName = (String) filteredBeforeBom.get("ossName");
 				String ossVersion = (String) filteredBeforeBom.get("ossVersion");
 				String licenseName = (String) filteredBeforeBom.get("licenseName");
 				
-				if(firstFlag) {
+				if (firstFlag) {
 					List<Map<String, Object>> addBeforeBomList = new ArrayList<>();
 					Map<String, Object> addBeforeBom = new LinkedHashMap<>();
 					Map<String, Object> addBeforeBom2 = new HashMap<>();
@@ -645,8 +645,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					
 					firstFlag = false;
 				} else {
-					for(Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
-						if(deduplicatedBeforeBom.containsKey(ossName)) {
+					for (Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
+						if (deduplicatedBeforeBom.containsKey(ossName)) {
 							@SuppressWarnings("unchecked")
 							List<Map<String, Object>> orgValues = (List<Map<String, Object>>) deduplicatedBeforeBom.get(ossName);
 							
@@ -659,7 +659,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						}
 					}
 					
-					if(!deduplicateFlag) {
+					if (!deduplicateFlag) {
 						List<Map<String, Object>> addBeforeBomList = new ArrayList<>();
 						Map<String, Object> addBeforeBom = new LinkedHashMap<>();
 						Map<String, Object> addBeforeBom2 = new HashMap<>();
@@ -674,12 +674,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 			}
 			
-			for(Map<String, Object> filteredAfterBom : filteredAfterBomList) {
+			for (Map<String, Object> filteredAfterBom : filteredAfterBomList) {
 				String ossName = (String) filteredAfterBom.get("ossName");
 				String ossVersion = (String) filteredAfterBom.get("ossVersion");
 				String licenseName = (String) filteredAfterBom.get("licenseName");
 				
-				if(firstFlag) {
+				if (firstFlag) {
 					List<Map<String, Object>> addAfterBomList = new ArrayList<>();
 					Map<String, Object> addAfterBom = new LinkedHashMap<>();
 					Map<String, Object> addAfterBom2 = new HashMap<>();
@@ -692,8 +692,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					
 					firstFlag = false;
 				} else {
-					for(Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
-						if(deduplicatedAfterBom.containsKey(ossName)) {
+					for (Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
+						if (deduplicatedAfterBom.containsKey(ossName)) {
 							@SuppressWarnings("unchecked")
 							List<Map<String, Object>> orgValues = (List<Map<String, Object>>) deduplicatedAfterBom.get(ossName);
 							
@@ -706,7 +706,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						} 
 					}
 					
-					if(!deduplicateFlag) {
+					if (!deduplicateFlag) {
 						List<Map<String, Object>> addAfterBomList = new ArrayList<>();
 						Map<String, Object> addAfterBom = new LinkedHashMap<>();
 						Map<String, Object> addAfterBom2 = new HashMap<>();
@@ -721,11 +721,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 			}
 			
-			for(Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
-				for(String beforeKey : deduplicatedBeforeBom.keySet()) {
-					for(Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
-						for(String afterKey : deduplicatedAfterBom.keySet()) {
-							if(beforeKey.equalsIgnoreCase(afterKey)) {
+			for (Map<String, Object> deduplicatedBeforeBom : deduplicatedBeforeBomList) {
+				for (String beforeKey : deduplicatedBeforeBom.keySet()) {
+					for (Map<String, Object> deduplicatedAfterBom : deduplicatedAfterBomList) {
+						for (String afterKey : deduplicatedAfterBom.keySet()) {
+							if (beforeKey.equalsIgnoreCase(afterKey)) {
 								Map<String, Object> changeMap = new LinkedHashMap<String, Object>();
 								
 								changeMap.put("name", afterKey);
@@ -771,7 +771,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<Map<String, Object>> list = apiProjectMapper.selectProject(paramMap);
 		List<Map<String, Object>> contents = new ArrayList<Map<String, Object>>();
 		
-		for(Map<String, Object> map : list) {
+		for (Map<String, Object> map : list) {
 			Map<String, Object> modelMap = new HashMap<String, Object>();
 			String prjId = (String) map.get("prjId").toString();
 			List<Map<String, Object>> modelList = apiProjectMapper.selectModelList(prjId);
@@ -795,7 +795,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public List<Map<String, Object>> getVerifyOssList(Map<String, Object> project) {
 		List<Map<String, Object>> verifyFilePathList = apiProjectMapper.selectVerifyOssList(project);
 		
-		if(verifyFilePathList != null && !verifyFilePathList.isEmpty() && verifyFilePathList.get(0) == null) {
+		if (verifyFilePathList != null && !verifyFilePathList.isEmpty() && verifyFilePathList.get(0) == null) {
 			verifyFilePathList = new ArrayList<>();
 		}
 		
@@ -812,12 +812,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		final Comparator<Map<String, Object>> comp = Comparator.comparing((Map<String, Object> o) -> o.get("ossName")+"|"+ o.get("ossVersion"));
 		gridData = gridData.stream().sorted(comp).collect(Collectors.toList());
 		
-		for(Map<String, Object> info : gridData) {
-			if(isEmpty(groupColumn)) {
+		for (Map<String, Object> info : gridData) {
+			if (isEmpty(groupColumn)) {
 				groupColumn = (String) info.get("ossName") + "-" + (String) info.get("ossVersion");
 			}
 						
-			if(groupColumn.equals((String) info.get("ossName") + "-" + (String) info.get("ossVersion")) // 같은 groupColumn이면 데이터를 쌓음
+			if (groupColumn.equals((String) info.get("ossName") + "-" + (String) info.get("ossVersion")) // 같은 groupColumn이면 데이터를 쌓음
 					&& !("-".equals((String) info.get("ossName")) 
 					&& !"NA".equals((String) info.get("licenseType")))) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
@@ -836,11 +836,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 
 	private void setVerifyMergeData(List<Map<String, Object>> tempData, List<Map<String, Object>> resultGridData) {
-		if(tempData.size() > 0) {
+		if (tempData.size() > 0) {
 			Collections.sort(tempData, new Comparator<Map<String, Object>>() {
 				@Override
 				public int compare(Map<String, Object> o1, Map<String, Object> o2) {
-					if(((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) {
+					if (((String) o1.get("licenseName")).length() >= ((String) o2.get("licenseName")).length()) {
 						return 1;
 					}else {
 						return -1;
@@ -850,8 +850,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			Map<String, Object> rtnBean = null;
 			
-			for(Map<String, Object> temp : tempData) {
-				if(rtnBean == null) {
+			for (Map<String, Object> temp : tempData) {
+				if (rtnBean == null) {
 					rtnBean = temp;
 					
 					continue;
@@ -859,8 +859,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				
 				String key = (String) temp.get("ossName") + "-" + (String) temp.get("licenseType");
 				
-				if("--NA".equals(key)) {
-					if(!((String) rtnBean.get("licenseName")).contains((String) temp.get("licenseName"))) {
+				if ("--NA".equals(key)) {
+					if (!((String) rtnBean.get("licenseName")).contains((String) temp.get("licenseName"))) {
 						resultGridData.add(rtnBean);
 						rtnBean = temp;
 						
@@ -868,18 +868,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 				}
 				
-				for(String licenseName : ((String) temp.get("licenseName")).split(",")) {
+				for (String licenseName : ((String) temp.get("licenseName")).split(",")) {
 					boolean equalFlag = false;
 					
-					for(String rtnLicenseName : ((String) rtnBean.get("licenseName")).split(",")) {
-						if(rtnLicenseName.equals(licenseName)) {
+					for (String rtnLicenseName : ((String) rtnBean.get("licenseName")).split(",")) {
+						if (rtnLicenseName.equals(licenseName)) {
 							equalFlag = true;
 							
 							break;
 						}
 					}
 					
-					if(!equalFlag) {
+					if (!equalFlag) {
 						rtnBean.put("licenseName", (String) rtnBean.get("licenseName") + "," + licenseName);
 					}
 				}
@@ -909,7 +909,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		prjParam.put("packageFileId2", newPackagingFileIdList.get(1));
 		prjParam.put("packageFileId3", newPackagingFileIdList.get(2));
 		
-		for(String fileSeq : fileSeqs){
+		for (String fileSeq : fileSeqs){
 			Map<String, Object> paramT2File = new HashMap<>();
 			
 			paramT2File.put("fileSeq", fileSeq);
@@ -920,26 +920,26 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 		List<Map<String, Object>> result = apiFileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
 
-		if(result.size() > 0){
-			for(Map<String, Object> res : result){
+		if (result.size() > 0){
+			for (Map<String, Object> res : result){
 				String rtnFilePath = (String) res.get("logiPath");
 				String rtnFileName = (String) res.get("logiNm");
 				String rtnFileSeq = Integer.toString((int) res.get("fileSeq"));
 				
-				if(publicUrl.equals(rtnFilePath)){
+				if (publicUrl.equals(rtnFilePath)){
 					// select한 filePath가 upload Dir 일 경우 해당 파일만 삭제함.
 					file = new File(rtnFilePath + "/" + rtnFileName);
 					
 					int reuseCnt = apiFileMapper.getPackgingReuseCnt(rtnFileName);
 					
-					if(reuseCnt == 0){
+					if (reuseCnt == 0){
 						Map<String, Object> delFile = new HashMap<>();
 						delFile.put("fileSeq", rtnFileSeq);
 						delFile.put("gubn", "A");
 						int returnSuccess = apiFileMapper.updateFileDelYnKessan(delFile);
 						
-						if(returnSuccess > 0) {
-							if(file.delete()){
+						if (returnSuccess > 0) {
+							if (file.delete()){
 								log.debug(rtnFilePath + "/" + rtnFileName + " is delete success.");
 							} else {
 								log.debug(rtnFilePath + "/" + rtnFileName + " is delete failed.");
@@ -958,39 +958,39 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		try {
 			Map<String, Object> project = apiProjectMapper.selectProjectMaster(prjParam);
 			ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
-			if(project.containsKey("packageFileId")) {
-				if(project.get("packageFileId") != null && !("").equals(Integer.toString((int) project.get("packageFileId")))){
+			if (project.containsKey("packageFileId")) {
+				if (project.get("packageFileId") != null && !("").equals(Integer.toString((int) project.get("packageFileId")))){
 					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId")));
 				}
 			}
-			if(project.containsKey("packageFileId2")) {
-				if(project.get("packageFileId2") != null && !("").equals(Integer.toString((int) project.get("packageFileId2")))){
+			if (project.containsKey("packageFileId2")) {
+				if (project.get("packageFileId2") != null && !("").equals(Integer.toString((int) project.get("packageFileId2")))){
 					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId2")));
 				}
 			}
-			if(project.containsKey("packageFileId3")) {
-				if(project.get("packageFileId3") != null && !("").equals(Integer.toString((int) project.get("packageFileId3")))){
+			if (project.containsKey("packageFileId3")) {
+				if (project.get("packageFileId3") != null && !("").equals(Integer.toString((int) project.get("packageFileId3")))){
 					origPackagingFileIdList.add(Integer.toString((int) project.get("packageFileId3")));
 				}
 			}
 						
 			int idx = 0;
 			
-			for(String fileId : origPackagingFileIdList){
+			for (String fileId : origPackagingFileIdList){
 				Map<String, Object> fileInfo = new HashMap<>();
 				
-				if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+				if (!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
 					//fileInfo.setFileSeq(fileId);
 					fileInfo = apiFileMapper.selectFileInfo(fileId);
 					deleteComment += "Packaging file, "+ (String) fileInfo.get("origNm") +", was deleted by "+loginUserName()+". <br>";
 				}
 				
-				if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+				if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
 					//fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
 					fileInfo = apiFileMapper.selectFileInfo(newPackagingFileIdList.get(idx));
 					oss.fosslight.domain.File resultFile = (oss.fosslight.domain.File) apiProjectMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
 					
-					if(CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
+					if (CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
 						uploadComment += "Packaging file, "+ (String) fileInfo.get("origNm")+", was loaded from Project ID: "+resultFile.getRefPrjId()+" by "+loginUserName()+". <br>";
 					} else {
 						uploadComment += "Packaging file, "+ (String) fileInfo.get("origNm")+", was uploaded by "+loginUserName()+". <br>";
@@ -1013,30 +1013,30 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		ArrayList<String> LogiNms = new ArrayList<String>();
 		ArrayList<String> reuseNms = new ArrayList<String>();
 		
-		for(Map<String, Object> uploadFileInfo : uploadFileInfos){
+		for (Map<String, Object> uploadFileInfo : uploadFileInfos){
 			LogiNms.add((String) uploadFileInfo.get("logiNm"));
 		}
 		
 		// 현재 proejct Packaging File 중 재사용중인 packaging File 이 있다면 제거 불가
 		List<Map<String, Object>> reusePackaging = apiFileMapper.getReusePackagingInfo();
 		
-		for(Map<String, Object> reuse : reusePackaging){
+		for (Map<String, Object> reuse : reusePackaging){
 			reuseNms.add((String) reuse.get("logiNm"));
 		}
 		
-		if(file.exists()){
-			for(File f : file.listFiles()){
+		if (file.exists()){
+			for (File f : file.listFiles()){
 				String fileNm = f.getName();
 				
-				if(!LogiNms.contains(fileNm)){
+				if (!LogiNms.contains(fileNm)){
 					Map<String, Object> delFile = new HashMap<String, Object>();
 					delFile.put("logiPath", url);
 					delFile.put("logiNm", f.getName());
 					
 					int returnSuccess = apiFileMapper.updateReuseChkFileDelYnByFilePathNm(delFile);
 					
-					if(returnSuccess > 0 && !reuseNms.contains(fileNm)){
-						if(f.delete()){
+					if (returnSuccess > 0 && !reuseNms.contains(fileNm)){
+						if (f.delete()){
 							log.debug(url + "/" + f.getName() + " is delete success.");
 						}else{
 							log.debug(url + "/" + f.getName() + " is delete failed.");
@@ -1049,12 +1049,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		// 재사용을 했었던 file중 다른 project에서도 재사용을 하지 않은 file 있는지 확인하고 재사용을 안한다면 file 삭제 / 추후 reuse하는 다른 project에서도 reuseFlag가 N이 되면 지우는 case이므로 log는 남기지 않음.
 		List<Map<String, Object>> reusePackagingFileList = apiFileMapper.getPackgingReuseCntToList(prjId);
 		
-		for(Map<String, Object> reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
+		for (Map<String, Object> reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
 			File reuseFile = new File((String) reusePackagingFile.get("logiPath"));
 			
-			if(reuseFile.exists()){
-				for(File f : reuseFile.listFiles()){
-					if(((String) reusePackagingFile.get("logiNm")).equals(f.getName())){
+			if (reuseFile.exists()){
+				for (File f : reuseFile.listFiles()){
+					if (((String) reusePackagingFile.get("logiNm")).equals(f.getName())){
 						Map<String, Object> delFile = new HashMap<>();
 						delFile.put("logiPath", reusePackagingFile.get("logiPath"));
 						delFile.put("logiNm", f.getName());
@@ -1067,8 +1067,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						
 						apiFileMapper.setReusePackagingFileHidden(refPrjId, logiPath, logiNm);
 						
-						if(returnSuccess > 0){
-							if(f.delete()){
+						if (returnSuccess > 0){
+							if (f.delete()){
 								log.debug(url + "/" + f.getName() + " is delete success.");
 							}else{
 								log.debug(url + "/" + f.getName() + " is delete failed.");
@@ -1088,7 +1088,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		int result = apiProjectMapper.checkPackagingFileId(prjId, packageFileId, packageFileId2, packageFileId3);
 		
-		if(result > 0){
+		if (result > 0){
 			return false;
 		}else{
 			return true;
@@ -1134,14 +1134,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			{
 				prjInfo = getProjectBasicInfo(prjId);
 				
-				if(prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals((String) prjInfo.get("verificationStatus"))) {
+				if (prjInfo != null && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals((String) prjInfo.get("verificationStatus"))) {
 					doUpdate = false;
 				}
 			}
 			
 			File chk_list_file = new File(VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list_"+packagingFileIdx);
 			
-			if(!chk_list_file.exists()) {
+			if (!chk_list_file.exists()) {
 				isChangedPackageFile = true;
 			}
 			
@@ -1151,16 +1151,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			log.debug("[API] VERIFY TARGET FILE : " + filePath);
 			
-			if(packagingFileIdx == 1 && isChangedPackageFile) {
+			if (packagingFileIdx == 1 && isChangedPackageFile) {
 				ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_OUTPUT + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 			}
 			
 			String exceptionWordsPatten = "proprietary\\|commercial";
-			if(checkExceptionWordsList != null && !checkExceptionWordsList.isEmpty()) {
+			if (checkExceptionWordsList != null && !checkExceptionWordsList.isEmpty()) {
 				exceptionWordsPatten = "";
 				
-				for(String s : checkExceptionWordsList) {
-					if(!isEmpty(exceptionWordsPatten)) {
+				for (String s : checkExceptionWordsList) {
+					if (!isEmpty(exceptionWordsPatten)) {
 						exceptionWordsPatten += "\\|";
 					}
 					
@@ -1172,7 +1172,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			log.info("[API] VERIFY OrigNm : " + file.get("origNm"));
 			String projectNm = ((String) prjInfo.get("prjName")).replace(" ", "@@");
 			
-			if(prjInfo.containsKey("prjVersion") && prjInfo.get("prjVersion") != null && !("").equals((String) prjInfo.get("prjVersion"))){
+			if (prjInfo.containsKey("prjVersion") && prjInfo.get("prjVersion") != null && !("").equals((String) prjInfo.get("prjVersion"))){
 				projectNm +="_"+((String) prjInfo.get("prjVersion")).replace(" ", "@@");
 			}
 			
@@ -1183,7 +1183,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 			log.info("[API] VERIFY START : " + prjId);
 			
-			if(isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
+			if (isChangedPackageFile){ // packageFile을 변경하지 않고 다시 verify할 경우 아래 shellCommander는 중복 동작 하지 않음.
 				ShellCommander.shellCommandWaitFor(commandStr);
 			}
 			
@@ -1193,7 +1193,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			//STEP 3 : 결과 문자열 리스트값을 배열로 변환 		
 			String chk_list_file_path = null;
 			
-			if(packagingFileIdx == 1) {
+			if (packagingFileIdx == 1) {
 				chk_list_file_path = VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list_1";
 			} else {
 				chk_list_file_path = VERIFY_PATH_OUTPUT+"/"+prjId+"/verify_chk_list";
@@ -1220,7 +1220,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			log.debug("[API] rePath : " + rePath);
 			
-			if(rePath.indexOf(".tar") > -1){
+			if (rePath.indexOf(".tar") > -1){
 				rePath = rePath.substring(0, rePath.lastIndexOf(".tar"));
 			}
 			
@@ -1233,30 +1233,30 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
 			List<String> readmePathList = new ArrayList<String>();
-			if(result != null) {
+			if (result != null) {
 				boolean isFirst = true;
 				
-				for(String s : result) {
-					if(!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
+				for (String s : result) {
+					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
 
 						boolean isFile = s.endsWith("*");
 						s = s.replace(VERIFY_PATH_DECOMP +"/" + prjId + "/", "");
 						s = s.replaceAll("//", "/");
 						
-						if(s.startsWith("/")) {
+						if (s.startsWith("/")) {
 							s = s.substring(1);
 						}
 						
-						if(s.endsWith("*")) {
+						if (s.endsWith("*")) {
 							s = s.substring(0, s.length()-1);
 						}
 						
-						if(s.endsWith("/")) {
+						if (s.endsWith("/")) {
 							s = s.substring(0, s.length() -1);
 						}
 						
-						if(isFirst) {
+						if (isFirst) {
 							// 첫번째 path를 압축을 푼 처번째 dir로 사용
 							decompressionRootPath = s;
 							
@@ -1266,18 +1266,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						int cnt = 0;
 						
 						//파일 path인 경우, 상위 dir의 파일 count를 +1 한다.
-						if(isFile){
+						if (isFile){
 							String _dir = s;
 							
-							if(s.toUpperCase().indexOf("README") > -1) {
+							if (s.toUpperCase().indexOf("README") > -1) {
 								readmePathList.add(s);
 							}
 							
-							if(s.indexOf("/") > -1) {
+							if (s.indexOf("/") > -1) {
 								_dir = s.substring(0, s.lastIndexOf("/"));
 							}
 							
-							if(deCompResultMap.containsKey(_dir)) {
+							if (deCompResultMap.containsKey(_dir)) {
 								cnt = deCompResultMap.get(_dir);
 							}
 							
@@ -1293,8 +1293,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			List<String> paths = sortByValue(deCompResultMap);
 			
-			for(String path : paths){
-				if(deCompResultMap.get(path) != null){
+			for (String path : paths){
+				if (deCompResultMap.get(path) != null){
 					deCompResultMap = setAddFileCount(deCompResultMap, path, (int)deCompResultMap.get(path));
 				}
 			}
@@ -1344,11 +1344,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
-				if(replaceFilePath.startsWith("/")) {
+				if (replaceFilePath.startsWith("/")) {
 					replaceFilePath = replaceFilePath.substring(1);
 				}
 				
-				if(replaceFilePath.endsWith("/")) {
+				if (replaceFilePath.endsWith("/")) {
 					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
 				}
 				
@@ -1359,11 +1359,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				
 				String addRootDir = decompressionDirName + "/" + path;
 				
-				if(addRootDir.startsWith("/")) {
+				if (addRootDir.startsWith("/")) {
 					addRootDir = addRootDir.substring(1);
 				}
 				
-				if(addRootDir.endsWith("/")) {
+				if (addRootDir.endsWith("/")) {
 					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
 				}
 				
@@ -1374,11 +1374,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				
 				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
-				if(addRootDirReplaceFilePath.startsWith("/")) {
+				if (addRootDirReplaceFilePath.startsWith("/")) {
 					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
 				}
 				
-				if(addRootDirReplaceFilePath.endsWith("/")) {
+				if (addRootDirReplaceFilePath.endsWith("/")) {
 					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
 				}
 				
@@ -1388,11 +1388,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
 
 				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
-				if(replaceRootDir.startsWith("/")) {
+				if (replaceRootDir.startsWith("/")) {
 					replaceRootDir = replaceRootDir.substring(1);
 				}
 				
-				if(replaceRootDir.endsWith("/")) {
+				if (replaceRootDir.endsWith("/")) {
 					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
 				}
 				
@@ -1403,11 +1403,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				
 				String replaceRootDirReplaceFilePath = replaceRootDir;
 				
-				if(replaceRootDirReplaceFilePath.endsWith("*")) {
+				if (replaceRootDirReplaceFilePath.endsWith("*")) {
 					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
 				}
 				
-				if(replaceRootDirReplaceFilePath.endsWith("/")) {
+				if (replaceRootDirReplaceFilePath.endsWith("/")) {
 					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
 				}
 				
@@ -1418,11 +1418,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				
 				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
 				
-				if(replaceDecomFileRootDir.startsWith("/")) {
+				if (replaceDecomFileRootDir.startsWith("/")) {
 					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
 				}
 				
-				if(replaceDecomFileRootDir.endsWith("/")) {
+				if (replaceDecomFileRootDir.endsWith("/")) {
 					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
 				}
 				
@@ -1435,7 +1435,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			// 통합 Map 에 모든 허용 패턴을 저장
 			int idx = 0;
 			
-			for(String s : pathCheckList1) {
+			for (String s : pathCheckList1) {
 				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
 				checkResultMap.put(pathCheckList2.get(idx), deCompResultMap.containsKey(pathCheckList2.get(idx)) ? deCompResultMap.get(pathCheckList2.get(idx)) : 0);
 				checkResultMap.put(pathCheckList3.get(idx), deCompResultMap.containsKey(pathCheckList3.get(idx)) ? deCompResultMap.get(pathCheckList3.get(idx)) : 0);
@@ -1486,24 +1486,24 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			log.info("[API] VERIFY Path Check START -----------------");
 			
-			for(String gridPath : gridFilePaths){
-				if(!separatorErrFlag) {
+			for (String gridPath : gridFilePaths){
+				if (!separatorErrFlag) {
 					separatorErrFlag = gridPath.contains("\\") ? true : false;
 				}
 				
 				//사용자가 * 입력했을때
-				if(!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
-					if(gridPath.endsWith("*")) {
+				if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
+					if (gridPath.endsWith("*")) {
 						gridPath = gridPath.substring(0, gridPath.length()-1);
 					}
-					if(gridPath.startsWith(".")) {
+					if (gridPath.startsWith(".")) {
 						gridPath = gridPath.substring(1, gridPath.length());
 					}
 					// 앞뒤 path구분 제거
-					if(gridPath.endsWith("/")) {
+					if (gridPath.endsWith("/")) {
 						gridPath = gridPath.substring(0, gridPath.length()-1);
 					}
-					if(gridPath.startsWith("/")) {
+					if (gridPath.startsWith("/")) {
 						gridPath = gridPath.substring(1);
 					}
 					
@@ -1515,17 +1515,17 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					 */
 					boolean resultFlag = false;
 					
-					if(checkResultMap.containsKey(gridPath)) {
+					if (checkResultMap.containsKey(gridPath)) {
 						resultFlag = true;
 						gFileCount = checkResultMap.get(gridPath);
 					}
 					
-					if(!resultFlag) {//path가 존재하지않을 때
+					if (!resultFlag) {//path가 존재하지않을 때
 						gValidIdxlist.add(gridComponentIds.get(gridIdx));
 					} else {//path가 존재할 때
 						// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
 						// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
-						if(gFileCount == 0) {
+						if (gFileCount == 0) {
 							gFileCount = 1;
 						}
 						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
@@ -1542,15 +1542,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			//STEP 4 : README 파일 존재 유무 확인(README 여러개 일경우도 생각해야함 ---차후)
 			
 			// depth가 낮은 readme 파일을 구하기 위해 sort
-			if(packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
+			if (packagingFileIdx == 1){ // packageFile에서 readMe File은 첫번째 file에서만 찾음.
 //				List<String> sortList = new ArrayList<>(deCompResultMap.keySet());
 				Collections.sort(readmePathList, new Comparator<String>() {
 
 					@Override
 					public int compare(String arg1, String arg2) {
-						if(arg1.split("\\/").length > arg2.split("\\/").length) {
+						if (arg1.split("\\/").length > arg2.split("\\/").length) {
 							return 1;
-						} else if(arg1.split("\\/").length < arg2.split("\\/").length) {
+						} else if (arg1.split("\\/").length < arg2.split("\\/").length) {
 							return -1;
 						} else {
 							return arg1.compareTo(arg2);
@@ -1559,33 +1559,33 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				});
 				
 //				String lastReadmeFilePath = "";
-				for(String r : readmePathList) {
+				for (String r : readmePathList) {
 					String _upperPath = avoidNull(r).toUpperCase();
 					
-					if(_upperPath.endsWith("/")) {
+					if (_upperPath.endsWith("/")) {
 						continue;
 					}
 					
 //					String _currentReadmeFilePath = _upperPath.indexOf("/") < 0 ? _upperPath : _upperPath.substring(0,_upperPath.lastIndexOf("/"));
 //					
-//					if(!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
-//						if(!isEmpty(readmePath)) {
+//					if (!lastReadmeFilePath.equals(_currentReadmeFilePath)) {
+//						if (!isEmpty(readmePath)) {
 //							break;
 //						}
 //						
 //						lastReadmeFilePath = _currentReadmeFilePath;
 //					}
 					
-					if(_upperPath.indexOf("/") > -1) {
+					if (_upperPath.indexOf("/") > -1) {
 						_upperPath = _upperPath.substring(_upperPath.lastIndexOf("/"), _upperPath.length());
 					}
 					
-					if(_upperPath.indexOf("README") > -1){
+					if (_upperPath.indexOf("README") > -1){
 						String _readmePath = r.replaceAll("\\n", "");
 						
 						int afterDepthCnt = StringUtils.countMatches(_readmePath, "/");
 						int beforeDepthCnt = StringUtils.countMatches(readmePath, "/");
-						if(isEmpty(readmePath) || beforeDepthCnt > afterDepthCnt) {
+						if (isEmpty(readmePath) || beforeDepthCnt > afterDepthCnt) {
 							readmePath = _readmePath;
 						}
 					}
@@ -1595,18 +1595,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			String readmeFileName = "";
 			//STEP 6 : README 파일 내용 출력
-			if(!StringUtil.isEmpty(readmePath)){
-				if(readmePath.indexOf("*") > -1){
+			if (!StringUtil.isEmpty(readmePath)){
+				if (readmePath.indexOf("*") > -1){
 					readmePath = readmePath.substring(0, readmePath.length()-1);
 				}
 				
 				readmeFileName = readmePath;
 				
-				if(readmeFileName.indexOf("/") > -1) {
+				if (readmeFileName.indexOf("/") > -1) {
 					readmeFileName = readmeFileName.substring(readmeFileName.lastIndexOf("/") + 1);
 				}
 				
-				if(readmePath.indexOf(" ") > -1) {
+				if (readmePath.indexOf(" ") > -1) {
 					log.info("do space replase ok");
 					
 					readmePath = readmePath.replaceAll(" ", "*");
@@ -1617,7 +1617,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				log.info("[API] VERIFY Copy Readme file START -----------------");
 				log.info("[API] VERIFY README MV PATH : " + VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath);
 				
-				if(isChangedPackageFile){
+				if (isChangedPackageFile){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "cp "+VERIFY_PATH_DECOMP +"/" + prjId +"/" + readmePath+ " " + VERIFY_PATH_OUTPUT +"/" + prjId +"/"});
 				}
 				
@@ -1625,7 +1625,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 			
 			//STEP 7 : README 파일 내용 DB 에 저장
-			if(doUpdate && packagingFileIdx == 1) {
+			if (doUpdate && packagingFileIdx == 1) {
 				log.debug("[API] VERIFY readme 등록");
 				
 				project.put("prjId", prjId);
@@ -1648,14 +1648,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			project.put("exceptFileContent", !isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
 			project.put("verifyFileContent", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
 			
-			if(doUpdate) {
+			if (doUpdate) {
 				registVerifyContents(project);
 			}
 			
 			log.debug("[API] VERIFY 파일내용 등록 완료");
 			
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
-			if(!isEmpty(exceptFileContent)) {
+			if (!isEmpty(exceptFileContent)) {
 				log.info("[API] VERIFY writhFile exceptFileContent file START -----------------");
 				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
@@ -1663,7 +1663,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				log.info("[API] VERIFY writhFile exceptFileContent file END -----------------");
 			}
 			
-			if(!isEmpty(verify_chk_list)) {
+			if (!isEmpty(verify_chk_list)) {
 				log.info("[API] VERIFY writhFile verify_chk_list file START -----------------");
 				
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_FILE_LIST, verify_chk_list.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
@@ -1672,7 +1672,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 			
 			resCd="10";
-			if(separatorErrFlag) {
+			if (separatorErrFlag) {
 				resMsg = getMessage("verify.path.error");
 			} else {
 				resMsg= getMessage(gValidIdxlist.isEmpty() ? "msg.common.success" : "msg.common.valid");
@@ -1687,12 +1687,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			//path not found.가 1건이라도 있으면 status_verify_yn의 flag는 N으로 저장함.
 			// packagingFileId, filePath는 1번만 저장하며, gValidIdxlist의 값때문에 마지막 fileSeq일때 저장함.
-			if(doUpdate && packagingFileIdx == fileSeqs.size()) {
+			if (doUpdate && packagingFileIdx == fileSeqs.size()) {
 				// verify 버튼 클릭시 file path를 저장한다.
-				if(gridComponentIds != null && !gridComponentIds.isEmpty()) {
+				if (gridComponentIds != null && !gridComponentIds.isEmpty()) {
 					int seq = 0;
 					
-					for(String s : gridComponentIds){
+					for (String s : gridComponentIds){
 						Map<String, Object> param = new HashMap<>();
 						param.put("componentId", s);
 						param.put("filePath", gridFilePaths.get(seq++));
@@ -1706,7 +1706,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if(prjInfo.containsKey("destributionStatus") && prjInfo.get("destributionStatus") != null && !("").equals(prjInfo.get("destributionStatus"))){
+					if (prjInfo.containsKey("destributionStatus") && prjInfo.get("destributionStatus") != null && !("").equals(prjInfo.get("destributionStatus"))){
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);
@@ -1729,7 +1729,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			resMsg="process failed. (server error)";
 		} finally {
 			try {
-				if(isChangedPackageFile){
+				if (isChangedPackageFile){
 					ShellCommander.shellCommandWaitFor(new String[]{"/bin/bash", "-c", "find " + VERIFY_PATH_DECOMP + " -maxdepth 1 -name "+prjId+" -type d -exec rm -rf {} \\;"});
 				}
 				
@@ -1765,7 +1765,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@Override
 	public void updateVerifyFileCount(ArrayList<String> fileCounts) {
-		for(String componentId : fileCounts){
+		for (String componentId : fileCounts){
 			Map<String, Object> param = new HashMap<>();
 			param.put("componentId", componentId);
 			param.put("verifyFileCount", " ");
@@ -1776,7 +1776,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@Override
 	public void updateVerifyFileCount(HashMap<String, Object> fileCounts) {
-		for(String componentId : fileCounts.keySet()){
+		for (String componentId : fileCounts.keySet()){
 			Map<String, Object> param = new HashMap<>();
 			param.put("componentId", componentId);
 			param.put("verifyFileCount", (String) fileCounts.get(componentId));
@@ -1796,7 +1796,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			int pFileCnt = deCompResultMap.get(url);
 			deCompResultMap.put(url, fileCnt + pFileCnt);
 			
-			if(deCompResultMap.get(url.substring(0, url.lastIndexOf("/"))) != null){
+			if (deCompResultMap.get(url.substring(0, url.lastIndexOf("/"))) != null){
 				setAddFileCount(deCompResultMap, url, fileCnt);
 			}
 			
@@ -1828,19 +1828,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> packageFileList = new ArrayList<>();
 		
 		if (packageFile.containsKey("packageFileId")) {
-			if(packageFile.get("packageFileId") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId")))) {
+			if (packageFile.get("packageFileId") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId")))) {
 				packageFileList.add(Integer.toString((int) packageFile.get("packageFileId")));
 			}
 		}
 		
 		if (packageFile.containsKey("packageFileId2")) {
-			if(packageFile.get("packageFileId2") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId2")))) {
+			if (packageFile.get("packageFileId2") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId2")))) {
 				packageFileList.add(Integer.toString((int) packageFile.get("packageFileId2")));
 			}
 		}
 		
 		if (packageFile.containsKey("packageFileId3")) {
-			if(packageFile.get("packageFileId3") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId3")))) {
+			if (packageFile.get("packageFileId3") != null && !("").equals(Integer.toString((int) packageFile.get("packageFileId3")))) {
 				packageFileList.add(Integer.toString((int) packageFile.get("packageFileId3")));
 			}
 		}
@@ -1865,7 +1865,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-		if(componentId.size() > 0){
+		if (componentId.size() > 0){
 			for (int i = 0; i < componentId.size(); i++) {
 				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
 			}
@@ -1875,10 +1875,10 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		HashMap<String, Object> mergeListMap = getIdentificationGridList(paramMap);
 		
-		if(mergeListMap != null && mergeListMap.get("rows") != null) {
-			for(HashMap<String, Object> bean : (List<HashMap<String, Object>>) mergeListMap.get("rows")) {
+		if (mergeListMap != null && mergeListMap.get("rows") != null) {
+			for (HashMap<String, Object> bean : (List<HashMap<String, Object>>) mergeListMap.get("rows")) {
 				
-				if((bean.get("ossName") == null || "-".equals((String) bean.get("ossName")))) {
+				if ((bean.get("ossName") == null || "-".equals((String) bean.get("ossName")))) {
 					List<HashMap<String, Object>> ocll = (List<HashMap<String, Object>>) bean.get("ossComponentsLicenseList");
 					if (ocll.size() > 1) {
 						continue;
@@ -1891,7 +1891,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				bean.put("adminCheckYn", CoConstDef.FLAG_NO);
 				bean.put("preObligationType", bean.get("obligationType"));
 				if (bean.containsKey("licenseName")) {
-					if(((String) bean.get("licenseName")).contains("Other")) {
+					if (((String) bean.get("licenseName")).contains("Other")) {
 						String licenseNm = (String) bean.get("licenseName");
 					}
 				}
@@ -1903,7 +1903,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				List<HashMap<String, Object>> licenseList = findOssLicenseIdAndName(bean);
 				
 				if (licenseList.size() > 0) {
-					for(HashMap<String, Object> licenseBean : licenseList) {
+					for (HashMap<String, Object> licenseBean : licenseList) {
 						licenseBean.put("componentId", bean.get("componentId"));
 						
 						apiProjectMapper.registComponentLicense(licenseBean);
@@ -1933,30 +1933,30 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			HashMap<String, HashMap<String, Object>> _ossMap = new HashMap<>();
 			HashMap<String, String> _ossNamesMap = new HashMap<>();
 			
-			if(nickNameList != null) {
-				for(Map<String, Object> bean : nickNameList) {
-					if(bean.get("ossNickname") != null) {
+			if (nickNameList != null) {
+				for (Map<String, Object> bean : nickNameList) {
+					if (bean.get("ossNickname") != null) {
 						nickNameMap.put((String) bean.get("ossName"), ((String) bean.get("ossNickname")).split(","));
 					}
 				}
 			}
 			
-			if(list != null) {
+			if (list != null) {
 				List<HashMap<String, Object>> licenseBeanList = new ArrayList<>();
 				
-				for(HashMap<String, Object> bean : list) {
+				for (HashMap<String, Object> bean : list) {
 					
 					HashMap<String, Object> licenseBean = new HashMap<>();
 					HashMap<String, Object> targetBean = null;
 					String key = (String) bean.get("ossName") +"_"+ avoidNull((String) bean.get("ossVersion")); // oss name을 nick name으로 가져온다.
 					key = key.toUpperCase();
 					
-					if(_ossMap.containsKey(key)) {
+					if (_ossMap.containsKey(key)) {
 						targetBean = _ossMap.get(key);
 					} else {
 						targetBean = bean;
 						
-						if(nickNameMap.containsKey(targetBean.get("ossNameTemp"))) {
+						if (nickNameMap.containsKey(targetBean.get("ossNameTemp"))) {
 							targetBean.put("ossNicknames", nickNameMap.get(targetBean.get("ossNameTemp")));
 						}
 					}
@@ -1978,34 +1978,34 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					
 					targetBean.put("ossLicenses", makeOssLicense(key, licenseBeanList));
 									
-					if(_ossMap.containsKey(key)) {
+					if (_ossMap.containsKey(key)) {
 						_ossMap.replace(key, targetBean);
 					} else {
 						_ossMap.put(key, targetBean);
 					}
 					
-					if(!_ossNamesMap.containsKey(((String) bean.get("ossName")).toUpperCase())) {
+					if (!_ossNamesMap.containsKey(((String) bean.get("ossName")).toUpperCase())) {
 						_ossNamesMap.put(((String) bean.get("ossName")).toUpperCase(), (String) bean.get("ossName"));
 					}
 				}
 			}
 			
 			HashMap<String, HashMap<String, Object>> _idMasterMap = new HashMap<>();
-			for(HashMap<String, Object> bean : _ossMap.values()) {
-				if(!_idMasterMap.containsKey(bean.get("ossId"))) {
+			for (HashMap<String, Object> bean : _ossMap.values()) {
+				if (!_idMasterMap.containsKey(bean.get("ossId"))) {
 					_idMasterMap.put(Integer.toString((int) bean.get("ossId")), bean);
 				}
 			}
 			
 			OSS_INFO_BY_ID = _idMasterMap;
 			
-			if(listNick != null) {
+			if (listNick != null) {
 
-				for(HashMap<String, Object> bean : listNick) {
+				for (HashMap<String, Object> bean : listNick) {
 					String key = (String) bean.get("ossName") +"_"+ avoidNull((String) bean.get("ossVersion")); // oss name을 nick name으로 가져온다.
 					String ossNickNameKey = ((String) bean.get("ossName")).toUpperCase();
 
-					if(!_ossNamesMap.containsKey(ossNickNameKey)) {
+					if (!_ossNamesMap.containsKey(ossNickNameKey)) {
 						_ossNamesMap.put(ossNickNameKey, (String) bean.get("ossNameTemp"));
 					}
 					
@@ -2036,7 +2036,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			}
 			
-			if(!_ossMap.isEmpty()) {
+			if (!_ossMap.isEmpty()) {
 				OSS_INFO_UPPER = _ossMap;
 			}
 		} catch(Exception e) {
@@ -2071,7 +2071,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
             List<HashMap<String, Object>> list = apiProjectMapper.getLicenseInfoInit();
             List<HashMap<String, Object>> nickList = apiProjectMapper.getLicenseInfoInitNick();
             
-            if(list == null) {
+            if (list == null) {
                 throw new RuntimeException("SYSTEM ERR GET CODE LICENSE MASTER INFO");
             }
             
@@ -2079,17 +2079,17 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
             HashMap<String, HashMap<String, Object>> license_info_upper_map = new HashMap<>();
             HashMap<String, HashMap<String, Object>> license_info_by_id_map = new HashMap<>();
             
-            for(HashMap<String, Object> vo : list) {
-            	if(vo.containsKey("licenseNicknameStr")) {
+            for (HashMap<String, Object> vo : list) {
+            	if (vo.containsKey("licenseNicknameStr")) {
             		List<String> licenseNicknameList = new ArrayList<String>();
-            		for(String nick : ((String) vo.get("licenseNicknameStr")).split("\\|")) {
+            		for (String nick : ((String) vo.get("licenseNicknameStr")).split("\\|")) {
             			licenseNicknameList.add(nick);
             		}
             		vo.put("licenseNicknameList", licenseNicknameList);
             	}
             	
-            	if(vo.containsKey("restriction")) {
-            		if(!("").equals((String) vo.get("restriction"))) {
+            	if (vo.containsKey("restriction")) {
+            		if (!("").equals((String) vo.get("restriction"))) {
                 		vo.put("restrictionStr", licenseRestrictionList((String) vo.get("restriction")));
             		}
             	}
@@ -2098,13 +2098,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
             	license_info_upper_map.put(((String) vo.get("licenseName")).toUpperCase(),vo);
             	
             	//SHORT_IDENTIFIER
-            	if(vo.containsKey("shortIdentifier")) {
-            		if(!("").equals(vo.get("shortIdentifier"))) {
-            			if(!license_info_map.containsKey(vo.get("shortIdentifier"))) {
+            	if (vo.containsKey("shortIdentifier")) {
+            		if (!("").equals(vo.get("shortIdentifier"))) {
+            			if (!license_info_map.containsKey(vo.get("shortIdentifier"))) {
                         	license_info_map.put((String) vo.get("shortIdentifier"), vo);
                 		}
                 		
-                		if(!license_info_upper_map.containsKey(((String) vo.get("shortIdentifier")).toUpperCase())) {
+                		if (!license_info_upper_map.containsKey(((String) vo.get("shortIdentifier")).toUpperCase())) {
                 			license_info_upper_map.put(((String) vo.get("shortIdentifier")).toUpperCase(), vo);
                 		}
             		}
@@ -2113,15 +2113,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
             	license_info_by_id_map.put(Integer.toString((int) vo.get("licenseId")), vo);
             }
             
-            for(HashMap<String, Object> vo : nickList) {
+            for (HashMap<String, Object> vo : nickList) {
             	
             	HashMap<String, Object> sourceBean = license_info_by_id_map.get(Integer.toString((int) vo.get("licenseId")));
             	
-            	if(vo.containsKey("licenseNicknameList")) {
+            	if (vo.containsKey("licenseNicknameList")) {
             		vo.put("licenseNicknameList", sourceBean.get("licenseNicknameList"));
             	}
             	
-            	if(vo.containsKey("restrictionStr")) {
+            	if (vo.containsKey("restrictionStr")) {
             		vo.put("restrictionStr", sourceBean.get("restrictionStr"));
             	}
             	            	
@@ -2129,15 +2129,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
             	license_info_upper_map.put(((String) vo.get("licenseName")).toUpperCase(),vo);
             }
             
-            if(!license_info_map.isEmpty()) {
+            if (!license_info_map.isEmpty()) {
             	LICENSE_INFO = license_info_map;
             }
             
-            if(!license_info_upper_map.isEmpty()) {
+            if (!license_info_upper_map.isEmpty()) {
             	LICENSE_INFO_UPPER = license_info_upper_map;
             }
             
-            if(!license_info_by_id_map.isEmpty()) {
+            if (!license_info_by_id_map.isEmpty()) {
             	LICENSE_INFO_BY_ID = license_info_by_id_map;
             }
         } catch (Exception e) {
@@ -2148,15 +2148,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	private String licenseRestrictionList(String restrictionStr) {
 		String returnStr = "";
 		
-		if(!isEmpty(restrictionStr)) {
+		if (!isEmpty(restrictionStr)) {
 			String restrictionArr[] = restrictionStr.split(",");
 			List<String> restrictionList = new ArrayList<>();
 			
-			for(int i = 0 ; i < restrictionArr.length ; i++){
+			for (int i = 0 ; i < restrictionArr.length ; i++){
 				restrictionList.add(restrictionArr[i]);
 			}
 			
-            for(String str : restrictionList){
+            for (String str : restrictionList){
             	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
             }
 		}
@@ -2176,7 +2176,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
-		if(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
+		if (CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
 			paramMap.put("roleOutLicenseIdList", CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST);
 		}
 		
@@ -2188,12 +2188,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
 			// need check의 저장값을 유지하기 위함
-			if(CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
+			if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
 				paramMap.put("merge", CoConstDef.FLAG_NO);
 				List<HashMap<String, Object>> bomBeforeList = apiProjectMapper.selectMergeBomList(paramMap);
 				
-				if(bomBeforeList != null) {
-					for(Map<String, Object> _orgIdentificationBean : bomBeforeList) {
+				if (bomBeforeList != null) {
+					for (Map<String, Object> _orgIdentificationBean : bomBeforeList) {
 						obligationTypeMergeMap.put((String) _orgIdentificationBean.get("refComponentId"), (String) _orgIdentificationBean.get("obligationType"));
 					}
 				}
@@ -2212,8 +2212,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				ll.put("ossComponentsLicenseList", listLicense);
 				ll.put("obligationLicense", CoConstDef.FLAG_YES.equals(ll.get("adminCheckYn")) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : checkObligationSelectedLicense(listLicense));
 				
-				if(CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
-					if(obligationTypeMergeMap.containsKey(Integer.toString((int) ll.get("componentId")))) {
+				if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
+					if (obligationTypeMergeMap.containsKey(Integer.toString((int) ll.get("componentId")))) {
 						ll.put("obligationType", obligationTypeMergeMap.get(Integer.toString((int) ll.get("componentId"))));
 					} else {
 						ll.put("obligationType", ll.get("obligationLicense"));
@@ -2223,14 +2223,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				// grouping 된 file path를 br tag로 변경
 				ll.put("filePath", lineReplaceToBR((String) ll.get("filePath")));
 				
-				if(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) ll.get("referenceDiv"))) {
-					if(!batMergeSrcMap.containsKey(((String) ll.get("ossName")).toUpperCase())) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) ll.get("referenceDiv"))) {
+					if (!batMergeSrcMap.containsKey(((String) ll.get("ossName")).toUpperCase())) {
 						batMergeSrcMap.put(((String) ll.get("ossName")).toUpperCase(), ll);
-					} else if(StringUtil.compareTo(((String) ll.get("ossVersion")), (String) batMergeSrcMap.get(((String) ll.get("ossName")).toUpperCase()).get("ossVersion")) > 0) {
+					} else if (StringUtil.compareTo(((String) ll.get("ossVersion")), (String) batMergeSrcMap.get(((String) ll.get("ossName")).toUpperCase()).get("ossVersion")) > 0) {
 						batMergeSrcMap.replace(((String) ll.get("ossName")).toUpperCase(), ll);
 					}
-				} else if(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(((String) ll.get("referenceDiv")))) {
-					if(!batMergePartnerMap.containsKey(((String) ll.get("ossName")).toUpperCase())) {
+				} else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(((String) ll.get("referenceDiv")))) {
+					if (!batMergePartnerMap.containsKey(((String) ll.get("ossName")).toUpperCase())) {
 						batMergePartnerMap.put(((String) ll.get("ossName")).toUpperCase(), ll);
 					} else if (StringUtil.compareTo(((String) ll.get("ossVersion")), (String) batMergePartnerMap.get(((String) ll.get("ossName")).toUpperCase()).get("ossVersion")) > 0) {
 						batMergePartnerMap.replace(((String) ll.get("ossName").toString()), ll);
@@ -2238,7 +2238,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 				
 				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-				if(ll.get("cveId") == null 
+				if (ll.get("cveId") == null 
 						&& isEmpty((String) ll.get("ossVersion")) 
 						&& !isEmpty((String) ll.get("cvssScoreMax"))
 						&& !("-".equals((String) ll.get("ossName")))){ 
@@ -2259,32 +2259,32 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			for (Map<String, Object> ll : list) {
 				// 이미 추가된 oss의 경우
-				if(egnoreList.contains((Integer.toString((int) ll.get("componentId"))))) {
+				if (egnoreList.contains((Integer.toString((int) ll.get("componentId"))))) {
 					continue;
 				}
 				
 				int addIdx = -1;
 				
-				if((String) ll.get("ossName") != null && !("").equals((String) ll.get("ossName"))) {
+				if ((String) ll.get("ossName") != null && !("").equals((String) ll.get("ossName"))) {
 					String mergeKey = ((String) ll.get("ossName")).toUpperCase();
 					// main oss로 표시되는 bat oss의 version이 명시되어 있지 않은 경우
-					if(CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(((String) ll.get("referenceDiv"))) && (ll.get("mergePreDiv") == null && ("").equals((String) ll.get("mergePreDiv"))) 
+					if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(((String) ll.get("referenceDiv"))) && (ll.get("mergePreDiv") == null && ("").equals((String) ll.get("mergePreDiv"))) 
 							&& (ll.get("ossVersion") == null && ("").equals((String) ll.get("ossVersion")))) {
 						Map<String, Object> refBean = null;
 						
-						if( batMergeSrcMap.containsKey(mergeKey)) {
+						if ( batMergeSrcMap.containsKey(mergeKey)) {
 							// bat => src
 							refBean = batMergeSrcMap.get(mergeKey);
 							
 							// 설정된 license가 상이하고, bat와 동일한 license가 src에 존재한다면 (최상위 버전이 아닌경우)
 							// continue하고 다음 loop에서 merge
-							if(!isSameLicense( (List<Map<String, Object>>) refBean.get("ossComponentsLicenseList"), (List<Map<String, Object>>) ll.get("ossComponentsLicenseList"))) {
+							if (!isSameLicense( (List<Map<String, Object>>) refBean.get("ossComponentsLicenseList"), (List<Map<String, Object>>) ll.get("ossComponentsLicenseList"))) {
 								String ossNameAndVersion = findBatOssOtherVersionWithLicense(ll, refBean, list);
 								
-								if(!isEmpty(ossNameAndVersion)) {
+								if (!isEmpty(ossNameAndVersion)) {
 									List<Map<String, Object>> _batList = null;
 									
-									if(srcSameLicenseMap.containsKey(ossNameAndVersion)) {
+									if (srcSameLicenseMap.containsKey(ossNameAndVersion)) {
 										_batList = srcSameLicenseMap.get(ossNameAndVersion);
 										_batList.add(ll);
 										srcSameLicenseMap.replace(ossNameAndVersion, _batList);
@@ -2306,11 +2306,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 							// 순서 정렬
 							addIdx = findOssAppendIndex(CoConstDef.CD_DTL_COMPONENT_ID_SRC, refBean.get("componentId"), list);
 							
-							if(addIdx > -1) {
+							if (addIdx > -1) {
 								addIdx = addIdx +1;
 								ll.put("groupingColumn", (String) refBean.get("ossName") + (String) refBean.get("ossVersion"));
 							}					
-						} else if( batMergePartnerMap.containsKey(mergeKey)) {
+						} else if ( batMergePartnerMap.containsKey(mergeKey)) {
 							// 3rd => bat
 							refBean = batMergePartnerMap.get(mergeKey);
 							
@@ -2322,12 +2322,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 							
 							// bin 에 누락된 정보를 3rd의 첫번재 row에서 채워 넣는다.
 							// DOWNLOAD_LOCATION
-							if(ll.get("downloadLocation") == null) {
+							if (ll.get("downloadLocation") == null) {
 								ll.put("downloadLocation", refBean.get("downloadLocation"));
 							}
 							
 							// HOMEPAGE
-							if(ll.get("homepage") == null) {
+							if (ll.get("homepage") == null) {
 								ll.put("homepage", refBean.get("homepage"));
 							}
 							
@@ -2342,16 +2342,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 							// 3rd party의 우선순위가 가장 낮기 때문에, 복수건을 취득하는 경우는 없지만, 기능 확장을 고려해서 list 형으로 반환
 							groupList = findOssGroupList(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, (String) batMergePartnerMap.get(mergeKey).get("ossName"), (String) batMergePartnerMap.get(mergeKey).get("ossVersion"), list);
 							
-							if(groupList != null && !groupList.isEmpty()) {
-								for(Map<String, Object> _groupBean : groupList) {
+							if (groupList != null && !groupList.isEmpty()) {
+								for (Map<String, Object> _groupBean : groupList) {
 									egnoreList.add((String) _groupBean.get("componentId"));
 								}
 							}
 						}
 					} 
 					// 3rd party의 경우, bat에 동일한 oss가 없을 경우만 추가 (정렬)
-					else if(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals((String) ll.get("referenceDiv")) && isEmpty((String) ll.get("mergePreDiv")) ) {
-						if(existsBatOSS((String) ll.get("ossName"), list)) {
+					else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals((String) ll.get("referenceDiv")) && isEmpty((String) ll.get("mergePreDiv")) ) {
+						if (existsBatOSS((String) ll.get("ossName"), list)) {
 							continue;
 						}
 					}
@@ -2359,8 +2359,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				// License Restriction 저장
 				ll.put("restriction", licenseRestrictionListById((String) ll.get("licenseId")));
 
-				if(addIdx > -1) {
-					if(addIdx > _list.size() -1) {
+				if (addIdx > -1) {
+					if (addIdx > _list.size() -1) {
 						_list.add(ll);
 					} else {
 						_list.add(addIdx, ll);
@@ -2368,26 +2368,26 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				} else {
 					_list.add(ll);
 					
-					if(groupList != null && !groupList.isEmpty()) {
+					if (groupList != null && !groupList.isEmpty()) {
 						_list.addAll(groupList);
 					}
 				}
 				
-				if(CoConstDef.FLAG_YES.equals((String) ll.get("adminCheckYn"))) {
+				if (CoConstDef.FLAG_YES.equals((String) ll.get("adminCheckYn"))) {
 					adminCheckList.add((String) ll.get("componentId"));
 				}
 			}
 			
 			// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
-			if(!srcSameLicenseMap.isEmpty()) {
+			if (!srcSameLicenseMap.isEmpty()) {
 				List<Map<String, Object>> _tmp = new ArrayList<>();
 				
-				for(Map<String, Object> bean : _list) {
+				for (Map<String, Object> bean : _list) {
 					_tmp.add(bean);
 					String _key = (String) bean.get("ossName") + "-" + avoidNull((String) bean.get("ossVersion"));
 					
-					if(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) bean.get("referenceDiv")) && srcSameLicenseMap.containsKey(_key)) {
-						for(Map<String, Object> _mergeBean : srcSameLicenseMap.get(_key)) {
+					if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) bean.get("referenceDiv")) && srcSameLicenseMap.containsKey(_key)) {
+						for (Map<String, Object> _mergeBean : srcSameLicenseMap.get(_key)) {
 							_mergeBean.put("ossId", bean.get("ossId"));
 							_mergeBean.put("ossName", bean.get("ossName"));
 							_mergeBean.put("ossVersion", bean.get("ossVersion"));
@@ -2404,7 +2404,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 			map.put("rows", _list);
 			
-			if(adminCheckList.size() > 0) {
+			if (adminCheckList.size() > 0) {
 				map.put("adminCheckList", adminCheckList);
 			}
 		}
@@ -2415,19 +2415,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	private String checkObligationSelectedLicense(List<HashMap<String, Object>> listLicense) {
 		String rtnVal = "";
 		
-		if(listLicense != null) {
-			for(Map<String, Object> bean : listLicense) {
-				if(!CoConstDef.FLAG_YES.equals(bean.get("excludeYn"))) {
+		if (listLicense != null) {
+			for (Map<String, Object> bean : listLicense) {
+				if (!CoConstDef.FLAG_YES.equals(bean.get("excludeYn"))) {
 					// 확인 가능한 라이선스 중에서만 obligation 대상으로 한다.
-					if(bean.containsKey("licenseName")) {
-						if(LICENSE_INFO_UPPER.containsKey(((String) bean.get("licenseName")).toUpperCase())) {
+					if (bean.containsKey("licenseName")) {
+						if (LICENSE_INFO_UPPER.containsKey(((String) bean.get("licenseName")).toUpperCase())) {
 							Map<String, Object> license = LICENSE_INFO_UPPER.get(((String) bean.get("licenseName")).toUpperCase());
 							
-							if(CoConstDef.FLAG_YES.equals(license.get("obligationNeedsCheckYn"))) {
+							if (CoConstDef.FLAG_YES.equals(license.get("obligationNeedsCheckYn"))) {
 								return CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK;
-							} else if(CoConstDef.FLAG_YES.equals(license.get("obligationDisclosingSrcYn"))) {
+							} else if (CoConstDef.FLAG_YES.equals(license.get("obligationDisclosingSrcYn"))) {
 								rtnVal = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE;
-							} else if(isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.get("obligationNotificationYn"))) {
+							} else if (isEmpty(rtnVal) && CoConstDef.FLAG_YES.equals(license.get("obligationNotificationYn"))) {
 								rtnVal = CoConstDef.CD_DTL_OBLIGATION_NOTICE;
 							}
 						}
@@ -2445,12 +2445,12 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	@SuppressWarnings("unchecked")
 	private String findBatOssOtherVersionWithLicense(Map<String, Object> ll, Map<String, Object> refBean, List<HashMap<String, Object>> list) {
-		for(Map<String, Object> bean : list) {
-			if(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) bean.get("referenceDiv")) 
+		for (Map<String, Object> bean : list) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals((String) bean.get("referenceDiv")) 
 					&& ((String) bean.get("ossName")).equals((String) refBean.get("ossName"))
 					&& !((String) bean.get("ossVersion")).equals((String) refBean.get("ossVersion"))
 					&& ((String) bean.get("ossName")).equals((String) ll.get("ossName"))) {
-				if(isSameLicense((List<Map<String, Object>>) bean.get("ossComponentsLicenseList"), (List<Map<String, Object>>) ll.get("ossComponentsLicenseList"))) {
+				if (isSameLicense((List<Map<String, Object>>) bean.get("ossComponentsLicenseList"), (List<Map<String, Object>>) ll.get("ossComponentsLicenseList"))) {
 					return (String) bean.get("ossName") + "-" + avoidNull((String) bean.get("ossVersion"));
 				}
 			}
@@ -2461,31 +2461,31 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	
 	@SuppressWarnings("unchecked")
 	private boolean isSameLicense(List<Map<String, Object>> list1, List<Map<String, Object>> list2) {
-		if(list1 == null && list2 == null) {
+		if (list1 == null && list2 == null) {
 			return false;
 		}
 		
-		if((list1 == null && list2 != null) || (list1 != null && list2 == null)) {
+		if ((list1 == null && list2 != null) || (list1 != null && list2 == null)) {
 			return false;
 		}
 		
-		if(list1.size() != list2.size()) {
+		if (list1.size() != list2.size()) {
 			return false;
 		}
 		
 		List<String> licenseNames = new ArrayList<>();
 		
-		for(Map<String, Object> bean : list1) {
+		for (Map<String, Object> bean : list1) {
 			Map<String, Object> liMaster = LICENSE_INFO.get(bean.get("licenseName"));
 			
-			if(liMaster == null) {
+			if (liMaster == null) {
 				licenseNames.add(avoidNull((String) bean.get("licenseName")));
 			} else {
 				licenseNames.add((String) liMaster.get("licenseName"));
-				if(liMaster.containsKey("shortIdentifier")) {
+				if (liMaster.containsKey("shortIdentifier")) {
 					licenseNames.add((String) liMaster.get("shortIdentifier"));
 				}
-				if(liMaster.containsKey("licenseNicknameList")) {
+				if (liMaster.containsKey("licenseNicknameList")) {
 					List<String> licenseNicknameList = (List<String>) liMaster.get("licenseNicknameList");
 					for (String ln : licenseNicknameList) {
 						licenseNames.add(ln);
@@ -2494,9 +2494,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 		}
 		
-		for(Map<String, Object> bean : list2) {
-			if(bean.containsKey("licenseName")) {
-				if(!licenseNames.contains((String) bean.get("licenseName"))) {
+		for (Map<String, Object> bean : list2) {
+			if (bean.containsKey("licenseName")) {
+				if (!licenseNames.contains((String) bean.get("licenseName"))) {
 					return false;
 				}
 			}
@@ -2508,8 +2508,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	private int findOssAppendIndex(String type, Object object, List<HashMap<String, Object>> list) {
 		int idx = 0;
 		
-		for(Map<String, Object> bean : list) {
-			if(type.equals((String) bean.get("referenceDiv")) && ((String) object).equals(bean.get("componentId"))) {
+		for (Map<String, Object> bean : list) {
+			if (type.equals((String) bean.get("referenceDiv")) && ((String) object).equals(bean.get("componentId"))) {
 				return idx;
 			}
 			
@@ -2523,8 +2523,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String targetGroup = avoidNull(ossName) + avoidNull(ossVersion);
 		List<Map<String, Object>> groupList = new ArrayList<>();
 		
-		for(Map<String, Object> bean : list) {
-			if(type.equals((String) bean.get("referenceDiv")) && targetGroup.equalsIgnoreCase((String) bean.get("groupingColumn"))) {
+		for (Map<String, Object> bean : list) {
+			if (type.equals((String) bean.get("referenceDiv")) && targetGroup.equalsIgnoreCase((String) bean.get("groupingColumn"))) {
 				groupList.add(bean);
 			}
 		}
@@ -2533,8 +2533,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 	
 	private boolean existsBatOSS(String ossName, List<HashMap<String, Object>> list) {
-		for(Map<String, Object> bean : list) {
-			if(CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals((String) bean.get("referenceDiv")) && isEmpty((String) bean.get("mergePreDiv")) && isEmpty((String) bean.get("ossVersion"))
+		for (Map<String, Object> bean : list) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals((String) bean.get("referenceDiv")) && isEmpty((String) bean.get("mergePreDiv")) && isEmpty((String) bean.get("ossVersion"))
 					&& ossName.equalsIgnoreCase((String) bean.get("ossName"))) {
 				return true;
 			}
@@ -2546,13 +2546,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	private String licenseRestrictionListById(String licenseIdStr) {
 		String returnStr = "";
 		
-		if(licenseIdStr != null) {
+		if (licenseIdStr != null) {
 			String restrictionStr = "";
 			String licenseIdArr[] = licenseIdStr.split(",");
 			
-			for(int i = 0 ; i < licenseIdArr.length ; i++) {
+			for (int i = 0 ; i < licenseIdArr.length ; i++) {
 				Map<String, Object> license = LICENSE_INFO_BY_ID.get(licenseIdArr[i]);
-				if(license != null && license.containsKey("restriction") && !("").equals(license.get("restriction"))) {
+				if (license != null && license.containsKey("restriction") && !("").equals(license.get("restriction"))) {
 					restrictionStr += (isEmpty(restrictionStr)?"":",") + (String) license.get("restriction"); 
 				}
 			}
@@ -2562,19 +2562,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			List<String> distinctList = new ArrayList<String>();
 			
 			// String 배열 -> String 리스트
-			for(int i = 0 ; i < restrictionArr.length ; i++){
+			for (int i = 0 ; i < restrictionArr.length ; i++){
 				restrictionList.add(restrictionArr[i]);
 			}
 			
 			// 중복 제거
-            for(String str : restrictionList){
+            for (String str : restrictionList){
                 if (!distinctList.contains(str)) {
                 	distinctList.add(str);
                 }
             }
             
-            for(String str : distinctList){
-            	if(!("").equals(str)) {
+            for (String str : distinctList){
+            	if (!("").equals(str)) {
                 	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
             	}
             }
@@ -2584,19 +2584,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	}
 	
 	private HashMap<String, Object> findOssIdAndName(HashMap<String, Object> bean) {
-		if(bean != null && bean.containsKey("ossName")) {
-			if("N/A".equals((String) bean.get("ossVersion"))) {
+		if (bean != null && bean.containsKey("ossName")) {
+			if ("N/A".equals((String) bean.get("ossVersion"))) {
 				bean.put("ossVersion", "");
 			}
 			
 			String findKey = ((String) bean.get("ossName")).trim() +"_";
-			if(bean.containsKey("ossVersion")) {
+			if (bean.containsKey("ossVersion")) {
 				findKey = ((String) bean.get("ossVersion")).trim();
 			}
 			findKey = findKey.toUpperCase();
 			Map<String, Object> masterBean = OSS_INFO_UPPER.get(findKey);
 			
-			if(masterBean != null) {
+			if (masterBean != null) {
 				bean.put("ossId", masterBean.get("ossId"));
 				bean.put("ossName", masterBean.get("ossName"));
 			}
@@ -2610,16 +2610,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<HashMap<String, Object>> ossComponentsLicenseList = null;
 		List<HashMap<String, Object>> returnOssComponentsLicenseList = new ArrayList<>();
 		// 먼저 license Id는 찾을수 있으면 모두 설정한다.
-		if(bean.containsKey("ossComponentsLicenseList")) {
+		if (bean.containsKey("ossComponentsLicenseList")) {
 			ossComponentsLicenseList = (List<HashMap<String, Object>>) bean.get("ossComponentsLicenseList");
-			for(HashMap<String, Object> licenseBean : ossComponentsLicenseList) {
+			for (HashMap<String, Object> licenseBean : ossComponentsLicenseList) {
 				if (licenseBean.containsKey("licenseName")) {
 					HashMap<String, Object> licenseMaster = (HashMap<String, Object>) LICENSE_INFO_UPPER.get(avoidNull(((String) licenseBean.get("licenseName")), "").trim().toUpperCase());
 					
-					if(licenseMaster != null) {
+					if (licenseMaster != null) {
 						licenseBean.put("licenseId", licenseMaster.get("licenseId"));
 						
-						if(licenseMaster.containsKey("shortIdentifier") && !("").equals(licenseMaster.get("shortIdentifier"))) {
+						if (licenseMaster.containsKey("shortIdentifier") && !("").equals(licenseMaster.get("shortIdentifier"))) {
 							licenseBean.put("licenseName", licenseMaster.get("shortIdentifier"));
 						}else {
 							licenseBean.put("licenseName", licenseMaster.get("licenseName"));
@@ -2635,28 +2635,28 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		// oss에서 추가설정한 license text 및 oss copyright 설정
-		if(bean.containsKey("ossId")) {
+		if (bean.containsKey("ossId")) {
 			HashMap<String, Object> ossMaster = (HashMap<String, Object>) OSS_INFO_BY_ID.get(Integer.toString((int) bean.get("ossId")));
 			
-			if(ossMaster != null) {
+			if (ossMaster != null) {
 				// oss master에 등록된 licnese순서 기준으로 찾는다 (기본적으로 size가 일치 해야함, multi dual license의 경우)
 				if (ossMaster.containsKey("ossLicenses")) {
 					List<HashMap<String, Object>> ossLicensesList = (List<HashMap<String, Object>>) ossMaster.get("ossLicenses");
 					
 					if (ossLicensesList != null && ossLicensesList.size() > 0) {
 						
-						for(int i=0; i<ossLicensesList.size(); i++) {
+						for (int i=0; i<ossLicensesList.size(); i++) {
 							HashMap<String, Object> ossLicense = ossLicensesList.get(i);
-							if(returnOssComponentsLicenseList.size() >= i+1 
+							if (returnOssComponentsLicenseList.size() >= i+1 
 									&& ossLicense.get("licenseId").equals(returnOssComponentsLicenseList.get(i).get("licenseId"))) {
 								// license text
 								// oss_license에 존재하는 경우만 설정
-								if(ossLicense.containsKey("ossLicenseText") && ossLicense.get("ossLicenseText") != null && ((String) ossLicense.get("ossLicenseText")).length() > 0) {
+								if (ossLicense.containsKey("ossLicenseText") && ossLicense.get("ossLicenseText") != null && ((String) ossLicense.get("ossLicenseText")).length() > 0) {
 									returnOssComponentsLicenseList.get(i).put("licenseText", ossLicense.get("ossLicenseText"));
 								}
 								
 								// oss copyright
-								if(ossLicense.containsKey("ossCopyright") && ossLicense.get("ossCopyright") != null && ((String) ossLicense.get("ossCopyright")).length() > 0) {
+								if (ossLicense.containsKey("ossCopyright") && ossLicense.get("ossCopyright") != null && ((String) ossLicense.get("ossCopyright")).length() > 0) {
 									returnOssComponentsLicenseList.get(i).put("copyrightText", ossLicense.get("ossCopyright"));
 								}
 							}
@@ -2675,8 +2675,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		@SuppressWarnings("unchecked")
 		List<String> prjIdList = (List<String>) paramMap.get("prjId");
 		
-		if(prjIdList != null) {
-			if(isEmpty(ossReportFlag)) {
+		if (prjIdList != null) {
+			if (isEmpty(ossReportFlag)) {
 				ossReportFlag = CoConstDef.FLAG_NO;
 				
 				paramMap.put("ossReportFlag", ossReportFlag);

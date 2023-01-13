@@ -28,7 +28,7 @@ public class SessionController extends CoTopComponent{
 	
 	@GetMapping(value = SESSION.LOGIN, produces = "text/html; charset=utf-8")
 	public String user(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		if(isLogin()) {
+		if (isLogin()) {
 			res.sendRedirect(req.getContextPath() + "/index");
 		}
 		
@@ -44,7 +44,7 @@ public class SessionController extends CoTopComponent{
 				long d2_timestamp = d2.getTime() / 1000;
 				long today_timestamp = System.currentTimeMillis() / 1000;
 	
-				if(d1_timestamp < today_timestamp && d2_timestamp > today_timestamp){
+				if (d1_timestamp < today_timestamp && d2_timestamp > today_timestamp){
 					res.sendRedirect(req.getContextPath() + AppConstBean.ERROR_PAGES_DEFAULT);
 				}
 				

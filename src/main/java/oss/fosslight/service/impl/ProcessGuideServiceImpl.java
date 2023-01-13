@@ -30,7 +30,7 @@ public class ProcessGuideServiceImpl extends CoTopComponent implements ProcessGu
 		Map<String, Object> map = null;
 		int records = processGuideMapper.selectProcessGuideTotalCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			vo.setTotListSize(records);
 			// Grid paging 처리를 위한 기본 param 설정 Map 생성(반드시 totlistsize를 set 하고 나서 생성해야함)
 			map = getGridPagerMap(vo);
@@ -53,10 +53,10 @@ public class ProcessGuideServiceImpl extends CoTopComponent implements ProcessGu
 		Map<String, Object> map = new HashMap<String, Object>();
 		int records = processGuideMapper.selectProcessGuideCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			ProcessGuide guide = processGuideMapper.selectProcessGuide(vo);
 			
-			if(guide != null) {
+			if (guide != null) {
 				map.put("processGuide", guide);
 			}
 		}

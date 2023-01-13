@@ -31,24 +31,24 @@ public class ShellCommander extends CoTopComponent {
 			br = new BufferedReader(isr);
 			String line;
 			
-			while((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				list.add(line);
 			}
 			
 		} finally {
-			if(br != null) { 
+			if (br != null) { 
 				try {br.close();} catch (Exception e) {}
 			}
 			
-			if(isr != null) {
+			if (isr != null) {
 				try {isr.close();} catch (Exception e) {}
 			}
 			
-			if(is != null) {
+			if (is != null) {
 				try {is.close();} catch (Exception e) {}
 			}
 			
-			if(process != null) {
+			if (process != null) {
 				try {process.destroy();} catch (Exception e) {}
 			}
 	}
@@ -69,23 +69,23 @@ public class ShellCommander extends CoTopComponent {
 			br = new BufferedReader(isr);
 			String line;
 			
-			while((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				list.add(line);
 			}
 		} finally {
-			if(br != null) { 
+			if (br != null) { 
 				try {br.close();} catch (Exception e) {}
 			}
 			
-			if(isr != null) {
+			if (isr != null) {
 				try {isr.close();} catch (Exception e) {}
 			}
 			
-			if(is != null) {
+			if (is != null) {
 				try {is.close();} catch (Exception e) {}
 			}
 			
-			if(process != null) {
+			if (process != null) {
 				try {process.destroy();} catch (Exception e) {}
 			}
 		}
@@ -106,23 +106,23 @@ public class ShellCommander extends CoTopComponent {
 			br = new BufferedReader(isr);
 			String line;
 			
-			while((line = br.readLine()) != null) {
+			while ((line = br.readLine()) != null) {
 				log.debug("ShellCommander : "+line);
 			}
 		} finally {
-			if(br != null) { 
+			if (br != null) { 
 				try {br.close();} catch (Exception e) {}
 			}
 			
-			if(isr != null) {
+			if (isr != null) {
 				try {isr.close();} catch (Exception e) {}
 			}
 			
-			if(is != null) {
+			if (is != null) {
 				try {is.close();} catch (Exception e) {}
 			}
 			
-			if(process != null) {
+			if (process != null) {
 				try {process.destroy();} catch (Exception e) {}
 			}
 		}

@@ -257,7 +257,7 @@ public class RequestUtil {
 
 			List<String> ignoreParamList = new ArrayList<>();
 			if (ignoreParams != null) {
-				for(String s : Arrays.asList(ignoreParams)) {
+				for (String s : Arrays.asList(ignoreParams)) {
 					// 대소문자무시
 					ignoreParamList.add(s.toUpperCase());
 				}
@@ -265,7 +265,7 @@ public class RequestUtil {
 			
 			StringBuilder result = new StringBuilder();
 
-			if(params != null && !params.isEmpty()) {
+			if (params != null && !params.isEmpty()) {
 				for (Map.Entry<String, Object> entry : params.entrySet()) {
 					String _key = entry.getKey();
 					if (ignoreParamList.contains(_key.toUpperCase())) {
@@ -275,7 +275,7 @@ public class RequestUtil {
 						continue;
 					}
 					
-					if(convertCamelCase) {
+					if (convertCamelCase) {
 						_key = StringUtil.convert2CamelCase(_key);
 					}
 					
@@ -315,29 +315,29 @@ public class RequestUtil {
 	public static String post(String url, Map<String, Object> params, boolean convertCamalCase, String[] ignoreParams) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		List<String> ignoreParamList = new ArrayList<>();
-		if(ignoreParams != null) {
-			for(String s : Arrays.asList(ignoreParams)) {
+		if (ignoreParams != null) {
+			for (String s : Arrays.asList(ignoreParams)) {
 				ignoreParamList.add(s.toUpperCase());
 			}
 		}
-		if(params != null) {
-			for(String _k : params.keySet()) {
+		if (params != null) {
+			for (String _k : params.keySet()) {
 				
-				if(ignoreParamList.contains(_k.toUpperCase())) {
+				if (ignoreParamList.contains(_k.toUpperCase())) {
 					continue;
 				}
 				
 				Object _v = params.get(_k);
-				if(_v == null) {
+				if (_v == null) {
 					continue;
 				}
-				if(convertCamalCase) {
+				if (convertCamalCase) {
 					_k = StringUtil.convert2CamelCase(_k);
 				}
 				
 				if (_v instanceof List<?> || _v instanceof String) {
 					parts.add(_k, _v);
-				} else if(_v instanceof String[]) {
+				} else if (_v instanceof String[]) {
 					//2019-06-04 Javaroid 배열로 값을 전송하기 위한 처리. 고객 그룹 등록 등 일괄 처리를 위한 작업 때문에 추가하였다.
 					String[] _value = (String[])_v;
 					for (String value : _value) {

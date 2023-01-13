@@ -57,13 +57,13 @@ public class ExcelDownloadController extends CoTopComponent {
 		String downloadId = null;
 		
 		try {
-			if(map.containsKey("extParam")) {
+			if (map.containsKey("extParam")) {
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, (String)map.get("extParam"));				
 			} else {
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId((String)map.get("type"), (String)map.get("parameter"), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			}
 			
-			if(isEmpty(downloadId)){
+			if (isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {
@@ -82,7 +82,7 @@ public class ExcelDownloadController extends CoTopComponent {
 		try {
 			downloadId = ExcelDownLoadUtil.getExcelDownloadIdOss("OSS", ossMaster , RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(isEmpty(downloadId)){
+			if (isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {
@@ -119,7 +119,7 @@ public class ExcelDownloadController extends CoTopComponent {
 		try {
 			downloadId = ExcelDownLoadUtil.getChartExcel(params, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
-			if(isEmpty(downloadId)){
+			if (isEmpty(downloadId)){
 				return makeJsonResponseHeader(false, "overflow");
 			}
 		} catch (Exception e) {

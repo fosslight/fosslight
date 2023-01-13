@@ -819,7 +819,7 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setDistributionType(String distributionType) {
 		this.distributionType = distributionType;
-		if(!isEmpty(distributionType) && isEmpty(this.distributionTypeOfCodeDtlExp)) {
+		if (!isEmpty(distributionType) && isEmpty(this.distributionTypeOfCodeDtlExp)) {
 			this.distributionTypeOfCodeDtlExp = CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, distributionType);
 		}
 	}
@@ -2500,7 +2500,7 @@ public class Project extends ComBean implements Serializable {
 	 * @param prjId the prj id
 	 */
 	public void addPrjIdList(String prjId) {
-		if(this.prjIdList == null) {
+		if (this.prjIdList == null) {
 			this.prjIdList = new ArrayList<>();
 		}
 		this.prjIdList.add(prjId);

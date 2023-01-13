@@ -283,7 +283,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
-		if(!isEmptyWithLineSeparator(description)) {
+		if (!isEmptyWithLineSeparator(description)) {
 			this.descriptionHtml = CommonFunction.makeHtmlLinkTagWithText(CommonFunction.lineReplaceToBR(description));
 		}
 	}
@@ -628,7 +628,7 @@ public class LicenseMaster extends ComBean implements Serializable {
 	 * @param licenseNicknameStr the license nickname str
 	 */
 	public void addLicenseNicknameList(String licenseNicknameStr) {
-		if(this.licenseNicknameList == null) {
+		if (this.licenseNicknameList == null) {
 			this.licenseNicknameList = new ArrayList<>();
 		}
 		this.licenseNicknameList.add(licenseNicknameStr);
@@ -739,13 +739,13 @@ public class LicenseMaster extends ComBean implements Serializable {
 	}
 
 	public String getWebpageLinkFormat() {
-		if(StringUtil.isEmpty(this.webpageLinkFormat) && !StringUtil.isEmpty(this.webpage)) {
-			if(this.webpage.contains(",")){
+		if (StringUtil.isEmpty(this.webpageLinkFormat) && !StringUtil.isEmpty(this.webpage)) {
+			if (this.webpage.contains(",")){
 				String[] webpages = this.webpage.split(",");
 				String result = "";
 							
-				for(int i = 0 ; i < webpages.length ; i++){
-					if(i > 0){ result += "<br>"; }
+				for (int i = 0 ; i < webpages.length ; i++){
+					if (i > 0){ result += "<br>"; }
 								
 					result += "<a href='"+webpages[i]+"' target='_blank'>" + webpages[i] + "</a>";
 				}

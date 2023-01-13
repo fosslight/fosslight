@@ -46,7 +46,7 @@ public class Statistics extends ComBean implements Serializable {
 	private int total;
 	
 	public void addCategoryCnt(int categoryCnt, int idx) {
-		if(this.dataArray.size() == idx) {
+		if (this.dataArray.size() == idx) {
 			this.dataArray.add(new ArrayList<Integer>());
 		}
 		this.dataArray.get(idx).add(categoryCnt);
@@ -67,7 +67,7 @@ public class Statistics extends ComBean implements Serializable {
 	private List<String> categoryList;
 	
 	public void addCategoryList(String columnName) {
-		if(this.categoryList == null) {
+		if (this.categoryList == null) {
 			this.categoryList = new ArrayList<String>();
 		}
 		this.categoryList.add(columnName);

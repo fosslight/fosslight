@@ -257,7 +257,7 @@ public final class DateUtil {
 		
 		date = date.replaceAll("[^\\d]*", "");
 		
-		if(date.length() > 8) {
+		if (date.length() > 8) {
 			date = date.substring(0, 8);
 		}
 		
@@ -608,7 +608,7 @@ public final class DateUtil {
 		Calendar cal1 = convertStringToCalender(date1);
 		Calendar cal2 = convertStringToCalender(date2);
 
-		if(cal1 == null || cal2 == null) {
+		if (cal1 == null || cal2 == null) {
 			return -1;
 		}
 
@@ -789,7 +789,7 @@ public final class DateUtil {
      * @return
      */
     public static String dateTypeConvert(String date){
-    	if(!date.isEmpty()){
+    	if (!date.isEmpty()){
     		date = date.substring(0, 10);
         	String[] temp = date.split("-");
         	date = date.format("%s년 %s월 %s일", 	temp[0], temp[1], temp[2]);
@@ -848,7 +848,7 @@ public final class DateUtil {
      */
     public static String dateFormatConvert(String date, String orgDateFormat, String convDateFormat) {
     	try{
-    		if(StringUtil.isEmpty(date)) {
+    		if (StringUtil.isEmpty(date)) {
     			return date;
     		}
     		
@@ -930,7 +930,7 @@ public final class DateUtil {
     	// 현재 날짜
     	Date toDay = convertStringToSQLDate(getCurrentDateAsString());
 		
-    	if(!((toDay.compareTo(date1) >= 0) && (toDay.compareTo(date2) <= 0))){
+    	if (!((toDay.compareTo(date1) >= 0) && (toDay.compareTo(date2) <= 0))){
 			ret = (toDay.compareTo(date1) < 0) ? -1 : 1;
 		}
 		

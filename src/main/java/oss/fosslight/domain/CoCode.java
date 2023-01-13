@@ -157,7 +157,7 @@ public class CoCode {
     {
         Vector<String[]> vector = new Vector<String[]>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
             if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
@@ -175,10 +175,10 @@ public class CoCode {
     {
         Vector<CoCodeDtl> vector = new Vector<CoCodeDtl>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
               continue;
             }
             vector.add(codedtl);
@@ -197,7 +197,7 @@ public class CoCode {
     {
         Vector<String[]> vector = new Vector<String[]>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
             if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
@@ -214,7 +214,7 @@ public class CoCode {
     {
         Vector<CoCodeDtl> vector = new Vector<CoCodeDtl>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
             if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
@@ -236,7 +236,7 @@ public class CoCode {
     {
         Vector<String> vector = new Vector<String>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
             if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
@@ -280,7 +280,7 @@ public class CoCode {
     {
         StringBuffer stringbuffer = (new StringBuffer("<select name='")).append(s).append("'>\n");
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             stringbuffer.append("    <option value='").append(codedtl.cdDtlNo).append('\'');
@@ -304,7 +304,7 @@ public class CoCode {
     {
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             
@@ -314,7 +314,7 @@ public class CoCode {
             
             stringbuffer.append("    <option VALUE='").append(codedtl.cdDtlNo).append('\'');
             
-            if((i == 0 && codedtl.cdDtlNo.equals(s)) || (i == 1 && codedtl.cdDtlNm.equals(s))) {
+            if ((i == 0 && codedtl.cdDtlNo.equals(s)) || (i == 1 && codedtl.cdDtlNm.equals(s))) {
                 stringbuffer.append(" selected");
             }
             stringbuffer.append(">").append(codedtl.cdDtlNm).append("</option>\n");
@@ -334,8 +334,8 @@ public class CoCode {
         StringBuffer stringbuffer = new StringBuffer();
         
         int j = 0;
-        if(CoConstDef.CD_PROJECT_STATUS.equals(cd)) {
-	        for(int k = codeDtls.size(); j < k; j++)
+        if (CoConstDef.CD_PROJECT_STATUS.equals(cd)) {
+	        for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 
@@ -346,17 +346,17 @@ public class CoCode {
 	            stringbuffer.append("    <input name='statuses' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((status.indexOf(codedtl.cdDtlNo)>-1)?"checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	        }
-        } else if(CoConstDef.CD_LICENSE_RESTRICTION.equals(cd)) {
+        } else if (CoConstDef.CD_LICENSE_RESTRICTION.equals(cd)) {
         	int newLineIdx = 0; 
-        	if("list".equals(callType)){
+        	if ("list".equals(callType)){
         		newLineIdx = 3;
-        	}else if("edit".equals(callType)){
+        	}else if ("edit".equals(callType)){
         		newLineIdx = 4;
         	}
         	
         	List<String> restrictionList = Arrays.asList(status.split(","));
         	
-        	for(int k = codeDtls.size(); j < k; j++)
+        	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 
@@ -367,8 +367,8 @@ public class CoCode {
 	            stringbuffer.append("    <input name='restrictions' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((restrictionList.contains(codedtl.cdDtlNo))?"checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;"+(j==newLineIdx?"<br>"+("list".equals(callType)?"<label></label>":""):""));
 	        }
-        } else if(CoConstDef.CD_NOTICE_INFO.equals(cd)) {
-        	for(int k = codeDtls.size(); j < k; j++)
+        } else if (CoConstDef.CD_NOTICE_INFO.equals(cd)) {
+        	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 
@@ -399,9 +399,9 @@ public class CoCode {
         int j = 0;
         NAExceptionFlag = StringUtils.isEmpty(NAExceptionFlag) ? true : NAExceptionFlag; // default 시 true로 setting
         
-        if(!StringUtils.isEmpty(name)) {
+        if (!StringUtils.isEmpty(name)) {
         	List<String> values = Arrays.asList(val.split(","));
-	        for(int k = codeDtls.size(); j < k; j++){
+	        for (int k = codeDtls.size(); j < k; j++){
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 	           
 	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
@@ -431,7 +431,7 @@ public class CoCode {
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
         
-        if(StringUtils.isEmpty(distributionType)) {
+        if (StringUtils.isEmpty(distributionType)) {
         	distributionType = CoConstDef.CD_GENERAL_MODEL;
         }
         
@@ -439,7 +439,7 @@ public class CoCode {
           networkServerType = CoConstDef.FLAG_NO;
         }
         
-        for(int k = codeDtls.size(); j < k; j++) {
+        for (int k = codeDtls.size(); j < k; j++) {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             
             if (CoConstDef.FLAG_NO.equals(codedtl.useYn)
@@ -474,7 +474,7 @@ public class CoCode {
 	public String createOptionCheckboxString(String s, String s1, int i) {
 		StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             

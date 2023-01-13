@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CompressUtil {
     public static void compressGZIP(File input, File output, boolean deleteInputFile) throws IOException {
         
-		try(
+		try (
 			GzipCompressorOutputStream out = new GzipCompressorOutputStream(new FileOutputStream(output));
 		) {	
             IOUtils.copy(new FileInputStream(input), out);
@@ -32,7 +32,7 @@ public class CompressUtil {
 			throw e;
 		}
         
-        if(deleteInputFile) {
+        if (deleteInputFile) {
         	try {
         		input.deleteOnExit();
         	} catch(Exception e) {
@@ -52,7 +52,7 @@ public class CompressUtil {
         	out = new FileOutputStream(output);
             IOUtils.copy(in, out);
             
-            if(deleteInputFile) {
+            if (deleteInputFile) {
             	try {
             		input.deleteOnExit();
             	} catch(Exception e) {
@@ -62,19 +62,19 @@ public class CompressUtil {
         } catch(Exception e) {
         	log.error(e.getMessage());
         } finally {
-			if(in != null) {
+			if (in != null) {
 				try {
 					in.close();
 				} catch (Exception e) {}
 			}
 			
-			if(zin != null) {
+			if (zin != null) {
 				try {
 					zin.close();
 				} catch (Exception e) {}
 			}
 			
-			if(out != null) {
+			if (out != null) {
 				try {
 					out.close();
 				} catch (Exception e2) {}
@@ -85,11 +85,11 @@ public class CompressUtil {
     public static void decompressTarGZ(File tarFile, String dest) throws IOException {
     	File dir = new File(dest);
     	
-    	if(!dir.exists()) {
+    	if (!dir.exists()) {
     		dir.mkdirs();
     	}
     	
-		try(
+		try (
 			TarArchiveInputStream tarIn = new TarArchiveInputStream(
 			new GzipCompressorInputStream(
 				new BufferedInputStream(
@@ -98,7 +98,7 @@ public class CompressUtil {
 				)
 			);
 		) {
-			TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
+			TarArchiveEntry tarEntry = tarIn.getNextTarEntry ();
 			
 			while (tarEntry != null) {
 				File destPath = new File(dest, tarEntry.getName());
@@ -108,13 +108,13 @@ public class CompressUtil {
 				} else { // tar.gz의 하위 file이 dir가 아닐경우 file로 생성
 					destPath.createNewFile();
 					byte [] btoRead = new byte[1024];
-					try(
+					try (
 						BufferedOutputStream bout = 
 						new BufferedOutputStream(new FileOutputStream(destPath));
 					){
 						int len = 0;
 					
-						while((len = tarIn.read(btoRead)) != -1){
+						while ((len = tarIn.read(btoRead)) != -1){
 							bout.write(btoRead,0,len);
 						}
 						
@@ -124,7 +124,7 @@ public class CompressUtil {
 					}
 				}
 				
-				tarEntry = tarIn.getNextTarEntry();
+				tarEntry = tarIn.getNextTarEntry ();
 			}
 		} catch (Exception e) {
 			throw e;

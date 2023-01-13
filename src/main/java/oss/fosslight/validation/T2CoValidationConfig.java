@@ -55,7 +55,7 @@ public class T2CoValidationConfig extends CoTopComponent {
     }
     
     public static T2CoValidationConfig getInstance(){
-        if(instance == null){
+        if (instance == null){
             throw new IllegalStateException("not initialized");
         }
         
@@ -96,23 +96,23 @@ public class T2CoValidationConfig extends CoTopComponent {
     		}
         }
         
-        for(Object oKey : map.keySet()){
+        for (Object oKey : map.keySet()){
             String key = (String)oKey;
             
-            if(key.indexOf(".") < 0 ){
+            if (key.indexOf(".") < 0 ){
                 continue;
             }
             
             String val = (String) map.get(key);
 
-            while(val.matches(".*\\$\\{[\\w\\d_]+\\}.*")){
+            while (val.matches(".*\\$\\{[\\w\\d_]+\\}.*")){
                 String refKey = val.replaceFirst(".*\\$\\{([\\w\\d]+)\\}.*", "$1");
                 String refVal = ((String) map.get(key)).replaceAll("\\\\", "\\\\\\\\");//escape 재처리
                 val = val.replaceAll("\\$\\{" + refKey + "\\}", refVal);
             }
 
             //Map에 값추가
-            if(key.endsWith(".MSG")){
+            if (key.endsWith(".MSG")){
                 String ruleKey = key.substring(0, key.length() - 4);//.MSG제거
                 messageConfigMap.put(ruleKey.toUpperCase(), val);
             }else{
@@ -120,10 +120,10 @@ public class T2CoValidationConfig extends CoTopComponent {
                 String ruleType = key.substring(ruleKey.length() + 1).toUpperCase();
                 ruleKey = ruleKey.replaceAll("\\\\\\.", "\\.");//.을 escape 해서 제거
 
-                if(ruleTypeDef.contains(ruleType)){
+                if (ruleTypeDef.contains(ruleType)){
                     Map<String, String> rule = ruleMap.get(ruleKey);
                     
-                    if(rule == null){
+                    if (rule == null){
                         rule = new HashMap<>();
                         ruleMap.put(ruleKey.toUpperCase(), rule);
                     }
@@ -142,7 +142,7 @@ public class T2CoValidationConfig extends CoTopComponent {
     }
     
     public void reload() throws IOException{
-        if(instance != null){
+        if (instance != null){
         	instance.load();
         }else{
             throw new IllegalStateException("not initialized.");

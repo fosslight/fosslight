@@ -32,9 +32,9 @@ public class AjaxInterceptor implements HandlerInterceptor {
     		SecurityContext sc = SecurityContextHolder.getContext();
 			Authentication auth = sc.getAuthentication();
 			
-			if(auth == null) {
+			if (auth == null) {
 				//Ajax 콜인지 아닌지 판단
-                if(isAjaxRequest(request)){
+                if (isAjaxRequest(request)){
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                     return false;
                 }

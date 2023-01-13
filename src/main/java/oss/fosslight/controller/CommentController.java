@@ -64,16 +64,16 @@ public class CommentController extends CoTopComponent {
 		commentsHistory.setReferenceId(rId);
 		model.addAttribute("basicInfo", commentsHistory);
 		
-		if("prj".equalsIgnoreCase(rDiv)) {
+		if ("prj".equalsIgnoreCase(rDiv)) {
 			model.addAttribute("project", projectService.getProjectBasicInfo(rId));
-		} else if("3rd".equalsIgnoreCase(rDiv)) {
+		} else if ("3rd".equalsIgnoreCase(rDiv)) {
 		    PartnerMaster partnerMaster = new PartnerMaster();
 	        partnerMaster.setPartnerId(rId);
 	        
 		    model.addAttribute("partner", partnerService.getPartnerMasterOne(partnerMaster));
-		} else if("oss".equalsIgnoreCase(rDiv)) {
+		} else if ("oss".equalsIgnoreCase(rDiv)) {
 			
-		} else if("license".equalsIgnoreCase(rDiv)) {
+		} else if ("license".equalsIgnoreCase(rDiv)) {
 			
 		}
 		
