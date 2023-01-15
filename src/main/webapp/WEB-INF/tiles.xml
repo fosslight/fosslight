@@ -111,7 +111,7 @@
 		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
     </definition>
-    <definition name="tiles/admin/system/bat/binarypopup"    template="/WEB-INF/views/admin/bat/binarypopup.jsp">
+    <definition name="tiles/admin/binary/binarypopup"    template="/WEB-INF/views/admin/binary/binarypopup.jsp">
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
         <put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
     </definition>

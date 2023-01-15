@@ -22,6 +22,11 @@
 							<input id="createProject" type="button" value="Create Project for OSS Notice" class="btnColor red w200" />
 						</c:if>
 						<c:if test="${detail.loginUserRole eq 'ROLE_ADMIN'}">
+							<c:if test="${not empty binaryFile and detail.status eq 'REV'}">
+								<div style="position:absolute;right:154px;top:5px;width:175px;" id="binaryDB">
+									<input type="checkbox" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" value="N" style="margin-right:10px;"/>Do not register in binary DB
+								</div>
+							</c:if>
 							<c:if test="${detail.status eq 'REV' }">
 							<a href="javascript:void(0);" class="btnSet confirm" onclick="fn.confirm()"><span>Confirm</span></a>
 							</c:if>
@@ -198,6 +203,26 @@
 							</td>
 						</tr>
 					</tr>
+						<tr>
+							<th class="dCase">fosslight_binary.txt</th>
+							<td class="dCase uploadCase binaryUpload">
+								<c:if test="${empty binaryFile}">
+									<span class="fileex_back" <c:if test="${isCommited}">style="display:none;"</c:if>>
+										<div id="partnerBinaryFile">upload</div>
+										<input type="hidden" id="binaryFileId" name="binaryFileId"/>
+									</span>
+								</c:if>
+								<c:if test="${not empty binaryFile}">
+									<a href="<c:url value="/download/${binaryFile.fileSeq}/${binaryFile.logiNm}"/>">${binaryFile.origNm}</a>
+									<span style="margin-left:20px;">${binaryFile.createdDate}</span>
+									<span> <input type="button" value="Delete" class="smallDelete" onclick="fn.deleteBinaryFile(this)" style="vertical-align:super;" <c:if test="${isCommited}">style="display:none;"</c:if>/></span>
+									<input type="hidden" id="binaryFileId" name="binaryFileId" value="${binaryFile.fileId}"/>
+								</c:if>
+								<div class="required">
+									<div class="retxt ossFileId">This field is required.</div>
+								</div>
+							</td>
+						</tr>
 					<tr>
 						<th class="dCase"><spring:message code="msg.common.field.relatedDocuments" /></th>
 						<td class="dCase uploadCase documentsUpload">
@@ -363,6 +388,9 @@
 				<input id="copyUrl" type="text" style="width:1px; height:1px; margin:0; padding:0; border: 0;">
 				<c:if test="${not empty detail.partnerId}">
 					<input type="button" value="Share URL" class="btnColor red" onclick="fn.shareUrl();" />
+				</c:if>
+				<c:if test="${not empty detail.partnerId and ct:isAdmin()}">
+					<input type="button" value="Save (Binary DB)" class="btnSave btnColor red idenSave" onclick="fn.binaryDBSave('${detail.partnerId}')" style="width:120px;"/>
 				</c:if>
                 <c:if test="${not empty detail.partnerId}">
                     <input type="button" value="Export" class="btnColor red btnExport" onclick="fn.downloadExcel()"/>

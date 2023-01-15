@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.BinaryDataMapper">
+
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+    <sql id="orderby">
+    	<choose>
+    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">ORDER BY BAT_ID desc</when>
+    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('SOFTWARE_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('asc', sord)">
+    			ORDER BY (
+    			  CASE 
+    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 1 
+					WHEN ${sidx} REGEXP '^[가-힣].+$' then 2 
+					WHEN ${sidx} REGEXP '^[0-9].+$' then 3 
+					ELSE 4 
+			      END), ${sidx} ${sord}
+    		</when>
+    		<when test="!@oss.fosslight.util.StringUtil@isEmpty(sidx) and @oss.fosslight.util.StringUtil@equals('SOFTWARE_NAME', sidx) and  @oss.fosslight.util.StringUtil@equals('desc', sord)">
+    			ORDER BY (
+    			  CASE 
+    				WHEN ${sidx} REGEXP '^[a-zA-Z].+$' then 4 
+					WHEN ${sidx} REGEXP '^[가-힣].+$' then 3
+					WHEN ${sidx} REGEXP '^[0-9].+$' then 2 
+					ELSE 1
+			      END), ${sidx} ${sord}
+    		</when>
+    		<when test="@oss.fosslight.util.StringUtil@equals('SOFTWARE_VERSION', sidx)">
+				ORDER BY A.SEQ ${sord}
+				    , A.MAJOR_VERSION ${sord}
+				    , BINARY ( CASE WHEN A.SOFTWARE_VERSION REGEXP '^[a-zA-Z]+' THEN SOFTWARE_VERSION END ) ${sord}
+				    , A.ASCII ${sord}
+				    , A.MINOR_VERSION ${sord}
+				    , A.PATCH_VERSION ${sord}
+				    , A.VERSION_LEN ${sord}
+    		</when>
+    		<otherwise>ORDER BY ${sidx} ${sord}</otherwise>
+    	</choose>
+    </sql>
+    <sql id="filters">
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(fileName)">
+    		<choose>
+    			<when test="@oss.fosslight.util.StringUtil@equals(binaryPopupFlag, 'Y')">
+    				AND FILE_NAME = #{fileName}
+    			</when>
+    			<otherwise>
+    				<choose>
+    					<when test="@oss.fosslight.util.StringUtil@equals(equalFlag, 'N')">
+    						AND FILE_NAME LIKE CONCAT('%', #{fileName}, '%')
+    					</when>
+    					<otherwise>
+    						AND FILE_NAME = #{fileName}
+    					</otherwise>
+    				</choose>
+    			</otherwise>
+    		</choose>
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+    		AND OSS_NAME LIKE CONCAT('%', #{ossName}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+    		AND OSS_VERSION = #{ossVersion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(license)">
+    		AND LICENSE LIKE CONCAT('%', #{license}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(parentName)">
+    		AND PARENT_NAME LIKE CONCAT('%', #{parentName}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformName)">
+    		AND PLATFORM_NAME LIKE CONCAT('%', #{platformName}, '%')
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(platformVersion)">
+    		AND PLATFORM_VERSION = #{platformVersion}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
+    		AND UPDATE_DATE <![CDATA[>=]]> #{schStartDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(schEndDate)">
+    		AND UPDATE_DATE <![CDATA[<=]]> #{schEndDate}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+    		AND CHECK_SUM = #{checkSum}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlshCheckSum)">
+    		AND TLSH_CHECK_SUM = #{tlshCheckSum}
+    	</if>
+    </sql>
+    
+    <select id="countBinaryList" resultType="int">
+    	SELECT COUNT(1) FROM BINARY_DATA
+    	WHERE 1=1
+    	<include refid="filters"/>
+    </select>
+    
+    <select id="getBinaryList" resultType="BinaryData">
+    	SELECT 
+    		CONCAT( FILE_NAME , '-' , CHECK_SUM, '-', COALESCE(OSS_NAME,''), '-', COALESCE(OSS_VERSION,''), '-', COALESCE(REPLACE(LICENSE, ',','|'),'') ) AS BAT_ID
+    		, FILE_NAME
+    		, PATH_NAME
+    		, SOURCE_PATH
+    		, CHECK_SUM
+    		, TLSH_CHECK_SUM
+    		, OSS_NAME
+    		, OSS_VERSION
+    		, LICENSE
+    		, PARENT_NAME
+    		, PLATFORM_NAME
+    		, PLATFORM_VERSION
+    		, UPDATE_DATE 
+    	FROM BINARY_DATA
+    	WHERE 1=1
+    	<include refid="filters"/>
+    	<include refid="orderby"/>
+    	<include refid="limitPage"/>
+    </select>
+    
+    <update id="updateBinaryData" parameterType="BinaryData">
+    	UPDATE BINARY_DATA SET
+    		PATH_NAME = #{pathName}, SOURCE_PATH = #{sourcePath}, OSS_NAME = #{ossName}, OSS_VERSION = #{ossVersion}, LICENSE = #{license}
+    		, PARENT_NAME = #{parentName}, PLATFORM_NAME = #{platformName}, PLATFORM_VERSION = #{platformVersion}
+    	WHERE CONCAT( fileName , '-' , checkSum, '-', COALESCE(ossName,''), '-', COALESCE(ossVersion,''), '-', COALESCE(REPLACE(license, ',','|'),'') ) = #{batId}
+    </update>
+    
+    <delete id="deleteBinaryData" parameterType="BinaryData">
+    	DELETE FROM BINARY_DATA WHERE CONCAT( fileName , '-' , checkSum, '-', COALESCE(ossName,''), '-', COALESCE(ossVersion,''), '-', COALESCE(REPLACE(license, ',','|'),'') ) = #{batId}
+    </delete>
+    
+    <insert id="insertBinaryData" parameterType="BinaryData">
+    	INSERT INTO BINARY_DATA (FILE_NAME, PATH_NAME, SOURCE_PATH, CHECK_SUM, TLSH_CHECK_SUM
+    	, OSS_NAME, OSS_VERSION, LICENSE, PARENT_NAME, PLATFORM_NAME, PLATFORM_VERSION, UPDATE_DATE)
+    	VALUES(
+    		#{fileName}
+			, #{pathName}
+			, #{sourcePath}
+			, #{checkSum}
+			, #{tlshCheckSum}
+			, #{ossName}
+			, #{ossVersion}
+			, #{license}
+			, #{parentName}
+			, #{platformName}
+			, #{platformVersion}
+			, NOW()
+    	)
+    </insert>
+    
+	<insert id="insertBinaryDataLog" parameterType="BinaryData">
+		INSERT INTO BINARY_DATA_HIS (ACTION_ID, ACTION_TYPE, FILE_NAME, PATH_NAME, SOURCE_PATH, CHECK_SUM, TLSH_CHECK_SUM, OSS_NAME, OSS_VERSION
+		, LICENSE, PARENT_NAME, PLATFORM_NAME, PLATFORM_VERSION, UPDATE_DATE, CREATOR, COMMENT, MODIFIER)
+		VALUES(
+			#{actionId}
+			, #{actionType}
+			, #{fileName}
+			, #{pathName}
+			, #{sourcePath}
+			, #{checkSum}
+			, #{tlshCheckSum}
+			, #{ossName}
+			, #{ossVersion}
+			, #{license}
+			, #{parentName}
+			, #{platformName}
+			, #{platformVersion}
+			, #{updateDate}
+			, #{loginUserName}
+			, #{comment}
+			, #{loginUserName}
+			)
+	</insert>
+	
+	<select id="countExistsBinaryName" resultType="int">
+		SELECT COUNT(1) AS total FROM BINARY_DATA WHERE FILE_NAME = #{fileName}
+	</select>
+	
+	<select id="getBinaryListWithNameAndChecksum" resultType="BinaryData">
+		SELECT
+    		FILE_NAME
+    		, PATH_NAME
+    		, SOURCE_PATH
+    		, CHECK_SUM
+    		, TLSH_CHECK_SUM
+    		, OSS_NAME
+    		, OSS_VERSION
+    		, LICENSE
+    		, PARENT_NAME
+    		, PLATFORM_NAME
+    		, PLATFORM_VERSION
+    		, UPDATE_DATE 
+		FROM BINARY_DATA 
+		WHERE FILE_NAME = #{fileName} AND CHECK_SUM = #{checkSum}
+	</select>
+	
+	<select id="getBinaryTlshListWithoutChecksum" resultType="BinaryData">
+		SELECT
+    		FILE_NAME
+    		, PATH_NAME
+    		, SOURCE_PATH
+    		, CHECK_SUM
+    		, TLSH_CHECK_SUM
+    		, OSS_NAME
+    		, OSS_VERSION
+    		, LICENSE
+    		, PARENT_NAME
+    		, PLATFORM_NAME
+    		, PLATFORM_VERSION
+    		, UPDATE_DATE 
+		FROM BINARY_DATA 
+		WHERE FILE_NAME = #{fileName} AND TLSH_CHECK_SUM != '0' AND CHECK_SUM != #{checkSum}
+	</select>
+	
+	<delete id="deleteBinaryListWithNameAndChecksum">
+		DELETE FROM BINARY_DATA WHERE FILE_NAME = #{fileName} AND CHECK_SUM = #{checkSum}
+	</delete>
+	
+	<update id="updateTlshCheckSumToZero">
+	
+	</update>
+	
+	<select id="selectBinaryDataListWithBinaryName" resultType="BinaryData">
+		SELECT
+    		FILE_NAME
+    		, PATH_NAME
+    		, SOURCE_PATH
+    		, CHECK_SUM
+    		, TLSH_CHECK_SUM
+    		, OSS_NAME
+    		, OSS_VERSION
+    		, LICENSE
+    		, PARENT_NAME
+    		, PLATFORM_NAME
+    		, PLATFORM_VERSION
+    		, UPDATE_DATE 
+		FROM BINARY_DATA 
+		WHERE FILE_NAME = #{fileName} AND TLSH_CHECK_SUM != '0'
+	</select>
+	
+</mapper>
