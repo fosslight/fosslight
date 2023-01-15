@@ -25,29 +25,29 @@ public class BinaryData  extends ComBean implements Serializable {
 	private String batId;
 	
 	/** The filename. */
-	private String fileName    ;
+	private String fileName;
 	
 	/** The pathname. */
-	private String pathName    ;
-	private String sourcePath    ;
+	private String pathName;
+	private String sourcePath;
 	
 	/** The checksum. */
-	private String checkSum    ;
+	private String checkSum;
 	
 	/** The tlshchecksum. */
 	private String tlshCheckSum;
 	
 	/** The ossname. */
-	private String ossName     ;
+	private String ossName;
 	
 	/** The ossversion. */
-	private String ossVersion  ;
+	private String ossVersion;
 	
 	/** The license. */
-	private String license     ;
+	private String license;
 	
 	/** The parentname. */
-	private String parentName  ;
+	private String parentName;
 	
 	/** The platformname. */
 	private String platformName;

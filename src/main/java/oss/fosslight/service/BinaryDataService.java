@@ -67,6 +67,9 @@ public class BinaryDataService  extends CoTopComponent {
 		}
 		
 		List<BinaryData> list = binaryDataMapper.getBinaryList(vo);
+		for(BinaryData item : list) {
+			item.setDownloadlocation(CommonFunction.getOssDownloadLocation(item.getOssName(), item.getOssVersion()));
+		}
 		
 		if(CoConstDef.FLAG_NO.equals(vo.getBinaryPopupFlag())) {
 			map.put("page", vo.getCurPage());
@@ -89,7 +92,11 @@ public class BinaryDataService  extends CoTopComponent {
 		boolean isDeleteMode = CoConstDef.GRID_OPERATION_DELETE.equals(bean.getOper());
 		List<BinaryData> historyList = new ArrayList<>();
 		
-		if(!StringUtil.isEmpty(bean.getBatId())) {
+		if(!StringUtil.isEmpty(bean.getId()) && StringUtil.isEmpty(bean.getBatId())) {
+			bean.setBatId(bean.getId());
+		}
+		
+		if(StringUtil.isEmpty(bean.getBatId())) {
 			bean.setBatId(bean.getFileName() + "-" + bean.getCheckSum() + "-" + avoidNull(bean.getOssName()) + "-" + avoidNull(bean.getOssVersion()) + "-" + avoidNull(bean.getLicense()));
 		}
 		

@@ -29,7 +29,7 @@ var evt = {
 			$('#search').click(function(){
 				var postData=$('#batSearch').serializeObject();
 
-				$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/system/bat/listAjax"/>'}).trigger('reloadGrid');
+				$("#list").jqGrid('setGridParam', {postData:postData, page : 1, url:'<c:url value="/binary/listAjax"/>'}).trigger('reloadGrid');
 			});
 			
 			// ossNames auto complete
@@ -213,7 +213,7 @@ var ajax = {
 	setBat: function(param) {
 		$.ajax({
 			type: 'POST',
-			url: '<c:url value="/system/bat/modAjax"/>',
+			url: '<c:url value="/binary/modAjax"/>',
 			data: param,
 			headers: {
 				'Accept': 'application/json',
@@ -230,7 +230,7 @@ var ajax = {
 
 
 var updateDialogEdit = {
-        url:'<c:url value="/system/bat/modAjax"/>'
+        url:'<c:url value="/binary/modAjax"/>'
             , closeAfterEdit: true
             , reloadAfterSubmit: true
             , modal: true
@@ -243,12 +243,12 @@ var updateDialogEdit = {
 			    		var editRowId = $("#FrmGrid_list  #filename").attr("rowid");
 			    		var editRowData = $("#list").getRowData(editRowId);
 
-			    		if(postdata["ossname"] != editRowData["ossname"]){
-			    			obj["ossname"] 	= postdata["ossname"];
+			    		if(postdata["ossName"] != editRowData["ossName"]){
+			    			obj["ossName"] 	= postdata["ossName"];
 			    		}
 			    		
-			    		if(postdata["ossversion"] != editRowData["ossversion"]){
-			    			obj["ossversion"] = postdata["ossversion"];
+			    		if(postdata["ossVersion"] != editRowData["ossVersion"]){
+			    			obj["ossVersion"] = postdata["ossVersion"];
 			    		}
 			    		
 			    		if(postdata["license"] != editRowData["license"]){
@@ -259,7 +259,7 @@ var updateDialogEdit = {
 			    			obj["comment"] 	= postdata["comment"];
 			    		}
 			    		
-			    		obj["updatedate"]	= postdata["updatedate"];
+			    		obj["updateDate"]	= postdata["updateDate"];
 			    		obj["oper"]			= postdata["oper"];
 			    		// id => concat( filename , '-' , checksum, '-', COALESCE(ossname,''), '-', COALESCE(ossversion,''), '-', COALESCE(license,'') )
 						obj["id"]			= selectedRow[i];
@@ -276,16 +276,16 @@ var updateDialogEdit = {
                 fn.getSelectedRowCnt();
                 
                 if(multiSelectFlag){
-					$("#pathname", formid).attr("disabled","disabled");
-					$("#sourcepath", formid).attr("disabled","disabled");
-					$("#parentname", formid).attr("disabled","disabled");
-					$("#platformname", formid).attr("disabled","disabled");
-					$("#platformversion", formid).attr("disabled","disabled");
+					$("#pathName", formid).attr("disabled","disabled");
+					$("#sourcePath", formid).attr("disabled","disabled");
+					$("#parentName", formid).attr("disabled","disabled");
+					$("#platformName", formid).attr("disabled","disabled");
+					$("#platformVersion", formid).attr("disabled","disabled");
                 }
                 
-            	$("#filename", formid).attr("disabled","disabled");
-            	$("#checksum", formid).attr("disabled","disabled");
-            	$("#tlshchecksum", formid).attr("disabled","disabled");
+            	$("#fileName", formid).attr("disabled","disabled");
+            	$("#checkSum", formid).attr("disabled","disabled");
+            	$("#tlshCheckSum", formid).attr("disabled","disabled");
             	$("#downloadlocation", formid).attr("disabled","disabled");
             }
             , afterSubmit: function(response, postdata) {
@@ -325,7 +325,7 @@ var updateDialogEdit = {
 };
 
 var updateDialogDel = {
-        url:'<c:url value="/system/bat/modAjax"/>'
+        url:'<c:url value="/binary/modAjax"/>'
             , closeAfterDel: true
             , reloadAfterSubmit: true
             , modal: true
@@ -374,10 +374,10 @@ var batList = {
 			, colNames: ['batId','Binary File name','Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment']
 			, colModel: [
 				{name: 'batId', index: 'batId', hidden:true, key:true},
-				{name: 'filename', index: 'filename', width: 150, allign: 'left',editable: true, template: searchStringOptions},
-				{name: 'pathname', index: 'pathname', width: 150, allign: 'left',editable: true, template: searchStringOptions},
-				{name: 'sourcepath', index: 'sourcepath', width: 150, allign: 'left',editable: true, template: searchStringOptions},
-				{name: 'ossname', index: 'ossname', width: 150, allign: 'left',editable: true, template: searchStringOptions,
+				{name: 'fileName', index: 'fileName', width: 150, allign: 'left',editable: true, template: searchStringOptions},
+				{name: 'pathName', index: 'pathName', width: 150, allign: 'left',editable: true, template: searchStringOptions},
+				{name: 'sourcePath', index: 'sourcePath', width: 150, allign: 'left',editable: true, template: searchStringOptions},
+				{name: 'ossName', index: 'ossName', width: 150, allign: 'left',editable: true, template: searchStringOptions,
 					editoptions: {
 						dataInit:
 							function (e) { 
@@ -394,7 +394,7 @@ var batList = {
 								}).on('autocompletechange', function() {
 									if(e.value!=""){
 										var rowid = (e.id).split('_')[0];
-										fn.griOssVersions($('#ossversion'), e.value, 'list');
+										fn.griOssVersions($('#ossVersion'), e.value, 'list');
 									}
 								});
 								
@@ -402,7 +402,7 @@ var batList = {
 							}
 					}	
 				} ,
-				{name: 'ossversion', index: 'ossversion', width: 80, align: 'left',editable: true, template: searchStringOptions},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left',editable: true, template: searchStringOptions},
 				{name: 'license', index: 'license', width: 150, align: 'left',editable: true, template: searchStringOptions,
  					editoptions: {
  						dataInit: function (e) {
@@ -424,12 +424,12 @@ var batList = {
  					}
 				},
 				{name: 'downloadlocation', index: 'downloadlocation', width: 100, align: 'left', formatter: 'link', formatoptions: {target:'_blank'}, editable: true, template: searchStringOptions},
-				{name: 'parentname', index: 'parentname', width: 100, align: 'left',editable: true, template: searchStringOptions},
-				{name: 'platformname', index: 'platformname', width: 100, align: 'left',editable: true, template: searchStringOptions},
-				{name: 'platformversion', index: 'platformversion', width: 100, align: 'left',editable: true, template: searchStringOptions},
-				{name: 'checksum', index: 'checksum', width: 150, allign: 'center',editable: true,hidden:true},
-				{name: 'tlshchecksum', index: 'tlshchecksum', width: 150, allign: 'center',editable: true,hidden:true},
-				{name: 'updatedate', index: 'updatedate', width: 100, align: 'left',editable: false, formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, template: searchDateOptions},
+				{name: 'parentName', index: 'parentName', width: 100, align: 'left',editable: true, template: searchStringOptions},
+				{name: 'platformName', index: 'platformName', width: 100, align: 'left',editable: true, template: searchStringOptions},
+				{name: 'platformVersion', index: 'platformVersion', width: 100, align: 'left',editable: true, template: searchStringOptions},
+				{name: 'checkSum', index: 'checkSum', width: 150, allign: 'center',editable: true,hidden:true},
+				{name: 'tlshCheckSum', index: 'tlshCheckSum', width: 150, allign: 'center',editable: true,hidden:true},
+				{name: 'updateDate', index: 'updateDate', width: 100, align: 'left',editable: false, formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, template: searchDateOptions},
 				{name: 'comment', index: 'comment', width: 150,editable: true,hidden:true, edittype:'textarea', editoptions:{maxlength:2048, rows:5}, editrules: { edithidden: true }, template: searchStringOptions}
 			]
 			, editurl :'clientArray'

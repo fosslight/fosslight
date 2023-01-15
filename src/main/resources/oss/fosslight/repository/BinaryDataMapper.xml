@@ -123,11 +123,11 @@
     	UPDATE BINARY_DATA SET
     		PATH_NAME = #{pathName}, SOURCE_PATH = #{sourcePath}, OSS_NAME = #{ossName}, OSS_VERSION = #{ossVersion}, LICENSE = #{license}
     		, PARENT_NAME = #{parentName}, PLATFORM_NAME = #{platformName}, PLATFORM_VERSION = #{platformVersion}
-    	WHERE CONCAT( fileName , '-' , checkSum, '-', COALESCE(ossName,''), '-', COALESCE(ossVersion,''), '-', COALESCE(REPLACE(license, ',','|'),'') ) = #{batId}
+    	WHERE CONCAT( FILE_NAME , '-' , CHECK_SUM, '-', COALESCE(OSS_NAME,''), '-', COALESCE(OSS_VERSION,''), '-', COALESCE(REPLACE(LICENSE, ',','|'),'') ) = #{batId}
     </update>
     
     <delete id="deleteBinaryData" parameterType="BinaryData">
-    	DELETE FROM BINARY_DATA WHERE CONCAT( fileName , '-' , checkSum, '-', COALESCE(ossName,''), '-', COALESCE(ossVersion,''), '-', COALESCE(REPLACE(license, ',','|'),'') ) = #{batId}
+    	DELETE FROM BINARY_DATA WHERE CONCAT( FILE_NAME , '-' , CHECK_SUM, '-', COALESCE(OSS_NAME,''), '-', COALESCE(OSS_VERSION,''), '-', COALESCE(REPLACE(LICENSE, ',','|'),'') ) = #{batId}
     </delete>
     
     <insert id="insertBinaryData" parameterType="BinaryData">

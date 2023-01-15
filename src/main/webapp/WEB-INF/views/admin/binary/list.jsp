@@ -10,15 +10,15 @@
 					<dt>Basic Search Area</dt>
 					<dd>
 						<label>Binary Name</label>
-						<input name="filename" type="text" />
+						<input name="fileName" type="text" />
 					</dd>
 					<dd class="centerAign">
 						<label>Project Name</label>
-						<input type="text" name="parentname"/>
+						<input type="text" name="parentName"/>
 					</dd>
 					<dd class="lastAign">
 						<label>OSS Name</label>
-						<input name="ossname" type="text" class="autoComOss" />
+						<input name="ossName" type="text" class="autoComOss" />
 					</dd>
 					<dd>
 						<label>Updated Date</label>
@@ -27,19 +27,19 @@
 					</dd>
 					<dd class="centerAign">
 						<label>Platform Name</label>
-						<input type="text" name="platformname"/>
+						<input type="text" name="platformName"/>
 					</dd>
 					<dd class="lastAign">
 						<label>OSS Version</label>
-						<input type="text" name="ossversion" />
+						<input type="text" name="ossVersion" />
 					</dd>
 					<dd>
 						<label>TLSH</label>
-						<input type="text" name="tlshchecksum" />
+						<input type="text" name="tlshCheckSum" />
 					</dd>
 					<dd class="centerAign">
 						<label>Platform Version</label>
-						<input type="text" name="platformversion"/>
+						<input type="text" name="platformVersion"/>
 					</dd>
 					<dd class="lastAign">
 						<label>License Name</label>
@@ -47,7 +47,7 @@
 					</dd>
 					<dd>
 						<label>Checksum</label>
-						<input type="text" name="checksum" />
+						<input type="text" name="checkSum" />
 					</dd>
 				</dl>
 				<input id="search" type="button" value="Search" class="btnColor search" />
