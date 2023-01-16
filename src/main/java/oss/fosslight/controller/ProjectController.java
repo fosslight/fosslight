@@ -64,6 +64,8 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.service.AutoIdService;
+import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
@@ -106,6 +108,8 @@ public class ProjectController extends CoTopComponent {
 	
 	@Autowired ResponseService responseService;
 	@Autowired SearchService searchService;
+	
+	@Autowired private BinaryDataService binaryDataService;
 	
 	/** The env. */
 	@Resource
@@ -1985,6 +1989,7 @@ public class ProjectController extends CoTopComponent {
 				}
 
 				projectService.registSrcOss(ossComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+				binaryDataService.autoIdentificationWithBinryTextFile(project);
 				
 				if (!isEmpty(changeExclude) || !isEmpty(changeAdded)) {
 					String changedByResultTxt = "";
@@ -2467,6 +2472,8 @@ public class ProjectController extends CoTopComponent {
 
 			projectService.registSrcOss(ossComponents, ossComponentsLicense, project,
 					CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			
+			binaryDataService.autoIdentificationWithAndroidResultTextFile(project);
 			
 			try {
 				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
@@ -4416,5 +4423,99 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 		}
+	}
+	
+	
+
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.PROJECT_BINARY_DB_SAVE)
+	public @ResponseBody ResponseEntity<Object> binaryDBSave(@RequestBody Project project,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		Project prjInfo = projectService.getProjectDetail(project);
+		
+		boolean booleanFlag = false;
+		
+		if(project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+			if(prjInfo != null && !isEmpty(prjInfo.getBinBinaryFileId()) && prjInfo.getIdentificationSubStatusBin() != null && !(CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusBin())) 
+					&& !(CoConstDef.FLAG_YES.equals(project.getIgnoreBinaryDbFlag()))) {
+				try {
+
+					ProjectIdentification parambin = new ProjectIdentification();
+					parambin.setReferenceId(prjInfo.getPrjId());
+					parambin.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+					Map<String, Object> mapbin = projectService.getIdentificationGridList(parambin);
+					
+					// platform 정보
+					String platformName = "";
+					String platformVer = "";
+					
+					if(CoConstDef.COMMON_SELECTED_ETC.equals(prjInfo.getOsType()) && !isEmpty(prjInfo.getOsTypeEtc())) {
+						platformName = CommonFunction.getPlatformName(prjInfo.getOsTypeEtc());
+						platformVer = CommonFunction.getPlatformVersion(prjInfo.getOsTypeEtc());
+					} else {
+						String _temp = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, prjInfo.getOsType());
+						platformName = CommonFunction.getPlatformName(_temp);
+						platformVer = CommonFunction.getPlatformVersion(_temp);
+					}
+					
+					String _prjName = "[" + prjInfo.getPrjId() + "]" + prjInfo.getPrjName();
+					if(!isEmpty(prjInfo.getPrjVersion())) {
+						_prjName += "_" + prjInfo.getPrjVersion();
+					}
+					
+					binaryDataService.insertBatConfirmBinOssWithChecksum(_prjName, platformName, platformVer, prjInfo.getBinBinaryFileId(), (List<ProjectIdentification>) mapbin.get("mainData"));
+					
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				
+				} finally {
+					booleanFlag = true;
+				}
+			}else {
+				booleanFlag = false;
+			}
+		}
+		
+		if(project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+			if(prjInfo != null && !isEmpty(prjInfo.getSrcAndroidResultFileId()) && prjInfo.getIdentificationSubStatusAndroid() != null && !(CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid()))
+					&& !(CoConstDef.FLAG_YES.equals(project.getIgnoreBinaryDbFlag()))) {
+				try {
+
+					ProjectIdentification paramandroid = new ProjectIdentification();
+					paramandroid.setReferenceId(prjInfo.getPrjId());
+					paramandroid.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+					Map<String, Object> mapandroid = projectService.getIdentificationGridList(paramandroid);
+					
+					// platform 정보
+					String platformName = "";
+					String platformVer = "";
+					if(CoConstDef.COMMON_SELECTED_ETC.equals(prjInfo.getOsType()) && !isEmpty(prjInfo.getOsTypeEtc())) {
+						platformName = CommonFunction.getPlatformName(prjInfo.getOsTypeEtc());
+						platformVer = CommonFunction.getPlatformVersion(prjInfo.getOsTypeEtc());
+					} else {
+						String _temp = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, prjInfo.getOsType());
+						platformName = CommonFunction.getPlatformName(_temp);
+						platformVer = CommonFunction.getPlatformVersion(_temp);
+					}
+					
+					String _prjName = "[" + prjInfo.getPrjId() + "]" + prjInfo.getPrjName();
+					if(!isEmpty(prjInfo.getPrjVersion())) {
+						_prjName += "_" + prjInfo.getPrjVersion();
+					}
+					
+					binaryDataService.insertBatConfirmAndroidBinOssWithChecksum(_prjName, platformName, platformVer, prjInfo.getSrcAndroidResultFileId(), (List<ProjectIdentification>) mapandroid.get("mainData"));
+				
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				
+				} finally {
+					booleanFlag = true;
+				}
+			}else {
+				booleanFlag = false;
+			}
+		}
+		
+		return makeJsonResponseHeader(booleanFlag, null);
 	}
 }

@@ -67,7 +67,7 @@
 						<li><a href="#<c:url value="/bat/list"/>" class="add-tab">BAT List</a></li>
 					</c:if>
 					<c:if test="${binarydbFlag}">
-						<li><a href="#<c:url value="/system/bat"/>" class="add-tab">Binary DB</a></li>
+						<li><a href="#<c:url value="/binary"/>" class="add-tab">Binary DB</a></li>
 					</c:if>
 					<li><a href="#<c:url value="/vulnerability/list"/>" class="add-tab">Vulnerability</a></li>
 					<li><a href="#<c:url value="/selfCheck/list"/>" class="add-tab">Self-Check List</a></li>

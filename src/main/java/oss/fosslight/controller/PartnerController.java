@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,7 @@ import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.HistoryService;
@@ -82,6 +84,7 @@ public class PartnerController extends CoTopComponent{
 	@Autowired FileMapper fileMapper;
 	@Autowired ProjectMapper projectMapper;
 	@Autowired SearchService searchService;
+	@Autowired private BinaryDataService binaryDataService;
 	
 	/** The session key search. */
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_PARTNER_LIST";
@@ -469,16 +472,62 @@ public class PartnerController extends CoTopComponent{
 		ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
 		
 		try{
-			History h = new History();
+			// binary.txt 파일이 변경된 경우 최초 한번만 수행
+			PartnerMaster beforePartnerInfo = new PartnerMaster();
+			if(!isEmpty(partnerMaster.getPartnerId())) {
+				beforePartnerInfo.setPartnerId(partnerMaster.getPartnerId());
+				beforePartnerInfo = partnerService.getPartnerMasterOne(partnerMaster);
+			}
 			
-			if (!isNew) {
-				h = partnerService.work(partnerMaster);
-				partnerService.registPartnerMaster(partnerMaster, ossComponents, ossComponentsLicense);
-				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-			} else {
-				partnerService.registPartnerMaster(partnerMaster, ossComponents, ossComponentsLicense);
-				h = partnerService.work(partnerMaster);
-				h.sethAction(CoConstDef.ACTION_CODE_INSERT);
+			String binaryFileId = partnerMaster.getBinaryFileId();
+			
+			if((!isEmpty(binaryFileId) && beforePartnerInfo == null)  // 최초생성시 binary.txt File을 upload하였거나
+					|| (!isEmpty(binaryFileId) && beforePartnerInfo != null && !binaryFileId.equals(beforePartnerInfo.getBinaryFileId()))) { // binary.txt를 변경하였을 경우에만 동작.
+				List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfo(binaryFileId));
+				
+				if(binaryTxtList != null && !binaryTxtList.isEmpty()) {
+					// 현재 osslist의 binary 목록을 격납
+					Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
+					
+					for(ProjectIdentification bean : ossComponents) {
+						if(!isEmpty(bean.getBinaryName())) {
+							componentBinaryList.put(bean.getBinaryName(), bean);
+						}
+					}
+					
+					List<ProjectIdentification> addComponentList = Lists.newArrayList();
+					
+					// 존재여부 확인
+					for(String binaryNameTxt : binaryTxtList) {
+						if(!componentBinaryList.containsKey(binaryNameTxt)) {
+							// add 해야할 list
+							ProjectIdentification bean = new ProjectIdentification();
+							// 화면에서 추가한 것 처럼 jqg로 시작하는 component id를 임시로 설정한다.
+							bean.setGridId("jqg_"+binaryFileId+"_"+addComponentList.size());
+							bean.setBinaryName(binaryNameTxt);
+							addComponentList.add(bean);
+							
+//							changeAdded += "<br> - " + binaryNameTxt;
+						} else { // exclude처리된 경우
+							ProjectIdentification bean = componentBinaryList.get(binaryNameTxt);
+							if(bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+//								changeExclude += "<br>" + binaryNameTxt;
+							}
+						}
+					}
+					
+					if(addComponentList != null && !addComponentList.isEmpty()) {
+						ossComponents.addAll(addComponentList);
+					}
+				}
+			}
+			
+			partnerService.registPartnerMaster(partnerMaster, ossComponents, ossComponentsLicense);
+			History h = partnerService.work(partnerMaster);
+			h.sethAction(!isNew ? CoConstDef.ACTION_CODE_UPDATE : CoConstDef.ACTION_CODE_INSERT);
+			
+			if(!isEmpty(binaryFileId)) {
+				binaryDataService.autoIdentificationWithBinryTextFilePartner(partnerMaster);
 			}
 			
 			historyService.storeData(h);
@@ -832,6 +881,25 @@ public class PartnerController extends CoTopComponent{
 			}
 			
 			partnerService.updatePartnerConfirm(partnerMaster);
+			
+			if(partnerMaster != null && !isEmpty(partnerMaster.getBinaryFileId()) &&  !(CoConstDef.FLAG_YES.equals(partnerMaster.getIgnoreBinaryDbFlag()))) {
+				try {
+					ProjectIdentification paramPartner = new ProjectIdentification();
+					paramPartner.setReferenceId(partnerMaster.getPartnerId());
+					paramPartner.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+					
+					// platform 정보
+					String platformName = "";
+					String platformVer = "";
+					String _partnerName = "[3rd-" + partnerMaster.getPartnerId() + "]" + partnerMaster.getPartnerName();
+					
+					T2File binaryTextFile = fileService.selectFileInfo(partnerMaster.getBinaryFileId());
+					
+					binaryDataService.insertBatConfirmBinOssWithChecksum(CoConstDef.CD_CHECK_OSS_PARTNER, _partnerName, platformName, platformVer, binaryTextFile, (List<ProjectIdentification>) map.get("mainData"));
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
 			
 			try {
 				mailbean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_CONF);
@@ -1292,5 +1360,126 @@ public class PartnerController extends CoTopComponent{
 			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader();
+	}
+	
+
+	@ResponseBody
+	@PostMapping(value = PARTNER.NOTICE_TEXT)
+	public String noticeText(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
+			HttpServletResponse res, Model model) throws Exception {
+
+		String fileType = req.getParameter("fileType");
+		ArrayList<Object> resultList = new ArrayList<Object>();
+		// 파일등록
+		List<UploadFile> list = new ArrayList<UploadFile>();
+		String fileId = req.getParameter("registFileId");
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+		
+		// 파일 등록
+		try {
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
+				file.setCreator(loginUserName());
+				if (fileId == null) {
+					list = fileService.uploadFile(req, file);
+				} else {
+					list = fileService.uploadFile(req, file, null, fileId);
+				}
+			}
+
+			if(fileExtension.equals("csv")) {
+				resultList = CommonFunction.checkCsvFileLimit(list);
+			} else {
+				resultList = CommonFunction.checkXlsxFileLimit(list);
+			}
+			
+			if(resultList.size() > 0) {
+				return toJson(resultList);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+
+		if ("text".equals(fileType)) {
+			resultList.add(list);
+			resultList.add(fileType);
+			resultList.add("TEXT_FILE");
+
+			return toJson(resultList);
+		} else if (fileExtension.equals("csv")) {
+			resultList.add(list);
+			resultList.add("BIN");
+			resultList.add("CSV_FILE");
+
+			return toJson(resultList);
+		} else {
+			// sheet이름
+			List<Object> sheetNameList = null;
+
+			try {
+				sheetNameList = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+			
+			Boolean isSpdxSpreadsheet = false;
+			for(Object sheet : sheetNameList) {
+				String sheetName = sheet.toString();
+				if(sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
+					isSpdxSpreadsheet = true;
+				}
+			}
+			
+			if(isSpdxSpreadsheet){
+				resultList.add(list);
+				resultList.add(sheetNameList);
+				resultList.add("SPDX_SPREADSHEET_FILE");
+			}
+			else {
+				resultList.add(list);
+				resultList.add(sheetNameList);
+				resultList.add("EXCEL_FILE");
+			}
+
+			return toJson(resultList);
+		}
+	}
+	
+	
+	@PostMapping(value = PARTNER.SAVE_BINARY_DB)
+	public @ResponseBody ResponseEntity<Object> saveBinaryDB(@RequestBody PartnerMaster partner,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		boolean resultFlag = false;
+		
+		try {
+			PartnerMaster partnerMaster = new PartnerMaster();
+			partnerMaster.setPartnerId(partner.getPartnerId());
+			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+			String binaryFileId = partnerMaster.getBinaryFileId();
+			
+			if(!isEmpty(binaryFileId)) {
+				ProjectIdentification paramPartner = new ProjectIdentification();
+				paramPartner.setReferenceId(partnerMaster.getPartnerId());
+				paramPartner.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				Map<String, Object> mapPartner = projectService.getIdentificationGridList(paramPartner);
+				
+				// platform 정보
+				String platformName = "";
+				String platformVer = "";
+				String _partnerName = "[3rd-" + partnerMaster.getPartnerId() + "]" + partnerMaster.getPartnerName();
+				
+				T2File binaryTextFile = fileService.selectFileInfo(partnerMaster.getBinaryFileId());
+				
+				binaryDataService.insertBatConfirmBinOssWithChecksum(CoConstDef.CD_CHECK_OSS_PARTNER, _partnerName, platformName, platformVer, binaryTextFile, (List<ProjectIdentification>) mapPartner.get("mainData"));
+				
+				resultFlag = true;
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return makeJsonResponseHeader(resultFlag, null);
 	}
 }

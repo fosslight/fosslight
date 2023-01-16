@@ -354,6 +354,70 @@ var saveFlag = false;
 				}
 			});
 			
+			
+			var accept4 = '';
+	 		<c:forEach var="file" items="${ct:getCodes(ct:getConstDef('CD_FILE_ACCEPT'))}" varStatus="fileStatus">
+				<c:if test="${file eq '19'}">
+				accept4 = '${ct:getCodeExpString(ct:getConstDef("CD_FILE_ACCEPT"), file)}';
+				</c:if>
+			</c:forEach>
+			
+			$('#partnerBinaryFile').uploadFile({
+				url:'<c:url value="${suffixUrl}/partner/noticeText?fileType=text"/>',
+				multiple:false,
+				dragDrop:true,
+				allowedTypes:accept4,
+				fileName:"myfile",
+				sequential:true,
+				sequentialCount:1,
+				dynamicFormData: function() {
+					var data ={ "registFileId" : '' }
+
+					return data;
+				},
+				onSubmit:function(files){
+					// file ext 재확인
+					var accept4 = "";
+					var ext = files[0].split(".")[1];
+					
+					<c:forEach var="file" items="${ct:getCodes(ct:getConstDef('CD_FILE_ACCEPT'))}" varStatus="fileStatus">
+						<c:if test="${file eq '19'}">
+						accept4 = '${ct:getCodeExpString(ct:getConstDef("CD_FILE_ACCEPT"), file)}';
+						</c:if>
+					</c:forEach>
+					
+					if(accept4 != ext){
+						return false;
+					}
+				},
+				onSuccess:function(files,data,xhr,pd){
+					var result = jQuery.parseJSON(data);
+					
+					if(result == null) {
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					} else {
+						result = result[0][0];
+						$('#binaryFileId').val(result.registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						$('.binaryUpload').children().remove();
+						
+						var htmlStr  = '<a href="/download/'+result.registSeq+'/'+result.fileName+'">'+result.originalFilename+'</a>';
+							htmlStr += '<span style="margin-left:20px;">' + result.createdDate + '</span>';
+							htmlStr += '<span> <input type="button" value="Delete" class="smallDelete" style="vertical-align:super;" onclick="fn.deleteBinaryFile(this)" /></span>';
+							htmlStr += '<input type="hidden" id="binaryFileId" name="binaryFileId" value="'+result.registSeq+'"/>';
+						
+						$('.binaryUpload').append(htmlStr);
+					}
+				},
+				onError:function(files,status,errMsg,pd){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});			
+			
 			$('#documentsFile').uploadFile({
 				url : '<c:url value="/partner/documentsFile"/>',
 				multiple:false,
@@ -1107,6 +1171,17 @@ var saveFlag = false;
 			
 			evt.init();
 		},
+		deleteBinaryFile : function(obj){
+			var htmlStr  = '<span class="fileex_back">';
+				htmlStr +=    '<div id="partnerBinaryFile">upload</div>';
+				htmlStr +=    '<input type="hidden" id="binaryFileId" name="binaryFileId"/>';
+				htmlStr += '</span>';
+			
+			$('.binaryUpload').children().remove();
+			$('.binaryUpload').append(htmlStr);
+			
+			evt.init();
+		},
 		makeOssList : function(data){
 			// 서브 그리드 url 전송 설정(false 전송 안함)
 			partyMainData = data.mainData;
@@ -1263,7 +1338,7 @@ var saveFlag = false;
 					
 					return false;
 				}
-				var param = {status : 'CONF', partnerId : '${detail.partnerId}', userComment : replaceWithLink(CKEDITOR.instances['editor'].getData())};
+				var param = {status : 'CONF', partnerId : '${detail.partnerId}', binaryFileId : '${detail.binaryFileId}', userComment : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 				$.ajax({
 					url : '<c:url value="${suffixUrl}/partner/changeStatus"/>',
 					type : 'POST',
@@ -1917,6 +1992,31 @@ var saveFlag = false;
 			$('.ajs-close').trigger("click");
 			alertify.success('<spring:message code="msg.common.success" />');
 		},
+		binaryDBSave : function() {
+			var param = {
+				"partnerId" : '${detail.partnerId}',
+				"referenceDiv" : "20"
+			};
+
+			$.ajax({
+				url : '<c:url value="${suffixUrl}/partner/saveBinaryDB"/>',
+				type : 'POST',
+				data : JSON.stringify(param),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success : function(data){
+					if("false" == data.isValid) {
+						alertify.alert('Nothing to store in Binary DB', function(){});
+					}else{
+						alertify.alert('<spring:message code="msg.common.success" />', function(){});
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+	    },
 	    bulkEdit : function(){
 	    	var gridList = $("#list");
 	        var targetGird = "list";

@@ -560,6 +560,31 @@ var bom_fn = {
 			alertify.alert('<spring:message code="msg.project.warn.project.status" />', function(){});
 		}
 	},
+	binaryDBSave : function(prjId) {
+		var param = {
+			"prjId" : prjId,
+			"referenceDiv" : "13"
+		};
+
+		$.ajax({
+			url : '<c:url value="${suffixUrl}/project/binaryDBSave"/>',
+			type : 'POST',
+			data : JSON.stringify(param),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				if("false" == data.isValid) {
+					alertify.alert('Nothing to store in Binary DB', function(){});
+				}else{
+					alertify.alert('<spring:message code="msg.common.success" />', function(){});
+				}
+			},
+			error : function(){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+    },
     exportList:function(){
         var buttonId = event.target.id;
         var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");

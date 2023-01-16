@@ -1001,7 +1001,7 @@ var fn_grid_com = {
 			if(filename!=""){
 				onAjaxLoadingHide = true;
 				$.ajax({
-					url : '<c:url value="/system/bat/existBinaryName"/>',
+					url : '<c:url value="/binary/existBinaryName"/>',
 					type : 'GET',
 					dataType : 'json',
 					cache : false,
@@ -1013,13 +1013,13 @@ var fn_grid_com = {
 							var _encUrl = "filename="+fn_grid_com.replaceGetParamChar(filename);
 							
 							if(_popup == null || _popup.closed) {
-								_popup = window.open("<c:url value='/system/bat/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/binary/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
 								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 									alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
 								}
 							} else {
 								_popup.close();
-								_popup = window.open("<c:url value='/system/bat/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
+								_popup = window.open("<c:url value='/binary/binarypopup?"+_encUrl+"'/>", "binaryViewPopup_"+filename, "width=1450, height=650, toolbar=no, location=no, left=100, top=100");
 							}
 						}
 					},
