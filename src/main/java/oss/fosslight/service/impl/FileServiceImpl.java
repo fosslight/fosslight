@@ -1097,23 +1097,41 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@Override
 	public void deletePhysicalFile(T2File file, String flag) {
 		String filePath = "";
+		boolean isAndroidNoticeFolder = false;
+		String folderPath = "";
 		
 		if (flag.equals("VERIFY")) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		}else {
 			T2File T2file = fileMapper.getFileInfo2(file);
 			filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
+			if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
+				isAndroidNoticeFolder = true;
+				folderPath = T2file.getLogiPath();
+			}
 		}
 		
 		try {
 			FileOutputStream to = new FileOutputStream(filePath);
 			to.flush();
    	 		to.close();
-   	 		
-   	 		File LogiFile = new File(filePath);	
-   	 		if (LogiFile.exists()){
-   	 			LogiFile.delete();
-   	 		}
+			if(isAndroidNoticeFolder) {
+				File folder = new File(folderPath);
+				while(folder.exists()) {
+					File[] folder_list = folder.listFiles();
+					for(int i = 0;i < folder_list.length; i++) {
+						folder_list[i].delete();
+					}
+					if(folder_list.length == 0 && folder.isDirectory()) {
+						folder.delete();
+					}
+				}
+			} else{
+				File LogiFile = new File(filePath);
+				if (LogiFile.exists()) {
+					LogiFile.delete();
+				}
+			}
 		} catch(Exception e) {
 			log.info(e.getMessage(), e);
 		}
