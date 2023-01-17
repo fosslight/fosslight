@@ -1848,6 +1848,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				project.setSrcAndroidNoticeFileFlag(CoConstDef.FLAG_YES);
 				fileDeleteCheckFlag = true;
 			}
+			if(isEmpty(project.getSrcAndroidNoticeXmlId()) && !isEmpty(prjFileCheck.getSrcAndroidNoticeXmlId())) {
+				project.setSrcAndroidNoticeXmlFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
 		}
 		
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
