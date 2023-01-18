@@ -44,7 +44,7 @@ public class CryptUtil {
 	 * @throws InvalidKeySpecException 
 	 */
     public static String encryptAES256(String message, String key) throws Exception {
-    	if(message == null || message.trim().length() == 0) {
+    	if (message == null || message.trim().length() == 0) {
     		return message;
     	}
     	byte[] textBytes = message.getBytes("UTF-8");
@@ -74,7 +74,7 @@ public class CryptUtil {
      * @throws BadPaddingException
      */
     public static String decryptAES256(String encMessage, String key) throws Exception {
-    	if(encMessage == null || encMessage.trim().length() == 0) {
+    	if (encMessage == null || encMessage.trim().length() == 0) {
     		return encMessage;
     	}
     	byte[] textBytes = Base64.decodeBase64(encMessage);

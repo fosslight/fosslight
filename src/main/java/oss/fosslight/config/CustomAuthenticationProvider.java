@@ -51,26 +51,26 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
         List<String> customAccounts = Arrays.asList(CommonFunction.emptyCheckProperty("custom.accounts", "").split(","));
         
-        if(CoConstDef.FLAG_YES.equals(ldapFlag) && !customAccounts.contains(user_id)) {
+        if (CoConstDef.FLAG_YES.equals(ldapFlag) && !customAccounts.contains(user_id)) {
         	rtnMap = checkByADUser(user_id, user_pw, rtnMap);
         	loginSuccess = (boolean) rtnMap.get("isAuthenticated");
         } else {
         	loginSuccess = checkSystemUser(user_id, user_pw);
         }
         
-        if(loginSuccess) {
+        if (loginSuccess) {
             List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
             T2Users user = new T2Users();
             user.setUserId(user_id);
             T2Users getUser = userService.getUserAndAuthorities(user);
             
-            for(T2Authorities auth : getUser.getAuthoritiesList()) {
+            for (T2Authorities auth : getUser.getAuthoritiesList()) {
             	roles.add(new SimpleGrantedAuthority(auth.getAuthority()));
             }
             
             return new UsernamePasswordAuthenticationToken(user_id, user_pw, roles);          
         } else {
-        	if(rtnMap.containsKey("msg")) {
+        	if (rtnMap.containsKey("msg")) {
         		throw new BadCredentialsException((String) rtnMap.get("msg"));
         	} else {
                 throw new BadCredentialsException("Bad credentials");
@@ -106,7 +106,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				rtnMap.put("isAuthenticated", false);
 				return rtnMap;
 			} finally {
-				if(con != null) {
+				if (con != null) {
 					try {
 						con.close();
 					} catch (Exception e) {}
@@ -114,7 +114,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 			}
 			
 			// 사용자 가입여부 체크
-			if(!userService.existUserIdOrEmail(user_id)){
+			if (!userService.existUserIdOrEmail(user_id)){
 				T2Users vo = new T2Users();
 				vo.setUserId(user_id);
 				vo.setCreatedDateCurrentTime();
@@ -127,13 +127,13 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				String userEmail = info[1];
 				String userEmailCnt = info[2];
 				
-				if(StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
+				if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
 					log.debug("Cannot find Ldap user information : " + vo.getUserId());
 					rtnMap.put("isAuthenticated", false);
 					return rtnMap;
 				}
 				
-				if(Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
+				if (Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
 					log.debug("ldap user email duplicate : " + vo.getUserId());
 					rtnMap.put("isAuthenticated", false);
 					rtnMap.put("msg", "enter email");

@@ -28,7 +28,7 @@ public class OssComponentUtil {
 	private boolean USE_AUTOCOMPLETE_LICENSE_TEXT = "true".equalsIgnoreCase(CommonFunction.getProperty("use.autocomplete.licensetext"));
 	
 	public static OssComponentUtil getInstance () {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new OssComponentUtil();
 		}
 		
@@ -52,8 +52,8 @@ public class OssComponentUtil {
 		List<String> ossNameList = new ArrayList<>();
 		
 		// ossName 정보만 취득
-		for(OssComponents bean : selectedData) {
-			if(!StringUtil.isEmpty(bean.getOssName()) && !ossNameList.contains(bean.getOssName())) {
+		for (OssComponents bean : selectedData) {
+			if (!StringUtil.isEmpty(bean.getOssName()) && !ossNameList.contains(bean.getOssName())) {
 				ossNameList.add(bean.getOssName());
 			}
 		}
@@ -67,26 +67,26 @@ public class OssComponentUtil {
 		Map<String, String> ossNameInfo = CoCodeManager.OSS_INFO_UPPER_NAMES;
 		
 		// DB 정보를 기준으로 Merge
-		for(OssComponents bean : selectedData) {
+		for (OssComponents bean : selectedData) {
 			String key = (bean.getOssName() + "_" + StringUtil.nvl(bean.getOssVersion())).toUpperCase();
 			
 			// 분석결과서 업로드시 OSS VERSION을 N/A로 사용자가 지정한 경우, OSS VERSION이 공백인 OSS가 존재함에도 불구하고, 다른 OSS로 인식하여 멀티라이선스로 적용되지 않는 현상
 			// N/A인 경우 공백이 VERSION이 존재하는지 체크하고 존해할 경우 자동 치환한다.
-			if("AWS IoT Device SDK for C".equals(bean.getOssName())) {
+			if ("AWS IoT Device SDK for C".equals(bean.getOssName())) {
 				System.out.println();
 			}
 			
-			if(regData.containsKey(key)) {
+			if (regData.containsKey(key)) {
 				// 사용자가 입력한 oss 가 db에 존재한다면
 				// DB + 입력정보
 				fillList.addAll(mergeOssAndLicense(regData.get(key), bean, replaceDownloadHomepage));				
-			} else if("N/A".equalsIgnoreCase(bean.getOssVersion()) && regData.containsKey((bean.getOssName() + "_").toUpperCase()))  {
+			} else if ("N/A".equalsIgnoreCase(bean.getOssVersion()) && regData.containsKey((bean.getOssName() + "_").toUpperCase()))  {
 				bean.setOssVersion("");
 				fillList.addAll(mergeOssAndLicense(regData.get((bean.getOssName() + "_").toUpperCase()), bean, replaceDownloadHomepage));	
 			} else {
 				// DB에서 확인되지 않은 OSS
 				// 라이선스별로 row 등록
-				for(OssComponentsLicense userLicense : bean.getOssComponentsLicense()) {
+				for (OssComponentsLicense userLicense : bean.getOssComponentsLicense()) {
 					List<OssComponentsLicense> _list = new ArrayList<>();
 					_list.add(fillLicenseInfo(userLicense));
 					OssComponents newBean = (OssComponents) BeanUtils.cloneBean(bean);
@@ -97,11 +97,11 @@ public class OssComponentUtil {
 			}
 		}
 		
- 		if(!newList.isEmpty()) {
+ 		if (!newList.isEmpty()) {
 			fillList.addAll(newList);
 		}
 		
-		if(!fillList.isEmpty()) {
+		if (!fillList.isEmpty()) {
 			selectedData.clear();
 			selectedData.addAll(fillList);
 		}
@@ -119,14 +119,14 @@ public class OssComponentUtil {
 		setOssBasicInfo(ossComponent, master, replaceDownloadHomepage);
 		
 		// 멀티라이선스인 경우
-		if(CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
+		if (CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
 			mergeOssLicenseInfo(ossComponent, master);
 			
 			list.add(ossComponent);
-		} else if(CoConstDef.LICENSE_DIV_SINGLE.equals(master.getLicenseDiv()) && ossComponent.getOssComponentsLicense() != null && ossComponent.getOssComponentsLicense().size() > 1) {
+		} else if (CoConstDef.LICENSE_DIV_SINGLE.equals(master.getLicenseDiv()) && ossComponent.getOssComponentsLicense() != null && ossComponent.getOssComponentsLicense().size() > 1) {
 			// 싱글로 등록되어 있는 oss인데, 라이선스를 복수개 등록한 경우 별개의 row로 분할
 			// 사용자가 입력한 라이선스별로 별도의 row로 구성
-			for(OssComponentsLicense comLicense : ossComponent.getOssComponentsLicense()) {
+			for (OssComponentsLicense comLicense : ossComponent.getOssComponentsLicense()) {
 				OssComponents newBean = (OssComponents) BeanUtils.cloneBean(ossComponent);
 				newBean.setOssComponentsLicense(null);
 				newBean.addOssComponentsLicense(comLicense);
@@ -145,21 +145,21 @@ public class OssComponentUtil {
 	}
 	
 	private void setOssBasicInfo(OssComponents ossComponent, OssMaster master, boolean replaceDownloadHomepage) {
-		if(StringUtil.isEmpty(ossComponent.getOssId())) {
+		if (StringUtil.isEmpty(ossComponent.getOssId())) {
 			ossComponent.setOssId(master.getOssId());
 		}
 		
-		if(!replaceDownloadHomepage) {
-			if(StringUtil.isEmpty(ossComponent.getDownloadLocation())) {
+		if (!replaceDownloadHomepage) {
+			if (StringUtil.isEmpty(ossComponent.getDownloadLocation())) {
 				ossComponent.setDownloadLocation(master.getDownloadLocation());
 			}
 			
-			if(StringUtil.isEmpty(ossComponent.getHomepage())) {
+			if (StringUtil.isEmpty(ossComponent.getHomepage())) {
 				ossComponent.setHomepage(master.getHomepage());
 			}
 		}
 
-		if(StringUtil.isEmpty(ossComponent.getCopyrightText())) {
+		if (StringUtil.isEmpty(ossComponent.getCopyrightText())) {
 			ossComponent.setCopyrightText(master.getCopyright());
 		}
 		
@@ -172,12 +172,12 @@ public class OssComponentUtil {
 		List<OssComponentsLicense> subList = new ArrayList<>();
 		List<String> selectedLicenseList = new ArrayList<>();
 
-		if(CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
-			for(OssLicense subBean : master.getOssLicenses()) {
+		if (CoConstDef.LICENSE_DIV_MULTI.equals(master.getLicenseDiv())) {
+			for (OssLicense subBean : master.getOssLicenses()) {
 				OssComponentsLicense componentLicenseBean = findOssLicense(subBean, ossComponent);
 				
 				// 등록되어있는 license인 경우
-				if(componentLicenseBean != null && !selectedLicenseList.contains(componentLicenseBean.getLicenseId())) {
+				if (componentLicenseBean != null && !selectedLicenseList.contains(componentLicenseBean.getLicenseId())) {
 					selectedLicenseList.add(componentLicenseBean.getLicenseId());
 					componentLicenseBean.setExcludeYn(CoConstDef.FLAG_NO);
 				} else {
@@ -191,11 +191,11 @@ public class OssComponentUtil {
 				componentLicenseBean.setLicensetype(subBean.getLicenseType());
 				componentLicenseBean.setOssLicenseComb(subBean.getOssLicenseComb());
 				
-				if(USE_AUTOCOMPLETE_LICENSE_TEXT && StringUtil.isEmpty(componentLicenseBean.getLicenseText())) {
+				if (USE_AUTOCOMPLETE_LICENSE_TEXT && StringUtil.isEmpty(componentLicenseBean.getLicenseText())) {
 					componentLicenseBean.setLicenseText(subBean.getOssLicenseText());
 				}
 				
-				if(StringUtil.isEmpty(componentLicenseBean.getCopyrightText())) {
+				if (StringUtil.isEmpty(componentLicenseBean.getCopyrightText())) {
 					componentLicenseBean.setCopyrightText(subBean.getOssCopyright());
 				}
 				
@@ -208,7 +208,7 @@ public class OssComponentUtil {
 			OssComponentsLicense componentLicenseBean = findOssLicense(master.getOssLicenses().get(0), ossComponent);
 			
 			// 등록되어있는 license인 경우
-			if(componentLicenseBean != null && !selectedLicenseList.contains(componentLicenseBean.getLicenseId())) {
+			if (componentLicenseBean != null && !selectedLicenseList.contains(componentLicenseBean.getLicenseId())) {
 				selectedLicenseList.add(componentLicenseBean.getLicenseId());
 				
 				// DB에 등록되지 않은 라이선스가 포함된 경우 마지막 row로 추가
@@ -226,14 +226,14 @@ public class OssComponentUtil {
 	}
 	
 	private OssComponentsLicense fillLicenseInfo(OssComponentsLicense componentLicenseBean) {
-		if(CoCodeManager.LICENSE_INFO.containsKey(componentLicenseBean.getLicenseName())) {
+		if (CoCodeManager.LICENSE_INFO.containsKey(componentLicenseBean.getLicenseName())) {
 			LicenseMaster license = CoCodeManager.LICENSE_INFO.get(componentLicenseBean.getLicenseName());
 			
-			if(StringUtil.isEmpty(componentLicenseBean.getLicenseId())) {
+			if (StringUtil.isEmpty(componentLicenseBean.getLicenseId())) {
 				componentLicenseBean.setLicenseId(license.getLicenseId());
 			}
 			
-			if(USE_AUTOCOMPLETE_LICENSE_TEXT && StringUtil.isEmpty(componentLicenseBean.getLicenseText())) {
+			if (USE_AUTOCOMPLETE_LICENSE_TEXT && StringUtil.isEmpty(componentLicenseBean.getLicenseText())) {
 				componentLicenseBean.setLicenseText(license.getLicenseText());
 			}
 		}
@@ -246,25 +246,25 @@ public class OssComponentUtil {
 		List<OssComponentsLicense> returnList = new ArrayList<>();
 		List<String> ossMasterLicenseIdList = new ArrayList<>();
 		
-		for(OssLicense liBean : master.getOssLicenses()) {
+		for (OssLicense liBean : master.getOssLicenses()) {
 			ossMasterLicenseIdList.add(liBean.getLicenseId());
 		}
 		
-		for(OssComponentsLicense bean : ossComponent.getOssComponentsLicense()) {
+		for (OssComponentsLicense bean : ossComponent.getOssComponentsLicense()) {
 			boolean addflag = true;
 			
 			// 닉네임, short identify 모두 비교
-			if(CoCodeManager.LICENSE_INFO.containsKey(bean.getLicenseName())) {
+			if (CoCodeManager.LICENSE_INFO.containsKey(bean.getLicenseName())) {
 				String selectedLicenseId = CoCodeManager.LICENSE_INFO.get(bean.getLicenseName()).getLicenseId();
 				
-				if(ossMasterLicenseIdList.contains(selectedLicenseId)) {
+				if (ossMasterLicenseIdList.contains(selectedLicenseId)) {
 					addflag = false;
 				}
 			} else {
 				// 미등록 라이선스
 			}
 			
-			if(addflag && !StringUtil.isEmpty(bean.getLicenseName())) {
+			if (addflag && !StringUtil.isEmpty(bean.getLicenseName())) {
 				bean.setEditable(CoConstDef.FLAG_YES);
 				returnList.add(fillLicenseInfo(bean));
 			}
@@ -274,39 +274,39 @@ public class OssComponentUtil {
 	}
 	
 	private OssComponentsLicense findOssLicense(OssLicense dbData, OssComponents userDataList) {
-		for(OssComponentsLicense bean : userDataList.getOssComponentsLicense()) {
+		for (OssComponentsLicense bean : userDataList.getOssComponentsLicense()) {
 			String selectedLicenseId = "";
 			
 			// 대소문자 구분으로 인한 문제로, 만약 일치하는 라이선스가 있을 경우
 			// 사용자 입력 라이선스 명을 DB 명으로 변경한다.
 			String inputLicenseName = bean.getLicenseName().trim();
 			
-			if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(inputLicenseName.toUpperCase())) {
+			if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(inputLicenseName.toUpperCase())) {
 				bean.setLicenseName(CoCodeManager.LICENSE_INFO_UPPER.get(inputLicenseName.toUpperCase()).getLicenseName());
 			}
 			
 			// 확인 가능한 라이선스 이면
-			if(CoCodeManager.LICENSE_INFO.containsKey(bean.getLicenseName())) {
+			if (CoCodeManager.LICENSE_INFO.containsKey(bean.getLicenseName())) {
 				LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO.get(bean.getLicenseName());
 
 				List<String> compareList = new ArrayList<>();
 				compareList.add(licenseMaster.getLicenseName());
 				
-				if(!StringUtil.isEmpty(licenseMaster.getShortIdentifier())) {
+				if (!StringUtil.isEmpty(licenseMaster.getShortIdentifier())) {
 					compareList.add(licenseMaster.getShortIdentifier());
 				}
 				
-				if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+				if (licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
 					compareList.addAll(licenseMaster.getLicenseNicknameList());
 				}
 				
-				if(compareList.contains(bean.getLicenseName())) {
+				if (compareList.contains(bean.getLicenseName())) {
 					selectedLicenseId = licenseMaster.getLicenseId();
 				}
 			}
 			
 			// 라이선스가 라이선스 마스터에 등록되어 있어야하고, oss에 포함되는 라이선스이어야만 반환
-			if(selectedLicenseId.equals(dbData.getLicenseId())) {
+			if (selectedLicenseId.equals(dbData.getLicenseId())) {
 				bean.setLicenseId(dbData.getLicenseId());
 				
 				return bean;
@@ -321,21 +321,21 @@ public class OssComponentUtil {
 		boolean isfirst = true;
 		List<String> isSelectedDuplicatedLicenseCheckList = new ArrayList<>();
 		
-		for(OssComponentsLicense bean : allList) {
+		for (OssComponentsLicense bean : allList) {
 			boolean onSelected = CoConstDef.FLAG_YES.equals(bean.getEditable()) || selectedLicenseList.contains(bean.getLicenseId());
 			
 			// license id가 없다는 것은 사용자가 등록되지 않은 라이선스를 입력한 경우 => license master에 존재하는 경우 license id를 설정하기 때문에, Editable flag로 판단한다.
 			// 복수개의 라이선스가 설정되어 있고(OSS는 DB에 존재한다는 뜻), 처음이 아닌경우 OR 조건으로 추가한다.
-			if( CoConstDef.FLAG_YES.equals(bean.getEditable())) {
-				if(!isfirst && StringUtil.isEmpty(bean.getOssLicenseComb())) {
+			if ( CoConstDef.FLAG_YES.equals(bean.getEditable())) {
+				if (!isfirst && StringUtil.isEmpty(bean.getOssLicenseComb())) {
 					bean.setOssLicenseComb("OR");
 				}
 			}
 			
-			if(!onSelected || isSelectedDuplicatedLicenseCheckList.contains(bean.getLicenseId()) || CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+			if (!onSelected || isSelectedDuplicatedLicenseCheckList.contains(bean.getLicenseId()) || CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 				bean.setExcludeYn(CoConstDef.FLAG_YES);
 			} else {
-				if(null != bean.getLicenseId()) {
+				if (null != bean.getLicenseId()) {
 					isSelectedDuplicatedLicenseCheckList.add(bean.getLicenseId());
 				}
 				

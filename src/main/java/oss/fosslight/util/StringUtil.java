@@ -731,7 +731,7 @@ public final class StringUtil {
 	}
 	
 	public static String deleteWhitespaceWithSpecialChar(String str) {
-		if(str == null) {
+		if (str == null) {
 			return "";
 		}
 		
@@ -4347,18 +4347,18 @@ public final class StringUtil {
 	public static String getRandom(String type, int loopCount) {
 		String dummyString="1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijlmnopqrstuvwxyz";
 		
-		if(type != null){
-			if(type.equals("123")) {
+		if (type != null){
+			if (type.equals("123")) {
 				dummyString = "1234567890";
-			} else if(type.equals("abc")) {
+			} else if (type.equals("abc")) {
 				dummyString = "abcdefghijlmnopqrstuvwxyz";
-			} else if(type.equals("ABC")) {
+			} else if (type.equals("ABC")) {
 				dummyString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			} else if(type.equals("ABC123") || type.equals("123ABC")) {
+			} else if (type.equals("ABC123") || type.equals("123ABC")) {
 				dummyString = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			} else if(type.equals("abc123") || type.equals("123abc")) {
+			} else if (type.equals("abc123") || type.equals("123abc")) {
 				dummyString = "1234567890abcdefghijklmnopqrstuvwxyz";
-			} else if(type.equals("aA1!")) {
+			} else if (type.equals("aA1!")) {
 				dummyString = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%_-";
 			}
 		}
@@ -4369,7 +4369,7 @@ public final class StringUtil {
 		int randomInt;
 		char tempChar;
 		
-		for(int loop=0; loop<loopCount; loop++) {
+		for (int loop=0; loop<loopCount; loop++) {
 			randomInt=random.nextInt(dummyString.length());
 			tempChar=dummyString.charAt(randomInt);
 			tempBuilder.append(tempChar);
@@ -4417,8 +4417,9 @@ public final class StringUtil {
     }
 
 	public static String convert2CamelCase(String underScore) {
-		if (underScore.indexOf('_') < 0	&& Character.isLowerCase(underScore.charAt(0)))
+		if (underScore.indexOf('_') < 0	&& Character.isLowerCase(underScore.charAt(0))) {
 			return underScore;
+		}
 
 		StringBuilder result = new StringBuilder();
 		boolean nextUpper = false;

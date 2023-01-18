@@ -51,7 +51,7 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getErrorCodeMap(){
-        if(errMap == null){
+        if (errMap == null){
             return new HashMap<String, String>();
         }else{
             return errMap;
@@ -59,7 +59,7 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getWarningCodeMap(){
-        if(diffMap == null){
+        if (diffMap == null){
             return new HashMap<String, String>();
         }else{
             return diffMap;
@@ -67,7 +67,7 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getInfoCodeMap(){
-        if(infoMap == null){
+        if (infoMap == null){
             return new HashMap<String, String>();
         }else{
             return infoMap;
@@ -83,17 +83,19 @@ public class T2CoValidationResult {
     }
     
     void validate(String key){
-        if(dataMap == null) throw new IllegalStateException("no dataMap");
+        if (dataMap == null) {
+          throw new IllegalStateException("no dataMap");
+        }
         
-        if(dataMap.containsKey(key)){
-            validDataMap.put(key, dataMap.get(key));
-        }else{
-            throw new IllegalArgumentException("invalid key. Entry not found in dataMap.");
+        if (dataMap.containsKey(key)) {
+          validDataMap.put(key, dataMap.get(key));
+        } else {
+          throw new IllegalArgumentException("invalid key. Entry not found in dataMap.");
         }
     }
     
     public Map<String, String> getValidDataMap(){
-        if(isValid()){
+        if (isValid()){
             return validDataMap;
         }
         
@@ -101,7 +103,9 @@ public class T2CoValidationResult {
     }
     
     public boolean isValid(){
-        if(errMap == null) throw new IllegalStateException("Not validated yet.");
+        if (errMap == null) {
+          throw new IllegalStateException("Not validated yet.");
+        }
         
         return errMap.isEmpty();
     }
@@ -113,15 +117,15 @@ public class T2CoValidationResult {
     public String getValidMessage(String key){
         boolean printErrCd = false;
         
-        if(errMap == null || !errMap.containsKey(key)){
+        if (errMap == null || !errMap.containsKey(key)){
             return "";
-        }else if(messageMap == null || !messageMap.containsKey(errMap.get(key))){
+        }else if (messageMap == null || !messageMap.containsKey(errMap.get(key))){
             return errMap.get(key);
         }else{
             String errCd = errMap.get(key);
             String msg;
             
-            if(errCd.endsWith(".LENGTH")){
+            if (errCd.endsWith(".LENGTH")){
                 Map<String,String> rule = ruleMap.get(key);
 
                 // key에 해당ㅇ하는 rule이 없을 경우
@@ -130,7 +134,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if(rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.indexOf(".") > -1) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -146,7 +150,7 @@ public class T2CoValidationResult {
     }
     
     public String format(String str){
-        if(str == null || "".equals(str)) {
+        if (str == null || "".equals(str)) {
         	return "";
         }
         
@@ -158,24 +162,24 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getFormattedMessageMap(){
-        if(errMap == null) {
+        if (errMap == null) {
         	return new HashMap<>();
         }
 
         Map<String, String> formatted = new HashMap<>();
         Iterator<String> itr = errMap.keySet().iterator();
         
-        while(itr.hasNext()){
+        while (itr.hasNext()){
             String key = (String)itr.next();
             String camelKey = key;
             
-            if(CoConstDef.VALIDATION_USE_CAMELCASE) {
+            if (CoConstDef.VALIDATION_USE_CAMELCASE) {
             	camelKey = StringUtil.convertToCamelCase(camelKey);
             }
             
             formatted.put(camelKey, getFormattedMessage(key));
             
-            if(!StringUtil.isEmpty(getFormattedMessage(key))) {
+            if (!StringUtil.isEmpty(getFormattedMessage(key))) {
             	formatted.put(camelKey+"Style", "style=\"background:#FEF8F8;border:1px solid #FF0000;\"");
             }
         }
@@ -189,12 +193,12 @@ public class T2CoValidationResult {
     	Map<String, String> messageMap = new HashMap<>();
         Iterator<String> itr = errMap.keySet().iterator();
         
-        while(itr.hasNext()){
+        while (itr.hasNext()){
         	String key = (String)itr.next();
             String camelKey = key;
             
-            if(CoConstDef.VALIDATION_USE_CAMELCASE) {
-            	if(camelKey.indexOf(".") > -1) {
+            if (CoConstDef.VALIDATION_USE_CAMELCASE) {
+            	if (camelKey.indexOf(".") > -1) {
             		String _name = StringUtil.convertToCamelCase(camelKey.substring(0, camelKey.indexOf(".")));
             		String _rowId = camelKey.substring(camelKey.indexOf("."));
             		camelKey = _name + _rowId;
@@ -215,12 +219,12 @@ public class T2CoValidationResult {
     	Map<String, String> messageMap = new HashMap<>();
         Iterator<String> itr = diffMap.keySet().iterator();
         
-        while(itr.hasNext()){
+        while (itr.hasNext()){
         	String key = (String)itr.next();
             String camelKey = key;
             
-            if(CoConstDef.VALIDATION_USE_CAMELCASE) {
-            	if(camelKey.indexOf(".") > -1) {
+            if (CoConstDef.VALIDATION_USE_CAMELCASE) {
+            	if (camelKey.indexOf(".") > -1) {
             		String _name = StringUtil.convertToCamelCase(camelKey.substring(0, camelKey.indexOf(".")));
             		String _rowId = camelKey.substring(camelKey.indexOf("."));
             		camelKey = _name + _rowId;
@@ -237,7 +241,7 @@ public class T2CoValidationResult {
     }
     
     public boolean isDiff(){
-    	if(diffMap == null) {
+    	if (diffMap == null) {
     		throw new IllegalStateException("Not validated yet.");
     	}
     	
@@ -247,15 +251,15 @@ public class T2CoValidationResult {
     public String getDiffMessage(String key){
         boolean printErrCd = false;
         
-        if(diffMap == null || !diffMap.containsKey(key)){
+        if (diffMap == null || !diffMap.containsKey(key)){
             return "";
-        }else if(messageMap == null || !messageMap.containsKey(diffMap.get(key))){
+        }else if (messageMap == null || !messageMap.containsKey(diffMap.get(key))){
             return diffMap.get(key);
         }else{
             String errCd = diffMap.get(key);
             String msg;
             
-            if(errCd.endsWith(".LENGTH")){
+            if (errCd.endsWith(".LENGTH")){
                 Map<String,String> rule = ruleMap.get(key);
                 
                 // key에 해당ㅇ하는 rule이 없을 경우
@@ -264,7 +268,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if(rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.indexOf(".") > -1) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -283,11 +287,11 @@ public class T2CoValidationResult {
     	Map<String, String> messageMap = new HashMap<>();
         Iterator<String> itr = infoMap.keySet().iterator();
         
-        while(itr.hasNext()){
+        while (itr.hasNext()){
         	String key = (String)itr.next();
             String camelKey = key;
             
-            if(CoConstDef.VALIDATION_USE_CAMELCASE) {
+            if (CoConstDef.VALIDATION_USE_CAMELCASE) {
             	camelKey = StringUtil.convertToCamelCase(camelKey);
             }
             
@@ -300,7 +304,7 @@ public class T2CoValidationResult {
     }
     
     public boolean hasInfo(){
-    	if(infoMap == null) {
+    	if (infoMap == null) {
     		throw new IllegalStateException("Not validated yet.");
     	}
     	
@@ -310,15 +314,15 @@ public class T2CoValidationResult {
     public String getInfoMessage(String key){
         boolean printErrCd = false;
         
-        if(infoMap == null || !infoMap.containsKey(key)){
+        if (infoMap == null || !infoMap.containsKey(key)){
             return "";
-        }else if(messageMap == null || !messageMap.containsKey(infoMap.get(key))){
+        }else if (messageMap == null || !messageMap.containsKey(infoMap.get(key))){
             return infoMap.get(key);
         }else{
             String errCd = infoMap.get(key);
             String msg;
             
-            if(errCd.endsWith(".LENGTH")){
+            if (errCd.endsWith(".LENGTH")){
                 Map<String,String> rule = ruleMap.get(key);
                 
                 // key에 해당ㅇ하는 rule이 없을 경우
@@ -327,7 +331,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if(rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.indexOf(".") > -1) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -354,11 +358,11 @@ public class T2CoValidationResult {
     	Iterator<String> itr = errMap.keySet().iterator();
     	boolean result = true;
   
-		while(itr.hasNext()){
+		while (itr.hasNext()){
 			String key = (String)itr.next();
 			String componentId = key.split("\\.")[1];
 			
-			if(adminCheckList.indexOf(componentId) == -1) {
+			if (adminCheckList.indexOf(componentId) == -1) {
 				result = false;
 			}
 		}

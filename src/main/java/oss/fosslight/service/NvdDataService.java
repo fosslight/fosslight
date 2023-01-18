@@ -78,9 +78,11 @@ public class NvdDataService {
 		// 작업등록
 		try {
 			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
-			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			if (!fileCheck) {
+				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
+			}
 			
-			if(fileCheck) {
+			if (fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
 				nvdMetaDataSyncJob();
 			}
@@ -92,7 +94,7 @@ public class NvdDataService {
 		try {
 			// initialize NVD Data Feed
 			// check initialize flag
-			if("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
 				codeMapper.updateCodeDtlNm("990", "100", "N");
 
 				// delete all NVD Data and Max Score
@@ -108,9 +110,11 @@ public class NvdDataService {
 
 		try {
 			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE");
-			if(!fileCheck) fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			if (!fileCheck) {
+				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
+			}
 			
-			if(fileCheck) {
+			if (fileCheck) {
 				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_NVDCVE);
 				nvdCveDataSyncJob();
 			}
@@ -134,7 +138,7 @@ public class NvdDataService {
 		
 		boolean updateFlag = false;
 		// 2. Json File -> DB Insert
-		for(Map<String, Object> wMetaMap : waitList){
+		for (Map<String, Object> wMetaMap : waitList){
 
 			param.put("fileNm", wMetaMap.get("fileNm"));
 			param.put("modiDate", wMetaMap.get("modiDate"));
@@ -143,7 +147,7 @@ public class NvdDataService {
 			nvdDataMapper.updateJobStatus(param);
 			
 			String NVD_CVE_PATH = env.getProperty("root.dir");
-			if(StringUtil.isEmpty(NVD_CVE_PATH)) {
+			if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 				NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 			}
 			NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
@@ -159,7 +163,7 @@ public class NvdDataService {
 		// truncate and insert 처리
 		// 위험성 : truncate는 transaction 으로 관리 할 수 없다. truncate이후에 insert 실패시 data 없을 수 있음
 		
-		if(updateFlag){
+		if (updateFlag){
 			String insertQuery = "INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, VENDOR, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE ) VALUES (?,?,?,?,?,?,?) "
 					+ "ON DUPLICATE KEY UPDATE PRODUCT = values(PRODUCT), VERSION = values(VERSION), VENDOR = values(VENDOR), CVE_ID = values(CVE_ID), CVSS_SCORE = values(CVSS_SCORE), VULN_SUMMARY = values(VULN_SUMMARY), MODI_DATE = values(MODI_DATE)";
 			
@@ -200,14 +204,16 @@ public class NvdDataService {
 				getMaxScoreProductVerStmt = conn1.prepareStatement(selectQuery2);
 				insertStmt = conn2.prepareStatement(insertQuery);
 				
-				for(int idx = 0; idx < cnt; ) {
-					if(endIdx >= cnt) endIdx = cnt;
+				for (int idx = 0; idx < cnt; ) {
+					if (endIdx >= cnt) {
+						endIdx = cnt;
+					}
 					preparedStatementGetProductList(conn2, itemList, params, getProductStmt, getMaxScoreProductVerStmt, insertStmt, idx, endIdx);
 					
 					idx = idx+BATCH_SIZE;
 					endIdx = idx+BATCH_SIZE;
 					
-					if(idx % 10000 == 0) {
+					if (idx % 10000 == 0) {
 						log.info("NVD_DATA_TEMP_V3 process : " + idx + " / " + cnt);
 					}
 				}
@@ -215,56 +221,68 @@ public class NvdDataService {
 			} catch(Exception e) {
 				log.error(e.getMessage(), e);
 				
-				try{
-					if(insertStmt!=null)
+				try {
+					if (insertStmt != null) {
 						insertStmt.close();
-				}catch(SQLException e1){}
-				try{
-					if(getMaxScoreProductVerStmt!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn2!=null)
+					if (conn2 != null) {
 						conn2.rollback();
 						conn2.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn1!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn1 != null) {
 						conn1.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn!=null)
+					if (conn != null) {
 						conn.close();
+					}
 				}catch(SQLException e1){}
 			} finally {
 				try{
-					if(insertStmt!=null)
+					if (insertStmt != null) {
 						insertStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(getMaxScoreProductVerStmt!=null)
+					if (getMaxScoreProductVerStmt != null) {
 						getMaxScoreProductVerStmt.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn2!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn2 != null) {
 						conn2.close();
-				}catch(SQLException e1){}
-				try{
-					if(conn1!=null)
+					}
+				} catch(SQLException e1) {}
+				try {
+					if (conn1 != null) {
 						conn1.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 				try{
-					if(conn!=null)
+					if (conn != null) {
 						conn.close();
-				}catch(SQLException e1){}
+					}
+				} catch(SQLException e1) {}
 			}
 			
 			nvdDataMapper.deleteNvdDataScoreV3();
@@ -275,7 +293,7 @@ public class NvdDataService {
 		}
 		
 		int nickNameMgrCnt = nvdDataMapper.selectNickNameMgrtNvdDataScoreV3();
-		if(nickNameMgrCnt > 0) {
+		if (nickNameMgrCnt > 0) {
 			log.info("Nickname Migration Count : " + nickNameMgrCnt);
 			// OSS_NICKNAME 기준으로 NVD_DATA_SCORE_V3에 NICKNAME을 추가함.
 			nvdDataMapper.insertNickNameMgrtNvdDataScoreV3();
@@ -284,7 +302,7 @@ public class NvdDataService {
 		}
 		
 		int MaxCvssScoreCnt = nvdDataMapper.selectMaxCvssScoreNvdDataScoreV3();
-		if(MaxCvssScoreCnt > 0) {
+		if (MaxCvssScoreCnt > 0) {
 			log.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
 			// NVD_DATA_SCORE_V3에서 CVSS_SCORE MAX값을 기준으로 PRODUCT에서 VERSION이 없는 DATA를 추가함.
 			nvdDataMapper.insertMaxCvssScoreNvdDataScoreV3();
@@ -293,7 +311,7 @@ public class NvdDataService {
 		}
 		
 		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
-		if(diffCvssScoreCnt > 0){
+		if (diffCvssScoreCnt > 0){
 			log.info("ossName <-> NickName cvssScore Diff Count : " + diffCvssScoreCnt);
 			// ossName과 NickName의 nvd data가 동일한 version일 경우에 cvss score만 다를때 더 높은 값으로 변경을 함. 변경시 CVE ID 도 같이 변경을 함.
 			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
@@ -326,28 +344,30 @@ public class NvdDataService {
 				
 				itemList.add(itemMap);
 				
-				if(itemList.size() % BATCH_SIZE == 0) {
+				if (itemList.size() % BATCH_SIZE == 0) {
 					preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
 					itemList.clear();
 				}
 			}
 			
-			if(itemList.size() > 0) {
+			if (itemList.size() > 0) {
 				preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
 			}
 		} catch(Exception e) {
 			itemList.clear();
 			log.error(e.getMessage(), e);
 			try{
-				if(rs!=null)
+				if (rs != null) {
 					rs.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		} finally {
 			itemList.clear();
 			try{
-				if(rs!=null)
+				if (rs != null) {
 					rs.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		}
 	}
 	
@@ -359,10 +379,10 @@ public class NvdDataService {
 			String vendor = "";
 			List<String> vendorList = new ArrayList<>();
 			
-			for(Map<String, Object> item : itemList) {
+			for (Map<String, Object> item : itemList) {
 				vendor = (String) item.get("vendor");
-				for(String chk : vendor.split(",")) {
-					if(!StringUtil.isEmpty(chk)) {
+				for (String chk : vendor.split(",")) {
+					if (!StringUtil.isEmpty(chk)) {
 						vendorList.add(chk);
 					}
 				}
@@ -376,9 +396,9 @@ public class NvdDataService {
 				
 				getMaxScoreProductVerStmt.clearParameters();
 				
-				if(vendorList.size() > 0) {
+				if (vendorList.size() > 0) {
 					while (getMaxScoreProductVerRs.next()) {
-						for(String vn : vendorList) {
+						for (String vn : vendorList) {
 							paramMap = new HashMap<>();
 							paramMap.put("PRODUCT", getMaxScoreProductVerRs.getString(1));
 							paramMap.put("VERSION", getMaxScoreProductVerRs.getString(2));
@@ -390,7 +410,7 @@ public class NvdDataService {
 							
 							params.add(paramMap);
 							
-							if(params.size() % BATCH_SIZE == 0) {
+							if (params.size() % BATCH_SIZE == 0) {
 								preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
 								params.clear();
 							}
@@ -409,7 +429,7 @@ public class NvdDataService {
 						
 						params.add(paramMap);
 						
-						if(params.size() % BATCH_SIZE == 0) {
+						if (params.size() % BATCH_SIZE == 0) {
 							preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
 							params.clear();
 						}
@@ -419,33 +439,36 @@ public class NvdDataService {
 				vendorList.clear();
 			}
 			
-			if(params.size() > 0) {
+			if (params.size() > 0) {
 				preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
 				params.clear();
 			}
 		} catch(Exception e) {
 			params.clear();
 			log.error(e.getMessage(), e);
-			try{
-				if(getMaxScoreProductVerRs!=null)
+			try {
+				if (getMaxScoreProductVerRs != null) {
 					getMaxScoreProductVerRs.close();
-			}catch(SQLException e1){}
-			try{
-				if(getMaxScoreProductVerStmt!=null)
+				}
+			} catch(SQLException e1) {}
+			try {
+				if (getMaxScoreProductVerStmt != null) {
 					getMaxScoreProductVerStmt.close();
-			}catch(SQLException e1){}
+				}
+			} catch(SQLException e1) {}
 		} finally {
 			params.clear();
 			try{
-				if(getMaxScoreProductVerRs!=null)
+				if (getMaxScoreProductVerRs != null) {
 					getMaxScoreProductVerRs.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e) {}
 		}
 	}
 	
 	private void preparedStatementInsertNvdDataListTempV3(Connection conn2, PreparedStatement insertStmt, List<Map<String, Object>> params) {
 		try{
-			for(Map<String, Object> item : params) {
+			for (Map<String, Object> item : params) {
 				insertStmt.setString(1, (String) item.get("PRODUCT"));
 				insertStmt.setString(2, (String) item.get("VERSION"));
 				insertStmt.setString(3, (String) item.get("VENDOR"));
@@ -473,7 +496,7 @@ public class NvdDataService {
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, Object> map = mapper.readValue(  new File(cpeFileRootPath + File.separator + cpeFileName + ".json") , new TypeReference<Map<String, Object>>() { });
 		
-		if(map.containsKey("CVE_Items")) {
+		if (map.containsKey("CVE_Items")) {
 			List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
 			Map<String, Object> cveInfo = null;
 			Map<String, Object> comapare = null;
@@ -482,10 +505,10 @@ public class NvdDataService {
 			
 			List<Map<String, Object>> cpe_match_all = null;
 			
-			for(Map<String, Object> cveItem : cveItems) {
+			for (Map<String, Object> cveItem : cveItems) {
 				
 				cveInfo = cveDatajsonReader(cveItem);
-				if(cveInfo == null || cveInfo.isEmpty()) {
+				if (cveInfo == null || cveInfo.isEmpty()) {
 					continue;
 				}
 				
@@ -496,7 +519,7 @@ public class NvdDataService {
 				List<String> matchNames = null;
 				cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
 				
-//				if(cpe_match_all.isEmpty()) {
+//				if (cpe_match_all.isEmpty()) {
 //					log.info("REJECTED CVE " + cveId);
 //				}
 				
@@ -551,42 +574,42 @@ public class NvdDataService {
 
 				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
 				// 신규등록
-				if(comapare == null){
+				if (comapare == null){
 					nvdDataMapper.insertCveInfoV3(cveInfo);
 					
-					if(!ossList.isEmpty()) {
+					if (!ossList.isEmpty()) {
 						insertDataList.addAll(ossList);
 					}
 					
 					updateFlag = true;
 				}
 				// 변경(delete > insert)
-				else if(!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
+				else if (!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
 						|| !((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore"))) ){
 					// 기존 데이터 삭제
 					nvdDataMapper.deleteCveDataV3(cveInfo);
 					nvdDataMapper.deleteNvdDataV3(cveInfo);
 					// 변경 데이터 등록
 					nvdDataMapper.insertCveInfoV3(cveInfo);
-					if(!ossList.isEmpty()) {
+					if (!ossList.isEmpty()) {
 						insertDataList.addAll(ossList);
 					}
 				} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
 						&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
 					// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
 					
-					if(!ossList.isEmpty()) {
+					if (!ossList.isEmpty()) {
 						insertDataList.addAll(ossList);
 					}
 				}
 				
-				if(insertDataList.size() % BATCH_SIZE == 0) {
+				if (insertDataList.size() % BATCH_SIZE == 0) {
 					prepareStatementUpdateNvdData(insertDataList);
 					insertDataList.clear();
 				}
 			}
 			
-			if(insertDataList.size() > 0) {
+			if (insertDataList.size() > 0) {
 				prepareStatementUpdateNvdData(insertDataList);
 			}
 		}
@@ -608,7 +631,7 @@ public class NvdDataService {
 			
 			int seq = 1;
 			
-			for(Map<String, String> item : insertDataList){
+			for (Map<String, String> item : insertDataList){
 				stmt.setString(1, (String) item.get("cveId"));
 				stmt.setString(2, (String) item.get("product"));
 				stmt.setString(3, (String) item.get("version"));
@@ -616,7 +639,7 @@ public class NvdDataService {
 				stmt.addBatch();
 				stmt.clearParameters();
 				
-				if((seq % BATCH_SIZE) == 0 ) {
+				if ((seq % BATCH_SIZE) == 0 ) {
 					stmt.executeBatch();
 					stmt.clearBatch();
 					conn.commit();
@@ -629,7 +652,7 @@ public class NvdDataService {
 			conn.commit();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (Exception e2) {
@@ -638,14 +661,16 @@ public class NvdDataService {
 			}
 		} finally {
 			try{
-				if(stmt!=null)
+				if (stmt != null) {
 					stmt.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e){}
 			
 			try{
-				if(conn!=null)
+				if (conn != null) {
 					conn.close();
-			}catch(SQLException e){}
+				}
+			} catch(SQLException e){}
 		}
 	}
 
@@ -662,7 +687,7 @@ public class NvdDataService {
 		// impact
 		Map<String, Object> impact = (Map<String, Object>) cveItem.get("impact");
 
-//		if(!impact.containsKey("baseMetricV3") && !impact.containsKey("baseMetricV2")) {
+//		if (!impact.containsKey("baseMetricV3") && !impact.containsKey("baseMetricV2")) {
 //			// REJECT
 //			return null;
 //		}
@@ -670,12 +695,12 @@ public class NvdDataService {
 		// CVSS V3가 없는 경우 V2 Score를 사용
 		String baseScore = "0";
 		String baseMetric = "";
-		if(impact.containsKey("baseMetricV3")) {
+		if (impact.containsKey("baseMetricV3")) {
 			Map<String, Object> baseMetricV3 = (Map<String, Object>) impact.get("baseMetricV3");
 			Map<String, Object> cvssV3 = (Map<String, Object>) baseMetricV3.get("cvssV3");
 			baseScore = String.valueOf(cvssV3.get("baseScore"));
 			baseMetric = "V3";					
-		} else if(impact.containsKey("baseMetricV2")){
+		} else if (impact.containsKey("baseMetricV2")){
 			Map<String, Object> baseMetricV2 = (Map<String, Object>) impact.get("baseMetricV2");
 			Map<String, Object> cvssV2 = (Map<String, Object>) baseMetricV2.get("cvssV2");
 			baseScore = String.valueOf(cvssV2.get("baseScore"));
@@ -689,17 +714,17 @@ public class NvdDataService {
 		List<Map<String, Object>> configurations_nodes = (List<Map<String, Object>>) configurationsInfo.get("nodes");
 		
 		// 정의된 모든 cpe match 정보
-		for(Map<String, Object> node_data : configurations_nodes) {
+		for (Map<String, Object> node_data : configurations_nodes) {
 			// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
-			if(node_data.containsKey("cpe_match")) {
+			if (node_data.containsKey("cpe_match")) {
 				cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpe_match"));
 			}
 			
-			if(node_data.containsKey("children")) {
+			if (node_data.containsKey("children")) {
 				List<Map<String, Object>> children = (List<Map<String, Object>>) node_data.get("children");
 				// 스키마 구조상으로는 children 하위 노드에서 다시 operator AND 조건이 발생할 수 있지만, 실제 Data 존재하지 않았기 때문에
 				// 재귀처리는 생략하고 1Depth 까지만 찾는다.
-				for(Map<String, Object> children_data : children) {
+				for (Map<String, Object> children_data : children) {
 					cpe_match_all.addAll((List<Map<String, Object>>) children_data.get("cpe_match"));
 				}
 			}
@@ -709,8 +734,8 @@ public class NvdDataService {
 		Map<String, Object> description = (Map<String, Object>) cveInfo.get("description");
 		List<Map<String, Object>> description_datas = (List<Map<String, Object>>) description.get("description_data");
 		String descriptionStr = "";
-		for(Map<String, Object> description_data : description_datas) {
-			if(!StringUtil.isEmpty(descriptionStr)) {
+		for (Map<String, Object> description_data : description_datas) {
+			if (!StringUtil.isEmpty(descriptionStr)) {
 				descriptionStr += "\n";
 			}
 			descriptionStr += description_data.get("value");
@@ -731,7 +756,7 @@ public class NvdDataService {
 
 	private boolean nvdMetaCheckJob(String FILE_NM, String FILE_TYPE) throws IOException {
 		HashMap<String, String> metaInfo = nvdMetaData(FILE_NM);
-		if(metaInfo != null){
+		if (metaInfo != null){
 			// 1. 사용중인 메타 데이터 조회
 			HashMap<String, Object> param = new HashMap<String, Object>();
 			param.put("fileType", FILE_TYPE);
@@ -739,7 +764,7 @@ public class NvdDataService {
 			List<HashMap<String, Object>> useList = nvdDataMapper.selectUseMetaData(param);
 			// 2. 메타 데이터를 비교한다.
 			// 2.1. 신규 파일면 메타 데이터를 신규 등록한다.
-			if( useList.size() == 0 || !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
+			if ( useList.size() == 0 || !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
 				param.put("modiDate", metaInfo.get("modiDate"));
 				param.put("size", Integer.parseInt(metaInfo.get("size")));
 				param.put("zipSize",Integer.parseInt(metaInfo.get("zipSize")));
@@ -749,7 +774,7 @@ public class NvdDataService {
 				return true;
 			}
 			// 2.2. 변경된 파일이면 메타 데이터를 삭제한다.
-			if( useList.size() > 0 && !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
+			if ( useList.size() > 0 && !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
 				param.put("fileNm", FILE_NM);
 				param.put("modiDate", useList.get(0).get("modiDate"));
 				param.put("useYn", "N");
@@ -783,7 +808,7 @@ public class NvdDataService {
 			log.error(ioe.getMessage(), ioe);
 		}
 		
-		if(!fileCheck && cnt < maxCnt) {
+		if (!fileCheck && cnt < maxCnt) {
 			fileCheck = nvdMetaRetryCheckJob(FILE_NM, FILE_TYPE, fileCheck, ++cnt);
 		}
 		
@@ -798,7 +823,7 @@ public class NvdDataService {
 	 */
 	private void nvdFeedDataDownloadJob(String FILE_NAME) throws Exception  {
 		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
+		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
 		String NVD_DATA_BACKUP_PATH = NVD_CVE_PATH;
@@ -817,7 +842,7 @@ public class NvdDataService {
 			log.warn(e.getMessage(), e);
 			Thread.sleep(1000 * 30);
 			log.info("Retry downloading the NVD data file. FILE_NAME : " + FILE_NAME);
-			if(Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
+			if (Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
 				try {
 					Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().delete();
 				} catch (Exception e2) {}
@@ -839,7 +864,7 @@ public class NvdDataService {
 
 		
 		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
+		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
 		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
@@ -925,16 +950,16 @@ public class NvdDataService {
 							stmt.clearParameters();
 
 							// CPE Names
-							if(matchItem.containsKey("cpe_name")) {
+							if (matchItem.containsKey("cpe_name")) {
 								int nameIdx = 0;
-								for(Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
+								for (Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
 									stmt2.setInt(1, seq);
 									stmt2.setInt(2, nameIdx);
 									stmt2.setString(3, (String) cpe_name.get("cpe23Uri"));
 									stmt2.addBatch();
 									stmt2.clearParameters();
 									
-									if(seq2 % BATCH_SIZE == 0) {
+									if (seq2 % BATCH_SIZE == 0) {
 										stmt2.executeBatch(); // Batch 실행
 										stmt2.clearBatch(); // Batch 초기화
 					                    conn.commit(); // 커밋
@@ -944,7 +969,7 @@ public class NvdDataService {
 								}
 							}
 							
-							if(seq % BATCH_SIZE == 0) {
+							if (seq % BATCH_SIZE == 0) {
 								stmt.executeBatch(); // Batch 실행
 			                    stmt.clearBatch(); // Batch 초기화
 			                    conn.commit(); // 커밋
@@ -959,7 +984,7 @@ public class NvdDataService {
 						conn.commit();
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
-						if(conn != null) {
+						if (conn != null) {
 							try {
 								conn.rollback();
 							} catch (Exception e2) {
@@ -967,22 +992,25 @@ public class NvdDataService {
 							}
 						}
 					} finally {
-						try{
-							if(stmt!=null)
+						try {
+							if (stmt != null) {
 								stmt.close();
-						}catch(SQLException e){}
-						try{
-							if(stmt2!=null)
+							}
+						} catch(SQLException e) {}
+						try {
+							if (stmt2 != null) {
 								stmt2.close();
-						}catch(SQLException e){}
+							}
+						} catch(SQLException e) {}
 						try{
-							if(conn!=null)
+							if (conn != null) {
 								conn.close();
-						}catch(SQLException e){}
+							}
+						} catch(SQLException e) {}
 					}
 				}
 
-				if(totSize > 0) {
+				if (totSize > 0) {
 					nvdDataMapper.truncateCpeMatch();
 					nvdDataMapper.truncateCpeMatchNames();
 					nvdDataMapper.copyNvdDataMatchFromTemp();
@@ -1015,10 +1043,10 @@ public class NvdDataService {
 			URL url = new URL( (NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NM) ? NVD_META_URL : NVD_CVE_URL) +FILE_NM+".meta");
 			con = (HttpURLConnection)url.openConnection();
 			con.setRequestMethod("HEAD");
-			if(con.getResponseCode() == HttpURLConnection.HTTP_OK){
+			if (con.getResponseCode() == HttpURLConnection.HTTP_OK){
 				s = new Scanner(url.openConnection().getInputStream());
 				metaInfo = new HashMap<String, String>();
-				while(s.hasNext()){
+				while (s.hasNext()){
 					String txt = s.next();
 					String[] d = txt.split(":");
 					String k = d[0].equals("lastModifiedDate") ? "modiDate" : d[0];
@@ -1032,10 +1060,10 @@ public class NvdDataService {
 			log.error("unknownHost connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
 			return metaInfo;
 		} finally {
-			if(s != null) {
+			if (s != null) {
 				try {s.close();} catch (Exception e) {}
 			}
-			if(con != null) {
+			if (con != null) {
 				try {con.disconnect();} catch (Exception e) {}
 			}
 		}
@@ -1048,16 +1076,16 @@ public class NvdDataService {
 
 		int nvdBeginDateYear = 2002;
 		int currentDateYear = StringUtil.string2integer(DateUtil.getCurrentDateAsString("yyyy")) ;
-		for(int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
+		for (int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
 			nvdFeedDataDownloadJob("nvdcve-1.1-" + year);
 		}
 		
 		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if(StringUtil.isEmpty(NVD_CVE_PATH)) {
+		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
 		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-		for(int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
+		for (int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
 			updateNvdData(NVD_CVE_PATH, "nvdcve-1.1-" + year);
 		}
 		

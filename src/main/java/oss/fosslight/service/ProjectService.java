@@ -134,7 +134,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	boolean existsWatcher(Project project);
 
-	String getPartnerFormatName(String partnerId);
+	String getPartnerFormatName(String partnerId, boolean onlyName);
 
 	void updateIdentificationConfirmSkipPackaing(Project project);
 	

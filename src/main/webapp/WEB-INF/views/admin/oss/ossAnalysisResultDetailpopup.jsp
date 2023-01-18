@@ -109,7 +109,7 @@
 					if(licenseName != ''){
 						var cloneData = common_data.detectLicenseClone.split("autoComOssLicense1").join("autoComOssLicense"+seq); // autoComplete 기능으로 인해 cloneData를 별도로 가공함.
 						$(cloneData).appendTo('.detailDetectedLicense'+seq);
-						$(".detailDetectedLicense"+seq+" input[type=text]:last").val(licenseName);
+						$(".detailDetectedLicense"+seq+" input[type=text]:last").val(licenseName.trim());
 						
 						grid_fn.setCustomAutoComplete('single', '', seq);
 						

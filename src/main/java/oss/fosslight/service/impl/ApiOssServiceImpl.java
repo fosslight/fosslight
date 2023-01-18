@@ -28,7 +28,7 @@ public class ApiOssServiceImpl implements ApiOssService {
 	public List<Map<String, Object>> getOssInfo(Map<String, Object> paramMap) {
 		String rtnOssName = apiOssMapper.getOssName((String) paramMap.get("ossName"));
 		
-		if(!StringUtil.isEmpty(rtnOssName)) {
+		if (!StringUtil.isEmpty(rtnOssName)) {
 			paramMap.replace("ossName", rtnOssName);
 		}
 		
@@ -48,9 +48,9 @@ public class ApiOssServiceImpl implements ApiOssService {
 	
 	public String[] getOssNickNameListByOssName(String ossName) {
 		List<String> nickList = null;
-		if(!StringUtil.isEmpty(ossName)) {
+		if (!StringUtil.isEmpty(ossName)) {
 			nickList =  apiOssMapper.selectOssNicknameList(ossName);
-			if(nickList != null) {
+			if (nickList != null) {
 				nickList = nickList.stream()
 									.filter(CommonFunction.distinctByKey(nick -> nick.trim().toUpperCase()))
 									.collect(Collectors.toList());

@@ -86,7 +86,7 @@ public class CodeController extends CoTopComponent {
 			, Model model) throws Exception{
 		T2CoValidationResult vResult = validateWithAppendix(req, "PROC_MODE", "ADD");
 		
-		if(!vResult.isValid()) {
+		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		
@@ -107,7 +107,7 @@ public class CodeController extends CoTopComponent {
 
 		T2CoValidationResult vResult = validate(vo.getT2codeDtl());
 		
-		if(!vResult.isValid()) {
+		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		

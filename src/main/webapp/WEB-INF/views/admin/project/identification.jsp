@@ -721,6 +721,9 @@
                     	</c:if>
                     </span>
                     <span class="right">
+                    	<c:if test="${ct:isAdmin()}">
+							<input type="button" value="Save (Binary DB)" class="btnSave btnColor red idenSave" onclick="binAndroid_fn.binaryDBSave('${project.prjId}')" style="width:120px;"/>
+						</c:if>
                         <input type="button" value="Export" onclick="binAndroid_fn.downloadExcel()" class="btnColor red btnExpor binAndroidBtn" />
                         <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('ANDROID')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
@@ -767,6 +770,9 @@
 					</span>
 					<input type="hidden" id="mergeYn"  style="display: none;"/>
                     <span class="right">
+                    	<c:if test="${ct:isAdmin()}">
+							<input type="button" value="Save (Binary DB)" class="btnSave btnColor red idenSave" onclick="bom_fn.binaryDBSave('${project.prjId}')" style="width:120px;"/>
+						</c:if>
 						<c:if test="${project.identificationStatus ne 'CONF'}">
 							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
 						</c:if>

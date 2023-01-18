@@ -48,7 +48,7 @@ public class CsvUtil extends CoTopComponent {
 			int cellIdx = 0;
 			Row row = sheet.createRow(rowIdx);
 
-			for(String token : nextLine) {
+			for (String token : nextLine) {
 				Cell cell = row.createCell(cellIdx); cellIdx++;
 				cell.setCellValue(token);
 			}

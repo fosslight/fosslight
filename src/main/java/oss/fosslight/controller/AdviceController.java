@@ -30,7 +30,7 @@ public class AdviceController extends CoTopComponent{
 	public String getSessUserId(){
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
-		if(auth != null) {
+		if (auth != null) {
 			return auth.getName();
 		}
 		
@@ -44,13 +44,13 @@ public class AdviceController extends CoTopComponent{
 		HashMap<String, Object> sessDetailInfo = null;
 		T2Users sessUserInfo = null;
 		
-		if(auth != null) {			
+		if (auth != null) {			
 			try{
 				sessDetailInfo = (HashMap<String, Object>) auth.getDetails();
 			}catch(Exception e){
 			}
 			
-			if(sessDetailInfo != null){
+			if (sessDetailInfo != null){
 				sessUserInfo = (T2Users)sessDetailInfo.get("sessUserInfo");
 			}else{
 			}

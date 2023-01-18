@@ -11,15 +11,18 @@ public abstract class T2BasicValidator extends T2CoValidator{
 	protected String PROC_MODE;
 	
     public void setAppendix(String key, Object obj){
-    	if(!isEmpty(key) && obj != null) {
-    		if("PROC_MODE".equals(key)) {
+    	if (!isEmpty(key) && obj != null) {
+    		if ("PROC_MODE".equals(key)) {
     			this.PROC_MODE = (String) obj;
     		}
     	}
     }
     
     protected String treatment(String paramvalue){
-        if(paramvalue == null) return null;
+        if (paramvalue == null) {
+          return null;
+        }
+
         return paramvalue;
     }
     

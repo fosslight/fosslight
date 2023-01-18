@@ -82,9 +82,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean sw = true;
 		String fileId = "";
 		
-		if(oldFileId==null || "0".equals(oldFileId) || "".equals(oldFileId)){
+		if (oldFileId==null || "0".equals(oldFileId) || "".equals(oldFileId)){
 			fileId = fileMapper.getFileId();
-			if(fileId == null){
+			if (fileId == null){
 				fileId = "1";
 			}
 		}else{
@@ -93,12 +93,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		int indexNum = 0;
 		
-		while(fileNames.hasNext()){
+		while (fileNames.hasNext()){
 			UploadFile upFile = new UploadFile();					
 			boolean uploadSucc = true;
 			String fileName = fileNames.next();		//input name
 			
-			if(inputFileName != null){
+			if (inputFileName != null){
 				String inputFileNameRe = inputFileName.replace("##]", "");
 				int st = fileName.indexOf("[");
 				int en = fileName.indexOf("]");
@@ -111,7 +111,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				
 				boolean isInput = fileName.startsWith(inputFileNameRe);
 				
-				if(!isInput || inputFileName == null){
+				if (!isInput || inputFileName == null){
 					continue;
 				}
 			}
@@ -120,11 +120,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			MultipartFile mFile = multipartRequest.getFile(fileName);
 			
-			if(isEmpty(mFile.getOriginalFilename())) {
+			if (isEmpty(mFile.getOriginalFilename())) {
 				throw new RuntimeException("File Name is empty");
 			}
 			
-			if(mFile.getSize() <= 0) {
+			if (mFile.getSize() <= 0) {
 				throw new RuntimeException("File Size is 0");
 			}
 			
@@ -133,12 +133,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			// originalFileName에 경로가 포함되어 있는 경우 처리
 			log.debug("File upload OriginalFileName : " + originalFileName);
 			
-			if(originalFileName.indexOf("/") > -1) {
+			if (originalFileName.indexOf("/") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
 			}
-			if(originalFileName.indexOf("\\") > -1) {
+			if (originalFileName.indexOf("\\") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
@@ -146,11 +146,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			String fileExt = FilenameUtils.getExtension(originalFileName);
 			
-			if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+			if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 				fileExt = "tgz.gz";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 				fileExt = "tar.bz2";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 				fileExt = "tar.gz";
 			}
 			
@@ -198,14 +198,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			upFile.setRegistSeq(registFile(registFile));
 			upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
 			
-			if(mFile.getSize()!=0){ //File Null Check
-				if(! file.exists()){ //경로상에 파일이 존재하지 않을 경우
+			if (mFile.getSize()!=0){ //File Null Check
+				if (! file.exists()){ //경로상에 파일이 존재하지 않을 경우
 					try {
-						if(file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
+						if (file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
 
 							boolean upSucc = file.createNewFile(); //이후 파일 생성
 							
-							if(!upSucc){
+							if (!upSucc){
 								uploadSucc=false;
 							}
 						}
@@ -223,7 +223,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			result.add(upFile);
 		}
 		
-		if(sw){
+		if (sw){
 			result = null;
 		}
 		
@@ -234,7 +234,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	public String registFile(T2File file) {
 		int result = fileMapper.insertFile(file);
 		
-		if(result <= 0){
+		if (result <= 0){
 			return null;
 		}
 		
@@ -279,7 +279,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String fileId = "";
 		
 		//구 fileId가 존제 한다면 구 fileId에 넣어준다
-		if(!isEmpty(oldFileId)){
+		if (!isEmpty(oldFileId)){
 			fileId = oldFileId;
 		} else {
 			fileId = avoidNull(fileMapper.getFileId(), "1");
@@ -289,13 +289,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 
 		int indexNum = 0;
 		
-		while(fileNames.hasNext()){
+		while (fileNames.hasNext()){
 			UploadFile upFile = new UploadFile();
 			registFile.setCreator(registFile.getCreator());
 			boolean uploadSucc = true;
 			String fileName = fileNames.next();		//input name
 			
-			if(inputFileName != null){
+			if (inputFileName != null){
 				String inputFileNameRe = inputFileName.replace("##]", "");
 				int st = fileName.indexOf("[");
 				int en = fileName.indexOf("]");
@@ -310,7 +310,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				
 				boolean isInput = fileName.startsWith(inputFileNameRe);
 				
-				if(!isInput || inputFileName == null){
+				if (!isInput || inputFileName == null){
 					continue;
 				}
 			}
@@ -319,11 +319,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			MultipartFile mFile = multipartRequest.getFile(fileName);
 
-			if(isEmpty(mFile.getOriginalFilename())) {
+			if (isEmpty(mFile.getOriginalFilename())) {
 				throw new RuntimeException("File Name is empty");
 			}
 			
-			if(mFile.getSize() <= 0) {
+			if (mFile.getSize() <= 0) {
 				throw new RuntimeException("File Size is 0");
 			}
 			
@@ -332,12 +332,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			// originalFileName에 경로가 포함되어 있는 경우 처리
 			log.debug("File upload OriginalFileName : " + originalFileName);
 			
-			if(originalFileName.indexOf("/") > -1) {
+			if (originalFileName.indexOf("/") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
 			}
-			if(originalFileName.indexOf("\\") > -1) {
+			if (originalFileName.indexOf("\\") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
@@ -345,11 +345,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			String fileExt = FilenameUtils.getExtension(originalFileName);
 			
-			if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+			if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 				fileExt = "tgz.gz";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 				fileExt = "tar.bz2";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 				fileExt = "tar.gz";
 			}
 			
@@ -359,7 +359,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			try{
 				/* 파일 저장 경로 설정 hk-cho */
 				// 1) parameter로 filePath가 넘어오지 않았을 경우 Property에 있는 경로에 저장
-				if(StringUtil.isEmpty(filePath)) {
+				if (StringUtil.isEmpty(filePath)) {
 					uploadFilePath = appEnv.getProperty("upload.path", "/upload");
 					uploadThumbFilePath = appEnv.getProperty("image.path", "/image");
 				} else { // 2) parameter로 filePath가 넘어왔을 경우 넘어온 filePath에 저장
@@ -376,7 +376,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			String phyFileNm = originalFileName;						// 서버에 저장될 물리 파일명
 			String thumbPhyFileNm = phyFileNm+"_thumb."+fileExt;		// 서버에 저장될 thumb 물리 파일명
 			
-			if(useRandomPath){
+			if (useRandomPath){
 				UUID randomUUID = UUID.randomUUID();
 				phyFileNm = randomUUID+"."+fileExt;
 				thumbPhyFileNm = randomUUID+"_thumb."+fileExt;
@@ -410,16 +410,16 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				registFile.setContentType(mFile.getContentType());
 			} catch (Exception e) {}
 			
-			if(mFile.getSize()!=0){ //File Null Check
+			if (mFile.getSize()!=0){ //File Null Check
 				new File(filePath).mkdirs();
 				
-				if(isOrigFile) {
+				if (isOrigFile) {
 					uploadSucc = FileUtil.transferTo(mFile, new File(filePath + "/" + originalFileName));
 				} else {
 					uploadSucc = FileUtil.transferTo(mFile, new File(filePath + "/" + phyFileNm));
 				}
 				
-				if(uploadSucc){
+				if (uploadSucc){
 					try {
 						String regiSeq = registFile(registFile);
 						
@@ -438,7 +438,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			result.add(upFile);
 		}
 		
-		if(sw){
+		if (sw){
 			result = null;
 		}
 		
@@ -455,11 +455,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		fileInfo.setExt(FilenameUtils.getExtension(fileName));
 		
 		try {
-			if(fileName.toLowerCase().endsWith(".tgz.gz")) {
+			if (fileName.toLowerCase().endsWith(".tgz.gz")) {
 				fileInfo.setExt("tgz.gz");
-			} else if(fileName.toLowerCase().endsWith(".tar.bz2")) {
+			} else if (fileName.toLowerCase().endsWith(".tar.bz2")) {
 				fileInfo.setExt("tar.bz2");
-			} else if(fileName.toLowerCase().endsWith(".tar.gz")) {
+			} else if (fileName.toLowerCase().endsWith(".tar.gz")) {
 				fileInfo.setExt("tar.gz");
 			}
 		} catch (Exception e) {
@@ -483,11 +483,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		fileInfo.setExt(FilenameUtils.getExtension(fileName));
 		
 		try {
-			if(avoidNull(fileName.toLowerCase()).endsWith(".tgz.gz")) {
+			if (avoidNull(fileName.toLowerCase()).endsWith(".tgz.gz")) {
 				fileInfo.setExt("tgz.gz");
-			} else if(avoidNull(fileName.toLowerCase()).endsWith(".tar.bz2")) {
+			} else if (avoidNull(fileName.toLowerCase()).endsWith(".tar.bz2")) {
 				fileInfo.setExt("tar.bz2");
-			} else if(avoidNull(fileName.toLowerCase()).endsWith(".tar.gz")) {
+			} else if (avoidNull(fileName.toLowerCase()).endsWith(".tar.gz")) {
 				fileInfo.setExt("tar.gz");
 			}
 		} catch (Exception e) {
@@ -535,14 +535,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		boolean uploadSucc = true;
 		UploadFile upFile = new UploadFile();
 		
-		if(StringUtil.isEmpty(filePath)){
+		if (StringUtil.isEmpty(filePath)){
 			try {
 				uploadFilePath = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 				uploadThumbFilePath = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId + "/thumb";
 				
 				File dir = new File(uploadFilePath);
 				
-				if(!dir.exists()){
+				if (!dir.exists()){
 					dir.mkdirs();
 				}
 			} catch(Exception e) {
@@ -563,7 +563,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		// Url의 index 다음 문자열 부터 분리후 저장
 		String originalFileName = avoidNull(url).trim();
 		
-		if(originalFileName.indexOf("/") > -1) {
+		if (originalFileName.indexOf("/") > -1) {
 			originalFileName = originalFileName.substring(originalFileName.lastIndexOf('/') + 1);
 		}
 		
@@ -572,11 +572,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String fileName = originalFileName.substring(0,i);		//input name
 		String fileExt = FilenameUtils.getExtension(originalFileName);
 		
-		if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 			fileExt = "tar.bz2";
-		} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+		} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 			fileExt = "tar.gz";
 		}
 		
@@ -596,7 +596,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		try {
 			readChannel = Channels.newChannel(new URL(url.replaceAll("\\s", "%20")).openStream());
 			
-			if(isOrigFile) {
+			if (isOrigFile) {
 				fileOS = new FileOutputStream(uploadFilePath+"/"+fileName+"."+fileExt);
 			} else {
 				fileOS = new FileOutputStream(uploadFilePath+"/"+randomUUID+"."+fileExt);
@@ -609,7 +609,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			log.error(e.getMessage());
 			ShellCommanderResult = -1;
 		} finally {
-			if(writeChannel != null) {
+			if (writeChannel != null) {
 				try {
 					writeChannel.close();
 				} catch (Exception e) {
@@ -617,7 +617,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				}
 			}
 			
-			if(fileOS != null) {
+			if (fileOS != null) {
 				try {
 					fileOS.close();
 				} catch (Exception e) {
@@ -625,7 +625,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				}
 			}
 			
-			if(readChannel != null) {
+			if (readChannel != null) {
 				try {
 					readChannel.close();
 				} catch (Exception e) {
@@ -634,7 +634,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 		
-		if(ShellCommanderResult == 0){
+		if (ShellCommanderResult == 0){
 			File getfile = new File(uploadFilePath+"/"+randomUUID+"."+fileExt);
 			long fileSize = getfile.length();
 			
@@ -703,7 +703,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 		prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 		
-		for(String fileSeq : fileSeqs){
+		for (String fileSeq : fileSeqs){
 			T2File paramT2File = new T2File();
 			
 			paramT2File.setFileSeq(fileSeq);
@@ -714,28 +714,28 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String packagingUrl = appEnv.getProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 		List<T2File> result = fileMapper.selectPackagingFileInfo(prjId); // verify한 file을 select함.
 
-		if(result.size() > 0){
-			for(T2File res : result){
+		if (result.size() > 0){
+			for (T2File res : result){
 				String rtnFilePath = res.getLogiPath();
 				String rtnFileName = res.getLogiNm();
 				String rtnFileSeq = res.getFileSeq();
 				
-				if(publicUrl.equals(rtnFilePath)){
+				if (publicUrl.equals(rtnFilePath)){
 					// select한 filePath가 upload Dir 일 경우 해당 파일만 삭제함.
 					file = new File(rtnFilePath + "/" + rtnFileName);
 					
 					for (String fileSeq : fileSeqs) {
-						if(file.exists() && !rtnFileSeq.equals(fileSeq)){
+						if (file.exists() && !rtnFileSeq.equals(fileSeq)){
 							int reuseCnt = fileMapper.getPackgingReuseCnt(rtnFileName);
 								
-							if(reuseCnt == 0){
+							if (reuseCnt == 0){
 								T2File delFile = new T2File();
 								delFile.setFileSeq(rtnFileSeq);
 								delFile.setGubn("A");
 								int returnSuccess = fileMapper.updateFileDelYnKessan(delFile);
 								
-								if(returnSuccess > 0) {
-									if(file.delete()){
+								if (returnSuccess > 0) {
+									if (file.delete()){
 										log.debug(rtnFilePath + "/" + rtnFileName + " is delete success.");
 									} else {
 										log.debug(rtnFilePath + "/" + rtnFileName + " is delete failed.");
@@ -762,21 +762,21 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			int idx = 0;
 			
-			for(String fileId : origPackagingFileIdList){
+			for (String fileId : origPackagingFileIdList){
 				T2File fileInfo = new T2File();
 				
-				if(!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
+				if (!isEmpty(fileId) && !fileId.equals(newPackagingFileIdList.get(idx))){
 					//fileInfo.setFileSeq(fileId);
 					fileInfo = fileMapper.selectFileInfo(fileId);
 					deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
 				}
 				
-				if(!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
+				if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
 					//fileInfo.setFileSeq(newPackagingFileIdList.get(idx));
 					fileInfo = fileMapper.selectFileInfo(newPackagingFileIdList.get(idx));
 					oss.fosslight.domain.File resultFile = verificationMapper.selectVerificationFile(newPackagingFileIdList.get(idx));
 					
-					if(CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
+					if (CoConstDef.FLAG_YES.equals(resultFile.getReuseFlag())){
 						uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+resultFile.getRefPrjId()+" by "+loginUserName()+". <br>";
 					} else {
 						uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
@@ -800,30 +800,30 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		ArrayList<String> LogiNms = new ArrayList<String>();
 		ArrayList<String> reuseNms = new ArrayList<String>();
 		
-		for(T2File uploadFileInfo : uploadFileInfos){
+		for (T2File uploadFileInfo : uploadFileInfos){
 			LogiNms.add(uploadFileInfo.getLogiNm());
 		}
 		
 		// 현재 proejct Packaging File 중 재사용중인 packaging File 이 있다면 제거 불가
 		List<T2File> reusePackaging = fileMapper.getReusePackagingInfo();
 		
-		for(T2File reuse : reusePackaging){
+		for (T2File reuse : reusePackaging){
 			reuseNms.add(reuse.getLogiNm());
 		}
 		
-		if(file.exists()){
-			for(File f : file.listFiles()){
+		if (file.exists()){
+			for (File f : file.listFiles()){
 				String fileNm = f.getName();
 				
-				if(!LogiNms.contains(fileNm)){
+				if (!LogiNms.contains(fileNm)){
 					T2File delFile = new T2File();
 					delFile.setLogiPath(url);
 					delFile.setLogiNm(f.getName());
 					
 					int returnSuccess = fileMapper.updateReuseChkFileDelYnByFilePathNm(delFile);
 					
-					if(returnSuccess > 0 && !reuseNms.contains(fileNm)){
-						if(f.delete()){
+					if (returnSuccess > 0 && !reuseNms.contains(fileNm)){
+						if (f.delete()){
 							log.debug(url + "/" + f.getName() + " is delete success.");
 						}else{
 							log.debug(url + "/" + f.getName() + " is delete failed.");
@@ -836,12 +836,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		// 재사용을 했었던 file중 다른 project에서도 재사용을 하지 않은 file 있는지 확인하고 재사용을 안한다면 file 삭제 / 추후 reuse하는 다른 project에서도 reuseFlag가 N이 되면 지우는 case이므로 log는 남기지 않음.
 		List<T2File> reusePackagingFileList = fileMapper.getPackgingReuseCntToList(prjId);
 		
-		for(T2File reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
+		for (T2File reusePackagingFile : reusePackagingFileList){ // reuseCnt가 0인 값만 불러오고 삭제처리 후 hidden flag를 Y로 변경 그리고 재검색시 조회 불가상태로 만듦.
 			File reuseFile = new File(reusePackagingFile.getLogiPath());
 			
-			if(reuseFile.exists()){
-				for(File f : reuseFile.listFiles()){
-					if(reusePackagingFile.getLogiNm().equals(f.getName())){
+			if (reuseFile.exists()){
+				for (File f : reuseFile.listFiles()){
+					if (reusePackagingFile.getLogiNm().equals(f.getName())){
 						T2File delFile = new T2File();
 						delFile.setLogiPath(reusePackagingFile.getLogiPath());
 						delFile.setLogiNm(f.getName());
@@ -850,8 +850,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						
 						fileMapper.setReusePackagingFileHidden(refPrjId[refPrjId.length-1], reusePackagingFile.getLogiPath(), f.getName());
 						
-						if(returnSuccess > 0){
-							if(f.delete()){
+						if (returnSuccess > 0){
+							if (f.delete()){
 								log.debug(url + "/" + f.getName() + " is delete success.");
 							}else{
 								log.debug(url + "/" + f.getName() + " is delete failed.");
@@ -911,9 +911,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String fileId = "";
 		
 		//구 fileId가 존제 한다면 구 fileId에 넣어준다
-		if(oldFileId==null || "0".equals(oldFileId) || "".equals(oldFileId)){
+		if (oldFileId==null || "0".equals(oldFileId) || "".equals(oldFileId)){
 			fileId = fileMapper.getFileId();
-			if(fileId == null){
+			if (fileId == null){
 				fileId = "1";
 			}
 		} else {
@@ -922,7 +922,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		int indexNum = 0;
 		
-		while(fileNames.hasNext()){
+		while (fileNames.hasNext()){
 			UploadFile upFile = new UploadFile();
 					
 			boolean uploadSucc = true;
@@ -932,11 +932,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			MultipartFile mFile = multipartRequest.getFile(fileName);
 			
-			if(isEmpty(mFile.getOriginalFilename())) {
+			if (isEmpty(mFile.getOriginalFilename())) {
 				throw new RuntimeException("File Name is empty");
 			}
 			
-			if(mFile.getSize() <= 0) {
+			if (mFile.getSize() <= 0) {
 				throw new RuntimeException("File Size is 0");
 			}
 			
@@ -945,12 +945,12 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			// originalFileName에 경로가 포함되어 있는 경우 처리
 			log.debug("File upload OriginalFileName : " + originalFileName);
 			
-			if(originalFileName.indexOf("/") > -1) {
+			if (originalFileName.indexOf("/") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("/") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
 			}
-			if(originalFileName.indexOf("\\") > -1) {
+			if (originalFileName.indexOf("\\") > -1) {
 				originalFileName = originalFileName.substring(originalFileName.lastIndexOf("\\") + 1);
 				
 				log.debug("File upload OriginalFileName Substring with File.separator : " + originalFileName);
@@ -958,11 +958,11 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			
 			String fileExt = FilenameUtils.getExtension(originalFileName);
 			
-			if(originalFileName.toLowerCase().endsWith(".tgz.gz")) {
+			if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 				fileExt = "tgz.gz";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.bz2")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.bz2")) {
 				fileExt = "tar.bz2";
-			} else if(originalFileName.toLowerCase().endsWith(".tar.gz")) {
+			} else if (originalFileName.toLowerCase().endsWith(".tar.gz")) {
 				fileExt = "tar.gz";
 			}
 			
@@ -1010,13 +1010,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			upFile.setRegistSeq(registFile(registFile));
 			upFile.setCreatedDate(CommonFunction.getCurrentDateTime(CoConstDef.DATABASE_FORMAT_DATE_ALL));
 			
-			if(mFile.getSize()!=0){ //File Null Check
-				if(! file.exists()){ //경로상에 파일이 존재하지 않을 경우
+			if (mFile.getSize()!=0){ //File Null Check
+				if (! file.exists()){ //경로상에 파일이 존재하지 않을 경우
 					try {
-						if(file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
+						if (file.getParentFile().mkdirs()){ //경로에 해당하는 디렉토리들을 생성
 								boolean upSucc = file.createNewFile(); //이후 파일 생성
 								
-								if(!upSucc){
+								if (!upSucc){
 									uploadSucc=false;
 								}
 						} 
@@ -1037,20 +1037,20 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			try {
 				File convertHTMLFile = null;
 				
-				if("XML".equals(fileExt.toUpperCase())) {
+				if ("XML".equals(fileExt.toUpperCase())) {
 					convertHTMLFile = CommonFunction.convertXMLToHTML(file, false);
-				} else if("ZIP".equals(fileExt.toUpperCase())) {
+				} else if ("ZIP".equals(fileExt.toUpperCase())) {
 					FileUtil.decompress(uploadFilePath + "/" + file.getName(), uploadFilePath + "/" + randomUUID);
 					convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
-				} else if("TAR.GZ".equals(fileExt.toUpperCase())) {
+				} else if ("TAR.GZ".equals(fileExt.toUpperCase())) {
 					CompressUtil.decompressTarGZ(file, uploadFilePath + "/" + randomUUID);
 					convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
 				}
 				
-				if(convertHTMLFile != null) {
+				if (convertHTMLFile != null) {
 					long convertHTMLFileSize = convertHTMLFile.length();
 					
-					if(convertHTMLFileSize > 0){
+					if (convertHTMLFileSize > 0){
 						UploadFile convertNoticeFile = new UploadFile();
 						String convertFileId = fileMapper.getFileId();
 						String convertNoticeFileName = "Notice-"+prjId+"_"+DateUtil.getCurrentDateTime(DateUtil.DATE_PATTERN)+".html";
@@ -1087,7 +1087,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 		}
 		
-		if(sw){
+		if (sw){
 			result = null;
 		}
 		
@@ -1097,23 +1097,41 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	@Override
 	public void deletePhysicalFile(T2File file, String flag) {
 		String filePath = "";
+		boolean isAndroidNoticeFolder = false;
+		String folderPath = "";
 		
-		if(flag.equals("VERIFY")) {
+		if (flag.equals("VERIFY")) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
 		}else {
 			T2File T2file = fileMapper.getFileInfo2(file);
 			filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
+			if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
+				isAndroidNoticeFolder = true;
+				folderPath = T2file.getLogiPath();
+			}
 		}
 		
 		try {
 			FileOutputStream to = new FileOutputStream(filePath);
 			to.flush();
    	 		to.close();
-   	 		
-   	 		File LogiFile = new File(filePath);	
-   	 		if(LogiFile.exists()){
-   	 			LogiFile.delete();
-   	 		}
+			if(isAndroidNoticeFolder) {
+				File folder = new File(folderPath);
+				while(folder.exists()) {
+					File[] folder_list = folder.listFiles();
+					for(int i = 0;i < folder_list.length; i++) {
+						folder_list[i].delete();
+					}
+					if(folder_list.length == 0 && folder.isDirectory()) {
+						folder.delete();
+					}
+				}
+			} else{
+				File LogiFile = new File(filePath);
+				if (LogiFile.exists()) {
+					LogiFile.delete();
+				}
+			}
 		} catch(Exception e) {
 			log.info(e.getMessage(), e);
 		}
@@ -1125,14 +1143,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		String newFileId = fileMapper.getFileId();
 		List<T2File> orgFileInfoList = fileMapper.getFileInfoList(fileId);
 		
-		for(T2File orgFile : orgFileInfoList) {
+		for (T2File orgFile : orgFileInfoList) {
 			String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
 			
 			UUID randomUUID = UUID.randomUUID();
 			String copyFileName = randomUUID + "." + orgFile.getExt();
 			String newFile = orgFile.getLogiPath();
 			
-			if(FileUtil.copyFile(baseFile, newFile, copyFileName)) {
+			if (FileUtil.copyFile(baseFile, newFile, copyFileName)) {
 				T2File fileInfo = new T2File();
 				fileInfo.setFileId(newFileId);
 				fileInfo.setFileSeq(orgFile.getFileSeq());
@@ -1144,7 +1162,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 				fileCopyFlag = false;
 			}
 			
-			if(!fileCopyFlag) {
+			if (!fileCopyFlag) {
 				newFileId = null;
 				log.error("physical file copy error");
 				break;

@@ -63,37 +63,37 @@ public class ApiBatServiceImpl implements ApiBatService {
 			{	
 				String fileName = (String) paramMap.get("fileName");
 				
-				if(!StringUtil.isEmpty(fileName)) {
+				if (!StringUtil.isEmpty(fileName)) {
 					strWhere += " AND UPPER(filename) LIKE UPPER('%" + fileName + "%') ";
 				}
 				
 				String tlsh = (String) paramMap.get("tlsh");
 				
-				if(!StringUtil.isEmpty(tlsh)){
+				if (!StringUtil.isEmpty(tlsh)){
 					strWhere += " AND UPPER(tlshchecksum) = UPPER('" + tlsh + "') ";
 				}
 
 				String checksum = (String) paramMap.get("checksum");
 				
-				if(!StringUtil.isEmpty(checksum)){
+				if (!StringUtil.isEmpty(checksum)){
 					strWhere += " AND UPPER(checksum) = UPPER('" + checksum + "') ";
 				}
 				
 				String platformName = (String) paramMap.get("platformName");
 				
-				if(!StringUtil.isEmpty(platformName)) {
+				if (!StringUtil.isEmpty(platformName)) {
 					strWhere += " AND UPPER(platformname) LIKE UPPER('%"+ platformName +"%') ";
 				}
 				
 				String platformVersion = (String) paramMap.get("platformVersion");
 				
-				if(!StringUtil.isEmpty(platformVersion)) {
+				if (!StringUtil.isEmpty(platformVersion)) {
 					strWhere += " AND UPPER(platformversion) LIKE UPPER('"+ platformVersion +"%') ";
 				}
 				
 				String sourcePath = (String) paramMap.get("sourcePath");
 				
-				if(!StringUtil.isEmpty(sourcePath)) {
+				if (!StringUtil.isEmpty(sourcePath)) {
 					strWhere += " AND UPPER(ossname) LIKE UPPER('%"+ sourcePath +"%') ";
 				}
 			}
@@ -104,7 +104,7 @@ public class ApiBatServiceImpl implements ApiBatService {
 			
 			rs = stmt.executeQuery(sql);
 			
-			while(rs.next()) {
+			while (rs.next()) {
 				Map<String, Object> batData = new HashMap<String, Object>();
 				
 				batData.put("binaryFileName", 	rs.getString("filename"));
@@ -125,25 +125,25 @@ public class ApiBatServiceImpl implements ApiBatService {
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
-			if(totalRs != null) {
+			if (totalRs != null) {
 				try {
 					totalRs.close();
 				} catch (Exception e) {}
 			}
 			
-			if(rs != null) {
+			if (rs != null) {
 				try {
 					rs.close();
 				} catch (Exception e) {}
 			}
 			
-			if(stmt!=null) {
+			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {}
 			}
 			
-			if(conn!=null) {
+			if (conn != null) {
 				try {
 					conn.close();
 				} catch (SQLException e) {}

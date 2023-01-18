@@ -36,7 +36,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 		Map<String, Object> map = null;
 		int records = codeMapper.selectCodeTotalCount(vo);
 		
-		if(records > 0) {
+		if (records > 0) {
 			vo.setTotListSize(records);
 			map = getGridPagerMap(vo);
 			map.put("rows", codeMapper.selectCodeList(vo));
@@ -52,7 +52,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	public ArrayList<T2CodeDtl> getCodeDetailList(T2CodeDtl vo) throws Exception {
 		ArrayList<T2CodeDtl> codeDetailList = codeMapper.selectCodeDetailList(vo);
 		
-		if(codeDetailList.size() > 0){
+		if (codeDetailList.size() > 0){
 			for (T2CodeDtl t2CodeDtl : codeDetailList) {
 				if (isGithubTokenCodeDtl(t2CodeDtl)) {
 					t2CodeDtl.setCdDtlExp("");
@@ -76,9 +76,9 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	@Override
 	public void setCode(T2Code vo) throws Exception {
 		// 추가
-		if(CoConstDef.GRID_OPERATION_ADD.equals(vo.getOper())) {
+		if (CoConstDef.GRID_OPERATION_ADD.equals(vo.getOper())) {
 			codeMapper.insertCode(vo);
-		} else if(CoConstDef.GRID_OPERATION_EDIT.equals(vo.getOper())) { // 수정
+		} else if (CoConstDef.GRID_OPERATION_EDIT.equals(vo.getOper())) { // 수정
 			codeMapper.updateCode(vo);
 		} else { // 삭제
 			codeMapper.deleteCodeDetailAll(vo);
@@ -132,7 +132,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			}
 		}
 
-		if(isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
+		if (isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
 			// 1. 기존 github token값 보관
 			T2CodeDtl githubTokenDtl = codeMapper.getCodeDetail(cdNo, CoConstDef.CD_DTL_GITHUB_TOKEN);
 
@@ -144,7 +144,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 
 			// 3. 전체 상세 코드 재등록(추가 / 변경 / 삭제)
 			for (T2CodeDtl codeDtl : dtlList) {
-				if(isGithubTokenCodeDtlNo(codeDtl.getCdDtlNo()) && codeDtl.getCdDtlExp().isEmpty()) {
+				if (isGithubTokenCodeDtlNo(codeDtl.getCdDtlNo()) && codeDtl.getCdDtlExp().isEmpty()) {
 					codeMapper.insertCodeDetail(githubTokenDtl);
 				} else {
 					codeMapper.insertCodeDetail(codeDtl);

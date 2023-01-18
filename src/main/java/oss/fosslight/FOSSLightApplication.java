@@ -40,13 +40,13 @@ public class FOSSLightApplication implements CommandLineRunner  {
 	public void run(String... args) throws Exception {
 		boolean checkFlag = false;
 		
-		if(env.containsProperty("secret.key")) {
+		if (env.containsProperty("secret.key")) {
 			List<String> argsList = Arrays.asList(args)
 											.stream()
 											.filter(c -> c.indexOf("secretKey") > -1)
 											.collect(Collectors.toList());
 			
-			if(argsList != null && argsList.size() > 0) {
+			if (argsList != null && argsList.size() > 0) {
 				String checkSecretKey = String.join("", argsList).split("=")[1];
 				String secretKey = env.getProperty("secret.key");
 				

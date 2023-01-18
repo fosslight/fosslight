@@ -223,10 +223,13 @@ public class ApiProjectController extends CoTopComponent {
 						List<String[]> models = new ArrayList<>();
 						for (String strModel : modelListToUpdate) {
 							String[] model = strModel.split("\\|");
-							if (model.length > 2) models.add(model);
+							if (model.length > 2) {
+								models.add(model);
+							}
 						}
-						if (models.size() > 0)
+						if (models.size() > 0) {
 							modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
+						}
 					} else {
 						errorCode = CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE;
 					}
@@ -274,20 +277,20 @@ public class ApiProjectController extends CoTopComponent {
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		try {
-			if(CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
+			if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT > createCnt) {
 				Map<String, Object> paramMap = new HashMap<String, Object>();
 				
 				String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
 				
-				if(isEmpty(osTypeStr)) {
+				if (isEmpty(osTypeStr)) {
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 				}
 				
-				if(!isEmpty(distributionType)) {
+				if (!isEmpty(distributionType)) {
 					String distributionTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, distributionType);
 					
-					if(isEmpty(distributionTypeStr)) {
+					if (isEmpty(distributionTypeStr)) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 					}
@@ -295,10 +298,10 @@ public class ApiProjectController extends CoTopComponent {
 					distributionType = CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL;
 				}
 				
-				if(!isEmpty(distributionSite)) {
+				if (!isEmpty(distributionSite)) {
 					String distributionSiteStr = CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, distributionSite);
 					
-					if(isEmpty(distributionSiteStr)) {
+					if (isEmpty(distributionSiteStr)) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 					}
@@ -307,8 +310,8 @@ public class ApiProjectController extends CoTopComponent {
 				}
 				
 				
-				if(!isEmpty(networkServerType)) {
-					if(!CoConstDef.FLAG_YES.equals(networkServerType) 
+				if (!isEmpty(networkServerType)) {
+					if (!CoConstDef.FLAG_YES.equals(networkServerType) 
 							&& !CoConstDef.FLAG_NO.equals(networkServerType)) { // NETWORK Service Only는 Y / N만 선택 가능함.
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
@@ -317,47 +320,47 @@ public class ApiProjectController extends CoTopComponent {
 					networkServerType = CoConstDef.FLAG_NO;
 				} 
 				
-				if(isEmpty(noticeType)) {
-					if(!isEmpty(noticeTypeEtc)) {
+				if (isEmpty(noticeType)) {
+					if (!isEmpty(noticeTypeEtc)) {
 						String noticeTypeEtcStr = CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc);
 						
-						if(!isEmpty(noticeTypeEtcStr)) {
+						if (!isEmpty(noticeTypeEtcStr)) {
 							noticeType = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED;
-						} else if(isEmpty(noticeTypeEtcStr)) {
+						} else if (isEmpty(noticeTypeEtcStr)) {
 							return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 						}
 					} else {
 						noticeType = CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL;
 					}
-				} else if(!isEmpty(noticeType)) {
+				} else if (!isEmpty(noticeType)) {
 					String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, noticeType);
 					
-					if(isEmpty(noticeTypeStr)) {
+					if (isEmpty(noticeTypeStr)) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 					}
 				}
 				
-				if(!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)) {
+				if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)) {
 					noticeTypeEtc = "";
-				} else if(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType) && isEmpty(noticeTypeEtc)) {
+				} else if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType) && isEmpty(noticeTypeEtc)) {
 					noticeTypeEtc = CoConstDef.CD_DTL_DEFAULT_PLATFORM;
-				} else if(!isEmpty(noticeTypeEtc)) {
+				} else if (!isEmpty(noticeTypeEtc)) {
 					String noticeTypeEtcStr = CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc);
 					
-					if(!isEmpty(noticeTypeEtcStr)) {
+					if (!isEmpty(noticeTypeEtcStr)) {
 						noticeTypeEtc = noticeTypeEtcStr;
-					} else if(isEmpty(noticeTypeEtcStr)) {
+					} else if (isEmpty(noticeTypeEtcStr)) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 					}
 				}
 				
-				if(!isEmpty(priority)) {
+				if (!isEmpty(priority)) {
 					String priorityStr = CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, priority);
 					
-					if(isEmpty(priorityStr)) {
+					if (isEmpty(priorityStr)) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
 					}
@@ -386,7 +389,7 @@ public class ApiProjectController extends CoTopComponent {
 				
 				int resultCnt = apiProjectService.makeOssNotice(noticeParamMap);
 				
-				if(!isEmpty(resultPrjId) && resultCnt > 0) {
+				if (!isEmpty(resultPrjId) && resultCnt > 0) {
 					try {
 						History h = new History();
 						Project project = new Project();
@@ -400,7 +403,7 @@ public class ApiProjectController extends CoTopComponent {
 						log.error(e.getMessage(), e);
 					}
 					
-					if(comment != null) {
+					if (comment != null) {
 						CommentsHistory commentHisBean = new CommentsHistory();
 						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
 						commentHisBean.setReferenceId(resultPrjId);
@@ -464,8 +467,8 @@ public class ApiProjectController extends CoTopComponent {
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 			
-			if(searchFlag) {
-				if("Y".equals(mergeSaveFlag)) {
+			if (searchFlag) {
+				if ("Y".equals(mergeSaveFlag)) {
 					apiProjectService.registBom(prjId, mergeSaveFlag);
 				}
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
@@ -503,7 +506,7 @@ public class ApiProjectController extends CoTopComponent {
 
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
-			if(searchFlag) {
+			if (searchFlag) {
 				resultMap = apiProjectService.getBomExportJson(prjId);
 			}
 			return responseService.getSingleResult(resultMap);
@@ -530,7 +533,7 @@ public class ApiProjectController extends CoTopComponent {
 			
 			Map<String, Object> paramMap = new HashMap<>();
 		
-			if(!isEmpty(beforePrjId) && beforePrjId.equals(afterPrjId)) {
+			if (!isEmpty(beforePrjId) && beforePrjId.equals(afterPrjId)) {
 				paramMap.put("status", "same");
 				resultMap.put("contents", paramMap);
 				return responseService.getSingleResult(resultMap);
@@ -544,13 +547,13 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("prjId", prjIdList);
 			paramMap.put("distributionType", "normal");
 			
-			boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
+			int records = apiProjectService.existProjectCntBomCompare(paramMap);
 			
-			if(searchFlag) {
+			if (records > 0) {
 				List<Map<String, Object>> beforeBomList = apiProjectService.getBomList(beforePrjId);
 				List<Map<String, Object>> afterBomList = apiProjectService.getBomList(afterPrjId);
 				
-				if(beforeBomList == null 
+				if (beforeBomList == null 
 						|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
 					throw new Exception();
 				}
@@ -559,8 +562,10 @@ public class ApiProjectController extends CoTopComponent {
 				
 				return responseService.getSingleResult(resultMap);
 			} else {
-				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+				paramMap.clear();
+				paramMap.put("status", "not exist project");
+				resultMap.put("contents", paramMap);
+				return responseService.getSingleResult(resultMap);
 			}
 		} catch (Exception e) {
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
@@ -595,13 +600,13 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("distributionType", "normal");
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-			if(searchFlag) {
-				if(ossReport != null) {
-					if(ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
+			if (searchFlag) {
+				if (ossReport != null) {
+					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
 						
 						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
-						if(!checkDistributionTypeFlag) {
+						if (!checkDistributionTypeFlag) {
 							return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 						}
@@ -623,7 +628,7 @@ public class ApiProjectController extends CoTopComponent {
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if(!isEmpty(errorMsg)) {
+						if (!isEmpty(errorMsg)) {
 							resultMap.put("errorMessage", errorMsg);
 						}
 						
@@ -662,7 +667,7 @@ public class ApiProjectController extends CoTopComponent {
 								log.error(e.getMessage(), e);
 							}
 							
-							if(comment != null) {
+							if (comment != null) {
 								CommentsHistory commentHisBean = new CommentsHistory();
 								commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 								commentHisBean.setReferenceId(prjId);
@@ -738,7 +743,7 @@ public class ApiProjectController extends CoTopComponent {
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
-			if(searchFlag) {
+			if (searchFlag) {
 				List<ProjectIdentification> ossComponents = new ArrayList<>();
 				List<List<ProjectIdentification>> ossComponentsLicense = null;
 				String changeExclude = "";
@@ -747,17 +752,17 @@ public class ApiProjectController extends CoTopComponent {
 				UploadFile ossReportBean = null;
 				UploadFile binartTxtBean = null;
 				
-				if(ossReport != null) {
-					if(!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
+				if (ossReport != null) {
+					if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
-					} else if(CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
+					} else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
 					} else {
 						
 						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin -> bin Android 
-						if(!checkDistributionTypeFlag) {
+						if (!checkDistributionTypeFlag) {
 							return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 						}
@@ -770,7 +775,7 @@ public class ApiProjectController extends CoTopComponent {
 						ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>()); 
 						ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if(!isEmpty(errorMsg)) {
+						if (!isEmpty(errorMsg)) {
 							resultMap.put("errorMessage", errorMsg);
 						}
 						
@@ -778,24 +783,24 @@ public class ApiProjectController extends CoTopComponent {
 					}
 				}
 				
-				if(binartTxt != null) {
-						if(binartTxt.getOriginalFilename().contains("txt")) {
+				if (binartTxt != null) {
+						if (binartTxt.getOriginalFilename().contains("txt")) {
 						binartTxtBean = apiFileService.uploadFile(binartTxt); // file 등록 처리 이후 upload된 file정보를 return함.
 						String binaryFileId = binartTxtBean.getRegistFileId();
 						List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfoById(binaryFileId));
 						
-						if(binaryTxtList != null && !binaryTxtList.isEmpty()) {
+						if (binaryTxtList != null && !binaryTxtList.isEmpty()) {
 							// 현재 osslist의 binary 목록을 격납
 							Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
-							for(ProjectIdentification bean : ossComponents) {
-								if(bean != null && !isEmpty(bean.getBinaryName())) {
+							for (ProjectIdentification bean : ossComponents) {
+								if (bean != null && !isEmpty(bean.getBinaryName())) {
 									componentBinaryList.put(bean.getBinaryName(), bean);
 								}
 							}
 							List<ProjectIdentification> addComponentList = Lists.newArrayList();
 							// 존재여부 확인
-							for(String binaryNameTxt : binaryTxtList) {
-								if(!componentBinaryList.containsKey(binaryNameTxt)) {
+							for (String binaryNameTxt : binaryTxtList) {
+								if (!componentBinaryList.containsKey(binaryNameTxt)) {
 									// add 해야할 list
 									ProjectIdentification bean = new ProjectIdentification();
 									// 화면에서 추가한 것 처럼 jqg로 시작하는 component id를 임시로 설정한다.
@@ -808,12 +813,12 @@ public class ApiProjectController extends CoTopComponent {
 								// exclude처리된 경우
 								else {
 									ProjectIdentification bean = componentBinaryList.get(binaryNameTxt);
-									if(bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+									if (bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
 										changeExclude += "<br>" + binaryNameTxt;
 									}
 								}
 							}
-							if(addComponentList != null && !addComponentList.isEmpty()) {
+							if (addComponentList != null && !addComponentList.isEmpty()) {
 								ossComponents.addAll(addComponentList);
 							}
 						}
@@ -825,7 +830,7 @@ public class ApiProjectController extends CoTopComponent {
 					}
 				}
 				
-				if(ossReportBean == null 
+				if (ossReportBean == null 
 						&& binartTxtBean == null) {
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
 							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
@@ -849,12 +854,12 @@ public class ApiProjectController extends CoTopComponent {
 						if (!isEmpty(changeExclude) || !isEmpty(changeAdded)) {
 							String changedByResultTxt = "";
 							
-							if(!isEmpty(changeAdded)) {
+							if (!isEmpty(changeAdded)) {
 								changedByResultTxt += "<b>The following binaries were added to OSS List automatically because they exist in the binary.txt.</b><br>";
 								changedByResultTxt += changeAdded;
 							}
-							if(!isEmpty(changeExclude)) {
-								if(!isEmpty(changedByResultTxt)) {
+							if (!isEmpty(changeExclude)) {
+								if (!isEmpty(changedByResultTxt)) {
 									changedByResultTxt += "<br><br>";
 								}
 								changedByResultTxt += "<b>The following binaries are written to the OSS report as excluded, but they are in the binary.txt. Make sure it is not included in the final firmware.</b><br>";
@@ -911,9 +916,9 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						try {
-							if(getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId)) != null) {
+							if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId)) != null) {
 								String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId), true);
-								if(!isEmpty(chagedOssVersion)) {
+								if (!isEmpty(chagedOssVersion)) {
 									CommentsHistory commentHisBean = new CommentsHistory();
 									commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 									commentHisBean.setReferenceId(prjId);
@@ -926,7 +931,7 @@ public class ApiProjectController extends CoTopComponent {
 							log.error(e.getMessage(), e);
 						}
 						
-						if(comment != null) {
+						if (comment != null) {
 							CommentsHistory commentHisBean = new CommentsHistory();
 							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 							commentHisBean.setReferenceId(prjId);
@@ -995,16 +1000,16 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			UploadFile ossReportBean = null;
 			
-			if(searchFlag) {
-				if(!ossReport.getOriginalFilename().contains("xls")){ // 확장자 xls, xlsx, xlsm 허용
+			if (searchFlag) {
+				if (!ossReport.getOriginalFilename().contains("xls")){ // 확장자 xls, xlsx, xlsm 허용
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
 							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
-				} else if(CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
+				} else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
 							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
 				} else {
 					boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin Android -> bin 
-					if(!checkDistributionTypeFlag) {
+					if (!checkDistributionTypeFlag) {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 					}
@@ -1025,12 +1030,12 @@ public class ApiProjectController extends CoTopComponent {
 				
 				UploadFile noticeHtmlBean = null;
 				UploadFile noticeXMLBean = null;
-				if(count == 1) {
+				if (count == 1) {
 					Map<String, UploadFile> Files = apiFileService.uploadNoticeXMLFile(noticeHtml, prjId);
 					
 					noticeHtmlBean = Files.get("noticeHTML");
 					noticeXMLBean = Files.get("noticeXML");
-				}else if(count == 0) {
+				}else if (count == 0) {
 					noticeHtmlBean = apiFileService.uploadFile(noticeHtml); // noticeHtml 등록
 				} else {
 					noticeHtmlBean = null;
@@ -1038,7 +1043,7 @@ public class ApiProjectController extends CoTopComponent {
 				
 				UploadFile resultTxtBean = null;
 				
-				if(resultTxt != null) {
+				if (resultTxt != null) {
 					resultTxtBean = apiFileService.uploadFile(resultTxt); // resultTxt 등록
 				}
 				
@@ -1047,7 +1052,7 @@ public class ApiProjectController extends CoTopComponent {
 				List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 				List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 				
-				if(ossReportBean == null 
+				if (ossReportBean == null 
 						&& noticeHtmlBean == null
 						&& resultTxtBean == null) {
 					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
@@ -1135,9 +1140,9 @@ public class ApiProjectController extends CoTopComponent {
 						}
 						
 						try {
-							if(getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId)) != null) {
+							if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId)) != null) {
 								String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId), true);
-								if(!isEmpty(chagedOssVersion)) {
+								if (!isEmpty(chagedOssVersion)) {
 									CommentsHistory commentHisBean = new CommentsHistory();
 									commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 									commentHisBean.setReferenceId(prjId);
@@ -1150,7 +1155,7 @@ public class ApiProjectController extends CoTopComponent {
 							log.error(e.getMessage(), e);
 						}
 						
-						if(comment != null) {
+						if (comment != null) {
 							CommentsHistory commentHisBean = new CommentsHistory();
 							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 							commentHisBean.setReferenceId(prjId);
@@ -1217,12 +1222,12 @@ public class ApiProjectController extends CoTopComponent {
 		String afterFileSeq = "";
 		boolean uploadFlag = false;
 		
-		if(searchFlag) {
+		if (searchFlag) {
 			Map<String, Object> result = apiProjectService.selectVerificationCheck(prjId);
 			String useYn = (String) result.get("useYn");
 			String packageFileSeq = (String) result.get("packageFileSeq").toString();
 						
-			if(CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
+			if (CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "Up to 3 packaging files can be uploaded.");
 			}
 			
@@ -1230,7 +1235,7 @@ public class ApiProjectController extends CoTopComponent {
 			UploadFile packageFileBean = apiFileService.uploadFile(packageFile, filePath); // packagingFile 등록
 			afterFileSeq = packageFileBean.getRegistSeq();
 			
-			if(CoConstDef.FLAG_YES.equals(useYn) && CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT >= Integer.parseInt(packageFileSeq)) {
+			if (CoConstDef.FLAG_YES.equals(useYn) && CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT >= Integer.parseInt(packageFileSeq)) {
 				// packaging File comment
 				String uploadComment = "Packaging file, "+packageFileBean.getOriginalFilename()+", was uploaded by "+userInfo.getUserId()+". <br>";
 				
@@ -1249,7 +1254,7 @@ public class ApiProjectController extends CoTopComponent {
 				errorMsg = null; // 정상적으로 처리됨.
 				uploadFlag = true;
 			} else {
-				if(!CoConstDef.FLAG_YES.equals(useYn)) {
+				if (!CoConstDef.FLAG_YES.equals(useYn)) {
 					errorMsg = "delete project"; // 삭제된 project
 				}
 			}
@@ -1322,7 +1327,7 @@ public class ApiProjectController extends CoTopComponent {
 				
 				resMap = result.get(0);
 				
-				if(fileSeqs.size() > 1){
+				if (fileSeqs.size() > 1){
 					resMap.put("verifyValid", result.get(result.size()-1).get("verifyValid"));
 					resMap.put("fileCounts", result.get(result.size()-1).get("fileCounts"));
 				}

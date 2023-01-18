@@ -80,7 +80,7 @@ public class UserController extends CoTopComponent {
 		// validation check
 		T2CoValidationResult vResult = validate(req);
 		
-		if(!vResult.isValid()) {
+		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
 		
@@ -94,12 +94,12 @@ public class UserController extends CoTopComponent {
 		
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
 		
-		if(!CoConstDef.FLAG_YES.equals(ldapFlag)) {
+		if (!CoConstDef.FLAG_YES.equals(ldapFlag)) {
 			vo.setPassword(encodePassword((String) validResultMap.get("USER_PW")));
 		}
 		
 		// 선택된 division이 없을경우 N/A로 선택됨.
-		if(isEmpty(vo.getDivision())){
+		if (isEmpty(vo.getDivision())){
 			vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 		}
 		
@@ -147,7 +147,7 @@ public class UserController extends CoTopComponent {
 		String email = req.getParameter("email");
 		List<T2Users> list = userService.checkEmail(email);
 		
-		if(list.size() > 0){
+		if (list.size() > 0){
 			resMap.put("isValid", "true");
 			resMap.put("userId", list.get(0).getUserId());
 			resMap.put("division", list.get(0).getDivision());
@@ -205,7 +205,7 @@ public class UserController extends CoTopComponent {
 			
 			int updateCnt = userService.updateUsers(userInfo);
 			
-			if(updateCnt == 1) {
+			if (updateCnt == 1) {
 				resMap.put("resCd", "10");
 			} else {
 				resMap.put("resCd", "20");
@@ -230,12 +230,12 @@ public class UserController extends CoTopComponent {
 		try {
 			params.put("USER_NAME", params.get("userName").trim());
 			params.put("DIVISION", params.get("division").trim());
-			if(params.get("password") != null) {
+			if (params.get("password") != null) {
 				params.put("PASSWORD", params.get("password").trim());
 			}
 			T2CoAdminValidator validator = new T2CoAdminValidator();
 			T2CoValidationResult vr = validator.validate(params);
-			if(!vr.isValid()) {
+			if (!vr.isValid()) {
 				return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
 			}
 			userInfo.setUserId(loginUserName());
@@ -244,7 +244,7 @@ public class UserController extends CoTopComponent {
 			userInfo.setDivision(params.get("DIVISION"));
 			
 			String passwd = params.get("PASSWORD");
-			if(!StringUtil.isEmpty(passwd)) {
+			if (!StringUtil.isEmpty(passwd)) {
 				userInfo.setPassword(encodePassword(passwd)); // password encoding	
 			}
 			
@@ -275,7 +275,7 @@ public class UserController extends CoTopComponent {
 		
 		isSuccess = userService.procToken(userData);
 		
-		if(isSuccess) {
+		if (isSuccess) {
 			// email 발송
 			try {
 				String emailType = null;
@@ -292,7 +292,7 @@ public class UserController extends CoTopComponent {
 						break;
 				}
 				
-				if(!isEmpty(emailType)) {
+				if (!isEmpty(emailType)) {
 					CoMail mailBean = new CoMail(emailType);
 					mailBean.setParamUserId(userData.getUserId());
 					mailBean.setToIds(new String[] { userData.getUserId() });

@@ -1214,6 +1214,35 @@ var binAndroid_fn = {
     	collabUrl = "${ct:getCodeExpString(ct:getConstDef('CD_COLLAB_INFO'), ct:getConstDef('CD_SUPPLEMENT_NOTICE_HELP_URL'))}";
 
     	window.open(collabUrl);
+    },
+    binaryDBSave : function(prjId) {
+    	loading.show();
+		
+		var param = {
+			"prjId" : prjId,
+			"referenceDiv" : "14"
+		};
+        
+		$.ajax({
+			url : '<c:url value="${suffixUrl}/project/binaryDBSave"/>',
+			type : 'POST',
+			data : JSON.stringify(param),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				loading.hide();
+				if("false" == data.isValid) {
+					alertify.alert('Nothing to store in Binary DB', function(){});
+				}else{
+					alertify.alert('<spring:message code="msg.common.success" />', function(){});
+				}
+			},
+			error : function(){
+				loading.hide();
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
     }
 }
 

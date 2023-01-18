@@ -66,7 +66,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		int cnt = 1;
 		String cdNm = beData != null ? beData.gethType() : null;
 
-		for(String[] dtlCd : CoCodeManager.getValues(cdNm)){
+		for (String[] dtlCd : CoCodeManager.getValues(cdNm)){
 			Map<String, Object> dataMap = new HashMap<String, Object>();
 
 			// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
@@ -78,7 +78,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 			Object beD_ = getDataForType(cdNm, dtlCd, beMap);
 
 			// main data
-			if(asD_.getClass().equals(String.class) && beD_.getClass().equals(String.class)){
+			if (asD_.getClass().equals(String.class) && beD_.getClass().equals(String.class)){
 				dataMap.put("as", asD_);
 				dataMap.put("be", beD_);
 			} else { // sub list data
@@ -114,21 +114,21 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 		// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 		String[] inf = CoCodeManager.getCodeExpString(cdNm, dtlCd[0]).split("\\|");
 
-		if(inf[0].equals("String")) {
+		if (inf[0].equals("String")) {
 			ret = dMap != null ? escapeSql(nvl((String)dMap.get(dtlCd[1]), "")) : "";
-		} else if(inf[0].equals("Code")) {
-			if((dtlCd[1]).equals("obligation")){
+		} else if (inf[0].equals("Code")) {
+			if ((dtlCd[1]).equals("obligation")){
 				ret = dMap != null ? (String)dMap.get("obligationType"): "";
 			}else{
 				ret = dMap != null ?nvl(CoCodeManager.getCodeString(inf[2], (String)dMap.get(dtlCd[1])), inf[2]) : "";
 			}
-		} else if(inf[0].equals("Array") && "999".equals(dtlCd[2])) {
+		} else if (inf[0].equals("Array") && "999".equals(dtlCd[2])) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join("<br>", asArr) : "";
-		} else if(inf[0].equals("Array") && dtlCd[2] == null) {
+		} else if (inf[0].equals("Array") && dtlCd[2] == null) {
 			List<String> asArr = dMap != null ? (ArrayList<String>)dMap.get(dtlCd[1]) : null;
 			ret = asArr != null && asArr.size() > 0 ? String.join(", ", asArr) : "";
-		} else if(inf[0].equals("Array") && dtlCd[2] != null) {
+		} else if (inf[0].equals("Array") && dtlCd[2] != null) {
 			String sCdNm = dtlCd[2]; // CD_SUB_NO(Ref Entity)
 			HashMap<String, Object> sTblMap = new HashMap<String, Object>();
 
@@ -142,7 +142,7 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 			colInfo.put("order", "0");
 			colNames.add(colInfo);
 
-			for(String[] v : CoCodeManager.getAllValues(sCdNm)){
+			for (String[] v : CoCodeManager.getAllValues(sCdNm)){
 				colInfo =  new HashMap<String, Object>();
 				colInfo.put("key", v[2]);
 				colInfo.put("name", v[4].split("\\|")[1]);
@@ -157,21 +157,21 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 			// colModel 생성
 			List<Map<String, Object>> subList = new ArrayList<Map<String, Object>>();
 
-			if(dMap != null && dMap.get(dtlCd[1]) != null){
+			if (dMap != null && dMap.get(dtlCd[1]) != null){
 				// sub list 생성
 				int sCnt = 1;
 
-				for(Map<String, Object> sMap : (List<Map<String, Object>>) dMap.get(dtlCd[1])){
+				for (Map<String, Object> sMap : (List<Map<String, Object>>) dMap.get(dtlCd[1])){
 					Map<String, Object> sDataMap = new HashMap<String, Object>();
 					sDataMap.put("no", sCnt++);
 
 					// row data 생성
-					for(String[] sDtlCd : CoCodeManager.getValues(sCdNm)){
+					for (String[] sDtlCd : CoCodeManager.getValues(sCdNm)){
 						String[] sInf = CoCodeManager.getCodeExpString(sCdNm, sDtlCd[0]).split("\\|");	// EXP : TYPE(String, Code, Array, Object) | NAME | CD_NO
 
-						if(sInf[0].equals("String")){
+						if (sInf[0].equals("String")){
 							sDataMap.put(sDtlCd[1], escapeSql(nvl((String)sMap.get(sDtlCd[1]))) );
-						}else if(sInf[0].equals("Code")){
+						}else if (sInf[0].equals("Code")){
 							sDataMap.put(sDtlCd[1], CoCodeManager.getCodeString(sInf[1], (String)sMap.get(sDtlCd[1])) );
 						}
 					}

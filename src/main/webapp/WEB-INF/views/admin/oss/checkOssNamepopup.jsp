@@ -258,7 +258,7 @@
 								cleanErrMsg("ossList", rowId);
 								
 								var rowdata = target.getRowData(rowId);
-								rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
+								rowdata["checkName"] = rowdata["checkName"].split("redirect")[0].split("Invalid")[0];
 								rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
 								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
 
@@ -392,7 +392,7 @@
 											rowData = data.rows[rowIdx++];
 											var dataObject = datas.filter(function(a){return a.componentId==rowid})[0];
 											
-											if(dataObject.checkName.indexOf("|") > -1 || dataObject.checkOssList == "I") {
+											if(dataObject.checkName.indexOf("|") > -1) {
 												className= className + ' excludeRow';
 											}
 											
@@ -470,21 +470,22 @@
 						var checkOssList = rowObject["checkOssList"];
 						var returnValue;
 
-						if(checkOssList == "I"){
-							returnValue = "<div style='color: red !important; font-size: 11px; padding-top: 2px; white-space: pre-wrap'>Invalid download location.</div>";
+						display = checkName.split("|");
+
+						for (var i in display) {
+							display[i] = checkOssList == "Y" ?
+									"<a href='#' onclick='Ctrl_fn.showOssViewPage(\"" + display[i] + "\")' style='color:#2883f3;text-decoration:underline;'>" + display[i] + "</a>"
+									: display[i];
+						}
+
+						if(checkOssList == "I") {
+							returnValue = display.join("<br>") + "<div style='color: red !important; font-size: 11px; padding-top: 2px; white-space: pre-wrap'>Invalid download location.</div>";
 						} else {
-							display = checkName.split("|");
-
-							for (var i in display) {
-								display[i] = checkOssList == "Y" ?
-										"<a href='#' onclick='Ctrl_fn.showOssViewPage(\"" + display[i] + "\")' style='color:#2883f3;text-decoration:underline;'>" + display[i] + "</a>"
-										: display[i];
-							}
-
 							returnValue = typeof rowObject["redirectLocation"] == "undefined" ? display.join("<br>")
 									: display.join("<br>") + "<div style='color: blue !important; font-size: 11px; padding-top: 2px; white-space: pre-wrap'>" + "redirect url:\n" +
 									"https://" + rowObject["redirectLocation"] + "</div>";
 						}
+
 						return returnValue;
 					},
 					displayDownloadLocation : function(cellvalue, options, rowObject){

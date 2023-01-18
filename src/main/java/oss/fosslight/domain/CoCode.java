@@ -157,11 +157,11 @@ public class CoCode {
     {
         Vector<String[]> vector = new Vector<String[]>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-            	continue;
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             vector.add(new String[] {
                 codedtl.cdDtlNo, codedtl.cdDtlNm, codedtl.cdSubNo, codedtl.cdDtlExp
@@ -175,11 +175,11 @@ public class CoCode {
     {
         Vector<CoCodeDtl> vector = new Vector<CoCodeDtl>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-            	continue;
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             vector.add(codedtl);
         }
@@ -197,11 +197,11 @@ public class CoCode {
     {
         Vector<String[]> vector = new Vector<String[]>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-            	continue;
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             vector.add(new String[] {
                 codedtl.cdDtlNo, codedtl.cdSubNo, codedtl.cdDtlNm, codedtl.cdDtlNm2, codedtl.cdDtlExp, codedtl.cdOrder+""
@@ -214,11 +214,11 @@ public class CoCode {
     {
         Vector<CoCodeDtl> vector = new Vector<CoCodeDtl>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-            	continue;
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             vector.add(codedtl);
         }
@@ -236,11 +236,11 @@ public class CoCode {
     {
         Vector<String> vector = new Vector<String>();
         int i = 0;
-        for(int j = codeDtls.size(); i < j; i++)
+        for (int j = codeDtls.size(); i < j; i++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(i);
-            if(!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-            	continue;
+            if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             vector.add(codedtl.cdDtlNo);
         }
@@ -259,9 +259,9 @@ public class CoCode {
 		int i = 0;
 		for (int j = codeDtls.size(); i < j; i++) {
 			CoCodeDtl codedtl = (CoCodeDtl) codeDtls.get(i);
-			if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
-				continue;
-			}
+      if (!ignoreDel && CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+        continue;
+      }
 			vector.add(codedtl.cdDtlNm);
 		}
 
@@ -280,12 +280,11 @@ public class CoCode {
     {
         StringBuffer stringbuffer = (new StringBuffer("<select name='")).append(s).append("'>\n");
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             stringbuffer.append("    <option value='").append(codedtl.cdDtlNo).append('\'');
-            if((i == 0 && codedtl.cdDtlNo.equals(s1)) || (i == 1 && codedtl.cdDtlNm.equals(s1)))
-            {
+            if ((i == 0 && codedtl.cdDtlNo.equals(s1)) || (i == 1 && codedtl.cdDtlNm.equals(s1))) {
                 stringbuffer.append(" selected");
             }
             stringbuffer.append(">").append(codedtl.cdDtlNm).append("</option>\n");
@@ -305,19 +304,17 @@ public class CoCode {
     {
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             
-            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-            {
-            	continue;
+            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             
             stringbuffer.append("    <option VALUE='").append(codedtl.cdDtlNo).append('\'');
             
-            if( (i == 0 && codedtl.cdDtlNo.equals(s) ) || ( i == 1 && codedtl.cdDtlNm.equals(s) ))
-            {
+            if ((i == 0 && codedtl.cdDtlNo.equals(s)) || (i == 1 && codedtl.cdDtlNm.equals(s))) {
                 stringbuffer.append(" selected");
             }
             stringbuffer.append(">").append(codedtl.cdDtlNm).append("</option>\n");
@@ -337,57 +334,53 @@ public class CoCode {
         StringBuffer stringbuffer = new StringBuffer();
         
         int j = 0;
-        if(CoConstDef.CD_PROJECT_STATUS.equals(cd)) {
-	        for(int k = codeDtls.size(); j < k; j++)
+        if (CoConstDef.CD_PROJECT_STATUS.equals(cd)) {
+	        for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
-	            
-	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-	            {
-	            	continue;
-	            }
+
+              if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+                continue;
+              }
 	            
 	            stringbuffer.append("    <input name='statuses' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((status.indexOf(codedtl.cdDtlNo)>-1)?"checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	        }
-        } else if(CoConstDef.CD_LICENSE_RESTRICTION.equals(cd)) {
+        } else if (CoConstDef.CD_LICENSE_RESTRICTION.equals(cd)) {
         	int newLineIdx = 0; 
-        	if("list".equals(callType)){
+        	if ("list".equals(callType)){
         		newLineIdx = 3;
-        	}else if("edit".equals(callType)){
+        	}else if ("edit".equals(callType)){
         		newLineIdx = 4;
         	}
         	
         	List<String> restrictionList = Arrays.asList(status.split(","));
         	
-        	for(int k = codeDtls.size(); j < k; j++)
+        	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
-	            
-	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-	            {
-	            	continue;
-	            }
+
+              if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+                continue;
+              }
 	            
 	            stringbuffer.append("    <input name='restrictions' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((restrictionList.contains(codedtl.cdDtlNo))?"checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;"+(j==newLineIdx?"<br>"+("list".equals(callType)?"<label></label>":""):""));
 	        }
-        } else if(CoConstDef.CD_NOTICE_INFO.equals(cd)) {
-        	for(int k = codeDtls.size(); j < k; j++)
+        } else if (CoConstDef.CD_NOTICE_INFO.equals(cd)) {
+        	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
-	            
-	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-	            {
-	            	continue;
-	            }
+
+              if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+                continue;
+              }
 	            
 	            stringbuffer.append("<input name='noticeType' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append(CoConstDef.FLAG_YES.equals(codedtl.cdDtlExp)?"checked='checked'":"");
-	            
-	            if(CoConstDef.CD_NOTICE_HTML_STR.equals(codedtl.cdDtlNm.toUpperCase())) 
-	            {
-	            	stringbuffer.append(" disabled ");
-	            }
+
+              if (CoConstDef.CD_NOTICE_HTML_STR.equals(codedtl.cdDtlNm.toUpperCase())) {
+                stringbuffer.append(" disabled ");
+              }
 	            
 	            stringbuffer.append("  />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	        }
@@ -406,18 +399,18 @@ public class CoCode {
         int j = 0;
         NAExceptionFlag = StringUtils.isEmpty(NAExceptionFlag) ? true : NAExceptionFlag; // default 시 true로 setting
         
-        if(!StringUtils.isEmpty(name)) {
+        if (!StringUtils.isEmpty(name)) {
         	List<String> values = Arrays.asList(val.split(","));
-	        for(int k = codeDtls.size(); j < k; j++){
+	        for (int k = codeDtls.size(); j < k; j++){
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
 	           
-	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-	            {
+	            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
 	            	continue;
 	            }
-	            
-	            if(!NAExceptionFlag && codedtl.cdDtlNo.equals("NA")) // default로 NA도 생성 false값 입력시 예외처리
-	            	continue;
+
+              if (!NAExceptionFlag && codedtl.cdDtlNo.equals("NA")) { // default로 NA도 생성 false값 입력시 예외처리
+                continue;
+              }
 	            
 	            stringbuffer.append("    <input name='").append(name).append("' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((values.contains(codedtl.cdDtlNo)) ? "checked='checked'":""); 
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -438,20 +431,20 @@ public class CoCode {
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
         
-        if(StringUtils.isEmpty(distributionType)) {
+        if (StringUtils.isEmpty(distributionType)) {
         	distributionType = CoConstDef.CD_GENERAL_MODEL;
         }
         
-        if(StringUtils.isEmpty(networkServerType)) {
-        	networkServerType = CoConstDef.FLAG_NO;
+        if (StringUtils.isEmpty(networkServerType)) {
+          networkServerType = CoConstDef.FLAG_NO;
         }
         
-        for(int k = codeDtls.size(); j < k; j++) {
+        for (int k = codeDtls.size(); j < k; j++) {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             
-            if (CoConstDef.FLAG_NO.equals(codedtl.useYn) 
-            		|| codedtl.cdDtlNo.equals(CoConstDef.CD_NETWORK_SERVER)) {
-            	continue;
+            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)
+                || codedtl.cdDtlNo.equals(CoConstDef.CD_NETWORK_SERVER)) {
+              continue;
             }
             
             stringbuffer.append("<span class='radioSet'>")
@@ -481,21 +474,20 @@ public class CoCode {
 	public String createOptionCheckboxString(String s, String s1, int i) {
 		StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
-        for(int k = codeDtls.size(); j < k; j++)
+        for (int k = codeDtls.size(); j < k; j++)
         {
             CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
             
-            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) 
-            {
-            	continue;
+            if (CoConstDef.FLAG_NO.equals(codedtl.useYn)) {
+              continue;
             }
             
-            if(s1.equals("oss")) {
-            	stringbuffer.append("<li><input type='checkbox' name='mostUsedOssChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
+            if (s1.equals("oss")) {
+              stringbuffer.append("<li><input type='checkbox' name='mostUsedOssChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
                 .append(" id='checkboxOss_").append(codedtl.cdDtlNo).append("' />")
                 .append("<label for='checkboxOss_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
             } else {
-            	stringbuffer.append("<li><input type='checkbox' name='mostUsedLicenseChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
+              stringbuffer.append("<li><input type='checkbox' name='mostUsedLicenseChartDivision' value='").append(codedtl.cdDtlNo).append("' ")
                 .append(" id='checkboxLicense_").append(codedtl.cdDtlNo).append("' />")
                 .append("<label for='checkboxLicense_").append(codedtl.cdDtlNo).append("'>").append(codedtl.cdDtlNm).append("</label></li>");
             }

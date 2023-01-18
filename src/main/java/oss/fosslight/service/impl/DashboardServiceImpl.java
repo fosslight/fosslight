@@ -52,9 +52,9 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         List<Project> list = dashboardMapper.selectDashboardJobsList(paramMap);
         // TODO bin 변경  > ???
         
-        if(list != null) {
+        if (list != null) {
 			// 코드변환처리
-			for(Project bean : list) {
+			for (Project bean : list) {
 				bean.setStatus( CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, bean.getStatus()));
 				
 				// Project priority 
@@ -74,14 +74,14 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         boolean projectFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
         boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
         
-        if(projectFlag) {
+        if (projectFlag) {
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS);
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
         }
         
-        if(partnerFlag) {
+        if (partnerFlag) {
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
         }
         
@@ -108,8 +108,8 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
 
         List<OssMaster> ossList = dashboardMapper.selectDashboardOssList(ossMaster);
         
-		for(OssMaster item : ossList) {
-			if(CoCodeManager.OSS_INFO_BY_ID.containsKey(item.getOssId())) {
+		for (OssMaster item : ossList) {
+			if (CoCodeManager.OSS_INFO_BY_ID.containsKey(item.getOssId())) {
 				item.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(item.getOssId()).getOssLicenses()));
 			}
 		}

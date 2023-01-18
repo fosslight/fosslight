@@ -58,7 +58,7 @@ public class T2File extends ComBean implements Serializable {
 	}
 
 	public void setBeforeOrigNm(String beforeOrigNm) {
-		if(beforeOrigNm != null) {
+		if (beforeOrigNm != null) {
 			beforeOrigNm = beforeOrigNm.replaceAll("\t", "").trim();
 		}
 		this.beforeOrigNm = beforeOrigNm;
@@ -69,7 +69,7 @@ public class T2File extends ComBean implements Serializable {
 	}
 	
 	public void setOrigNm(String origNm) {
-		if(origNm != null) {
+		if (origNm != null) {
 			origNm = origNm.replaceAll("\t", "").trim();
 		}
 		this.origNm = origNm;
@@ -78,7 +78,7 @@ public class T2File extends ComBean implements Serializable {
 		return logiNm;
 	}
 	public void setLogiNm(String logiNm) {
-		if(logiNm != null) {
+		if (logiNm != null) {
 			logiNm = logiNm.replaceAll("\t", "").trim();
 		}
 		this.logiNm = logiNm;

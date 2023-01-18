@@ -326,24 +326,24 @@ public class T2Users extends ComBean implements Serializable{
 	}
 
 	public String getDefaultTabAnchor() {
-		if(isEmpty(defaultTabAnchor) && !isEmpty(defaultTab)) {
+		if (isEmpty(defaultTabAnchor) && !isEmpty(defaultTab)) {
 			String _temp = "";
-			for(String s : defaultTab.split(",")) {
+			for (String s : defaultTab.split(",")) {
 				String _anchor = CoCodeManager.getCodeExpString(CoConstDef.CD_DEFAULT_TAB, s);
-				if(!isEmpty(_anchor)) {
-					if(!isEmpty(_temp)) {
+				if (!isEmpty(_anchor)) {
+					if (!isEmpty(_temp)) {
 						_temp += ",";
 					}
 					_temp += _anchor;
 				}
 			}
 			
-			if(!isEmpty(_temp)) {
+			if (!isEmpty(_temp)) {
 				return _temp;
 			}
 		}
 		
-		for(String[] dtlCd : CoCodeManager.getValues(CoConstDef.CD_DEFAULT_TAB)) {
+		for (String[] dtlCd : CoCodeManager.getValues(CoConstDef.CD_DEFAULT_TAB)) {
 			defaultTab = dtlCd[0]; // detail No
 			defaultTabAnchor = dtlCd[3]; // detail Description
 			
