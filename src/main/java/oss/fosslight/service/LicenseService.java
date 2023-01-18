@@ -46,4 +46,8 @@ public interface LicenseService extends HistoryConfig{
 	String webPageStringFormat(String[] webpages);
 
 	LicenseMaster getLicenseId(LicenseMaster licenseMaster);
+
+	Map<String, Object> getLicenseDataMap(String gridId, boolean status, String msg);
+
+    Map<String, Object> saveLicense(LicenseMaster licenseMaster);
 }
