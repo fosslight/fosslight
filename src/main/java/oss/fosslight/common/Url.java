@@ -82,8 +82,10 @@ public final class Url {
 
 		/**Add LicenseBulkReg path*/
 		public static final String LICENSE_BULK_REG = PATH + "/licenseBulkReg";
+		public static final String BULK_REG_AJAX = PATH+"/bulkRegAjax";
 		public static final String LICENSE_BULK_REG_JSP = TILES_ROOT + PATH + "/licenseBulkReg";
 		public static final String CSV_FILE = PATH + "/csvFile";
+		public static final String BULK_VALIDATION = PATH + "/bulkValidation";
 	}
 	
 	public static final class EXCELDOWNLOAD {

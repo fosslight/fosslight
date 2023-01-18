@@ -20,6 +20,8 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	
 	private LicenseService 	licenseService 	= (LicenseService) getWebappContext().getBean(LicenseService.class);
 	private String licenseId = null;
+	private String VALID_TYPE = null;
+	public final String VALID_LICNESELIST_BULK = "LICENSELIST_BULK";
 
 	private String PROC_TYPE = null;
 	public final String PROC_TYPE_DELETE				 		= "DEL";
@@ -155,6 +157,8 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	protected String treatment(String paramvalue) {
 		return paramvalue;
 	}
-	
 
+	public void setVALIDATION_TYPE(String vALID_TYPE) {
+		VALID_TYPE = vALID_TYPE;
+	}
 }
