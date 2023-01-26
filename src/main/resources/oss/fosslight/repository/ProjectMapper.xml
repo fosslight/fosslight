@@ -1408,7 +1408,7 @@
 			SRC_ANDROID_CSV_FILE_ID = null,
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidNoticeFileFlag)">
-			SRC_ANDROID_NOTICE_FILE_ID = null
+			SRC_ANDROID_NOTICE_FILE_ID = null,
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidNoticeXmlFileFlag)">
 				SRC_ANDROID_NOTICE_XML_ID = null
