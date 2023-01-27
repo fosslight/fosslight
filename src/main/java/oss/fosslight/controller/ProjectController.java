@@ -3753,10 +3753,12 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) throws Exception {
 		String fileType = req.getParameter("fileType");
 		ArrayList<Object> resultList = new ArrayList<Object>();
-		// 파일등록
+		// 파일등록거
 		List<UploadFile> list = new ArrayList<UploadFile>();
 		String fileId = req.getParameter("registFileId");
 		String prjId = req.getParameter("prjId");
+		Project prj = new Project();
+		prj.setPrjId(prjId);
 		
 		// 파일 이름
 		int count = 0;
@@ -3805,7 +3807,9 @@ public class ProjectController extends CoTopComponent {
 					file.setCreator(loginUserName());
 					list = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
 				}
-				
+				prj.setSrcAndroidNoticeFileId(list.get(0).getRegistFileId());
+				prj.setSrcAndroidNoticeXmlId(list.get(1).getRegistFileId());
+
 				resultList.add(list);
 				resultList.add(fileType);
 			}
@@ -3826,13 +3830,21 @@ public class ProjectController extends CoTopComponent {
 				if (resultList.size() > 0) {
 					return toJson(resultList);
 				}
+				if ("csv".equals(fileType)) {
+					prj.setSrcAndroidCsvFileId(list.get(0).getRegistFileId());
+				} else if ("notice".equals(fileType)) {
+					prj.setSrcAndroidNoticeFileId(list.get(0).getRegistFileId());
+				} else {
+					prj.setSrcAndroidResultFileId(list.get(0).getRegistFileId());
+				}
 			}
 			
 			resultList.add(list);
 			resultList.add(fileType);
 
 		}
-		
+		projectService.updateFileId(prj);
+
 		// 결과값 resultList에 담기
 		return toJson(resultList);
 	}
