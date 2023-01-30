@@ -19,16 +19,33 @@
 											<dd><label>${code[1]}</label><span class="checkSet"><input type="checkbox" id="ldap${code[0]}" <c:if test="${code[3] eq 'Y'}">checked</c:if> /></span></dd>
 										</c:when>
 										<c:when test="${fn:contains(code[1], 'Protocol')}">
-											<dd><label>${code[1]}</label><select style="padding: 0px" id="ldap${code[0]}"><option value="ldap">LDAP</option><option value="ldaps">LDAPS</option></select></dd>
+											<dd><label class="tooltipData">${code[1]}<span style="color: #FF0000"> * </span></label><select style="padding: 0px" id="ldap${code[0]}"><option value="ldap">LDAP</option><option value="ldaps">LDAPS</option></select></dd>
 										</c:when>
 										<c:when test="${fn:contains(code[1], 'Search Scope')}">
-											<dd><label>${code[1]}</label><select style="padding: 0px" id="ldap${code[0]}"><option value="2">Subtree</option><option value="0">Object</option><option value="1">One level</option></select></dd>
+											<dd><label>${code[1]}<span id="search_scope_inf">&nbsp</span></label><select style="padding: 0px" id="ldap${code[0]}"><option value="2">Subtree</option><option value="0">Object</option><option value="1">One level</option></select></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'LDAP Search DN')}">
+											<dd>
+												<label>${code[1]}<span id="search_dn_inf">&nbsp</span><span style="color: #FF0000"> * </span></label><input type="text" id="ldap${code[0]}" value="${code[3]}" placeholder="ex) cn=admin,dc=fosslight,dc=org"/>
+											</dd>
 										</c:when>
 										<c:when test="${fn:contains(code[1], 'PW')}">
-											<dd><label>${code[1]}</label><input type="password" id="ldap${code[0]}" value="${code[3]}"/></dd>
+											<dd><label>${code[1]}<span style="color: #FF0000"> * </span></label><input type="password" id="ldap${code[0]}" value="${code[3]}"/></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'Port')}">
+											<dd><label>${code[1]}</label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'LDAP Base DN')}">
+											<dd><label>${code[1]}<span id="base_dn_inf">&nbsp</span><span style="color: #FF0000"> * </span></label><input type="text" id="ldap${code[0]}" value="${code[3]}" placeholder="ex) dc=fosslight,dc=org"/></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'Filter')}">
+											<dd><label>${code[1]}</label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
+										</c:when>
+										<c:when test="${fn:contains(code[1], 'LDAP UID')}">
+											<dd><label>${code[1]}<span id="ldap_uid_inf">&nbsp</span><span style="color: #FF0000"> * </span></label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
 										</c:when>
 										<c:otherwise>
-											<dd><label>${code[1]}</label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
+											<dd><label>${code[1]}<span style="color: #FF0000"> * </span></label><input type="text" id="ldap${code[0]}" value="${code[3]}"/></dd>
 										</c:otherwise>
 									</c:choose>
 								</c:forEach>

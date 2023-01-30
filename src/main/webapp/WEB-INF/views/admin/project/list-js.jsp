@@ -1172,7 +1172,7 @@
 									return $(this).prop('title');
 								}
 							});
-						
+
 							gridTooltip.existTooltip = true;
 						}
 					

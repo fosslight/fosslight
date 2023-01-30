@@ -16,14 +16,65 @@
 	$(document).ready(function () {
 		'use strict';
 		config_fn.init();
-	});	
-	
+	});
+
+    var data = {
+        typeCodes : [],
+        tooltipCont :
+            "<div class=\"tooltipData350\"><dl><dt><span>LDAP Search DN</span></dt><dd>When a user logs in to Harbor with their LDAP username and password, Harbor uses these values to bind to the LDAP server.</dd></dl></div>",
+        tooltipCont2 :
+            "<div class=\"tooltipData350\"><dl><dt><span>LDAP Base DN</span></dt><dd>Harbor looks up the user under the LDAP Base DN entry, including the subtree.</dd></dl></div>",
+        tooltipCont3 :
+            "<div class=\"tooltipData350\"><dl><dt><span>LDAP UID</span></dt><dd>An attribute, for example uid, or cn, that is used to match a user with the username. If a match is found, the user’s password is verified by a bind request to the LDAP server.</dd></dl></div>",
+        tooltipCont4 :
+            "<div class=\"tooltipData350\"><dl><dt><span>Search Scope</span></dt><dd>The scope to search for LDAP users. Select from Subtree, Base, and OneLevel.</dd></dl></div>",
+        existTooltip : false,
+        init : function(){
+            list.load();	// Grid Load
+        }
+
+    };
 	// 함수
 	var config_fn = {
 		init : function(){
 			//var addBtn = '<input id="urlAdd" type="button" value="Add" class="btnCLight gray">';
 			//var delBtn = '<input id="urlDel" type="button" value="Delete" class="btnCLight gray">';
 			//$("#config925 > .detailArea > dl").after(addBtn +'&nbsp;' + delBtn);
+            $('<span class="iconSet help">Help</span>').appendTo($("#search_dn_inf"))
+                .attr("title", data.tooltipCont).tooltip({
+                content: function () {
+                    return $(this).prop('title');
+                }
+            });
+
+            $('<span class="iconSet help">Help</span>').appendTo($("#base_dn_inf"))
+                .attr("title", data.tooltipCont2).tooltip({
+                content: function () {
+                    return $(this).prop('title');
+                }
+            });
+
+            $('<span class="iconSet help">Help</span>').appendTo($("#ldap_uid_inf"))
+                .attr("title", data.tooltipCont3).tooltip({
+                content: function () {
+                    return $(this).prop('title');
+                }
+            });
+
+            $('<span class="iconSet help">Help</span>').appendTo($("#search_scope_inf"))
+                .attr("title", data.tooltipCont4).tooltip({
+                content: function () {
+                    return $(this).prop('title');
+                }
+            });
+
+            // $('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_ossType"))
+            //     .attr("title", data.tooltipCont2).tooltip({
+            //     content: function () {
+            //         return $(this).prop('title');
+            //     }
+            // });
+
 			$("#projectConfig > .detailArea").show();
 			config_evt.init();
 			config_fn.viewConfigSetting();
