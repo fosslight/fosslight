@@ -1820,6 +1820,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateAndroidNoticeFileInfoWithLoadFromProject(project);
 		}
 	}
+
+	public void updateFileId(Project project) {
+		projectMapper.updateFileId(project);
+	}
 	
 	private void deleteUploadFile(Project project, String refDiv) {
 		Project prjFileCheck = projectMapper.getProjectBasicInfo(project);

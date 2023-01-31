@@ -340,6 +340,7 @@ public class Project extends ComBean implements Serializable {
 	private String srcAndroidNoticeFileFlag = "N";
 
 	private String srcAndroidNoticeXmlFileFlag = "N";
+	private String srcAndroidResultFileFlag = "N";
 	
 	private String identificationStatusConfFlag = "N";
 	
@@ -4186,6 +4187,14 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSrcAndroidNoticeXmlFileFlag(String srcAndroidNoticeXmlFileFlag) {
 		this.srcAndroidNoticeXmlFileFlag = srcAndroidNoticeXmlFileFlag;
+	}
+
+	public String getSrcAndroidResultFileFlag() {
+		return srcAndroidResultFileFlag;
+	}
+
+	public void setSrcAndroidResultFileFlag(String srcAndroidResultFileFlag) {
+		this.srcAndroidResultFileFlag = srcAndroidResultFileFlag;
 	}
 
 	public String getIdentificationStatusConfFlag() {

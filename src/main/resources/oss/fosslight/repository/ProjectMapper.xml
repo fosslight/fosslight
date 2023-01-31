@@ -1411,7 +1411,10 @@
 			SRC_ANDROID_NOTICE_FILE_ID = null,
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidNoticeXmlFileFlag)">
-				SRC_ANDROID_NOTICE_XML_ID = null
+				SRC_ANDROID_NOTICE_XML_ID = null,
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', srcAndroidResultFileFlag)">
+				SRC_ANDROID_RESULT_FILE_ID = null
 			</if>
 		</set>
 		WHERE 
