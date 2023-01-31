@@ -239,6 +239,8 @@ public interface ProjectMapper {
 
 	void updateComponentsOssInfo(Project project);
 
+	void updateComponentsCopyrightInfo(ProjectIdentification projectIdentification);
+
 	void updateWithoutVerifyYn(OssNotice ossNotice);
 	
 	List<Project> selectWatchersCheck(Project project);
