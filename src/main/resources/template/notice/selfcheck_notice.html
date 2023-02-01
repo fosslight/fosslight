@@ -50,7 +50,7 @@
 					#foreach( $!{closeSource} in $!{disclosureObligationList} ) 
 					<tr>
 						<td>
-							#if($!{closeSource.homepage} != "")<a href="$!{closeSource.homepage}" target='_blank'>$!{closeSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end</a>#end
+							#if($!{closeSource.homepage} != "")<a href="$!{closeSource.homepage}" target='_blank' rel='noreferrer noopener'>$!{closeSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end</a>#end
 							#if($!{closeSource.homepage} == "")$!{closeSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end #end
 						</td>
 						<td>
@@ -64,8 +64,8 @@
 				</table>
 			</div>
 				<p>
-					#if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from $!{companyNameFull} at <a href= "$!{distributionSiteUrl}" target='_blank'>$!{distributionSiteUrl}.</a> #end
-					#if($!{editCompanyYn} == "N" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from <a href= "$!{distributionSiteUrl}" target='_blank'>$!{distributionSiteUrl}.</a> #end
+					#if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from $!{companyNameFull} at <a href= "$!{distributionSiteUrl}" target='_blank' rel='noreferrer noopener'>$!{distributionSiteUrl}.</a> #end
+					#if($!{editCompanyYn} == "N" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from <a href= "$!{distributionSiteUrl}" target='_blank' rel='noreferrer noopener'>$!{distributionSiteUrl}.</a> #end
 					#if($!{editDistributionSiteUrlYn} == "N") #end
 					#if($!{editDistributionSiteUrlYn} == "Y" && $!{editEmailYn} == "Y") 
 						#if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") We #end will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product. 
@@ -92,7 +92,7 @@
 					#foreach( $!{openSource} in $!{noticeObligationList} ) 
 					<tr>
 						<td >
-							#if($!{openSource.homepage} != "")<a href="$!{openSource.homepage}" target='_blank'>$!{openSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end</a>#end
+							#if($!{openSource.homepage} != "")<a href="$!{openSource.homepage}" target='_blank' rel='noreferrer noopener'>$!{openSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end</a>#end
 							#if($!{openSource.homepage} == "")$!{openSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end #end
 						</td>
 						<td>
@@ -151,7 +151,7 @@
 			<ul class="bdTop2 license">
 				#foreach( $!{license} in $!{licenseListUrls} )
 					#if($!{license.licenseName} != "") 
-						<li id="$!{license.licenseName}">$!{license.licenseName} : <a href="$!{license.webpage}" target='_blank' >$!{license.webpage}</a></li>
+						<li id="$!{license.licenseName}">$!{license.licenseName} : <a href="$!{license.webpage}" target='_blank' rel='noreferrer noopener' >$!{license.webpage}</a></li>
 					#end
 				#end
 			</ul>
