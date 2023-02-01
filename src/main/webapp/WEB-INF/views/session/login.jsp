@@ -30,8 +30,9 @@
 			var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 			
 			$(document).ready(function() {
-				$("#okRegister, #btnCancel, #btn_login, #btnRegist").css("cursor", "pointer");
+				$("#okRegister, #btnRegistCancel, #btn_login, #btnRegist, #btnResetPwd, #okResetPwd, #btnResetPwdCancel").css("cursor", "pointer");
 				$(".registArea").css("display", "none");
+				$(".resetPwdArea").css("display", "none");
 				var ldapFlag = "${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG'))}";
 				if(ldapFlag === 'Y') {
 					$('#btnRegist').hide();
@@ -41,10 +42,20 @@
 					$('.registArea').show();
 				});// registArea show
 				
-				$('#btnCancel').click(function(){
+				$('#btnRegistCancel').click(function(){
 					$('.registArea').hide();
 					$(".loginArea").show();
 				}); // registArea hide
+
+				$('#btnResetPwd').click(function() {
+					$(".loginArea").hide();
+					$('.resetPwdArea').show();
+				}); // resetPwdArea show
+
+				$('#btnResetPwdCancel').click(function() {
+					$('.resetPwdArea').hide();
+					$(".loginArea").show();
+				}); // resetPwdArea hide
 				
 				$("#btn_login").click(function() {
 					excSubmit();
@@ -58,6 +69,10 @@
 						$("#email").val($("#emailTemp").val());
 					}
 					registSubmit();
+				});
+
+				$('#okResetPwd').click(function(){
+					console.log('초기화 버튼 눌림');
 				});
 				
 				// error message hide 처리
@@ -301,11 +316,12 @@
 									<span class="checkSet"><input type="checkbox" id="saveID" /><label for="saveID">SAVE ID</label></span>
 									<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
 								</span>
+								<span class="options">
+									<strong><a id="btnResetPwd">Reset Password</a></strong>
+								</span>
 							</form>
 						</div>
 					</fieldset>
-					<!------------>
-					<p><spring:message code="msg.login.description.forgot.pw" /></p>
 				</div>
 			</div>
 		</div>
@@ -361,7 +377,48 @@
 								</dl>
 								<span class="joinBtn">
 									<input type="button" value="SIGN UP" class="btnlogin" id="okRegister" />
-									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnCancel" />
+									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnRegistCancel" />
+								</span>
+							</form>
+						</div>
+					</fieldset>
+					<!------------>
+				</div>
+			</div>
+		</div>
+		<!-- //Login -->
+		<!-- Login -->
+		<div id="login" class="resetPwdArea">
+			<div class="back">
+				<div class="box joinCase">
+					<fieldset>
+						<div>
+							<h1><img src="../images/img_login_logo2.png" alt="FOSSLIGHT" /><br/>RESET PASSWORD</h1>
+							<form id="resetPwd">
+								<dl>
+									<dt><label>ID</label></dt>
+									<dd class="required">
+										<input type="text" name="userId" placeholder="foss.kim"/>
+									</dd>
+									<dt><label>e-mail</label></dt>
+									<dd class="required">
+										<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
+										<c:if test="${not empty useDomainFlag}">
+											<span class="selectSet">
+												<strong for="emailCombo">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</strong>
+												<select name="registDomain" id="emailCombo" onchange="emailChange()">
+													<option></option>
+													${ct:genOption(ct:getConstDef("CD_REGIST_DOMAIN"))}
+												</select>
+											</span>
+										</c:if>
+										<input type="text" id="emailTemp" <c:if test="${not empty useDomainFlag}">style="display:none;"</c:if> value="<c:if test="${not empty useDomainFlag}">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</c:if>"/>
+										<input type="hidden" id="email" name="email" value=""/>
+									</dd>
+								</dl>
+								<span class="joinBtn">
+									<input type="button" value="Reset Password" class="btnlogin" id="okResetPwd" />
+									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnResetPwdCancel" />
 								</span>
 							</form>
 						</div>
