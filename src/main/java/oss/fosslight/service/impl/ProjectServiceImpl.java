@@ -541,28 +541,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				_list = _tmp;
 			}
-
-			Project param = new Project();
-			param.setPrjId(identification.getReferenceId());
-
-			if (avoidNull(getProjectDetail(param).getIdentificationStatus()).equals("CONF")){
-				List<ProjectIdentification> confList = new ArrayList<>();
-				for (ProjectIdentification bean : _list) {
-					String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
-					if (!isEmpty(ossCopyright)){
-						String addCopyright = avoidNull(bean.getCopyrightText());
-						if (!isEmpty(bean.getCopyrightText())) {
-							addCopyright += "\n";
-						}
-						addCopyright += ossCopyright;
-						bean.setCopyrightText(addCopyright);
-					}
-					confList.add(bean);
-				}
-				map.put("rows", confList);
-			} else{
-				map.put("rows", _list);
-			}
+			map.put("rows", _list);
 
 			if (adminCheckList.size() > 0) {
 				map.put("adminCheckList", adminCheckList);
@@ -2982,6 +2961,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	public void updateProjectIdentificationConfirm(Project project) {
+		Map<String, Object> map = null;
+		ProjectIdentification param = new ProjectIdentification();
+		param.setReferenceId(project.getPrjId());
+		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		param.setMerge(CoConstDef.FLAG_NO);
+		map = getIdentificationGridList(param);
+		if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+			for (ProjectIdentification bean : (List<ProjectIdentification>) map.get("rows")) {
+				String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
+				if (!isEmpty(ossCopyright)) {
+					String addCopyright = avoidNull(bean.getCopyrightText());
+					if (!isEmpty(bean.getCopyrightText())) {
+						addCopyright += "\n";
+					}
+					addCopyright += ossCopyright;
+					bean.setCopyrightText(addCopyright);
+					projectMapper.updateComponentsCopyrightInfo(bean);
+				}
+			}
+		}
+
 		// oss id 등록
 		projectMapper.updateComponentsOssId(project);
 		// downlaod location, homepage등 master 정보로 치환
