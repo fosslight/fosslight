@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +70,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	/**
 	 * 코드 저장
 	 */
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	@Transactional
 	@Override
 	public void setCode(T2Code vo) throws Exception {
@@ -92,7 +91,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	}
 
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	@Transactional
 	public void setCodeDetails(List<T2CodeDtl> dtlList, String cdNo) throws Exception {
 		// if code_no equals CD_USER_DIVISION value, after code_detail_name and detain_no check, division_no update

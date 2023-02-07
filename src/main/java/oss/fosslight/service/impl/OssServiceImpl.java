@@ -23,13 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.google.gson.reflect.TypeToken;
 import org.apache.commons.beanutils.BeanUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -37,10 +35,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -888,7 +887,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registOssMaster(OssMaster ossMaster) {
 		try {
 			String[] ossNicknames = ossMaster.getOssNicknames();
@@ -1196,7 +1195,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@SuppressWarnings("unchecked")
 	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public int deleteOssMaster(OssMaster ossMaster) {
 		int result = 1;
 		log.debug("DELETE OSS");
@@ -2522,7 +2521,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public Map<String, Object> saveOss(OssMaster ossMaster) {
 		String resCd = "00";
 		String result = null;
