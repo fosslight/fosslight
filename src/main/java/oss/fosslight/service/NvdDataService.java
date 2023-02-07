@@ -797,7 +797,7 @@ public class NvdDataService {
 		
 		log.warn("5초후 재시도합니다.");
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(1000 * 60 * 5);
 		} catch (InterruptedException e) {
 			log.error(e.getMessage());
 		}
