@@ -795,9 +795,9 @@ public class NvdDataService {
 	private boolean nvdMetaRetryCheckJob(String FILE_NM, String FILE_TYPE, boolean fileCheck, int cnt) {
 		int maxCnt = 3;
 		
-		log.warn("5초후 재시도합니다.");
+		log.warn("Try again in 5 minutes...");
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(1000 * 60 * 5);
 		} catch (InterruptedException e) {
 			log.error(e.getMessage());
 		}

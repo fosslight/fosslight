@@ -2970,6 +2970,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
 			for (ProjectIdentification bean : (List<ProjectIdentification>) map.get("rows")) {
 				String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
+				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId());
+				if(oss != null) {
+					bean.setCopyrightText(avoidNull(oss.getCopyright()));
+				}
 				if (!isEmpty(ossCopyright)) {
 					String addCopyright = avoidNull(bean.getCopyrightText());
 					if (!isEmpty(bean.getCopyrightText())) {
@@ -2977,8 +2981,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					addCopyright += ossCopyright;
 					bean.setCopyrightText(addCopyright);
-					projectMapper.updateComponentsCopyrightInfo(bean);
 				}
+				projectMapper.updateComponentsCopyrightInfo(bean);
 			}
 		}
 

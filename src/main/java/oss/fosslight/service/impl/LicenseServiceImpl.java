@@ -11,9 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +31,11 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.LicenseMapper;
-import oss.fosslight.service.*;
+import oss.fosslight.service.CommentService;
+import oss.fosslight.service.HistoryService;
+import oss.fosslight.service.LicenseService;
+import oss.fosslight.service.OssService;
+import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
@@ -215,7 +217,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 	
 	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public int deleteLicenseMaster(LicenseMaster licenseMaster) {
 		licenseMapper.deleteLicenseNickname(licenseMaster);
 		
@@ -304,7 +306,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 	@Transactional
 	@Override
-	@CacheEvict(value="autocompleteCache", allEntries=true)
+//	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registLicenseMaster(LicenseMaster licenseMaster) {
 		String[] licenseNicknames = licenseMaster.getLicenseNicknames();
 		String licenseId = licenseMaster.getLicenseId();
