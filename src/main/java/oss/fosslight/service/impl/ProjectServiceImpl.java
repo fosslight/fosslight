@@ -3591,6 +3591,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 			}
+		} else {
+			for (ProjectIdentification bean : reportData) {
+				bean.setBinaryNotice("nok");
+			}
 		}
 		
 		resultMap.put("reportData", reportData);
