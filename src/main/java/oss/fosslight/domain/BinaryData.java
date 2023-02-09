@@ -77,4 +77,6 @@ public class BinaryData  extends ComBean implements Serializable {
 	private String actionId;
 	
 	private String actionType;
+	
+	private int tlshDistance = -1;
 }
