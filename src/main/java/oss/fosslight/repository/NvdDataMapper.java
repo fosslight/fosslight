@@ -46,6 +46,7 @@ public interface NvdDataMapper {
 	int selectMaxCvssScoreNvdDataScoreV3();
 	void insertMaxCvssScoreNvdDataScoreV3();
 	int ossNameNickNameCvssScoreDiffCnt();
+	int ossNameToNickMgrtCvssScoreDiffCnt();
 	void ossNameToNickNameMgrtCvssScore();
 	void nickNameToOssNameMgrtCvssScore();
 	void insertCpeMatchData(Map<String, Object> params);

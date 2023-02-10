@@ -312,12 +312,18 @@ public class NvdDataService {
 		
 		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
 		if (diffCvssScoreCnt > 0){
-			log.info("ossName <-> NickName cvssScore Diff Count : " + diffCvssScoreCnt);
-			// ossName과 NickName의 nvd data가 동일한 version일 경우에 cvss score만 다를때 더 높은 값으로 변경을 함. 변경시 CVE ID 도 같이 변경을 함.
+			log.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
 			nvdDataMapper.ossNameToNickNameMgrtCvssScore();
+		} else{
+			log.info("NickName -> ossName cvssScore Diff Count : 0");
+		}
+		
+		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
+		if (ossNameToNickDiffCvssScoreCnt > 0){
+			log.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
 			nvdDataMapper.nickNameToOssNameMgrtCvssScore();
-		}else{
-			log.info("ossName <-> NickName cvssScore Diff Count : 0");
+		} else{
+			log.info("ossName -> NickName cvssScore Diff Count : 0");
 		}
 		
 		return resCd;
