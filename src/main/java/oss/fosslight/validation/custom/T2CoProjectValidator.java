@@ -1031,6 +1031,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 							diffMap.put("HOMEPAGE." + bean.getComponentId(), "HOMEPAGE.DIFFERENT");
 						}
 					}
+
+					if(!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !isEmpty(bean.getLicenseName())) {
+						var licenseText = CommonFunction.makeRecommendedLicenseString(checkOSSMaster, bean);
+						if(!isEmpty(licenseText)) {
+							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Recommended : " + licenseText );
+						}
+					}
 				}
 			}
 		}
@@ -2299,6 +2306,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 					if (!diffMap.containsKey("HOMEPAGE." + bean.getGridId()) && !isEmpty(bean.getHomepage())) {
 						if (checkOssData(ossInfo.get(checkKey), bean.getHomepage(), "HOMEPAGE")) {
 							diffMap.put("HOMEPAGE." + bean.getGridId(), "HOMEPAGE.DIFFERENT");
+						}
+					}
+
+					if(!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
+						var licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
+						if(!isEmpty(licenseText)) {
+							diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
 						}
 					}
 				}
