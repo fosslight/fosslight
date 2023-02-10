@@ -419,6 +419,42 @@ public class CommonFunction extends CoTopComponent {
 			return makeLicenseString(licenseList, delimiter);
 		}
 	}
+public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectIdentification bean) {
+		List<ProjectIdentification> list = new ArrayList<>();
+		boolean dual = false;
+		for (OssLicense license : ossmaster.getOssLicenses()) {
+			ProjectIdentification prj = new ProjectIdentification();
+			prj.setOssLicenseComb(license.getOssLicenseComb());
+			prj.setLicenseType(license.getLicenseType());
+			prj.setLicenseName(license.getLicenseName());
+			list.add(prj);
+			if(!isEmpty(license.getOssLicenseComb()) && license.getOssLicenseComb().equals("OR")) {
+				dual = true;
+			}
+		}
+		if(dual) {
+			if(list.size() != 0) {
+				list = CommonFunction.makeLicenseExcludeYn(list);
+				String licenseText = CommonFunction.makeLicenseExpressionIdentify(list, ",");
+				if(!isEmpty(licenseText)) {
+					String[] recommended = licenseText.split(",");
+					String[] userinput = bean.getLicenseName().split(",");
+					int cnt = 0;
+					for(String s : recommended) {
+						for(String s2 : userinput) {
+							if(s.equals(s2)) {
+								cnt++;
+							}
+						}
+					}
+					if(cnt == 0) {
+						return licenseText;
+					}
+				}
+			}
+		}
+		return null;
+	}
 	public static String makeLicenseString(List<OssLicense> list, String delimiter) {
 		String result = "";
 		for (OssLicense bean : list) {

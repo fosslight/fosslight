@@ -3532,6 +3532,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<Vulnerability> list = null;
 		String[] nicknameList = null;
 		List<String> dashOssNameList = new ArrayList<>();
+		List<String> convertNameList = null;
+		boolean convertFlag = false;
 		
 		try {
 			if (ossMaster.getOssName().contains(" ")) {
@@ -3543,12 +3545,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			nicknameList = getOssNickNameListByOssName(ossMaster.getOssName());
-			ossMaster.setOssNicknames(nicknameList);
 			
 			for (String nick : nicknameList) {
 				if (nick.contains("-")) {
 					dashOssNameList.add(nick);
 				}
+				if (nick.contains(" ")) {
+					if (!convertFlag) {
+						convertNameList = new ArrayList<>();
+						convertFlag = true;
+					}
+					convertNameList.add(nick.replaceAll(" ", "_"));
+				}
+			}
+			
+			if (convertNameList != null) {
+				convertNameList.addAll(Arrays.asList(nicknameList));
+				ossMaster.setOssNicknames(convertNameList.toArray(new String[convertNameList.size()]));
+			} else {
+				ossMaster.setOssNicknames(nicknameList);
 			}
 			
 			if (dashOssNameList.size() > 0) {
@@ -3556,7 +3571,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			
 			list = ossMapper.getOssVulnerabilityList2(ossMaster);
-			ossMaster.setOssNameTemp(null);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
@@ -3565,6 +3579,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			list = checkVulnData(list, nicknameList);
 			list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
 		}
+		
+		ossMaster.setOssNameTemp(null);
+		if (convertFlag) ossMaster.setOssNicknames(nicknameList);
 		
 		return list;
 	}

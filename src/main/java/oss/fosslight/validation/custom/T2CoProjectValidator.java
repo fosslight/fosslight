@@ -6,6 +6,7 @@
 package oss.fosslight.validation.custom;
 
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,12 +21,17 @@ import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.BinaryAnalysisResult;
+import oss.fosslight.domain.BinaryData;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.service.AutoIdService;
+import oss.fosslight.service.BinaryDataService;
+import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SelfCheckService;
@@ -39,6 +45,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 	private ProjectService projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
 	private OssService ossService = (OssService) getWebappContext().getBean(OssService.class);
 	private T2UserService userService = (T2UserService) getWebappContext().getBean(T2UserService.class);
+	private FileService fileService = (FileService) getWebappContext().getBean(FileService.class);
+	private BinaryDataService binaryDataService = (BinaryDataService) getWebappContext().getBean(BinaryDataService.class);
 	private List<ProjectIdentification> ossComponetList = null;
 	private List<List<ProjectIdentification>> ossComponentLicenseList = null;
 	private Map<String, List<ProjectIdentification>> ossComponentLicenseListMap = null;
@@ -1021,6 +1029,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 							&& !isEmpty(bean.getHomepage())) {
 						if (checkOssData(checkOSSMaster, bean.getHomepage(), "HOMEPAGE")) {
 							diffMap.put("HOMEPAGE." + bean.getComponentId(), "HOMEPAGE.DIFFERENT");
+						}
+					}
+
+					if(!diffMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !errMap.containsKey("LICENSE_NAME." + bean.getComponentId()) && !isEmpty(bean.getLicenseName())) {
+						var licenseText = CommonFunction.makeRecommendedLicenseString(checkOSSMaster, bean);
+						if(!isEmpty(licenseText)) {
+							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Recommended : " + licenseText );
 						}
 					}
 				}
@@ -2293,6 +2308,13 @@ public class T2CoProjectValidator extends T2CoValidator {
 							diffMap.put("HOMEPAGE." + bean.getGridId(), "HOMEPAGE.DIFFERENT");
 						}
 					}
+
+					if(!diffMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !errMap.containsKey("LICENSE_NAME." + bean.getGridId()) && !isEmpty(bean.getLicenseName())) {
+						var licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
+						if(!isEmpty(licenseText)) {
+							diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
+						}
+					}
 				}
 				
 				// exception 처리
@@ -2330,9 +2352,199 @@ public class T2CoProjectValidator extends T2CoValidator {
 				}
 
 			} // end of loop
+			
+			Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
+			boolean isAndroid = false;
+			if ((PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_BIN.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) && !isEmpty(projectId)) {
+				Project projectInfo = projectService.getProjectBasicInfo(projectId);
+				checkBinaryInfoMap = binaryDataService.getBinaryListFromBinaryDB(isAndroid, projectInfo);
+			}
+			
+			if(checkBinaryInfoMap != null) {
+				String errMessageFormatSame = "Same {0}";
+				String errMessageFormatSimilar = "Similar {0}";
+				String errMessageFormatModified = "Modified ";
+				
+				for (ProjectIdentification bean : ossComponetList) {
+					if (CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+						continue;
+					}
+					
+					basicKey = "BINARY_NAME";
+					gridKey = StringUtil.convertToCamelCase(basicKey);
+					errKey = basicKey + "." + bean.getGridId();
+					
+					if (!diffMap.containsKey(errKey)) {
+						String binaryName = avoidNull(bean.getBinaryName());
+						
+						if (isEmpty(binaryName)) {
+							continue;
+						}
+
+						List<BinaryData> _batList = checkBinaryInfoMap.get(binaryName);
+						if (_batList != null && !_batList.isEmpty()) {
+							String msgParam = "";
+							String msgParamSame = ""; // 동일한 binary가 존재하는 경우
+							String msgParamLicense = "";
+
+							// oss name version이 동일한게 있으면 pass
+							boolean hasBatOssSameTlsh = false;
+
+							// 먼저 사용자 입력 정보와 동일한 binary 정보가 db에 존재하는 경우 message를
+							// 표시하지 않는다
+							boolean doCheck = true;
+							boolean tlshDistanceOver = true;
+							
+							for (BinaryData _temp : _batList) {
+								// 동일한 binary가 없는 경우 유사한 binary 체크
+								if (avoidNull(bean.getOssName(), "-").equalsIgnoreCase(_temp.getOssName())
+										&& avoidNull(bean.getOssVersion()).equalsIgnoreCase(_temp.getOssVersion())
+										&& compareLicenseWithLicenseNameSort(bean, _temp)) {
+									doCheck = false;
+								}
+								
+								if(_temp.getTlshDistance() > 120){
+									tlshDistanceOver = false;
+								}
+							}
+							
+							if (doCheck && tlshDistanceOver) {
+								BinaryData _temp = null;
+								for (BinaryData _temp2 : _batList) {
+									if (_temp2.getTlshDistance() == 0) {
+										hasBatOssSameTlsh = true;
+										_temp = _temp2;
+										break;
+									}
+								}
+								
+								if(_temp == null) {
+									_temp = _batList.get(0);
+								}
+								
+								boolean isSameLicense = compareLicenseWithLicenseNameSort(bean, _temp);
+								boolean isSameOssName = avoidNull(bean.getOssName(), "-").equalsIgnoreCase(_temp.getOssName());
+								boolean isSameOssVersion = avoidNull(bean.getOssVersion()).equalsIgnoreCase(_temp.getOssVersion());
+								//2) OSS NAME + VERSION 등일하나 LICENSE 만 다른 경우
+								if(isSameOssName
+										&& isSameOssVersion
+										&& !isSameLicense) {
+									// Same binary : / <License>
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + " /"+_temp.getLicense())); // message를
+								} 
+								// 3) OSS NAME LICENSE는 동일하나  VERSION 이 다른경우
+								else if(isSameOssName && isSameLicense && !isSameOssVersion) {
+									// Same binary : <OSS Name> <OSS Version>
+									infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion())+" /"));
+								}
+								// 4) OSS NAME 은 동일하나 VERSION 과 LICENSE 가 다른 경우 
+								else if(isSameOssName && !isSameOssVersion && !isSameLicense) {
+									// Same binary : <OSS Name> <OSS Version> / <License>
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								}
+								// 6) OSS NAME은 다르나, LICENSE 는 동일
+								else if(!isSameOssName && isSameLicense) {
+									// Same binary : <OSS Name> <OSS Version> /
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " /"));
+								} 
+								// 7) OSS NAME LICENSE 모두 다른 경우
+								else {
+									// Same binary : <OSS Name> <OSS Version> / <License>
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								}
+							} else {
+								// oss name + version + license 까지 동일하면 match info Matched message 표시
+								infoMap.put(errKey, basicKey + ".MATCHED");
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
+	private boolean compareLicenseWithLicenseNameSort(ProjectIdentification bean, BinaryData _temp) {
+
+		String selectedLicenses = "";
+		if (bean.getOssComponentsLicenseList() != null) {
+			for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
+				if (CoConstDef.FLAG_YES.equals(license.getExcludeYn()) || isEmpty(license.getLicenseName())) {
+					continue;
+				}
+
+				if (!isEmpty(selectedLicenses)) {
+					selectedLicenses += ",";
+				}
+				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().trim().toUpperCase())) {
+					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
+							.get(license.getLicenseName().trim().toUpperCase());
+					selectedLicenses += avoidNull(master.getShortIdentifier(), master.getLicenseNameTemp());
+				} else {
+					selectedLicenses += license.getLicenseName();
+				}
+
+			}
+		} else if (ossComponentLicenseListMap != null && ossComponentLicenseListMap.containsKey(bean.getGridId())) {
+			for (ProjectIdentification license : ossComponentLicenseListMap.get(bean.getGridId())) {
+				if (CoConstDef.FLAG_YES.equals(license.getExcludeYn())) {
+					continue;
+				}
+
+				if (!isEmpty(selectedLicenses)) {
+					selectedLicenses += ",";
+				}
+				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(license.getLicenseName().trim().toUpperCase())) {
+					LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER
+							.get(license.getLicenseName().trim().toUpperCase());
+					selectedLicenses += avoidNull(master.getShortIdentifier(), master.getLicenseNameTemp());
+				} else {
+					selectedLicenses += license.getLicenseName();
+				}
+			}
+		}
+
+		String regLicenses = "";
+		for (String s : avoidNull(_temp.getLicense()).split(",")) {
+			if (isEmpty(s)) {
+				continue;
+			}
+			if (!isEmpty(regLicenses)) {
+				regLicenses += ",";
+			}
+			s = s.trim();
+			if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(s.toUpperCase())) {
+				LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(s.toUpperCase());
+				regLicenses += avoidNull(master.getShortIdentifier(), master.getLicenseNameTemp());
+			} else {
+				regLicenses += s;
+			}
+		}
+
+		// 콤마구분 형태의 동일한 문자 객체를 sorting 하여 비교 한다.
+		List<String> compare1 = Arrays.asList(selectedLicenses.trim().toUpperCase().split(","));
+		List<String> compare2 = Arrays.asList(avoidNull(regLicenses).toUpperCase().split(","));
+		Collections.sort(compare1);
+		Collections.sort(compare2);
+
+		String diff1 = "";
+		String diff2 = "";
+		for (String s : compare1) {
+			if (!isEmpty(diff1)) {
+				diff1 += ",";
+			}
+			diff1 += s;
+		}
+		for (String s : compare2) {
+			if (!isEmpty(diff2)) {
+				diff2 += ",";
+			}
+			diff2 += s;
+		}
+
+		return diff1.equalsIgnoreCase(diff2);
+
+	}
+	
 	private String makeBinaryOssName(String ossName, String ossVersion) {
 		String rtn = avoidNull(ossName, "-");
 		

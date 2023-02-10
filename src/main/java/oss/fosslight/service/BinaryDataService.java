@@ -1311,4 +1311,215 @@ public class BinaryDataService  extends CoTopComponent {
 		}
 			
 	}
+
+	public Map<String, List<BinaryData>> getBinaryListFromBinaryDB(boolean isAndroid, Project projectInfo) {
+		Map<String, List<BinaryData>> listMap = new HashMap<>();
+		
+		if(projectInfo != null ) {
+			if(isAndroid) {
+				if(!isEmpty(projectInfo.getSrcAndroidResultFileId())) {
+
+					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getSrcAndroidResultFileId());
+					
+					if(binaryTextFile != null) {
+						Map<String, Object> readFileData = CommonFunction.getAndroidResultFileInfo(binaryTextFile, new ArrayList<String>());
+						
+						if(readFileData != null && readFileData.containsKey("addCheckList")) {
+							Map<String, String[]> checksumInfoMap = new HashMap<>();
+							List<OssComponents> _loadlist = (List<OssComponents>) readFileData.get("addCheckList");
+							
+							for(OssComponents bean : _loadlist) {
+								// binary name을 key로 sha256sum과 tlsh 를 격납한다.
+								if(isEmpty(bean.getBinaryName()) || isEmpty(bean.getCheckSum()) || isEmpty(bean.getTlsh())) {
+									continue;
+								}
+								
+								String binaryName = bean.getBinaryName();
+								
+								if(binaryName.endsWith("/") || binaryName.endsWith("\\")) {
+									continue;
+								}
+								
+								if(isEmpty(binaryName)) {
+									continue;
+								}
+
+								checksumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getSourceCodePath())});
+							}
+							
+							try {
+								for(String binaryname : checksumInfoMap.keySet()) {
+									String[] datas = checksumInfoMap.get(binaryname);
+									
+									List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
+								
+									if(listMap.containsKey(binaryname) && _list != null) {
+										List<BinaryData> resultList = listMap.get(binaryname);
+										if(resultList != null){
+											resultList.addAll(_list);
+											listMap.put(binaryname, resultList);
+										}
+										
+									} else {
+										listMap.put(binaryname, _list);
+									}
+								}
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}							
+						}
+					}
+					
+				}
+			} else {
+				if(!isEmpty(projectInfo.getBinBinaryFileId())) {
+					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getBinBinaryFileId());
+					
+					Map<String, String[]> loadDataMap = loadBinaryText(binaryTextFile, true);
+					
+					if(loadDataMap != null && !loadDataMap.isEmpty()) {
+						try {
+							for(String binaryname : loadDataMap.keySet()) {
+								String[] datas = loadDataMap.get(binaryname);
+								
+								List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
+								
+								if(listMap.containsKey(binaryname) && _list != null) {
+									List<BinaryData> resultList = listMap.get(binaryname);
+									if(resultList != null){
+										resultList.addAll(_list);
+										listMap.put(binaryname, resultList);
+									}
+								} else {
+									listMap.put(binaryname, _list);
+								}
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+					}
+				}
+			}
+		}
+		
+		return listMap;
+	}
+	
+	private static Map<String, String[]> loadBinaryText(T2File binaryTextFile, boolean pathFlag) {
+		Map<String, String[]> loadData = new HashMap<>();
+		
+		if(binaryTextFile != null && binaryTextFile.getExt().equals("txt")) {
+			log.info("loadBinaryText : " + binaryTextFile.getLogiNm());
+			
+			String _contents = avoidNull(CommonFunction.getStringFromFile(binaryTextFile.getLogiPath() + "/" + binaryTextFile.getLogiNm()));
+			
+			if(!isEmpty(_contents)) {
+				boolean isHeader = true;
+				int idx_checkSum = -1;
+				int idx_tlsh = -1;
+				int idx_binaryName = -1;
+				
+				for(String line : _contents.split(System.lineSeparator())) {
+					if(isHeader) {
+						String[] hdata = line.split("\t", -1);
+						
+						// header 정보가 없을 경우 처리 중단
+						if(hdata == null || isEmpty(line)) {
+							log.warn("Header row is empty :" + binaryTextFile.getLogiNm());
+							
+							break;
+						}
+						
+						int idx = 0;
+						
+						for(String s : hdata) {
+							if(idx_binaryName < 0 && (s.trim().equalsIgnoreCase("Binary Name") || s.trim().equalsIgnoreCase("Binary"))) {
+								idx_binaryName = idx;
+							} else if(idx_checkSum < 0 && (s.trim().equalsIgnoreCase("checksum") || s.trim().equalsIgnoreCase("sha1sum"))) {
+								idx_checkSum = idx;
+							} else if(idx_tlsh < 0 && (s.trim().equalsIgnoreCase("tlsh"))) {
+								idx_tlsh = idx;
+							}
+							
+							idx ++;
+						}
+						
+						isHeader = false;
+						
+						continue;
+					}
+					
+					String binaryName, checkSum, tlsh;
+					String[] data = line.split("\t", -1);
+					
+					if(idx_binaryName > -1 && idx_checkSum > -1 && idx_tlsh > -1) {
+						if(data == null) {
+							log.warn("unexpected format Bin binary text : " + line);
+							
+							continue;
+						} else if(data.length < idx_binaryName + 1) {
+							log.warn("unexpected format Bin binary text (idx_binaryName index): " + line); 
+							
+							continue;
+						} else if(data.length < idx_checkSum + 1) {
+							log.warn("unexpected format Bin binary text (idx_checkSum index): " + line); 
+							
+							continue;
+						} else if(data.length < idx_tlsh + 1) {
+							log.warn("unexpected format Bin binary text (idx_tlsh index): " + line); 
+							
+							continue;
+						}
+						
+						binaryName = data[idx_binaryName].trim();
+						checkSum = data[idx_checkSum].trim();
+						tlsh = data[idx_tlsh].trim();
+						
+						// tils가 추출되지 않은 경우 공백
+						if(isEmpty(binaryName) || isEmpty(checkSum)) {
+							log.warn("unexpected format Bin binary text : " + line);
+							
+							continue;
+						}
+					} else {
+						// binary name을 key로 sha256sum과 tlsh 를 격납한다.
+						if(data == null || data.length !=3 || isEmpty(data[0]) || isEmpty(data[1])) {
+							log.warn("unexpected format Bin binary text : " + line);
+							
+							continue;
+						}
+						
+						binaryName = data[0].trim();
+						
+						if(binaryName.endsWith("/") || binaryName.endsWith("\\")) {
+							log.warn("unexpected format Bin binary text (is not file) : " + line);
+							
+							continue;
+						}
+						
+						checkSum = data[1].trim();
+						tlsh = data[2].trim();
+					}
+
+					if(!pathFlag){
+						if(binaryName.indexOf("/") > -1) {
+							binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
+						}
+						
+						if(binaryName.indexOf("\\") > -1) {
+							binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
+						}
+					}
+					
+					if(isEmpty(binaryName)) {
+						continue;
+					}
+					
+					loadData.put(binaryName, new String[]{checkSum, avoidNull(tlsh, "0")});
+				}					
+			}
+		}
+		
+		return loadData;
+	}
 }
