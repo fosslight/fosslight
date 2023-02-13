@@ -188,6 +188,12 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String cvssScoreMax;
 	
+	private String cvssScoreMax1;
+
+	private String cvssScoreMax2;
+
+	private String cvssScoreMax3;
+	
 	/** The cve id. */
 	private String cveId;
 	
@@ -2012,4 +2018,28 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	public void setCheckedEvidence(String checkedEvidence) {
 		this.checkedEvidence = checkedEvidence;
     }
+
+	public String getCvssScoreMax1() {
+		return cvssScoreMax1;
+	}
+
+	public void setCvssScoreMax1(String cvssScoreMax1) {
+		this.cvssScoreMax1 = cvssScoreMax1;
+	}
+
+	public String getCvssScoreMax2() {
+		return cvssScoreMax2;
+	}
+
+	public void setCvssScoreMax2(String cvssScoreMax2) {
+		this.cvssScoreMax2 = cvssScoreMax2;
+	}
+
+	public String getCvssScoreMax3() {
+		return cvssScoreMax3;
+	}
+
+	public void setCvssScoreMax3(String cvssScoreMax3) {
+		this.cvssScoreMax3 = cvssScoreMax3;
+	}
 }
