@@ -215,7 +215,7 @@
 				}else{
 					alertify.confirm(confirmMsg, function (e) {
 						if (e) {
-							fn.saveSubmit(true);
+							fn.saveSubmit();
 						} else {
 							return false;
 						}
@@ -224,7 +224,7 @@
 			});
 
 			$("#popCopyConfirmSave").click(function(){
-				fn.saveSubmit(true);
+				fn.saveSubmit();
 				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
 				$("#copyConfirmPopup").hide();
 			});
@@ -530,7 +530,7 @@
 	var fn = {
 		editComment : function() {
 			initCKEditorToolbar("editor");
-			fn.saveSubmit(false);
+			fn.saveSubmit();
 		},
 		copy : function(){
 			var prjId = $('input[name=prjId]').val();
@@ -804,7 +804,7 @@
 				});
 			},
 			// 저장
-			saveSubmit : function(reload){
+			saveSubmit : function(){
 				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
@@ -876,12 +876,7 @@
 					dataType: "json",
 					cache : false,
 					success: function(data) {
-						if(reload) {
-							fn.onRegistSuccess(data);
-						}
-						else {
-							alertify.success('<spring:message code="msg.common.success" />');
-						}
+						fn.onRegistSuccess(data);
 					},
 					error : fn.onError
 				}).submit();
@@ -1002,9 +997,6 @@
 												activeTabInFrameList("PROJECT");
 											}
 										);
-									} else {
-										deleteTabInFrame('#<c:url value="/project/edit/'+prjId+'"/>');
-										activeTabInFrameList("PROJECT");
 									}
 								}
 							});	

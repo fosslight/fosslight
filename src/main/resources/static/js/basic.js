@@ -828,19 +828,19 @@ function createValidMsgComplex(msgData){
 				var targetId = seqSuffix[1] + "_" + seqSuffix[0];
 				
 				if(seqSuffix[0]=='licenseNicknames'){
-					$('input[name=licenseNicknames]:eq('+(Number(seqSuffix[1])-1)+')').parent().next("span.retxt").html(value).show();
+					$('input[name=licenseNicknames]:eq('+(Number(seqSuffix[1])-1)+')').focus().parent().next("span.retxt").html(value).show();
 				}
 				
 				if($('input[id='+targetId+']').length > 0) {
-					$('input[id='+targetId+']').after(makeErrMsg(value)).show();
+					$('input[id='+targetId+']').focus().after(makeErrMsg(value)).show();
 				} else if($('textarea[id='+targetId+']').length > 0) {
-					$('textarea[id='+targetId+']').after(makeErrMsg(value)).show();
+					$('textarea[id='+targetId+']').focus().after(makeErrMsg(value)).show();
 				} else if($('select[id='+targetId+']').length > 0) {
-					$('select[id='+targetId+']').after(makeErrMsg(value)).show();
+					$('select[id='+targetId+']').focus().after(makeErrMsg(value)).show();
 				}
 			} else {
 				if(key == 'licenseNicknames'){
-					$('input[name=licenseNicknames]').parent().next("span.retxt").html(value).show();
+					$('input[name=licenseNicknames]').focus().parent().next("span.retxt").html(value).show();
 				}
 
 				if(key == 'validMsgModelList') {
@@ -848,11 +848,11 @@ function createValidMsgComplex(msgData){
 				}
 				
 				if($('input[name='+key+']').length > 0) {
-					$('input[name='+key+']').next("span.retxt,div.retxt").html(value).show();
+					$('input[name='+key+']').focus().next("span.retxt,div.retxt").html(value).show();
 				} else if($('textarea[name='+key+']').length > 0) {
-					$('textarea[name='+key+']').next("span.retxt,div.retxt").html(value).show();
+					$('textarea[name='+key+']').focus().next("span.retxt,div.retxt").html(value).show();
 				} else if($('select[name='+key+']').length > 0) {
-					$('select[name='+key+']').parent().siblings("span.retxt,div.retxt").html(value).show();
+					$('select[name='+key+']').focus().parent().siblings("span.retxt,div.retxt").html(value).show();
 				}
 			}
 		}
