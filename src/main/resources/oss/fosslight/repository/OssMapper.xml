@@ -2164,7 +2164,9 @@
 					 , CVE.VULN_SUMMARY
 					 , CVE.MODI_DATE
 				  FROM (
-				  		SELECT PRODUCT
+				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
+				  		FROM
+				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
 				 			 , VERSION
 				 			 , CVE_ID
 				  		  FROM NVD_DATA_V3
@@ -2188,6 +2190,8 @@
 				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 				 		   AND VERSION = #{ossVersion}
 				 		</if>
+				 		) NVD
+				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
 				    ON DATA.CVE_ID = CVE.CVE_ID

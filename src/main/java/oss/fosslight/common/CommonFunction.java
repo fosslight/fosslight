@@ -432,6 +432,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				dual = true;
 			}
 		}
+		Map<String, LicenseMaster> licenseInfo = CoCodeManager.LICENSE_INFO_UPPER;
 		if(dual) {
 			if(list.size() != 0) {
 				list = CommonFunction.makeLicenseExcludeYn(list);
@@ -439,6 +440,19 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				if(!isEmpty(licenseText)) {
 					String[] recommended = licenseText.split(",");
 					String[] userinput = bean.getLicenseName().split(",");
+					List<String> recType = new ArrayList<>();
+					List<String> userType = new ArrayList<>();
+					for(String s : recommended) {
+						recType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+					}
+					for(String s : userinput) {
+						userType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+					}
+					if(recType.stream().distinct().collect(Collectors.toList()).size() == 1
+							&& userType.stream().distinct().collect(Collectors.toList()).size() == 1) {
+						return null;
+					}
+
 					int cnt = 0;
 					for(String s : recommended) {
 						for(String s2 : userinput) {
