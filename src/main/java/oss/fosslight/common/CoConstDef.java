@@ -531,6 +531,7 @@ public class CoConstDef {
 	/** Project Identification self reject */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT = "45";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY = "46";
+	public static final String CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF = "100";
 	/* Project Identification Binary DB Check*/
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT = "47";
 	/** Project Request Review(packaging) */

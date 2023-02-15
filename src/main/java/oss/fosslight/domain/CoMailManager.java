@@ -721,6 +721,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
        		case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_REQ_REVIEW:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF:
+				case CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_SELF_REJECT:
@@ -903,6 +904,7 @@ public class CoMailManager extends CoTopComponent {
     				// Creator, watcher
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(bean.getMsgType())
@@ -955,6 +957,7 @@ public class CoMailManager extends CoTopComponent {
     				}
     				// Reviewer
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(bean.getMsgType())
