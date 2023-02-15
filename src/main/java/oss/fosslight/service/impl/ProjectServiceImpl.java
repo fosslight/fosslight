@@ -641,6 +641,57 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						project.setCvssScore(cvssScoreMax[0]);
 						project.setCveId(cvssScoreMax[1]);
 					}
+					
+					// convert max score
+					if (!isEmpty(project.getCvssScore()) && !project.getCvssScore().equals("0.0")
+							&& (project.getCvssScoreMax() != null || project.getCvssScoreMax1() != null || project.getCvssScoreMax2() != null || project.getCvssScoreMax3() != null || project.getCvssScoreMax4() != null || project.getCvssScoreMax5() != null)) {
+						List<String> cvssScoreMaxList = new ArrayList<>();
+						
+						if (!isEmpty(project.getCvssScoreMax())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax());
+						}
+						if (!isEmpty(project.getCvssScoreMax1())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax1());
+						}
+						if (!isEmpty(project.getCvssScoreMax2())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax2());
+						}
+						if (!isEmpty(project.getCvssScoreMax3())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax3());
+						}
+						if (!isEmpty(project.getCvssScoreMax4())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax4());
+						}
+						if (!isEmpty(project.getCvssScoreMax5())) {
+							cvssScoreMaxList.add(project.getCvssScoreMax5());
+						}
+						
+						if (!cvssScoreMaxList.isEmpty()) {
+							String[] cvssScoreMaxString = null;
+							BigDecimal cvssScore = null;
+							BigDecimal cvssScoreMax = null;
+							String cveId = null;
+							
+							for (String cvssScoreMaxStr : cvssScoreMaxList) {
+								cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+								if (cvssScoreMax != null) {
+									cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+									if (cvssScoreMax.compareTo(cvssScore) == -1) {
+										cvssScoreMax = cvssScore;
+										cveId = cvssScoreMaxString[1];
+									}
+								} else {
+									cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+									cveId = cvssScoreMaxString[1];
+								}
+							}
+							
+							if (cvssScoreMax != null && cvssScoreMax.compareTo(new BigDecimal(project.getCvssScore())) > 0) {
+								project.setCvssScore(String.valueOf(cvssScoreMax));
+								if (!isEmpty(cveId)) project.setCveId(cveId);
+							}
+						}
+					}
 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
