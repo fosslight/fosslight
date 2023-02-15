@@ -426,8 +426,6 @@ public class OssController extends CoTopComponent{
 		if (ossMailInfo.getOssNicknames() != null) {
 			ossMailInfo.setOssNickname(CommonFunction.arrayToString(ossMailInfo.getOssNicknames(), "<br>"));	
 		}
-
-		resCd="10";
 		
 		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
 		
@@ -452,8 +450,13 @@ public class OssController extends CoTopComponent{
 		}
 
 		// 삭제처리
-		ossService.deleteOssMaster(ossMaster);
-		CoCodeManager.getInstance().refreshOssInfo();
+		try {
+			ossService.deleteOssMaster(ossMaster);
+			resCd="10";
+			CoCodeManager.getInstance().refreshOssInfo();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		resMap.put("resCd", resCd);
 		

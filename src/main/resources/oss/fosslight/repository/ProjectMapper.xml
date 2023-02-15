@@ -921,11 +921,14 @@
 	</insert>	
 	
 	<delete id="deleteProjectMaster" parameterType="oss.fosslight.domain.Project">
+	<!-- 
 		UPDATE PROJECT_MASTER 
 		   SET USE_YN = 'N'
 		      ,MODIFIER = #{loginUserName}
 		      ,MODIFIED_DATE = now()
 		 WHERE PRJ_ID = #{prjId}
+		 --> 
+		 DELETE FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
 	
 	<delete id="deleteProjectModel" parameterType="oss.fosslight.domain.Project">
@@ -3625,6 +3628,7 @@
 		  , NOTICE_TYPE_ETC				   =  #{noticeTypeEtc}                     
 	</insert>
 	<select id="getNoticeType" parameterType="String" resultType="oss.fosslight.domain.CamelMap">SELECT NOTICE_TYPE, NOTICE_TYPE_ETC FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}</select>
+	<delete id="deleteOssNotice">DELETE FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}</delete>
 	
 	<select id="getComponentListForLicenseCheck" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponentsLicense">
 		SELECT T1.COMPONENT_ID, T1.OSS_ID, T2.LICENSE_ID, T2.LICENSE_NAME 

@@ -856,7 +856,8 @@
 	</select>
 	
 	<update id="deleteOssMaster" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_MASTER SET USE_YN='N', MODIFIER=#{loginUserName}, MODIFIED_DATE=now() WHERE OSS_ID=#{ossId}
+		<!-- UPDATE OSS_MASTER SET USE_YN='N', MODIFIER=#{loginUserName}, MODIFIED_DATE=now() WHERE OSS_ID=#{ossId} -->
+		DELETE FROM OSS_MASTER WHERE OSS_ID=#{ossId}
 	</update>
 	<delete id="deleteOssNickname" parameterType="oss.fosslight.domain.OssMaster">
 		DELETE FROM OSS_NICKNAME WHERE OSS_NAME=#{ossName}
@@ -1409,6 +1410,10 @@
 			MULTI_LICENSE_FLAG = #{multiLicenseFlag}
 			, DUAL_LICENSE_FLAG = #{dualLicenseFlag}    
 	</insert>
+	<delete id="deleteOssLicenseFlag">
+		DELETE FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = #{ossId}
+	</delete>
+	
 	<update id="updateOssLicenseVDiffFlag" parameterType="oss.fosslight.domain.OssMaster">
 		UPDATE OSS_MASTER_LICENSE_FLAG SET VERSION_DIFF_FLAG = #{versionDiffFlag}
 		WHERE OSS_ID IN 

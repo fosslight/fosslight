@@ -1717,7 +1717,8 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(@ModelAttribute Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
-		projectService.deleteProject(project);
+
+		Project projectInfo = projectService.getProjectDetail(project);
 		
 		try {
 			History h = new History();
@@ -1741,8 +1742,23 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		
+		String rtnFlag = "11"; // default error
 		HashMap<String, Object> resMap = new HashMap<>();
-		resMap.put("resCd", "10");
+		
+		try {
+			projectService.deleteProject(project);
+			rtnFlag = "10"; // Success
+			try {
+				// Delete project ref files
+				projectService.deleteProjectRefFiles(projectInfo);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		resMap.put("resCd", rtnFlag);
 		
 		return makeJsonResponseHeader(resMap);
 	}

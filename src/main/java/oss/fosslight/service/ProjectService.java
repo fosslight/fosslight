@@ -187,6 +187,8 @@ public interface ProjectService extends HistoryConfig{
 	public String checkOssNicknameList(ProjectIdentification identification);
 
 	public void updateFileId(Project project);
+
+	public void deleteProjectRefFiles(Project projectInfo);
 }
 
 

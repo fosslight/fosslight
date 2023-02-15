@@ -484,7 +484,9 @@
 	</select>
 	
 	<update id="deleteLicenseMaster" parameterType="oss.fosslight.domain.LicenseMaster">
-		UPDATE LICENSE_MASTER SET USE_YN='N' WHERE LICENSE_ID=#{licenseId}
+		<!-- UPDATE LICENSE_MASTER SET USE_YN='N' WHERE LICENSE_ID=#{licenseId} -->
+		
+		DELETE FROM LICENSE_MASTER WHERE LICENSE_ID=#{licenseId}
 	</update>
 	
 	<delete id="deleteLicenseNickname" parameterType="oss.fosslight.domain.LicenseMaster">

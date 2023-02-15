@@ -1557,7 +1557,33 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
+		projectMapper.deleteProjectModel(project);
+		projectMapper.deleteProjectWatcher(project);
+		projectMapper.deleteStatisticsMostUsedInfo(project);
+		projectMapper.deleteAddList(project);
+		projectMapper.deleteOssNotice(project.getPrjId());
 		projectMapper.deleteProjectMaster(project);
+	}
+	
+	@Override
+	@Transactional
+	public void deleteProjectRefFiles(Project projectInfo) {
+		// delete identification files
+		deleteFiles(projectInfo.getCsvFile());
+		deleteFiles(projectInfo.getAndroidCsvFile());
+		deleteFiles(projectInfo.getAndroidNoticeFile());
+		deleteFiles(projectInfo.getAndroidResultFile());
+		deleteFiles(projectInfo.getBinCsvFile());
+		deleteFiles(projectInfo.getBinBinaryFile());
+	}
+	
+	private void deleteFiles(List<T2File> list) {
+		if(list != null) {
+			for(T2File fileInfo : list) {
+				projectMapper.deleteFileBySeq(fileInfo);
+				fileService.deletePhysicalFile(fileInfo, null);
+			}
+		}
 	}
 
 	@Override

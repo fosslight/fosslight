@@ -6,24 +6,20 @@
 package oss.fosslight.domain;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.Type;
 
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
-import org.springframework.util.StringUtils;
-
-import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.util.StringUtil;
-@Slf4j
 public class ComBean extends CoTopComponent implements Serializable {
 
 	/** The Constant serialVersionUID. */
@@ -207,7 +203,7 @@ public class ComBean extends CoTopComponent implements Serializable {
 		return sidx;
 	}
     public String getSidxEx() {
-		if (StringUtils.isEmpty(sidx)) {
+		if (StringUtil.isEmpty(sidx)) {
 			return sidx;
 		}
 

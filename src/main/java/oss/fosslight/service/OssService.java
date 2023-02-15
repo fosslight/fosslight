@@ -9,14 +9,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import com.github.jsonldjava.utils.Obj;
 import oss.fosslight.config.HistoryConfig;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssLicense;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.Vulnerability;
 
 public interface OssService extends HistoryConfig{
 	String registOssMaster(OssMaster ossMaster);
 	
-	int deleteOssMaster(OssMaster ossMaster);
+	void deleteOssMaster(OssMaster ossMaster);
 	
 	Map<String,Object> getOssMasterList(OssMaster ossMaster);
 	

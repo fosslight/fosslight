@@ -1196,73 +1196,72 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Transactional
 	@Override
 //	@CacheEvict(value="autocompleteCache", allEntries=true)
-	public int deleteOssMaster(OssMaster ossMaster) {
-		int result = 1;
-		log.debug("DELETE OSS");
+	public void deleteOssMaster(OssMaster ossMaster) {
 
-		try {
-			OssMaster beforeBean = getOssInfo(ossMaster.getOssId(), false);
-			
-			if (isEmpty(ossMaster.getOssName())) {
-				ossMaster.setOssName(beforeBean.getOssName());
-			}
-			
-			// 바로 삭제 일 경우( identification 상태가 conf인 프로젝트가 없을시 )
-			if (CoConstDef.FLAG_NO.equals(avoidNull(ossMaster.getNewOssId(), CoConstDef.FLAG_NO))) {
-				//3. 기존의 Oss 삭제		
-				//ossMapper.deleteOssNickname(ossMaster);
-				
-				// 닉네임은 이름으로 매핑되기 때문에, 삭제후에 신규 추가시 자동으로 설정되는 문제가 있음
-				// 삭제하는 oss 이름으로 공유하는 닉네임이 더이상 없을 경우, 닉네임도 삭제하도록 추가
-				if (ossMapper.checkHasAnotherVersion(ossMaster) == 0) {
-					ossMapper.deleteOssNickname(ossMaster);
-				}
-				
-				ossMapper.deleteOssLicense(ossMaster);
-				updateLicenseDivDetail(ossMaster);
-				
-				ossMapper.deleteOssDownloadLocation(ossMaster);
-				ossMapper.deleteOssMaster(ossMaster);
-			
-			} else {
-				// 동일한 oss에서 이동하는 경우, nick name을 별도로 등록하지 않음
-				OssMaster afterBean = getOssInfo(ossMaster.getNewOssId(), false);
-				
-				if (!beforeBean.getOssName().toUpperCase().equals(afterBean.getOssName().toUpperCase())) {
-					//2. 기존 Oss 의 Name 과 Nickname을 현재 선택한 Oss의 Nickname 에 병합
-					ArrayList<String> nickNamesArray = new ArrayList<>();
-					Map<String, Object> map = ossMapper.selectOssNameMap(ossMaster);
-					String ossName = (String)map.get("ossName");
-					List<Map<String, String>> list = (List<Map<String, String>>) map.get("nicknameList");
-					
-					nickNamesArray.add(ossName);
-					
-					for (Map<String, String> nickMap : list){
-						nickNamesArray.addAll(new ArrayList<String>(nickMap.values()));
-					}
-					
-					for (String nickname : nickNamesArray){
-						ossMaster.setOssNickname(nickname);
-						ossMapper.mergeOssNickname(ossMaster);
-					}
-				}
-				
-				if (ossMapper.checkHasAnotherVersion(ossMaster) == 0) {
-					ossMapper.deleteOssNickname(ossMaster);
-				}
-				
-				ossMapper.deleteOssLicense(ossMaster);
-				updateLicenseDivDetail(ossMaster);
-				
-				ossMapper.deleteOssDownloadLocation(ossMaster);
-				ossMapper.deleteOssMaster(ossMaster);
-			}
-		} catch(Exception e) {
-			result = 0;
-			log.error("FAILED TO REMOVE OSS DATA.", e);
+		OssMaster beforeBean = getOssInfo(ossMaster.getOssId(), false);
+		
+		if (isEmpty(ossMaster.getOssName())) {
+			ossMaster.setOssName(beforeBean.getOssName());
 		}
 		
-		return result;
+		// 바로 삭제 일 경우( identification 상태가 conf인 프로젝트가 없을시 )
+		if (CoConstDef.FLAG_NO.equals(avoidNull(ossMaster.getNewOssId(), CoConstDef.FLAG_NO))) {
+			//3. 기존의 Oss 삭제		
+			//ossMapper.deleteOssNickname(ossMaster);
+			
+			// 닉네임은 이름으로 매핑되기 때문에, 삭제후에 신규 추가시 자동으로 설정되는 문제가 있음
+			// 삭제하는 oss 이름으로 공유하는 닉네임이 더이상 없을 경우, 닉네임도 삭제하도록 추가
+			if (ossMapper.checkHasAnotherVersion(ossMaster) == 0) {
+				ossMapper.deleteOssNickname(ossMaster);
+			}
+			
+			ossMapper.deleteOssLicense(ossMaster);
+			ossMapper.deleteOssLicenseDeclaredSync(ossMaster);
+			ossMapper.deleteOssLicenseDetectedSync(ossMaster);
+			
+			updateLicenseDivDetail(ossMaster);
+			
+			ossMapper.deleteOssDownloadLocation(ossMaster);
+			ossMapper.deleteOssMaster(ossMaster);
+		
+		} else {
+			// 동일한 oss에서 이동하는 경우, nick name을 별도로 등록하지 않음
+			OssMaster afterBean = getOssInfo(ossMaster.getNewOssId(), false);
+			
+			if (!beforeBean.getOssName().toUpperCase().equals(afterBean.getOssName().toUpperCase())) {
+				//2. 기존 Oss 의 Name 과 Nickname을 현재 선택한 Oss의 Nickname 에 병합
+				ArrayList<String> nickNamesArray = new ArrayList<>();
+				Map<String, Object> map = ossMapper.selectOssNameMap(ossMaster);
+				String ossName = (String)map.get("ossName");
+				List<Map<String, String>> list = (List<Map<String, String>>) map.get("nicknameList");
+				
+				nickNamesArray.add(ossName);
+				
+				for (Map<String, String> nickMap : list){
+					nickNamesArray.addAll(new ArrayList<String>(nickMap.values()));
+				}
+				
+				for (String nickname : nickNamesArray){
+					ossMaster.setOssNickname(nickname);
+					ossMapper.mergeOssNickname(ossMaster);
+				}
+			}
+			
+			if (ossMapper.checkHasAnotherVersion(ossMaster) == 0) {
+				ossMapper.deleteOssNickname(ossMaster);
+			}
+			
+			ossMapper.deleteOssLicense(ossMaster);
+			ossMapper.deleteOssLicenseDeclaredSync(ossMaster);
+			ossMapper.deleteOssLicenseDetectedSync(ossMaster);
+			ossMapper.deleteOssLicenseFlag(ossMaster.getOssId());
+			
+			updateLicenseDivDetail(ossMaster);
+			
+			ossMapper.deleteOssDownloadLocation(ossMaster);
+			ossMapper.deleteOssMaster(ossMaster);
+		}
+	
 	}
 
 	@Override
