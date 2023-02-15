@@ -377,8 +377,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				// convert max score
-				if (!isEmpty(ll.getCvssScore()) && !ll.getCvssScore().equals("0.0")
-						&& (ll.getCvssScoreMax() != null || ll.getCvssScoreMax1() != null || ll.getCvssScoreMax2() != null || ll.getCvssScoreMax3() != null || ll.getCvssScoreMax4() != null || ll.getCvssScoreMax5() != null)) {
+				if (ll.getCvssScoreMax() != null || ll.getCvssScoreMax1() != null || ll.getCvssScoreMax2() != null 
+						|| ll.getCvssScoreMax3() != null || ll.getCvssScoreMax4() != null || ll.getCvssScoreMax5() != null) {
 					List<String> cvssScoreMaxList = new ArrayList<>();
 					
 					if (!isEmpty(ll.getCvssScoreMax())) {
@@ -420,11 +420,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							}
 						}
 						
-						if (cvssScoreMax != null && cvssScoreMax.compareTo(new BigDecimal(ll.getCvssScore())) > 0) {
+						if (cvssScoreMax != null) {
 							ll.setCvssScore(String.valueOf(cvssScoreMax));
+							ll.setVulnYn(CoConstDef.FLAG_YES);
 							if (!isEmpty(cveId)) ll.setCveId(cveId);
 						}
 					}
+				} else {
+					ll.setVulnYn(CoConstDef.FLAG_NO);
 				}
 			}
 			
@@ -643,8 +646,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					// convert max score
-					if (!isEmpty(project.getCvssScore()) && !project.getCvssScore().equals("0.0")
-							&& (project.getCvssScoreMax() != null || project.getCvssScoreMax1() != null || project.getCvssScoreMax2() != null || project.getCvssScoreMax3() != null || project.getCvssScoreMax4() != null || project.getCvssScoreMax5() != null)) {
+					if (project.getCvssScoreMax() != null || project.getCvssScoreMax1() != null || project.getCvssScoreMax2() != null 
+							|| project.getCvssScoreMax3() != null || project.getCvssScoreMax4() != null || project.getCvssScoreMax5() != null) {
 						List<String> cvssScoreMaxList = new ArrayList<>();
 						
 						if (!isEmpty(project.getCvssScoreMax())) {
@@ -686,11 +689,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								}
 							}
 							
-							if (cvssScoreMax != null && cvssScoreMax.compareTo(new BigDecimal(project.getCvssScore())) > 0) {
+							if (cvssScoreMax != null) {
 								project.setCvssScore(String.valueOf(cvssScoreMax));
+								project.setVulnYn(CoConstDef.FLAG_YES);
 								if (!isEmpty(cveId)) project.setCveId(cveId);
 							}
 						}
+					} else {
+						project.setVulnYn(CoConstDef.FLAG_NO);
 					}
 				}
 				
