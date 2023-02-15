@@ -377,79 +377,53 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				// convert max score
-				if (ll.getCvssScoreMax() != null && !isEmpty(ll.getCvssScore()) && !ll.getCvssScore().equals("0.0")) {
-					String[] cvssScoreMaxString = null;
-					String[] cvssScoreMaxString1 = null;
-					String[] cvssScoreMaxString2 = null;
-					String[] cvssScoreMaxString3 = null;
+				if (!isEmpty(ll.getCvssScore()) && !ll.getCvssScore().equals("0.0")
+						&& (ll.getCvssScoreMax() != null || ll.getCvssScoreMax1() != null || ll.getCvssScoreMax2() != null || ll.getCvssScoreMax3() != null || ll.getCvssScoreMax4() != null || ll.getCvssScoreMax5() != null)) {
+					List<String> cvssScoreMaxList = new ArrayList<>();
 					
-					BigDecimal cvssScore = null;
-					BigDecimal cvssScoreMax = null;
-					String cveId = null;
-					
-					if (!isEmpty(ll.getOssName())) {
-						if (!isEmpty(ll.getCvssScoreMax())) {
-							cvssScoreMaxString = ll.getCvssScoreMax().split("\\@");
-						}
-						if (!isEmpty(ll.getCvssScoreMax1())) {
-							cvssScoreMaxString1 = ll.getCvssScoreMax1().split("\\@");
-						}
-						if (!isEmpty(ll.getCvssScoreMax2())) {
-							cvssScoreMaxString2 = ll.getCvssScoreMax2().split("\\@");
-						}
-						if (!isEmpty(ll.getCvssScoreMax3())) {
-							cvssScoreMaxString3 = ll.getCvssScoreMax3().split("\\@");
-						}
+					if (!isEmpty(ll.getCvssScoreMax())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax());
+					}
+					if (!isEmpty(ll.getCvssScoreMax1())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax1());
+					}
+					if (!isEmpty(ll.getCvssScoreMax2())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
+					if (!isEmpty(ll.getCvssScoreMax3())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
+					if (!isEmpty(ll.getCvssScoreMax4())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax4());
+					}
+					if (!isEmpty(ll.getCvssScoreMax5())) {
+						cvssScoreMaxList.add(ll.getCvssScoreMax5());
 					}
 					
-					if (cvssScoreMaxString != null) {
-						cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-						cvssScoreMax = cvssScore;
-						cveId = cvssScoreMaxString[1];
-					}
-					
-					if (cvssScoreMaxString1 != null) {
-						if (cvssScoreMax != null) {
-							cvssScore = new BigDecimal(cvssScoreMaxString1[0]);
-							if (cvssScoreMax.compareTo(cvssScore) == -1) {
-								cvssScoreMax = cvssScore;
-								cveId = cvssScoreMaxString1[1];
+					if (!cvssScoreMaxList.isEmpty()) {
+						String[] cvssScoreMaxString = null;
+						BigDecimal cvssScore = null;
+						BigDecimal cvssScoreMax = null;
+						String cveId = null;
+						
+						for (String cvssScoreMaxStr : cvssScoreMaxList) {
+							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+							if (cvssScoreMax != null) {
+								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+								if (cvssScoreMax.compareTo(cvssScore) == -1) {
+									cvssScoreMax = cvssScore;
+									cveId = cvssScoreMaxString[1];
+								}
+							} else {
+								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+								cveId = cvssScoreMaxString[1];
 							}
-						} else {
-							cvssScoreMax = new BigDecimal(cvssScoreMaxString1[0]);
-							cveId = cvssScoreMaxString1[1];
 						}
-					}
-
-					if (cvssScoreMaxString2 != null) {
-						if (cvssScoreMax != null) {
-							cvssScore = new BigDecimal(cvssScoreMaxString2[0]);
-							if (cvssScoreMax.compareTo(cvssScore) == -1) {
-								cvssScoreMax = cvssScore;
-								cveId = cvssScoreMaxString2[1];
-							}
-						} else {
-							cvssScoreMax = new BigDecimal(cvssScoreMaxString2[0]);
-							cveId = cvssScoreMaxString2[1];
+						
+						if (cvssScoreMax != null && cvssScoreMax.compareTo(new BigDecimal(ll.getCvssScore())) > 0) {
+							ll.setCvssScore(String.valueOf(cvssScoreMax));
+							if (!isEmpty(cveId)) ll.setCveId(cveId);
 						}
-					}
-
-					if (cvssScoreMaxString3 != null) {
-						if (cvssScoreMax != null) {
-							cvssScore = new BigDecimal(cvssScoreMaxString3[0]);
-							if (cvssScoreMax.compareTo(cvssScore) == -1) {
-								cvssScoreMax = cvssScore;
-								cveId = cvssScoreMaxString3[1];
-							}
-						} else {
-							cvssScoreMax = new BigDecimal(cvssScoreMaxString3[0]);
-							cveId = cvssScoreMaxString3[1];
-						}	
-					}
-					
-					if (cvssScoreMax != null && cvssScoreMax.compareTo(new BigDecimal(ll.getCvssScore())) > 0) {
-						ll.setCvssScore(String.valueOf(cvssScoreMax));
-						if (!isEmpty(cveId)) ll.setCveId(cveId);
 					}
 				}
 			}
