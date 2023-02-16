@@ -143,6 +143,8 @@ public class OssMaster extends ComBean implements Serializable{
 	//OSS_NICKNAME
 	private String[] ossNicknames;
 	
+	private String[] ossNicknameArr;
+	
 	/** The oss nickname. */
 	private String ossNickname;
 	
@@ -2024,5 +2026,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDashOssNameList(String[] dashOssNameList) {
 		this.dashOssNameList = dashOssNameList;
+	}
+
+	public String[] getOssNicknameArr() {
+		return ossNicknameArr;
+	}
+
+	public void setOssNicknameArr(String[] ossNicknameArr) {
+		this.ossNicknameArr = ossNicknameArr;
 	}
 }
