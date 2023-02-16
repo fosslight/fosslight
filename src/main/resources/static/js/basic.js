@@ -223,15 +223,33 @@ $(document).ready(function (){
 			tabs = $(this).closest(".ui-tabs"),
 			panel = tabs.children().eq(index + 1),
 			tabLink = parent.find("a").attr("href");
+		var i = index-1;
+		var iframeDiv = "div:eq(" + i+ ")";
+		if($(".contents").children(iframeDiv).find("iframe").contents().find("#loading_wrap").css("display") == "block") {
+			alertify.confirm('If you close the tab now, it might not work properly. Do you want to close the tab?', function (e) {
+				if(e) {
+					$(tabLink).remove();
+					parent.remove();
+					panel.remove();
+
+					if (lastTab > selectTab) lastTab--;
+
+					$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0);
+
+					selectTab = lastTab;
+				}
+			});
+		} else {
 			$(tabLink).remove();
 			parent.remove();
 			panel.remove();
-			
-		if(lastTab > selectTab) lastTab--;
-			
-		$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0 );
-		
-		selectTab = lastTab;
+
+			if(lastTab > selectTab) lastTab--;
+
+			$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0 );
+
+			selectTab = lastTab;
+		}
 	});
 	
 	/* tab click event */
