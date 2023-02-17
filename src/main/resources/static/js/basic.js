@@ -226,19 +226,7 @@ $(document).ready(function (){
 		var i = index-1;
 		var iframeDiv = "div:eq(" + i+ ")";
 		if($(".contents").children(iframeDiv).find("iframe").contents().find("#loading_wrap").css("display") == "block") {
-			alertify.confirm('If you close the tab now, it might not work properly. Do you want to close the tab?', function (e) {
-				if(e) {
-					$(tabLink).remove();
-					parent.remove();
-					panel.remove();
-
-					if (lastTab > selectTab) lastTab--;
-
-					$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0);
-
-					selectTab = lastTab;
-				}
-			});
+			alertify.alert('Work in progress now. You cannot close the tab.', function (e) {});
 		} else {
 			$(tabLink).remove();
 			parent.remove();
