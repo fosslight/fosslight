@@ -172,6 +172,7 @@
         if (isClicked == false) {
             isClicked = true;
             $("#btn").click(() => {
+                loading.show();
                 OssBulkGridStatusMessageManager.cleanStatusMessages();
                 OssBulkGridWarningMessageUtil.cleanMessages();
                 target.jqGrid('saveRow', _mainLastsel);
@@ -205,9 +206,11 @@
                             showErrorMsg();
                             OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                         }
+                        loading.hide();
                     },
                     error: (e) => {
                         OssBulkGridWarningMessageUtil.setMessagesToCurPage();
+                        loading.hide();
                     }
                 })
             })

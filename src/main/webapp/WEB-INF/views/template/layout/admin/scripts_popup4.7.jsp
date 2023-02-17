@@ -10,11 +10,11 @@ var CTX_PATH = "${ctxPath}";
 <link rel="stylesheet" href="${ctxPath}/css/uploadFile/uploadfile.css" />
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.css">
 
-<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 <script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
 <script src="${ctxPath}/js/i18n/grid.locale-en.js"></script>
-<script src="${ctxPath}/js/uploadFile/jquery.uploadfile.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-file-upload/4.0.11/jquery.uploadfile.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
 <script src="${ctxPath}/js/basic.js?${jsVersion}"></script>

@@ -105,6 +105,8 @@ public interface OssMapper {
 	
 	int checkExistsOssByname(OssMaster bean);
 	
+	void deleteOssLicenseFlag(String ossId);
+	
 	void updateOssLicenseFlag(OssMaster updateParam);
 	
 	void updateOssLicenseVDiffFlag(OssMaster updateParam);

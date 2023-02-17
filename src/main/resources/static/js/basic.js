@@ -223,15 +223,21 @@ $(document).ready(function (){
 			tabs = $(this).closest(".ui-tabs"),
 			panel = tabs.children().eq(index + 1),
 			tabLink = parent.find("a").attr("href");
+		var i = index-1;
+		var iframeDiv = "div:eq(" + i+ ")";
+		if($(".contents").children(iframeDiv).find("iframe").contents().find("#loading_wrap").css("display") == "block") {
+			alertify.alert('Work in progress now. You cannot close the tab.', function (e) {});
+		} else {
 			$(tabLink).remove();
 			parent.remove();
 			panel.remove();
-			
-		if(lastTab > selectTab) lastTab--;
-			
-		$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0 );
-		
-		selectTab = lastTab;
+
+			if(lastTab > selectTab) lastTab--;
+
+			$("#nav-tabs").tabs("refresh").tabs('option', 'active', lastTab > -1 ? lastTab : 0 );
+
+			selectTab = lastTab;
+		}
 	});
 	
 	/* tab click event */

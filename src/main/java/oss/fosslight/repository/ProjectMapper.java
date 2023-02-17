@@ -215,6 +215,8 @@ public interface ProjectMapper {
 
 	void updateComponentsLicenseInfo(Project project);
 
+	void deleteOssNotice(String prjId);
+	
 	void makeOssNotice(OssNotice noticeParam);
 
 	Map<String, Object> getNoticeType(String prjId);

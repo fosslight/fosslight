@@ -448,9 +448,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					for(String s : userinput) {
 						userType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
 					}
-					if(recType.stream().distinct().collect(Collectors.toList()).size() == 1
-							&& userType.stream().distinct().collect(Collectors.toList()).size() == 1) {
-						return null;
+					List<String> recTypeList = recType.stream().distinct().collect(Collectors.toList());
+					List<String> userTypeList = userType.stream().distinct().collect(Collectors.toList());
+					if(recTypeList.size() == 1 && userTypeList.size() == 1) {
+						if(recTypeList.get(0).equals(userTypeList.get(0))) {
+							return null;
+						}
 					}
 
 					int cnt = 0;

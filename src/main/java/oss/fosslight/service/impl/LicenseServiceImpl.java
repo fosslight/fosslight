@@ -220,7 +220,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 //	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public int deleteLicenseMaster(LicenseMaster licenseMaster) {
 		licenseMapper.deleteLicenseNickname(licenseMaster);
-		
+		licenseMapper.deleteLicenseWebPages(licenseMaster);
 		return licenseMapper.deleteLicenseMaster(licenseMaster);
 	}
 	

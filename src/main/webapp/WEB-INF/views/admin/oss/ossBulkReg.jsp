@@ -22,6 +22,10 @@
             <input type="button" id="btn" value="Save" class="btnColor red" style="width: 125px;" />
         </span>
     </div>
+    <div id="loading_wrap" class="loading" style="display:none;">
+        <div class="loadingBlind"></div>
+        <img src="${ctxPath}/images/loading.gif" alt="loading" />
+    </div>
     </body>
 </div>
 <tiles:insertAttribute name="ossBulkReg-js"></tiles:insertAttribute>

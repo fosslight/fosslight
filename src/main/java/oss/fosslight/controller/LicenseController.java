@@ -184,12 +184,6 @@ public class LicenseController extends CoTopComponent{
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
-		licenseService.deleteLicenseMaster(licenseMaster);
-		
-		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
-		CoCodeManager.getInstance().refreshLicenseInfo();
-		
 		try {
 			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE);
 			mailBean.setParamLicenseId(licenseMaster.getLicenseId());
@@ -199,6 +193,11 @@ public class LicenseController extends CoTopComponent{
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+		
+		licenseService.deleteLicenseMaster(licenseMaster);
+		
+		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
+		CoCodeManager.getInstance().refreshLicenseInfo();
 		
 		try {
 			boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);

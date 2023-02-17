@@ -212,7 +212,7 @@
 					    }
 					  }
 					, {name: 'ossType', index: 'ossType', width: 70, align: 'center',formatter: 'ossType'}
-					<c:if test="${searchBean.linkFlag == 'N'}">
+					<c:if test="${searchBean.linkFlag != 'Y'}">
 					, {name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: 'linkOssName'}
 					</c:if>
 					<c:if test="${searchBean.linkFlag == 'Y'}">
