@@ -296,13 +296,6 @@ public class OssMaster extends ComBean implements Serializable{
 	private int[] csvComponentIdList;
 	private String[] dashOssNameList;
 	
-	private String cvssScoreMax;
-	private String cvssScoreMax1;
-	private String cvssScoreMax2;
-	private String cvssScoreMax3;
-	private String cvssScoreMax4;
-	private String cvssScoreMax5;
-	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
 	}
@@ -2041,53 +2034,5 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setOssNicknameArr(String[] ossNicknameArr) {
 		this.ossNicknameArr = ossNicknameArr;
-	}
-
-	public String getCvssScoreMax() {
-		return cvssScoreMax;
-	}
-
-	public void setCvssScoreMax(String cvssScoreMax) {
-		this.cvssScoreMax = cvssScoreMax;
-	}
-
-	public String getCvssScoreMax1() {
-		return cvssScoreMax1;
-	}
-
-	public void setCvssScoreMax1(String cvssScoreMax1) {
-		this.cvssScoreMax1 = cvssScoreMax1;
-	}
-
-	public String getCvssScoreMax2() {
-		return cvssScoreMax2;
-	}
-
-	public void setCvssScoreMax2(String cvssScoreMax2) {
-		this.cvssScoreMax2 = cvssScoreMax2;
-	}
-
-	public String getCvssScoreMax3() {
-		return cvssScoreMax3;
-	}
-
-	public void setCvssScoreMax3(String cvssScoreMax3) {
-		this.cvssScoreMax3 = cvssScoreMax3;
-	}
-
-	public String getCvssScoreMax4() {
-		return cvssScoreMax4;
-	}
-
-	public void setCvssScoreMax4(String cvssScoreMax4) {
-		this.cvssScoreMax4 = cvssScoreMax4;
-	}
-
-	public String getCvssScoreMax5() {
-		return cvssScoreMax5;
-	}
-
-	public void setCvssScoreMax5(String cvssScoreMax5) {
-		this.cvssScoreMax5 = cvssScoreMax5;
 	}
 }

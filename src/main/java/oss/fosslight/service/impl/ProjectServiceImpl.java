@@ -178,56 +178,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 						OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						
-						if (nvdMaxScoreInfo != null) {
-							List<String> cvssScoreMaxList = new ArrayList<>();
-							
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax());
-							}
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax1())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax1());
-							}
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax2())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax2());
-							}
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax3())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax3());
-							}
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax4())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax4());
-							}
-							if (!isEmpty(nvdMaxScoreInfo.getCvssScoreMax5())) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax5());
-							}
-							
-							if (!cvssScoreMaxList.isEmpty()) {
-								String[] cvssScoreMaxString = null;
-								BigDecimal cvssScore = null;
-								BigDecimal cvssScoreMax = null;
-								String cveId = null;
-								
-								for (String cvssScoreMaxStr : cvssScoreMaxList) {
-									cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-									if (cvssScoreMax != null) {
-										cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-										if (cvssScoreMax.compareTo(cvssScore) == -1) {
-											cvssScoreMax = cvssScore;
-											cveId = cvssScoreMaxString[1];
-										}
-									} else {
-										cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
-										cveId = cvssScoreMaxString[1];
-									}
-								}
-								
-								if (cvssScoreMax != null) {
-									bean.setCvssScore(String.valueOf(cvssScoreMax));
-									bean.setVulnYn(CoConstDef.FLAG_YES);
-									bean.setCveId(cveId);
-								}
-							}
-						} else {
-							bean.setVulnYn(CoConstDef.FLAG_NO);
+						if (nvdMaxScoreInfo != null && nvdMaxScoreInfo.getCvssScore() != null) {
+							bean.setCvssScore(nvdMaxScoreInfo.getCvssScore());
+							bean.setVulnYn(nvdMaxScoreInfo.getVulnYn());
+							bean.setCveId(nvdMaxScoreInfo.getCveId());
 						}
 					}
 				}
