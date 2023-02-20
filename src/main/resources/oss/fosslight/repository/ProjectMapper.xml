@@ -3856,37 +3856,40 @@
 	</select>
 	
 	<select id="findIdentificationMaxNvdInfo" resultType="oss.fosslight.domain.OssMaster">
-		SELECT CASE WHEN NVD.CVSS_SCORE IS NOT NULL THEN NVD.CVSS_SCORE ELSE NVD1.CVSS_SCORE END CVSS_SCORE
-			 , CASE WHEN NVD.CVE_ID IS NOT NULL THEN NVD.CVE_ID ELSE NVD1.CVE_ID END CVE_ID
-			 , CASE WHEN NVD.VULN_YN IS NOT NULL THEN NVD.VULN_YN ELSE IFNULL(NVD1.VULN_YN, 'N') END VULN_YN
-  		  FROM OSS_COMPONENTS OC
+		SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
+  		  FROM (SELECT OSS_NAME, OSS_VERSION
+				FROM OSS_COMPONENTS
+				WHERE REFERENCE_ID = #{prjId}
+  		 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		 		AND REFERENCE_DIV = #{commponentDiv}
+  		 	</if>
+  		 	<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   		AND REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 	</if>
+  		   		AND EXCLUDE_YN = 'N'
+		   		AND OSS_NAME IS NOT NULL
+		   		AND OSS_NAME != '-'
+		  ) OC
+  		  LEFT OUTER JOIN OSS_NICKNAME NICK
+  		  ON OC.OSS_NAME = NICK.OSS_NAME
   		  LEFT OUTER JOIN (SELECT PRODUCT 
   		  					    , VERSION
   		  					    , CVSS_SCORE 
   		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN 
+  		  					    , VENDOR
+  		  					    , 'Y' AS VULN_YN
   		  					 FROM NVD_DATA_SCORE_V3) NVD 
-  		  	ON NVD.PRODUCT = OC.OSS_NAME 
-  		   AND NVD.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) 
-  		  LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN 
-  		  					 FROM NVD_DATA_SCORE_V3) NVD1 
-  		  	ON NVD1.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_') 
-  		   AND NVD1.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) 
-  		 WHERE OC.REFERENCE_ID = #{prjId}
-  		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 	AND OC.REFERENCE_DIV = #{commponentDiv}
-  		 </if>
-  		 <if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 </if>
-  		   AND OC.EXCLUDE_YN = 'N'
-		   AND OC.OSS_NAME IS NOT NULL
-		   AND OC.OSS_NAME != '-'
-  		 ORDER BY NVD.CVSS_SCORE *1 DESC, CVE_ID LIMIT 1
+  		  	ON (NVD.PRODUCT = OC.OSS_NAME
+				OR NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+				OR (NVD.PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(OC.OSS_NAME, '-', 2), '-', -1)
+						AND NVD.VENDOR = SUBSTRING_INDEX(OC.OSS_NAME, '-', 1))
+				OR NVD.PRODUCT = NICK.OSS_NICKNAME
+				OR NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
+				OR (NVD.PRODUCT = SUBSTRING_INDEX(SUBSTRING_INDEX(NICK.OSS_NICKNAME, '-', 2), '-', -1)
+						AND NVD.VENDOR = SUBSTRING_INDEX(NICK.OSS_NICKNAME, '-', 1))) 
+  		  AND NVD.VERSION = IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION)
+		  WHERE NVD.CVSS_SCORE IS NOT NULL
+		  ORDER BY NVD.CVSS_SCORE*1 DESC LIMIT 1
 	</select>
 	
 	<select id="selectOssComponentMaxIdx" parameterType="oss.fosslight.domain.Project" resultType="int">
