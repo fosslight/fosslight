@@ -322,16 +322,10 @@ public class OssController extends CoTopComponent{
 		List<Vulnerability> vulnInfoList = ossService.getOssVulnerabilityList2(ossMaster);
 		
 		if (vulnInfoList != null && !vulnInfoList.isEmpty()) {
-			if (vulnInfoList.size() >= 5) {
-				List<Vulnerability> newVulnInfoList = new ArrayList<>();
-				for (int i=0; i<5; i++) {
-					newVulnInfoList.add(vulnInfoList.get(i));
-				}
+			if (vulnInfoList.size() == 5) {
 				model.addAttribute("vulnListMore", "vulnListMore");
-				model.addAttribute("vulnInfoList", toJson(newVulnInfoList));
-			} else {
-				model.addAttribute("vulnInfoList", toJson(vulnInfoList));
 			}
+			model.addAttribute("vulnInfoList", toJson(vulnInfoList));
 		}
 		
 		List<String> nickList = new ArrayList<>();
