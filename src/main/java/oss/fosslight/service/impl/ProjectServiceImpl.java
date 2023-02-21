@@ -178,10 +178,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 						OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						
-						if (nvdMaxScoreInfo != null) {
-							bean.setCveId(nvdMaxScoreInfo.getCveId());
+						if (nvdMaxScoreInfo != null && nvdMaxScoreInfo.getCvssScore() != null) {
 							bean.setCvssScore(nvdMaxScoreInfo.getCvssScore());
 							bean.setVulnYn(nvdMaxScoreInfo.getVulnYn());
+							bean.setCveId(nvdMaxScoreInfo.getCveId());
 						}
 					}
 				}

@@ -2205,7 +2205,6 @@
 			GROUP BY T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
 		</if>
 			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC
-			LIMIT 5
 	</select>
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">

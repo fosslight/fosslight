@@ -733,6 +733,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 			Map<String, OssMaster> ossInfoByName = null;
 			ossInfoByName = CoCodeManager.OSS_INFO_UPPER;
 
+			// check deactivate oss info
+			List<String> deactivateOssList = ossService.getDeactivateOssList();
+			deactivateOssList.replaceAll(String::toUpperCase);
+			
 			for (ProjectIdentification bean : ossComponetList) {
 				boolean diffMapLicense = false;
 				
@@ -804,6 +808,32 @@ public class T2CoProjectValidator extends T2CoValidator {
 					errMap.put(basicKey + "." + bean.getComponentId(), errCd);
 				}
 
+				if(checkOSSMaster != null) {
+					if(CoConstDef.FLAG_YES.equals(checkOSSMaster.getDeactivateFlag())){
+						if (CommonFunction.isAdmin()) {
+							errMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
+						} else {
+							diffMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
+						}
+					}
+				} else {
+					boolean deactivateFlag = false;
+					
+					if(!isEmpty(bean.getOssName())) {
+						if(deactivateOssList.contains(bean.getOssName().toUpperCase())) {
+							deactivateFlag = true;
+						}
+						
+						if(deactivateFlag) {
+							if (CommonFunction.isAdmin()) {
+								errMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
+							} else {
+								diffMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
+							}
+						}
+					}
+				}
+				
 				// oss 등록 여부 체크
 				if (!CommonFunction.isIgnoreLicense(bean.getLicenseName())) {
 					// oss 등록 여부 체크
