@@ -3529,6 +3529,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		List<Vulnerability> list = null;
+		List<Vulnerability> convertList = new ArrayList<>();
 		String[] nicknameList = null;
 		List<String> dashOssNameList = new ArrayList<>();
 		List<String> convertNameList = null;
@@ -3575,14 +3576,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		if (list != null) {
-			list = checkVulnData(list, nicknameList);
+			list = checkVulnData(list, ossMaster.getOssNicknames());
 			list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+			int idx = 1;
+			for (Vulnerability vuln : list) {
+				if (idx > 5) break;
+				convertList.add(vuln);
+				idx++;
+			}
 		}
 		
 		ossMaster.setOssNameTemp(null);
 		if (convertFlag) ossMaster.setOssNicknames(nicknameList);
 		
-		return list;
+		return convertList;
 	}
 
 	private List<Vulnerability> checkVulnData(List<Vulnerability> list, String[] nicknameList) {
