@@ -99,7 +99,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			for (String key : diffMap.keySet()) {
 				if (key.toUpperCase().startsWith("LICENSENAME") && 
 						(diffMap.get(key).equals(ruleMap.get("LICENSE_NAME.UNCONFIRMED.MSG"))
-								|| diffMap.get(key).startsWith("Declared"))) {
+								|| diffMap.get(key).startsWith("Declared")
+								|| diffMap.get(key).startsWith("Recommended"))) {
 					resultData.addAll((List<ProjectIdentification>) componentData
 							.stream()
 							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
