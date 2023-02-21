@@ -408,6 +408,9 @@
 	                <input id="partyDelete" type="button" value="Delete" class="btnColor red" onclick="fn.delete()"/>
 	                <input id="partyBulkEdit" type="button" value="Bulk Edit" class="btnColor red" onclick="fn.bulkEdit()"/>
 	            </c:if>
+				<c:if test="${not empty detail.partnerId and ct:isAdmin()}">
+					<input type="button" value="OSS bulk registration" onclick="fn_grid_com.ossBulkReg('${detail.partnerId }','20')" class="btnColor red" style="width: 145px;" />
+				</c:if>
             </span>
         </div>
 		<div class="jqGridSet list2">
