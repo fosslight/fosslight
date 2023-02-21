@@ -826,9 +826,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 						
 						if(deactivateFlag) {
 							if (CommonFunction.isAdmin()) {
-								errMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+								errMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
 							} else {
-								diffMap.put(basicKey + "." + bean.getGridId(), "OSS_NAME.DEACTIVATED");
+								diffMap.put(basicKey + "." + bean.getComponentId(), "OSS_NAME.DEACTIVATED");
 							}
 						}
 					}
