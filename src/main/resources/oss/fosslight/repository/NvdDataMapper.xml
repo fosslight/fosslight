@@ -619,4 +619,19 @@
 	<update id="truncateCpeMatchNameTemp">TRUNCATE TABLE NVD_CPE_MATCH_NAMES_TEMP</update>
 	<insert id="copyNvdDataMatchFromTemp">INSERT INTO NVD_CPE_MATCH SELECT * FROM NVD_CPE_MATCH_TEMP</insert>
 	<insert id="copyNvdDataMatchNameFromTemp">INSERT INTO NVD_CPE_MATCH_NAMES SELECT * FROM NVD_CPE_MATCH_NAMES_TEMP</insert>
+	
+	<select id="selectVendorProductNvdDataV3Cnt">SELECT COUNT(*) FROM NVD_DATA_V3 WHERE VENDOR != '' AND (VENDORPRODUCT = '' OR VENDORPRODUCT IS NULL)</select>
+	<update id="updateVendorProductNvdDataV3">
+		UPDATE NVD_DATA_V3
+		   SET VENDORPRODUCT = CONCAT(VENDOR,'-',PRODUCT)
+		 WHERE VENDOR != ''
+		   AND (VENDORPRODUCT = '' OR VENDORPRODUCT IS NULL)
+	</update>
+	<select id="selectVendorProductNvdDataScoreV3Cnt">SELECT COUNT(*) FROM NVD_DATA_SCORE_V3 WHERE VENDOR != '' AND (VENDORPRODUCT = '' OR VENDORPRODUCT IS NULL)</select>
+	<update id="updateVendorProductNvdDataScoreV3">
+		UPDATE NVD_DATA_SCORE_V3
+		   SET VENDORPRODUCT = CONCAT(VENDOR,'-',PRODUCT)
+		 WHERE VENDOR != ''
+		   AND (VENDORPRODUCT = '' OR VENDORPRODUCT IS NULL)
+	</update>
 </mapper>

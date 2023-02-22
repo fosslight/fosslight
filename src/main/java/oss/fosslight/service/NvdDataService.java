@@ -326,6 +326,12 @@ public class NvdDataService {
 			log.info("ossName -> NickName cvssScore Diff Count : 0");
 		}
 		
+		int vendorProductNvdDataScoreV3Cnt = nvdDataMapper.selectVendorProductNvdDataScoreV3Cnt();
+		if (vendorProductNvdDataScoreV3Cnt > 0) {
+			log.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
+			nvdDataMapper.updateVendorProductNvdDataScoreV3();
+		}
+		
 		return resCd;
 	}
 	
@@ -617,6 +623,12 @@ public class NvdDataService {
 			
 			if (insertDataList.size() > 0) {
 				prepareStatementUpdateNvdData(insertDataList);
+			}
+			
+			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
+			if (vendorProductNvdDataV3Cnt > 0) {
+				log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
+				nvdDataMapper.updateVendorProductNvdDataV3();
 			}
 		}
 	
