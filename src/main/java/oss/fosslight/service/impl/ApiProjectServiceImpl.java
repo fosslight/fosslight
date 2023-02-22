@@ -8,6 +8,7 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2245,6 +2246,60 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					String[] cvssScoreMax = ((String) ll.get("cvssScoreMax")).split("\\@");
 					ll.put("cvssScore", cvssScoreMax[0]);
 					ll.put("cveId", cvssScoreMax[1]);
+				}
+				
+				// convert max score
+				if (ll.get("cvssScoreMax") != null || ll.get("cvssScoreMax1") != null || ll.get("cvssScoreMax2") != null 
+						|| ll.get("cvssScoreMax3") != null || ll.get("cvssScoreMax4") != null || ll.get("cvssScoreMax5") != null) {
+					List<String> cvssScoreMaxList = new ArrayList<>();
+					
+					if (ll.get("cvssScoreMax") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax"));
+					}
+					if (ll.get("cvssScoreMax1") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax1"));
+					}
+					if (ll.get("cvssScoreMax2") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax2"));
+					}
+					if (ll.get("cvssScoreMax3") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax3"));
+					}
+					if (ll.get("cvssScoreMax4") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax4"));
+					}
+					if (ll.get("cvssScoreMax5") != null) {
+						cvssScoreMaxList.add((String) ll.get("cvssScoreMax5"));
+					}
+					
+					if (!cvssScoreMaxList.isEmpty()) {
+						String[] cvssScoreMaxString = null;
+						BigDecimal cvssScore = null;
+						BigDecimal cvssScoreMax = null;
+						String cveId = null;
+						
+						for (String cvssScoreMaxStr : cvssScoreMaxList) {
+							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+							if (cvssScoreMax != null) {
+								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+								if (cvssScoreMax.compareTo(cvssScore) == -1) {
+									cvssScoreMax = cvssScore;
+									cveId = cvssScoreMaxString[1];
+								}
+							} else {
+								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+								cveId = cvssScoreMaxString[1];
+							}
+						}
+						
+						if (cvssScoreMax != null) {
+							ll.put("cvssScore", (String.valueOf(cvssScoreMax)));
+							ll.put("vulnYn", CoConstDef.FLAG_YES);
+							ll.put("cveId", cveId);
+						}
+					}
+				} else {
+					ll.put("vulnYn", CoConstDef.FLAG_NO);
 				}
 			}
 			

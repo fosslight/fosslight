@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -227,6 +228,60 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					String[] cvssScoreMax = bean.getCvssScoreMax().split("\\@");
 					bean.setCvssScore(cvssScoreMax[0]);
 					bean.setCveId(cvssScoreMax[1]);
+				}
+				
+				// convert max score
+				if (bean.getCvssScoreMax() != null || bean.getCvssScoreMax1() != null || bean.getCvssScoreMax2() != null 
+						|| bean.getCvssScoreMax3() != null || bean.getCvssScoreMax4() != null || bean.getCvssScoreMax5() != null) {
+					List<String> cvssScoreMaxList = new ArrayList<>();
+					
+					if (!isEmpty(bean.getCvssScoreMax())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax());
+					}
+					if (!isEmpty(bean.getCvssScoreMax1())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					if (!isEmpty(bean.getCvssScoreMax2())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax2());
+					}
+					if (!isEmpty(bean.getCvssScoreMax3())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax3());
+					}
+					if (!isEmpty(bean.getCvssScoreMax4())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax4());
+					}
+					if (!isEmpty(bean.getCvssScoreMax5())) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax5());
+					}
+					
+					if (!cvssScoreMaxList.isEmpty()) {
+						String[] cvssScoreMaxString = null;
+						BigDecimal cvssScore = null;
+						BigDecimal cvssScoreMax = null;
+						String cveId = null;
+						
+						for (String cvssScoreMaxStr : cvssScoreMaxList) {
+							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+							if (cvssScoreMax != null) {
+								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+								if (cvssScoreMax.compareTo(cvssScore) == -1) {
+									cvssScoreMax = cvssScore;
+									cveId = cvssScoreMaxString[1];
+								}
+							} else {
+								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+								cveId = cvssScoreMaxString[1];
+							}
+						}
+						
+						if (cvssScoreMax != null) {
+							bean.setCvssScore(String.valueOf(cvssScoreMax));
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+							bean.setCveId(cveId);
+						}
+					}
+				} else {
+					bean.setVulnYn(CoConstDef.FLAG_NO);
 				}
 			}
 				
