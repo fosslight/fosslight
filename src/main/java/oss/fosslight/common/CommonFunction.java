@@ -443,10 +443,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					List<String> recType = new ArrayList<>();
 					List<String> userType = new ArrayList<>();
 					for(String s : recommended) {
-						recType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+						if(licenseInfo.get(s.toUpperCase()) != null){
+							recType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+						}
 					}
 					for(String s : userinput) {
-						userType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+						if(licenseInfo.get(s.toUpperCase()) != null) {
+							userType.add(licenseInfo.get(s.toUpperCase()).getLicenseType());
+						}
 					}
 					List<String> recTypeList = recType.stream().distinct().collect(Collectors.toList());
 					List<String> userTypeList = userType.stream().distinct().collect(Collectors.toList());
