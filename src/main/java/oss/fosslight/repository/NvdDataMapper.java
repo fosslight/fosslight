@@ -59,4 +59,8 @@ public interface NvdDataMapper {
 	void truncateCpeMatchNameTemp();
 	void copyNvdDataMatchFromTemp();
 	void copyNvdDataMatchNameFromTemp();
+	int selectVendorProductNvdDataV3Cnt();
+	void updateVendorProductNvdDataV3();
+	int selectVendorProductNvdDataScoreV3Cnt();
+	void updateVendorProductNvdDataScoreV3();
 }

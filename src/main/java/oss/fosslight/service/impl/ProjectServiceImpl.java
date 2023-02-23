@@ -423,7 +423,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (cvssScoreMax != null) {
 							ll.setCvssScore(String.valueOf(cvssScoreMax));
 							ll.setVulnYn(CoConstDef.FLAG_YES);
-							if (!isEmpty(cveId)) ll.setCveId(cveId);
+							ll.setCveId(cveId);
 						}
 					}
 				} else {
@@ -692,7 +692,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							if (cvssScoreMax != null) {
 								project.setCvssScore(String.valueOf(cvssScoreMax));
 								project.setVulnYn(CoConstDef.FLAG_YES);
-								if (!isEmpty(cveId)) project.setCveId(cveId);
+								project.setCveId(cveId);
 							}
 						}
 					} else {
