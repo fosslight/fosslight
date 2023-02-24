@@ -4416,8 +4416,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 				if (!isEmpty(temp.getRestriction())) {
 					for (String restriction : temp.getRestriction().split("\\n")) {
-						if (!rtnBean.getRestriction().contains(restriction)) {
-							rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
+						if (!isEmpty(restriction) && !rtnBean.getRestriction().contains(restriction)) {
+							if (!isEmpty(rtnBean.getRestriction())) {
+								rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
+							} else {
+								rtnBean.setRestriction(restriction);
+							}
 						}
 					}
 				}
