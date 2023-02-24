@@ -621,7 +621,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					commentService.registComment(historyBean);
 					
+					ossMapper.deleteOssLicenseFlag(bean.getOssId());
 					ossMapper.deleteOssLicense(bean);
+					ossMapper.deleteOssDownloadLocation(bean);
 					ossMapper.deleteOssMaster(bean);
 					
 					mergeBean.setMergeOssId(bean.getNewOssId());
