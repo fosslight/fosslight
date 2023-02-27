@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
@@ -1368,7 +1369,8 @@ public class PartnerController extends CoTopComponent{
 	public String noticeText(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
 			HttpServletResponse res, Model model) throws Exception {
 
-		String fileType = req.getParameter("fileType");
+		String fileType = StringEscapeUtils.escapeHtml(req.getParameter("fileType"));
+                
 		ArrayList<Object> resultList = new ArrayList<Object>();
 		// 파일등록
 		List<UploadFile> list = new ArrayList<UploadFile>();
