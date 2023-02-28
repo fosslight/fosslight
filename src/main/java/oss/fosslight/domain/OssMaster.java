@@ -263,6 +263,7 @@ public class OssMaster extends ComBean implements Serializable{
 	private String ossTypeSearch;
 
 	private String licenseNameAllSearchFlag;
+	private String homepageAllSearchFlag;
 	
 	private String startAnalysisFlag;
 	
@@ -1784,6 +1785,14 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setLicenseNameAllSearchFlag(String licenseNameAllSearchFlag) {
 		this.licenseNameAllSearchFlag = licenseNameAllSearchFlag;
+	}
+
+	public String getHomepageAllSearchFlag() {
+		return homepageAllSearchFlag;
+	}
+
+	public void setHomepageAllSearchFlag(String homepageAllSearchFlag) {
+		this.homepageAllSearchFlag = homepageAllSearchFlag;
 	}
 
 	public String getOssTypeSearch() {

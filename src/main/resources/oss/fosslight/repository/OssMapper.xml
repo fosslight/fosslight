@@ -358,12 +358,23 @@
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			AND 
-			(
-			T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			)
+		AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(homepageAllSearchFlag,'Y')">
+					(
+					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					)
+				</when>
+				<otherwise>
+					(
+					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					)
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyrights)">
 			AND (
@@ -571,12 +582,23 @@
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			AND 
-			(
-			T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-			)
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(homepageAllSearchFlag,'Y')">
+					(
+					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					)
+				</when>
+				<otherwise>
+					(
+					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					)
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyrights)">
 			AND (
@@ -765,14 +787,23 @@
 			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			AND 
-			(
-			T1.HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
-			OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',#{homepage},'%')
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',#{homepage},'%')
-			</if>
-			)
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(homepageAllSearchFlag,'Y')">
+					(
+					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					)
+				</when>
+				<otherwise>
+					(
+					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					)
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyrights)">
 			AND (

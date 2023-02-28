@@ -33,7 +33,9 @@
 					</dd>
 					<dd>
 						<label>Website</label>
-						<input name="homepage" type="text" value="${searchBean.homepage}"/>
+						<input name="homepage" type="text" value="${searchBean.homepage}" style="width:230px"/>
+						<input type="checkbox"id="homepageAllSearchFlag" ${searchBean.homepageAllSearchFlag eq 'Y' ? 'checked="checked"' : ''} /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="homepageAllSearchFlag" value="${searchBean.homepageAllSearchFlag}"/>
 					</dd>
 					<dd>
 						<label>Deactivate</label>

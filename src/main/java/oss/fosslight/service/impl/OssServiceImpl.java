@@ -113,6 +113,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (isEmpty(ossMaster.getLicenseNameAllSearchFlag())) {
 			ossMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
 		}
+
+		if (isEmpty(ossMaster.getHomepageAllSearchFlag())) {
+			ossMaster.setHomepageAllSearchFlag(CoConstDef.FLAG_NO);
+		}
 		
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		ossMaster.setCveIdText();
