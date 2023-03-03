@@ -1276,6 +1276,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 				case 7:
 					p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 					break;
+				case 8 :
+					p = Pattern.compile("((http|https)://www.nuget.org/packages/([^/]+))");
+					break;
 				default:
 					break;
 			}
