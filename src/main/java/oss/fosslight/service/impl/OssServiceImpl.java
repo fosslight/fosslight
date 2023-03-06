@@ -2081,7 +2081,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
 			case 8 :
-				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
+				p = Pattern.compile("((http|https)://www.nuget.org/packages/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
