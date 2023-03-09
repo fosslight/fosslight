@@ -340,7 +340,7 @@ var fn_grid_com = {
 		    	event.cancelBubble = true; //IE
 	    	}
 	    	
-	    	var dataArray = $("#"+target).jqGrid('getGridParam', 'data');
+	    	var dataArray = $("#"+target).jqGrid("getRowData");
 	    	
             if($(allChk).is(":checked")) {
                 $("#"+target+" input[id*='_excludeYn']").each(function (idx){
