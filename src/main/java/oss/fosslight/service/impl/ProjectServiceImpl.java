@@ -223,7 +223,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
 		
 		if (!isEmpty(project.getBinCsvFileId())) {
-			project.setBinCsvFile(projectMapper.selectFileInfoById(project.getBinCsvFileId()));
+			project.setBinCsvFile(projectMapper.selectBinCsvFile(project));
 		}
 		
 		if (!isEmpty(project.getBinBinaryFileId())) {
@@ -1707,7 +1707,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 2) delete
-		if (orgOssMap != null && !orgOssMap.isEmpty()) {
+		if (deleteList != null && !deleteList.isEmpty()) {
 			OssComponents param = new OssComponents();
 			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			param.setReferenceId(prjId);

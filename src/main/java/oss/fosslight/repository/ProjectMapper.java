@@ -94,6 +94,8 @@ public interface ProjectMapper {
 	void updateFileId(Project project);
 
 	List<T2File> selectCsvFile(Project project);
+	
+	List<T2File> selectBinCsvFile(Project project);
 
 	void deleteFileBySeq(T2File file);
 
