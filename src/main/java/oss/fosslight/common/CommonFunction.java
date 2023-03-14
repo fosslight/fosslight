@@ -5,16 +5,26 @@
 
 package oss.fosslight.common; 
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +52,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.BeanMap;
@@ -4827,5 +4841,43 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		Collections.sort(notPermissionList);
 		return notPermissionList;
+	}
+	
+	public static void setSslWithCert() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+		// Load CAs from an InputStream
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+		InputStream caInput = new BufferedInputStream(new FileInputStream("/home/osc/LGERootCA.crt"));
+		Certificate ca;
+		try {
+			ca = cf.generateCertificate(caInput);
+			log.debug("ca=" + ((X509Certificate) ca).getSubjectDN());
+		} finally {
+			caInput.close();
+		}
+		// Create a KeyStore containing our trusted CAs
+		String keyStoreType = KeyStore.getDefaultType();
+		KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+		keyStore.load(null, null);
+		keyStore.setCertificateEntry("ca", ca);
+		// Create a TrustManager that trusts the CAs in our KeyStore
+		String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+		tmf.init(keyStore);
+		// Create an SSLContext that uses our TrustManager
+		SSLContext context = SSLContext.getInstance("TLS");
+		context.init(null, tmf.getTrustManagers(), null);
+		SSLContext.setDefault(context);
+	}
+	
+	public void setSslWithNoCert() throws NoSuchAlgorithmException, KeyManagementException {
+		SSLContext context = SSLContext.getInstance("TLS");
+		X509TrustManager tm;
+		tm = new X509TrustManager() {
+			public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {}
+			public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {}
+			public X509Certificate[] getAcceptedIssuers() {return new X509Certificate[0];}
+		};
+		context.init(null, new TrustManager[]{tm}, null);
+		SSLContext.setDefault(context);
 	}
 }

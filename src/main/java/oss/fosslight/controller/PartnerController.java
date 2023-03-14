@@ -719,8 +719,7 @@ public class PartnerController extends CoTopComponent{
 				userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
 				userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
 				
-				String userId = project.getParEmail().split("@")[0];
-				String filter = "(cn=" + userId + ")";
+				String filter = project.getParEmail().split("@")[0];
 				
 				boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", filter);
 				
@@ -1328,6 +1327,18 @@ public class PartnerController extends CoTopComponent{
 						&& beforePartnerList.size() == afterPartnerList.size()) {
 					
 					for (int i=0; i<beforePartnerList.size(); i++) {
+						try {
+							String mailType = CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED;
+							CoMail mailBean = new CoMail(mailType);
+							mailBean.setParamPartnerId(afterPartnerList.get(i).getPartnerId());
+							mailBean.setCompareDataBefore(beforePartnerList.get(i));
+							mailBean.setCompareDataAfter(afterPartnerList.get(i));
+							
+							CoMailManager.getInstance().sendMail(mailBean);
+						} catch(Exception e) {
+							log.error(e.getMessage(), e);
+						}
+						
 						try {
 							CommentsHistory commentsHistory = new CommentsHistory();
 							commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
