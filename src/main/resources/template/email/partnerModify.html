@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html lang="ko">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<style>
+			.marker{background-color: Yellow;}
+		</style>
+		<title>FOSSLight Hub</title>
+	</head>
+	<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td width="60" style="background:#f9f9f9"></td>
+				<td>
+					<table cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td colspan="3" height="25" style="background:#c00c3f">
+								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+							</td>
+						</tr>
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
+							#if( $contentsTitle )
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
+							#end
+							#if( $contentsSubTitle )
+								<p style="font-size:12px;">$!contentsSubTitle</p>
+							#end
+							
+							#if( $comment )
+								<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+								<div style="padding:10px;font-size:12px;">$!comment</div>
+							#end
+								<!-- <p style="font-size:12px;">▶Created : $!before.createdDate / $!before.creator</p> -->
+								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+										<th style="padding:5px;background:#f0f0f0;">Before Change</th>
+										<th style="padding:5px;background:#f0f0f0;">After Change</th>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party Name</th>
+										<td style="padding:5px;">$!before.partnerName</td>
+										<td style="padding:5px;">$!after.partnerName</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
+										<td style="padding:5px;">$!before.softwareName</td>
+										<td style="padding:5px;">$!after.softwareName</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
+										<td style="padding:5px;">$!before.softwareVersion</td>
+										<td style="padding:5px;">$!after.softwareVersion</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Delivery Form</th>
+										<td style="padding:5px;">$!before.deliveryForm</td>
+										<td style="padding:5px;">$!after.deliveryForm</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
+										<td style="padding:5px;">$!before.description</td>
+										<td style="padding:5px;">$!after.description</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Commitment</th>
+										<td style="padding:5px;">$!before.confirmationFileId</td>
+										<td style="padding:5px;">$!after.confirmationFileId</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
+										<td style="padding:5px;">$!before.creator</td>
+										<td style="padding:5px;">$!after.creator</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
+										<td style="padding:5px;">$!before.division</td>
+										<td style="padding:5px;">$!after.division</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										<td style="padding:5px;">$!before.reviewer</td>
+										<td style="padding:5px;">$!after.reviewer</td>
+									</tr>
+								</table>
+								<div style="margin:20px 0;border:1px dashed #666;"></div>
+								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
+								<div style="font-size:12px;">* This mail was sent by <a href="$domain">$shortDomain</a></div>
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr>
+					</table>
+				</td>
+				<td width="60" style="background:#f9f9f9"></td>
+			</tr>
+			<tr>
+				<td colspan="3" height="28" style="background:#f9f9f9"></td>
+			</tr>
+		</table>
+		
+	</body>
+</html>
