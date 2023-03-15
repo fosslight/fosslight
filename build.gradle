@@ -129,5 +129,7 @@ dependencies {
 	runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.10.7'
 	
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+	implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '2.3.8.RELEASE'
+	
 	implementation files('libs/tlsh-4.6.0.jar')
 }

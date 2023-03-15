@@ -113,6 +113,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (isEmpty(ossMaster.getLicenseNameAllSearchFlag())) {
 			ossMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
 		}
+
+		if (isEmpty(ossMaster.getHomepageAllSearchFlag())) {
+			ossMaster.setHomepageAllSearchFlag(CoConstDef.FLAG_NO);
+		}
 		
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		ossMaster.setCveIdText();
@@ -621,7 +625,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					commentService.registComment(historyBean);
 					
+					ossMapper.deleteOssLicenseFlag(bean.getOssId());
 					ossMapper.deleteOssLicense(bean);
+					ossMapper.deleteOssDownloadLocation(bean);
 					ossMapper.deleteOssMaster(bean);
 					
 					mergeBean.setMergeOssId(bean.getNewOssId());
@@ -2018,6 +2024,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 5: // cocoapods
 					checkName = "cocoapods:" + ossNameMatcher.group(3);
 					break;
+				case 8:
+					checkName = "nuget:" + ossNameMatcher.group(3);
+					break;
 				default:
 					break;
 			}
@@ -2070,6 +2079,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 7:
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				break;
+			case 8 :
+				p = Pattern.compile("((http|https)://www.nuget.org/packages/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
@@ -2229,7 +2241,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 									oc.setUseCaches(false);
 									oc.setConnectTimeout(1500);
 									if (200 == oc.getResponseCode()) {
-										if (oc.getURL().toString().equals("https://" + downloadlocationUrl) || oc.getURL().toString().equals("https://" + downloadlocationUrl + "/")) {
+										ProjectIdentification url = new ProjectIdentification();
+										url.setDownloadLocation(oc.getURL().toString());
+										url = downloadlocationFormatter(url, urlSearchSeq);
+										if (url.getDownloadLocation().equals(downloadlocationUrl) || url.getDownloadLocation().equals(downloadlocationUrl + "/")) {
 											checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 										} else {
 											redirectlocationUrl = oc.getURL().toString().split("//")[1];

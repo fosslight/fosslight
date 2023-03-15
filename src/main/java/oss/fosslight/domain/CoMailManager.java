@@ -335,6 +335,12 @@ public class CoMailManager extends CoTopComponent {
     				convertDataMap.put("after", bean.getCompareDataAfter());
     			}
     			
+    			// partner 기본정보가 변경된 경우, 코드변환하여 다시 맵에 격납한다.
+    			if (CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())) {
+    				convertDataMap.put("before", convertCodePartnerBaiscInfo( bean.getCompareDataBefore()));
+    				convertDataMap.put("after", convertCodePartnerBaiscInfo( bean.getCompareDataAfter()));
+    			}
+    			
     			// 프로젝트 기본정보가 변경된 경우, 코드변환하여 다시 맵에 격납한다.
     			if (CoConstDef.CD_MAIL_TYPE_PROJECT_CHANGED.equals(bean.getMsgType())
     					|| CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(bean.getMsgType())) {
@@ -1007,6 +1013,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED:
+    		case CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED:
@@ -1104,6 +1111,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(partnerInfo.getReviewer())) {
         					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
@@ -1115,6 +1123,7 @@ public class CoMailManager extends CoTopComponent {
     				else if (CoConstDef.CD_MAIL_TYPE_PARTER_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_CANCELED_CONF.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REJECT.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())
     						) {
     					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getCreator()})));
     					toList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
@@ -1267,9 +1276,22 @@ public class CoMailManager extends CoTopComponent {
     	return procResult;
     }
     
+    private Object convertCodePartnerBaiscInfo(Object bean) {
+    	PartnerMaster convBean = (PartnerMaster) bean;
+    	// creator
+    	if (!isEmpty(convBean.getCreator())) {
+    		convBean.setCreator(makeUserNameFormatWithDivision(convBean.getCreator()));
+    	}
+    	if (!isEmpty(convBean.getDivision())) {
+			convBean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, convBean.getDivision()));
+		}
+    	// reviewer
+		if (!isEmpty(convBean.getReviewer())) {
+			convBean.setReviewer(makeUserNameFormatWithDivision(convBean.getReviewer()));
+		}
+    	return convBean;
+    }
     
-    
-
 	private Object convertCodeProjectBaiscInfo(Object bean) {
 		Project convBean = (Project) bean;
 		// opertating system
@@ -2340,6 +2362,22 @@ public class CoMailManager extends CoTopComponent {
 					}
 				}
 			}
+		} else if (CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(msgType)) {
+			PartnerMaster before = (PartnerMaster) convertDataMap.get("before");
+			PartnerMaster after = (PartnerMaster) convertDataMap.get("after");
+			
+			after.setPartnerName(appendChangeStyle(before.getPartnerName(), after.getPartnerName()));
+			after.setSoftwareName(appendChangeStyle(before.getSoftwareName(), after.getSoftwareName()));
+			after.setSoftwareVersion(appendChangeStyle(before.getSoftwareVersion(), after.getSoftwareVersion()));
+			after.setDeliveryForm(appendChangeStyle(before.getDeliveryForm(), after.getDeliveryForm()));
+			after.setDescription(appendChangeStyle(before.getDescription(), after.getDescription()));
+			after.setConfirmationFileId(appendChangeStyle(before.getConfirmationFileId(), after.getConfirmationFileId()));
+			after.setCreator(appendChangeStyle(before.getCreator(), after.getCreator()));
+			after.setDivision(appendChangeStyle(before.getDivision(), after.getDivision()));
+			after.setReviewer(appendChangeStyle(before.getReviewer(), after.getReviewer()));
+			
+			convertDataMap.replace("before", before);
+			convertDataMap.replace("after", after);
 		}
 		return convertDataMap;
 	}

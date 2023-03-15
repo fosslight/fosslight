@@ -13,15 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.Context;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
+import javax.naming.directory.Attributes;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -57,6 +56,8 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.JwtUtil;
 import oss.fosslight.util.StringUtil;
+
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 /**
  * The Class T2UserServiceImpl.
@@ -411,54 +412,36 @@ public class T2UserServiceImpl implements T2UserService {
 		String userPw = (String) userInfo.get(pwKey);
 		
 		String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
-		Hashtable<String, String> properties = new Hashtable<String, String>();
-		properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
-		properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-		properties.put(Context.SECURITY_PRINCIPAL, userId+ldapDomain);
-		properties.put(Context.SECURITY_CREDENTIALS, userPw);
-		
-		String[] attrIDs = { "cn", "mail" };
-		if (StringUtil.isEmpty(filter)) {
-			filter = "(cn=" + userId + ")";
-		}
-		
-		DirContext con = null;
-		SearchControls constraints = new SearchControls();
-		NamingEnumeration<SearchResult> m_ne = null;
-		
 		try {
-			con = new InitialDirContext(properties);
-			isAuthenticated = true;
+			LdapContextSource contextSource = new LdapContextSource();
+			contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+			contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
+			contextSource.setUserDn(userId+ldapDomain);
+			contextSource.setPassword(userPw);
+			CommonFunction.setSslWithCert();
+			contextSource.afterPropertiesSet();
 			
-			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-			
-			if (attrIDs != null) {
-				constraints.setReturningAttributes(attrIDs);
+			if (StringUtil.isEmpty(filter)) {
+				filter = userId;
 			}
 			
-			String searchKey = StringUtil.avoidNull(CommonFunction.getProperty("ldap.search.key"), "");
-			m_ne = con.search(searchKey, filter, constraints);
-		} catch (NamingException e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (NamingException e) {}
-			}
-		}
-		
-		try {
-			SearchResult sr = null;
-
-			while (m_ne.hasMoreElements()) {
-				sr = (SearchResult) m_ne.next();
-				if (sr != null) {
-					String email = (String) sr.getAttributes().get("mail").get();
-					
-					if (!StringUtil.isEmpty(email)) {
-						userInfo.put("EMAIL", email);
+			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+			ldapTemplate.afterPropertiesSet();
+			
+			if(ldapTemplate.authenticate("", String.format("(cn=%s)", userId), userPw)) {
+				isAuthenticated = true;
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				List<String[]> result = ldapTemplate.search(query().where("cn").is(filter), new AttributesMapper() {
+					public Object mapFromAttributes(Attributes attrs) throws NamingException {
+						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+					}
+				});
+				if(result != null && result.size() > 0) {
+					for(int i=0;i<result.size();i++) {
+						String email = result.get(i)[0];
+						if (!StringUtil.isEmpty(email)) {
+							userInfo.put("EMAIL", email);
+						}
 					}
 				}
 			}
@@ -611,66 +594,67 @@ public class T2UserServiceImpl implements T2UserService {
 		return properties;
 	}
 
+	private LdapContextSource makeLdapContextSource() {
+		String LDAP_SEARCH_DOMAIN = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
+		String LDAP_SEARCH_ID = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID);
+		String LDAP_SEARCH_PW = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW);
+		
+		LdapContextSource contextSource = new LdapContextSource();
+		contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+		contextSource.setBase("OU=LGE Users,DC=LGE,DC=NET");
+		contextSource.setUserDn(LDAP_SEARCH_ID+LDAP_SEARCH_DOMAIN);
+		contextSource.setPassword(LDAP_SEARCH_PW);
+		
+		return contextSource;
+	}
+	
 	public String[] checkUserInfo(T2Users userInfo) {
-		return checkUserInfo(userInfo, makeLdapProperty());
+		return checkUserInfo(userInfo, makeLdapContextSource());
 	}
 
-	private String[] checkUserInfo(T2Users userInfo, Hashtable<String, String> property) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private String[] checkUserInfo(T2Users userInfo, LdapContextSource contextSource) {
 		String[] result = new String[3];
-
-		String[] attrIDs = { "distinguishedName", "displayName", "title", "mail", "cn" };
-		String filter = "(cn=" + userInfo.getUserId() + ")";
-
-		DirContext con = null;
-		SearchControls constraints = new SearchControls();
-		NamingEnumeration<SearchResult> m_ne = null;
-		try {
-			con = new InitialDirContext(property);
-			constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-
-			if (attrIDs != null) {
-				constraints.setReturningAttributes(attrIDs);
-			}
-
-			String searchKey = StringUtil.avoidNull(CommonFunction.getProperty("ldap.search.key"), "");
-			m_ne = con.search(searchKey, filter, constraints);
-		} catch (NamingException e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (con != null) {
-				try {
-					con.close();
-				} catch (NamingException e) {}
-			}
-		}
+		String userId = !StringUtil.isEmptyTrimmed(userInfo.getUserId()) ? userInfo.getUserId() : userInfo.getCreator();
 
 		try {
-			SearchResult sr = null;
-			int cnt = 1;
-			while (m_ne.hasMoreElements()) {
-				sr = (SearchResult) m_ne.next();
-				if (sr != null) {
-					// 이름/직책/부서(email)
-					String displayName = (String) sr.getAttributes().get("displayName").get();
-					String email = (String) sr.getAttributes().get("mail").get();
-					if (StringUtil.isEmptyTrimmed(displayName)) {
-						result[0] = email.split("@")[0];
-					} else{
-						result[0] = displayName.replaceAll("\\("+email+"\\)", "").trim();
+			CommonFunction.setSslWithCert();
+			contextSource.afterPropertiesSet();
+			
+			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+			ldapTemplate.afterPropertiesSet();
+			
+			if(ldapTemplate.authenticate("", String.format("(cn=%s)", userId), contextSource.getPassword())) {
+				List<String[]> searchResult = ldapTemplate.search(query().where("cn").is(userId), new AttributesMapper() {
+					public Object mapFromAttributes(Attributes attrs) throws NamingException {
+						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
 					}
-					
-					if (!StringUtil.isEmptyTrimmed(userInfo.getEmail())) {
-						if (email.equals(userInfo.getEmail().trim())) {
-							result[1] = email;
-							result[2] = String.valueOf(cnt);
-							break;
-						} else {
-							result[1] = "";
-							result[2] = String.valueOf(cnt);
+				});
+				if(searchResult != null && searchResult.size() > 0) {
+					int cnt = 1;
+					for(int i=0;i<searchResult.size();i++) {
+						String email = searchResult.get(i)[0];
+						String displayName = searchResult.get(i)[1];
+						
+						if (StringUtil.isEmptyTrimmed(displayName)) {
+							result[0] = email.split("@")[0];
+						} else{
+							result[0] = displayName.replaceAll("\\("+email+"\\)", "").trim();
 						}
-					} else {
-						result[1] = email;
-						result[2] = String.valueOf(cnt++);
+						
+						if (!StringUtil.isEmptyTrimmed(userInfo.getEmail())) {
+							if (email.equals(userInfo.getEmail().trim())) {
+								result[1] = email;
+								result[2] = String.valueOf(cnt);
+								break;
+							} else {
+								result[1] = "";
+								result[2] = String.valueOf(cnt);
+							}
+						} else {
+							result[1] = email;
+							result[2] = String.valueOf(cnt++);
+						}
 					}
 				}
 			}

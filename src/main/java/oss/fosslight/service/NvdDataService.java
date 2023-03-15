@@ -6,6 +6,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -20,6 +22,12 @@ import java.util.Map;
 import java.util.Scanner;
 
 import javax.annotation.PostConstruct;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -1055,11 +1063,12 @@ public class NvdDataService {
 	
 	private HashMap<String, String> nvdMetaData(String FILE_NM) throws IOException{
 		HashMap<String, String> metaInfo = null;
-		HttpURLConnection con = null;
+		HttpsURLConnection con = null;
 		Scanner s = null;
 		try {
 			URL url = new URL( (NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NM) ? NVD_META_URL : NVD_CVE_URL) +FILE_NM+".meta");
-			con = (HttpURLConnection)url.openConnection();
+			ignoreSsl();
+			con = (HttpsURLConnection)url.openConnection();
 			con.setRequestMethod("HEAD");
 			if (con.getResponseCode() == HttpURLConnection.HTTP_OK){
 				s = new Scanner(url.openConnection().getInputStream());
@@ -1117,4 +1126,51 @@ public class NvdDataService {
 		nvdDataMapper.resetCveDataV3();
 		nvdDataMapper.resetNvdDataV3();
 	}
+	
+	private void ignoreSsl() {
+		HostnameVerifier hv = new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+	    		return true;
+	    	}
+		};
+		try {
+			trustAllHttpsCertificates();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		HttpsURLConnection.setDefaultHostnameVerifier(hv);
+	}
+
+	private static void trustAllHttpsCertificates() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+	
+	static class miTM implements TrustManager,X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+ 
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+ 
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+    }
 }

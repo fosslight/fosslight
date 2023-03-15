@@ -7,12 +7,9 @@ package oss.fosslight.config;
 
 import java.util.*;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -90,27 +87,29 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		
 		if (StringUtil.isNotEmpty(user_pw)) {
 			String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
-			Hashtable<String, String> properties = new Hashtable<String, String>();
-			properties.put(Context.INITIAL_CONTEXT_FACTORY, CoConstDef.AD_LDAP_LOGIN.INITIAL_CONTEXT_FACTORY.getValue());
-			properties.put(Context.PROVIDER_URL, CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
-			properties.put(Context.SECURITY_AUTHENTICATION, "simple");
-			properties.put(Context.SECURITY_PRINCIPAL, user_id+ldapDomain);
-			properties.put(Context.SECURITY_CREDENTIALS, user_pw);
 
-			DirContext con = null;
 			try {
-				con = new InitialDirContext(properties);
-				rtnMap.put("isAuthenticated", true);
-			}catch (NamingException e) {
-				log.debug("LDAP NamingException userId : " + user_id + " ERROR Message :" + e.getMessage());
+				LdapContextSource contextSource = new LdapContextSource();
+				contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+				contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+				contextSource.setUserDn(user_id+ldapDomain);
+				contextSource.setPassword(user_pw);
+				CommonFunction.setSslWithCert();
+				contextSource.afterPropertiesSet();
+
+				LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+				ldapTemplate.afterPropertiesSet();
+				
+				if (ldapTemplate.authenticate("", String.format("(cn=%s)", user_id), user_pw)) {
+					rtnMap.put("isAuthenticated", true);
+				} else {
+					rtnMap.put("isAuthenticated", false);
+					return rtnMap;
+				}
+			} catch (Exception e) {
+				log.warn("ERROR Message :" + e.getMessage());
 				rtnMap.put("isAuthenticated", false);
 				return rtnMap;
-			} finally {
-				if (con != null) {
-					try {
-						con.close();
-					} catch (Exception e) {}
-				}
 			}
 			
 			// 사용자 가입여부 체크

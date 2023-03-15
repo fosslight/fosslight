@@ -3116,8 +3116,7 @@ public class ProjectController extends CoTopComponent {
 				userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
 				userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
 				
-				String userId = project.getPrjEmail().split("@")[0];
-				String filter = "(cn=" + userId + ")";
+				String filter = project.getPrjEmail().split("@")[0];
 				
 				boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", filter);
 				

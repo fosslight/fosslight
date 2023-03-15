@@ -176,6 +176,7 @@ public class OssController extends CoTopComponent{
 		String homepage =req.getParameter("homepage");
 		if (!values.contains(homepage)){
 			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+			homepage = homepage.replaceFirst("/$", "");
 			ossMaster.setHomepage(homepage);
 		}
 

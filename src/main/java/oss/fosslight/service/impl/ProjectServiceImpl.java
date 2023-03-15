@@ -223,7 +223,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
 		
 		if (!isEmpty(project.getBinCsvFileId())) {
-			project.setBinCsvFile(projectMapper.selectFileInfoById(project.getBinCsvFileId()));
+			project.setBinCsvFile(projectMapper.selectBinCsvFile(project));
 		}
 		
 		if (!isEmpty(project.getBinBinaryFileId())) {
@@ -1707,7 +1707,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 2) delete
-		if (orgOssMap != null && !orgOssMap.isEmpty()) {
+		if (deleteList != null && !deleteList.isEmpty()) {
 			OssComponents param = new OssComponents();
 			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			param.setReferenceId(prjId);
@@ -2918,7 +2918,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					|| (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType()) && !hasSourceOss)) { // OSS Notice가 N/A이면서 packaging이 필요 없는 경우
 				// do nothing
 				mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY;
-				userComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY));
+				if (!isEmpty(avoidNull(userComment)) && (CoConstDef.FLAG_YES.equals(prjInfo.getNetworkServerType()) && !isNetworkRestriction)) {
+					userComment = avoidNull(userComment) + "<br />" + avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY));
+				} else {
+					userComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY));
+				}
 			} else {
 				String _tempComment;
 				if(isAndroidModel) {
@@ -4416,8 +4420,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 				if (!isEmpty(temp.getRestriction())) {
 					for (String restriction : temp.getRestriction().split("\\n")) {
-						if (!rtnBean.getRestriction().contains(restriction)) {
-							rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
+						if (!isEmpty(restriction) && !rtnBean.getRestriction().contains(restriction)) {
+							if (!isEmpty(rtnBean.getRestriction())) {
+								rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
+							} else {
+								rtnBean.setRestriction(restriction);
+							}
 						}
 					}
 				}

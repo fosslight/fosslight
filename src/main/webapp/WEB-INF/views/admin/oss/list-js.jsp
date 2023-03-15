@@ -80,6 +80,10 @@
 				$("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 
+ 			$("#homepageAllSearchFlag").on("change", function(e){
+				$("[name='homepageAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+			});
+
 			$("#deactivateFlag").on("change", function(){
 				$("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});

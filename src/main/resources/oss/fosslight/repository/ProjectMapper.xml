@@ -1434,6 +1434,16 @@
 			T1.FILE_ID = #{srcCsvFileId}
 	</select>
 	
+	<select id="selectBinCsvFile" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.T2File">
+		SELECT
+			T1.*
+			, DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		FROM
+			T2_FILE T1
+		WHERE
+			T1.FILE_ID = #{binCsvFileId}
+	</select>
+	
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
 		UPDATE T2_FILE 
 			SET DEL_YN = 'Y'
