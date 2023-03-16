@@ -128,9 +128,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		String orgOssName = ossMaster.getOssName();
 		List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
+		multiOssList.replaceAll(String::toUpperCase);
 		
 		for (OssMaster oss : list){
-			if (multiOssList.contains(oss.getOssName())) {
+			if (multiOssList.contains(oss.getOssName().toUpperCase())) {
 				ossMaster.setOssId(oss.getOssId());
 				ossMaster.setOssName(oss.getOssName());
 				List<OssMaster> subList = ossMapper.selectOssSubList(ossMaster);
