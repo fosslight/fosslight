@@ -782,14 +782,14 @@ public class CoMailManager extends CoTopComponent {
     				ccList = new ArrayList<>();
     				// 로그인 사용자가 Admin이면 to : project creator cc: reviewer, watcher
     				if (CommonFunction.isAdmin()) {
-    					toList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함하고 있음
+    					toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함하고 있음
         				if (!isEmpty(prjInfo.getReviewer())) {
         					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
         					ccList.addAll(Arrays.asList(selectAdminMailAddr()));
         				}
     				} else {
-    					ccList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함하고 있음
+    					ccList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함하고 있음
         				if (!isEmpty(prjInfo.getReviewer())) {
         					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
         				} else {
@@ -814,7 +814,7 @@ public class CoMailManager extends CoTopComponent {
     				ccList = new ArrayList<>();
     				
     				if ("W".equals(bean.getReceiveFlag())) {
-            			watcherList = mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId());
+            			watcherList = mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId());
             			if (watcherList != null && !watcherList.isEmpty()) {
             				toList.addAll(watcherList);
             			} else {
@@ -831,7 +831,7 @@ public class CoMailManager extends CoTopComponent {
 						toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getCreator()})));
     				} else if ("WR".equals(bean.getReceiveFlag())) {
 
-            			watcherList = mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId());
+            			watcherList = mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId());
             			if (watcherList != null && !watcherList.isEmpty()) {
             				toList.addAll(watcherList);
             			} else {
@@ -924,7 +924,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
     						) {
-						toList.addAll(mailManagerMapper.setProjectWatcherMailList(bean.getParamPrjId())); // creator를 포함
+						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
     				}
     				// Creator only
     				else if (CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED.equals(bean.getMsgType())) {

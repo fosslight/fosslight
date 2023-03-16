@@ -5,9 +5,15 @@
 
 package oss.fosslight.config;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
+
 import java.util.*;
 
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -82,8 +88,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		return userService.checkPassword(user_pw, param);
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap) {
 		String rtnEmail = (String) rtnMap.get("email");
+		List<String[]> searchResult = null;
 		
 		if (StringUtil.isNotEmpty(user_pw)) {
 			String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
@@ -101,6 +109,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				ldapTemplate.afterPropertiesSet();
 				
 				if (ldapTemplate.authenticate("", String.format("(cn=%s)", user_id), user_pw)) {
+					searchResult = ldapTemplate.search(query().where("cn").is(user_id), new AttributesMapper() {
+						public Object mapFromAttributes(Attributes attrs) throws NamingException {
+							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+						}
+					});
+					
 					rtnMap.put("isAuthenticated", true);
 				} else {
 					rtnMap.put("isAuthenticated", false);
@@ -114,31 +128,58 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 			
 			// 사용자 가입여부 체크
 			if (!userService.existUserIdOrEmail(user_id)){
+				String userName = "";
+				String userEmail = "";
+				String userEmailCnt = "";
+				
+				if (searchResult != null) {
+					int cnt = 1;
+					for(int i=0;i<searchResult.size();i++) {
+						String email = searchResult.get(i)[0];
+						String displayName = searchResult.get(i)[1];
+						
+						if (StringUtil.isEmptyTrimmed(displayName)) {
+							userName = email.split("@")[0];
+						} else{
+							userName = displayName.replaceAll("\\("+email+"\\)", "").trim();
+						}
+						
+						if (!StringUtil.isEmptyTrimmed(rtnEmail)) {
+							if (email.equals(rtnEmail.trim())) {
+								userEmail = email;
+								userEmailCnt = String.valueOf(cnt);
+								break;
+							} else {
+								userEmail= "";
+								userEmailCnt = String.valueOf(cnt);
+							}
+						} else {
+							userEmail = email;
+							userEmailCnt = String.valueOf(cnt++);
+						}
+					}
+				}
+				
+				if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
+					log.debug("Cannot find Ldap user information : " + user_id);
+					rtnMap.put("isAuthenticated", false);
+					return rtnMap;
+				}
+				
+				if (Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
+					log.debug("ldap user email duplicate : " + user_id);
+					rtnMap.put("isAuthenticated", false);
+					rtnMap.put("msg", "enter email");
+					
+					return rtnMap;
+				}
+				
 				T2Users vo = new T2Users();
 				vo.setUserId(user_id);
 				vo.setCreatedDateCurrentTime();
 				vo.setCreator(user_id);
 				vo.setModifier(user_id);
 				vo.setEmail(rtnEmail);
-
-				String[] info = userService.checkUserInfo(vo);
-				String userName = info[0];
-				String userEmail = info[1];
-				String userEmailCnt = info[2];
-				
-				if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
-					log.debug("Cannot find Ldap user information : " + vo.getUserId());
-					rtnMap.put("isAuthenticated", false);
-					return rtnMap;
-				}
-				
-				if (Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
-					log.debug("ldap user email duplicate : " + vo.getUserId());
-					rtnMap.put("isAuthenticated", false);
-					rtnMap.put("msg", "enter email");
-					
-					return rtnMap;
-				}
 				vo.setEmail(userEmail);
 				vo.setUserName(userName);
 				vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);

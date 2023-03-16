@@ -616,6 +616,7 @@ public class T2UserServiceImpl implements T2UserService {
 	private String[] checkUserInfo(T2Users userInfo, LdapContextSource contextSource) {
 		String[] result = new String[3];
 		String userId = !StringUtil.isEmptyTrimmed(userInfo.getUserId()) ? userInfo.getUserId() : userInfo.getCreator();
+		String ldapSearchID = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID);
 
 		try {
 			CommonFunction.setSslWithCert();
@@ -624,7 +625,7 @@ public class T2UserServiceImpl implements T2UserService {
 			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
 			ldapTemplate.afterPropertiesSet();
 			
-			if(ldapTemplate.authenticate("", String.format("(cn=%s)", userId), contextSource.getPassword())) {
+			if(ldapTemplate.authenticate("", String.format("(cn=%s)", ldapSearchID), contextSource.getPassword())) {
 				List<String[]> searchResult = ldapTemplate.search(query().where("cn").is(userId), new AttributesMapper() {
 					public Object mapFromAttributes(Attributes attrs) throws NamingException {
 						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
