@@ -4846,7 +4846,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static void setSslWithCert() throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
 		// Load CAs from an InputStream
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-		InputStream caInput = new BufferedInputStream(new FileInputStream("/home/osc/LGERootCA.crt"));
+		InputStream caInput = new BufferedInputStream(new FileInputStream(getProperty("lge.root.ca.path") + "/LGERootCA.crt"));
 		Certificate ca;
 		try {
 			ca = cf.generateCertificate(caInput);
