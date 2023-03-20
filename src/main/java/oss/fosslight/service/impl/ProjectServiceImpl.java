@@ -1707,19 +1707,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 2) delete
-		if (deleteList != null && !deleteList.isEmpty()) {
-			OssComponents param = new OssComponents();
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			param.setReferenceId(prjId);
-			param.setOssComponentsIdList(deleteList);
-			List<String> deleteComponentIds = projectMapper.getDeleteOssComponentsLicenseIds(param);
-			param.setOssComponentsIdList(deleteComponentIds);
-			
-			if (deleteComponentIds.size() > 0){
-				projectMapper.deleteOssComponentsLicenseWithIds(param);
-				// deleteOssComponentsWithIds는 not in 값을 delete, deleteOssComponentsWithIds2는 in 값을 delete함.
-				projectMapper.deleteOssComponentsWithIds2(param); 
-			}
+		OssComponents param = new OssComponents();
+		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+		param.setReferenceId(prjId);
+		param.setOssComponentsIdList(deleteList);
+		List<String> deleteComponentIds = projectMapper.getDeleteOssComponentsLicenseIds(param);
+		param.setOssComponentsIdList(deleteComponentIds);
+		
+		if (deleteComponentIds.size() > 0){
+			projectMapper.deleteOssComponentsLicenseWithIds(param);
+			// deleteOssComponentsWithIds는 not in 값을 delete, deleteOssComponentsWithIds2는 in 값을 delete함.
+			projectMapper.deleteOssComponentsWithIds2(param); 
 		}
 		
 		// 3) insert from project
@@ -1792,11 +1790,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// 2) delete
 		if (!thirdPartyDeleteList.isEmpty()) {
-			PartnerMaster param = new PartnerMaster();
-			param.setPrjId(prjId);
-			param.setThirdPartyPartnerIdList(thirdPartyDeleteList);
+			PartnerMaster thirdPartyDeleteParam = new PartnerMaster();
+			thirdPartyDeleteParam.setPrjId(prjId);
+			thirdPartyDeleteParam.setThirdPartyPartnerIdList(thirdPartyDeleteList);
 			
-			partnerMapper.deletePartnerMapList(param);
+			partnerMapper.deletePartnerMapList(thirdPartyDeleteParam);
 		}
 	}
 

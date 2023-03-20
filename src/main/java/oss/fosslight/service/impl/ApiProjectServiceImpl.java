@@ -393,6 +393,60 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			li.put("LICENSE_NAME", licenseName);
 			li.put("ROLE_OUT_LICENSE", CoCodeManager.CD_ROLE_OUT_LICENSE);
 			li.put("OSS_COMPONENTS_LICENSE_LIST", listLicense);
+			
+			// convert max score
+			if (li.get("cvssScoreMax") != null || li.get("cvssScoreMax1") != null || li.get("cvssScoreMax2") != null
+					|| li.get("cvssScoreMax3") != null || li.get("cvssScoreMax4") != null || li.get("cvssScoreMax5") != null) {
+				List<String> cvssScoreMaxList = new ArrayList<>();
+				
+				if (li.get("cvssScoreMax") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax"));
+				}
+				if (li.get("cvssScoreMax1") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax1"));
+				}
+				if (li.get("cvssScoreMax2") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax2"));
+				}
+				if (li.get("cvssScoreMax3") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax3"));
+				}
+				if (li.get("cvssScoreMax4") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax4"));
+				}
+				if (li.get("cvssScoreMax5") != null) {
+					cvssScoreMaxList.add((String) li.get("cvssScoreMax5"));
+				}
+				
+				if (!cvssScoreMaxList.isEmpty()) {
+					String[] cvssScoreMaxString = null;
+					BigDecimal cvssScore = null;
+					BigDecimal cvssScoreMax = null;
+					String cveId = null;
+					
+					for (String cvssScoreMaxStr : cvssScoreMaxList) {
+						cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+						if (cvssScoreMax != null) {
+							cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+							if (cvssScoreMax.compareTo(cvssScore) == -1) {
+								cvssScoreMax = cvssScore;
+								cveId = cvssScoreMaxString[1];
+							}
+						} else {
+							cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+							cveId = cvssScoreMaxString[1];
+						}
+					}
+					
+					if (cvssScoreMax != null) {
+						li.put("CVSS_SCORE", String.valueOf(cvssScoreMax));
+						li.put("YULN_YN", CoConstDef.FLAG_YES);
+						li.put("CVE_ID", cveId);
+					}
+				}
+			} else {
+				li.put("YULN_YN", CoConstDef.FLAG_NO);
+			}
 		}
 		
 		return setMergeGridData(list);
