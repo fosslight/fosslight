@@ -30,6 +30,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1760,6 +1761,9 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+		SimpleDateFormat dateFormatParser = new SimpleDateFormat("yyyyMMdd");
+        dateFormatParser.setLenient(false);
+		
 		if (count == 1) {
 			if (fileName.indexOf("/") > -1) {
 				fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
@@ -1793,12 +1797,18 @@ public class ExcelUtil extends CoTopComponent {
 
 					for (colindex = 0; colindex < maxcols; colindex++) {
 						Cell cell = row.getCell(colindex);
-						String value = getCellData(cell);
+						String value = null;
+						if (colindex == 2) {
+							value = getReleaseData(cell, dateFormatParser);
+						} else {
+							value = getCellData(cell);
+						}
+						
 						if (colindex < model.length && value != null) {
 							model[colindex] = value;
 						}
 					}
-					if (!model[0].isEmpty() && !model[1].isEmpty() && !model[2].isEmpty()) {
+					if (!model[0].isEmpty() && !model[1].isEmpty()) {
 						models.add(model);
 					}
 				}
@@ -1812,6 +1822,68 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 		return models;
+	}
+
+	private static String getReleaseData(Cell cell, SimpleDateFormat dateFormatParser) {
+		String value = "";
+		DataFormatter formatter = new DataFormatter();
+		boolean releaseDataFlag = false;
+		
+		if (cell == null) {
+			
+		} else {
+			CellType cellType = cell.getCellType();
+			switch (cellType) {
+				case NUMERIC:
+					value = formatter.formatCellValue(cell);
+					try {
+						dateFormatParser.parse(value);
+						releaseDataFlag = true;
+					} catch (Exception e) {
+						releaseDataFlag = false;
+					}
+					
+					if (!releaseDataFlag) {
+						value = "false";
+					}
+										
+					break;
+				case STRING:
+					value = cell.getStringCellValue() + "";
+					try {
+						dateFormatParser.parse(value);
+						releaseDataFlag = true;
+					} catch (Exception e) {
+						releaseDataFlag = false;
+					}
+					
+					if (!releaseDataFlag) {
+						value = "false";
+					}
+					
+					break;
+				case BLANK:
+					value = cell.getStringCellValue() + "";
+					
+					break;
+				case ERROR:
+					value = cell.getErrorCellValue() + "";
+					
+					break;
+				case BOOLEAN:
+					value = cell.getBooleanCellValue() + "";
+					
+					break;
+				default:
+					break;
+			}
+		}
+		
+		if (value == null) {
+			value = "";
+		}
+		
+		return "false".equals(value) ? "" : StringUtil.isNumeric(value) ? StringUtil.trim(value) : StringUtil.trim(value).replaceAll("(^\\p{Z}+|\\p{Z}+$)", "");
 	}
 
 	public static Map<String, List<Project>> readModelFromList(List<String[]> models, String prjId, String modelListAppendFlag, String modelSeq, String distributionType) {
