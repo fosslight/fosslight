@@ -2082,7 +2082,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
 			case 8 :
-				p = Pattern.compile("((http|https)://www.nuget.org/packages/([^/]+))");
+				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
@@ -2418,7 +2418,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 
 					List<String> componentIds = paramBean.getComponentIdList();
-					
 					switch(targetName.toUpperCase()) {
 						case CoConstDef.CD_CHECK_OSS_SELF:
 							for (String componentId : componentIds) {
