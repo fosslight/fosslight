@@ -1,0 +1,12 @@
+mariadb-java-client:
+- version: "2.7.2"
+  source name or path:
+  - "migration/migration/drivers/mariadb-java-client-2.7.2.jar"
+  license:
+  - "LGPL-2.1"
+  download location: "https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client"
+mybatis-migrations:
+- version: "3.3.11"
+  source name or path: "migration/mybatis-migrations-3.3.11"
+  license: "Apache-2.0"
+  download location: "https://mvnrepository.com/artifact/org.mybatis/mybatis-migrations"
