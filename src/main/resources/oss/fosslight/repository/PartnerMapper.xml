@@ -92,6 +92,9 @@
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
 					AND t4.FILE_PATH LIKE CONCAT('%',REGEXP_REPLACE(#{binaryName}, '_', '\\\\_'))
 				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
+					AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('20') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = t1.PARTNER_ID )
+				</if>
 				GROUP BY t1.PARTNER_ID) T1
 	</select>
 	
@@ -228,6 +231,9 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
 		   AND A.FILE_PATH LIKE CONCAT('%',#{binaryName})
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
+		   AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('20') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = A.PARTNER_ID )
 		</if>
 		 GROUP BY A.PARTNER_ID
 		<if test="@oss.fosslight.util.StringUtil@equals('partnerId', sortField)">
