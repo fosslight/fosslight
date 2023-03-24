@@ -295,7 +295,11 @@
 			</if>
 			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
-				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = T1.PRJ_ID )
+				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM 
+							 WHERE COMM.USE_YN = 'Y' 
+							   AND COMM.REFERENCE_ID = T1.PRJ_ID
+							   AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') 
+							   AND REGEXP_REPLACE(COMM.CONTENTS, <![CDATA['<img[^>]+>']]>, '') LIKE CONCAT('%',#{userComment},'%') )
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
@@ -537,7 +541,11 @@
 			</if>
 			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
-				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = T1.PRJ_ID )
+				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM 
+							 WHERE COMM.USE_YN = 'Y' 
+							   AND COMM.REFERENCE_ID = T1.PRJ_ID
+							   AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') 
+							   AND REGEXP_REPLACE(COMM.CONTENTS, <![CDATA['<img[^>]+>']]>, '') LIKE CONCAT('%',#{userComment},'%') )
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
