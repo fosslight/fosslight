@@ -23,7 +23,7 @@ jobs:
     if: ${{ github.repository == 'fosslight/fosslight' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v8
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-stale: 30
