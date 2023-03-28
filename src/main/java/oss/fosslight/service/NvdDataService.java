@@ -199,8 +199,14 @@ public class NvdDataService {
 		try {
 			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
 				log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
-				responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, 0);
-				httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
+				for (int j=0; j<5; j++) {
+					responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
+					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
+					if (httpsUrlConnectionFlag) {
+						break;
+					}
+				}
+				
 				if (httpsUrlConnectionFlag) {
 					if (responseMap.containsKey("vulnerabilities")) {
 						vulnerabilities = (List<Map<String, Object>>) responseMap.get("vulnerabilities");
@@ -310,30 +316,27 @@ public class NvdDataService {
 			}
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
-			responseMap.put("connectionFlag", false);
-			return responseMap;
-		} finally {
-			if (httpsUrlConnectionFlag) {
-				int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
-				if (vendorProductNvdDataV3Cnt > 0) {
-					log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
-					nvdDataMapper.updateVendorProductNvdDataV3();
-				}
-				
-				// success data insert > nvd_meta table
-				HashMap<String, Object> param = new HashMap<String, Object>();
-				param.put("fileNm", fileNm);
-				param.put("fileType", format);
-				param.put("modiDate", urlConnTimestamp);
-				
-				nvdDataMapper.insertNewMetaDataUrlConnection(param);
-				responseMap.put("connectionFlag", true);
-				log.info("nvdCveDataApiJob end");
-			} else {
-				responseMap.put("connectionFlag", false);
-			}
+			httpsUrlConnectionFlag = false;
 		}
 		
+		if (httpsUrlConnectionFlag) {
+			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
+			if (vendorProductNvdDataV3Cnt > 0) {
+				log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
+				nvdDataMapper.updateVendorProductNvdDataV3();
+			}
+			
+			// success data insert > nvd_meta table
+			HashMap<String, Object> param = new HashMap<String, Object>();
+			param.put("fileNm", fileNm);
+			param.put("fileType", format);
+			param.put("modiDate", urlConnTimestamp);
+			
+			nvdDataMapper.insertNewMetaDataUrlConnection(param);
+			log.info("nvdCveDataApiJob end");
+		}
+		
+		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
 	}
 
@@ -417,7 +420,13 @@ public class NvdDataService {
 		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
 		
 		try {
-			responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, startIndex, 0);
+			for (int i=0; i<5; i++) {
+				responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, startIndex, i);
+				if ((boolean) responseMap.get("connectionFlag")) {
+					break;
+				}
+			}
+			
 			if ((boolean) responseMap.get("connectionFlag")) {
 				// check url connection timestamp
 				HashMap<String, Object> param = new HashMap<String, Object>();
@@ -429,7 +438,6 @@ public class NvdDataService {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			responseMap.put("connectionFlag", false);
-			return responseMap;
 		}
 		
 		return responseMap;
@@ -467,11 +475,14 @@ public class NvdDataService {
 			stmt = conn.prepareStatement(SQL_INSERT);
 			stmt2 = conn.prepareStatement(SQL_INSERT2);
 			
-			for (int i=0; i < totalResults; i+=2000) {
-				if (i > totalResults) break;
+			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
 				log.info("nvdMetaMatch index : " + i + " / " + "totalResults : " + totalResults);
-				responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, 0);
-				httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
+				for (int j=0; j<5; j++) {
+					responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
+					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
+					if (httpsUrlConnectionFlag) break;
+				}
+				
 				if (httpsUrlConnectionFlag) {
 					if (responseMap.containsKey("matchStrings")) {
 						if (i == 0) {
@@ -562,8 +573,7 @@ public class NvdDataService {
 			}
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
-			responseMap.put("connectionFlag", false);
-			return responseMap;
+			httpsUrlConnectionFlag = false;
 		} finally {
 			try {
 				if (stmt != null) {
@@ -580,34 +590,31 @@ public class NvdDataService {
 					conn.close();
 				}
 			} catch(SQLException e) {}
-			
-			log.info("httpsUrlConnectionFlag : "+httpsUrlConnectionFlag);
-			if (httpsUrlConnectionFlag) {
-				if (totalResults > 0) {
-					nvdDataMapper.truncateCpeMatch();
-					nvdDataMapper.truncateCpeMatchNames();
-					nvdDataMapper.copyNvdDataMatchFromTemp();
-					nvdDataMapper.copyNvdDataMatchNameFromTemp();
-				}
-
-				nvdDataMapper.truncateCpeMatchTemp();
-				nvdDataMapper.truncateCpeMatchNameTemp();
-				
-				// success data insert > nvd_meta table
-				HashMap<String, Object> param = new HashMap<String, Object>();
-				param.put("fileNm", fileNm);
-				param.put("fileType", format);
-				param.put("modiDate", urlConnTimestamp);
-				
-				nvdDataMapper.insertNewMetaDataUrlConnection(param);
-				responseMap.put("connectionFlag", true);
-				
-				log.info("nvdMetaDataApiJob end");
-			} else {
-				responseMap.put("connectionFlag", false);
-			}
 		}
 		
+		log.info("httpsUrlConnectionFlag : "+httpsUrlConnectionFlag);
+		if (httpsUrlConnectionFlag) {
+			if (totalResults > 0) {
+				nvdDataMapper.truncateCpeMatch();
+				nvdDataMapper.truncateCpeMatchNames();
+				nvdDataMapper.copyNvdDataMatchFromTemp();
+				nvdDataMapper.copyNvdDataMatchNameFromTemp();
+			}
+
+			nvdDataMapper.truncateCpeMatchTemp();
+			nvdDataMapper.truncateCpeMatchNameTemp();
+			
+			// success data insert > nvd_meta table
+			HashMap<String, Object> param = new HashMap<String, Object>();
+			param.put("fileNm", fileNm);
+			param.put("fileType", format);
+			param.put("modiDate", urlConnTimestamp);
+			
+			nvdDataMapper.insertNewMetaDataUrlConnection(param);
+			log.info("nvdMetaDataApiJob end");
+		}
+		
+		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
 	}
 
@@ -616,6 +623,7 @@ public class NvdDataService {
 		HttpsURLConnection httpsURLConnection = null;
 		Map<String, Object> rtnMap = new HashMap<>();
 		String urlString = restApiUrl + "?resultsPerPage=" + resultsPerPage + "&startIndex=" + startIndex;
+		boolean connectionFlag = true;
 		
 		try {
 			URL url = new URL(urlString);
@@ -623,9 +631,12 @@ public class NvdDataService {
 			httpsURLConnection = (HttpsURLConnection) url.openConnection();
 			httpsURLConnection.setRequestMethod("GET");
 			httpsURLConnection.addRequestProperty("x-api-key", NVD_API_KEY);
+			httpsURLConnection.addRequestProperty("Accept-Encoding", "identity");
 			httpsURLConnection.setDoOutput(true);
+			httpsURLConnection.setConnectTimeout(1000 * 5);
 			
 			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+				connectionFlag = true;
 				ObjectMapper mapper = new ObjectMapper();
 				try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()))) {
 					String line;
@@ -635,54 +646,30 @@ public class NvdDataService {
 				}
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
-				if (httpsURLConnection != null) {
-					httpsURLConnection.disconnect();
+				try {
+					log.warn("Try again in 5 seconds...");
+					Thread.sleep(1000 * 5);
+				} catch (InterruptedException e) {
+					log.error(e.getMessage());
 				}
 				
-				if (cnt > 5) {
-					rtnMap.put("connectionFlag", false);
-					return rtnMap;
-				} else {
-					log.warn("Try again in 10 seconds...");
-					try {
-						Thread.sleep(1000 * 10);
-						
-						if (httpsURLConnection != null) {
-							httpsURLConnection.disconnect();
-						}
-					} catch (InterruptedException e) {
-						log.error(e.getMessage());
-					}
-					
-					rtnMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, startIndex, ++cnt);
-				}
+				connectionFlag = false;
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			if (httpsURLConnection != null) {
-				httpsURLConnection.disconnect();
+			try {
+				log.warn("Try again in 5 seconds...");
+				Thread.sleep(1000 * 5);
+			} catch (InterruptedException e1) {
+				log.error(e1.getMessage());
 			}
 			
-			if (cnt > 5) {
-				rtnMap.put("connectionFlag", false);
-				return rtnMap;
-			} else {
-				log.warn("Try again in 10 seconds...");
-				try {
-					Thread.sleep(1000 * 10);		
-				} catch (InterruptedException e1) {
-					log.error(e1.getMessage());
-				}
-				
-				rtnMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, startIndex, ++cnt);
-			}
+			connectionFlag = false;
 		} finally {
-			if (httpsURLConnection != null) {
-				httpsURLConnection.disconnect();
-			}
-			rtnMap.put("connectionFlag", true);
+			httpsURLConnection.disconnect();
 		}
 		
+		rtnMap.put("connectionFlag", connectionFlag);
 		return rtnMap;
 	}
 
