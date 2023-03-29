@@ -72,7 +72,9 @@
 				});
 
 				$('#okResetPwd').click(function(){
-					console.log('초기화 버튼 눌림');
+					if(validResetPassword()) {
+						resetPasswordSubmit();
+					}
 				});
 				
 				// error message hide 처리
@@ -179,7 +181,34 @@
 					error : onError
 				});
 			};
-			
+
+			function resetPasswordSubmit() {
+				$.ajax({
+					url :'<c:url value="/system/user/resetPassword"/>',
+					type : 'POST',
+					data: JSON.stringify({'userId' : $('#resetPwdForm #userId').val(), 'email' : $('#resetPwdForm #email').val()}),
+					dataType: "json",
+					contentType: "application/json; charset=utf-8",
+					cache : false,
+					success: onResetPasswordSuccess,
+					error : onError
+				});
+			}
+
+			function validResetPassword() {
+				if ($('#resetPwdForm #userId').isValueEmpty()) {
+					$('#resetPwdForm #userIdRequired').show();
+					return false;
+				}
+
+				if ($('#resetPwdForm #email').isValueEmpty()) {
+					$('#resetPwdForm #emailRequired').show();
+					return false;
+				}
+
+				return true;
+			}
+
             function onSuccess(json, status){
                 if(json.response.error) {
                     alertify.error(json.response.message, 0);
@@ -229,6 +258,23 @@
   	  				});
   				}
   			};
+
+			function onResetPasswordSuccess(data, status) {
+				if (data.resCd == '10') {
+					alertify.alert('<spring:message code="msg.login.resetPassword.success" />', function(){
+						location.reload();
+					});
+				} else if (data.resCd == '21') {
+					alertify.alert('<spring:message code="msg.login.resetPassword.failureToFindUser" />', function(){
+						location.reload();
+					});
+				}
+				else {
+					alertify.alert('<spring:message code="msg.common.valid2" />', function () {
+						location.reload();
+					});
+				}
+			}
 
 			function onError(data, status){
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -314,10 +360,10 @@
 								<input type="button" value="LOGIN" class="btnlogin" id="btn_login" />
 								<span class="joinGo">
 									<span class="checkSet"><input type="checkbox" id="saveID" /><label for="saveID">SAVE ID</label></span>
-									<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
-								</span>
-								<span class="options">
-									<strong><a id="btnResetPwd">Reset Password</a></strong>
+									<span class="options">
+										<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
+										<strong><a class="btnRegist" id="btnResetPwd">Reset Password</a></strong>
+									</span>
 								</span>
 							</form>
 						</div>
@@ -394,26 +440,17 @@
 					<fieldset>
 						<div>
 							<h1><img src="../images/img_login_logo2.png" alt="FOSSLIGHT" /><br/>RESET PASSWORD</h1>
-							<form id="resetPwd">
+							<form id="resetPwdForm">
 								<dl>
 									<dt><label>ID</label></dt>
 									<dd class="required">
-										<input type="text" name="userId" placeholder="foss.kim"/>
+										<input type="text" id="userId" name="userId" placeholder="foss.kim"/>
+										<div id="userIdRequired" class="retxt" style="display: none">Required</div>
 									</dd>
 									<dt><label>e-mail</label></dt>
 									<dd class="required">
-										<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
-										<c:if test="${not empty useDomainFlag}">
-											<span class="selectSet">
-												<strong for="emailCombo">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</strong>
-												<select name="registDomain" id="emailCombo" onchange="emailChange()">
-													<option></option>
-													${ct:genOption(ct:getConstDef("CD_REGIST_DOMAIN"))}
-												</select>
-											</span>
-										</c:if>
-										<input type="text" id="emailTemp" <c:if test="${not empty useDomainFlag}">style="display:none;"</c:if> value="<c:if test="${not empty useDomainFlag}">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</c:if>"/>
-										<input type="hidden" id="email" name="email" value=""/>
+										<input type="email" id="email" name="email" value=""/>
+										<div id="emailRequired" class="retxt" style="display: none">Required</div>
 									</dd>
 								</dl>
 								<span class="joinBtn">
