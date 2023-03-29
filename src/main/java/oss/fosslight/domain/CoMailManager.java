@@ -474,7 +474,18 @@ public class CoMailManager extends CoTopComponent {
 					convertDataMap.put("expireDate", user.getExpireDate());
 					convertDataMap.put("tokenInfo", CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TOKEN_CREATE_TYPE));
 	    		}
-				
+
+				if (CoConstDef.CD_MAIL_TYPE_RESET_USER_PASSWORD.equals(bean.getMsgType())) {
+					Map<String, Object> userInfoMap = bean.getParamList().get(0);
+					T2Users user = new T2Users();
+
+					user.setUserId(userInfoMap.get("userId").toString());
+					user.setPassword(userInfoMap.get("afterPassword").toString());
+					user.setModifiedDate(userInfoMap.get("modifiedTime").toString());
+
+					convertDataMap.put("userInfo", user);
+					convertDataMap.put("requestedIP", userInfoMap.get("requestedIP"));
+				}
 
 				if (CoConstDef.CD_MAIL_TOKEN_DELETE_TYPE.equals(bean.getMsgType())) {
 					convertDataMap.put("mailType", CoConstDef.CD_MAIL_TOKEN_DELETE_TYPE);
@@ -1361,7 +1372,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TOKEN_CREATE_TYPE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TOKEN_DELETE_TYPE.equals(bean.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED.equals(bean.getMsgType())
-					) {
+					|| CoConstDef.CD_MAIL_TYPE_RESET_USER_PASSWORD.equals(bean.getMsgType())) {
 				String _convUser = avoidNull(makeUserNameFormat(!isEmpty(bean.getParamUserId()) ? bean.getParamUserId() : bean.getLoginUserName()));
 
 				title = StringUtil.replace(title, "${User}", _convUser);
