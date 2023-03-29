@@ -633,7 +633,7 @@ public class NvdDataService {
 			httpsURLConnection.addRequestProperty("x-api-key", NVD_API_KEY);
 			httpsURLConnection.addRequestProperty("Accept-Encoding", "identity");
 			httpsURLConnection.setDoOutput(true);
-			httpsURLConnection.setConnectTimeout(1000 * 5);
+			httpsURLConnection.setConnectTimeout(1000 * 15);
 			
 			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				connectionFlag = true;
@@ -647,8 +647,8 @@ public class NvdDataService {
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
 				try {
-					log.warn("Try again in 5 seconds...");
-					Thread.sleep(1000 * 5);
+					log.warn("Try again in 15 seconds...");
+					Thread.sleep(1000 * 15);
 				} catch (InterruptedException e) {
 					log.error(e.getMessage());
 				}
@@ -658,8 +658,8 @@ public class NvdDataService {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			try {
-				log.warn("Try again in 5 seconds...");
-				Thread.sleep(1000 * 5);
+				log.warn("Try again in 15 seconds...");
+				Thread.sleep(1000 * 15);
 			} catch (InterruptedException e1) {
 				log.error(e1.getMessage());
 			}
