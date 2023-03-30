@@ -479,6 +479,7 @@ public final class Url {
 		public static final String AUTOCOMPLETE_CREATOR_DIVISION_AJAX = PATH + "/autoCompleteCreatorDivisionAjax";
 		
 		public static final String CHANGE_PASSWORD = PATH + "/changePassword";
+		public static final String RESET_PASSWORD = PATH + "/resetPassword";
 		public static final String UPDATE_USERNAME_DIVISION = PATH + "/updateUserNameAndDivision";
 		
 		public static final String TOKEN_PROC = PATH + "/tokenProc/{procType}";

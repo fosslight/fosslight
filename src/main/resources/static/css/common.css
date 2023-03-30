@@ -174,8 +174,8 @@ body#login_before {background:#fff;}
 #login .box .btnlogin {width:100%;color:#fff;height:53px;border:none;background:#ac1e35;}
 #login .joinGo {display:block;padding:20px 0;text-align:left;}
 #login .joinGo label {font-weight:bold;}
-#login .joinGo strong {float:right;margin-top:-3px;border-bottom:1px solid #333}
-#login .joinGo strong a {font-size:14px;}
+#login .joinGo strong a {font-size:14px; border-bottom:1px solid #333}
+#login .options {float: right; margin-top:-3px;}
 #login .joinBtn {display:block;}
 #login .joinBtn .btnlogin {float:left;width:60%;}
 #login .joinBtn .btnJoinCanel {float:left;width:40%;color:#fff;height:53px;border:none;background:#ccc;}
