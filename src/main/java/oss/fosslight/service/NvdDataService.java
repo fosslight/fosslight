@@ -59,6 +59,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
@@ -618,7 +621,6 @@ public class NvdDataService {
 		return responseMap;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, Object> getDataForRestApiConnection(String restApiUrl, int resultsPerPage, int startIndex, int cnt) {
 		HttpsURLConnection httpsURLConnection = null;
 		Map<String, Object> rtnMap = new HashMap<>();
@@ -631,18 +633,15 @@ public class NvdDataService {
 			httpsURLConnection = (HttpsURLConnection) url.openConnection();
 			httpsURLConnection.setRequestMethod("GET");
 			httpsURLConnection.addRequestProperty("x-api-key", NVD_API_KEY);
-			httpsURLConnection.addRequestProperty("Accept-Encoding", "identity");
-			httpsURLConnection.setDoOutput(true);
 			httpsURLConnection.setConnectTimeout(1000 * 15);
 			
 			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-				connectionFlag = true;
-				ObjectMapper mapper = new ObjectMapper();
-				try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()))) {
-					String line;
-					while ((line = bufferedReader.readLine()) != null) {
-						rtnMap = mapper.readValue(line, Map.class);
-					}
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
+				rtnMap = getFromJSONObjectToMap(bufferedReader);
+				if (rtnMap != null) {
+					connectionFlag = true;
+				} else {
+					connectionFlag = false;
 				}
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
@@ -671,6 +670,19 @@ public class NvdDataService {
 		
 		rtnMap.put("connectionFlag", connectionFlag);
 		return rtnMap;
+	}
+
+	@SuppressWarnings({ "unchecked", "deprecation" })
+	private Map<String, Object> getFromJSONObjectToMap(BufferedReader br) {
+		Map<String, Object> map = null;
+		JSONParser jsonPar = new JSONParser();
+        try {
+        	JSONObject jsonObj = (JSONObject) jsonPar.parse(br);
+        	map = new ObjectMapper().readValue(jsonObj.toString(), Map.class);
+        } catch (Exception e) {
+        	log.error(e.getMessage(), e);
+        }
+		return map;
 	}
 
 	@Transactional
