@@ -637,33 +637,38 @@ public class NvdDataService {
 			
 			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-				rtnMap = getFromJSONObjectToMap(bufferedReader);
-				if (rtnMap != null) {
+				Map<String, Object> convertMap = getFromJSONObjectToMap(bufferedReader);
+				if (convertMap != null) {
 					connectionFlag = true;
+					rtnMap = convertMap;
 				} else {
 					connectionFlag = false;
+					try {
+						log.warn("Try again in 15 seconds...");
+						Thread.sleep(1000 * 15);
+					} catch (InterruptedException e) {
+						log.error(e.getMessage());
+					}
 				}
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
+				connectionFlag = false;
 				try {
 					log.warn("Try again in 15 seconds...");
 					Thread.sleep(1000 * 15);
 				} catch (InterruptedException e) {
 					log.error(e.getMessage());
 				}
-				
-				connectionFlag = false;
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
+			connectionFlag = false;
 			try {
 				log.warn("Try again in 15 seconds...");
 				Thread.sleep(1000 * 15);
 			} catch (InterruptedException e1) {
 				log.error(e1.getMessage());
 			}
-			
-			connectionFlag = false;
 		} finally {
 			httpsURLConnection.disconnect();
 		}
@@ -676,12 +681,17 @@ public class NvdDataService {
 	private Map<String, Object> getFromJSONObjectToMap(BufferedReader br) {
 		Map<String, Object> map = null;
 		JSONParser jsonPar = new JSONParser();
-        try {
-        	JSONObject jsonObj = (JSONObject) jsonPar.parse(br);
-        	map = new ObjectMapper().readValue(jsonObj.toString(), Map.class);
-        } catch (Exception e) {
-        	log.error(e.getMessage(), e);
-        }
+		if (br != null) {
+			try {
+				JSONObject jsonObj = (JSONObject) jsonPar.parse(br);
+	        	map = new ObjectMapper().readValue(jsonObj.toString(), Map.class);
+	        } catch (ParseException e) {
+	        	log.warn(e.getMessage(), e);
+	        } catch (Exception e) {
+	        	log.error(e.getMessage(), e);
+	        }
+		}
+        
 		return map;
 	}
 
