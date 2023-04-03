@@ -36,6 +36,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +61,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
@@ -653,7 +652,13 @@ public class NvdDataService {
 			connectionFlag = false;
 		} finally {
 			httpsURLConnection.disconnect();
-			if (!connectionFlag) {
+			if (connectionFlag) {
+				try {
+					Thread.sleep(1000 * 6);
+				} catch (InterruptedException e) {
+					log.error(e.getMessage());
+				}
+			} else {
 				try {
 					log.warn("Try again in 15 seconds...");
 					Thread.sleep(1000 * 15);
@@ -667,16 +672,14 @@ public class NvdDataService {
 		return rtnMap;
 	}
 
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings({ "unchecked" })
 	private Map<String, Object> getFromJSONObjectToMap(BufferedReader br) {
 		Map<String, Object> map = null;
-		JSONParser jsonPar = new JSONParser();
 		if (br != null) {
 			try {
-				JSONObject jsonObj = (JSONObject) jsonPar.parse(br);
-	        	map = new ObjectMapper().readValue(jsonObj.toString(), Map.class);
-	        } catch (ParseException e) {
-	        	log.warn(e.getMessage(), e);
+				JSONTokener tokener = new JSONTokener(br);
+			    JSONObject json = new JSONObject(tokener);
+	        	map = new ObjectMapper().readValue(json.toString(), Map.class);
 	        } catch (Exception e) {
 	        	log.error(e.getMessage(), e);
 	        }
