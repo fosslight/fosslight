@@ -643,16 +643,17 @@ public class NvdDataService {
 					rtnMap = convertMap;
 				} else {
 					connectionFlag = false;
-					try {
-						log.warn("Try again in 15 seconds...");
-						Thread.sleep(1000 * 15);
-					} catch (InterruptedException e) {
-						log.error(e.getMessage());
-					}
 				}
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
 				connectionFlag = false;
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			connectionFlag = false;
+		} finally {
+			httpsURLConnection.disconnect();
+			if (!connectionFlag) {
 				try {
 					log.warn("Try again in 15 seconds...");
 					Thread.sleep(1000 * 15);
@@ -660,17 +661,6 @@ public class NvdDataService {
 					log.error(e.getMessage());
 				}
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage());
-			connectionFlag = false;
-			try {
-				log.warn("Try again in 15 seconds...");
-				Thread.sleep(1000 * 15);
-			} catch (InterruptedException e1) {
-				log.error(e1.getMessage());
-			}
-		} finally {
-			httpsURLConnection.disconnect();
 		}
 		
 		rtnMap.put("connectionFlag", connectionFlag);
