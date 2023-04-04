@@ -98,6 +98,7 @@ public class NvdDataService {
 	public void setResourcePathPrefix(){
 		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
 		DB_URL = env.getRequiredProperty("spring.datasource.url");
+		if (!DB_URL.startsWith("jdbc:mariadb")) DB_URL = "jdbc:mariadb://" + DB_URL;
 		USERNAME = env.getRequiredProperty("spring.datasource.username");
 		PASSWORD = env.getRequiredProperty("spring.datasource.password");
 	}
