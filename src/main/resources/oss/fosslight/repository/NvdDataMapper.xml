@@ -35,6 +35,12 @@
 			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y')
     </insert>
     
+    <insert id="insertNewMetaDataUrlConnection" parameterType="HashMap">
+    	INSERT INTO NVD_META
+			(FILE_NM, FILE_TYPE, MODI_DATE, USE_YN, JOB_STATUS) VALUES
+			(#{fileNm}, #{fileType}, #{modiDate}, 'Y', 'C')
+    </insert>
+    
     <insert id="insertErrorMetaData" parameterType="HashMap">
     	INSERT INTO NVD_META
 			(FILE_NM, FILE_TYPE, MODI_DATE, SIZE, ZIP_SIZE, GZ_SIZE, SHA256, USE_YN, JOB_STATUS) VALUES
@@ -634,4 +640,21 @@
 		 WHERE VENDOR != ''
 		   AND (VENDORPRODUCT = '' OR VENDORPRODUCT IS NULL)
 	</update>
+	
+	<!-- 사용중인 메타 데이터 조회 -->
+    <select id="selectUseMetaDataUrlConnection" parameterType="HashMap" resultType="HashMap">
+    	SELECT 
+    		FILE_NM		AS fileNm
+    		, FILE_TYPE	AS fileType
+    		, MODI_DATE	AS modiDate
+    		, USE_YN	AS useYn
+    		, JOB_STATUS AS jobStatus
+    	FROM NVD_META
+		WHERE FILE_TYPE = #{fileType} 
+			AND FILE_NM = #{fileNm}
+			AND MODI_DATE = #{modiDate}
+			AND USE_YN = 'Y'
+			AND JOB_STATUS = 'C' 
+		ORDER BY IDX DESC
+    </select>
 </mapper>

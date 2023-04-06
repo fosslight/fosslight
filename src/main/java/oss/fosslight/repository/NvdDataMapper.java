@@ -63,4 +63,6 @@ public interface NvdDataMapper {
 	void updateVendorProductNvdDataV3();
 	int selectVendorProductNvdDataScoreV3Cnt();
 	void updateVendorProductNvdDataScoreV3();
+	void insertNewMetaDataUrlConnection(HashMap<String, Object> param);
+	List<Map<String, Object>> selectUseMetaDataUrlConnection(HashMap<String, Object> param);
 }

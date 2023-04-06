@@ -252,6 +252,7 @@
 			});
 			
 			$("#copy").on('click',function(){
+				var ossId = $('input[name=ossId]').val();
 				if(opener == null) {
 					activeDeleteTabInFrame();
 					createTabInFrame('copy_'+ossId+'_Opensource', '#<c:url value="/oss/copy/'+ossId+'"/>');

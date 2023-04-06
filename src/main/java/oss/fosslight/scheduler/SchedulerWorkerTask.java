@@ -72,7 +72,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	}
 	
 	// 새벽 12시 스케줄 - CPE Dictionary, CVE Update Data Sync 
-	@Scheduled(cron="0 0 1 * * ?")
+	@Scheduled(cron="${nvd.scheduled.cron.value}")
 //	@Scheduled(fixedDelay=1000)
 	public void nvdDataIfJob() {
 		String resCd = "";

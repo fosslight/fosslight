@@ -558,6 +558,7 @@ public class CoConstDef {
 
 	/** changed USER Info */
 	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";
+	public static final String CD_MAIL_TYPE_RESET_USER_PASSWORD = "817";
 	
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";

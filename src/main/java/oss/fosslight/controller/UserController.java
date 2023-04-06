@@ -6,6 +6,9 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -217,6 +221,61 @@ public class UserController extends CoTopComponent {
 			resMap.put("resCd", "password change Failure.");
 		}
 		
+		return makeJsonResponseHeader(resMap);
+	}
+
+	@PostMapping(value = USER.RESET_PASSWORD)
+	public @ResponseBody ResponseEntity<Object> resetPassword(
+			@RequestBody Map<String, String> params,
+			HttpServletRequest httpServletRequest) {
+		Map<String, Object> resMap = new HashMap<>();
+		T2Users targetUser = new T2Users();
+		String userId = params.getOrDefault("userId", "");
+		String email = params.getOrDefault("email", "");
+		targetUser.setUserId(userId);
+
+		T2Users foundUser = userService.getUser(targetUser);
+		if (foundUser == null || !foundUser.getEmail().equals(email)) {
+			resMap.put("resCd", 21);
+			resMap.put("resMsg", "Can't find matching user");
+			return makeJsonResponseHeader(resMap);
+		}
+
+		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
+		foundUser.setPassword(encodePassword(generatedPassword));
+		foundUser.setModifier(userId);
+
+		int updateCnt = userService.updateUsers(foundUser);
+		if (updateCnt != 1) {
+			resMap.put("resCd", "20");
+			resMap.put("resMsg", "fail to reset password");
+
+			return makeJsonResponseHeader(resMap);
+		}
+
+		String emailType = CoConstDef.CD_MAIL_TYPE_RESET_USER_PASSWORD;
+		CoMail mailBean = new CoMail(emailType);
+
+		List<Map<String, Object>> paramList = new ArrayList<>();
+		Map<String, Object> userInfo = new HashMap<>();
+		userInfo.put("userId", userId);
+		userInfo.put("afterPassword", generatedPassword);
+		userInfo.put("modifiedTime", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
+		userInfo.put("requestedIP", httpServletRequest.getRemoteAddr());
+		paramList.add(userInfo);
+
+		mailBean.setParamList(paramList);
+		mailBean.setParamUserId(userId);
+		mailBean.setToIds(new String[] { foundUser.getUserId() });
+
+		boolean isMailSendingSuccessful = CoMailManager.getInstance().sendMail(mailBean);
+		if (!isMailSendingSuccessful) {
+			resMap.put("resCd", "20");
+			resMap.put("resMsg", "fail to send email");
+			return makeJsonResponseHeader(resMap);
+		}
+
+		resMap.put("resCd", "10");
 		return makeJsonResponseHeader(resMap);
 	}
 	

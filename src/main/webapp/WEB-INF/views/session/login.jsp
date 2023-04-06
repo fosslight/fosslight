@@ -30,8 +30,9 @@
 			var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 			
 			$(document).ready(function() {
-				$("#okRegister, #btnCancel, #btn_login, #btnRegist").css("cursor", "pointer");
+				$("#okRegister, #btnRegistCancel, #btn_login, #btnRegist, #btnResetPwd, #okResetPwd, #btnResetPwdCancel").css("cursor", "pointer");
 				$(".registArea").css("display", "none");
+				$(".resetPwdArea").css("display", "none");
 				var ldapFlag = "${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG'))}";
 				if(ldapFlag === 'Y') {
 					$('#btnRegist').hide();
@@ -41,10 +42,20 @@
 					$('.registArea').show();
 				});// registArea show
 				
-				$('#btnCancel').click(function(){
+				$('#btnRegistCancel').click(function(){
 					$('.registArea').hide();
 					$(".loginArea").show();
 				}); // registArea hide
+
+				$('#btnResetPwd').click(function() {
+					$(".loginArea").hide();
+					$('.resetPwdArea').show();
+				}); // resetPwdArea show
+
+				$('#btnResetPwdCancel').click(function() {
+					$('.resetPwdArea').hide();
+					$(".loginArea").show();
+				}); // resetPwdArea hide
 				
 				$("#btn_login").click(function() {
 					excSubmit();
@@ -58,6 +69,12 @@
 						$("#email").val($("#emailTemp").val());
 					}
 					registSubmit();
+				});
+
+				$('#okResetPwd').click(function(){
+					if(validResetPassword()) {
+						resetPasswordSubmit();
+					}
 				});
 				
 				// error message hide 처리
@@ -164,7 +181,34 @@
 					error : onError
 				});
 			};
-			
+
+			function resetPasswordSubmit() {
+				$.ajax({
+					url :'<c:url value="/system/user/resetPassword"/>',
+					type : 'POST',
+					data: JSON.stringify({'userId' : $('#resetPwdForm #userId').val(), 'email' : $('#resetPwdForm #email').val()}),
+					dataType: "json",
+					contentType: "application/json; charset=utf-8",
+					cache : false,
+					success: onResetPasswordSuccess,
+					error : onError
+				});
+			}
+
+			function validResetPassword() {
+				if ($('#resetPwdForm #userId').isValueEmpty()) {
+					$('#resetPwdForm #userIdRequired').show();
+					return false;
+				}
+
+				if ($('#resetPwdForm #email').isValueEmpty()) {
+					$('#resetPwdForm #emailRequired').show();
+					return false;
+				}
+
+				return true;
+			}
+
             function onSuccess(json, status){
                 if(json.response.error) {
                     alertify.error(json.response.message, 0);
@@ -214,6 +258,23 @@
   	  				});
   				}
   			};
+
+			function onResetPasswordSuccess(data, status) {
+				if (data.resCd == '10') {
+					alertify.alert('<spring:message code="msg.login.resetPassword.success" />', function(){
+						location.reload();
+					});
+				} else if (data.resCd == '21') {
+					alertify.alert('<spring:message code="msg.login.resetPassword.failureToFindUser" />', function(){
+						location.reload();
+					});
+				}
+				else {
+					alertify.alert('<spring:message code="msg.common.valid2" />', function () {
+						location.reload();
+					});
+				}
+			}
 
 			function onError(data, status){
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -299,13 +360,14 @@
 								<input type="button" value="LOGIN" class="btnlogin" id="btn_login" />
 								<span class="joinGo">
 									<span class="checkSet"><input type="checkbox" id="saveID" /><label for="saveID">SAVE ID</label></span>
-									<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
+									<span class="options">
+										<strong><a class="btnRegist" id="btnRegist">SignUp</a></strong>
+										<strong><a class="btnRegist" id="btnResetPwd">Reset Password</a></strong>
+									</span>
 								</span>
 							</form>
 						</div>
 					</fieldset>
-					<!------------>
-					<p><spring:message code="msg.login.description.forgot.pw" /></p>
 				</div>
 			</div>
 		</div>
@@ -361,7 +423,39 @@
 								</dl>
 								<span class="joinBtn">
 									<input type="button" value="SIGN UP" class="btnlogin" id="okRegister" />
-									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnCancel" />
+									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnRegistCancel" />
+								</span>
+							</form>
+						</div>
+					</fieldset>
+					<!------------>
+				</div>
+			</div>
+		</div>
+		<!-- //Login -->
+		<!-- Login -->
+		<div id="login" class="resetPwdArea">
+			<div class="back">
+				<div class="box joinCase">
+					<fieldset>
+						<div>
+							<h1><img src="../images/img_login_logo2.png" alt="FOSSLIGHT" /><br/>RESET PASSWORD</h1>
+							<form id="resetPwdForm">
+								<dl>
+									<dt><label>ID</label></dt>
+									<dd class="required">
+										<input type="text" id="userId" name="userId" placeholder="foss.kim"/>
+										<div id="userIdRequired" class="retxt" style="display: none">Required</div>
+									</dd>
+									<dt><label>e-mail</label></dt>
+									<dd class="required">
+										<input type="email" id="email" name="email" value=""/>
+										<div id="emailRequired" class="retxt" style="display: none">Required</div>
+									</dd>
+								</dl>
+								<span class="joinBtn">
+									<input type="button" value="Reset Password" class="btnlogin" id="okResetPwd" />
+									<input type="button" value="CANCEL" class="btnJoinCanel" id="btnResetPwdCancel" />
 								</span>
 							</form>
 						</div>

@@ -1913,20 +1913,39 @@
 					{name: 'releaseDate', index: 'releaseDate', align: 'center', width:100, editable:true, sorttype:'date',
 						editoptions:{maxlength:8, dataEvents:[
 							{
-								type: 'keyup',
+								type: 'focusout',
 								fn: function(e) {
 									var result = $(this).val();
 									gDateKeyup = true;
 									
 									if(/\d+/.test(result)) {
 										result = result.match(/\d+/g).join("");
-										$(this).val(result);
+										if (result.length == 8){
+											// 날짜 형식 체크
+											var date_pattern = /^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/;
+											if (!date_pattern.test(result)){
+												alertify.error('<spring:message code="msg.common.valid" />', 0);
+												$(this).val("");
+											} else {
+												// 해당 월 말일 체크
+												var checkLastDate = new Date(result.substring(0,4), result.substring(4,6), 0);
+												if (parseInt(result.substring(6,8)) > parseInt(checkLastDate.getDate())){
+													alertify.error('<spring:message code="msg.common.valid" />', 0);
+													$(this).val("");
+												} else {
+													$(this).val(result);
+												}
+											}
+										} else {
+											alertify.error('<spring:message code="msg.common.valid" />', 0);
+											$(this).val("");
+										}
 									} else {
 										$(this).val("");
 									}
 								}
 							},
-                            {  
+/*                          {  
 	                           type: 'blur',
                                fn: function(e) {
 	                               var date_pattern = /^(19|20)\d{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/; 
@@ -1939,7 +1958,7 @@
 	                            	   gDateKeyup = false;
 	                               }
                                }
-                            }
+                            } */
 						]}
    					},
 					{name: 'modifier', index: 'modifier', align: 'center', width:80, editable:false, hidden:true},

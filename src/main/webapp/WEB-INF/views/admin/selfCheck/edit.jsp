@@ -269,7 +269,6 @@
 					</div>
 				</div>
 				<div class="btnLayout w1025">
-				<c:if test="${ct:isAdmin()}">
 					<input type="button" id="noticePreview" value="Preview" class="btnColor" style="width: 100px;"/>
 					<span class="selectSet" style="width:160px">
 						<strong for="docType" title="selected value"></strong>
@@ -298,7 +297,6 @@
 						<input type="checkbox" id="chkUseCustomNotice" style="margin:0 5px;" <c:if test="${fullCustomFlag}">checked</c:if>/>Use the html editor
 						<input type="button" id="noticeEditor" value="Edit" class="btnColor" style="margin-left: 5px;width: 100px;<c:if test="${!fullCustomFlag}">opacity: 0.5</c:if>" <c:if test="${!fullCustomFlag}">disabled="disabled"</c:if>/>
 					</c:if>
-				</c:if>
 				</div>
 			</div>
 		</div>

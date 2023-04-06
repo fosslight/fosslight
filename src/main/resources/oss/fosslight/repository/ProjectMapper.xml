@@ -295,7 +295,11 @@
 			</if>
 			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
-				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = T1.PRJ_ID )
+				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM 
+							 WHERE COMM.USE_YN = 'Y' 
+							   AND COMM.REFERENCE_ID = T1.PRJ_ID
+							   AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') 
+							   AND REGEXP_REPLACE(COMM.CONTENTS, <![CDATA['<img[^>]+>']]>, '') LIKE CONCAT('%',#{userComment},'%') )
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
@@ -537,7 +541,11 @@
 			</if>
 			
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
-				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM WHERE COMM.USE_YN = 'Y' AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') AND COMM.CONTENTS LIKE CONCAT('%',#{userComment},'%') AND COMM.REFERENCE_ID = T1.PRJ_ID )
+				AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM 
+							 WHERE COMM.USE_YN = 'Y' 
+							   AND COMM.REFERENCE_ID = T1.PRJ_ID
+							   AND COMM.REFERENCE_DIV IN ('19', '10', '12', '14') 
+							   AND REGEXP_REPLACE(COMM.CONTENTS, <![CDATA['<img[^>]+>']]>, '') LIKE CONCAT('%',#{userComment},'%') )
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
@@ -3875,174 +3883,151 @@
 	</select>
 	
 	<select id="findIdentificationMaxNvdInfo" resultType="oss.fosslight.domain.OssMaster">
-		SELECT TBL.CVSS_SCORE, TBL.CVE_ID, TBL.VULN_YN
-		FROM
-		(
-			SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		  	) OC
-  		  	LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3) NVD 
-  		  	ON NVD.PRODUCT = OC.OSS_NAME 
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-  		   
+		SELECT UTBL.*
+		FROM (
+			SELECT TBL.*
+			FROM
+			(	SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				FROM NVD_DATA_SCORE_V3 NVD
+				INNER JOIN (
+					SELECT OC.OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+					AND OC.EXCLUDE_YN = 'N'
+					AND OC.OSS_NAME != '-'
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME != ''
+					AND EXISTS (SELECT 1 FROM NVD_DATA_SCORE_V3 WHERE PRODUCT = OC.OSS_NAME AND VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-'))
+			) OC
+			ON NVD.PRODUCT = OC.OSS_NAME
+			AND NVD.VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-')
+			ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+
 			UNION
-			
-			SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		 	) OC  
-			LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3) NVD
-  		  	ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-  		   
+
+			SELECT TBL.*
+			FROM (	
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				FROM NVD_DATA_SCORE_V3 NVD
+				INNER JOIN (
+					SELECT OC.OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+					AND OC.EXCLUDE_YN = 'N'
+					AND OC.OSS_NAME != '-'
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME != ''
+					AND EXISTS (SELECT 1 FROM NVD_DATA_SCORE_V3 WHERE PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_') AND VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-'))
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			AND NVD.VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-')
+			ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+
 			UNION
-			
-			SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		  	) OC
-			LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , VENDORPRODUCT
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3
-  		  					WHERE VENDORPRODUCT IS NOT NULL) NVD
-  		  	ON NVD.VENDORPRODUCT = OC.OSS_NAME
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-  		   
-  		   	UNION
-  		   
-  		   	SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		  	) OC
-		  	LEFT OUTER JOIN OSS_NICKNAME NICK
-  		  	ON OC.OSS_NAME = NICK.OSS_NAME
-			LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3) NVD
-  		  	ON NVD.PRODUCT = NICK.OSS_NICKNAME
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-  		   
-  		   	UNION
-  		   
-  		   	SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		  	) OC
-		  	LEFT OUTER JOIN OSS_NICKNAME NICK
-  		  	ON OC.OSS_NAME = NICK.OSS_NAME
-		  	LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3) NVD
-  		  	ON NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-  		   
-  		   	UNION
-  		   
-  		   	SELECT NVD.CVSS_SCORE, NVD.CVE_ID, NVD.VULN_YN
-			FROM (SELECT OSS_NAME, OSS_VERSION
-					FROM OSS_COMPONENTS
-					WHERE REFERENCE_ID = #{prjId}
-  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		 			AND REFERENCE_DIV = #{commponentDiv}
-  		 		</if>
-  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-  		   			AND REFERENCE_DIV IN ('10','11','12','14','15') 
-  		 		</if>
-  		 			AND EXCLUDE_YN = 'N'
-		   			AND OSS_NAME IS NOT NULL
-		   			AND OSS_NAME != '-'
-		   			AND OSS_NAME != ''
-		  	) OC
-		  	LEFT OUTER JOIN OSS_NICKNAME NICK
-  		  	ON OC.OSS_NAME = NICK.OSS_NAME
-			LEFT OUTER JOIN (SELECT PRODUCT 
-  		  					    , VERSION
-  		  					    , CVSS_SCORE 
-  		  					    , CVE_ID 
-  		  					    , VENDORPRODUCT
-  		  					    , 'Y' AS VULN_YN
-  		  					 FROM NVD_DATA_SCORE_V3
-  		  					WHERE VENDORPRODUCT IS NOT NULL) NVD
-  		  	ON NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
-  		   	AND NVD.VERSION = OC.OSS_VERSION
-		) TBL
-		ORDER BY TBL.CVSS_SCORE*1 DESC LIMIT 1
+
+			SELECT TBL.*
+			FROM (
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				FROM NVD_DATA_SCORE_V3 NVD
+				INNER JOIN (
+					SELECT OC.OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+					AND OC.EXCLUDE_YN = 'N'
+					AND OC.OSS_NAME != '-'
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME != ''
+					AND EXISTS (SELECT 1 FROM NVD_DATA_SCORE_V3 WHERE VENDORPRODUCT = OC.OSS_NAME AND VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-'))
+				) OC
+				ON NVD.VENDORPRODUCT = OC.OSS_NAME
+				AND NVD.VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-')
+				ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+
+			UNION
+
+			SELECT TBL.*
+			FROM (
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				FROM (
+					SELECT PRODUCT, VERSION, CVSS_SCORE, CVE_ID
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_NICKNAME WHERE OSS_NICKNAME = NVD.PRODUCT)
+				) NVD
+				INNER JOIN (
+					SELECT NICK.OSS_NICKNAME, OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_NICKNAME NICK
+					ON OC.OSS_NAME = NICK.OSS_NAME
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+					AND OC.EXCLUDE_YN = 'N'
+					AND OC.OSS_NAME != '-'
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME != ''
+				) OC
+				ON NVD.PRODUCT = OC.OSS_NICKNAME
+				AND NVD.VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-')
+				ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+
+			UNION
+
+			SELECT TBL.*
+			FROM (
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				FROM (
+					SELECT PRODUCT, VERSION, CVSS_SCORE, CVE_ID
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_NICKNAME WHERE OSS_NICKNAME = REPLACE(NVD.PRODUCT, '_', ' '))
+				) NVD
+				INNER JOIN (
+					SELECT REPLACE(NICK.OSS_NICKNAME, '_', ' ') AS OSS_NICKNAME, OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					INNER JOIN OSS_NICKNAME NICK
+					ON OC.OSS_NAME = NICK.OSS_NAME
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+					AND OC.EXCLUDE_YN = 'N'
+					AND OC.OSS_NAME != '-'
+					AND OC.OSS_NAME IS NOT NULL
+					AND OC.OSS_NAME != ''
+				) OC
+				ON NVD.PRODUCT = OC.OSS_NICKNAME
+				AND NVD.VERSION = IF(OC.OSS_VERSION != '', OC.OSS_VERSION, '-')
+				ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+
+			UNION
+
+			SELECT TBL.*
+			FROM (
+				SELECT CVSS_SCORE, CVE_ID
+				FROM NVD_DATA_SCORE_V3 NVD
+				WHERE EXISTS (SELECT 1 FROM (SELECT NICK.OSS_NICKNAME, OC.OSS_VERSION 
+											   FROM OSS_NICKNAME NICK 
+										 INNER JOIN OSS_COMPONENTS OC 
+												 ON NICK.OSS_NAME = OC.OSS_NAME
+											  WHERE OC.REFERENCE_ID = #{prjId}
+												AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+												AND OC.EXCLUDE_YN = 'N'
+												AND OC.OSS_NAME != '-'
+												AND OC.OSS_NAME IS NOT NULL
+												AND OC.OSS_NAME != ''
+												AND NICK.OSS_NICKNAME REGEXP '[-]'
+												GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
+										) TBL
+										WHERE TBL.OSS_NICKNAME = NVD.VENDORPRODUCT
+										AND TBL.OSS_VERSION = IF(NVD.VERSION != '-', NVD.VERSION, ''))
+			ORDER BY NVD.CVSS_SCORE DESC LIMIT 1
+			) TBL
+		) UTBL
+		ORDER BY UTBL.CVSS_SCORE*1 DESC LIMIT 1
 	</select>
 	
 	<select id="selectOssComponentMaxIdx" parameterType="oss.fosslight.domain.Project" resultType="int">
