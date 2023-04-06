@@ -3893,7 +3893,12 @@
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3915,7 +3920,12 @@
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3937,7 +3947,12 @@
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3965,7 +3980,12 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3992,7 +4012,12 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -4014,7 +4039,12 @@
 										 INNER JOIN OSS_COMPONENTS OC 
 												 ON NICK.OSS_NAME = OC.OSS_NAME
 											  WHERE OC.REFERENCE_ID = #{prjId}
-												AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+											<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 										AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 									</if>
+  		 									<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   										AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 									</if>
 												AND OC.EXCLUDE_YN = 'N'
 												AND OC.OSS_NAME != '-'
 												AND OC.OSS_NAME IS NOT NULL
