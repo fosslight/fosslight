@@ -198,6 +198,7 @@ public class NvdDataService {
 		List<Map<String, String>> ossList = new ArrayList<>();
 		List<Map<String, String>> insertDataList = new ArrayList<>();
 		List<Map<String, Object>> cpe_match_all = null;
+		List<Map<String, Object>> cvePatchList = null;
 		log.info("nvdCveDataApiJob start");
 		try {
 			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
@@ -270,6 +271,20 @@ public class NvdDataService {
 
 										ossList.add(_productInfo);
 									}
+								}
+								
+								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
+								if (cvePatchList != null) {
+									nvdDataMapper.deleteNvdDataPatchLink(cveId);
+									for (Map<String, Object> cvePatchInfo : cvePatchList) {
+										Map<String, Object> _patchInfo = new HashMap<>();
+										_patchInfo.put("cveId", cveId);
+										_patchInfo.put("patchLink", cvePatchInfo.get("url"));
+										_patchInfo.put("publDate", cveInfo.get("publDate"));
+										
+										nvdDataMapper.insertNvdDataPatchLink(_patchInfo);
+									}
+									cvePatchList = null;
 								}
 								
 								comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
@@ -403,6 +418,28 @@ public class NvdDataService {
 				}
 			}
 			
+			List<Map<String, Object>> cvePatchList = new ArrayList<>();
+			if (cveItem.containsKey("references")) {
+				List<Map<String, Object>> referencesInfo = (List<Map<String, Object>>) cveItem.get("references");
+				
+				for (Map<String, Object> references : referencesInfo) {
+					if (references.containsKey("tags")) {
+						boolean checkPatchLinkFlag = false;
+						List<String> tagsList = (List<String>) references.get("tags");
+						for (String tag : tagsList) {
+							tag = tag.toUpperCase();
+							if (tag.equals("PATCH") || tag.equals("MITIGATION") || tag.equals("RELEASE NOTES")) {
+								checkPatchLinkFlag = true;
+								break;
+							}
+						}
+						if (checkPatchLinkFlag) {
+							cvePatchList.add(references);
+						}
+					}
+				}
+			}
+			
 			resultMap.put("ossList", ossList);
 			resultMap.put("cveId", cveId);
 			resultMap.put("publDate", DateUtil.convertStringToTimestamp((publishedDate), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
@@ -411,6 +448,7 @@ public class NvdDataService {
 			resultMap.put("summary", descriptionStr);
 			resultMap.put("baseMetric", baseMetric);
 			resultMap.put("cpe_match_all", cpe_match_all);
+			resultMap.put("cvePatchList", cvePatchList);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

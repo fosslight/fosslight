@@ -65,4 +65,6 @@ public interface NvdDataMapper {
 	void updateVendorProductNvdDataScoreV3();
 	void insertNewMetaDataUrlConnection(HashMap<String, Object> param);
 	List<Map<String, Object>> selectUseMetaDataUrlConnection(HashMap<String, Object> param);
+	void insertNvdDataPatchLink(Map<String, Object> param);
+	void deleteNvdDataPatchLink(@Param(value = "cveId") String cveId);
 }

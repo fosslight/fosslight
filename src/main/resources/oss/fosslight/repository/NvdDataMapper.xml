@@ -657,4 +657,12 @@
 			AND JOB_STATUS = 'C' 
 		ORDER BY IDX DESC
     </select>
+    
+    <insert id="insertNvdDataPatchLink" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_PATCH_LINK (CVE_ID, PATCH_LINK, PUBL_DATE) VALUES (#{cveId}, #{patchLink}, #{publDate})
+    </insert>
+    
+    <delete id="deleteNvdDataPatchLink" parameterType="String">
+    	DELETE FROM NVD_DATA_PATCH_LINK WHERE CVE_ID = #{cveId}
+    </delete>
 </mapper>
