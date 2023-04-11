@@ -243,7 +243,7 @@
 																	<br>
 																	${csvFile.createdDate}
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
-																	<input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
+																	<input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
 															</span>
 														</li>
@@ -391,7 +391,7 @@
 																	<br>
 																	${csvFile.createdDate}
 																	<input type="hidden" value="${csvFile.fileSeq }"/>
-																	<input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
+																	<input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
 																</strong>
 															</span>
 														</li>

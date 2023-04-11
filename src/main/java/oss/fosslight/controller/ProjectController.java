@@ -4545,4 +4545,42 @@ public class ProjectController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(booleanFlag, null);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.DELETE_FILES)
+	public @ResponseBody ResponseEntity<Object> deleteFiles (@RequestBody HashMap<String, Object> map, 
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		// default validation
+		boolean isValid = true;
+		// last response map
+		Map<String, String> resMap = new HashMap<>();
+		// default 00:java error check code, 10:success code
+		String resCd = "00";
+		String delFileString = (String) map.get("csvDelFileIds");
+		String prjId = (String) map.get("prjId");
+		String referenceDiv = (String) map.get("referenceDiv");
+
+		Type collectionType = new TypeToken<List<T2File>>() {}.getType();
+		List<T2File> delFile = new ArrayList<T2File>();
+		delFile = (List<T2File>) fromJson(delFileString, collectionType);
+
+		if (delFile.size() > 0) {
+			try {
+				Project project = new Project();
+				project.setCsvFile(delFile);
+				project.setPrjId(prjId);
+				project.setReferenceDiv(referenceDiv);
+				projectService.deleteUploadFile(project);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			// success code set 10
+			resCd = "10";
+			resMap.put("isValid", String.valueOf(isValid));
+			resMap.put("resCd", resCd);
+		}
+
+		return makeJsonResponseHeader(resMap);
+	}
 }

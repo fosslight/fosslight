@@ -1447,6 +1447,46 @@ var com_fn = {
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
             }
         });
-    }
+    },
+	deleteFiles : function(obj, type){
+		var FileSeq = [];
+		var tabGubn = $(".tabMenu").find("span").text();
+		var seq = $(obj).prev().val();
+		var referenceDiv = "";
+		
+		if(seq == ""){
+			return;
+		}
+		
+		switch(tabGubn.toUpperCase()){
+			case "SRC":		referenceDiv = "11";	break;
+			case "ANDROID":	referenceDiv = "14";	break;
+			case "BIN":		referenceDiv = "15";	break;
+		}
+		
+		var object = {fileSeq : seq};
+		FileSeq.push(object);
+		var Data = {"csvDelFileIds" : JSON.stringify(FileSeq), "prjId" : "${project.prjId}", "referenceDiv" : referenceDiv};
+		
+		$.ajax({
+			url : '<c:url value="/project/deleteFiles"/>',
+			type : 'POST',
+			data : JSON.stringify(Data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if("10" == data.resCd){
+					alertify.success('<spring:message code="msg.common.success" />');
+					$(obj).closest('li').remove();
+				}else{
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+	}
 }
 </script>

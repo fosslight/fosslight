@@ -563,12 +563,12 @@ var bin_fn = {
 	makeFileTag : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
 		
-		$('.binFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
+		$('.binFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, \'1\')"/></strong></span></li>');
 	},
 	makeFileTag2 : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
 		
-		$('.binBinaryFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="bin_fn.deleteCsv(this, \'2\')"/></strong></span></li>');
+		$('.binBinaryFileArea').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, \'2\')"/></strong></span></li>');
 	},
 	deleteCsv : function(obj, type){
 		var Seq = $(obj).prev().val();
