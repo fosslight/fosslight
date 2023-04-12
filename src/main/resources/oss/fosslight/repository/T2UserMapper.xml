@@ -373,7 +373,7 @@
 			   SET TOKEN = null, EXPIRE_DATE = null
 			</when>
 		</choose>
-		     WHERE EMAIL = #{email} AND USER_ID = #{userId}
+		     WHERE USER_ID = #{userId}
 	</update>
 	
 	<select id="existUserIdOrEmail" resultType="int">
