@@ -169,6 +169,9 @@
 			syncSave : function(){
 				var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow");
 				
+				var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
+				ossName = ossName.substring(0, ossName.indexOf(" ("));
+				
 				var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
 				
 				if (checkedOssList.length > 0) { 
@@ -192,7 +195,12 @@
 						$.ajax({
 							url : '<c:url value="/oss/ossSyncUpdate"/>',
 							type : 'POST',
-							data : {"ossId" : syncRefOssId, "ossIds" : ossIds, "comment" : editorVal, "syncItem" : syncItem},
+							data : {
+								"ossId" : syncRefOssId,
+								"ossIds" : ossIds,
+								"ossName" : ossName,
+								"comment" : editorVal,
+								"syncItem" : syncItem},
 							dataType : 'json',
 							cache : false,
 							success: function(data){

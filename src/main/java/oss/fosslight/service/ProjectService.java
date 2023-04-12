@@ -189,6 +189,8 @@ public interface ProjectService extends HistoryConfig{
 	public void updateFileId(Project project);
 
 	public void deleteProjectRefFiles(Project projectInfo);
+
+	public void deleteUploadFile(Project project);
 }
 
 

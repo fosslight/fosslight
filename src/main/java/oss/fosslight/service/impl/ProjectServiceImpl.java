@@ -5322,4 +5322,57 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return null;
 	}
+
+	@Override
+	public void deleteUploadFile(Project project) {
+		Project prjInfo = projectMapper.getProjectBasicInfo(project);
+		boolean fileDeleteCheckFlag = false;
+		String physicalFilePath = "";
+		T2File fileInfo = null;
+		
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN)
+				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+			physicalFilePath = "Identification";
+		}
+		
+		if (project.getCsvFile() != null) {
+			for (int i = 0; i < project.getCsvFile().size(); i++) {
+				if (i == 0) {
+					fileInfo = fileService.selectFileInfo(project.getCsvFile().get(i).getFileSeq());
+				}
+				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
+				fileService.deletePhysicalFile(project.getCsvFile().get(i), physicalFilePath);
+			}
+		}
+		
+		if (fileInfo != null) {
+			T2File fileInfo2 = fileService.selectFileInfoById(fileInfo.getFileId());
+			switch (project.getReferenceDiv()) {
+			case CoConstDef.CD_DTL_COMPONENT_ID_SRC: 
+				if (fileInfo2 == null && prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
+					project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
+					fileDeleteCheckFlag = true;
+				}
+				break;
+			case CoConstDef.CD_DTL_COMPONENT_ID_BIN: 
+				if (fileInfo2 == null && prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
+					project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
+					fileDeleteCheckFlag = true;
+				}
+				break;
+			case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID: 
+				if (fileInfo2 == null && prjInfo.getSrcAndroidCsvFileId().equals(fileInfo.getFileId())) {
+					project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
+					fileDeleteCheckFlag = true;
+				}
+				break;
+			default :
+				break;
+			}
+		}
+		
+		if (fileDeleteCheckFlag) {
+			projectMapper.updateFileId2(project);
+		}
+	}
 }

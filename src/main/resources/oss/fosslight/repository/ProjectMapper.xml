@@ -1440,6 +1440,8 @@
 			T2_FILE T1
 		WHERE
 			T1.FILE_ID = #{srcCsvFileId}
+		AND
+			T1.DEL_YN = 'N'
 	</select>
 	
 	<select id="selectBinCsvFile" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.T2File">
@@ -1450,6 +1452,8 @@
 			T2_FILE T1
 		WHERE
 			T1.FILE_ID = #{binCsvFileId}
+		AND
+			T1.DEL_YN = 'N'
 	</select>
 	
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
@@ -3887,13 +3891,18 @@
 		FROM (
 			SELECT TBL.*
 			FROM
-			(	SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+			(	SELECT NVD.CVSS_SCORE, NVD.CVE_ID, 'Y' AS VULN_YN
 				FROM NVD_DATA_SCORE_V3 NVD
 				INNER JOIN (
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3909,13 +3918,18 @@
 
 			SELECT TBL.*
 			FROM (	
-				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID, 'Y' AS VULN_YN
 				FROM NVD_DATA_SCORE_V3 NVD
 				INNER JOIN (
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3931,13 +3945,18 @@
 
 			SELECT TBL.*
 			FROM (
-				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID, 'Y' AS VULN_YN
 				FROM NVD_DATA_SCORE_V3 NVD
 				INNER JOIN (
 					SELECT OC.OSS_NAME, OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3953,7 +3972,7 @@
 
 			SELECT TBL.*
 			FROM (
-				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID, 'Y' AS VULN_YN
 				FROM (
 					SELECT PRODUCT, VERSION, CVSS_SCORE, CVE_ID
 					FROM NVD_DATA_SCORE_V3 NVD
@@ -3965,7 +3984,12 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -3980,7 +4004,7 @@
 
 			SELECT TBL.*
 			FROM (
-				SELECT NVD.CVSS_SCORE, NVD.CVE_ID
+				SELECT NVD.CVSS_SCORE, NVD.CVE_ID, 'Y' AS VULN_YN
 				FROM (
 					SELECT PRODUCT, VERSION, CVSS_SCORE, CVE_ID
 					FROM NVD_DATA_SCORE_V3 NVD
@@ -3992,7 +4016,12 @@
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 			AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 		</if>
+  		 		<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   			AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 		</if>
 					AND OC.EXCLUDE_YN = 'N'
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
@@ -4007,14 +4036,19 @@
 
 			SELECT TBL.*
 			FROM (
-				SELECT CVSS_SCORE, CVE_ID
+				SELECT CVSS_SCORE, CVE_ID, 'Y' AS VULN_YN
 				FROM NVD_DATA_SCORE_V3 NVD
 				WHERE EXISTS (SELECT 1 FROM (SELECT NICK.OSS_NICKNAME, OC.OSS_VERSION 
 											   FROM OSS_NICKNAME NICK 
 										 INNER JOIN OSS_COMPONENTS OC 
 												 ON NICK.OSS_NAME = OC.OSS_NAME
 											  WHERE OC.REFERENCE_ID = #{prjId}
-												AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
+											<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+ 		 										AND OC.REFERENCE_DIV = #{commponentDiv}
+ 		 									</if>
+  		 									<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
+  		   										AND OC.REFERENCE_DIV IN ('10','11','12','14','15') 
+  		 									</if>
 												AND OC.EXCLUDE_YN = 'N'
 												AND OC.OSS_NAME != '-'
 												AND OC.OSS_NAME IS NOT NULL

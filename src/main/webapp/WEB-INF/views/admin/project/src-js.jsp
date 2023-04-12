@@ -484,7 +484,7 @@ var src_fn = {
 	makeFileTag : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '<c:url value="/download/'+obj.registSeq+'/'+obj.fileName+'"/>';
-		$('.csvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="src_fn.deleteCsv(this, \'1\')"/></strong></span></li>');
+		$('.csvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, \'1\')"/></strong></span></li>');
 	},
 	deleteCsv : function(obj, type){
 		var Seq = $(obj).prev().val();
