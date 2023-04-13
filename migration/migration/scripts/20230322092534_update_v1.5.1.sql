@@ -1,27 +1,19 @@
--- // update v1.5.0
+-- // update v1.5.1
 -- Migration SQL that makes the change goes here.
-ALTER TABLE `NVD_DATA_SCORE_V3` ADD `VENDOR` varchar(128) NOT NULL DEFAULT '';
+ALTER TABLE `NVD_DATA_SCORE_V3` MODIFY `VENDOR` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `NVD_DATA_SCORE_V3` ADD `VENDORPRODUCT` varchar(255) NULL;
 ALTER TABLE `NVD_DATA_SCORE_V3` ADD KEY `VENDORPRODUCT_VERSION` (`VENDORPRODUCT`,`VERSION`);
-ALTER TABLE `NVD_DATA_TEMP_V3` ADD `VENDOR` varchar(128) NOT NULL DEFAULT '';
+ALTER TABLE `NVD_DATA_TEMP_V3` MODIFY `VENDOR` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `NVD_DATA_TEMP_V3` ADD `VENDORPRODUCT` varchar(255) NULL;
-ALTER TABLE `NVD_DATA_V3` ADD `VENDOR` varchar(128) NOT NULL DEFAULT '';
+ALTER TABLE `NVD_DATA_V3` MODIFY `VENDOR` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `NVD_DATA_V3` ADD `VENDORPRODUCT` varchar(255) NULL;
 ALTER TABLE `NVD_DATA_V3` ADD KEY `VENDORPRODUCT_VERSION` (`VENDORPRODUCT`,`VERSION`);
 ALTER TABLE `OSS_DOWNLOADLOCATION` CHANGE `SORT_ORDER` `SORT_ORDER` varchar(50) DEFAULT NULL;
-ALTER TABLE `PROJECT_MASTER` ADD `REVIEW_REPORT_FILE_ID` int (11) DEFAULT NULL;
+ALTER TABLE `PROJECT_MASTER` MODIFY `REVIEW_REPORT_FILE_ID` int (11) DEFAULT NULL;
+ALTER TABLE `NVD_META` MODIFY `FILE_TYPE` varchar(48) DEFAULT NULL;
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "705" OR `CD_NO` = "911" OR `CD_NO` = "912";
-DELETE FROM `T2_CODE` WHERE `CD_NO` = "705" OR `CD_NO` = "911" OR `CD_NO` = "912";
+DELETE FROM `T2_CODE` WHERE `CD_NO` IN ("705", "911", "912");
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "910";
-INSERT INTO
-    `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`)
-VALUES
-    (
-        '750',
-        'Vulnerability Mailing Score',
-        'Vulnerability Mailing Score Code',
-        'N'
-    );
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "110" AND `CD_DTL_NO` = "30";
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "110" AND `CD_DTL_NO` = "31";
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "110" AND `CD_DTL_NO` = "70";
@@ -30,6 +22,15 @@ DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "111" AND `CD_DTL_NO` = "72";
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "103" AND `CD_DTL_NO` = "46";
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "103" AND `CD_DTL_NO` = "72";
 DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "705" AND `CD_DTL_NO` = "100";
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "102" AND `CD_DTL_NO` = "470";
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "102" AND `CD_DTL_NO` = "671";
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "103" AND `CD_DTL_NO` IN ("670", "671");
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "104" AND `CD_DTL_NO` IN ("215", "216");
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "110" AND `CD_DTL_NO` IN ("30", "31", "70");
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "111" AND `CD_DTL_NO` = "41";
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "750" AND `CD_DTL_NO` = "100";
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "903" AND `CD_DTL_NO` IN ("007", "008");
+DELETE FROM `T2_CODE_DTL` WHERE `CD_NO` = "910" AND `CD_DTL_NO` = "100";
 INSERT INTO
     `T2_CODE_DTL` (
         `CD_NO`,
@@ -45,6 +46,7 @@ VALUES
     ('102', '671', '[FOSSLight][PRJ-${Project ID}] Distribution, ${User} changed description: [${Project Name}]', '', 'Distribution, changed description', 671, 'Y'),
     ('102', '700', '[FOSSLight][3rd-${3rd Party ID}] ${User} changed : "${3rd Party Name}"', '', '', 700, 'Y'),
     ('102', '100', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested : " ${Project Name}"', '', '', 100, 'Y'),
+    ('102', '817', '[FOSSLight] Your password has been reset : ${User}', '', '${User}''s password has been reset.', 817, 'Y'),
     ('103', '46', 'Project Identification Confirmed Only', '', '200, 201, 202', 46, 'Y'),
     ('103', '670', 'redistribution changed description file', '', '200,203,204', 670, 'Y'),
     ('103', '671', 'redistribution changed description', '', '200,203,204', 671, 'Y'),
@@ -57,6 +59,7 @@ VALUES
     ('110', '31', 'commentWithProjectInfo.html', '', '42,43,44,46,52,53,54,45,55,31,56,65,34,35,36,812', 6, 'Y'),
     ('110', '41', 'partnerModify.html', '', '700', 19, 'Y'),
     ('110', '70', 'binaryDBDataCommitInfo.html', '', '47,470', 17, 'Y'),
+    ('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y'),
     ('111', '41', 'Project Identification Confirmed', '', '<p>BOM 탭의 Download Location, Homepage, Copyright text 정보가 DB 기반으로 업데이트 되었습니다.<br />Packaging 수행 후 Request 클릭하여 리뷰 요청해주시기 바랍니다.<br /> OSS Notice에 대하여 수정이 필요한 경우 (ex- text형식으로 발행), Packaging내 Notice탭에서 설정바랍니다.<br /><br />Download Location, Homepage and Copyright text in BOM tab have been updated based on DB.<br />After performing Packaging, click Request to request a review.<br />If it is necessary to modify the OSS Notice (ex- should be issued in text format), please set it in the Notice tab in Packaging.</p>', 41, 'Y'),
     ('111', '46', 'Project Identification Confirmed Only', '', '<p>BOM 탭의 Download Location, Homepage, Copyright text 정보가 DB 기반으로 업데이트 되었습니다.<br />Download Location, Homepage and Copyright text in BOM tab have been updated based on DB.</p>', 46, 'Y'),
     ('111', '72', '3rd party review confirm', '', '<p>3rd Party Software 리뷰가 완료되었습니다.</br > Project List - Identification - 3rd Party 탭에서 Confrim된 3rd Party Software를 불러올 수 있습니다.</br > 혹은 배포하는 Software가 3rd Party Software로만 구성되는 경우, 3rd Party List - 3rd Party 우측 상단의 <strong>Create Project for OSS Notice</strong>
@@ -119,6 +122,12 @@ CREATE TABLE `BINARY_DATA` (
         `PLATFORM_VERSION` VARCHAR(255) NULL DEFAULT NULL,
         `UPDATE_DATE` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
         INDEX `FILE_NAME_CHECK_SUM` (`FILE_NAME`, `CHECK_SUM`) USING BTREE
+);
+CREATE TABLE `NVD_DATA_PATCH_LINK` (
+        `CVE_ID` VARCHAR(16) NOT NULL,
+		`PATCH_LINK` VARCHAR(1024) NOT NULL,
+		`PUBL_DATE` DATETIME NOT NULL,
+		INDEX `CVE_ID` (`CVE_ID`) USING BTREE
 );
 -- //@UNDO
 -- SQL to undo the change goes here.
