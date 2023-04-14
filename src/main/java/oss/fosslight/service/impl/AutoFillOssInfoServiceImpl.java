@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
 import oss.fosslight.common.ExternalLicenseServiceType;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.ProjectIdentification;
@@ -134,6 +136,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return resultData;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public Map<String, Object> checkOssLicense(List<ProjectIdentification> ossList){
 		Map<String, Object> resMap = new HashMap<>();
@@ -168,27 +171,27 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			errors.add(e.getStatusText());
 		}
 
+		List<String> checkedLicenseList;
+		
 		for (ProjectIdentification oss : ossList) {
+			checkedLicenseList = null;
+			
 			List<ProjectIdentification> prjOssLicenses;
 			String downloadLocation = oss.getDownloadLocation();
 			String ossVersion = oss.getOssVersion();
 			String currentLicense = getLicenseNameSort(oss.getLicenseName());
 			String checkedLicense = "";
-
+			String checkedLicense1 = "";
+			String checkedLicense2 = "";
+			String checkedLicense3 = "";
+			
 			// Search Priority 1. find by oss name and oss version
 			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
-			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
+			checkedLicense1 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty()) {
-				if (!currentLicense.equals(checkedLicense)) {
-					String evidence = getMessage("check.evidence.exist.nameAndVersion");
-					oss.setCheckOssList("Y");
-					oss.setCheckLicense(checkedLicense);
-					oss.setCheckedEvidence(evidence);
-					oss.setCheckedEvidenceType("DB");
-					result.add(oss);
-				}
-				continue;
+			if (!checkedLicense1.isEmpty()) {
+				checkedLicenseList = new ArrayList<>();
+				checkedLicenseList.add(checkedLicense1);
 			}
 
 			if (downloadLocation.isEmpty()) {
@@ -233,19 +236,11 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			
 			// Search Priority 2. find by oss download location and version
 			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
-			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
+			checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty()) {
-				if (!currentLicense.equals(checkedLicense)) {
-					String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
-					oss.setCheckOssList("Y");
-					oss.setCheckLicense(checkedLicense);
-					oss.setCheckedEvidence(evidence);
-					oss.setCheckedEvidenceType("DB");
-					oss.setDownloadLocation(downloadLocation);
-					result.add(oss);
-				}
-				continue;
+			if (!checkedLicense2.isEmpty()) {
+				if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
+				checkedLicenseList.add(checkedLicense2);
 			}
 			
 			// Search Priority 3. find by oss download location
@@ -255,13 +250,81 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							ProjectIdentification::getLicenseName
 					))
 					.collect(Collectors.toList());
-			checkedLicense = combineOssLicenses(prjOssLicenses, currentLicense);
+			checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
-				if (!currentLicense.equals(checkedLicense)) {
+			if (!checkedLicense3.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
+				if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
+				checkedLicenseList.add(checkedLicense3);
+			}
+
+			if (checkedLicenseList != null) {
+				boolean permissiveLicenseCheckFlag = false;
+				List<String> currentLicenseList = Arrays.asList(currentLicense.split(","));
+				int currentLicenseListCnt = currentLicenseList.size();
+				
+				fLoop :
+				for (String li : checkedLicenseList) {
+					List<String> checkedLicenses = Arrays.asList(li.split("[|]"));
+					
+					sLoop :
+					for (String chkedLicense : checkedLicenses) {
+						List<String> licenseList = Arrays.asList(chkedLicense.split(","));
+						List<String> permissiveLicenseList = new ArrayList<>();
+						for (String license : licenseList) {
+							LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
+							if (master != null && master.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) {
+								permissiveLicenseList.add(license);
+							}
+						}
+						
+						if (licenseList.size() == permissiveLicenseList.size()) {
+							int duplicateCnt = permissiveLicenseList.stream()
+																	.filter(permissiveLicense -> currentLicenseList.stream()
+            														.anyMatch(Predicate.isEqual(permissiveLicense)))
+            														.collect(Collectors.toList()).size();
+							if (currentLicenseListCnt == duplicateCnt) {
+								permissiveLicenseCheckFlag = true;
+								break fLoop;
+							}
+						}
+					}
+				}
+				
+				if (permissiveLicenseCheckFlag) {
+					continue;
+				}
+			}
+			
+			if (!isEmpty(checkedLicense1)) {
+				if (!currentLicense.equals(checkedLicense1)) {
+					String evidence = getMessage("check.evidence.exist.nameAndVersion");
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense1);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("DB");
+					result.add(oss);
+				}
+				continue;
+			}
+			
+			if (!isEmpty(checkedLicense2)) {
+				if (!currentLicense.equals(checkedLicense2)) {
+					String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
+					oss.setCheckOssList("Y");
+					oss.setCheckLicense(checkedLicense2);
+					oss.setCheckedEvidence(evidence);
+					oss.setCheckedEvidenceType("DB");
+					oss.setDownloadLocation(downloadLocation);
+					result.add(oss);
+				}
+				continue;
+			}
+			
+			if (!isEmpty(checkedLicense3)) {
+				if (!currentLicense.equals(checkedLicense3)) {
 					String evidence = getMessage("check.evidence.exist.downloadLocation");
 					oss.setCheckOssList("Y");
-					oss.setCheckLicense(checkedLicense);
+					oss.setCheckLicense(checkedLicense3);
 					oss.setCheckedEvidence(evidence);
 					oss.setCheckedEvidenceType("DB");
 					oss.setDownloadLocation(downloadLocation);
@@ -481,7 +544,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
 		String checkLicense = "";
 		List<ProjectIdentification> licenses;
-
+		prjOssMasters = prjOssMasters.stream().filter(CommonFunction.distinctByKey(p -> p.getOssId())).collect(Collectors.toList());
+		
 		for (ProjectIdentification prjOssMaster : prjOssMasters) {
 
 			if (!isEmpty(checkLicense)) {
