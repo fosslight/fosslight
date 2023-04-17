@@ -939,6 +939,10 @@
 		 DELETE FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
 	
+	<delete id="deleteProjectDistributeHis" parameterType="oss.fosslight.domain.Project">
+		DELETE FROM PROJECT_DISTRIBUTE_HIS WHERE PRJ_ID = #{prjId}
+	</delete>
+	
 	<delete id="deleteProjectModel" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM PROJECT_MODEL
 		 WHERE PRJ_ID = #{prjId} 
