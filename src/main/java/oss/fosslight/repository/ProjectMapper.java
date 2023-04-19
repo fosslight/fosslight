@@ -348,4 +348,6 @@ public interface ProjectMapper {
 	void updateProjectDivision(Project project);
 	
 	void deleteProjectDistributeHis(Project project);
+	
+	List<OssComponentsLicense> selectBomLicenseList(ProjectIdentification identification);
 }

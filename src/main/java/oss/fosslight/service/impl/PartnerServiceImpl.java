@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -755,6 +756,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 		list = projectMapper.selectIdentificationGridList(identification);
+		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
+		if (notVersionOssComponentList != null) {
+			list.addAll(notVersionOssComponentList);
+			identification.setOssVersionEmptyFlag(null);
+		}
+		
+		list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 		
 		if (list != null && !list.isEmpty()) {
 

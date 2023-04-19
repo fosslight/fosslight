@@ -283,7 +283,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String reqMergeFlag = identification.getMerge();
 
 			list = projectMapper.selectBomList(identification);
+			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+			if (notVersionList != null) {
+				list.addAll(notVersionList);
+			}
+			identification.setOssVersionEmptyFlag(null);
+			
+			Comparator<ProjectIdentification> compare = Comparator
+					.comparing(ProjectIdentification::getLicenseTypeIdx)
+					.thenComparing(ProjectIdentification::getOssName)
+					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+					.thenComparing(ProjectIdentification::getLicenseName)
+					.thenComparing(ProjectIdentification::getMergeOrder);
 
+			list.sort(compare);
+			
 			// For loading 3rd Party ID
 			ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
 			thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
@@ -319,6 +334,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
 				identification.setMerge(CoConstDef.FLAG_NO);
 				List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
+				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+				List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
+				if (bomBeforeNotVersionList != null) {
+					list.addAll(bomBeforeNotVersionList);
+				}
+				identification.setOssVersionEmptyFlag(null);
+				bomBeforeList.sort(compare);
 				
 				if (bomBeforeList != null) {
 					for (ProjectIdentification _orgIdentificationBean : bomBeforeList) {
@@ -330,16 +352,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
 			Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
 			
+			// convert max score
+			List<String> cvssScoreMaxList = new ArrayList<>();
+			
+			Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+			List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+			for (OssComponentsLicense ocl : bomLicenseList) {
+				String key = ocl.getComponentId();
+				List<OssComponentsLicense> bomLicenses = null;
+				if (bomLicenseMap.containsKey(key)) {
+					bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+				} else {
+					bomLicenses = new ArrayList<>();
+				}
+				bomLicenses.add(ocl);
+				bomLicenseMap.put(key, bomLicenses);
+			}
+			
 			for (ProjectIdentification ll : list) {
 				ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
 				ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
   				ll.setCopyrightText(ll.getCopyrightText());
 				ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 
-
-				listLicense = projectMapper.selectBomLicense(ll);
-				ll.setOssComponentsLicenseList(listLicense);
-				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
+				if (bomLicenseMap.containsKey(ll.getComponentId())) {
+					ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+				}
+//				listLicense = projectMapper.selectBomLicense(ll);
+//				ll.setOssComponentsLicenseList(listLicense);
+//				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
 				
 				if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
 					if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
@@ -377,55 +419,44 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				// convert max score
-				if (ll.getCvssScoreMax() != null || ll.getCvssScoreMax1() != null || ll.getCvssScoreMax2() != null 
-						|| ll.getCvssScoreMax3() != null || ll.getCvssScoreMax4() != null || ll.getCvssScoreMax5() != null) {
-					List<String> cvssScoreMaxList = new ArrayList<>();
+				if (ll.getCvssScoreMax() != null) {
+					cvssScoreMaxList.add(ll.getCvssScoreMax());
+				}
+				if (ll.getCvssScoreMax1() != null) {
+					cvssScoreMaxList.add(ll.getCvssScoreMax1());
+				}
+				if (ll.getCvssScoreMax2() != null) {
+					cvssScoreMaxList.add(ll.getCvssScoreMax2());
+				}
+				if (ll.getCvssScoreMax3() != null) {
+					cvssScoreMaxList.add(ll.getCvssScoreMax3());
+				}
+				
+				if (!cvssScoreMaxList.isEmpty()) {
+					String[] cvssScoreMaxString = null;
+					BigDecimal cvssScore = null;
+					BigDecimal cvssScoreMax = null;
+					String cveId = null;
 					
-					if (!isEmpty(ll.getCvssScoreMax())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax());
-					}
-					if (!isEmpty(ll.getCvssScoreMax1())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax1());
-					}
-					if (!isEmpty(ll.getCvssScoreMax2())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax2());
-					}
-					if (!isEmpty(ll.getCvssScoreMax3())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax3());
-					}
-					if (!isEmpty(ll.getCvssScoreMax4())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax4());
-					}
-					if (!isEmpty(ll.getCvssScoreMax5())) {
-						cvssScoreMaxList.add(ll.getCvssScoreMax5());
-					}
-					
-					if (!cvssScoreMaxList.isEmpty()) {
-						String[] cvssScoreMaxString = null;
-						BigDecimal cvssScore = null;
-						BigDecimal cvssScoreMax = null;
-						String cveId = null;
-						
-						for (String cvssScoreMaxStr : cvssScoreMaxList) {
-							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-							if (cvssScoreMax != null) {
-								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-								if (cvssScoreMax.compareTo(cvssScore) == -1) {
-									cvssScoreMax = cvssScore;
-									cveId = cvssScoreMaxString[1];
-								}
-							} else {
-								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
-								cveId = cvssScoreMaxString[1];
-							}
-						}
-						
+					for (String cvssScoreMaxStr : cvssScoreMaxList) {
+						cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
 						if (cvssScoreMax != null) {
-							ll.setCvssScore(String.valueOf(cvssScoreMax));
-							ll.setVulnYn(CoConstDef.FLAG_YES);
-							ll.setCveId(cveId);
+							cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+							if (cvssScoreMax.compareTo(cvssScore) == -1) {
+								cvssScoreMax = cvssScore;
+								cveId = cvssScoreMaxString[1];
+							} 
+						} else {
+							cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+							cveId = cvssScoreMaxString[1];
 						}
 					}
+					
+					ll.setCvssScore(String.valueOf(cvssScoreMax));
+					ll.setVulnYn(CoConstDef.FLAG_YES);
+					ll.setCveId(cveId);
+					
+					cvssScoreMaxList.clear();
 				} else {
 					ll.setVulnYn(CoConstDef.FLAG_NO);
 				}
@@ -620,8 +651,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			list = projectMapper.selectIdentificationGridList(identification);
+			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
+			if (notVersionOssComponentList != null) {
+				list.addAll(notVersionOssComponentList);
+				identification.setOssVersionEmptyFlag(null);
+			}
+			
+			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
 			if (list != null && !list.isEmpty()) {
+				List<String> cvssScoreMaxList = new ArrayList<>();
 				for (ProjectIdentification project : list){
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
 					String _test2 = project.getOssName().trim() + "_" + project.getOssVersion().trim() + ".0";
@@ -646,55 +686,44 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					// convert max score
-					if (project.getCvssScoreMax() != null || project.getCvssScoreMax1() != null || project.getCvssScoreMax2() != null 
-							|| project.getCvssScoreMax3() != null || project.getCvssScoreMax4() != null || project.getCvssScoreMax5() != null) {
-						List<String> cvssScoreMaxList = new ArrayList<>();
+					if (project.getCvssScoreMax() != null) {
+						cvssScoreMaxList.add(project.getCvssScoreMax());
+					}
+					if (project.getCvssScoreMax1() != null) {
+						cvssScoreMaxList.add(project.getCvssScoreMax1());
+					}
+					if (project.getCvssScoreMax2() != null) {
+						cvssScoreMaxList.add(project.getCvssScoreMax2());
+					}
+					if (project.getCvssScoreMax3() != null) {
+						cvssScoreMaxList.add(project.getCvssScoreMax3());
+					}
+					
+					if (!cvssScoreMaxList.isEmpty()) {
+						String[] cvssScoreMaxString = null;
+						BigDecimal cvssScore = null;
+						BigDecimal cvssScoreMax = null;
+						String cveId = null;
 						
-						if (!isEmpty(project.getCvssScoreMax())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax());
-						}
-						if (!isEmpty(project.getCvssScoreMax1())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax1());
-						}
-						if (!isEmpty(project.getCvssScoreMax2())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax2());
-						}
-						if (!isEmpty(project.getCvssScoreMax3())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax3());
-						}
-						if (!isEmpty(project.getCvssScoreMax4())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax4());
-						}
-						if (!isEmpty(project.getCvssScoreMax5())) {
-							cvssScoreMaxList.add(project.getCvssScoreMax5());
-						}
-						
-						if (!cvssScoreMaxList.isEmpty()) {
-							String[] cvssScoreMaxString = null;
-							BigDecimal cvssScore = null;
-							BigDecimal cvssScoreMax = null;
-							String cveId = null;
-							
-							for (String cvssScoreMaxStr : cvssScoreMaxList) {
-								cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-								if (cvssScoreMax != null) {
-									cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-									if (cvssScoreMax.compareTo(cvssScore) == -1) {
-										cvssScoreMax = cvssScore;
-										cveId = cvssScoreMaxString[1];
-									}
-								} else {
-									cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+						for (String cvssScoreMaxStr : cvssScoreMaxList) {
+							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+							if (cvssScoreMax != null) {
+								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
+								if (cvssScoreMax.compareTo(cvssScore) == -1) {
+									cvssScoreMax = cvssScore;
 									cveId = cvssScoreMaxString[1];
 								}
-							}
-							
-							if (cvssScoreMax != null) {
-								project.setCvssScore(String.valueOf(cvssScoreMax));
-								project.setVulnYn(CoConstDef.FLAG_YES);
-								project.setCveId(cveId);
+							} else {
+								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
+								cveId = cvssScoreMaxString[1];
 							}
 						}
+						
+						project.setCvssScore(String.valueOf(cvssScoreMax));
+						project.setVulnYn(CoConstDef.FLAG_YES);
+						project.setCveId(cveId);
+						
+						cvssScoreMaxList.clear();
 					} else {
 						project.setVulnYn(CoConstDef.FLAG_NO);
 					}
@@ -3186,6 +3215,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			bomParam.setSaveBomFlag(CoConstDef.FLAG_YES);
 			bomParam.setBomWithAndroidFlag(project.getAndroidFlag()); // android Project
 			List<ProjectIdentification> bomList = projectMapper.selectBomList(bomParam);
+			bomParam.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(bomParam);;
+			if (notVersionList != null) {
+				bomList.addAll(notVersionList);
+			}
+			bomParam.setOssVersionEmptyFlag(null);
+			
+			Comparator<ProjectIdentification> compare = Comparator
+					.comparing(ProjectIdentification::getLicenseTypeIdx)
+					.thenComparing(ProjectIdentification::getOssName)
+					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+					.thenComparing(ProjectIdentification::getLicenseName)
+					.thenComparing(ProjectIdentification::getMergeOrder);
+
+			bomList.sort(compare);
 			
 			// 일괄 등록을 위해 대상 data의 component id 만 추출한다.
 			List<String> groupingList = new ArrayList<>(); // 불필요한 row (중복) 는 미등록
@@ -3567,6 +3611,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom) {
 		bom.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		List<ProjectIdentification> list = projectMapper.selectBomList(bom);
+		bom.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(bom);;
+		if (notVersionList != null) {
+			list.addAll(notVersionList);
+		}
+		bom.setOssVersionEmptyFlag(null);
+		
+		Comparator<ProjectIdentification> compare = Comparator
+				.comparing(ProjectIdentification::getLicenseTypeIdx)
+				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getMergeOrder);
+
+		list.sort(compare);
+		
+		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(bom);
+		for (OssComponentsLicense ocl : bomLicenseList) {
+			String key = ocl.getComponentId();
+			List<OssComponentsLicense> bomLicenses = null;
+			if (bomLicenseMap.containsKey(key)) {
+				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+			} else {
+				bomLicenses = new ArrayList<>();
+			}
+			bomLicenses.add(ocl);
+			bomLicenseMap.put(key, bomLicenses);
+		}
+		
 		List<ProjectIdentification> result = new ArrayList<>();
 		
 		List<OssComponentsLicense> license = null;
@@ -3580,25 +3654,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (list.get(i).getComponentId() != null) {
 				// 컴포넌트 라이센스 조회
 				list.get(i).setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
-				license = projectMapper.selectBomLicense(list.get(i));
-				
-				for (int j = 0; j < license.size(); j++){
-					if (j == 0) {
-						licenseId = license.get(j).getLicenseId();
-						licenseName = license.get(j).getLicenseName();
-						licenseText = license.get(j).getLicenseText();
-						copyrightText = license.get(j).getCopyrightText();
-					} else {
-						licenseId = licenseId + ","+license.get(j).getLicenseId();
-						licenseName = licenseName + ","+license.get(j).getLicenseName();
-						licenseText = licenseText + ","+license.get(j).getLicenseText();
-						copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
+				if (bomLicenseMap.containsKey(list.get(i).getComponentId())) {
+					license = bomLicenseMap.get(list.get(i).getComponentId());
+					
+					for (int j = 0; j < license.size(); j++){
+						if (j == 0) {
+							licenseId = license.get(j).getLicenseId();
+							licenseName = license.get(j).getLicenseName();
+							licenseText = license.get(j).getLicenseText();
+							copyrightText = license.get(j).getCopyrightText();
+						} else {
+							licenseId = licenseId + ","+license.get(j).getLicenseId();
+							licenseName = licenseName + ","+license.get(j).getLicenseName();
+							licenseText = licenseText + ","+license.get(j).getLicenseText();
+							copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
+						}
 					}
+					list.get(i).setLicenseId(licenseId);
+					list.get(i).setLicenseName(licenseName);
+					list.get(i).setLicenseText(licenseText);
+					list.get(i).setCopyrightText(copyrightText);
 				}
-				list.get(i).setLicenseId(licenseId);
-				list.get(i).setLicenseName(licenseName);
-				list.get(i).setLicenseText(licenseText);
-				list.get(i).setCopyrightText(copyrightText);
 				
 				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
 				if (isEmpty(list.get(i).getCveId()) 
@@ -5140,16 +5216,47 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public void insertCopyConfirmStatusBomList(Project project, ProjectIdentification identification) {
 		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+		if (notVersionList != null) {
+			bomList.addAll(notVersionList);
+		}
+		identification.setOssVersionEmptyFlag(null);
+		
+		Comparator<ProjectIdentification> compare = Comparator
+				.comparing(ProjectIdentification::getLicenseTypeIdx)
+				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getMergeOrder);
+
+		bomList.sort(compare);
+		
+		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+		for (OssComponentsLicense ocl : bomLicenseList) {
+			String key = ocl.getComponentId();
+			List<OssComponentsLicense> bomLicenses = null;
+			if (bomLicenseMap.containsKey(key)) {
+				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+			} else {
+				bomLicenses = new ArrayList<>();
+			}
+			bomLicenses.add(ocl);
+			bomLicenseMap.put(key, bomLicenses);
+		}
 		
 		for (ProjectIdentification pi : bomList) {
-			List<OssComponentsLicense> licenseList = projectMapper.selectBomLicense(pi);
 			pi.setReferenceId(project.getPrjId());
 			// 컴포넌트 마스터 인서트
 			projectMapper.registBomComponents(pi);
 			
-			for (OssComponentsLicense licenseBean : licenseList) {
-				licenseBean.setComponentId(pi.getComponentId());
-				projectMapper.registComponentLicense(licenseBean);
+			if (bomLicenseMap.containsKey(pi.getComponentId())) {
+				List<OssComponentsLicense> licenseList = bomLicenseMap.get(pi.getComponentId());
+				for (OssComponentsLicense licenseBean : licenseList) {
+					licenseBean.setComponentId(pi.getComponentId());
+					projectMapper.registComponentLicense(licenseBean);
+				}
 			}
 		}
 	}
@@ -5201,7 +5308,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public List<ProjectIdentification> selectIdentificationGridList(ProjectIdentification identification) {
-		return projectMapper.selectIdentificationGridList(identification);
+		List<ProjectIdentification> list = projectMapper.selectIdentificationGridList(identification);
+		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);
+		if (notVersionOssComponentList != null) {
+			list.addAll(notVersionOssComponentList);
+			identification.setOssVersionEmptyFlag(null);
+		}
+		
+		list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+		
+		return list;
 	}
 
 	@Override
@@ -5280,6 +5397,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public String checkOssNicknameList(ProjectIdentification identification) {
 		String referenceDivString = "";
 		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+		if (notVersionList != null) {
+			bomList.addAll(notVersionList);
+		}
+		identification.setOssVersionEmptyFlag(null);
+		
+		Comparator<ProjectIdentification> compare = Comparator
+				.comparing(ProjectIdentification::getLicenseTypeIdx)
+				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getMergeOrder);
+
+		bomList.sort(compare);
 		
 		if (bomList != null) {
 			List<ProjectIdentification> checkList = bomList.stream()
