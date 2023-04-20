@@ -355,21 +355,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			// convert max score
 			List<String> cvssScoreMaxList = new ArrayList<>();
 			
-//			Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+			Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+			List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
 			
-//			List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
-//			
-//			for (OssComponentsLicense ocl : bomLicenseList) {
-//				String key = ocl.getComponentId();
-//				List<OssComponentsLicense> bomLicenses = null;
-//				if (bomLicenseMap.containsKey(key)) {
-//					bomLicenses = bomLicenseMap.get(ocl.getComponentId());
-//				} else {
-//					bomLicenses = new ArrayList<>();
-//				}
-//				bomLicenses.add(ocl);
-//				bomLicenseMap.put(key, bomLicenses);
-//			}
+			for (OssComponentsLicense ocl : bomLicenseList) {
+				String key = ocl.getComponentId();
+				List<OssComponentsLicense> bomLicenses = null;
+				if (bomLicenseMap.containsKey(key)) {
+					bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+				} else {
+					bomLicenses = new ArrayList<>();
+				}
+				bomLicenses.add(ocl);
+				bomLicenseMap.put(key, bomLicenses);
+			}
 			
 			for (ProjectIdentification ll : list) {
 				ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
@@ -377,13 +376,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
   				ll.setCopyrightText(ll.getCopyrightText());
 				ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 
-//				if (bomLicenseMap.containsKey(ll.getComponentId())) {
-//					ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
-//					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
-//				}
-				listLicense = projectMapper.selectBomLicense(ll);
-				ll.setOssComponentsLicenseList(listLicense);
-				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
+				if (bomLicenseMap.containsKey(ll.getComponentId())) {
+					ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+				}
+//				listLicense = projectMapper.selectBomLicense(ll);
+//				ll.setOssComponentsLicenseList(listLicense);
+//				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
 				
 				if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
 					if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
@@ -3629,19 +3628,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		list.sort(compare);
 		
-//		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
-//		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(bom);
-//		for (OssComponentsLicense ocl : bomLicenseList) {
-//			String key = ocl.getComponentId();
-//			List<OssComponentsLicense> bomLicenses = null;
-//			if (bomLicenseMap.containsKey(key)) {
-//				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
-//			} else {
-//				bomLicenses = new ArrayList<>();
-//			}
-//			bomLicenses.add(ocl);
-//			bomLicenseMap.put(key, bomLicenses);
-//		}
+		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(bom);
+		for (OssComponentsLicense ocl : bomLicenseList) {
+			String key = ocl.getComponentId();
+			List<OssComponentsLicense> bomLicenses = null;
+			if (bomLicenseMap.containsKey(key)) {
+				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+			} else {
+				bomLicenses = new ArrayList<>();
+			}
+			bomLicenses.add(ocl);
+			bomLicenseMap.put(key, bomLicenses);
+		}
 		
 		List<ProjectIdentification> result = new ArrayList<>();
 		
@@ -3656,47 +3655,47 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (list.get(i).getComponentId() != null) {
 				// 컴포넌트 라이센스 조회
 				list.get(i).setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
-//				if (bomLicenseMap.containsKey(list.get(i).getComponentId())) {
-//					license = bomLicenseMap.get(list.get(i).getComponentId());
-//					
-//					for (int j = 0; j < license.size(); j++){
-//						if (j == 0) {
-//							licenseId = license.get(j).getLicenseId();
-//							licenseName = license.get(j).getLicenseName();
-//							licenseText = license.get(j).getLicenseText();
-//							copyrightText = license.get(j).getCopyrightText();
-//						} else {
-//							licenseId = licenseId + ","+license.get(j).getLicenseId();
-//							licenseName = licenseName + ","+license.get(j).getLicenseName();
-//							licenseText = licenseText + ","+license.get(j).getLicenseText();
-//							copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
-//						}
-//					}
-//					list.get(i).setLicenseId(licenseId);
-//					list.get(i).setLicenseName(licenseName);
-//					list.get(i).setLicenseText(licenseText);
-//					list.get(i).setCopyrightText(copyrightText);
-//				}
-				
-				license = projectMapper.selectBomLicense(list.get(i));
-				for (int j = 0; j < license.size(); j++){
-					if (j == 0) {
-						licenseId = license.get(j).getLicenseId();
-						licenseName = license.get(j).getLicenseName();
-						licenseText = license.get(j).getLicenseText();
-						copyrightText = license.get(j).getCopyrightText();
-					} else {
-						licenseId = licenseId + ","+license.get(j).getLicenseId();
-						licenseName = licenseName + ","+license.get(j).getLicenseName();
-						licenseText = licenseText + ","+license.get(j).getLicenseText();
-						copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
+				if (bomLicenseMap.containsKey(list.get(i).getComponentId())) {
+					license = bomLicenseMap.get(list.get(i).getComponentId());
+					
+					for (int j = 0; j < license.size(); j++){
+						if (j == 0) {
+							licenseId = license.get(j).getLicenseId();
+							licenseName = license.get(j).getLicenseName();
+							licenseText = license.get(j).getLicenseText();
+							copyrightText = license.get(j).getCopyrightText();
+						} else {
+							licenseId = licenseId + ","+license.get(j).getLicenseId();
+							licenseName = licenseName + ","+license.get(j).getLicenseName();
+							licenseText = licenseText + ","+license.get(j).getLicenseText();
+							copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
+						}
 					}
+					list.get(i).setLicenseId(licenseId);
+					list.get(i).setLicenseName(licenseName);
+					list.get(i).setLicenseText(licenseText);
+					list.get(i).setCopyrightText(copyrightText);
 				}
 				
-				list.get(i).setLicenseId(licenseId);
-				list.get(i).setLicenseName(licenseName);
-				list.get(i).setLicenseText(licenseText);
-				list.get(i).setCopyrightText(copyrightText);
+//				license = projectMapper.selectBomLicense(list.get(i));
+//				for (int j = 0; j < license.size(); j++){
+//					if (j == 0) {
+//						licenseId = license.get(j).getLicenseId();
+//						licenseName = license.get(j).getLicenseName();
+//						licenseText = license.get(j).getLicenseText();
+//						copyrightText = license.get(j).getCopyrightText();
+//					} else {
+//						licenseId = licenseId + ","+license.get(j).getLicenseId();
+//						licenseName = licenseName + ","+license.get(j).getLicenseName();
+//						licenseText = licenseText + ","+license.get(j).getLicenseText();
+//						copyrightText = copyrightText + ","+license.get(j).getCopyrightText();
+//					}
+//				}
+//				
+//				list.get(i).setLicenseId(licenseId);
+//				list.get(i).setLicenseName(licenseName);
+//				list.get(i).setLicenseText(licenseText);
+//				list.get(i).setCopyrightText(copyrightText);
 				
 				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
 				if (isEmpty(list.get(i).getCveId()) 
@@ -5254,30 +5253,34 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 		bomList.sort(compare);
 		
-//		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
-//		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
-//		for (OssComponentsLicense ocl : bomLicenseList) {
-//			String key = ocl.getComponentId();
-//			List<OssComponentsLicense> bomLicenses = null;
-//			if (bomLicenseMap.containsKey(key)) {
-//				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
-//			} else {
-//				bomLicenses = new ArrayList<>();
-//			}
-//			bomLicenses.add(ocl);
-//			bomLicenseMap.put(key, bomLicenses);
-//		}
+		Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+		List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+		for (OssComponentsLicense ocl : bomLicenseList) {
+			String key = ocl.getComponentId();
+			List<OssComponentsLicense> bomLicenses = null;
+			if (bomLicenseMap.containsKey(key)) {
+				bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+			} else {
+				bomLicenses = new ArrayList<>();
+			}
+			bomLicenses.add(ocl);
+			bomLicenseMap.put(key, bomLicenses);
+		}
 		
 		for (ProjectIdentification pi : bomList) {
-			List<OssComponentsLicense> licenseList = projectMapper.selectBomLicense(pi);
+//			List<OssComponentsLicense> licenseList = projectMapper.selectBomLicense(pi);
 			pi.setReferenceId(project.getPrjId());
 			// 컴포넌트 마스터 인서트
 			projectMapper.registBomComponents(pi);
 			
-			for (OssComponentsLicense licenseBean : licenseList) {
-				licenseBean.setComponentId(pi.getComponentId());
-				projectMapper.registComponentLicense(licenseBean);
+			if (bomLicenseMap.containsKey(pi.getComponentId())) {
+				List<OssComponentsLicense> licenseList = bomLicenseMap.get(pi.getComponentId());
+				for (OssComponentsLicense licenseBean : licenseList) {
+					licenseBean.setComponentId(pi.getComponentId());
+					projectMapper.registComponentLicense(licenseBean);
+				}
 			}
+			
 		}
 	}
 

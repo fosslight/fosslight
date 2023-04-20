@@ -1725,8 +1725,8 @@
 		FROM
 			OSS_COMPONENTS_LICENSE OCL
 		WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS 
-									WHERE REFERENCE_ID = #{referenceId} 
-									AND REFERENCE_DIV = #{referenceDiv} 
+									WHERE REFERENCE_ID = #{referenceId}
+									AND REFERENCE_DIV IN ('10', '11', '13', '15')
 									AND COMPONENT_ID = OCL.COMPONENT_ID)
 		AND IFNULL(OCL.EXCLUDE_YN, 'N') != 'Y'
 	</select>
@@ -4477,4 +4477,58 @@
 		WHERE
 			PRJ_ID = #{prjId}
 	</update>
+	
+	<delete id="deleteSecurityData" parameterType="oss.fosslight.domain.OssComponents">
+		DELETE FROM NVD_DATA_SECURITY
+		WHERE OSS_NAME = #{ossName}
+		AND OSS_VERSION = #{ossVersion}
+		AND CVE_ID = #{cveId}
+		AND CVSS_SCORE = #{cvssScore}
+	</delete>
+	
+	<insert id="insertSecurityData" parameterType="oss.fosslight.domain.OssComponents">
+        INSERT INTO
+            NVD_DATA_SECURITY
+            (
+            OSS_NAME
+            , OSS_VERSION
+            , CVE_ID
+            , CVSS_SCORE
+            , PUBL_DATE
+            , VULNERABILITY_RESOLUTION
+            , VULNERABILITY_LINK
+            , OFFICIAL_PATCH_LINK
+            , SECURITY_PATCH_LINK
+            , SECURITY_COMMENTS
+            )
+            VALUES
+            (
+            #{ossName}
+            , REPLACE(#{ossVersion}, '-', '')
+            , #{cveId}
+            , #{cvssScore}
+            , #{publDate}
+            , #{vulnerabilityResolution}
+            , #{vulnerabilityLink}
+            , #{officialPatchLink}
+            , #{securityPatchLink}
+            , #{securityComments}
+            )
+    </insert>
+    
+    <select id="getSecurityDataList" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssComponents">
+        SELECT OSS_NAME
+             , OSS_VERSION
+             , CVE_ID
+             , CVSS_SCORE
+             , DATE_FORMAT(PUBL_DATE, '%Y-%m-%d') AS PUBL_DATE
+             , VULNERABILITY_RESOLUTION
+             , VULNERABILITY_LINK
+             , OFFICIAL_PATCH_LINK
+             , SECURITY_PATCH_LINK
+             , SECURITY_COMMENTS
+          FROM NVD_DATA_SECURITY
+         WHERE OSS_NAME = #{ossName}
+           AND OSS_VERSION = #{ossVersion}
+    </select>
 </mapper>
