@@ -1448,7 +1448,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static String makeCategoryFormat(String distributeTarget, String mainCategoryCd, String subCategoryCode) {
-		String categoryCode = CoConstDef.CD_DTL_DISTRIBUTE_LGE.equals(avoidNull(distributeTarget, CoConstDef.CD_DTL_DISTRIBUTE_SKS)) ? CoConstDef.CD_MODEL_TYPE : CoConstDef.CD_MODEL_TYPE2;
+		String categoryCode = CoConstDef.CD_DTL_DISTRIBUTE_SKS.equals(avoidNull(distributeTarget, CoConstDef.CD_DTL_DISTRIBUTE_LGE)) ? CoConstDef.CD_MODEL_TYPE2 : CoConstDef.CD_MODEL_TYPE;
 		
 		return  CoCodeManager.getCodeString(categoryCode, mainCategoryCd) + " > " + CoCodeManager.getCodeString(CoCodeManager.getSubCodeNo(categoryCode, mainCategoryCd), subCategoryCode);
 	}

@@ -751,6 +751,8 @@ public class Project extends ComBean implements Serializable {
 	private String modelListAppendFlag = "N";
 	
 	private String modelSeq;
+	
+	private String deleteOsddFlag;
 
 	/**
 	 * Gets the prj id.
@@ -4235,5 +4237,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setOssNameTemp(String ossNameTemp) {
 		this.ossNameTemp = ossNameTemp;
+	}
+
+	public String getDeleteOsddFlag() {
+		return deleteOsddFlag;
+	}
+
+	public void setDeleteOsddFlag(String deleteOsddFlag) {
+		this.deleteOsddFlag = deleteOsddFlag;
 	}
 }

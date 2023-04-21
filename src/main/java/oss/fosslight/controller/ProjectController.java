@@ -1428,6 +1428,7 @@ public class ProjectController extends CoTopComponent {
 		if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 			ProjectIdentification identification = new ProjectIdentification();
 			identification.setReferenceId(project.getCopyPrjId());
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			identification.setMerge(CoConstDef.FLAG_NO);
 			Map<String, Object> result = getOssComponentDataInfo(identification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			projectService.insertCopyConfirmStatusBomList(project, identification);

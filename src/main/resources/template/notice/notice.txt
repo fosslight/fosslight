@@ -21,7 +21,7 @@ $!{closeSource.copyrightText}
 #end
 
 #if($!{noticeObligationSize} != "0")
-Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in to tables below.
+Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in the tables below.
 
 #foreach( $!{openSource} in $!{noticeObligationList} ) 
 $!{openSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{openSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)

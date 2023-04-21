@@ -346,4 +346,8 @@ public interface ProjectMapper {
 	void updateConfirmCopyVerificationDestributionStatus(Project project);
 
 	void updateProjectDivision(Project project);
+	
+	void deleteProjectDistributeHis(Project project);
+	
+	List<OssComponentsLicense> selectBomLicenseList(ProjectIdentification identification);
 }

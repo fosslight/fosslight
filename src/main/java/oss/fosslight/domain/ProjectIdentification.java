@@ -333,6 +333,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String ossNickName;
 	
 	private String attribution;
+	
+	private String ossVersionEmptyFlag;
 
 	/** Check whether the Object is included in the oss list */
 	private String checkOssList = "N";
@@ -2061,5 +2063,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setCvssScoreMax5(String cvssScoreMax5) {
 		this.cvssScoreMax5 = cvssScoreMax5;
+	}
+
+	public String getOssVersionEmptyFlag() {
+		return ossVersionEmptyFlag;
+	}
+
+	public void setOssVersionEmptyFlag(String ossVersionEmptyFlag) {
+		this.ossVersionEmptyFlag = ossVersionEmptyFlag;
 	}
 }
