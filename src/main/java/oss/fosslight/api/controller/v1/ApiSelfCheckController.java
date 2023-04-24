@@ -5,6 +5,7 @@
 
 package oss.fosslight.api.controller.v1;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,13 +132,33 @@ public class ApiSelfCheckController extends CoTopComponent {
 			
 			if (searchFlag) {
 				if (ossReport != null) {
-					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
-							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
-						
-						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					List<UploadFile> list = new ArrayList<UploadFile>();
+					list.add(bean);
+					ArrayList<Object> checkFileLimit = null;
+					if (bean.getFileExt().contains("csv")) {
+						checkFileLimit = CommonFunction.checkCsvFileLimit(list);
+					} else {
+						checkFileLimit = CommonFunction.checkXlsxFileLimit(list);
+					}
+					
+					if (checkFileLimit != null && checkFileLimit.contains("FILE_SIZE_LIMIT_OVER")) {
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
+								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+					}
+					
+//					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
+//							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > bean.getSize()) { // file size 5MB 이하만 허용.
+					
+					if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > bean.getSize()) {
+//						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
 						String[] sheet = new String[1];
 						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check", sheet);
-						String errorMsg = (String) result.get("errorMessage");
+						String errorMsg = "";
+						if (result.containsKey("errorMessage")) {
+							errorMsg = (String) result.get("errorMessage");
+						}
+						
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
