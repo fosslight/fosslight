@@ -194,67 +194,65 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				checkedLicenseList.add(checkedLicense1);
 			}
 
-			if (downloadLocation.isEmpty()) {
-				continue;
-			}
-
-			if (oss.getDownloadLocation().contains(";")) {
-				oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
-			}
-			
-			if (oss.getDownloadLocation().startsWith("git@")){
-				oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
-			}
-			
-			if (oss.getDownloadLocation().startsWith("http://") 
-					|| oss.getDownloadLocation().startsWith("https://")
-					|| oss.getDownloadLocation().startsWith("git://")
-					|| oss.getDownloadLocation().startsWith("ftp://")
-					|| oss.getDownloadLocation().startsWith("svn://")) {
-				oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
-			}
-			
-			if (oss.getDownloadLocation().startsWith("www.")) {
-				oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
-			}
-			
-			if (oss.getDownloadLocation().contains(".git")) {
-				if (oss.getDownloadLocation().endsWith(".git")) {
-					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
-				} else {
-					if (oss.getDownloadLocation().contains("#")) {
-						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+			if (!downloadLocation.isEmpty()) {
+				if (oss.getDownloadLocation().contains(";")) {
+					oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
+				}
+				
+				if (oss.getDownloadLocation().startsWith("git@")){
+					oss.setDownloadLocation(oss.getDownloadLocation().split("@")[1]);
+				}
+				
+				if (oss.getDownloadLocation().startsWith("http://") 
+						|| oss.getDownloadLocation().startsWith("https://")
+						|| oss.getDownloadLocation().startsWith("git://")
+						|| oss.getDownloadLocation().startsWith("ftp://")
+						|| oss.getDownloadLocation().startsWith("svn://")) {
+					oss.setDownloadLocation(oss.getDownloadLocation().split("//")[1]);
+				}
+				
+				if (oss.getDownloadLocation().startsWith("www.")) {
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(5, oss.getDownloadLocation().length()));
+				}
+				
+				if (oss.getDownloadLocation().contains(".git")) {
+					if (oss.getDownloadLocation().endsWith(".git")) {
 						oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
+					} else {
+						if (oss.getDownloadLocation().contains("#")) {
+							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+							oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().length()-4));
+						}
 					}
 				}
-			}
-			
-			String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
-			if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
-				oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
-			}
-			
-			// Search Priority 2. find by oss download location and version
-			prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
-			checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
+				
+				String[] downloadlocationUrlSplit = oss.getDownloadLocation().split("/");
+				if (downloadlocationUrlSplit[downloadlocationUrlSplit.length-1].indexOf("#") > -1) {
+					oss.setDownloadLocation(oss.getDownloadLocation().substring(0, oss.getDownloadLocation().indexOf("#")));
+				}
+				
+				// Search Priority 2. find by oss download location and version
+				prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
+				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense2.isEmpty()) {
-				if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-				checkedLicenseList.add(checkedLicense2);
-			}
-			
-			// Search Priority 3. find by oss download location
-			prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
-					.filter(CommonFunction.distinctByKeys(
-							ProjectIdentification::getOssName,
-							ProjectIdentification::getLicenseName
-					))
-					.collect(Collectors.toList());
-			checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
+				if (!checkedLicense2.isEmpty()) {
+					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
+					checkedLicenseList.add(checkedLicense2);
+				}
+				
+				// Search Priority 3. find by oss download location
+				prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
+						.filter(CommonFunction.distinctByKeys(
+								ProjectIdentification::getOssName,
+								ProjectIdentification::getLicenseName
+						))
+						.collect(Collectors.toList());
+				checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense3.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
-				if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-				checkedLicenseList.add(checkedLicense3);
+				if (!checkedLicense3.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
+					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
+					checkedLicenseList.add(checkedLicense3);
+				}
 			}
 
 			if (checkedLicenseList != null) {
@@ -293,6 +291,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				if (permissiveLicenseCheckFlag) {
 					continue;
 				}
+			} else {
+				continue;
 			}
 			
 			if (!isEmpty(checkedLicense1)) {
