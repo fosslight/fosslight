@@ -292,9 +292,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Comparator<ProjectIdentification> compare = Comparator
 					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName)
+					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName)
+					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getMergeOrder);
 
 			list.sort(compare);
@@ -656,8 +656,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
 			if (notVersionOssComponentList != null) {
 				list.addAll(notVersionOssComponentList);
-				identification.setOssVersionEmptyFlag(null);
 			}
+			identification.setOssVersionEmptyFlag(null);
 			
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
@@ -3225,9 +3225,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Comparator<ProjectIdentification> compare = Comparator
 					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName)
+					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName)
+					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 					.thenComparing(ProjectIdentification::getMergeOrder);
 
 			bomList.sort(compare);
@@ -3621,9 +3621,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
-				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		list.sort(compare);
@@ -5246,9 +5246,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
-				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		bomList.sort(compare);
@@ -5429,9 +5429,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Comparator<ProjectIdentification> compare = Comparator
 				.comparing(ProjectIdentification::getLicenseTypeIdx)
-				.thenComparing(ProjectIdentification::getOssName)
+				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName)
+				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
 				.thenComparing(ProjectIdentification::getMergeOrder);
 
 		bomList.sort(compare);
