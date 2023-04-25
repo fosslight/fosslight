@@ -407,13 +407,15 @@ public class NvdDataService {
 		
 			if (cveItem.containsKey("configurations")) {
 				List<Map<String, Object>> configurationsInfo = (List<Map<String, Object>>) cveItem.get("configurations");
-				List<Map<String, Object>> configurations_nodes = (List<Map<String, Object>>) configurationsInfo.get(0).get("nodes");
-				
-				// 정의된 모든 cpe match 정보
-				for (Map<String, Object> node_data : configurations_nodes) {
-					// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
-					if (node_data.containsKey("cpeMatch")) {
-						cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
+				for (Map<String, Object> configurations : configurationsInfo) {
+					List<Map<String, Object>> configurations_nodes = (List<Map<String, Object>>) configurations.get("nodes");
+					
+					// 정의된 모든 cpe match 정보
+					for (Map<String, Object> node_data : configurations_nodes) {
+						// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
+						if (node_data.containsKey("cpeMatch")) {
+							cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
+						}
 					}
 				}
 			}
