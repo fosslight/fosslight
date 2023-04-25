@@ -2232,10 +2232,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
 							} else {
 								String redirectlocationUrl = "";
-								String key = avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion());
-								if (CoCodeManager.OSS_INFO_UPPER.containsKey(key.toUpperCase())) {
-									continue;
-								}
 								try {
 									URL checkUrl = new URL("https://" + downloadlocationUrl);
 									HttpURLConnection oc = (HttpURLConnection) checkUrl.openConnection();
