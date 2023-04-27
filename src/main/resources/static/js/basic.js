@@ -994,14 +994,22 @@ var commonAjax = {
 	//Creator & Division
 	getCreatorDivisionTags : function(data){
 		return fnBasicAjaxData(data, "/system/user/autoCompleteCreatorDivisionAjax");
-	},
-	getXssPreventerUnescape : function(data){
-		return fnBasicAjaxData("prjName="+encodeURIComponent(data), "/project/xssPreventerUnescapeAjax");
 	}
 };
 
 function fnBasicAjaxData(data, url) {
 	return $.ajax({	type: 'GET',url:CTX_PATH+url,data:data,headers: {'Content-Type': 'application/json'}});
+}
+
+function xssPreventerUnescape(data){
+	var unescapeData = data;
+	if (unescapeData.indexOf("&amp;") > -1){
+		unescapeData = unescapeData.replace("&amp;", "&");
+	}
+	if (unescapeData.indexOf("&quot;") > -1) {
+		unescapeData = unescapeData.replace("&quot;", "\"");
+	}
+	return unescapeData;
 }
 
 var autoComplete = {
@@ -1080,11 +1088,7 @@ var autoComplete = {
 				if(data != null){
 					data.forEach(function(obj){
 						if(obj!=null) {
-							commonAjax.getXssPreventerUnescape(obj.prjName).success(function(data, status, headers, config){
-								if (data != null) {
-									autoComplete.projectNameTags.push(data.resultData);
-								}
-							});
+							autoComplete.projectNameTags.push(xssPreventerUnescape(obj.prjName));
 						}
 					})	
 				}

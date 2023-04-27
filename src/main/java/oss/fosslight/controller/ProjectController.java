@@ -238,13 +238,6 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(projectService.getProjectModelNameList());
 	}
 	
-	@GetMapping(value = PROJECT.XSS_UNESCAPE)
-	public @ResponseBody ResponseEntity<Object> xssPreventerUnescapeAjax(HttpServletRequest req, HttpServletResponse res, Model model) {
-		String unescapeData = req.getParameter("prjName");
-		unescapeData = XssPreventer.unescape(unescapeData);
-		return makeJsonResponseHeader(true, null, unescapeData);
-	}
-	
 	/**
 	 * Gets the user id list.
 	 *
