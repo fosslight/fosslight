@@ -41,6 +41,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
+import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -235,6 +236,13 @@ public class ProjectController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> autoCompleteModelAjax(Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		return makeJsonResponseHeader(projectService.getProjectModelNameList());
+	}
+	
+	@GetMapping(value = PROJECT.XSS_UNESCAPE)
+	public @ResponseBody ResponseEntity<Object> xssPreventerUnescapeAjax(HttpServletRequest req, HttpServletResponse res, Model model) {
+		String unescapeData = req.getParameter("prjName");
+		unescapeData = XssPreventer.unescape(unescapeData);
+		return makeJsonResponseHeader(true, null, unescapeData);
 	}
 	
 	/**

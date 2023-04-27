@@ -994,6 +994,9 @@ var commonAjax = {
 	//Creator & Division
 	getCreatorDivisionTags : function(data){
 		return fnBasicAjaxData(data, "/system/user/autoCompleteCreatorDivisionAjax");
+	},
+	getXssPreventerUnescape : function(data){
+		return fnBasicAjaxData("prjName="+encodeURIComponent(data), "/project/xssPreventerUnescapeAjax");
 	}
 };
 
@@ -1077,7 +1080,11 @@ var autoComplete = {
 				if(data != null){
 					data.forEach(function(obj){
 						if(obj!=null) {
-							autoComplete.projectNameTags.push(obj.prjName);
+							commonAjax.getXssPreventerUnescape(obj.prjName).success(function(data, status, headers, config){
+								if (data != null) {
+									autoComplete.projectNameTags.push(data.resultData);
+								}
+							});
 						}
 					})	
 				}

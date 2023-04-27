@@ -339,6 +339,7 @@ public final class Url {
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 		
 		public static final String DELETE_FILES = PATH + "/deleteFiles";
+		public static final String XSS_UNESCAPE = PATH + "/xssPreventerUnescapeAjax";
 	}
 	
 	public static final class VERIFICATION {
