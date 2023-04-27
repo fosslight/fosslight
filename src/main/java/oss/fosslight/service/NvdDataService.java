@@ -95,6 +95,8 @@ public class NvdDataService {
 	private String lastModStartDate;
 	private String lastModEndDate;
 	
+	boolean initializeFlag = false;
+	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
@@ -128,22 +130,35 @@ public class NvdDataService {
 //			return "91";
 //		}
 		
-		Date today = new Date();
-		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	    sdformat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		try {
+			// rest api NVD Data
+			// check initialize flag
+			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+				codeMapper.updateCodeDtlNm("990", "100", "N");
+				initializeFlag = true;
+			}
+		} catch (Exception e) {
+			log.error("Failed to NVD Data initiallize", e);
+		}
 		
-		Calendar cal = Calendar.getInstance();
-	    cal.setTime(today);
-	    cal.add(Calendar.HOUR, -1);
-		
-	    String endTime = sdformat.format(cal.getTime());
-	    
-		Calendar mon = Calendar.getInstance();
-	    mon.add(Calendar.MONTH, -1);
-	    String startTime = sdformat.format(mon.getTime());
-		
-		lastModStartDate = startTime + "%2B01:00";
-		lastModEndDate = endTime + "%2B01:00";
+		if (!initializeFlag) {
+			Date today = new Date();
+			SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+		    sdformat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
+			Calendar cal = Calendar.getInstance();
+		    cal.setTime(today);
+		    cal.add(Calendar.HOUR, -1);
+			
+		    String endTime = sdformat.format(cal.getTime());
+		    
+			Calendar mon = Calendar.getInstance();
+		    mon.add(Calendar.MONTH, -1);
+		    String startTime = sdformat.format(mon.getTime());
+			
+			lastModStartDate = startTime + "%2B01:00";
+			lastModEndDate = endTime + "%2B01:00";
+		}
 		
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
@@ -159,22 +174,22 @@ public class NvdDataService {
 			return "91";
 		}
 		
-		try {
+//		try {
 			// initialize NVD Data Feed
 			// check initialize flag
-			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
-				codeMapper.updateCodeDtlNm("990", "100", "N");
+//			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+//				codeMapper.updateCodeDtlNm("990", "100", "N");
 
 				// delete all NVD Data and Max Score
 //				resetNvdFeedData();
 				
 				// Put NVD Data feed from CPE2002 ~ current date year
-				initNvdDataFeed();
+//				initNvdDataFeed();
 				
-			}
-		} catch (Exception e) {
-			log.error("Failed to NVD Data initiallize", e);
-		}
+//			}
+//		} catch (Exception e) {
+//			log.error("Failed to NVD Data initiallize", e);
+//		}
 
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_CVE_REST_URL, 1, 0);
@@ -200,6 +215,7 @@ public class NvdDataService {
 			log.error(e.getMessage(), e);
 			return "92";
 		}
+		initializeFlag = false;
 		
 		return "00";
 	}
@@ -225,7 +241,6 @@ public class NvdDataService {
 		log.info("nvdCveDataApiJob start");
 		try {
 			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
-				log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
 				for (int j=0; j<5; j++) {
 					responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
 					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
@@ -233,6 +248,7 @@ public class NvdDataService {
 						break;
 					}
 				}
+				log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
 				
 				if (httpsUrlConnectionFlag) {
 					if (responseMap.containsKey("vulnerabilities")) {
@@ -675,13 +691,13 @@ public class NvdDataService {
 		
 		log.info("httpsUrlConnectionFlag : "+httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag) {
-			if (totalResults > 0) {
+			if (initializeFlag && totalResults > 0) {
 				nvdDataMapper.truncateCpeMatch();
 				nvdDataMapper.truncateCpeMatchNames();
-				nvdDataMapper.copyNvdDataMatchFromTemp();
-				nvdDataMapper.copyNvdDataMatchNameFromTemp();
 			}
 
+			nvdDataMapper.copyNvdDataMatchFromTemp();
+			nvdDataMapper.copyNvdDataMatchNameFromTemp();
 			nvdDataMapper.truncateCpeMatchTemp();
 			nvdDataMapper.truncateCpeMatchNameTemp();
 			
@@ -811,7 +827,11 @@ public class NvdDataService {
 	private Map<String, Object> getDataForRestApiConnection(String restApiUrl, int resultsPerPage, int startIndex, int cnt) {
 		HttpsURLConnection httpsURLConnection = null;
 		Map<String, Object> rtnMap = new HashMap<>();
-		String urlString = restApiUrl + "?lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate + "&resultsPerPage=" + resultsPerPage + "&startIndex=" + startIndex;
+		String urlString = restApiUrl + "?resultsPerPage=" + resultsPerPage + "&startIndex=" + startIndex;
+		if (!initializeFlag) {
+			urlString += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
+		}
+		
 		boolean connectionFlag = true;
 		
 		try {
