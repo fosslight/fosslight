@@ -2038,7 +2038,7 @@ function getBarChart(obj){
 		};		
 	};
 	
-	return new Highcharts.chart(obj.chartId, {
+	return Highcharts.chart(obj.chartId, {
 		chart: {
 			type: 'column'
 		},
