@@ -2044,12 +2044,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					ProjectModel.setModelListInfo(modelListInfo);
 					ProjectModel.setProductGroups(productGroupListInfo);
 					ProjectModel.setPageListSize(MAX_RECORD_CNT_LIST);
-				}
-				
-				Map<String, Object> map = complianceService.getModelList(ProjectModel);
-				
-				if (isMaximumRowCheck((int) map.get("records"))){
-					downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
+					
+					Map<String, Object> map = complianceService.getModelList(ProjectModel);
+					
+					if (isMaximumRowCheck((int) map.get("records"))){
+						downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
+					}
+				} else {
+					downloadId	= getModelStatusExcelId(null, null);
 				}
 				
 				break;

@@ -41,6 +41,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
+import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;

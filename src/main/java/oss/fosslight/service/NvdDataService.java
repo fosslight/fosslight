@@ -16,12 +16,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 import javax.net.ssl.HostnameVerifier;
@@ -89,6 +92,11 @@ public class NvdDataService {
 	private String USERNAME;
 	private String PASSWORD;
 	
+	private String lastModStartDate;
+	private String lastModEndDate;
+	
+	boolean initializeFlag = false;
+	
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
@@ -123,6 +131,36 @@ public class NvdDataService {
 //		}
 		
 		try {
+			// rest api NVD Data
+			// check initialize flag
+			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+				codeMapper.updateCodeDtlNm("990", "100", "N");
+				initializeFlag = true;
+			}
+		} catch (Exception e) {
+			log.error("Failed to NVD Data initiallize", e);
+		}
+		
+		if (!initializeFlag) {
+			Date today = new Date();
+			SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+		    sdformat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
+			Calendar cal = Calendar.getInstance();
+		    cal.setTime(today);
+		    cal.add(Calendar.HOUR, -1);
+			
+		    String endTime = sdformat.format(cal.getTime());
+		    
+			Calendar mon = Calendar.getInstance();
+		    mon.add(Calendar.MONTH, -1);
+		    String startTime = sdformat.format(mon.getTime());
+			
+			lastModStartDate = startTime + "%2B01:00";
+			lastModEndDate = endTime + "%2B01:00";
+		}
+		
+		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
 				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, 2000, rtnMap);
@@ -136,22 +174,22 @@ public class NvdDataService {
 			return "91";
 		}
 		
-		try {
+//		try {
 			// initialize NVD Data Feed
 			// check initialize flag
-			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
-				codeMapper.updateCodeDtlNm("990", "100", "N");
+//			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+//				codeMapper.updateCodeDtlNm("990", "100", "N");
 
 				// delete all NVD Data and Max Score
 //				resetNvdFeedData();
 				
 				// Put NVD Data feed from CPE2002 ~ current date year
-				initNvdDataFeed();
+//				initNvdDataFeed();
 				
-			}
-		} catch (Exception e) {
-			log.error("Failed to NVD Data initiallize", e);
-		}
+//			}
+//		} catch (Exception e) {
+//			log.error("Failed to NVD Data initiallize", e);
+//		}
 
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_CVE_REST_URL, 1, 0);
@@ -177,6 +215,7 @@ public class NvdDataService {
 			log.error(e.getMessage(), e);
 			return "92";
 		}
+		initializeFlag = false;
 		
 		return "00";
 	}
@@ -202,7 +241,6 @@ public class NvdDataService {
 		log.info("nvdCveDataApiJob start");
 		try {
 			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
-				log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
 				for (int j=0; j<5; j++) {
 					responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
 					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
@@ -210,6 +248,7 @@ public class NvdDataService {
 						break;
 					}
 				}
+				log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
 				
 				if (httpsUrlConnectionFlag) {
 					if (responseMap.containsKey("vulnerabilities")) {
@@ -230,22 +269,31 @@ public class NvdDataService {
 									// Version Range 조건 취득
 									// 검색 조건 설정
 									Map<String, String> _matchNameParams = new HashMap<>();
-									_matchNameParams.put("cpe23Uri", (String) cpe_match_data.get("criteria"));
+									String criteria = (String) cpe_match_data.get("criteria");
+									String matchCriteriaId = (String) cpe_match_data.get("matchCriteriaId");
+									_matchNameParams.put("cpe23Uri", criteria);
+									_matchNameParams.put("matchCriteriaId", matchCriteriaId);
+									
+									String versionStartIncluding = null;
+									String versionEndIncluding = null;
+									String versionStartExcluding = null;
+									String versionEndExcluding = null;
+									
 									if (cpe_match_data.containsKey("versionStartIncluding")) {
-										_matchNameParams.put("versionStartIncluding",
-												(String) cpe_match_data.get("versionStartIncluding"));
+										versionStartIncluding = (String) cpe_match_data.get("versionStartIncluding");
+										_matchNameParams.put("versionStartIncluding", versionStartIncluding);
 									}
 									if (cpe_match_data.containsKey("versionEndIncluding")) {
-										_matchNameParams.put("versionEndIncluding",
-												(String) cpe_match_data.get("versionEndIncluding"));
+										versionEndIncluding = (String) cpe_match_data.get("versionEndIncluding");
+										_matchNameParams.put("versionEndIncluding", versionEndIncluding);
 									}
 									if (cpe_match_data.containsKey("versionStartExcluding")) {
-										_matchNameParams.put("versionStartExcluding",
-												(String) cpe_match_data.get("versionStartExcluding"));
+										versionStartExcluding = (String) cpe_match_data.get("versionStartExcluding");
+										_matchNameParams.put("versionStartExcluding", versionStartExcluding);
 									}
 									if (cpe_match_data.containsKey("versionEndExcluding")) {
-										_matchNameParams.put("versionEndExcluding",
-												(String) cpe_match_data.get("versionEndExcluding"));
+										versionEndExcluding = (String) cpe_match_data.get("versionEndExcluding");
+										_matchNameParams.put("versionEndExcluding", versionEndExcluding);
 									}
 
 									matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
@@ -504,19 +552,17 @@ public class NvdDataService {
 		
 		List<Map<String, Object>> matchStrings = null;
 		boolean httpsUrlConnectionFlag = false;
+		boolean deleteCpeMatchDataFlag = false;
 		
 		responseMap.put("totalResults", totalResults);
 		int seq = 1;
 		
 		try {
-			String SQL_INSERT = "INSERT INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) VALUES (?,?,?,?,?,?)";
-			String SQL_INSERT2 = "INSERT INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI) VALUES (?,?,?)";
+			String SQL_INSERT = "INSERT INTO NVD_CPE_MATCH_TEMP (MATCH_CRITERIA_ID, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) VALUES (?,?,?,?,?,?)";
+			String SQL_INSERT2 = "INSERT INTO NVD_CPE_MATCH_NAMES_TEMP (MATCH_CRITERIA_ID, IDX, CPE23URI) VALUES (?,?,?)";
 			
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-			conn.setAutoCommit(false);
-			stmt = conn.prepareStatement(SQL_INSERT);
-			stmt2 = conn.prepareStatement(SQL_INSERT2);
+			List<Map<String, Object>> cpeMatchDataList = new ArrayList<>();
+			List<Map<String, Object>> cpeMatchNamesDataList = new ArrayList<>();
 			
 			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
 				log.info("nvdMetaMatch index : " + i + " / " + "totalResults : " + totalResults);
@@ -543,56 +589,57 @@ public class NvdDataService {
 							for (Map<String, Object> matchStringObj : matchStrings) {
 								if (matchStringObj.containsKey("matchString")) {
 									Map<String, Object> matchString = (Map<String, Object>) matchStringObj.get("matchString");
+									String matchCriteriaId = (String) matchString.get("matchCriteriaId");
 									String cpe23Uri = (String) matchString.get("criteria");
-									String versionStartIncluding = null;
-									String versionEndIncluding = null;
-									String versionStartExcluding = null;
-									String versionEndExcluding = null;
+									
+									Map<String, Object> cpeMatchMap = new HashMap<>();
+									cpeMatchMap.put("matchCriteriaId", matchCriteriaId);
+									cpeMatchMap.put("criteria", cpe23Uri);
 									
 									if (matchString.containsKey("versionStartIncluding")) {
-										versionStartIncluding = (String) matchString.get("versionStartIncluding");
+										cpeMatchMap.put("versionStartIncluding", (String) matchString.get("versionStartIncluding"));
 									}
 									if (matchString.containsKey("versionEndIncluding")) {
-										versionEndIncluding = (String) matchString.get("versionEndIncluding");
+										cpeMatchMap.put("versionEndIncluding", (String) matchString.get("versionEndIncluding"));
 									}
 									if (matchString.containsKey("versionStartExcluding")) {
-										versionStartExcluding = (String) matchString.get("versionStartExcluding");
+										cpeMatchMap.put("versionStartExcluding", (String) matchString.get("versionStartExcluding"));
 									}
 									if (matchString.containsKey("versionEndExcluding")) {
-										versionEndExcluding = (String) matchString.get("versionEndExcluding");
+										cpeMatchMap.put("versionEndExcluding", (String) matchString.get("versionEndExcluding"));
 									}
 									
-									stmt.setInt(1, seq);
-									stmt.setString(2, cpe23Uri);
-									stmt.setString(3, versionStartIncluding);
-									stmt.setString(4, versionEndIncluding);
-									stmt.setString(5, versionStartExcluding);
-									stmt.setString(6, versionEndExcluding);
-									stmt.addBatch();
-									stmt.clearParameters();
+									int checkMatchCriteriaId = nvdDataMapper.selectNvdCpeMatch(matchCriteriaId);
+									if (checkMatchCriteriaId > 0) { // delete
+										deleteCpeMatchDataFlag = true;
+										nvdDataMapper.deleteNvdCpeMatch(matchCriteriaId);
+									}
 									
-									if (seq % BATCH_SIZE == 0) {
-										stmt.executeBatch(); // Batch 실행
-										stmt.clearBatch(); // Batch 초기화
-					                    conn.commit(); // 커밋
+									cpeMatchDataList.add(cpeMatchMap);
+									
+									if (cpeMatchDataList.size() % BATCH_SIZE == 0) {
+										prepareStatementUpdateCpeMatchData(conn, stmt, SQL_INSERT, cpeMatchDataList);
+										cpeMatchDataList.clear();
 									}
 									
 									if (matchString.containsKey("matches")) {
 										List<Map<String, Object>> matches = (List<Map<String, Object>>) matchString.get("matches");
+										if (deleteCpeMatchDataFlag) {
+											nvdDataMapper.deleteNvdCpeMatchNames(matchCriteriaId);
+										}
 										
 										int nameIdx = 0;
 										for (Map<String, Object> match : matches) {
 											if (match.containsKey("cpeName")) {
-												stmt2.setInt(1, seq);
-												stmt2.setInt(2, nameIdx);
-												stmt2.setString(3, (String) match.get("cpeName"));
-												stmt2.addBatch();
-												stmt2.clearParameters();
+												Map<String, Object> cpeMatchNamesMap = new HashMap<>();
+												cpeMatchNamesMap.put("matchCriteriaId", matchCriteriaId);
+												cpeMatchNamesMap.put("idx", nameIdx);
+												cpeMatchNamesMap.put("cpeName", (String) match.get("cpeName"));
+												cpeMatchNamesDataList.add(cpeMatchNamesMap);
 												
-												if (seq2 % BATCH_SIZE == 0) {
-													stmt2.executeBatch(); // Batch 실행
-													stmt2.clearBatch(); // Batch 초기화
-								                    conn.commit(); // 커밋
+												if (cpeMatchNamesDataList.size() % BATCH_SIZE == 0) {
+													prepareStatementUpdateCpeMatchNamesData(conn, stmt2, SQL_INSERT2, cpeMatchNamesDataList);
+													cpeMatchNamesDataList.clear();
 												}
 												
 												nameIdx++;
@@ -601,12 +648,19 @@ public class NvdDataService {
 										}
 									}
 									seq++;
+									deleteCpeMatchDataFlag = false;
 								}
 							}
 							
-							stmt2.executeBatch();
-							stmt.executeBatch();
-							conn.commit();
+							if (!cpeMatchDataList.isEmpty()) {
+								prepareStatementUpdateCpeMatchData(conn, stmt, SQL_INSERT, cpeMatchDataList);
+								cpeMatchDataList.clear();
+							}
+							
+							if (!cpeMatchNamesDataList.isEmpty()) {
+								prepareStatementUpdateCpeMatchNamesData(conn, stmt2, SQL_INSERT2, cpeMatchNamesDataList);
+								cpeMatchNamesDataList.clear();	
+							}
 						}
 					}
 				} else {
@@ -637,13 +691,13 @@ public class NvdDataService {
 		
 		log.info("httpsUrlConnectionFlag : "+httpsUrlConnectionFlag);
 		if (httpsUrlConnectionFlag) {
-			if (totalResults > 0) {
+			if (initializeFlag && totalResults > 0) {
 				nvdDataMapper.truncateCpeMatch();
 				nvdDataMapper.truncateCpeMatchNames();
-				nvdDataMapper.copyNvdDataMatchFromTemp();
-				nvdDataMapper.copyNvdDataMatchNameFromTemp();
 			}
 
+			nvdDataMapper.copyNvdDataMatchFromTemp();
+			nvdDataMapper.copyNvdDataMatchNameFromTemp();
 			nvdDataMapper.truncateCpeMatchTemp();
 			nvdDataMapper.truncateCpeMatchNameTemp();
 			
@@ -661,10 +715,123 @@ public class NvdDataService {
 		return responseMap;
 	}
 
+	private void prepareStatementUpdateCpeMatchData(Connection conn, PreparedStatement stmt, String query, List<Map<String, Object>> cpeMatchDataList) {
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			stmt = conn.prepareStatement(query);
+			
+			for (Map<String, Object> cpeMatchData : cpeMatchDataList) {
+				stmt.setString(1, (String) cpeMatchData.get("matchCriteriaId"));
+				stmt.setString(2, (String) cpeMatchData.get("criteria"));
+				if (cpeMatchData.containsKey("versionStartIncluding")) {
+					stmt.setString(3, (String) cpeMatchData.get("versionStartIncluding"));
+				} else {
+					stmt.setString(3, null);
+				}
+				if (cpeMatchData.containsKey("versionEndIncluding")) {
+					stmt.setString(4, (String) cpeMatchData.get("versionEndIncluding"));
+				} else {
+					stmt.setString(4, null);
+				}
+				if (cpeMatchData.containsKey("versionStartExcluding")) {
+					stmt.setString(5, (String) cpeMatchData.get("versionStartExcluding"));
+				} else {
+					stmt.setString(5, null);
+				}
+				if (cpeMatchData.containsKey("versionEndExcluding")) {
+					stmt.setString(6, (String) cpeMatchData.get("versionEndExcluding"));
+				} else {
+					stmt.setString(6, null);
+				}
+				stmt.addBatch();
+				stmt.clearParameters();
+			}
+			
+			stmt.executeBatch(); // Batch 실행
+			stmt.clearBatch(); // Batch 초기화
+            conn.commit(); // 커밋
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e1){}
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e1){}
+		} finally {
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e){}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e){}
+		}
+	}
+	
+	private void prepareStatementUpdateCpeMatchNamesData(Connection conn, PreparedStatement stmt2, String query, List<Map<String, Object>> cpeMatchNamesDataList) {
+		try {
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			stmt2 = conn.prepareStatement(query);
+			
+			for (Map<String, Object> cpeMatchData : cpeMatchNamesDataList) {
+				stmt2.setString(1, (String) cpeMatchData.get("matchCriteriaId"));
+				stmt2.setInt(2, (int) cpeMatchData.get("idx"));
+				stmt2.setString(3, (String) cpeMatchData.get("cpeName"));
+				stmt2.addBatch();
+				stmt2.clearParameters();
+			}
+			
+			stmt2.executeBatch(); // Batch 실행
+			stmt2.clearBatch(); // Batch 초기화
+            conn.commit(); // 커밋
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException e1){}
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e1){}
+		} finally {
+			try{
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException e){}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e){}
+		}
+	}
+
 	private Map<String, Object> getDataForRestApiConnection(String restApiUrl, int resultsPerPage, int startIndex, int cnt) {
 		HttpsURLConnection httpsURLConnection = null;
 		Map<String, Object> rtnMap = new HashMap<>();
 		String urlString = restApiUrl + "?resultsPerPage=" + resultsPerPage + "&startIndex=" + startIndex;
+		if (!initializeFlag) {
+			urlString += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
+		}
+		
 		boolean connectionFlag = true;
 		
 		try {
@@ -723,6 +890,7 @@ public class NvdDataService {
 	        	map = new ObjectMapper().readValue(json.toString(), Map.class);
 	        } catch (Exception e) {
 	        	log.error(e.getMessage(), e);
+	        	map = null;
 	        }
 		}
         

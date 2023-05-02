@@ -60,7 +60,7 @@
 	    		 WHERE T1.USE_YN = 'Y'
 	    		 <if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
 			       AND (T1.CREATOR = #{userId} 
-							OR EXISTS (SELECT A1.PRJ_ID, A1.DIVISION, A2.USER_ID 
+							OR EXISTS (SELECT A1.PRJ_ID, A1.DIVISION
 										 FROM PRE_PROJECT_WATCHER A1 
 										<!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId} -->
 										WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{userId} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{userId}) ))))

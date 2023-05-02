@@ -552,9 +552,11 @@
 			T2.CPE23URI 
 		FROM NVD_CPE_MATCH T1 
 				INNER JOIN NVD_CPE_MATCH_NAMES T2 
-					ON T1.SEQ = T2.SEQ 
+					ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID 
 		WHERE 
 			T1.CPE23URI = #{cpe23Uri}
+		AND
+			T1.MATCH_CRITERIA_ID = #{matchCriteriaId}
 			<choose>
 				<when test="versionStartIncluding != null">AND T1.VER_START_INC = #{versionStartIncluding}</when>
 				<otherwise>AND T1.VER_START_INC IS NULL</otherwise>
@@ -664,5 +666,17 @@
     
     <delete id="deleteNvdDataPatchLink" parameterType="String">
     	DELETE FROM NVD_DATA_PATCH_LINK WHERE CVE_ID = #{cveId}
+    </delete>
+    
+    <select id="selectNvdCpeMatch" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM NVD_CPE_MATCH WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
+	</select>
+	
+	<delete id="deleteNvdCpeMatch" parameterType="String">
+    	DELETE FROM NVD_CPE_MATCH WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
+    </delete>
+    
+    <delete id="deleteNvdCpeMatchNames" parameterType="String">
+    	DELETE FROM NVD_CPE_MATCH_NAMES WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
     </delete>
 </mapper>

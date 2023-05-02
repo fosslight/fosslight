@@ -1001,6 +1001,17 @@ function fnBasicAjaxData(data, url) {
 	return $.ajax({	type: 'GET',url:CTX_PATH+url,data:data,headers: {'Content-Type': 'application/json'}});
 }
 
+function xssPreventerUnescape(data){
+	var unescapeData = data;
+	if (unescapeData.indexOf("&amp;") > -1){
+		unescapeData = unescapeData.replace("&amp;", "&");
+	}
+	if (unescapeData.indexOf("&quot;") > -1) {
+		unescapeData = unescapeData.replace("&quot;", "\"");
+	}
+	return unescapeData;
+}
+
 var autoComplete = {
 	licenseTags:[],
 	licenseLongTags:[],
@@ -1077,7 +1088,7 @@ var autoComplete = {
 				if(data != null){
 					data.forEach(function(obj){
 						if(obj!=null) {
-							autoComplete.projectNameTags.push(obj.prjName);
+							autoComplete.projectNameTags.push(xssPreventerUnescape(obj.prjName));
 						}
 					})	
 				}
@@ -2038,7 +2049,7 @@ function getBarChart(obj){
 		};		
 	};
 	
-	return new Highcharts.chart(obj.chartId, {
+	return Highcharts.chart(obj.chartId, {
 		chart: {
 			type: 'column'
 		},

@@ -67,4 +67,7 @@ public interface NvdDataMapper {
 	List<Map<String, Object>> selectUseMetaDataUrlConnection(HashMap<String, Object> param);
 	void insertNvdDataPatchLink(Map<String, Object> param);
 	void deleteNvdDataPatchLink(@Param(value = "cveId") String cveId);
+	int selectNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
+	void deleteNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
+	void deleteNvdCpeMatchNames(@Param(value = "matchCriteriaId") String matchCriteriaId);
 }

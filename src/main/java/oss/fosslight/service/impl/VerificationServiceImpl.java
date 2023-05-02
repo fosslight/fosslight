@@ -239,7 +239,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				// delete physical file
 				for (T2File delFile : deleteFileList){
-					fileService.deletePhysicalFile(delFile, "VERIFY");
+					if (verificationMapper.selectVerificationFile(delFile.getFileSeq()) == null) {
+						fileService.deletePhysicalFile(delFile, "VERIFY");
+					}
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
