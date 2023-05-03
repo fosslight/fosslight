@@ -36,6 +36,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -2437,8 +2438,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 								CommentsHistory commentInfo = null;
 
 								if (isEmpty(commentId)) {
-									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-									checkOssNameComment += "<p><b>Open Source Name</b></p>";
+									checkOssNameComment = messageSource.getMessage("msg.oss.changed.by.checkossname",null, LocaleContextHolder.getLocale());
 									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
@@ -2481,8 +2481,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 								CommentsHistory commentInfo = null;
 
 								if (isEmpty(commentId)) {
-									checkOssNameComment  = "<p><b>The following open source and license names will be changed to names registered on the system for efficient management.</b></p>";
-									checkOssNameComment += "<p><b>Open Source Name</b></p>";
+									checkOssNameComment = messageSource.getMessage("msg.oss.changed.by.checkossname",null, LocaleContextHolder.getLocale());
 									checkOssNameComment += changeOssNameInfo;
 									CommentsHistory commHisBean = new CommentsHistory();
 									commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
