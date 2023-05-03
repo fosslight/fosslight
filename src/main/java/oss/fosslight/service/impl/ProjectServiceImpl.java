@@ -5268,13 +5268,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		for (ProjectIdentification pi : bomList) {
-//			List<OssComponentsLicense> licenseList = projectMapper.selectBomLicense(pi);
+			List<OssComponentsLicense> licenseList = null;
 			pi.setReferenceId(project.getPrjId());
+			
+			if (bomLicenseMap.containsKey(pi.getComponentId())) {
+				licenseList = bomLicenseMap.get(pi.getComponentId());
+			}
+			
 			// 컴포넌트 마스터 인서트
 			projectMapper.registBomComponents(pi);
 			
-			if (bomLicenseMap.containsKey(pi.getComponentId())) {
-				List<OssComponentsLicense> licenseList = bomLicenseMap.get(pi.getComponentId());
+			if (licenseList != null) {
 				for (OssComponentsLicense licenseBean : licenseList) {
 					licenseBean.setComponentId(pi.getComponentId());
 					projectMapper.registComponentLicense(licenseBean);
