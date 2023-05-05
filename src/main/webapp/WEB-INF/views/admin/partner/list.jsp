@@ -84,6 +84,10 @@
 						<label>Comment</label>
 						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.comment}</textarea>					
 					</dd>
+					<dd class="lastAign">
+						<label style="width:100px;">Description</label>
+						<textarea name="description" style="margin: 0px; width: 150px; height: 54px;">${searchBean.description}</textarea>
+					</dd>
 				</dl>
 				<input name="act" type="hidden" value="search"/> 
 				<input type="submit" id="search" value="Search" class="btnColor search" />
