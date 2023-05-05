@@ -92,6 +92,9 @@
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
 					AND t4.FILE_PATH LIKE CONCAT('%',REGEXP_REPLACE(#{binaryName}, '_', '\\\\_'))
 				</if>
+	   		  	<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+					AND t1.DESCRIPTION LIKE CONCAT('%', REGEXP_REPLACE(#{description}, '_', '\\\\_'), '%')
+				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(userComment)">
 					AND EXISTS( SELECT 1 FROM COMMENTS_HISTORY COMM 
 								 WHERE COMM.USE_YN = 'Y' 
@@ -224,6 +227,9 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
 		   AND A.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+		   AND A.DESCRIPTION LIKE CONCAT('%',#{description},'%')
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
 		  <if test='reviewer.equals("N/A")'>
