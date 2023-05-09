@@ -1978,14 +1978,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String checkName = "";
 		boolean isValid = false;
 		Matcher ossNameMatcher = p.matcher("https://" + bean.getDownloadLocation());
+		String[] android = null;
 		while (ossNameMatcher.find()) {
 			for (String list : androidPlatformList){
-				if (ossNameMatcher.group(3).equals(list)){
+				if (ossNameMatcher.group(3).contains(list)){
 					isValid = true;
+					android = list.split("/");
 					break;
 				}
 			}
-			String[] android = ossNameMatcher.group(3).split("/");
+			if(!isValid) {
+				android = ossNameMatcher.group(3).split("/");
+				bean.setCheckOssList("I");
+			}
 			checkName = "android-";
 			for (String name : android) {
 				checkName += name + "-";
@@ -1993,9 +1998,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			checkName = checkName.substring(0, checkName.length()-1);
 		}
 		bean.setCheckName(checkName);
-		if (!isValid) {
-			bean.setCheckOssList("I");
-		}
 		return bean;
 	}
 
