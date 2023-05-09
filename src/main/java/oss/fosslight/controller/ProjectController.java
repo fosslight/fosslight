@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -2360,7 +2361,7 @@ public class ProjectController extends CoTopComponent {
 			List<String> licenseNickList = result.get("LICENSE");
 
 			if ((ossNickList != null && !ossNickList.isEmpty()) || (licenseNickList != null && !licenseNickList.isEmpty())) {
-				resultSb.append("<b>The following open source and license names will be changed to names registered on the system for efficient management.</b><br><br>");
+				resultSb.append(messageSource.getMessage("msg.oss.changed.by.system",null, LocaleContextHolder.getLocale()));
 				if (ossNickList != null) {
 					for (String s : ossNickList) {
 						if (hasOssNick) {
