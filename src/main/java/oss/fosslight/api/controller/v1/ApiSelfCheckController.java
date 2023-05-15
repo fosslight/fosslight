@@ -10,8 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -36,13 +42,16 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.service.ApiFileService;
 import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.ApiSelfCheckService;
+import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
@@ -51,6 +60,12 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 @RestController
 @RequestMapping(value = "/api/v1")
 public class ApiSelfCheckController extends CoTopComponent {
+	@Resource private Environment env;
+	private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	}
 	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
@@ -65,6 +80,8 @@ public class ApiSelfCheckController extends CoTopComponent {
 	private final ApiProjectService apiProjectService;
 	
 	private final SelfCheckService selfCheckService;
+	
+	private final FileService fileService;
 	
 	@ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
     @ApiImplicitParams({
@@ -204,6 +221,36 @@ public class ApiSelfCheckController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+		}
+	}
+	
+	@ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@PostMapping(value = {API.FOSSLIGHT_API_EXPORT_SELFCHECK})
+    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String _token, @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId){
+		String downloadId = "";
+		T2File fileInfo = new T2File();
+		
+		try {
+			T2Users userInfo = userService.checkApiUserAuth(_token);
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjId);
+			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+			if (searchFlag) {
+				downloadId = ExcelDownLoadUtil.getExcelDownloadId("selfReport", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+				fileInfo = fileService.selectFileInfo(downloadId);
+				
+				return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return null;
 		}
 	}
 }
