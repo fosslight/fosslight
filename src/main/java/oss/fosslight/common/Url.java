@@ -795,6 +795,9 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/oss_report_selfcheck";
+			
+			/** OSS Report upload */
+			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
 		
 		/** BINARY */
 			/** API Binary List 조회 */
