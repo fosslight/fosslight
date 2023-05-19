@@ -685,6 +685,8 @@
 			, T1.DEACTIVATE_FLAG
 			, T1.MODIFIER
 			, T1.MODIFIED_DATE
+			, T1.CVE_ID
+			, T1.CVSS_SCORE
 		FROM
 			OSS_MASTER 									T1
 			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
@@ -2264,5 +2266,70 @@
 		WHERE OSS_ID = (SELECT OSS_ID FROM OSS_MASTER WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
 	</select>
 
+	<select id="checkExistsVendorProductMatchOss" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+		SELECT COUNT(*)
+    	FROM OSS_MASTER OM
+    	LEFT JOIN OSS_NICKNAME NICK
+    	ON OM.OSS_NAME = NICK.OSS_NAME
+    	AND OM.USE_YN = 'Y'
+    	WHERE (OM.OSS_NAME = #{schOssName}
+    	<if test="dashOssNameList != null">
+    		<foreach item="item" collection="dashOssNameList">
+    			OR OM.OSS_NAME = #{item}
+    		</foreach>
+    	</if>
+    	<if test="dashOssNameList != null">
+    		<foreach item="item" collection="dashOssNameList">
+    			OR NICK.OSS_NICKNAME = #{item}
+    		</foreach>
+    	</if>
+    	)
+	</select>
 
+	<select id="selectVulnInfoForOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+    	SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID)
+    	FROM
+    	(
+    		SELECT PRODUCT
+    				<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
+    				, '-' AS VERSION
+    				</if>
+    				<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
+    				, VERSION
+    				</if>
+    				, VENDOR
+    				, CVE_ID
+    		FROM NVD_DATA_V3
+    		WHERE 1=1
+    		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
+    		AND VERSION = #{ossVersion}
+    		</if>
+    		AND (PRODUCT = #{ossName}
+    		<if test="conversionNameList != null">
+				<foreach item="item" collection="conversionNameList">
+					OR PRODUCT = #{item}
+				</foreach>
+			</if>
+			<if test="dashOssNameList != null">
+				<foreach item="item" collection="dashOssNameList">
+					OR VENDORPRODUCT = #{item}
+				</foreach>
+			</if>
+    		)
+    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
+    		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
+								WHERE OSS_NAME = #{ossName}
+								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
+								AND OSS_VERSION = #{ossVersion}
+								</if>
+								<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
+								AND OSS_VERSION = ''
+								</if>
+								AND VULNERABILITY_RESOLUTION = 'Fixed')
+    		</if>
+    	) NVD
+		INNER JOIN NVD_CVE_V3 CVE
+    	ON NVD.CVE_ID = CVE.CVE_ID
+    	ORDER BY CVE.CVSS_SCORE*1 DESC LIMIT 5
+    </select>
 </mapper>

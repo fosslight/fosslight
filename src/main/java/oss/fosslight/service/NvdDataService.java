@@ -319,6 +319,32 @@ public class NvdDataService {
 
 										ossList.add(_productInfo);
 									}
+									
+									Map<String, String> configurationInsertParam = new HashMap<>();
+									configurationInsertParam.put("cveId", cveId);
+									configurationInsertParam.put("matchCriteriaId", (String) cpe_match_data.get("matchCriteriaId"));
+									configurationInsertParam.put("criteria", criteria);
+									String[] criteriaArr = criteria.split(":");
+									configurationInsertParam.put("vendor", criteriaArr[3]);
+									configurationInsertParam.put("product", criteriaArr[4]);
+									configurationInsertParam.put("version", criteriaArr[5]);
+									if (versionStartIncluding != null) {
+										configurationInsertParam.put("versionStartIncluding", versionStartIncluding);
+									}
+									if (versionEndIncluding != null) {
+										configurationInsertParam.put("versionEndIncluding", versionEndIncluding);
+									}
+									if (versionStartExcluding != null) {
+										configurationInsertParam.put("versionStartExcluding", versionStartExcluding);
+									}
+									if (versionEndExcluding != null) {
+										configurationInsertParam.put("versionEndExcluding", versionEndExcluding);
+									}
+									
+									if (!initializeFlag) {
+										nvdDataMapper.deleteNvdDataConfigurations(configurationInsertParam);
+									}
+									nvdDataMapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
 								}
 								
 								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
@@ -386,6 +412,14 @@ public class NvdDataService {
 		}
 		
 		if (httpsUrlConnectionFlag) {
+			// configuration data delete & insert
+			if (initializeFlag) {
+				nvdDataMapper.truncateNvdDataConfigurations();
+			}
+			
+			nvdDataMapper.copyNvdDataConfigurationsFromTemp();
+			nvdDataMapper.truncateNvdDataConfigurationsTemp();
+			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
 				log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
@@ -892,6 +926,8 @@ public class NvdDataService {
 	        	log.error(e.getMessage(), e);
 	        	map = null;
 	        }
+		} else {
+			log.error("url connection response buffered reader null");
 		}
         
 		return map;

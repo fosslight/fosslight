@@ -3536,12 +3536,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster) {
-		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
-			ossMaster.setOssVersion("-");
+		if (avoidNull(ossMaster.getCveId()).isEmpty() && avoidNull(ossMaster.getCvssScore()).isEmpty()) {
+			return null;
 		}
 		
 		List<Vulnerability> list = null;
 		List<Vulnerability> convertList = new ArrayList<>();
+		
+		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
+			ossMaster.setOssVersion("-");
+		}
+		
 		String[] nicknameList = null;
 		List<String> dashOssNameList = new ArrayList<>();
 		List<String> convertNameList = null;
@@ -3807,6 +3812,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			map.put("returnType", e.getMessage());
 		}
 		return map;
+	}
+
+	@Override
+	public List<String> selectVulnInfoForOss(OssMaster ossMaster) {
+		return ossMapper.selectVulnInfoForOss(ossMaster);
+	}
+
+	@Override
+	public int checkExistsVendorProductMatchOss(OssMaster ossMaster) {
+		return ossMapper.checkExistsVendorProductMatchOss(ossMaster);
 	}
 
 }

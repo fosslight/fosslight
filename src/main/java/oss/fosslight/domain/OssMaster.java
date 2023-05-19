@@ -296,6 +296,15 @@ public class OssMaster extends ComBean implements Serializable{
 	private String linkFlag = "N";
 	private int[] csvComponentIdList;
 	private String[] dashOssNameList;
+	private String[] conversionNameList;
+	
+	private String cvssScoreMax;
+	private String cvssScoreMax1;
+	private String cvssScoreMax2;
+	private String cvssScoreMax3;
+	
+	private String vulnerabilityCheckFlag;
+	private String sndMailCheckFlag;
 	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
@@ -2043,5 +2052,61 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setOssNicknameArr(String[] ossNicknameArr) {
 		this.ossNicknameArr = ossNicknameArr;
+	}
+
+	public String getCvssScoreMax() {
+		return cvssScoreMax;
+	}
+
+	public void setCvssScoreMax(String cvssScoreMax) {
+		this.cvssScoreMax = cvssScoreMax;
+	}
+
+	public String getCvssScoreMax1() {
+		return cvssScoreMax1;
+	}
+
+	public void setCvssScoreMax1(String cvssScoreMax1) {
+		this.cvssScoreMax1 = cvssScoreMax1;
+	}
+
+	public String getCvssScoreMax2() {
+		return cvssScoreMax2;
+	}
+
+	public void setCvssScoreMax2(String cvssScoreMax2) {
+		this.cvssScoreMax2 = cvssScoreMax2;
+	}
+
+	public String getCvssScoreMax3() {
+		return cvssScoreMax3;
+	}
+
+	public void setCvssScoreMax3(String cvssScoreMax3) {
+		this.cvssScoreMax3 = cvssScoreMax3;
+	}
+
+	public String[] getConversionNameList() {
+		return conversionNameList;
+	}
+
+	public void setConversionNameList(String[] conversionNameList) {
+		this.conversionNameList = conversionNameList;
+	}
+
+	public String getVulnerabilityCheckFlag() {
+		return vulnerabilityCheckFlag;
+	}
+
+	public void setVulnerabilityCheckFlag(String vulnerabilityCheckFlag) {
+		this.vulnerabilityCheckFlag = vulnerabilityCheckFlag;
+	}
+
+	public String getSndMailCheckFlag() {
+		return sndMailCheckFlag;
+	}
+
+	public void setSndMailCheckFlag(String sndMailCheckFlag) {
+		this.sndMailCheckFlag = sndMailCheckFlag;
 	}
 }

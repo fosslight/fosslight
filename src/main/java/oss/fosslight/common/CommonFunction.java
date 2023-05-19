@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -4879,5 +4880,139 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		};
 		context.init(null, new TrustManager[]{tm}, null);
 		SSLContext.setDefault(context);
+	}
+
+	public static String getConversionCveInfo(String ossName, String ossVersion, List<String> cvssScoreMaxVendorProductList, List<String> cvssScoreMaxList, boolean vulnFixedCheckFlag) {
+		List<String> rtnScoreList = new ArrayList<>();
+		List<String> cvssScoreList = null;
+		OssMaster om = new OssMaster();
+		List<String> containsDashNameList = new ArrayList<>();
+		List<String> convertNicknameList = new ArrayList<>();
+		boolean vendorProductCheckFlag = false;
+		
+		if (!cvssScoreMaxVendorProductList.isEmpty()) {
+			cvssScoreList = cvssScoreMaxVendorProductList;
+		} else {
+			cvssScoreList = cvssScoreMaxList;
+			vendorProductCheckFlag = true;
+		}
+		
+		if (!cvssScoreList.isEmpty()) {
+			String[] cvssScoreMaxString = null;
+			for (String cvssScoreMaxStr : cvssScoreList) {
+				cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+				om.setSchOssName(cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2]);
+				om.setVulnerabilityCheckFlag(CoConstDef.FLAG_YES);
+				om.setOssName(ossName);
+				om.setVulnerabilityCheckFlag(CoConstDef.FLAG_NO);
+				
+				if (ossName.contains(" ")) {
+					convertNicknameList.add(ossName.replace(" ", "_"));
+				}
+				if (ossName.contains("-")) {
+					containsDashNameList.add(ossName);
+				}
+				String[] ossNicknames = ossService.getOssNickNameListByOssName(ossName);
+				if (ossNicknames != null && ossNicknames.length > 0) {
+					List<String> list = Arrays.asList(ossNicknames);
+					convertNicknameList.addAll(list);
+					for (String nick : ossNicknames) {
+						if (nick.contains(" ")) convertNicknameList.add(nick.replace(" ", "_"));
+						if (nick.contains("-")) containsDashNameList.add(nick);
+					}
+				}
+				
+				if (vulnFixedCheckFlag) {
+					om.setVulnerabilityCheckFlag(CoConstDef.FLAG_YES);
+				} else {
+					om.setVulnerabilityCheckFlag(null);
+				}
+				
+				if (vendorProductCheckFlag) {
+					if (containsDashNameList != null && !containsDashNameList.isEmpty()) {
+						om.setDashOssNameList(containsDashNameList.toArray(new String[containsDashNameList.size()]));
+					}
+					int cnt = ossService.checkExistsVendorProductMatchOss(om);
+					om.setOssName(ossName);
+					om.setOssVersion(ossVersion.isEmpty() ? "-" : ossVersion);
+					om.setDashOssNameList(null);
+					if (convertNicknameList != null && !containsDashNameList.isEmpty()) {
+						om.setConversionNameList(convertNicknameList.toArray(new String[convertNicknameList.size()]));
+					}
+					List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
+					if (cnt > 0) {
+						for (String cveData2 : cveDataList2) {
+							String[] cveData2Split = cveData2.split("\\@");
+							if (!cveData2Split[4].equals(cvssScoreMaxString[4])) {
+								rtnScoreList.add(cveData2);
+							}
+						}
+					} else {
+						if (cveDataList2 != null && !cveDataList2.isEmpty()) rtnScoreList.addAll(cveDataList2);
+					}
+				} else {
+					if (containsDashNameList != null && !containsDashNameList.isEmpty()) {
+						om.setDashOssNameList(containsDashNameList.toArray(new String[containsDashNameList.size()]));
+					}
+					if (convertNicknameList != null && !containsDashNameList.isEmpty()) {
+						om.setConversionNameList(convertNicknameList.toArray(new String[convertNicknameList.size()]));
+					}
+					om.setOssVersion(ossVersion.isEmpty() ? "-" : ossVersion);
+					List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
+					if (cveDataList2 != null && !cveDataList2.isEmpty()) rtnScoreList.addAll(cveDataList2);
+				}
+			}
+			
+			if (!rtnScoreList.isEmpty()) {
+				rtnScoreList = rtnScoreList.stream().distinct().collect(Collectors.toList());
+				if (rtnScoreList.size() > 1) {
+					Collections.sort(rtnScoreList, new Comparator<String>() {
+						@Override
+						public int compare(String o1, String o2) {
+							if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+								return -1;
+							}else {
+								return 1;
+							}
+						}
+					});
+				}
+				return rtnScoreList.get(0);
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	public static String getConversionCveInfoForList(List<String> cvssScoreMaxVendorProductList, List<String> cvssScoreMaxList) {
+		List<String> cvssScoreList = null;
+		
+		if (!cvssScoreMaxVendorProductList.isEmpty()) {
+			cvssScoreList = cvssScoreMaxVendorProductList;
+		} else {
+			cvssScoreList = cvssScoreMaxList;
+		}
+		
+		if (!cvssScoreList.isEmpty()) {
+			cvssScoreList = cvssScoreList.stream().distinct().collect(Collectors.toList());
+			if (cvssScoreList.size() > 1) {
+				Collections.sort(cvssScoreList, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+							return -1;
+						}else {
+							return 1;
+						}
+					}
+				});
+			}
+			
+			return cvssScoreList.get(0);
+		} else {
+			return null;
+		}
 	}
 }

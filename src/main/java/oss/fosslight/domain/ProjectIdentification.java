@@ -338,7 +338,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	/** Check whether the Object is included in the oss list */
 	private String checkOssList = "N";
-
+	private String publDate;
+	private String patchLink;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2063,6 +2065,22 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setCvssScoreMax5(String cvssScoreMax5) {
 		this.cvssScoreMax5 = cvssScoreMax5;
+	}
+
+	public String getPublDate() {
+		return publDate;
+	}
+
+	public void setPublDate(String publDate) {
+		this.publDate = publDate;
+	}
+
+	public String getPatchLink() {
+		return patchLink;
+	}
+
+	public void setPatchLink(String patchLink) {
+		this.patchLink = patchLink;
 	}
 
 	public String getOssVersionEmptyFlag() {

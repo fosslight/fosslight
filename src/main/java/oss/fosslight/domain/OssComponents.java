@@ -81,6 +81,7 @@ public class OssComponents extends ComBean implements Serializable {
 	
 
 	private String guireportFlag = "N";
+	private String activateFlag;
 	
 	/**
 	 * son system final list report용
@@ -104,6 +105,57 @@ public class OssComponents extends ComBean implements Serializable {
 
 	private String ossNickName;
 	
+	private String publDate;
+	private String vulnerabilityResolution;
+	private String vulnerabilityLink;
+	private String officialPatchLink;
+	private String securityPatchLink;
+	private String securityComments;
+	private String cpeName;
+	private String verStartEndRange;
+	private String cveIdTo;
+	private String cvssScoreTo;
+	
+	public String getPublDate() {
+		return publDate;
+	}
+
+	public void setPublDate(String publDate) {
+		this.publDate = publDate;
+	}
+
+	public String getVulnerabilityResolution() {
+		return vulnerabilityResolution;
+	}
+
+	public void setVulnerabilityResolution(String vulnerabilityResolution) {
+		this.vulnerabilityResolution = vulnerabilityResolution;
+	}
+
+	public String getOfficialPatchLink() {
+		return officialPatchLink;
+	}
+
+	public void setOfficialPatchLink(String officialPatchLink) {
+		this.officialPatchLink = officialPatchLink;
+	}
+
+	public String getSecurityPatchLink() {
+		return securityPatchLink;
+	}
+
+	public void setSecurityPatchLink(String securityPatchLink) {
+		this.securityPatchLink = securityPatchLink;
+	}
+
+	public String getSecurityComments() {
+		return securityComments;
+	}
+
+	public void setSecurityComments(String securityComments) {
+		this.securityComments = securityComments;
+	}
+
 	/* 2018-07-10 choye 추가  */
 	public String getComponentIdx() {
 		return componentIdx;
@@ -600,5 +652,53 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setSpdxIdentifier(String spdxIdentifier) {
 		this.spdxIdentifier = spdxIdentifier;
+	}
+
+	public String getActivateFlag() {
+		return activateFlag;
+	}
+
+	public void setActivateFlag(String activateFlag) {
+		this.activateFlag = activateFlag;
+	}
+
+	public String getVulnerabilityLink() {
+		return vulnerabilityLink;
+	}
+
+	public void setVulnerabilityLink(String vulnerabilityLink) {
+		this.vulnerabilityLink = vulnerabilityLink;
+	}
+
+	public String getCpeName() {
+		return cpeName;
+	}
+
+	public void setCpeName(String cpeName) {
+		this.cpeName = cpeName;
+	}
+
+	public String getVerStartEndRange() {
+		return verStartEndRange;
+	}
+
+	public void setVerStartEndRange(String verStartEndRange) {
+		this.verStartEndRange = verStartEndRange;
+	}
+
+	public String getCveIdTo() {
+		return cveIdTo;
+	}
+
+	public void setCveIdTo(String cveIdTo) {
+		this.cveIdTo = cveIdTo;
+	}
+
+	public String getCvssScoreTo() {
+		return cvssScoreTo;
+	}
+
+	public void setCvssScoreTo(String cvssScoreTo) {
+		this.cvssScoreTo = cvssScoreTo;
 	}
 }

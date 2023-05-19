@@ -339,6 +339,11 @@ public final class Url {
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 		
 		public static final String DELETE_FILES = PATH + "/deleteFiles";
+		
+		public static final String SECURITY = PATH + "/security/{prjId}";
+		public static final String SECURITY_GRID = PATH + "/securityGrid/{prjId}/{code}";
+		public static final String SECURITY_JSP = TILES_ROOT + PATH + "/security";
+		public static final String SAVE_SECURITY = PATH + "/saveSecurity";
 	}
 	
 	public static final class VERIFICATION {

@@ -679,4 +679,60 @@
     <delete id="deleteNvdCpeMatchNames" parameterType="String">
     	DELETE FROM NVD_CPE_MATCH_NAMES WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
     </delete>
+    
+    <insert id="insertNvdDataConfigurationsTemp" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_CONFIGURATIONS_TEMP (
+    		CVE_ID
+    		, MATCH_CRITERIA_ID
+    		, CRITERIA
+    		, VENDOR
+    		, PRODUCT
+    		, VERSION
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartIncluding)">
+    		, VER_START_INC
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndIncluding)">
+    		, VER_END_INC
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartExcluding)">
+    		, VER_START_EXC
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndExcluding)">
+    		, VER_END_EXC
+    	</if>
+    	) VALUE (
+    		#{cveId}
+    		, #{matchCriteriaId}
+    		, #{criteria}
+    		, #{vendor}
+    		, #{product}
+    		, #{version}
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartIncluding)">
+    		, #{versionStartIncluding}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndIncluding)">
+    		, #{versionEndIncluding}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartExcluding)">
+    		, #{versionStartExcluding}
+    	</if>
+    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndExcluding)">
+    		, #{versionEndExcluding}
+    	</if>
+    	)
+    </insert>
+    
+    <update id="truncateNvdDataConfigurations">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS</update>
+	<insert id="copyNvdDataConfigurationsFromTemp">INSERT INTO NVD_DATA_CONFIGURATIONS SELECT * FROM NVD_DATA_CONFIGURATIONS_TEMP</insert>
+	<update id="truncateNvdDataConfigurationsTemp">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS_TEMP</update>
+	
+	<delete id="deleteNvdDataConfigurations" parameterType="HashMap">
+		DELETE FROM NVD_DATA_CONFIGURATIONS
+		WHERE CVE_ID = #{cveId}
+		AND MATCH_CRITERIA_ID = #{matchCriteriaId}
+		AND CRITERIA = #{criteria}
+		AND VENDOR = #{vendor}
+		AND PRODUCT = #{product}
+		AND VERSION = #{version}
+	</delete>
 </mapper>

@@ -206,7 +206,17 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 		list = selfCheckMapper.selectIdentificationGridList(identification);
+		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+		List<ProjectIdentification> notVersionOssComponentList = selfCheckMapper.selectIdentificationGridList(identification);;
+		if (notVersionOssComponentList != null) {
+			list.addAll(notVersionOssComponentList);
+		}
+		identification.setOssVersionEmptyFlag(null);
+		list.sort(Comparator.comparing(ProjectIdentification::getComponentIdx));
+		
 		if (list != null && !list.isEmpty()) {
+			List<String> cvssScoreMaxList = new ArrayList<>();
+			List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
 			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
@@ -232,58 +242,29 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				}
 				
 				// convert max score
-				if (bean.getCvssScoreMax() != null || bean.getCvssScoreMax1() != null || bean.getCvssScoreMax2() != null 
-						|| bean.getCvssScoreMax3() != null || bean.getCvssScoreMax4() != null || bean.getCvssScoreMax5() != null) {
-					List<String> cvssScoreMaxList = new ArrayList<>();
-					
-					if (!isEmpty(bean.getCvssScoreMax())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax());
-					}
-					if (!isEmpty(bean.getCvssScoreMax1())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax1());
-					}
-					if (!isEmpty(bean.getCvssScoreMax2())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax2());
-					}
-					if (!isEmpty(bean.getCvssScoreMax3())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax3());
-					}
-					if (!isEmpty(bean.getCvssScoreMax4())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax4());
-					}
-					if (!isEmpty(bean.getCvssScoreMax5())) {
-						cvssScoreMaxList.add(bean.getCvssScoreMax5());
-					}
-					
-					if (!cvssScoreMaxList.isEmpty()) {
-						String[] cvssScoreMaxString = null;
-						BigDecimal cvssScore = null;
-						BigDecimal cvssScoreMax = null;
-						String cveId = null;
-						
-						for (String cvssScoreMaxStr : cvssScoreMaxList) {
-							cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-							if (cvssScoreMax != null) {
-								cvssScore = new BigDecimal(cvssScoreMaxString[0]);
-								if (cvssScoreMax.compareTo(cvssScore) == -1) {
-									cvssScoreMax = cvssScore;
-									cveId = cvssScoreMaxString[1];
-								}
-							} else {
-								cvssScoreMax = new BigDecimal(cvssScoreMaxString[0]);
-								cveId = cvssScoreMaxString[1];
-							}
-						}
-						
-						if (cvssScoreMax != null) {
-							bean.setCvssScore(String.valueOf(cvssScoreMax));
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-							bean.setCveId(cveId);
-						}
-					}
-				} else {
-					bean.setVulnYn(CoConstDef.FLAG_NO);
+				if (bean.getCvssScoreMax() != null) {
+					cvssScoreMaxList.add(bean.getCvssScoreMax());
 				}
+				if (bean.getCvssScoreMax1() != null) {
+					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax1());
+				}
+				if (bean.getCvssScoreMax2() != null) {
+					cvssScoreMaxList.add(bean.getCvssScoreMax2());
+				}
+				if (bean.getCvssScoreMax3() != null) {
+					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
+				}
+				
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				if (conversionCveInfo != null) {
+					String[] conversionCveData = conversionCveInfo.split("\\@");
+					bean.setCvssScore(conversionCveData[3]);
+					bean.setCveId(conversionCveData[4]);
+					bean.setVulnYn(CoConstDef.FLAG_YES);
+				}
+				
+				cvssScoreMaxVendorProductList.clear();
+				cvssScoreMaxList.clear();
 			}
 				
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득

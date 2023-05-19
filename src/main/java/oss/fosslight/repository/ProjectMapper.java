@@ -350,4 +350,20 @@ public interface ProjectMapper {
 	void deleteProjectDistributeHis(Project project);
 	
 	List<OssComponentsLicense> selectBomLicenseList(ProjectIdentification identification);
+	
+	void deleteSecurityData(OssComponents ossComponents);
+	
+	void insertSecurityData(OssComponents ossComponents);
+
+	List<OssComponents> getSecurityDataList(ProjectIdentification identification);
+
+	OssMaster findNotVersionIdentificationMaxNvdInfo(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
+
+	int existsWatcherByUserDivistion(Project project);
+
+	void updateWatcherDivision(Project project);
+
+	void updateCveInfoForNotFixedOssInfo(OssMaster ossMaster);
+
+	List<String> selectVulnInfoForIdentification(@Param("vendorProduct")String vendorProduct, @Param("version")String version);
 }

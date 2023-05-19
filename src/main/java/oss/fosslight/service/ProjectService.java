@@ -191,6 +191,10 @@ public interface ProjectService extends HistoryConfig{
 	public void deleteProjectRefFiles(Project projectInfo);
 
 	public void deleteUploadFile(Project project);
+	
+	public Map<String, Object> getSecurityGridList(Project project);
+
+	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents);
 }
 
 

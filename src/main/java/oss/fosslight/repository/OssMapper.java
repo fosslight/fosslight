@@ -242,4 +242,8 @@ public interface OssMapper {
 	List<OssMaster> checkOssNameTotal(ProjectIdentification bean);
 
 	Map<String, Object>  getRecentlyModifiedOss(OssMaster ossMaster);
+
+	List<String> selectVulnInfoForOss(OssMaster ossMaster);
+
+	int checkExistsVendorProductMatchOss(OssMaster ossMaster);
 }

@@ -70,4 +70,9 @@ public interface NvdDataMapper {
 	int selectNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
 	void deleteNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
 	void deleteNvdCpeMatchNames(@Param(value = "matchCriteriaId") String matchCriteriaId);
+	void insertNvdDataConfigurationsTemp(Map<String, String> param);
+	void truncateNvdDataConfigurations();
+	void copyNvdDataConfigurationsFromTemp();
+	void truncateNvdDataConfigurationsTemp();
+	void deleteNvdDataConfigurations(Map<String, String> param);
 }

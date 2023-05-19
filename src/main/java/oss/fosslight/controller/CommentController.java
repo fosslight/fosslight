@@ -64,7 +64,7 @@ public class CommentController extends CoTopComponent {
 		commentsHistory.setReferenceId(rId);
 		model.addAttribute("basicInfo", commentsHistory);
 		
-		if ("prj".equalsIgnoreCase(rDiv)) {
+		if ("prj".equalsIgnoreCase(rDiv) || rDiv.equalsIgnoreCase("security")) {
 			model.addAttribute("project", projectService.getProjectBasicInfo(rId));
 		} else if ("3rd".equalsIgnoreCase(rDiv)) {
 		    PartnerMaster partnerMaster = new PartnerMaster();

@@ -134,4 +134,8 @@ public interface OssService extends HistoryConfig{
 	Map<String, Object> getOssDataMap(String gridId, boolean status, String msg);
 	
 	Map<String, Object> saveOssURLNickname(ProjectIdentification paramBean);
+
+	List<String> selectVulnInfoForOss(OssMaster ossMaster);
+
+	int checkExistsVendorProductMatchOss(OssMaster ossMaster);
 }
