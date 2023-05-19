@@ -155,8 +155,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list = projectMapper.selectProjectList(project);
 				
 				if (list != null) {
-					List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
-					List<String> cvssScoreMaxList = new ArrayList<>();
+					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 					
 					// 코드변환처리
 					for (Project bean : list) {
@@ -185,49 +184,31 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
-						OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
-						OssMaster nvdMaxScoreInfo2 = projectMapper.findNotVersionIdentificationMaxNvdInfo(bean.getPrjId(), null);
+						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
+						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
 						
-						if (nvdMaxScoreInfo != null) {
-							if (nvdMaxScoreInfo.getCvssScoreMax() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax());
-							}
-							if (nvdMaxScoreInfo.getCvssScoreMax1() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax1());
-							}
-							if (nvdMaxScoreInfo.getCvssScoreMax2() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax2());
-							}
-							if (nvdMaxScoreInfo.getCvssScoreMax3() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax3());
+						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+							if (conversionCveInfo != null) {
+								customNvdMaxScoreInfoList.add(conversionCveInfo);
 							}
 						}
 						
-						if (nvdMaxScoreInfo2 != null) {
-							if (nvdMaxScoreInfo2.getCvssScoreMax() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax());
-							}
-							if (nvdMaxScoreInfo2.getCvssScoreMax1() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax1());
-							}
-							if (nvdMaxScoreInfo2.getCvssScoreMax2() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax2());
-							}
-							if (nvdMaxScoreInfo2.getCvssScoreMax3() != null) {
-								cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax3());
-							}
+						if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+							customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
 						}
 						
-						String conversionCveInfo = CommonFunction.getConversionCveInfoForList(cvssScoreMaxVendorProductList, cvssScoreMaxList);
-						if (conversionCveInfo != null) {
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							bean.setCvssScore(conversionCveData[3]);
-							bean.setCveId(conversionCveData[4]);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
+						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+							if (conversionCveInfo != null) {
+								String[] conversionCveData = conversionCveInfo.split("\\@");
+								bean.setCvssScore(conversionCveData[3]);
+								bean.setCveId(conversionCveData[4]);
+								bean.setVulnYn(CoConstDef.FLAG_YES);
+							}
+							
+							customNvdMaxScoreInfoList.clear();
 						}
-						
-						cvssScoreMaxVendorProductList.clear();
-						cvssScoreMaxList.clear();
 					}
 				}
 			}

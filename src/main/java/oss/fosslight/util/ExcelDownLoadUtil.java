@@ -1247,55 +1247,38 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			List<String[]> rows = new ArrayList<>();
 			
-			List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
-			List<String> cvssScoreMaxList = new ArrayList<>();
+			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 			
 			for (int i = 0; i < projectList.size(); i++){
 				Project param = projectList.get(i);
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
-				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				OssMaster nvdMaxScoreInfo2 = projectMapper.findNotVersionIdentificationMaxNvdInfo(param.getPrjId(), null);
-				
 				String nvdMaxScore = "";
 				
-				if (nvdMaxScoreInfo != null) {
-					if (nvdMaxScoreInfo.getCvssScoreMax() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax());
-					}
-					if (nvdMaxScoreInfo.getCvssScoreMax1() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax1());
-					}
-					if (nvdMaxScoreInfo.getCvssScoreMax2() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax2());
-					}
-					if (nvdMaxScoreInfo.getCvssScoreMax3() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo.getCvssScoreMax3());
+				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
+				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
+				
+				
+				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						customNvdMaxScoreInfoList.add(conversionCveInfo);
 					}
 				}
 				
-				if (nvdMaxScoreInfo2 != null) {
-					if (nvdMaxScoreInfo2.getCvssScoreMax() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax());
-					}
-					if (nvdMaxScoreInfo2.getCvssScoreMax1() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax1());
-					}
-					if (nvdMaxScoreInfo2.getCvssScoreMax2() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax2());
-					}
-					if (nvdMaxScoreInfo2.getCvssScoreMax3() != null) {
-						cvssScoreMaxList.add(nvdMaxScoreInfo2.getCvssScoreMax3());
+				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+				}
+				
+				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						String[] conversionCveData = conversionCveInfo.split("\\@");
+						nvdMaxScore = conversionCveData[3];
 					}
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfoForList(cvssScoreMaxList, cvssScoreMaxVendorProductList);
-				if (!conversionCveInfo.isEmpty()) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					nvdMaxScore = conversionCveData[3];
-				}
+				customNvdMaxScoreInfoList.clear();
 				
-				cvssScoreMaxList.clear();
-								
 				String[] rowParam = {
 					param.getPrjId()
 					, param.getStatus()

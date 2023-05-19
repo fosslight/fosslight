@@ -125,6 +125,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				list = selfCheckMapper.selectProjectList(project);
 				
 				if (list != null) {
+					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 					// 코드변환처리
 					for (Project bean : list) {
 						// DISTRIBUTION Android Flag
@@ -147,6 +148,32 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							bean.setOsType(bean.getOsTypeEtc());
 						}else{
 							bean.setOsType(CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, bean.getOsType()));
+						}
+						
+						List<String> nvdMaxScoreInfoList = selfCheckMapper.findIdentificationMaxNvdInfo(bean.getPrjId());
+						List<String> nvdMaxScoreInfoList2 = selfCheckMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId());
+						
+						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+							if (conversionCveInfo != null) {
+								customNvdMaxScoreInfoList.add(conversionCveInfo);
+							}
+						}
+						
+						if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+							customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+						}
+						
+						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+							if (conversionCveInfo != null) {
+								String[] conversionCveData = conversionCveInfo.split("\\@");
+								bean.setCvssScore(conversionCveData[3]);
+								bean.setCveId(conversionCveData[4]);
+								bean.setVulnYn(CoConstDef.FLAG_YES);
+							}
+							
+							customNvdMaxScoreInfoList.clear();
 						}
 					}
 				}

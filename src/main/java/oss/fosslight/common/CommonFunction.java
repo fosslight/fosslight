@@ -4986,14 +4986,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 	}
 	
-	public static String getConversionCveInfoForList(List<String> cvssScoreMaxVendorProductList, List<String> cvssScoreMaxList) {
-		List<String> cvssScoreList = null;
-		
-		if (!cvssScoreMaxVendorProductList.isEmpty()) {
-			cvssScoreList = cvssScoreMaxVendorProductList;
-		} else {
-			cvssScoreList = cvssScoreMaxList;
-		}
+	public static String getConversionCveInfoForList(List<String> cvssScoreMaxList) {
+		List<String> cvssScoreList = cvssScoreMaxList;
 		
 		if (!cvssScoreList.isEmpty()) {
 			cvssScoreList = cvssScoreList.stream().distinct().collect(Collectors.toList());
@@ -5011,6 +5005,42 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 			
 			return cvssScoreList.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	public static String checkNvdInfoForProduct(List<String> productCheckList) {
+		List<String> rtnScoreList = new ArrayList<>();
+		OssMaster om = new OssMaster();
+		String[] cvssScoreMaxString = null;
+		
+		for (String cvssScoreMaxStr : productCheckList) {
+			cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+			if (!cvssScoreMaxString[2].isEmpty()) {
+				om.setSchOssName(cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2]);
+				int cnt = ossService.checkExistsVendorProductMatchOss(om);
+				if (cnt == 0) {
+					rtnScoreList.add(cvssScoreMaxStr);
+				}
+			}
+		}
+		
+		if (!rtnScoreList.isEmpty()) {
+			rtnScoreList = rtnScoreList.stream().distinct().collect(Collectors.toList());
+			if (rtnScoreList.size() > 1) {
+				Collections.sort(rtnScoreList, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+							return -1;
+						}else {
+							return 1;
+						}
+					}
+				});
+			}
+			return rtnScoreList.get(0);
 		} else {
 			return null;
 		}

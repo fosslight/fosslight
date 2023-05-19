@@ -301,8 +301,10 @@ public interface ProjectMapper {
 	
 	int existsAddList(Project project);
 
-	OssMaster findIdentificationMaxNvdInfo(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
+	List<String> findIdentificationMaxNvdInfo(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
 
+	List<String> findIdentificationMaxNvdInfoForVendorProduct(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
+	
 	int selectOssComponentMaxIdx(Project project);
 	
 	Project getProjectBasicInfo(Project project);
@@ -357,7 +359,6 @@ public interface ProjectMapper {
 
 	List<OssComponents> getSecurityDataList(ProjectIdentification identification);
 
-	OssMaster findNotVersionIdentificationMaxNvdInfo(@Param("prjId")String prjId, @Param("commponentDiv")String commponentDiv);
 
 	int existsWatcherByUserDivistion(Project project);
 
