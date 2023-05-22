@@ -5716,7 +5716,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		for (ProjectIdentification pi : deduplicatedBomList) {
 			activateFlag = false;
 			
-			if (pi.getOssName().equals("-")) continue;
+			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
 			param.setOssName(pi.getOssName());
 			param.setOssVersion(pi.getOssVersion());
 			if(isEmpty(pi.getOssVersion()) || pi.getOssVersion().equals("N/A")) ossVersion = "-";
