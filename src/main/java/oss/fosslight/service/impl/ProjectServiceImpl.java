@@ -5682,6 +5682,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> securityGridMap = new HashMap<>();
 		List<String> deduplicatedkey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
+		List<ProjectIdentification> list = null;
 		
 		OssMaster param = new OssMaster();
 		OssComponents oc = null;
@@ -5689,57 +5690,72 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		boolean activateFlag;
 		String ossVersion = "";
 		String vulnerabilityLink = "";
-		
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
-		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		identification.setMerge(CoConstDef.FLAG_NO);
 		
-		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-		if (notVersionList != null) {
-			bomList.addAll(notVersionList);
-		}
-		identification.setOssVersionEmptyFlag(null);
-		
-		Comparator<ProjectIdentification> compare = Comparator
-				.comparing(ProjectIdentification::getLicenseTypeIdx)
-				.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-				.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-				.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-				.thenComparing(ProjectIdentification::getMergeOrder);
-
-		bomList.sort(compare);
-		List<ProjectIdentification> deduplicatedBomList = bomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
-		
-		for (ProjectIdentification pi : deduplicatedBomList) {
-			activateFlag = false;
+		Project prjInfo = projectMapper.selectProjectMaster2(project);
+		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			identification.setMerge(CoConstDef.FLAG_NO);
 			
+			List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+			if (notVersionList != null) {
+				bomList.addAll(notVersionList);
+			}
+			identification.setOssVersionEmptyFlag(null);
+			
+			Comparator<ProjectIdentification> compare = Comparator
+					.comparing(ProjectIdentification::getLicenseTypeIdx)
+					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
+					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+					.thenComparing(ProjectIdentification::getMergeOrder);
+
+			bomList.sort(compare);
+			list = bomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+		} else {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			List<ProjectIdentification> componentList = projectMapper.selectIdentificationGridList(identification);
+			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
+			if (notVersionOssComponentList != null) {
+				componentList.addAll(notVersionOssComponentList);
+			}
+			identification.setOssVersionEmptyFlag(null);
+			
+			componentList.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+			list = componentList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
+		}
+		
+		for (ProjectIdentification pi : list) {
+			activateFlag = false;
 			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
+			
 			param.setOssName(pi.getOssName());
 			param.setOssVersion(pi.getOssVersion());
 			if(isEmpty(pi.getOssVersion()) || pi.getOssVersion().equals("N/A")) ossVersion = "-";
 			
 			List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
-			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
-			if (securityDatalist != null && !securityDatalist.isEmpty()) {
-				for (OssComponents oss : securityDatalist) {
-					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
-					securityGridMap.put(key, oss);
-				}
-			}
-			
-			if (vulnList != null && vulnList.size() >= 100 && isEmpty(pi.getOssVersion())) {
-				activateFlag = true;
-				
-				vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getPublDate).reversed()).collect(Collectors.toList());
-				List<Vulnerability> convertVulnList = new ArrayList<>();
-				convertVulnList.add(vulnList.get(0));
-				vulnList = convertVulnList;
-			} 
-			
 			if (vulnList != null && !vulnList.isEmpty()) {
+				List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
+				if (securityDatalist != null && !securityDatalist.isEmpty()) {
+					for (OssComponents oss : securityDatalist) {
+						String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+						securityGridMap.put(key, oss);
+					}
+				}
+				
+				if (vulnList != null && vulnList.size() >= 100 && isEmpty(pi.getOssVersion())) {
+					activateFlag = true;
+					
+					vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getPublDate).reversed()).collect(Collectors.toList());
+					List<Vulnerability> convertVulnList = new ArrayList<>();
+					convertVulnList.add(vulnList.get(0));
+					vulnList = convertVulnList;
+				} 
+				
 				for (Vulnerability vuln : vulnList) {
 					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + vuln.getCveId() + "_" + vuln.getCvssScore()).toUpperCase();
 					if (!deduplicatedkey.contains(key)) {
