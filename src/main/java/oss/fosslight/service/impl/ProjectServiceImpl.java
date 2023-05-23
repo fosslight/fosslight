@@ -155,7 +155,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list = projectMapper.selectProjectList(project);
 				
 				if (list != null) {
+					ProjectIdentification identification = new ProjectIdentification();
+					identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					identification.setMerge(CoConstDef.FLAG_NO);
+					
 					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
+					Map<String, String> customExcludeCveInfoMap = new HashMap<>();
 					
 					// 코드변환처리
 					for (Project bean : list) {
@@ -184,11 +189,67 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
+						identification.setReferenceId(bean.getPrjId());
+						List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+						identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+						List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+						if (notVersionList != null) {
+							bomList.addAll(notVersionList);
+						}
+						identification.setOssVersionEmptyFlag(null);
+						
+						if (bomList != null && !bomList.isEmpty()) {
+							bomList = bomList.stream().filter(e -> !e.getLicenseTypeIdx().equals("1")).filter(CommonFunction.distinctByKey(e -> e.getOssName()+e.getOssVersion())).collect(Collectors.toList());
+							
+							T2CoProjectValidator pv = new T2CoProjectValidator();
+							pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+							pv.setAppendix("bomList", bomList);
+
+							T2CoValidationResult vr = pv.validate(new HashMap<>());
+							
+							if (!vr.isValid()) {
+								Map<String, String> validMap = vr.getValidMessageMap();
+								if (validMap != null && !validMap.isEmpty()) {
+									for (ProjectIdentification bom : bomList) {
+										boolean flag = false;
+										for (String key : validMap.keySet()) {
+											if (key.indexOf(bom.getComponentId()) > -1) {
+												flag = true;
+												break;
+											}
+										}
+										
+										if (!flag) {
+											String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
+											if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
+										}
+									}
+								}
+							} else {
+								for (ProjectIdentification bom : bomList) {
+									String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
+									if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
+								}
+							}
+						}
+						
 						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
 						
-						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {	
+							List<String> excludeCheckList = new ArrayList<>();
+							if (customExcludeCveInfoMap != null && !customExcludeCveInfoMap.isEmpty()) {
+								for (String scoreData : nvdMaxScoreInfoList) {
+									String[] scoreDataSplit = scoreData.split("\\@");
+									if (!customExcludeCveInfoMap.containsKey((scoreDataSplit[0]+"@"+scoreDataSplit[1]).toUpperCase())) {
+										excludeCheckList.add(scoreData);
+									}
+								}
+							} else {
+								excludeCheckList.addAll(nvdMaxScoreInfoList);
+							}
+							
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(excludeCheckList);
 							if (conversionCveInfo != null) {
 								customNvdMaxScoreInfoList.add(conversionCveInfo);
 							}
@@ -199,16 +260,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+							List<String> excludeCheckList = new ArrayList<>();
+							if (customExcludeCveInfoMap != null && !customExcludeCveInfoMap.isEmpty()) {
+								for (String scoreData : customNvdMaxScoreInfoList) {
+									String[] scoreDataSplit = scoreData.split("\\@");
+									if (!customExcludeCveInfoMap.containsKey((scoreDataSplit[0]+"@"+scoreDataSplit[1]).toUpperCase())) {
+										excludeCheckList.add(scoreData);
+									}
+								}
+							} else {
+								excludeCheckList.addAll(customNvdMaxScoreInfoList);
+							}
+							
+							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(excludeCheckList);
 							if (conversionCveInfo != null) {
 								String[] conversionCveData = conversionCveInfo.split("\\@");
 								bean.setCvssScore(conversionCveData[3]);
 								bean.setCveId(conversionCveData[4]);
 								bean.setVulnYn(CoConstDef.FLAG_YES);
 							}
-							
-							customNvdMaxScoreInfoList.clear();
 						}
+						
+						customNvdMaxScoreInfoList.clear();
+						customExcludeCveInfoMap.clear();
 					}
 				}
 			}
@@ -442,8 +516,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						&& !isEmpty(ll.getCvssScoreMax())
 						&& !("-".equals(ll.getOssName()))){ 
 					String[] cvssScoreMax = ll.getCvssScoreMax().split("\\@");
-					ll.setCvssScore(cvssScoreMax[0]);
-					ll.setCveId(cvssScoreMax[1]);
+					ll.setCvssScore(cvssScoreMax[3]);
+					ll.setCveId(cvssScoreMax[4]);
 				}
 				
 				// convert max score
@@ -693,8 +767,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							&& !isEmpty(project.getCvssScoreMax())
 							&& !("-".equals(project.getOssName()))){ 
 						String[] cvssScoreMax = project.getCvssScoreMax().split("\\@");
-						project.setCvssScore(cvssScoreMax[0]);
-						project.setCveId(cvssScoreMax[1]);
+						project.setCvssScore(cvssScoreMax[3]);
+						project.setCveId(cvssScoreMax[4]);
 					}
 					
 					// convert max score
