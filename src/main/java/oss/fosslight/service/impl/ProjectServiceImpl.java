@@ -189,52 +189,56 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
-						identification.setReferenceId(bean.getPrjId());
-						List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-						identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-						List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-						if (notVersionList != null) {
-							bomList.addAll(notVersionList);
-						}
-						identification.setOssVersionEmptyFlag(null);
-						
-						int securityDataCnt = getSecurityDataCntByProject(bean);
-						if (securityDataCnt > 0) bean.setSecActFlag(CoConstDef.FLAG_YES);
-						
-						if (bomList != null && !bomList.isEmpty()) {
+						if (!bean.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+							identification.setReferenceId(bean.getPrjId());
+							List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+							identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+							List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+							if (notVersionList != null) {
+								bomList.addAll(notVersionList);
+							}
+							identification.setOssVersionEmptyFlag(null);
 							bomList = bomList.stream().filter(e -> !e.getLicenseTypeIdx().equals("1")).filter(CommonFunction.distinctByKey(e -> e.getOssName()+e.getOssVersion())).collect(Collectors.toList());
 							
-							T2CoProjectValidator pv = new T2CoProjectValidator();
-							pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
-							pv.setAppendix("bomList", bomList);
+							if (bomList != null && !bomList.isEmpty()) {
+								T2CoProjectValidator pv = new T2CoProjectValidator();
+								pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+								pv.setAppendix("bomList", bomList);
 
-							T2CoValidationResult vr = pv.validate(new HashMap<>());
-							
-							if (!vr.isValid()) {
-								Map<String, String> validMap = vr.getValidMessageMap();
-								if (validMap != null && !validMap.isEmpty()) {
-									for (ProjectIdentification bom : bomList) {
-										boolean flag = false;
-										for (String key : validMap.keySet()) {
-											if (key.indexOf(bom.getComponentId()) > -1) {
-												flag = true;
-												break;
+								T2CoValidationResult vr = pv.validate(new HashMap<>());
+								
+								if (!vr.isValid()) {
+									Map<String, String> validMap = vr.getValidMessageMap();
+									if (validMap != null && !validMap.isEmpty()) {
+										for (ProjectIdentification bom : bomList) {
+											boolean flag = false;
+											for (String key : validMap.keySet()) {
+												if (key.indexOf(bom.getComponentId()) > -1) {
+													flag = true;
+													break;
+												}
+											}
+											
+											if (!flag) {
+												String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
+												if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
 											}
 										}
-										
-										if (!flag) {
-											String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
-											if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
-										}
+									}
+								} else {
+									for (ProjectIdentification bom : bomList) {
+										String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
+										if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
 									}
 								}
-							} else {
-								for (ProjectIdentification bom : bomList) {
-									String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
-									if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
-								}
 							}
+							
+							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+						} else {
+							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
+						
+						if (getSecurityDataCntByProject(bean)) bean.setSecActFlag(CoConstDef.FLAG_YES);
 						
 						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
@@ -301,14 +305,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
-	private int getSecurityDataCntByProject(Project project) {
-		if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		} else {
-			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+	private boolean getSecurityDataCntByProject(Project project) {
+		boolean flag = false;
+		for (int i=1; i<9; i++) {
+			project.setCode(String.valueOf(i));
+			flag = projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
+			if (flag) {
+				break;
+			}
 		}
-		
-		return projectMapper.getSecurityDataCntByProject(project);
+				
+		return flag;
 	}
 	
 	@Override
