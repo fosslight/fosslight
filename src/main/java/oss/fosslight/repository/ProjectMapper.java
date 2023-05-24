@@ -367,4 +367,6 @@ public interface ProjectMapper {
 	void updateCveInfoForNotFixedOssInfo(OssMaster ossMaster);
 
 	List<String> selectVulnInfoForIdentification(@Param("vendorProduct")String vendorProduct, @Param("version")String version);
+	
+	int getSecurityDataCntByProject(Project project);
 }

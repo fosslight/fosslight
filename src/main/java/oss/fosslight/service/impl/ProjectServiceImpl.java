@@ -198,6 +198,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						identification.setOssVersionEmptyFlag(null);
 						
+						int securityDataCnt = getSecurityDataCntByProject(bean);
+						if (securityDataCnt > 0) bean.setSecActFlag(CoConstDef.FLAG_YES);
+						
 						if (bomList != null && !bomList.isEmpty()) {
 							bomList = bomList.stream().filter(e -> !e.getLicenseTypeIdx().equals("1")).filter(CommonFunction.distinctByKey(e -> e.getOssName()+e.getOssVersion())).collect(Collectors.toList());
 							
@@ -296,6 +299,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		return map;
+	}
+	
+	private int getSecurityDataCntByProject(Project project) {
+		if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		} else {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+		}
+		
+		return projectMapper.getSecurityDataCntByProject(project);
 	}
 	
 	@Override

@@ -4682,4 +4682,167 @@
 		AND 
 			VERSION = #{ossVersion}
 	</update>
+	
+	<select id="getSecurityDataCntByProject" parameterType="oss.fosslight.domain.Project" resultType="int">
+		SELECT COUNT(*)
+		FROM (
+			SELECT TBL.CVE_ID
+			FROM (
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_COMPONENTS OC
+									ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+									AND NVD.VERSION = OC.OSS_VERSION
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') != ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_COMPONENTS OC
+									ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') = ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_NICKNAME NICK
+									ON NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
+									LEFT JOIN OSS_COMPONENTS OC
+									ON NICK.OSS_NAME = OC.OSS_NAME
+									AND NVD.VERSION = OC.OSS_VERSION
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') != ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_NICKNAME NICK
+									ON NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
+									LEFT JOIN OSS_COMPONENTS OC
+									ON NICK.OSS_NAME = OC.OSS_NAME
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') = ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_COMPONENTS OC
+									ON NVD.VENDORPRODUCT = OC.OSS_NAME
+									AND NVD.VERSION = OC.OSS_VERSION
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') != ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_COMPONENTS OC
+									ON NVD.VENDORPRODUCT = OC.OSS_NAME
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') = ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_NICKNAME NICK
+									ON NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
+									LEFT JOIN OSS_COMPONENTS OC
+									ON NICK.OSS_NAME = OC.OSS_NAME
+									AND NVD.VERSION = OC.OSS_VERSION
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') != ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+		
+				UNION
+		
+				SELECT CVE.CVE_ID
+				FROM NVD_CVE_V3 CVE
+				WHERE CVE.CVE_ID IN (SELECT CVE_ID 
+									FROM NVD_DATA_V3 NVD
+									INNER JOIN OSS_NICKNAME NICK
+									ON NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
+									LEFT JOIN OSS_COMPONENTS OC
+									ON NICK.OSS_NAME = OC.OSS_NAME
+									WHERE OC.REFERENCE_ID = #{prjId}
+									AND OC.REFERENCE_DIV = #{referenceDiv}
+									AND OC.OSS_NAME != '-'
+									AND OC.OSS_NAME IS NOT NULL
+									AND OC.OSS_NAME != ''
+									AND IFNULL(OC.OSS_VERSION, '') = ''
+									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+							)
+				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+			) TBL
+			GROUP BY TBL.CVE_ID
+		) TBL
+	</select>
 </mapper>
