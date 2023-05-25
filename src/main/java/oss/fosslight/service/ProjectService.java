@@ -126,7 +126,7 @@ public interface ProjectService extends HistoryConfig{
 
 	List<List<ProjectIdentification>> convertLicenseNickName(List<List<ProjectIdentification>> ossComponentsLicense);
 
-	void addWatcher(Project project);
+	String addWatcher(Project project);
 
 	void removeWatcher(Project project);
 

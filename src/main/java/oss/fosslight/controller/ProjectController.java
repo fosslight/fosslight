@@ -3135,8 +3135,9 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			if (!isEmpty(project.getPrjUserId()) || !isEmpty(project.getPrjEmail())) {
-				projectService.addWatcher(project);
+				String addWatcher = projectService.addWatcher(project);
 				resultMap.put("isValid", "true");
+				resultMap.put("addWatcher", addWatcher);
 			} else {
 				return makeJsonResponseHeader(false, null);
 			}

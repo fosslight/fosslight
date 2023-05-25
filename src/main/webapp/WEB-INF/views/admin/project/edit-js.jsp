@@ -542,7 +542,7 @@
 		// 왓쳐 엘리먼트 그리기
 		addHtml : function(target, str, division, userId){
 			var rlt = division+((userId!="") ? "/"+userId : "");
-			var html  = '<span><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+			var html  = '<span id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 			html += '<strong>'+str+'</strong>';
 			if('${project.viewOnlyFlag}' != "Y") {
 				html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
@@ -569,6 +569,14 @@
 				contentType : 'application/json',
 				success: function(resultData){
 					if(resultData.isValid == "true") {
+						if (resultData.addWatcher !== undefined){
+							var userId = resultData.addWatcher.split("/")[1];
+							var watcher = $("#"+userId).find('input[name=watchers]').val();
+							if (watcher !== undefined && watcher != resultData.addWatcher){
+								$("#"+userId).remove();
+							}
+						}
+						
 						alertify.success('<spring:message code="msg.common.success" />');
 					}
 				},
