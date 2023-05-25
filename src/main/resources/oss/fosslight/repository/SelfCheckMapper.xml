@@ -1455,10 +1455,7 @@
 					WHERE NVD.PRODUCT != '-'
 					AND NVD.PRODUCT = REPLACE(IFNULL(M.OSS_NAME, L1.OSS_NAME), ' ', '_')
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN (M.OSS_VERSION, '*')
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN ('-', '*')
+					AND NVD.VERSION = M.OSS_VERSION
 				</if>
 					AND NVD.CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY 
 									WHERE OSS_NAME = REPLACE(NVD.PRODUCT, '_', ' ')
@@ -1478,10 +1475,7 @@
 					AND IFNULL(M.OSS_NAME, L1.OSS_NAME) REGEXP '[-]'
 					AND NVD.VENDORPRODUCT = REPLACE(IFNULL(M.OSS_NAME, L1.OSS_NAME), ' ', '_')
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN (M.OSS_VERSION, '*')
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN ('-', '*')
+					AND NVD.VERSION = M.OSS_VERSION
 				</if>
 					AND NVD.CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY 
 									WHERE OSS_NAME = NVD.VENDORPRODUCT
@@ -1498,10 +1492,7 @@
 					FROM NVD_DATA_SCORE_V3 NVD
 					WHERE NVD.PRODUCT != '-'
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN (M.OSS_VERSION, '*')
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN ('-', '*')
+					AND NVD.VERSION = M.OSS_VERSION
 				</if>
 					AND NVD.PRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(M.OSS_NAME, L1.OSS_NAME))
 					AND NVD.CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY SCR
@@ -1522,10 +1513,7 @@
 					FROM NVD_DATA_SCORE_V3 NVD
 					WHERE NVD.VENDORPRODUCT IS NOT NULL
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN (M.OSS_VERSION, '*')
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND NVD.VERSION IN ('-', '*')
+					AND NVD.VERSION = M.OSS_VERSION
 				</if>
 					AND NVD.VENDORPRODUCT IN (SELECT OSS_NICKNAME FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(M.OSS_NAME, L1.OSS_NAME) AND OSS_NICKNAME REGEXP '[-]')
 					AND NVD.CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY SCR
