@@ -4690,12 +4690,16 @@
 			FROM (
 			<if test="@oss.fosslight.util.StringUtil@equals('1', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_COMPONENTS OC
-									ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-									AND NVD.VERSION = OC.OSS_VERSION
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS OC
 									WHERE OC.REFERENCE_ID = #{prjId}
 									AND OC.REFERENCE_DIV = #{referenceDiv}
 									AND OC.OSS_NAME != '-'
@@ -4703,36 +4707,48 @@
 									AND OC.OSS_NAME != ''
 									AND IFNULL(OC.OSS_VERSION, '') != ''
 									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+									AND NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+									AND NVD.VERSION = OC.OSS_VERSION)
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('2', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_COMPONENTS OC
-									ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-									WHERE OC.REFERENCE_ID = #{prjId}
-									AND OC.REFERENCE_DIV = #{referenceDiv}
-									AND OC.OSS_NAME != '-'
-									AND OC.OSS_NAME IS NOT NULL
-									AND OC.OSS_NAME != ''
-									AND IFNULL(OC.OSS_VERSION, '') = ''
-									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE NVD.PRODUCT IN (SELECT REPLACE(OC.OSS_NAME, ' ', '_') 
+												FROM OSS_COMPONENTS OC
+												WHERE OC.REFERENCE_ID = #{prjId}
+												AND OC.REFERENCE_DIV = #{referenceDiv}
+												AND OC.OSS_NAME != '-'
+												AND OC.OSS_NAME IS NOT NULL
+												AND OC.OSS_NAME != ''
+												AND IFNULL(OC.OSS_VERSION, '') = ''
+												AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y')
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('3', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS OC
 									INNER JOIN OSS_NICKNAME NICK
-									ON NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-									LEFT JOIN OSS_COMPONENTS OC
-									ON NICK.OSS_NAME = OC.OSS_NAME
-									AND NVD.VERSION = OC.OSS_VERSION
+									ON OC.OSS_NAME = NICK.OSS_NAME
 									WHERE OC.REFERENCE_ID = #{prjId}
 									AND OC.REFERENCE_DIV = #{referenceDiv}
 									AND OC.OSS_NAME != '-'
@@ -4740,36 +4756,47 @@
 									AND OC.OSS_NAME != ''
 									AND IFNULL(OC.OSS_VERSION, '') != ''
 									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+									AND NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
+									AND NVD.VERSION = OC.OSS_VERSION)
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('4', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_NICKNAME NICK
-									ON NVD.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-									LEFT JOIN OSS_COMPONENTS OC
-									ON NICK.OSS_NAME = OC.OSS_NAME
-									WHERE OC.REFERENCE_ID = #{prjId}
-									AND OC.REFERENCE_DIV = #{referenceDiv}
-									AND OC.OSS_NAME != '-'
-									AND OC.OSS_NAME IS NOT NULL
-									AND OC.OSS_NAME != ''
-									AND IFNULL(OC.OSS_VERSION, '') = ''
-									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE NVD.PRODUCT IN (SELECT REPLACE(NICK.OSS_NICKNAME, ' ', '_') FROM OSS_COMPONENTS OC
+											INNER JOIN OSS_NICKNAME NICK
+											ON OC.OSS_NAME = NICK.OSS_NAME
+											WHERE OC.REFERENCE_ID = #{prjId}
+											AND OC.REFERENCE_DIV = #{referenceDiv}
+											AND OC.OSS_NAME != '-'
+											AND OC.OSS_NAME IS NOT NULL
+											AND OC.OSS_NAME != ''
+											AND IFNULL(OC.OSS_VERSION, '') = ''
+											AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y')
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('5', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_COMPONENTS OC
-									ON NVD.VENDORPRODUCT = OC.OSS_NAME
-									AND NVD.VERSION = OC.OSS_VERSION
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS OC
 									WHERE OC.REFERENCE_ID = #{prjId}
 									AND OC.REFERENCE_DIV = #{referenceDiv}
 									AND OC.OSS_NAME != '-'
@@ -4777,36 +4804,47 @@
 									AND OC.OSS_NAME != ''
 									AND IFNULL(OC.OSS_VERSION, '') != ''
 									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+									AND NVD.VENDORPRODUCT = OC.OSS_NAME
+									AND NVD.VERSION = OC.OSS_VERSION)
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('6', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_COMPONENTS OC
-									ON NVD.VENDORPRODUCT = OC.OSS_NAME
-									WHERE OC.REFERENCE_ID = #{prjId}
-									AND OC.REFERENCE_DIV = #{referenceDiv}
-									AND OC.OSS_NAME != '-'
-									AND OC.OSS_NAME IS NOT NULL
-									AND OC.OSS_NAME != ''
-									AND IFNULL(OC.OSS_VERSION, '') = ''
-									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE NVD.VENDORPRODUCT IN (SELECT OC.OSS_NAME FROM OSS_COMPONENTS OC
+												WHERE OC.REFERENCE_ID = #{prjId}
+												AND OC.REFERENCE_DIV = #{referenceDiv}
+												AND OC.OSS_NAME != '-'
+												AND OC.OSS_NAME IS NOT NULL
+												AND OC.OSS_NAME != ''
+												AND IFNULL(OC.OSS_VERSION, '') = ''
+												AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y')
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('7', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS OC
 									INNER JOIN OSS_NICKNAME NICK
-									ON NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
-									LEFT JOIN OSS_COMPONENTS OC
-									ON NICK.OSS_NAME = OC.OSS_NAME
-									AND NVD.VERSION = OC.OSS_VERSION
+									ON OC.OSS_NAME = NICK.OSS_NAME
 									WHERE OC.REFERENCE_ID = #{prjId}
 									AND OC.REFERENCE_DIV = #{referenceDiv}
 									AND OC.OSS_NAME != '-'
@@ -4814,27 +4852,34 @@
 									AND OC.OSS_NAME != ''
 									AND IFNULL(OC.OSS_VERSION, '') != ''
 									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+									AND NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
+									AND NVD.VERSION = OC.OSS_VERSION)
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('8', code)">
 				SELECT CVE.CVE_ID
-				FROM NVD_CVE_V3 CVE
-				WHERE CVE.CVE_ID IN (SELECT NVD.CVE_ID 
-									FROM NVD_DATA_V3 NVD
-									INNER JOIN OSS_NICKNAME NICK
-									ON NVD.VENDORPRODUCT = NICK.OSS_NICKNAME
-									LEFT JOIN OSS_COMPONENTS OC
-									ON NICK.OSS_NAME = OC.OSS_NAME
-									WHERE OC.REFERENCE_ID = #{prjId}
-									AND OC.REFERENCE_DIV = #{referenceDiv}
-									AND OC.OSS_NAME != '-'
-									AND OC.OSS_NAME IS NOT NULL
-									AND OC.OSS_NAME != ''
-									AND IFNULL(OC.OSS_VERSION, '') = ''
-									AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
-							)
-				AND CVE.CVSS_SCORE <![CDATA[>=]]> 8.0
+				FROM (
+					SELECT CVE_ID
+					FROM NVD_CVE_V3
+					WHERE CVSS_SCORE <![CDATA[>=]]> 8.0
+				) CVE
+				INNER JOIN
+				(
+					SELECT DISTINCT NVD.CVE_ID
+					FROM NVD_DATA_V3 NVD
+					WHERE NVD.VENDORPRODUCT IN (SELECT NICK.OSS_NICKNAME FROM OSS_COMPONENTS OC
+												INNER JOIN OSS_NICKNAME NICK
+												ON OC.OSS_NAME = NICK.OSS_NAME
+												WHERE OC.REFERENCE_ID = #{prjId}
+												AND OC.REFERENCE_DIV = #{referenceDiv}
+												AND OC.OSS_NAME != '-'
+												AND OC.OSS_NAME IS NOT NULL
+												AND OC.OSS_NAME != ''
+												AND IFNULL(OC.OSS_VERSION, '') = ''
+												AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y')
+				) NVD
+				ON CVE.CVE_ID = NVD.CVE_ID
 			</if>
 			) TBL
 		) TBL

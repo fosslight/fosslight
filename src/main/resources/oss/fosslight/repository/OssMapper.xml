@@ -2266,24 +2266,24 @@
 		WHERE OSS_ID = (SELECT OSS_ID FROM OSS_MASTER WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
 	</select>
 
-	<select id="checkExistsVendorProductMatchOss" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
-		SELECT COUNT(*)
+	<select id="checkExistsVendorProductMatchOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT OM.OSS_ID
     	FROM OSS_MASTER OM
     	LEFT JOIN OSS_NICKNAME NICK
     	ON OM.OSS_NAME = NICK.OSS_NAME
     	AND OM.USE_YN = 'Y'
-    	WHERE (OM.OSS_NAME = #{schOssName}
-    	<if test="dashOssNameList != null">
-    		<foreach item="item" collection="dashOssNameList">
-    			OR OM.OSS_NAME = #{item}
-    		</foreach>
-    	</if>
-    	<if test="dashOssNameList != null">
-    		<foreach item="item" collection="dashOssNameList">
-    			OR NICK.OSS_NICKNAME = #{item}
-    		</foreach>
-    	</if>
-    	)
+    	WHERE OM.OSS_VERSION = #{ossVersion}
+    	<choose>
+    		<when test="dashOssNameList != null">
+    			AND (NICK.OSS_NICKNAME = #{schOssName}
+    			<foreach item="item" collection="dashOssNameList">
+    				OR NICK.OSS_NICKNAME = #{item}
+    			</foreach>)
+    		</when>
+    		<otherwise>
+    			AND NICK.OSS_NAME = #{schOssName}
+    		</otherwise>
+    	</choose>
 	</select>
 
 	<select id="selectVulnInfoForOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">

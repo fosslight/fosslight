@@ -103,13 +103,14 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if (list != null) {
+			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 			for (PartnerMaster bean : list) {
 				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
 				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
 				
 				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
 					if (conversionCveInfo != null) {
 						customNvdMaxScoreInfoList.add(conversionCveInfo);
 					}

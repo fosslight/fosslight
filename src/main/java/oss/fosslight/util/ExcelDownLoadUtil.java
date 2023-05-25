@@ -1248,6 +1248,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			List<String[]> rows = new ArrayList<>();
 			
 			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
+			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 			
 			for (int i = 0; i < projectList.size(); i++){
 				Project param = projectList.get(i);
@@ -1259,7 +1260,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				
 				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
 					if (conversionCveInfo != null) {
 						customNvdMaxScoreInfoList.add(conversionCveInfo);
 					}

@@ -137,5 +137,5 @@ public interface OssService extends HistoryConfig{
 
 	List<String> selectVulnInfoForOss(OssMaster ossMaster);
 
-	int checkExistsVendorProductMatchOss(OssMaster ossMaster);
+	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
 }

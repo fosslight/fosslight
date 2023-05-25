@@ -7,7 +7,6 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -122,6 +121,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			if (!StringUtil.isEmpty(ossId)) {
 				list = selfCheckMapper.selectUnlimitedOssComponentBomList(project);
 			} else {
+				Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 				list = selfCheckMapper.selectProjectList(project);
 				
 				if (list != null) {
@@ -154,7 +154,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 						List<String> nvdMaxScoreInfoList2 = selfCheckMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId());
 						
 						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(nvdMaxScoreInfoList);
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
 							if (conversionCveInfo != null) {
 								customNvdMaxScoreInfoList.add(conversionCveInfo);
 							}
@@ -213,6 +213,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 	
 	@Override
 	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification) {
+		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<ProjectIdentification> list = null;
 		List<String> unconfirmedLicenseList = new ArrayList<>();
@@ -282,7 +283,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					bean.setCvssScore(conversionCveData[3]);

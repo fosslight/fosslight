@@ -3820,7 +3820,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
-	public int checkExistsVendorProductMatchOss(OssMaster ossMaster) {
+	public List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster) {
 		return ossMapper.checkExistsVendorProductMatchOss(ossMaster);
 	}
 

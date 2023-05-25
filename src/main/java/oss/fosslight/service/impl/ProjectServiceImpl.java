@@ -148,6 +148,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (!StringUtil.isEmpty(ossId)) {
 				list = projectMapper.selectUnlimitedOssComponentBomList(project);
 			} else {
+				Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+				
 				if (CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_NO)) {
 					project.setIdentificationSubStatusBat(CoConstDef.FLAG_NO);
 				}
@@ -243,7 +245,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
 						
-						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {	
+						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
 							List<String> excludeCheckList = new ArrayList<>();
 							if (customExcludeCveInfoMap != null && !customExcludeCveInfoMap.isEmpty()) {
 								for (String scoreData : nvdMaxScoreInfoList) {
@@ -256,7 +258,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								excludeCheckList.addAll(nvdMaxScoreInfoList);
 							}
 							
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(excludeCheckList);
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, excludeCheckList);
 							if (conversionCveInfo != null) {
 								customNvdMaxScoreInfoList.add(conversionCveInfo);
 							}
@@ -378,7 +380,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<ProjectIdentification> list = null;
 		List<OssComponentsLicense> listLicense = null;
-
+		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+		
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
 		if (CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST != null && !CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST.isEmpty()) {
@@ -554,7 +557,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(ll.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					ll.setCvssScore(conversionCveData[3]);
@@ -805,7 +808,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
 					}
 					
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 					if (conversionCveInfo != null) {
 						String[] conversionCveData = conversionCveInfo.split("\\@");
 						project.setCvssScore(conversionCveData[3]);
@@ -2764,6 +2767,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification) {
+		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
 		List<String> cvssScoreMaxList = new ArrayList<>();
@@ -2800,7 +2804,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(pi.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
@@ -2877,7 +2881,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
