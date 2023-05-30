@@ -158,6 +158,9 @@
 			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
 				AND REFERENCE_DIV IN ('20')
 			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+				AND REFERENCE_DIV IN ('19', '10', '12', '14', '60')
+			</when>
 			<otherwise>
 				AND REFERENCE_DIV IN ('99')
 			</otherwise>

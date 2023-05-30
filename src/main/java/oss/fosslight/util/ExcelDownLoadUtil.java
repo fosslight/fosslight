@@ -16,19 +16,24 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -1242,15 +1247,38 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			List<String[]> rows = new ArrayList<>();
 			
+			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
+			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+			
 			for (int i = 0; i < projectList.size(); i++){
 				Project param = projectList.get(i);
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
-				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
 				String nvdMaxScore = "";
 				
-				if (nvdMaxScoreInfo != null) {
-					nvdMaxScore = avoidNull(nvdMaxScoreInfo.getCvssScore(), "");
+				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
+				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
+				
+				
+				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						customNvdMaxScoreInfoList.add(conversionCveInfo);
+					}
 				}
+				
+				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+				}
+				
+				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						String[] conversionCveData = conversionCveInfo.split("\\@");
+						nvdMaxScore = conversionCveData[3];
+					}
+				}
+				
+				customNvdMaxScoreInfoList.clear();
 				
 				String[] rowParam = {
 					param.getPrjId()
@@ -2102,6 +2130,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getBomCompareExcelId(dataStr);
 				
 				break;
+			case "security":
+				Type prj = new TypeToken<Project>(){}.getType();
+				Project param = (Project) fromJson(dataStr, prj);
+				Map<String, Object> result = projectService.getSecurityGridList(param);
+				Project projectMaster = projectService.getProjectDetail(param);
+				
+				downloadId = getSecurityExcelId(result, projectMaster, param.getCode());
+				
+				break;
 			default:
 				break;
 		}
@@ -2109,6 +2146,170 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return downloadId;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private static String getSecurityExcelId(Map<String, Object> result, Project projectMaster, String code) throws IOException {
+		List<OssComponents> securityGridList = null;
+		switch (code) {
+			case "total" : securityGridList = (List<OssComponents>) result.get("totalList");
+				break;
+			case "fixed" : securityGridList = (List<OssComponents>) result.get("fixedList");
+				break;
+			default : securityGridList = (List<OssComponents>) result.get("notFixedList");
+				break;
+		}
+		
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+		
+		// download file name
+		String downloadFileName = "fosslight_security"; // Default
+		downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_prj-" + StringUtil.deleteWhitespaceWithSpecialChar(projectMaster.getPrjId());
+		
+		try {
+			inFile= new FileInputStream(new File(downloadpath+"/Security.xlsx"));
+			wb = WorkbookFactory.create(inFile);
+			CreationHelper creationHelper = wb.getCreationHelper();
+			CellStyle style = wb.createCellStyle();
+			CellStyle hyperLinkStyle = wb.createCellStyle();
+			Font hyperLinkFont = wb.createFont();
+			hyperLinkFont.setUnderline(Font.U_SINGLE);
+			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+			hyperLinkStyle.setFont(hyperLinkFont);
+			sheet = wb.getSheetAt(7);
+			
+			if (securityGridList != null){
+				List<String[]> rowInfoData = new ArrayList<>();
+				List<String[]> rowDatas = new ArrayList<>();
+				
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date now = new Date();
+				String now_dt = format.format(now);
+				
+				String[] rowInfoParam = {
+						now_dt
+						, projectMaster.getPrjName()
+						, projectMaster.getPrjVersion()
+						, projectMaster.getPrjUserName()
+						, CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, projectMaster.getDivision())
+				};
+				
+				rowInfoData.add(rowInfoParam);
+				
+				int num = 1;
+				for (OssComponents bean : securityGridList) {
+					String[] rowParam = {
+						String.valueOf(num++)
+						, bean.getOssName()
+						, bean.getOssVersion()
+						, bean.getCveId()
+						, bean.getPublDate()
+						, bean.getCpeName()
+						, bean.getCvssScore()
+						, bean.getVulnerabilityResolution()
+						, bean.getVulnerabilityLink()
+						, bean.getOfficialPatchLink()
+						, bean.getSecurityPatchLink()
+						, bean.getVerStartEndRange()
+						, bean.getSecurityComments()
+					};
+					
+					rowDatas.add(rowParam);
+				}
+				
+				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if (inFile != null) {
+				try {
+					inFile.close();
+				} catch (Exception e) {}
+			}
+		}
+		
+		return makeExcelFileId(wb, downloadFileName);
+	}
+	
+	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows) {
+		int infoStartRow= 1;
+		int startRow= 8;
+		int startCol = 0;
+		int endCol = 0;
+		
+		if (!infoRows.isEmpty()) {
+			endCol = infoRows.get(0).length-1;
+		}
+		
+		int shiftRowNum = infoRows.get(0).length;
+		String[] rowParam = infoRows.get(0);
+		
+		for (int i = infoStartRow; i < infoStartRow+shiftRowNum; i++){
+			Row templateRow = sheet.getRow(i);
+			Cell templateCell = templateRow.getCell(3);
+			CellStyle st = templateCell.getCellStyle();
+			
+			Row row = sheet.getRow(i);
+			Cell cell = getCell(row, 3);
+			cell.setCellStyle(st);
+			cell.setCellValue(rowParam[i-infoStartRow]);
+			cell.setCellType(CellType.STRING);
+		}
+		
+		if (!rows.isEmpty()) {
+			endCol = rows.get(0).length-1;
+		}
+		
+		Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+		int rowIndex = 0;
+		for (int i = startRow; i < startRow+rows.size(); i++){
+			Row row = sheet.createRow(i);
+			for (int colNum=startCol; colNum<=endCol; colNum++){
+				Cell cell = row.createCell(colNum);
+				style.setWrapText(false);
+				if (colNum == 5 || colNum == 11) {
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						if (cellData.contains(",")) {
+							String[] splitData = cellData.split(",");
+							String sData = "";
+							for (int j=0; j<splitData.length; j++) {
+								sData += splitData[j];
+								sData += "\n";
+							}
+							cellData = sData.substring(0, sData.length()-1);
+							style.setWrapText(true);
+						}
+					}
+					cell.setCellValue(cellData);
+					cell.setCellStyle(style);
+				} else if (colNum == 8 || colNum == 9 || colNum == 10) {
+					String cellData = rows.get(rowIndex)[colNum];
+					if (!isEmpty(cellData)) {
+						if (cellData.contains(",")) {
+							String[] splitData = cellData.split(",");
+							String sData = "";
+							for (int j=0; j<splitData.length; j++) {
+								sData += splitData[j];
+								sData += "\n";
+							}
+							cellData = sData.substring(0, sData.length()-1);
+							hyperLinkStyle.setWrapText(true);
+						}
+						hyperlink.setAddress(cell.getStringCellValue());
+						cell.setCellValue(cellData);
+						cell.setCellStyle(hyperLinkStyle);
+					}
+				} else {
+					cell.setCellValue(rows.get(rowIndex)[colNum]);
+					cell.setCellStyle(style);
+				}
+			}
+			rowIndex++;
+		}
+		
+	}
 	/**
 	 * Binary DB excel download
 	 * @param bianrySearchBean

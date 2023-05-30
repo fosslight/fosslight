@@ -103,13 +103,33 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if (list != null) {
+			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 			for (PartnerMaster bean : list) {
-				OssMaster nvdMaxScoreInfo = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
 				
-				if (nvdMaxScoreInfo != null) {
-					bean.setCveId(nvdMaxScoreInfo.getCveId());
-					bean.setCvssScore(nvdMaxScoreInfo.getCvssScore());
-					bean.setVulnYn(nvdMaxScoreInfo.getVulnYn());
+				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						customNvdMaxScoreInfoList.add(conversionCveInfo);
+					}
+				}
+				
+				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+				}
+				
+				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+					if (conversionCveInfo != null) {
+						String[] conversionCveData = conversionCveInfo.split("\\@");
+						bean.setCvssScore(conversionCveData[3]);
+						bean.setCveId(conversionCveData[4]);
+						bean.setVulnYn(CoConstDef.FLAG_YES);
+					}
+					
+					customNvdMaxScoreInfoList.clear();
 				}
 			}			
 		}

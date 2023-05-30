@@ -811,6 +811,10 @@ public class CoCodeManager extends CoTopComponent {
 	            returnStr = "#059bf1";
 	            
 	            break;
+	        case "60": // Security
+	            returnStr = "#02304b";
+	            
+	            break;
 	        default:
 	            break;
         }

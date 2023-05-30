@@ -398,6 +398,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMMENT_PARTNER_USER = "21";
 	public static final String CD_DTL_COMMENT_LICENSE = "30";
 	public static final String CD_DTL_COMMENT_OSS = "40";
+	public static final String CD_DTL_COMMENT_SECURITY_HIS = "60";
 	
 	/** License 타입별 백그라운드 색 - 216 */
 	public static final String CD_LICENSE_BACKGROUND = "216";

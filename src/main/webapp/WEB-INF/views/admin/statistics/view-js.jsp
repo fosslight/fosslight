@@ -78,6 +78,50 @@ var common_fn = {
 
 		$("#schStatistics").on('click',function(e){
 			e.preventDefault();
+			
+			var date_pattern = /^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/;
+			var schStartDate = $("input[name=schStartDate]").val();
+			var schEndDate = $("input[name=schEndDate]").val();
+			
+			if (schStartDate.length == 8){
+				if (!date_pattern.test(schStartDate)){
+					alertify.error('<spring:message code="msg.common.valid" />', 0);
+					$("input[name=schStartDate]").val("");
+					return;
+				} else {
+					var checkLastDate = new Date(schStartDate.substring(0,4), schStartDate.substring(4,6), 0);
+					if (parseInt(schStartDate.substring(6,8)) > parseInt(checkLastDate.getDate())){
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$("input[name=schStartDate]").val("");
+						return;
+					}
+				}
+			} else {
+				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				$("input[name=schStartDate]").val("");
+			}
+			
+			if (schEndDate.length == 8){
+				if (!date_pattern.test(schEndDate)){
+					alertify.error('<spring:message code="msg.common.valid" />', 0);
+					$("input[name=schEndDate]").val("");
+					return;
+				} else {
+					var checkLastDate = new Date(schStartDate.substring(0,4), schStartDate.substring(4,6), 0);
+					if (parseInt(schEndDate.substring(6,8)) > parseInt(checkLastDate.getDate())){
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$("input[name=schEndDate]").val("");
+						return;
+					}
+				}
+			} else {
+				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				$("input[name=schEndDate]").val("");
+			}
+			
+			$("#startDate").val(schStartDate);
+			$("#endDate").val(schEndDate);
+			
 			if(common_fn.validation("MAIN")){
 				common_fn.chartReload();
 			}

@@ -350,6 +350,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private int statusPermission;
 	
+	private String secActFlag;
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4245,5 +4247,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setDeleteOsddFlag(String deleteOsddFlag) {
 		this.deleteOsddFlag = deleteOsddFlag;
+	}
+
+	public String getSecActFlag() {
+		return secActFlag;
+	}
+
+	public void setSecActFlag(String secActFlag) {
+		this.secActFlag = secActFlag;
 	}
 }

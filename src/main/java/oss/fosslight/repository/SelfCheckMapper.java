@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.LicenseMaster;
@@ -282,4 +283,8 @@ public interface SelfCheckMapper {
 	List<Vulnerability> getAllVulnListWithProject3(Project param);
 	
 	List<Vulnerability> getAllVulnListWithProjectByNickName3(Project project);
+
+	List<String> findIdentificationMaxNvdInfo(@Param("prjId")String prjId);
+
+	List<String> findIdentificationMaxNvdInfoForVendorProduct(@Param("prjId")String prjId);
 }

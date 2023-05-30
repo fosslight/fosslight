@@ -812,6 +812,7 @@ var bom_data = {
 							if(dataObject.licenseTypeIdx != "1" && className.indexOf('excludeRow') === -1) {
 								if(strBomValidMsgData.indexOf(rowid) == -1 /*&& strBomDiffMsgData.indexOf(rowid) == -1*/){
 									className= className + ' excludeRow';
+									bomList.jqGrid('setCell', rowid, 'cvssScore', null);
 								}
 							}
 							
