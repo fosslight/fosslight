@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -290,8 +291,37 @@ public class VerificationController extends CoTopComponent {
 			resMap = result.get(0);
 			
 			if (fileSeqs.size() > 1){
-				resMap.put("verifyValid", result.get(result.size()-1).get("verifyValid"));
-				resMap.put("fileCounts", result.get(result.size()-1).get("fileCounts"));
+				Map<String, Object> fileCountsMap = new HashMap<>();
+				List<String> verifyValidChkList = new ArrayList<>();
+				
+				for (Map<String, Object> resultMap : result) {
+					if (resultMap.containsKey("fileCounts")) {
+						Map<String, Object> fileCountMap = (Map<String, Object>) resultMap.get("fileCounts");
+						for (String key : fileCountMap.keySet()) {
+							if (fileCountsMap.containsKey(key)) {
+								fileCountsMap.replace(key, fileCountMap.get(key));
+							} else {
+								fileCountsMap.put(key, fileCountMap.get(key));
+							}
+						}
+					}
+				}
+				
+				for (Map<String, Object> resultMap : result) {
+					if (resultMap.containsKey("verifyValid")) {
+						List<String> verifyValidList = (List<String>) resultMap.get("verifyValid");
+						for (String verifyValid : verifyValidList) {
+							if (!fileCountsMap.containsKey(verifyValid)) {
+								verifyValidChkList.add(verifyValid);
+							}
+						}
+					}
+				}
+				
+				verifyValidChkList = verifyValidChkList.stream().distinct().collect(Collectors.toList());
+				
+				resMap.put("verifyValid", verifyValidChkList);
+				resMap.put("fileCounts", fileCountsMap);
 			}
 			
 			verificationService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));

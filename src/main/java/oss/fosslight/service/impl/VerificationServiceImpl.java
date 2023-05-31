@@ -645,6 +645,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String packageFileName = rePath;
 			String decompressionRootPath = "";
 			
+			boolean parenthesisCheckFlag = false;
+			if (packageFileName.contains("(") || packageFileName.contains(")")) parenthesisCheckFlag = true;
+			
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
@@ -654,8 +657,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				for (String s : result) {
 					if (s.contains("?")) s = s.replaceAll("[?]", "0x3F");
-					if (s.contains("(")) s = s.replaceAll("[(]", "0x28");
-					if (s.contains(")")) s = s.replaceAll("[)]", "0x29");
+					if (s.startsWith(packageFileName) && parenthesisCheckFlag) s = s.replace(packageFileName, "");
 					
 					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
