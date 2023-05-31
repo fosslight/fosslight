@@ -21,6 +21,12 @@ var com_evt = {
 			$("#mergeYn").val("Y");
 			
 			Bom_Save_Flg =true;
+			
+			if("REV" == curIdenStatus) {
+				if($("#binaryDB")){
+					$("#binaryDB").show();
+				}
+			}
 		}
 		
 		$('.btnCommentHistory').on('click', function(e){
