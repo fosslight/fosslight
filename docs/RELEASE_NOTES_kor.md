@@ -5,6 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 <p align='right'>
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
+
 ## [1.5.1](https://github.com/fosslight/fosslight/releases/tag/v1.5.1) (2023-06-05)
 ### New
 * 프로젝트에 Vulnerability Score가 8.0 이상인 OSS가 포함된 경우, CVE ID별로 확인 및 조치 상태 관리할 수 있는 **Security탭** 추가
