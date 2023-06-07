@@ -600,7 +600,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	public static String makeLicenseFromFiles(OssMaster _ossBean, boolean booleanflag) {
 		List<String> resultList = new ArrayList<>(); // declared License
-		List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
 		
 		if (_ossBean != null) {
 			for (OssLicense license : _ossBean.getOssLicenses()) {
@@ -615,7 +614,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 
-			if (detectedLicenseList != null) {
+			List<String> detectedLicenseList = _ossBean.getDetectedLicenses(); // detected License
+			if (detectedLicenseList != null && detectedLicenseList.isEmpty()) {
 				for (String licenseName : detectedLicenseList) {
 					if (booleanflag) {
 						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
@@ -3753,14 +3753,44 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 				}
 				
+				String downloadLocation = "";
+				if (bean.getDownloadLocation().contains(",")) {
+					List<String> downloadLocationSplitList = new ArrayList<>();
+					String[] downloadLocationSplit = bean.getDownloadLocation().split("[,]");
+					for (String download : downloadLocationSplit) {
+						boolean equalsFlag = false;
+						for (String customData : downloadLocationSplitList) {
+							if (download.equalsIgnoreCase(customData)) {
+								equalsFlag = true;
+								break;
+							}
+						}
+						
+						if (!equalsFlag) {
+							downloadLocationSplitList.add(download);
+						}
+					}
+					
+					if (downloadLocationSplitList != null && !downloadLocationSplitList.isEmpty()) {
+						String customDownloadLocation = "";
+						for (String customDownload : downloadLocationSplitList) {
+							customDownloadLocation += customDownload + ",";
+						}
+						
+						downloadLocation = customDownloadLocation.substring(0, customDownloadLocation.length()-1);
+					}
+				} else {
+					downloadLocation = bean.getDownloadLocation();
+				}
+				
 				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
-						, avoidNull(bean.getConcludedLicense(), null), copyright, bean.getDownloadLocation()
+						, avoidNull(bean.getConcludedLicense(), null), copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
 				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
-						, askalonoLicense, null, bean.getDownloadLocation()
+						, askalonoLicense, null, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
 				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
-						, scancodeLicense, copyright, bean.getDownloadLocation()
+						, scancodeLicense, copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
 				
 				List<OssAnalysis> ossAnalysisByNickList = new ArrayList<>();
