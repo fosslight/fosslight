@@ -377,7 +377,28 @@
 		WHERE 
 			PARTNER_ID = #{partnerId}
 	</update>
-	
+	<select id="getPartnerIdList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
+	SELECT
+		DISTINCT T1.PARTNER_ID
+	FROM
+		PARTNER_MASTER T1
+	WHERE
+		T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			AND T1.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+				OR EXISTS (
+					SELECT 1 
+					FROM PARTNER_WATCHER A1
+					WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = #{creator} OR ( A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) ))
+				)
+				OR T1.PUBLIC_YN = 'Y'
+			)
+		</if>
+	</select>
 	<select id="getPartnerNameList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerMaster">
 	SELECT
 		DISTINCT T1.PARTNER_NAME

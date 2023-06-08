@@ -91,6 +91,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
+	public List<Project> getProjectIdList(Project project) {
+		return projectMapper.getProjectIdList(project);
+	}
+	
+	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator}")
 	public List<Project> getProjectModelNameList() {
 		return projectMapper.getProjectModelNameList();

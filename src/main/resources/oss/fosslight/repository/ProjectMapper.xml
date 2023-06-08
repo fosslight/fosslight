@@ -1325,6 +1325,25 @@
 		</if>
 		ORDER BY T1.CREATED_DATE DESC
 	</select>
+	<select id="getProjectIdList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+	/* getProjectIdList : PROJECT ID AUTO COMPLETE */
+		SELECT DISTINCT T1.PRJ_ID
+		FROM PROJECT_MASTER T1
+		WHERE T1.USE_YN = 'Y'
+		AND T1.IDENTIFICATION_STATUS = 'CONF'
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+					OR EXISTS (
+						SELECT A1.PRJ_ID
+						FROM PROJECT_WATCHER A1
+						WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) ))
+					OR T1.PUBLIC_YN = 'Y'
+				)
+			)
+		</if>
+		ORDER BY T1.CREATED_DATE DESC
+	</select>
 	<select id="getProjectVersionList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
 	/* getProjectVersionList : PROJECT VERSION AUTO COMPLETE */
 		SELECT DISTINCT T1.PRJ_VERSION

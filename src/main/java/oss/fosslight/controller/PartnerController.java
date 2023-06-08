@@ -299,6 +299,18 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(map);
 	}
 	
+	@GetMapping(value=PARTNER.AUTOCOMPLETE_CONF_ID_AJAX)
+	public @ResponseBody ResponseEntity<Object> autoCompleteConfIdAjax(
+			PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		partnerMaster.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
+		partnerMaster.setStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+		
+		return makeJsonResponseHeader(partnerService.getPartnerIdList(partnerMaster));
+	}
+	
 	@GetMapping(value=PARTNER.AUTOCOMPLETE_CONF_NM_AJAX)
 	public @ResponseBody ResponseEntity<Object> autoCompleteConfAjax(
 			PartnerMaster partnerMaster

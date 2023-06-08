@@ -195,6 +195,8 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> getSecurityGridList(Project project);
 
 	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents);
+
+	public List<Project> getProjectIdList(Project project);
 }
 
 

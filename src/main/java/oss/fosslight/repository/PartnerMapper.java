@@ -148,4 +148,6 @@ public interface PartnerMapper {
 	public int updateDivision(@Param("partnerId") String partnerId, @Param("division") String division);
 
 	void updateDescription(PartnerMaster partnerMaster);
+
+	public List<PartnerMaster> getPartnerIdList(PartnerMaster partnerMaster);
 }

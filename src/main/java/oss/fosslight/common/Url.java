@@ -240,6 +240,7 @@ public final class Url {
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
 		public static final String AUTOCOMPLETE_VERSION_AJAX = PATH + "/autoCompleteVersionAjax";
 		public static final String AUTOCOMPLETE_MODEL_AJAX = PATH + "/autoCompleteModelAjax";
+		public static final String AUTOCOMPLETE_ID_AJAX = PATH + "/autoCompleteIdAjax";
 		
 		public static final String USER_ID_LIST = PATH + "/getUserIdList";
 		
@@ -421,6 +422,7 @@ public final class Url {
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		
 		public static final String AUTOCOMPLETE_CONF_NM_AJAX = PATH + "/autoCompleteConfNmAjax";
+		public static final String AUTOCOMPLETE_CONF_ID_AJAX = PATH + "/autoCompleteConfIdAjax";
 		
 		public static final String AUTOCOMPLETE_NM_AJAX = PATH + "/autoCompleteNmAjax";
 		
