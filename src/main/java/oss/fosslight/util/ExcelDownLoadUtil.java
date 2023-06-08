@@ -353,10 +353,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						if (!isEmpty(bean.getOssId()) && regOssInfoMapWithOssId.containsKey(bean.getOssId())) {
 							OssMaster mstData = regOssInfoMapWithOssId.get(bean.getOssId());
 							
-							if (mstData != null) {
-								bean.setDownloadLocation(mstData.getDownloadLocation());
+							if (mstData != null && mstData.getHomepage() != null) {
+//								bean.setDownloadLocation(mstData.getDownloadLocation());
 								bean.setHomepage(mstData.getHomepage());
-								bean.setCopyrightText(mstData.getCopyright());
+//								bean.setCopyrightText(mstData.getCopyright());
 							}
 						}
 					}
