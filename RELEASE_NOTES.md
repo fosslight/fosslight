@@ -6,7 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-06-05)
+
 ### New
 * Add **the Security tab**. You can check the vulnerability information by each CVE ID of OSS lists whose vulnerability score is 8.0 or higher based on the BOM tab of the Identification step and manage it for each project.
 * Available to [upgrade DB version](https://fosslight.org/fosslight-guide/features/3_maintenance.html#db-%EB%B2%84%EC%A0%84-%EC%97%85%EA%B7%B8%EB%A0%88%EC%9D%B4%EB%93%9C%ED%95%98%EA%B8%B0) using MyBatis Migrations.
