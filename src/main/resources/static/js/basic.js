@@ -929,6 +929,9 @@ var commonAjax = {
 	getProjectNameConfTags : function(data){
 		return fnBasicAjaxData(data, "/project/autoCompleteAjax?identificationStatus=CONF");
 	},
+	getProjectIdConfTags : function(data){
+		return fnBasicAjaxData(data, "/project/autoCompleteIdAjax");
+	},
 	getProjectVersionTags : function(data){
 		return fnBasicAjaxData(data, "/project/autoCompleteVersionAjax");
 	},
@@ -942,6 +945,9 @@ var commonAjax = {
 	//partner confirmed
 	getPartnerConfNmTags : function(data){
 		return fnBasicAjaxData(data, "/partner/autoCompleteConfNmAjax");
+	},
+	getPartnerConfIdTags : function(data){
+		return fnBasicAjaxData(data, "/partner/autoCompleteConfIdAjax");
 	},
 	getPartnerSwNmTags : function(data){
 		return fnBasicAjaxData(data, "/partner/autoCompleteSwNmAjax");
@@ -1017,9 +1023,9 @@ var autoComplete = {
 	licenseLongTags:[],
 	ossTags:[],
 	//project
-	projectNameTags:[], projectNameConfTags:[], projectVersionTags:[],projectModelTags:[],
+	projectNameTags:[], projectNameConfTags:[], projectIdConfTags:[], projectVersionTags:[],projectModelTags:[],
 	//partner
-	partyNameTags:[], partyConfNameTags:[], softwareNameTags:[], softwareConfNameTags:[],softwareVersionTags:[], softwareConfVersionTags:[],
+	partyNameTags:[], partyConfNameTags:[], partyConfIdTags:[], softwareNameTags:[], softwareConfNameTags:[],softwareVersionTags:[], softwareConfVersionTags:[],
 	//binary
 	binaryNameTags:[],binaryConfNameTags:[],binarySwNameTags:[],binarySwNameConfTags:[],binarySwVersionTags:[],binaryDivisionTags:[],
 	//code
@@ -1119,6 +1125,18 @@ var autoComplete = {
 			});
 		}
 		
+		if($('.autoComProjectIdConf').length > 0) {
+			commonAjax.getProjectIdConfTags().success(function(data, status, headers, config){
+				if(data != null){
+					data.forEach(function(obj){
+						if(obj!=null) {
+							autoComplete.projectIdConfTags.push(obj.prjId);
+						}
+					})	
+				}
+			});
+		}
+		
 		if($('.autoComProjectModel').length > 0) {
 			commonAjax.getProjectModelTags().success(function(data, status, headers, config){
 				if(data != null){
@@ -1148,6 +1166,17 @@ var autoComplete = {
 					data.forEach(function(obj){
 						if(obj!=null) {
 							autoComplete.partyConfNameTags.push(obj.partnerName);
+						}
+					})	
+				}
+			});
+		}
+		if($('.autoComConfPartyId').length > 0) {
+			commonAjax.getPartnerConfIdTags().success(function(data, status, headers, config){
+				if(data != null){
+					data.forEach(function(obj){
+						if(obj!=null) {
+							autoComplete.partyConfIdTags.push(obj.partnerId);
 						}
 					})	
 				}
@@ -1355,6 +1384,9 @@ var autoComplete = {
 	    $(".autoComProjectNmConf").autocomplete({source: autoComplete.projectNameConfTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 
+		$(".autoComProjectIdConf").autocomplete({source: autoComplete.projectIdConfTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
+	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
+
 	    $(".autoComProjectVersion").autocomplete({source: autoComplete.projectVersionTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 	    
@@ -1365,6 +1397,9 @@ var autoComplete = {
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 	    
 	    $(".autoComConfParty").autocomplete({source: autoComplete.partyConfNameTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
+	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
+	    
+	    $(".autoComConfPartyId").autocomplete({source: autoComplete.partyConfIdTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})
 	    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
 	    
 	    $(".autoComSwNm").autocomplete({source: autoComplete.softwareNameTags, minLength: 0,open: function() { $(this).attr('state', 'open'); },close: function () { $(this).attr('state', 'closed'); }})

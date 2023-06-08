@@ -81,6 +81,8 @@ public interface ProjectMapper {
 	
 	List<Project> getProjectNameList(Project project);
 	
+	List<Project> getProjectIdList(Project project);
+	
 	List<Project> getProjectModelNameList();
 	
 	List<OssComponents> selectComponentId(ProjectIdentification prj);
@@ -358,7 +360,6 @@ public interface ProjectMapper {
 	void insertSecurityData(OssComponents ossComponents);
 
 	List<OssComponents> getSecurityDataList(ProjectIdentification identification);
-
 
 	int existsWatcherByUserDivistion(Project project);
 

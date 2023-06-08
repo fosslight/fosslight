@@ -207,6 +207,14 @@ public class ProjectController extends CoTopComponent {
 		
 	}
 	
+	@GetMapping(value = PROJECT.AUTOCOMPLETE_ID_AJAX)
+	public @ResponseBody ResponseEntity<Object> autoCompleteIdAjax(Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
+		List<Project> list = projectService.getProjectIdList(project);
+		return makeJsonResponseHeader(list);
+	}
+	
 	/**
 	 * Auto complete version ajax.
 	 *

@@ -66,4 +66,6 @@ public interface PartnerService extends HistoryConfig{
 	public Map<String, List<PartnerMaster>> updatePartnerDivision(PartnerMaster partnerMaster);
 
 	public void updateDescription(PartnerMaster partnerMaster);
+
+	public List<PartnerMaster> getPartnerIdList(PartnerMaster partnerMaster);
 }

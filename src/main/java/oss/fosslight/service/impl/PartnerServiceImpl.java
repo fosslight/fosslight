@@ -1029,4 +1029,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		partnerMapper.updateDescription(partnerMaster);
 	}
 
+	@Override
+	@Cacheable(value="autocompletePartnerCache", key="{#root.methodName, #partnerMaster?.creator, #partnerMaster?.status}")
+	public List<PartnerMaster> getPartnerIdList(PartnerMaster partnerMaster) {
+		return partnerMapper.getPartnerIdList(partnerMaster);
+	}
 }
