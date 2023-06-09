@@ -168,7 +168,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					identification.setMerge(CoConstDef.FLAG_NO);
 					
 					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
-					Map<String, String> customExcludeCveInfoMap = new HashMap<>();
 					
 					// 코드변환처리
 					for (Project bean : list) {
@@ -197,50 +196,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
-						if (!bean.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-							identification.setReferenceId(bean.getPrjId());
-							List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-							identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-							List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-							if (notVersionList != null) {
-								bomList.addAll(notVersionList);
-							}
-							identification.setOssVersionEmptyFlag(null);
-							bomList = bomList.stream().filter(e -> !e.getLicenseTypeIdx().equals("1")).filter(CommonFunction.distinctByKey(e -> e.getOssName()+e.getOssVersion())).collect(Collectors.toList());
-							
-							if (bomList != null && !bomList.isEmpty()) {
-								T2CoProjectValidator pv = new T2CoProjectValidator();
-								pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
-								pv.setAppendix("bomList", bomList);
-
-								T2CoValidationResult vr = pv.validate(new HashMap<>());
-								
-								if (!vr.isValid()) {
-									Map<String, String> validMap = vr.getValidMessageMap();
-									if (validMap != null && !validMap.isEmpty()) {
-										for (ProjectIdentification bom : bomList) {
-											boolean flag = false;
-											for (String key : validMap.keySet()) {
-												if (key.indexOf(bom.getComponentId()) > -1) {
-													flag = true;
-													break;
-												}
-											}
-											
-											if (!flag) {
-												String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
-												if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
-											}
-										}
-									}
-								} else {
-									for (ProjectIdentification bom : bomList) {
-										String key = (bom.getOssName() + "@" + avoidNull(bom.getOssVersion(), "-")).toUpperCase();
-										if (!customExcludeCveInfoMap.containsKey(key)) customExcludeCveInfoMap.put(key, key);
-									}
-								}
-							}
-							
+						if (!CoConstDef.FLAG_YES.equals(androidFlag)) {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 						} else {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
@@ -252,19 +208,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
 						
 						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-							List<String> excludeCheckList = new ArrayList<>();
-							if (customExcludeCveInfoMap != null && !customExcludeCveInfoMap.isEmpty()) {
-								for (String scoreData : nvdMaxScoreInfoList) {
-									String[] scoreDataSplit = scoreData.split("\\@");
-									if (!customExcludeCveInfoMap.containsKey((scoreDataSplit[0]+"@"+scoreDataSplit[1]).toUpperCase())) {
-										excludeCheckList.add(scoreData);
-									}
-								}
-							} else {
-								excludeCheckList.addAll(nvdMaxScoreInfoList);
-							}
-							
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, excludeCheckList);
+							nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
+							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
 							if (conversionCveInfo != null) {
 								customNvdMaxScoreInfoList.add(conversionCveInfo);
 							}
@@ -275,19 +220,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-							List<String> excludeCheckList = new ArrayList<>();
-							if (customExcludeCveInfoMap != null && !customExcludeCveInfoMap.isEmpty()) {
-								for (String scoreData : customNvdMaxScoreInfoList) {
-									String[] scoreDataSplit = scoreData.split("\\@");
-									if (!customExcludeCveInfoMap.containsKey((scoreDataSplit[0]+"@"+scoreDataSplit[1]).toUpperCase())) {
-										excludeCheckList.add(scoreData);
-									}
-								}
-							} else {
-								excludeCheckList.addAll(customNvdMaxScoreInfoList);
-							}
-							
-							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(excludeCheckList);
+							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
 							if (conversionCveInfo != null) {
 								String[] conversionCveData = conversionCveInfo.split("\\@");
 								bean.setCvssScore(conversionCveData[3]);
@@ -297,7 +230,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						customNvdMaxScoreInfoList.clear();
-						customExcludeCveInfoMap.clear();
 					}
 				}
 			}
