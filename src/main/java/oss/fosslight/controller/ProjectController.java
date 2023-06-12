@@ -4597,4 +4597,84 @@ public class ProjectController extends CoTopComponent {
 
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@GetMapping(value = PROJECT.SECURITY)
+	public String vulnerabilityInfo(@ModelAttribute ProjectIdentification identification, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		Project projectMaster = projectService.getProjectDetail(project);
+		
+		if (!StringUtil.isEmpty(projectMaster.getCreator())){
+			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+		comHisBean.setReferenceId(projectMaster.getPrjId());
+		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+		
+		model.addAttribute("project", projectMaster);
+		
+		return PROJECT.SECURITY_JSP;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping(value = PROJECT.SECURITY_GRID)
+	public @ResponseBody ResponseEntity<Object> srcSecurityGridAjax(@ModelAttribute ProjectIdentification identification,
+			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String code) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		try {
+			result = projectService.getSecurityGridList(project);
+			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
+			rtnMap.put("fixedGridData", (List<OssComponents>) result.get("fixedList"));
+			rtnMap.put("notFixedGridData", (List<OssComponents>) result.get("notFixedList"));
+			if (result.containsKey("msg")) {
+				rtnMap.put("msg", result.get("msg"));
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return makeJsonResponseHeader(rtnMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.SAVE_SECURITY)
+	public @ResponseBody ResponseEntity<Object> saveSecurity(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		String prjId = (String) map.get("referenceId");
+		String tabName = (String) map.get("targetName");
+		String gridString = (String) map.get("gridData");
+		
+		Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
+		List<OssComponents> ossComponents = new ArrayList<>();
+		ossComponents = (List<OssComponents>) fromJson(gridString, collectionType);
+		
+		Map<String, String> resMap = new HashMap<>();
+		
+		try {
+			projectService.registSecurity(prjId, tabName, ossComponents);
+			
+			Project param = new Project();
+			param.setPrjId(prjId);
+			Project pDat = projectService.getProjectDetail(param);
+			resMap.put("identificationStatus", pDat.getIdentificationStatus());
+			History h = projectService.work(pDat);
+			h.sethAction(CoConstDef.ACTION_CODE_NEEDED);
+			historyService.storeData(h); // 메일로 보낼 데이터를 History에 저장합니다. -> h.gethData()로 확인 가능
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resMap.put("isValid", "false");
+		} finally {
+			resMap.put("isValid", "true");
+		}
+		
+		return makeJsonResponseHeader(resMap);
+	}
 }
