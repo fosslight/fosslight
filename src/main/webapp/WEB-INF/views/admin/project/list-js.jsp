@@ -459,6 +459,19 @@
 			
 			return display;
 		},
+		displaySecurityTab : function(cellvalue, options, rowObject){
+			var display = "";
+			
+			if(rowObject.identificationSubStatusBom != 0 || "Y" == rowObject.androidFlag) {
+				if (rowObject.secActFlag != 'Y') {
+					display += "<div class=\"tcenter\" title=\"<spring:message code='msg.project.security.tab.disabled'/>\"><a class=\"btnPG wauto off\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</a></div>";
+				} else {
+					display = "<div class=\"tcenter\"><a class=\"btnPG wauto\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</a></div>";
+				}
+			} 
+			
+			return display;
+		},
 		displayComment : function(cellvalue, options, rowObject){
 			var display = "";
 			
@@ -1067,7 +1080,9 @@
 			$('#changeDivisionPop').hide();
 		}, toolTipDoubleclick: function () {
                     return 'title="' + "Double click" + '"';
-            }
+        }, mvSecurityTab : function(prjId){
+			createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+		}
 	};
 	
 	// jqGrid
@@ -1085,8 +1100,8 @@
 					records:function(obj){return obj.records;}
 				},
 				colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
-				           , 'Packaging', 'Distribution', 'Download', 'Distribution Type', 'CVE ID'
-				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
+				           , 'Packaging', 'Distribution', 'Download', 'Security', 'Vulnera<br/>bility', 'Distribution Type', 'CVE ID'
+				           , 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
 					{name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick},
@@ -1096,9 +1111,10 @@
 					{name: 'verificationStatus', index: 'verificationStatus', width: 80, align: 'center', formatter: fn.displayVerification, unformatter: fn.unformatter, sortable : true, title:false},
 					{name: 'destributionStatus', index: 'destributionStatus', width: 80, align: 'center', formatter: fn.displayDistribution, unformatter: fn.unformatter, sortable : true, title:false<c:if test="${!distributionFlag}">, hidden:true</c:if>},
 					{name: 'download', index: 'download', width: 120, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false},
+					{name: '', index: '', width: 80, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false},
+					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
 					{name: 'distributionType', index: 'distributionType', width: 100, align: 'left', sortable : true},
 					{name: 'cveId', index: 'cveId', hidden:true},
-					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
 					{name: 'division', index: 'division', width: 70, align: 'left', sortable : true},
 					{name: 'creator', index: 'creator', width: 70, align: 'left', sortable : true},
 					{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
