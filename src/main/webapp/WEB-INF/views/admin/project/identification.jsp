@@ -110,6 +110,10 @@
 									<label>Software Version</label>
 									<input type="text" class="autoComConfSwVer" name="softwareVersion"/>
 								</dd>
+								<dd>
+									<label>3rd party Id</label>
+									<input type="text" class="autoComConfPartyId" name="partnerId"/>
+								</dd>
 								<dd class="sBtnArea"><input type="button" value="Search" class="btnColor red wauto partyBtn" id="3rdSearchBtn"/></dd>
 							</dl>
 							</form>
@@ -124,6 +128,10 @@
 								<dd>
 									<label>Project Version</label>
 									<input type="text" name="prjVersion"/>
+								</dd>
+								<dd>
+									<label>Project Id</label>
+									<input type="text" class="autoComProjectIdConf" name="prjId"/>
 								</dd>
 								<dd class="sBtnArea"><input type="button" value="Search" class="btnColor black wauto partyBtn" id="3rdProjectSearchBtn"/></dd>
 							</dl>
@@ -268,6 +276,10 @@
 								<dd>
 									<label>Project Version</label>
 									<input type="text" name="prjVersion"/>
+								</dd>
+								<dd>
+									<label>Project Id</label>
+									<input type="text" class="autoComProjectIdConf" name="prjId"/>
 								</dd>
 								<dd class="sBtnArea"><input id="srcProjectSearchBtn" type="button" value="Search" class="btnColor black wauto srcBtn" /></dd>
 							</dl>
@@ -438,6 +450,10 @@
 								<dd>
 									<label>Project Version</label>
 									<input type="text" name="prjVersion"/>
+								</dd>
+								<dd>
+									<label>Project Id</label>
+									<input type="text" class="autoComProjectIdConf" name="prjId"/>
 								</dd>
 								<dd class="sBtnArea"><input id="binProjectSearchBtn" type="button" value="Search" class="btnColor black wauto binBtn" /></dd>
 							</dl>
