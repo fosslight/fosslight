@@ -179,7 +179,7 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
 			CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 		</if>
-	CREATED_DATE DESC
+	COMM_ID DESC
 	LIMIT 5
 	</select>
 	
