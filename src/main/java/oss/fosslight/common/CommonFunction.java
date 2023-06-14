@@ -3586,7 +3586,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			String convertLicenseName = pi.getLicenseName();
 			
-			if (convertLicenseName.contains("\n")) { // 사용자가 oss-report를 통해 license 정보를 입력할 경우 개행이 있을 case가 존재하여 추가함. 
+			if (convertLicenseName != null && convertLicenseName.contains("\n")) { // 사용자가 oss-report를 통해 license 정보를 입력할 경우 개행이 있을 case가 존재하여 추가함. 
 				pi.setLicenseName(convertLicenseName.replace("\n", " "));
 			}
 			
@@ -3624,7 +3624,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			} else {
 				List<ProjectIdentification> licenseList = new ArrayList<ProjectIdentification>();
 				
-				if (pi.getLicenseName().contains(",")) {
+				if (pi.getLicenseName() != null &&  pi.getLicenseName().contains(",")) {
 					List<String> licenseNames = Arrays.asList(pi.getLicenseName().split(","));
 					pi.setLicenseDiv("M");
 					
@@ -4586,7 +4586,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	public static List<ProjectIdentification> removeDuplicateLicense(List<ProjectIdentification> ossComponents) {
 		for (ProjectIdentification pri : ossComponents) {
-			if (pri.getLicenseName().contains(",")) {
+			if (pri.getLicenseName() != null && pri.getLicenseName().contains(",")) {
 				List<String> licenseNameList = Arrays.asList(pri.getLicenseName().split(","));
 				List<String> licenseNameNicknameCheckList = new ArrayList<>();
 				List<String> duplicateList = new ArrayList<>();
