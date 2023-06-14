@@ -68,4 +68,6 @@ public interface PartnerService extends HistoryConfig{
 	public void updateDescription(PartnerMaster partnerMaster);
 
 	public List<PartnerMaster> getPartnerIdList(PartnerMaster partnerMaster);
+	
+	public Map<String, Object> getExportDataForSbomInfo(PartnerMaster partnerMaster);
 }

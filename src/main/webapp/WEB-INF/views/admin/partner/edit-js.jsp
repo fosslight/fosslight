@@ -119,6 +119,14 @@ var saveFlag = false;
 			}
 		});
 	});
+	
+	// close exportlist
+	$(document).click(function(e){
+		if(!$("#ExportContainer").has(e.target).length) {
+			$("#ExportList").hide();
+		}
+	});
+	
 	var commentTemp = '';
 	var modifyCommentId = '${detail.comment}';
 	var commentIdx= '${detail.comment}';
@@ -2056,6 +2064,151 @@ var saveFlag = false;
 	            alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
 	            return false;
 	        }
+		},
+		exportList : function(obj) {
+	    	var exportListId = '#' + $(obj).siblings("div").attr("id");
+	        if ($(exportListId).css('display')=='none') {
+	            $(exportListId).show();
+	        }else{
+	            $(exportListId).hide();
+	        }
+	        $(exportListId).menu();
+	    },
+	    selectDownloadFile : function(target) {
+	    	// download file
+	        if (target === "report_sub") fn.downloadExcel();
+	        else if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+	        else if (target === "RDF_sub") fn.downloadSpdxRdf();
+	        else if (target === "TAG_sub") fn.downloadSpdxTag();
+	        else if (target === "JSON_sub") fn.downloadSpdxJson();
+	        else if (target === "YAML_sub") fn.downloadSpdxYaml();
+	        // hide list
+	        $("#ExportList").hide();
+	    },
+		downloadSpdxSpreadSheetExcel : function(){
+			var partnerId = "${detail.partnerId}";
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+					data: JSON.stringify({"type":"spdx", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
+		},
+		downloadSpdxRdf : function() {
+			var partnerId = "${detail.partnerId}";
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+					data: JSON.stringify({"type":"spdxRdf", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
+		},
+		downloadSpdxTag : function() {
+			var partnerId = "${detail.partnerId}";
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",				   
+					url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+					data: JSON.stringify({"type":"spdxTag", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
+		},
+		downloadSpdxJson : function() {
+			var partnerId = "${detail.partnerId}";
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+					data: JSON.stringify({"type":"spdxJson", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
+		},
+		downloadSpdxYaml : function() {
+			var partnerId = "${detail.partnerId}";
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '<c:url value="/spdxdownload/getSPDXPost"/>',
+					data: JSON.stringify({"type":"spdxYaml", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
+				});
+			}
 		}
 	}
 	

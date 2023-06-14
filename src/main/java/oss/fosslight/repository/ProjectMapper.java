@@ -370,4 +370,8 @@ public interface ProjectMapper {
 	List<String> selectVulnInfoForIdentification(@Param("vendorProduct")String vendorProduct, @Param("version")String version);
 	
 	int getSecurityDataCntByProject(Project project);
+	
+	public List<OssComponents> selectOssComponentsSbomList(ProjectIdentification identification);
+
+	public List<OssComponents> selectOssComponentsListClassAppend(ProjectIdentification identification);
 }
