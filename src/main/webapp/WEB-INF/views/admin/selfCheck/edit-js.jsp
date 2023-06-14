@@ -1758,7 +1758,7 @@
 				datatype: 'local',
 				data : srcMainData,
 				colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'Binary Name or Source Path', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
-				           ,'LicenseId','Download Location','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'//,'CVSS_SCORE'
+				           ,'LicenseId','Download Location','Homepage','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'//,'CVSS_SCORE'
 				           ,'Vulnera<br/>bility','Obligation','Notify','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
@@ -1962,6 +1962,33 @@
 					{name: 'licenseNameExistsYn', index: 'licenseNameExistsYn', hidden:true},
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
 					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', edittype:'text'},
+					{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:false, template: searchStringOptions, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, 
+	 					editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+
+											$("#"+rowid+"_homepage").val(value);
+										}
+										
+										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					},
 					{name: 'copyrightText', index: 'copyrightText', width: 150, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
 						dataInit:
 							function (e) { 

@@ -74,5 +74,7 @@ public interface SelfCheckService extends HistoryConfig{
 	public String getNoticeTextFileForPreview(OssNotice ossNotice) throws IOException;
 
 	public boolean existProjectData(Project project);
+
+	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice);
 	
 }
