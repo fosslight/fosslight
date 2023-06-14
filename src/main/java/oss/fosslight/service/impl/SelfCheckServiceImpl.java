@@ -339,7 +339,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 
 			reconstLicenseList.clear();
-			reconstAddComponentLicenseList.clear();
+			if (reconstAddComponentLicenseList != null) reconstAddComponentLicenseList.clear();
 			
 			// license 정보 등록
 			for (ProjectIdentification bean : list) {
