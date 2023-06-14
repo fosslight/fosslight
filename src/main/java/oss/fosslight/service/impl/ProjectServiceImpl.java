@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -5835,6 +5836,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								
 								boolean emptyFlag = false;
 								for (Map<String, Object> cpeInfo : cpeInfoList) {
+									Map<String, Object> paramMap = new HashMap<>();
+									paramMap = cpeInfo;
+									if (!paramMap.containsKey("verStartInc")) paramMap.put("verStartInc", "");
+									if (!paramMap.containsKey("verEndInc")) paramMap.put("verEndInc", "");
+									if (!paramMap.containsKey("verStartExc")) paramMap.put("verStartExc", "");
+									if (!paramMap.containsKey("verEndExc")) paramMap.put("verEndExc", "");
+									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
+										continue;
+									}
+									
 									if (cpeInfo.containsKey("criteria")) {
 										String cpeInfoCriteria = (String) cpeInfo.get("criteria");
 										String[] url = cpeInfoCriteria.split(":");
@@ -6027,5 +6038,307 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+	
+	@Override
+	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice) {
+		Map<String, Object> model = new HashMap<String, Object>();
+		
+		String prjName = "";
+		String prjVersion = "";
+		String prjId = "";
+		String distributeSite = "";
+		int dashSeq = 0;
+		
+		Project project = new Project();
+		project.setPrjId(ossNotice.getPrjId());
+		
+		project = projectMapper.getProjectBasicInfo(project);
+		
+		if (project != null){
+			if (isEmpty(prjName)) {
+				prjName = project.getPrjName();
+			}
+			
+			if (isEmpty(prjId)) {
+				prjId = project.getPrjId();
+			}
+			
+			if (isEmpty(prjVersion)) {
+				prjVersion = project.getPrjVersion();
+			}
+			
+			if (isEmpty(distributeSite)) {
+				distributeSite = project.getDistributeTarget();
+			}
+		}
+		
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(ossNotice.getPrjId());
+		
+		List<OssComponents> ossComponentList = projectMapper.selectOssComponentsSbomList(identification);
+		
+		// TYPE별 구분
+		Map<String, OssComponents> noticeInfo = new HashMap<>();
+		Map<String, OssComponents> srcInfo = new HashMap<>();
+		Map<String, OssComponents> notObligationInfo = new HashMap<>();
+		
+		OssMaster om = new OssMaster();
+		OssComponents ossComponent;
+		
+		for (OssComponents bean : ossComponentList) {
+			if (bean.getOssName().isEmpty()) continue;
+			
+			om.setOssNames(new String[] {bean.getOssName()});
+			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
+			if (ossList != null && !ossList.isEmpty()) {
+				om = ossList.get(0);
+				
+				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getCopyright();
+				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getHomepage();
+				
+				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+					bean.setCopyrightText(copyright);
+				}
+				
+				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+					bean.setHomepage(homepage);
+				}
+			}
+			
+			String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+			
+			if ("-".equals(bean.getOssName())) {
+				componentKey += dashSeq++;
+			}
+			
+			// type
+			boolean isDisclosure = CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType());
+			boolean isNotice = CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType());
+			
+			if (CoConstDef.CD_DTL_NOTICE_TYPE_ACCOMPANIED.equals(ossNotice.getNoticeType())) {
+				isDisclosure = true;
+			}
+			
+			boolean addDisclosure = isDisclosure && srcInfo.containsKey(componentKey);
+			boolean addNotice = !isDisclosure && noticeInfo.containsKey(componentKey);
+			boolean addNotObligation = notObligationInfo.containsKey(componentKey);
+			
+			if (addDisclosure) {
+				ossComponent = srcInfo.get(componentKey);
+			} else if (addNotice) {
+				ossComponent = noticeInfo.get(componentKey);
+			} else if (addNotObligation) {
+				ossComponent = notObligationInfo.get(componentKey);
+			} else {
+				ossComponent = bean;
+			}
+			
+			// 라이선스 정보 생성
+			OssComponentsLicense license = new OssComponentsLicense();
+			license.setLicenseId(bean.getLicenseId());
+			license.setLicenseName(bean.getLicenseName());
+			license.setLicenseText(bean.getLicenseText());
+			license.setAttribution(bean.getAttribution());
+			
+			// 하나의 oss에 대해서 동일한 LICENSE가 복수 표시되는 현상 
+			// 일단 여기서 막는다. (쿼리가 잘못된 건지, DATA가 꼬이는건지 모르겠음)
+			if (!checkLicenseDuplicated(ossComponent.getOssComponentsLicense(), license)) {
+				ossComponent.addOssComponentsLicense(license);
+				
+				if (CoConstDef.FLAG_NO.equals(ossComponent.getAdminCheckYn())) {
+					bean.setOssCopyright(findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright()));
+					
+					// multi license 추가 copyright
+					if (!isEmpty(bean.getOssCopyright())) {
+						String addCopyright = avoidNull(ossComponent.getCopyrightText());
+						
+						if (!isEmpty(ossComponent.getCopyrightText())) {
+							addCopyright += "\r\n";
+						}
+						 
+						addCopyright += bean.getOssCopyright();
+						ossComponent.setCopyrightText(addCopyright);
+					}
+				}
+			}
+			
+			if (isDisclosure) {
+				if (addDisclosure) {
+					srcInfo.replace(componentKey, ossComponent);
+				} else {
+					srcInfo.put(componentKey, ossComponent);
+				}
+			} else if (isNotice) {
+				if (addNotice) {
+					noticeInfo.replace(componentKey, ossComponent);
+				} else {
+					noticeInfo.put(componentKey, ossComponent);
+				}
+			} else {
+				if (addNotObligation) {
+					notObligationInfo.replace(componentKey, ossComponent);
+				} else {
+					notObligationInfo.put(componentKey, ossComponent);
+				}
+			}
+		}
+		
+		List<OssComponents> addOssComponentList = projectMapper.selectOssComponentsListClassAppend(identification);
+		
+		if (addOssComponentList != null) {
+			for (OssComponents bean : addOssComponentList) {
+				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
+				if ("-".equals(bean.getOssName())) {
+					componentKey += dashSeq++;
+				}
+				
+				OssComponentsLicense license = new OssComponentsLicense();
+				license.setLicenseId(bean.getLicenseId());
+				license.setLicenseName(bean.getLicenseName());
+				license.setLicenseText(bean.getLicenseText());
+				license.setAttribution(bean.getAttribution());
+				
+				if (!checkLicenseDuplicated(bean.getOssComponentsLicense(), license)) {
+					bean.addOssComponentsLicense(license);
+				}
+				
+				boolean disclosureFlag = false;
+				boolean noticeFlag = false;
+				
+				switch(CommonFunction.checkObligationSelectedLicense(bean.getOssComponentsLicense())){
+					case CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE: 
+						srcInfo.put(componentKey, bean);
+						disclosureFlag = true;
+						break;
+					case CoConstDef.CD_DTL_OBLIGATION_NOTICE: 
+						noticeInfo.put(componentKey, bean);
+						noticeFlag = true;
+						break;
+				}
+				
+				if (!disclosureFlag && !noticeFlag) {
+					notObligationInfo.put(componentKey, bean);
+				}
+			}
+		}
+		
+		boolean isTextNotice = "text".equals(ossNotice.getFileType());
+		
+		Map<String, String> ossAttributionMap = new HashMap<>();
+		// 개행처리 및 velocity용 list 생성
+		List<OssComponents> noticeList = new ArrayList<>();
+		
+		for (OssComponents bean : noticeInfo.values()) {
+			if (isTextNotice) {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+			} else {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+			}
+
+			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
+				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
+			}
+			
+			if (!isEmpty(bean.getOssName())) {
+				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			
+			noticeList.add(bean);
+		}
+		
+		Collections.sort(noticeList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
+		List<OssComponents> srcList = new ArrayList<>();
+		
+		for (OssComponents bean : srcInfo.values()) {
+			if (isTextNotice) {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+			} else {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+			}
+			
+
+			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
+				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
+			}
+			
+			if (!isEmpty(bean.getOssName())) {
+				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			
+			srcList.add(bean);
+		}
+		
+		Collections.sort(srcList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
+		List<OssComponents> notObligationList = new ArrayList<>();
+		
+		for (OssComponents bean : notObligationInfo.values()) {
+			if (isTextNotice) {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+			} else {
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+			}
+			
+
+			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
+				ossAttributionMap.put(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()), avoidNull(bean.getOssName(), "") + "__" + bean.getOssAttribution());
+			}
+			
+			if (!isEmpty(bean.getOssName())) {
+				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
+			}
+			
+			notObligationList.add(bean);
+		}
+		
+		Collections.sort(notObligationList, new Comparator<OssComponents>() {
+			@Override
+			public int compare(OssComponents oc1, OssComponents oc2) {
+				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
+			}
+		});
+		
+		model.put("noticeObligationList", noticeList);
+		model.put("disclosureObligationList", srcList);
+		model.put("notObligationList", notObligationList);
+		model.put("addOssComponentList", addOssComponentList);
+		
+		return model;
+	}
+
+	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
+		if (ossComponentsLicense != null) {
+			for (OssComponentsLicense bean : ossComponentsLicense) {
+				if (bean.getLicenseId().equals(license.getLicenseId())) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 }
