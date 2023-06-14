@@ -825,7 +825,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			int idx = 1;
 			if (updateOssComponentList != null && updateOssComponentList.size() > 0) {
-				query = "UPDATE PRE_OSS_COMPONENTS SET OSS_ID = (CASE WHEN ? = '' THEN NULL ELSE ? END), OSS_NAME = ?, OSS_VERSION = REPLACE(?, 'N/A',''), FILE_PATH = ?, DOWNLOAD_LOCATION = ?, COPYRIGHT = ?, EXCLUDE_YN = ?, OBLIGATION_TYPE = ?"
+				query = "UPDATE PRE_OSS_COMPONENTS SET OSS_ID = (CASE WHEN ? = '' THEN NULL ELSE ? END), OSS_NAME = ?, OSS_VERSION = REPLACE(?, 'N/A',''), FILE_PATH = ?, DOWNLOAD_LOCATION = ?, HOME_PAGE = ?, COPYRIGHT = ?, EXCLUDE_YN = ?, OBLIGATION_TYPE = ?"
 						+ " WHERE REFERENCE_ID = ? AND REFERENCE_DIV = ? AND COMPONENT_IDX = ?";
 				stmt = conn.prepareStatement(query);
 				
@@ -836,12 +836,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					stmt.setString(4, item.getOssVersion());
 					stmt.setString(5, item.getFilePath());
 					stmt.setString(6, item.getDownloadLocation());
-					stmt.setString(7, item.getCopyrightText());
-					stmt.setString(8, item.getExcludeYn());
-					stmt.setString(9, item.getObligationType());
-					stmt.setString(10, item.getReferenceId());
-					stmt.setString(11, item.getReferenceDiv());
-					stmt.setString(12, item.getComponentIdx());
+					stmt.setString(7, item.getHomepage());
+					stmt.setString(8, item.getCopyrightText());
+					stmt.setString(9, item.getExcludeYn());
+					stmt.setString(10, item.getObligationType());
+					stmt.setString(11, item.getReferenceId());
+					stmt.setString(12, item.getReferenceDiv());
+					stmt.setString(13, item.getComponentIdx());
 					stmt.addBatch();
 					stmt.clearParameters();
 					
