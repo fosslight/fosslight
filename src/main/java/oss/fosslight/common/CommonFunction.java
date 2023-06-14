@@ -2748,7 +2748,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		if (list != null) {
 			for (ProjectIdentification bean : list) {
 				// license detail 아이콘 표시 여부를 위해 여기서 license id를 검증한다.
-				if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName().toUpperCase().trim()))) {
+				if (bean.getLicenseName() != null && CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName().toUpperCase().trim()))) {
 					return true;
 				}
 			}
@@ -3212,10 +3212,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			String restrictionStr = "";
 			
 			for (ProjectIdentification bean : componentLicenseList) {
-				LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().trim().toUpperCase());
-				
-				if (license != null && !isEmpty(license.getRestriction()) && !CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-					restrictionStr += (isEmpty(restrictionStr)?"":",") + license.getRestriction(); 
+				if (bean.getLicenseName() != null) {
+					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(bean.getLicenseName().trim().toUpperCase());
+					
+					if (license != null && !isEmpty(license.getRestriction()) && !CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
+						restrictionStr += (isEmpty(restrictionStr)?"":",") + license.getRestriction(); 
+					}
 				}
 			}
 			
@@ -4716,8 +4718,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		List<String> licenseNameList = getAllAvailableLicenseUpperCaseName(ossName, ossVer);
 		for (ProjectIdentification license : licenseList) {
-			if (!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
-				return true;
+			if (license.getLicenseName() != null) {
+				if (!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
+					return true;
+				}
 			}
 		}
 		return false;
