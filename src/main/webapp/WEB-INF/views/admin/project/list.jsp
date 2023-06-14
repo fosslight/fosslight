@@ -23,11 +23,15 @@
 						<input name="schEndDate" id="schEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.schEndDate}" maxlength="8" autocomplete="off" style="width:77px;"/> 
 					</dd>
 					<dd>
-						<label>Watcher</label>
-						<input type="text" name="watcher" class="autoComCreatorDivision" value="${searchBean.creator}"/>
+						<label>Division</label>
+						<span class="selectSet">
+							<strong title="Status selected value"></strong>
+							<select name="prjDivision">
+								<option value=""></option>
+								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
+							</select>
+						</span>						
 					</dd>
-
-
 					<dd class="centerAign">
 						<label>Creator</label>
 						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
@@ -74,16 +78,6 @@
 							<select name="priority">
 								<option value=""></option>
 								${ct:genOption(ct:getConstDef("CD_PROJECT_PRIORITY"))}
-							</select>
-						</span>
-					</dd>
-					<dd class="centerAign">
-						<label>Division</label>
-						<span class="selectSet">
-							<strong title="Status selected value"></strong>
-							<select name="prjDivision">
-								<option value=""></option>
-								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 							</select>
 						</span>
 					</dd>

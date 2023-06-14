@@ -17,15 +17,7 @@
 						<label>3rd Party Name</label>
 						<input type="text" name="partnerName" class="autoComParty" value="${searchBean.partnerName}"/>
 					</dd>
-
-
-					<dd class="lastAign">
-						<label>Created Date</label>
-						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8" autocomplete="off"/> ~
-						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8" autocomplete="off"/>
-					</dd>
-
-
+					<dd class="lastAign"></dd>
 					<dd>
 						<label style="width:100px;">3rd Party<br/>Software Name</label>
 						<input type="text" name="softwareName" class="autoComSwNm" value="${searchBean.softwareName}" style="width:150px;"/>
@@ -50,19 +42,19 @@
 						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", searchBean.status, false)}
             			</span>
 					</dd>
-					<dd>
-						<label style="width:100px;">Creator</label>
-						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}" style="width:150px;"/>
+					<dd class="">
+						<label style="width:100px;">Created Date</label>
+						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8" autocomplete="off"/> ~ 
+						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8" autocomplete="off"/> 			
 					</dd>
 					<dd class="centerAign">
+						<label>Creator</label>
+						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
+					</dd>
+					<dd class="lastAign">
 						<label>Reviewer</label>
 						<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
 					</dd>
-					<dd class="lastAign">
-						<label>Watcher</label>
-						<input type="text" name="watcher" class="autoComReviewer" value="${searchBean.reviewer}"/>
-					</dd>
-
 					<c:if test="${!ct:isAdmin()}">
 					<dd class="lastAign" >
 						<label style="width:150px;">View My 3rd Parties Only</label>
