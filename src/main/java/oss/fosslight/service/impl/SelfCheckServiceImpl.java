@@ -825,7 +825,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			int idx = 1;
 			if (updateOssComponentList != null && updateOssComponentList.size() > 0) {
-				query = "UPDATE PRE_OSS_COMPONENTS SET OSS_ID = (CASE WHEN ? = '' THEN NULL ELSE ? END), OSS_NAME = ?, OSS_VERSION = REPLACE(?, 'N/A',''), FILE_PATH = ?, DOWNLOAD_LOCATION = ?, HOME_PAGE = ?, COPYRIGHT = ?, EXCLUDE_YN = ?, OBLIGATION_TYPE = ?"
+				query = "UPDATE PRE_OSS_COMPONENTS SET OSS_ID = (CASE WHEN ? = '' THEN NULL ELSE ? END), OSS_NAME = ?, OSS_VERSION = REPLACE(?, 'N/A',''), FILE_PATH = ?, DOWNLOAD_LOCATION = ?, HOMEPAGE = ?, COPYRIGHT = ?, EXCLUDE_YN = ?, OBLIGATION_TYPE = ?"
 						+ " WHERE REFERENCE_ID = ? AND REFERENCE_DIV = ? AND COMPONENT_IDX = ?";
 				stmt = conn.prepareStatement(query);
 				
