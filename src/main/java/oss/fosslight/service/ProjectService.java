@@ -197,6 +197,8 @@ public interface ProjectService extends HistoryConfig{
 	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents);
 
 	public List<Project> getProjectIdList(Project project);
+	
+	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice);
 }
 
 
