@@ -296,7 +296,7 @@
   		   AND OC.EXCLUDE_YN = 'N'
 		   AND OC.OSS_NAME IS NOT NULL
 		   AND OC.OSS_NAME != '-'
-  		 ORDER BY NVD.CVSS_SCORE *1 DESC, CVE_ID LIMIT 1
+  		 ORDER BY NVD.CVSS_SCORE *1 DESC, NVD.CVE_ID LIMIT 1
 	</select>
 	
 	<select id="selectModelList" parameterType="string" resultType="oss.fosslight.domain.CamelMap">
