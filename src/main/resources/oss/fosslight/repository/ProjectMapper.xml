@@ -997,7 +997,7 @@
 				 , A.COPYRIGHT AS COPYRIGHT_TEXT
 		  FROM OSS_MASTER A
 		WHERE A.USE_YN = 'Y'
-			AND A.OSS_VERSION = #{ossVersion}
+			AND IFNULL(A.OSS_VERSION, '') = #{ossVersion}
 			AND (A.OSS_NAME = #{ossName}
 			  OR EXISTS (	SELECT 1 
 								  FROM OSS_NICKNAME B
