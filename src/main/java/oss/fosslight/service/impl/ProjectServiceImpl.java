@@ -5994,14 +5994,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			for (OssComponents oc : ossComponents) {
 				String key = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
 				if (securityGridMap.containsKey(key)) {
-					if (securityGridMap.get(key).getVulnerabilityResolution().equals("Fixed") && !oc.getVulnerabilityResolution().equals("Fixed")) {
+					if (avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && !avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
 						updateNvdDataList.add(oc);
-					} else if (!securityGridMap.get(key).getVulnerabilityResolution().equals("Fixed") && oc.getVulnerabilityResolution().equals("Fixed")) {
+					} else if (!avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
 						updateNvdDataList.add(oc);
 					}
 					deleteDataList.add(oc);
 				} else {
-					if (oc.getVulnerabilityResolution().equals("Fixed")) {
+					if (avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
 						updateNvdDataList.add(oc);
 					}
 				}
