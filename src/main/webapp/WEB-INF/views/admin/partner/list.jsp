@@ -21,8 +21,8 @@
 
 					<dd class="lastAign">
 						<label>Created Date</label>
-						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8" autocomplete="off"/> ~
-						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8" autocomplete="off"/>
+						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" maxlength="8" autocomplete="off" style="width:77px;"/> ~
+						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" maxlength="8" autocomplete="off" style="width:77px;"/>
 					</dd>
 
 
@@ -60,7 +60,7 @@
 					</dd>
 					<dd class="lastAign">
 						<label>Watcher</label>
-						<input type="text" name="watcher" class="autoComReviewer" value="${searchBean.reviewer}"/>
+						<input type="text" name="watcher" class="autoComWatcher" "/>
 					</dd>
 
 					<c:if test="${!ct:isAdmin()}">

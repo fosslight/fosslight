@@ -24,7 +24,7 @@
 					</dd>
 					<dd>
 						<label>Watcher</label>
-						<input type="text" name="watcher" class="autoComCreatorDivision" value="${searchBean.creator}"/>
+						<input type="text" name="watcher" class="autoComWatcher" "/>
 					</dd>
 
 
