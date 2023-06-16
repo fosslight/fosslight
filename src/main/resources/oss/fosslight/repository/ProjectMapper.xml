@@ -4648,10 +4648,18 @@
             (
             OSS_NAME
             , OSS_VERSION
-            , CVE_ID
-            , CVSS_SCORE
-            , PUBL_DATE
-            , VULNERABILITY_RESOLUTION
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			, CVE_ID
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			, CVSS_SCORE
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(publDate)">
+			, PUBL_DATE
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityResolution)">
+			, VULNERABILITY_RESOLUTION
+		</if>
             , SECURITY_PATCH_LINK
             , SECURITY_COMMENTS
             )
@@ -4659,13 +4667,29 @@
             (
             #{ossName}
             , REPLACE(#{ossVersion}, '-', '')
-            , #{cveId}
-            , #{cvssScore}
-            , #{publDate}
-            , #{vulnerabilityResolution}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
+			, #{cveId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			, #{cvssScore}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(publDate)">
+			, #{publDate}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityResolution)">
+			, #{vulnerabilityResolution}
+		</if>
             , #{securityPatchLink}
             , #{securityComments}
-            )
+            ) ON DUPLICATE KEY UPDATE
+            SECURITY_PATCH_LINK = #{securityPatchLink}
+            , SECURITY_COMMENTS = #{securityComments}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityResolution)">
+			, VULNERABILITY_RESOLUTION	= #{vulnerabilityResolution}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(publDate)">
+			, PUBL_DATE	= #{publDate}
+		</if>
     </insert>
     
     <select id="getSecurityDataList" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssComponents">
