@@ -112,12 +112,19 @@
 		},
 		exeSave : function() {
 			var prjId = '${project.prjId}';
-			var totalList = $("#totalList").jqGrid('getGridParam','data');
+			var totalGridData = $("#totalList").jqGrid("getRowData");
+			
+			$.each(totalGridData, function(i, obj){
+				if (obj["securityPatchLink"].indexOf("<a href") > -1){
+					var replaceVal = obj["securityPatchLink"].replace( /(<([^>]+)>)/ig, '');
+					obj["securityPatchLink"] = replaceVal;
+				}
+			});
 			
 			var finalData = {
 				referenceId : prjId,
 				targetName : "TOTAL",
-				gridData : JSON.stringify(totalList)
+				gridData : JSON.stringify(totalGridData)
 			};
 			
 			$.ajax({

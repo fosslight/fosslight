@@ -97,12 +97,19 @@
 		},
 		exeSave : function(){
 			var prjId = '${project.prjId}';
-			var notFixedList = $("#notFixedList").jqGrid('getGridParam','data');
+			var notFixedGridData = $("#notFixedList").jqGrid("getRowData");
+			
+			$.each(notFixedGridData, function(i, obj){
+				if (obj["securityPatchLink"].indexOf("<a href") > -1){
+					var replaceVal = obj["securityPatchLink"].replace( /(<([^>]+)>)/ig, '');
+					obj["securityPatchLink"] = replaceVal;
+				}
+			});
 			
 			var finalData = {
 				referenceId : prjId,
 				targetName : "NOTFIXED",
-				gridData : JSON.stringify(notFixedList)
+				gridData : JSON.stringify(notFixedGridData)
 			};
 			
 			$.ajax({
