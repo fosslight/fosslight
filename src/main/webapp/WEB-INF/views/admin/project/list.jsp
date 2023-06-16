@@ -19,19 +19,15 @@
 					</dd>
 					<dd class="lastAign">
 						<label>Created Date</label>
-						<input name="schStartDate" id="schStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.schStartDate}" maxlength="8" autocomplete="off" style="width:77px;"/> ~ 
-						<input name="schEndDate" id="schEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.schEndDate}" maxlength="8" autocomplete="off" style="width:77px;"/> 
+						<input name="schStartDate" id="schStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.schStartDate}" maxlength="8" autocomplete="off" style="width:77px;"/> ~
+						<input name="schEndDate" id="schEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.schEndDate}" maxlength="8" autocomplete="off" style="width:77px;"/>
 					</dd>
 					<dd>
-						<label>Division</label>
-						<span class="selectSet">
-							<strong title="Status selected value"></strong>
-							<select name="prjDivision">
-								<option value=""></option>
-								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
-							</select>
-						</span>						
+						<label>Watcher</label>
+						<input type="text" name="watcher" class="autoComWatcher" "/>
 					</dd>
+
+
 					<dd class="centerAign">
 						<label>Creator</label>
 						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
@@ -68,8 +64,8 @@
 					<dd style="width:100%;">
 						<label>Status</label>
 						<span class='checkSet'>
-						${ct:genCheckbox(ct:getConstDef("CD_PROJECT_STATUS"), searchBean.statuses, '')}
-            			</span>
+							${ct:genCheckbox(ct:getConstDef("CD_PROJECT_STATUS"), searchBean.statuses, '')}
+						</span>
 					</dd>
 					<dd>
 						<label>Priority</label>
@@ -81,11 +77,21 @@
 							</select>
 						</span>
 					</dd>
-					<c:if test="${!ct:isAdmin()}">
-					<dd class="">
-						<label class="vmiddle" style="width: 50%;">View My Projects Only</label>
-						<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
+					<dd class="centerAign">
+						<label>Division</label>
+						<span class="selectSet">
+							<strong title="Status selected value"></strong>
+							<select name="prjDivision">
+								<option value=""></option>
+								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
+							</select>
+						</span>
 					</dd>
+					<c:if test="${!ct:isAdmin()}">
+						<dd class="">
+							<label class="vmiddle" style="width: 50%;">View My Projects Only</label>
+							<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
+						</dd>
 					</c:if>
 				</dl>
 				<input type="button" value="Admin Expand apply" class="btnHiddenExpand" />
@@ -108,12 +114,12 @@
 					</dd>
 					<dd class="centerAign w600">
 						<label>Comment</label>
-						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.userComment}</textarea>					
+						<textarea name="userComment" style="margin: 0px; width: 180px; height: 54px;">${searchBean.userComment}</textarea>
 					</dd>
-						<dd>
-							<label>Binary Name</label>
-							<input type="text" name="schBinaryName"  value="${searchBean.schBinaryName}"/>
-						</dd>
+					<dd>
+						<label>Binary Name</label>
+						<input type="text" name="schBinaryName"  value="${searchBean.schBinaryName}"/>
+					</dd>
 					<c:if test="${partnerFlag}">
 						<dd class="centerAign">
 							<label>3rd party</label>
@@ -129,7 +135,7 @@
 		<!---->
 		<div class="btnLayout">
 			<input type="button" value="Reject" class="btnReject btnColor left" style="display: none;"/>
-			
+
 			<!-- Popup -->
 			<div id="changeStatusPop" class="pop changeStatusPop">
 				<h1 class="orange">Change Status</h1>
@@ -158,19 +164,19 @@
 				</div>
 			</div>
 			<!-- //Popup -->
-			
+
 			<!-- Popup -->
 			<div id="changeDivisionPop" class="pop changeDivisionPop">
 				<h1 class="orange">Change Division</h1>
 				<div class="popdata">
 					<div class="mtb20">
 						<span>Division</label>
-						<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
+							<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
 							<strong title="Division selected value"></strong>
 							<select name="division">
 								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 							</select>
-						</span>	
+						</span>
 					</div>
 				</div>
 				<div class="pbtn">
@@ -179,14 +185,14 @@
 				</div>
 			</div>
 			<!-- //Popup -->
-			
+
 			<span class="left">
 				<input id="copy" type="button" value="Copy" class="btnColor" onclick="fn.copy();"/>
 				<input id="changeStatus" type="button" value="Change Status" class="btnColor w120" onclick="fn.checkProjectStatus();"/>
 				<input type="button" value="BOM Compare" class="btnColor blue w120" onclick="fn.bomCompare();" />
 				<input type="button" value="Change Division" class="btnColor w120" onclick="fn.changeDivision();" />
 			</span>
-			
+
 			<span class="right">
 				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
 				<input type="button" value="Add" class="btnColor btnAdd" onclick="createTabInFrame('New_Project', '#<c:url value="/project/edit"/>')" />
@@ -200,4 +206,4 @@
 	</div>
 	<!---->
 </div>
-<!-- //wrap --> 
+<!-- //wrap -->
