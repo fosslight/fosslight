@@ -247,16 +247,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private boolean getSecurityDataCntByProject(Project project) {
-		boolean flag = false;
-		for (int i=1; i<9; i++) {
-			project.setCode(String.valueOf(i));
-			flag = projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
-			if (flag) {
-				break;
-			}
-		}
-				
-		return flag;
+		return projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
 	}
 	
 	@Override
