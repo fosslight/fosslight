@@ -1743,8 +1743,8 @@
 						   ON OM.OSS_ID = DOWN.OSS_ID
 		WHERE OM.OSS_NAME != #{ossName}
 		  AND (
-			SUBSTRING_INDEX(SUBSTRING_INDEX(OM.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
-		   OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
+			OM.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'),'%')
+		   	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'),'%')
 			)
 		GROUP BY OM.OSS_NAME
 		UNION
