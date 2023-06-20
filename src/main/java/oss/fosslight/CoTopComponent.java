@@ -433,46 +433,117 @@ public class CoTopComponent {
 	
 	public static String httpCodePrint(int code){
 		String res = Integer.toString(code);
-		
-		switch(code){
-			case HttpURLConnection.HTTP_ACCEPTED: 		  res = "HTTP_ACCEPTED"; 			break;
-			case HttpURLConnection.HTTP_BAD_GATEWAY: 	  res = "HTTP_BAD_GATEWAY"; 		break;
-			case HttpURLConnection.HTTP_BAD_METHOD: 	  res = "HTTP_BAD_METHOD"; 			break;
-			case HttpURLConnection.HTTP_BAD_REQUEST: 	  res = "HTTP_BAD_REQUEST"; 		break;
-			case HttpURLConnection.HTTP_CLIENT_TIMEOUT:   res = "HTTP_CLIENT_TIMEOUT"; 		break;
-			case HttpURLConnection.HTTP_CONFLICT: 		  res = "HTTP_CONFLICT"; 			break;
-			case HttpURLConnection.HTTP_CREATED: 		  res = "HTTP_CREATED"; 			break;
-			case HttpURLConnection.HTTP_ENTITY_TOO_LARGE: res = "HTTP_ENTITY_TOO_LARGE"; 	break;
-			case HttpURLConnection.HTTP_FORBIDDEN: 		  res = "HTTP_FORBIDDEN"; 			break;
-			case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:  res = "HTTP_GATEWAY_TIMEOUT"; 	break;
-			case HttpURLConnection.HTTP_GONE: 			  res = "HTTP_GONE"; 				break;
-			case HttpURLConnection.HTTP_INTERNAL_ERROR:   res = "HTTP_INTERNAL_ERROR"; 		break;
-			case HttpURLConnection.HTTP_LENGTH_REQUIRED:  res = "HTTP_LENGTH_REQUIRED"; 	break;
-			case HttpURLConnection.HTTP_MOVED_PERM: 	  res = "HTTP_MOVED_PERM"; 			break;
-			case HttpURLConnection.HTTP_MOVED_TEMP: 	  res = "HTTP_MOVED_TEMP"; 			break;
-			case HttpURLConnection.HTTP_MULT_CHOICE: 	  res = "HTTP_MULT_CHOICE"; 		break;
-			case HttpURLConnection.HTTP_NO_CONTENT: 	  res = "HTTP_NO_CONTENT"; 			break;
-			case HttpURLConnection.HTTP_NOT_ACCEPTABLE:   res = "HTTP_NOT_ACCEPTABLE"; 		break;
-			case HttpURLConnection.HTTP_NOT_AUTHORITATIVE:res = "HTTP_NOT_AUTHORITATIVE"; 	break;
-			case HttpURLConnection.HTTP_NOT_FOUND: 		  res = "HTTP_NOT_FOUND"; 			break;
-			case HttpURLConnection.HTTP_NOT_IMPLEMENTED:  res = "HTTP_NOT_IMPLEMENTED"; 	break;
-			case HttpURLConnection.HTTP_NOT_MODIFIED: 	  res = "HTTP_NOT_MODIFIED"; 		break;
-			case HttpURLConnection.HTTP_OK: 			  res = "HTTP_OK"; 					break;
-			case HttpURLConnection.HTTP_PARTIAL: 		  res = "HTTP_PARTIAL"; 			break;
-			case HttpURLConnection.HTTP_PAYMENT_REQUIRED: res = "HTTP_PAYMENT_REQUIRED"; 	break;
-			case HttpURLConnection.HTTP_PRECON_FAILED: 	  res = "HTTP_PRECON_FAILED"; 		break;
-			case HttpURLConnection.HTTP_PROXY_AUTH: 	  res = "HTTP_PROXY_AUTH"; 			break;
-			case HttpURLConnection.HTTP_REQ_TOO_LONG: 	  res = "HTTP_REQ_TOO_LONG"; 		break;
-			case HttpURLConnection.HTTP_RESET: 			  res = "HTTP_RESET"; 				break;
-			case HttpURLConnection.HTTP_SEE_OTHER: 		  res = "HTTP_SEE_OTHER"; 			break;
-			case HttpURLConnection.HTTP_UNAUTHORIZED: 	  res = "HTTP_UNAUTHORIZED"; 		break;
-			case HttpURLConnection.HTTP_UNAVAILABLE: 	  res = "HTTP_UNAVAILABLE"; 		break;
-			case HttpURLConnection.HTTP_UNSUPPORTED_TYPE: res = "HTTP_UNSUPPORTED_TYPE"; 	break;
-			case HttpURLConnection.HTTP_USE_PROXY: 		  res = "HTTP_USE_PROXY"; 			break;
-			case HttpURLConnection.HTTP_VERSION: 		  res = "HTTP_VERSION"; 			break;
-			default: break;	
+
+		switch (code) {
+			case HttpURLConnection.HTTP_ACCEPTED:
+				res = "HTTP_ACCEPTED";
+				break;
+			case HttpURLConnection.HTTP_BAD_GATEWAY:
+				res = "HTTP_BAD_GATEWAY";
+				break;
+			case HttpURLConnection.HTTP_BAD_METHOD:
+				res = "HTTP_BAD_METHOD";
+				break;
+			case HttpURLConnection.HTTP_BAD_REQUEST:
+				res = "HTTP_BAD_REQUEST";
+				break;
+			case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+				res = "HTTP_CLIENT_TIMEOUT";
+				break;
+			case HttpURLConnection.HTTP_CONFLICT:
+				res = "HTTP_CONFLICT";
+				break;
+			case HttpURLConnection.HTTP_CREATED:
+				res = "HTTP_CREATED";
+				break;
+			case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
+				res = "HTTP_ENTITY_TOO_LARGE";
+				break;
+			case HttpURLConnection.HTTP_FORBIDDEN:
+				res = "HTTP_FORBIDDEN";
+				break;
+			case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
+				res = "HTTP_GATEWAY_TIMEOUT";
+				break;
+			case HttpURLConnection.HTTP_GONE:
+				res = "HTTP_GONE";
+				break;
+			case HttpURLConnection.HTTP_INTERNAL_ERROR:
+				res = "HTTP_INTERNAL_ERROR";
+				break;
+			case HttpURLConnection.HTTP_LENGTH_REQUIRED:
+				res = "HTTP_LENGTH_REQUIRED";
+				break;
+			case HttpURLConnection.HTTP_MOVED_PERM:
+				res = "HTTP_MOVED_PERM";
+				break;
+			case HttpURLConnection.HTTP_MOVED_TEMP:
+				res = "HTTP_MOVED_TEMP";
+				break;
+			case HttpURLConnection.HTTP_MULT_CHOICE:
+				res = "HTTP_MULT_CHOICE";
+				break;
+			case HttpURLConnection.HTTP_NO_CONTENT:
+				res = "HTTP_NO_CONTENT";
+				break;
+			case HttpURLConnection.HTTP_NOT_ACCEPTABLE:
+				res = "HTTP_NOT_ACCEPTABLE";
+				break;
+			case HttpURLConnection.HTTP_NOT_AUTHORITATIVE:
+				res = "HTTP_NOT_AUTHORITATIVE";
+				break;
+			case HttpURLConnection.HTTP_NOT_FOUND:
+				res = "HTTP_NOT_FOUND";
+				break;
+			case HttpURLConnection.HTTP_NOT_IMPLEMENTED:
+				res = "HTTP_NOT_IMPLEMENTED";
+				break;
+			case HttpURLConnection.HTTP_NOT_MODIFIED:
+				res = "HTTP_NOT_MODIFIED";
+				break;
+			case HttpURLConnection.HTTP_OK:
+				res = "HTTP_OK";
+				break;
+			case HttpURLConnection.HTTP_PARTIAL:
+				res = "HTTP_PARTIAL";
+				break;
+			case HttpURLConnection.HTTP_PAYMENT_REQUIRED:
+				res = "HTTP_PAYMENT_REQUIRED";
+				break;
+			case HttpURLConnection.HTTP_PRECON_FAILED:
+				res = "HTTP_PRECON_FAILED";
+				break;
+			case HttpURLConnection.HTTP_PROXY_AUTH:
+				res = "HTTP_PROXY_AUTH";
+				break;
+			case HttpURLConnection.HTTP_REQ_TOO_LONG:
+				res = "HTTP_REQ_TOO_LONG";
+				break;
+			case HttpURLConnection.HTTP_RESET:
+				res = "HTTP_RESET";
+				break;
+			case HttpURLConnection.HTTP_SEE_OTHER:
+				res = "HTTP_SEE_OTHER";
+				break;
+			case HttpURLConnection.HTTP_UNAUTHORIZED:
+				res = "HTTP_UNAUTHORIZED";
+				break;
+			case HttpURLConnection.HTTP_UNAVAILABLE:
+				res = "HTTP_UNAVAILABLE";
+				break;
+			case HttpURLConnection.HTTP_UNSUPPORTED_TYPE:
+				res = "HTTP_UNSUPPORTED_TYPE";
+				break;
+			case HttpURLConnection.HTTP_USE_PROXY:
+				res = "HTTP_USE_PROXY";
+				break;
+			case HttpURLConnection.HTTP_VERSION:
+				res = "HTTP_VERSION";
+				break;
+			default:
+				break;
 		}
-		
+
 		return res;
 	}
 }
