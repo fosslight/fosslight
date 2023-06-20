@@ -4934,7 +4934,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		List<String> convertNicknameList = new ArrayList<>();
 		boolean vendorProductCheckFlag = false;
 		String ossId = null;
-		if (!ossName.isEmpty() && !ossName.equals("-")){
+		if (ossName != null && !ossName.isEmpty() && !ossName.equals("-")){
 			OssMaster bean = ossInfoMap.get((ossName+"_"+ossVersion).toUpperCase());
 			if (bean != null) ossId = bean.getOssId();
 		}
@@ -4952,20 +4952,22 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
 				String vendorProductName = cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2];
 				String existenceOssName = (cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2] + "_" + ossVersion).toUpperCase();
-				om.setOssName(ossName);
-				om.setOssVersion(ossVersion);
 				
-				containsDashNameList.add(vendorProductName);
-				if (ossName.contains(" ")) convertNicknameList.add(ossName.replace(" ", "_"));
-				if (ossName.contains("-")) containsDashNameList.add(ossName);
-				
-				String[] ossNicknames = ossService.getOssNickNameListByOssName(ossName);
-				if (ossNicknames != null && ossNicknames.length > 0) {
-					List<String> list = Arrays.asList(ossNicknames);
-					convertNicknameList.addAll(list);
-					for (String nick : ossNicknames) {
-						if (nick.contains(" ")) convertNicknameList.add(nick.replace(" ", "_"));
-						if (nick.contains("-")) containsDashNameList.add(nick);
+				if (ossName != null && !ossName.isEmpty()) {
+					om.setOssName(ossName);
+					om.setOssVersion(ossVersion);
+					
+					if (ossName.contains(" ")) convertNicknameList.add(ossName.replace(" ", "_"));
+					if (ossName.contains("-")) containsDashNameList.add(ossName);
+					
+					String[] ossNicknames = ossService.getOssNickNameListByOssName(ossName);
+					if (ossNicknames != null && ossNicknames.length > 0) {
+						List<String> list = Arrays.asList(ossNicknames);
+						convertNicknameList.addAll(list);
+						for (String nick : ossNicknames) {
+							if (nick.contains(" ")) convertNicknameList.add(nick.replace(" ", "_"));
+							if (nick.contains("-")) containsDashNameList.add(nick);
+						}
 					}
 				}
 				
@@ -4982,6 +4984,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (ossMaster != null && !ossMaster.getOssId().equals(ossId)) {
 						existsVendorProductBooleanFlag = true;
 					} else {
+						om.setSchOssName(vendorProductName);
 						if (containsDashNameList != null && !containsDashNameList.isEmpty()) {
 							containsDashNameList = containsDashNameList.stream().distinct().collect(Collectors.toList());
 							om.setDashOssNameList(containsDashNameList.toArray(new String[containsDashNameList.size()]));
