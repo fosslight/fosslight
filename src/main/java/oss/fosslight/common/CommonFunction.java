@@ -4934,7 +4934,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		List<String> convertNicknameList = new ArrayList<>();
 		boolean vendorProductCheckFlag = false;
 		String ossId = null;
-		if (ossName != null && !ossName.isEmpty() && !ossName.equals("-")){
+		if (!isEmpty(ossName) && !ossName.equals("-")){
 			OssMaster bean = ossInfoMap.get((ossName+"_"+ossVersion).toUpperCase());
 			if (bean != null) ossId = bean.getOssId();
 		}
@@ -4953,7 +4953,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String vendorProductName = cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2];
 				String existenceOssName = (cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2] + "_" + ossVersion).toUpperCase();
 				
-				if (ossName != null && !ossName.isEmpty()) {
+				if (!isEmpty(ossName)) {
 					om.setOssName(ossName);
 					om.setOssVersion(ossVersion);
 					
