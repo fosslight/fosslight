@@ -1100,7 +1100,7 @@
 					records:function(obj){return obj.records;}
 				},
 				colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
-				           , 'Packaging', 'Distribution', 'Download', 'Security', 'Vulnera<br/>bility', 'Distribution Type', 'CVE ID'
+				           , 'Packaging', 'Distribution', 'Download', 'Vulnera<br/>bility', 'Distribution Type', 'CVE ID'
 				           , 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
 				colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
@@ -1111,7 +1111,6 @@
 					{name: 'verificationStatus', index: 'verificationStatus', width: 80, align: 'center', formatter: fn.displayVerification, unformatter: fn.unformatter, sortable : true, title:false},
 					{name: 'destributionStatus', index: 'destributionStatus', width: 80, align: 'center', formatter: fn.displayDistribution, unformatter: fn.unformatter, sortable : true, title:false<c:if test="${!distributionFlag}">, hidden:true</c:if>},
 					{name: 'download', index: 'download', width: 120, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false},
-					{name: '', index: '', width: 80, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false},
 					{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
 					{name: 'distributionType', index: 'distributionType', width: 100, align: 'left', sortable : true},
 					{name: 'cveId', index: 'cveId', hidden:true},
