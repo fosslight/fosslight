@@ -244,8 +244,8 @@
 		  FROM T2_FILE T1
 		  LEFT JOIN PACKAGING_REUSE_MAP T2
 		    ON T1.FILE_SEQ = T2.PACKAGING_FILE_ID
-		   AND T1.DEL_YN = 'N'
 		 WHERE T1.FILE_SEQ = #{packageFileId}
+		   AND T1.DEL_YN = 'N'
 	</select>
 	
 	<select id="selectPackageFileName" resultType="oss.fosslight.domain.T2File" parameterType="String">
