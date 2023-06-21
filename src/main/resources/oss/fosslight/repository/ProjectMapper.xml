@@ -4636,7 +4636,8 @@
 	
 	<delete id="deleteSecurityData" parameterType="oss.fosslight.domain.OssComponents">
 		DELETE FROM NVD_DATA_SECURITY
-		WHERE OSS_NAME = #{ossName}
+		WHERE REFERENCE_ID = #{referenceId}
+		AND OSS_NAME = #{ossName}
 		AND OSS_VERSION = #{ossVersion}
 		AND CVE_ID = #{cveId}
 		AND	CAST(CVSS_SCORE AS DECIMAL(10, 1)) = CAST(#{cvssScore} AS DECIMAL(10,1))
@@ -4646,7 +4647,8 @@
         INSERT INTO
             NVD_DATA_SECURITY
             (
-            OSS_NAME
+            REFERENCE_ID
+            , OSS_NAME
             , OSS_VERSION
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
 			, CVE_ID
@@ -4665,7 +4667,8 @@
             )
             VALUES
             (
-            #{ossName}
+            #{referenceId}
+            , #{ossName}
             , REPLACE(#{ossVersion}, '-', '')
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
 			, #{cveId}
@@ -4702,7 +4705,8 @@
              , SECURITY_PATCH_LINK
              , SECURITY_COMMENTS
           FROM NVD_DATA_SECURITY
-         WHERE OSS_NAME = #{ossName}
+         WHERE REFERENCE_ID = #{referenceId}
+           AND OSS_NAME = #{ossName}
            AND OSS_VERSION = #{ossVersion}
     </select>
     
