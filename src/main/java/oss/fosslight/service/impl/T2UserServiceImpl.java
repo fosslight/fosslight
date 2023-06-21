@@ -22,7 +22,10 @@ import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -665,5 +668,31 @@ public class T2UserServiceImpl implements T2UserService {
 
 			return null;
 		}
+	}
+
+	@Override
+	public T2Users checkApiUserAuthAndSetSession(String _token) {
+		T2Users params = new T2Users();
+		params.setToken(_token);
+		params = getUser(params);
+		
+		if (params == null) {
+			throw new CUserNotFoundException();
+		}
+		
+		if (checkToken(params, _token)) {
+			List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
+			T2Users getUser = getUserAndAuthorities(params);
+			for (T2Authorities auth : getUser.getAuthoritiesList()) {
+            	roles.add(new SimpleGrantedAuthority(auth.getAuthority()));
+            }
+			
+			Authentication authentication = new UsernamePasswordAuthenticationToken(params.getUserId(), null, roles);
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			
+			return getUser;
+        } else {
+            throw new CSigninFailedException();
+        }
 	}
 }
