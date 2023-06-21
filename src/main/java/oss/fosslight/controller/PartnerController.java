@@ -1068,7 +1068,7 @@ public class PartnerController extends CoTopComponent{
 			
 			try {
 				if (CoConstDef.FLAG_YES.equals(excel)){
-					if (list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt())) {
+					if (list != null && !list.isEmpty() && CoCodeManager.getCodeExpString(CoConstDef.CD_FILE_ACCEPT, "22").contains(list.get(0).getFileExt().toLowerCase())) {
 
 						sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
 					}
