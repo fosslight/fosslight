@@ -5780,10 +5780,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
-				if (vulnList != null && vulnList.size() >= 100 && isEmpty(pi.getOssVersion())) {
+				if (vulnList != null && !vulnList.isEmpty() && isEmpty(pi.getOssVersion())) {
 					activateFlag = true;
 					
-					vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getPublDate).reversed()).collect(Collectors.toList());
+					vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getCvssScore).reversed()).collect(Collectors.toList());
 					List<Vulnerability> convertVulnList = new ArrayList<>();
 					convertVulnList.add(vulnList.get(0));
 					vulnList = convertVulnList;
@@ -5885,6 +5885,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								if (!isEmpty(verStartEndRange)) {
 									verStartEndRange = verStartEndRange.substring(0, verStartEndRange.length()-1);
 									oc.setVerStartEndRange(verStartEndRange);
+								} else {
+									oc.setVerStartEndRange("N/A");
 								}
 							}
 							
@@ -5902,16 +5904,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 								oc.setOfficialPatchLink(link);
 								oc.setVulnerabilityResolution("Unresolved");
 							} else {
+								oc.setOfficialPatchLink("N/A");
 								oc.setVulnerabilityResolution("Deferred (Not Available)");
 							}
 							
-							if (bean != null) {
-								oc.setSecurityPatchLink(bean.getSecurityPatchLink());
-								oc.setSecurityComments(bean.getSecurityComments());
-								oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-							}
+							oc.setSecurityPatchLink("N/A");
 						} else {
 							oc.setVulnerabilityResolution("");
+						}
+						
+						if (bean != null) {
+							if (!isEmpty(bean.getSecurityPatchLink())) oc.setSecurityPatchLink(bean.getSecurityPatchLink());
+							oc.setSecurityComments(bean.getSecurityComments());
+							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
 						}
 						
 						if (oc.getVulnerabilityResolution().equals("Fixed")) {
@@ -6000,11 +6005,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (!deleteDataList.isEmpty()) {
 				for (OssComponents oc : deleteDataList) {
+					oc.setReferenceId(prjId);
 					projectMapper.deleteSecurityData(oc);
 				}
 			}
 			
 			for (OssComponents oc : ossComponents) {
+				oc.setReferenceId(prjId);
 				projectMapper.insertSecurityData(oc);
 			}
 			
