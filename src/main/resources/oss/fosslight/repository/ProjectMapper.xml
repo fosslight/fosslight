@@ -5026,4 +5026,10 @@
 		  AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 		ORDER BY LICENSE_NAME
 	</select>
+	
+	<select id="selectVulnerabilityResolutionSecurityList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
+		SELECT REFERENCE_ID, OSS_NAME, OSS_VERSION, CVE_ID, CVSS_SCORE, VULNERABILITY_RESOLUTION
+		  FROM NVD_DATA_SECURITY
+		 WHERE REFERENCE_ID = #{prjId}
+	</select>
 </mapper>

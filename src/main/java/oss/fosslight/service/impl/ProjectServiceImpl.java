@@ -203,7 +203,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
 						
-						if (getSecurityDataCntByProject(bean)) bean.setSecActFlag(CoConstDef.FLAG_YES);
+						if (getSecurityDataCntByProject(bean)) {
+							if (checkIfVulnerabilityResolutionIsFixed(bean)) {
+								bean.setSecCode("Fixed");
+							} else {
+								bean.setSecCode("NotFixed");
+							}
+						}
 						
 						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
 						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
@@ -246,6 +252,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
+	private boolean checkIfVulnerabilityResolutionIsFixed(Project bean) {
+		List<OssComponents> securityDataList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		if (securityDataList != null && !securityDataList.isEmpty()) {
+			int fixedVulnResolutionDataListCnt = securityDataList.stream().filter(e -> avoidNull(e.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")).collect(Collectors.toList()).size();
+			if (securityDataList.size() == fixedVulnResolutionDataListCnt) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+
 	private boolean getSecurityDataCntByProject(Project project) {
 		return projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
 	}
@@ -5914,9 +5934,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (bean != null) {
-							if (!isEmpty(bean.getSecurityPatchLink())) oc.setSecurityPatchLink(bean.getSecurityPatchLink());
-							oc.setSecurityComments(bean.getSecurityComments());
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+							oc.setSecurityComments(bean.getSecurityComments());
+							
+							if (!isEmpty(bean.getSecurityPatchLink()) 
+									|| (oc.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
+								oc.setSecurityPatchLink(bean.getSecurityPatchLink());
+							}
 						}
 						
 						if (oc.getVulnerabilityResolution().equals("Fixed")) {
@@ -6338,5 +6362,53 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean checkReqEntrySecurity(Project project, String tabMenu) {
+		boolean reqEntryFlag = false;
+		Map<String, Object> result = getSecurityGridList(project);
+		
+		switch (tabMenu) {
+		case "fixed" : 
+			if (result.containsKey("fixedList")) {
+				List<OssComponents> fixedList = (List<OssComponents>) result.get("fixedList");
+				fixedList = fixedList.stream().filter(e -> e.getOssVersion().isEmpty()
+															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
+				if (!fixedList.isEmpty()) {
+					reqEntryFlag = true;
+				}
+			}
+			break;
+		case "notfixed" : 
+			if (result.containsKey("notFixedList")) {
+				List<OssComponents> notFixedList = (List<OssComponents>) result.get("notFixedList");
+				notFixedList = notFixedList.stream().filter(e -> isEmpty(avoidNull(e.getOssVersion()))
+															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
+				if (!notFixedList.isEmpty()) {
+					reqEntryFlag = true;
+				}
+			}
+			break;
+		default : 
+			if (result.containsKey("totalList")) {
+				List<OssComponents> totalList = (List<OssComponents>) result.get("totalList");
+				totalList = totalList.stream().filter(e -> e.getOssVersion().isEmpty()
+															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
+				if (!totalList.isEmpty()) {
+					reqEntryFlag = true;
+				}
+			}
+			break;
+		}
+		
+		return reqEntryFlag;
 	}
 }

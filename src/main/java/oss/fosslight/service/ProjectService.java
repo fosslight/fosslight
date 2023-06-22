@@ -199,6 +199,8 @@ public interface ProjectService extends HistoryConfig{
 	public List<Project> getProjectIdList(Project project);
 	
 	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice);
+
+	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 }
 
 

@@ -4597,4 +4597,21 @@ public class ProjectController extends CoTopComponent {
 
 		return makeJsonResponseHeader(resMap);
 	}
+
+	@PostMapping(value = PROJECT.CHECK_REQ_ENTRY_SECURITY)
+	public @ResponseBody ResponseEntity<Object> checkReqEntrySecurity(@RequestBody HashMap<String, Object> map,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		String prjId = (String)map.get("prjId");
+		String tabMenu = (String)map.get("tabMenu");
+		
+		Project param = new Project();
+		param.setPrjId(prjId);
+		
+		boolean reqEntryFlag = projectService.checkReqEntrySecurity(param, tabMenu);
+		if (!reqEntryFlag) {
+			return makeJsonResponseHeader();
+		} else {
+			return makeJsonResponseHeader(false, "checkReqEntry");
+		}
+	}
 }
