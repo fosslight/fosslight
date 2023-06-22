@@ -350,7 +350,7 @@ public class Project extends ComBean implements Serializable {
 	
 	private int statusPermission;
 	
-	private String secActFlag;
+	private String secCode;
 	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -4249,11 +4249,11 @@ public class Project extends ComBean implements Serializable {
 		this.deleteOsddFlag = deleteOsddFlag;
 	}
 
-	public String getSecActFlag() {
-		return secActFlag;
+	public String getSecCode() {
+		return secCode;
 	}
 
-	public void setSecActFlag(String secActFlag) {
-		this.secActFlag = secActFlag;
+	public void setSecCode(String secCode) {
+		this.secCode = secCode;
 	}
 }

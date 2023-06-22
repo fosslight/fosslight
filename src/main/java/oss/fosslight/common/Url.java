@@ -345,6 +345,7 @@ public final class Url {
 		public static final String SECURITY_GRID = PATH + "/securityGrid/{prjId}/{code}";
 		public static final String SECURITY_JSP = TILES_ROOT + PATH + "/security";
 		public static final String SAVE_SECURITY = PATH + "/saveSecurity";
+		public static final String CHECK_REQ_ENTRY_SECURITY = PATH + "/checkReqEntrySecurity";
 	}
 	
 	public static final class VERIFICATION {
