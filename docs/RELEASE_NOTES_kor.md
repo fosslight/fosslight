@@ -9,7 +9,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-06-05)
 
 ### New
-* 프로젝트에 Vulnerability Score가 8.0 이상인 OSS가 포함된 경우, CVE ID별로 확인 및 조치 상태 관리할 수 있는 **Security탭** 추가
+* 프로젝트에 Vulnerability가 검출된 OSS가 있는 경우, CVE ID별로 확인 및 조치 상태 관리할 수 있는 **Security탭** 추가
 * MyBatis Migrations를 이용하여 [DB 버전을 업그레이드](https://fosslight.org/fosslight-guide/features/3_maintenance.html#db-%EB%B2%84%EC%A0%84-%EC%97%85%EA%B7%B8%EB%A0%88%EC%9D%B4%EB%93%9C%ED%95%98%EA%B8%B0) 할 수 있습니다.
 * 비밀번호 분실시, 비밀번호를 재설정 가능
 * Self-Check 프로젝트를 Export 할 수 있는 API Endpoint([/api/v1/export_selfcheck](https://fosslight.org/fosslight-guide-en/features/2_rest_api.html#rest-api-list))가 추가
