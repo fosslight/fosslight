@@ -74,6 +74,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						&& (validMap.get(key).equals(ruleMap.get("LICENSE_NAME.UNCONFIRMED.MSG"))
 						|| validMap.get(key).equals(ruleMap.get("LICENSE_NAME.REQUIRED.MSG"))
 						|| validMap.get(key).equals(ruleMap.get("LICENSE_NAME.NOLICENSE.MSG"))
+						|| validMap.get(key).equals(ruleMap.get("LICENSE_NAME.INCLUDE_MULTI_OPERATE.MSG"))
+						|| validMap.get(key).equals(ruleMap.get("LICENSE_NAME.INCLUDE_DUAL_OPERATE.MSG"))
 						|| validMap.get(key).startsWith("Declared"))) {
 					resultData.addAll((List<ProjectIdentification>) componentData
 							.stream()
