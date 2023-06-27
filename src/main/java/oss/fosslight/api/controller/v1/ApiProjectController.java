@@ -186,7 +186,7 @@ public class ApiProjectController extends CoTopComponent {
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
-	@PostMapping(value = {API.FOSSLIGHT_API_MODEL_UPDATE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = {API.FOSSLIGHT_API_MODEL_UPDATE})
 	public CommonResult updateModelList(
 			@RequestHeader String _token,
 			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
