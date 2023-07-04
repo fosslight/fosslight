@@ -478,7 +478,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rows.add(params.toArray(new String[params.size()]));
 				} else {
 					// exclude 제외
-					if ((CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) || (isSelfCheck && CoConstDef.FLAG_YES.equals(bean.getExcludeYn()))) {
+					if ((CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && CoConstDef.FLAG_YES.equals(bean.getExcludeYn()))) {
 						continue;
 					}
 					
@@ -621,6 +621,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
 						params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
+					}
+					
+					if (isSelfCheck){
+						if (bean.getExcludeYn().equals(CoConstDef.FLAG_YES)) {
+							params.add("Exclude");
+						} else {
+							params.add("");
+						}
 					}
 					
 					addColumnWarningMessage(type, bean, vr, params);
