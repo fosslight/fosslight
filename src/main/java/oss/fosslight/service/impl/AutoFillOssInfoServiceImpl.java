@@ -297,6 +297,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				continue;
 			}
 			
+			oss.setDownloadLocation(downloadLocation);
+			
 			if (!isEmpty(checkedLicense1)) {
 				if (!currentLicense.equals(checkedLicense1)) {
 					String evidence = getMessage("check.evidence.exist.nameAndVersion");
@@ -335,8 +337,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				continue;
 			}
 
-			oss.setDownloadLocation(downloadLocation);
-			
 			// Search Priority 4. find by Clearly Defined And Github API
 			DependencyType dependencyType = DependencyType.downloadLocationToType(downloadLocation);
 
