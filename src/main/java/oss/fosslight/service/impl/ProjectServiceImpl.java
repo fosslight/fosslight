@@ -6411,4 +6411,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		return reqEntryFlag;
 	}
+
+	@Override
+	public void copySecurityDataForProject(Project project) {
+		boolean copyFlag = projectMapper.copySecurityDataForProjectCnt(project) > 0 ? true : false;
+		if (copyFlag) projectMapper.copySecurityDataForProject(project);
+	}
 }

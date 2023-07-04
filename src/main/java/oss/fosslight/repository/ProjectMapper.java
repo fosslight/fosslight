@@ -376,4 +376,8 @@ public interface ProjectMapper {
 	public List<OssComponents> selectOssComponentsListClassAppend(ProjectIdentification identification);
 
 	List<OssComponents> selectVulnerabilityResolutionSecurityList(Project project);
+
+	int copySecurityDataForProjectCnt(Project project);
+
+	void copySecurityDataForProject(Project project);
 }

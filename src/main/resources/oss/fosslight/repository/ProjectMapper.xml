@@ -5046,4 +5046,23 @@
 		   						AND OSS_NAME = SEC.OSS_NAME
 		   						AND OSS_VERSION = SEC.OSS_VERSION)
 	</select>
+	
+	<select id="copySecurityDataForProjectCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
+		SELECT COUNT(*) FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = #{copyPrjId}
+	</select>
+	
+	<insert id="copySecurityDataForProject" parameterType="oss.fosslight.domain.Project">
+		INSERT INTO NVD_DATA_SECURITY
+			SELECT #{prjId}
+					, T1.OSS_NAME
+					, T1.OSS_VERSION
+					, T1.CVE_ID
+					, T1.CVSS_SCORE
+					, T1.PUBL_DATE
+					, T1.VULNERABILITY_RESOLUTION
+					, T1.SECURITY_PATCH_LINK
+					, T1.SECURITY_COMMENTS
+			FROM NVD_DATA_SECURITY T1
+			WHERE T1.REFERENCE_ID = #{copyPrjId}
+	</insert>
 </mapper>
