@@ -4446,6 +4446,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public String addWatcher(Project project) {
+		String addWatcher = "";
+		
 		if (!isEmpty(project.getPrjEmail())) {
 			if (projectMapper.existsWatcherByEmail(project) == 0) { // 이미 추가된 watcher 체크
 				projectMapper.insertWatcher(project); // watcher 추가
@@ -4472,10 +4474,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		T2Users userInfo = new T2Users();
-		userInfo.setUserId(project.getPrjUserId());
-		userInfo = userMapper.getUser(userInfo);
-		return project.getPrjDivision() + "/" + userInfo.getUserId();
+		if (!isEmpty(project.getPrjUserId())) {
+			T2Users userInfo = new T2Users();
+			userInfo.setUserId(project.getPrjUserId());
+			userInfo = userMapper.getUser(userInfo);
+			addWatcher = project.getPrjDivision() + "/" + userInfo.getUserId();
+		} else {
+			addWatcher = project.getPrjEmail();
+		}
+		
+		return addWatcher;
 	}
 
 	@Override

@@ -434,7 +434,7 @@ public class T2UserServiceImpl implements T2UserService {
 			if(ldapTemplate.authenticate("", String.format("(cn=%s)", userId), userPw)) {
 				isAuthenticated = true;
 				@SuppressWarnings({ "unchecked", "rawtypes" })
-				List<String[]> result = ldapTemplate.search(query().where("cn").is(filter), new AttributesMapper() {
+				List<String[]> result = ldapTemplate.search(query().where("mail").is(filter), new AttributesMapper() {
 					public Object mapFromAttributes(Attributes attrs) throws NamingException {
 						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
 					}
