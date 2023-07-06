@@ -317,6 +317,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			project.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
 		}
 		
+		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			if (getSecurityDataCntByProject(project)) {
+				project.setSecCode(CoConstDef.FLAG_YES);
+			}
+		} else {
+			if (!project.getIdentificationSubStatusBom().equals("0")) {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				if (getSecurityDataCntByProject(project)) {
+					project.setSecCode(CoConstDef.FLAG_YES);
+				}
+			}
+		}
+		
 		return project;
 	}
 	

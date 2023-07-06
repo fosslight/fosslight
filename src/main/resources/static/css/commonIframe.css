@@ -343,6 +343,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnIcon.identi {background-color:#ffb526;background-position:-155px -270px}
 .btnIcon.packag {background-color:#4cf58c;background-position:-180px -270px}
 .btnIcon.distr {background-color:#f54cf3;background-position:-205px -270px}
+.btnIcon.security {background-color:#ff9900;background-position:-230px -270px}
 
 /* 2017-06-20 */
 .btnIcon.ossI {vertical-align:middle;cursor:pointer;border:none;background-position:-130px -240px}
