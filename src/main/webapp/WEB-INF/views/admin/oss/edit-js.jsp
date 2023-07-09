@@ -708,7 +708,7 @@
 			colModel:[
 				{name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
 				{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
-				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH", dataEvents:[{type:'change', fn:changeLicenseType}]}},
+				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
 				{name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
                         dataInit: function (elem) { 
 	                               $(elem).focus(function () { setCustomAutoComplete('multi'); }) 
