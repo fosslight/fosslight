@@ -44,7 +44,6 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.validation.T2BasicValidator;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoAdminValidator;
 
