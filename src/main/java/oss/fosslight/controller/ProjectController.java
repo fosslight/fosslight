@@ -4614,4 +4614,18 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, "checkReqEntry");
 		}
 	}
+	
+	@PostMapping(value=PROJECT.SEC_BULK_EDIT_POPUP)
+	public String securityBulkEditPopup(HttpServletRequest req, HttpServletResponse res, 
+			@RequestParam(value="rowId", required=true)String rowId,
+			@RequestParam(value="gridId", required=true)String gridId,
+			@RequestParam(value="target", required=true)String target,
+			Model model){
+		
+		model.addAttribute("rowId", rowId);
+		model.addAttribute("gridId", gridId);
+		model.addAttribute("target", target);
+		
+		return PROJECT.SEC_BULK_EDIT_POPUP_JSP;
+	}
 }
