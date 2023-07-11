@@ -70,7 +70,7 @@ $('#btnNotice').click(function(){
 
 if(getCookie("noticeYn") != "N"){
 	$.ajax({
-		url : '<c:url value="/system/notice/getPublishedtNotice"/>',
+		url : '<c:url value="/system/notice/getPublishedNotice"/>',
 		type : "GET",
 		success : function(data){
 			if(data.noticeList){

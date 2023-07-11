@@ -76,7 +76,7 @@ public class ProcessGuideController extends CoTopComponent {
 	}
 	
 	@RequestMapping(value={PROCESSGUIDE.PROCESS_GUIDE}, method = {RequestMethod.POST, RequestMethod.GET})
-	public @ResponseBody ResponseEntity<Object> getPublishedtProcessGuide(
+	public @ResponseBody ResponseEntity<Object> getPublishedProcessGuide(
 			@ModelAttribute ProcessGuide vo
 			, HttpServletRequest req
 			, HttpServletResponse res
