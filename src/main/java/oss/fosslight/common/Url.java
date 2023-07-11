@@ -622,7 +622,7 @@ public final class Url {
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		
-		public static final String PUBLISHEDT_NOTICE = PATH + "/getPublishedtNotice";
+		public static final String PUBLISHED_NOTICE = PATH + "/getPublishedNotice";
 	}
 	
 	public static final class CONFIGURATION {
