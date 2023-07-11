@@ -70,10 +70,6 @@ public class CommentController extends CoTopComponent {
 	        partnerMaster.setPartnerId(rId);
 	        
 		    model.addAttribute("partner", partnerService.getPartnerMasterOne(partnerMaster));
-		} else if ("oss".equalsIgnoreCase(rDiv)) {
-			
-		} else if ("license".equalsIgnoreCase(rDiv)) {
-			
 		}
 		
 		return COMMENT.POPUP_JSP;
