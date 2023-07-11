@@ -5804,6 +5804,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			list = componentList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
 		}
 		
+		int gridIdx = 1;
 		for (ProjectIdentification pi : list) {
 			activateFlag = false;
 			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
@@ -5849,6 +5850,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						oc = new OssComponents();
+						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
 						oc.setOssName(pi.getOssName());
 						oc.setOssVersion(pi.getOssVersion());
 						if (!activateFlag) {
@@ -5974,6 +5976,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						totalList.add(oc);
 						
 						bean = null;
+						gridIdx++;
 					}
 				}
 			}
