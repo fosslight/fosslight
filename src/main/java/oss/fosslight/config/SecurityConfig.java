@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import java.util.Objects;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -154,6 +155,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             HashMap<String, Object> info = new HashMap<String, Object>();
 			if (StringUtil.isEmptyTrimmed(userInfo.getDivision())){
 				userInfo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+			}
+			if (Objects.isNull(userInfo.getNumbersOfRowPerPage())) {
+				userInfo.setNumbersOfRowPerPage(CoConstDef.NUMBERS_OF_ROWS_PER_PAGE_DEFAULT);
 			}
             info.put("sessUserInfo", userInfo);
             auth.setDetails(info);
