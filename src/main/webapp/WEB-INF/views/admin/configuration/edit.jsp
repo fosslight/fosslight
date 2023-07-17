@@ -30,6 +30,21 @@
 							</div>
 						</td>
 					</tr>
+					<tr>
+						<th class="dCase txStr">Number of rows displayed per page</th>
+						<td class="dCase">
+							<div>
+								<span class="selectSet" style="width: 200px;">
+									<strong title="Division selected value"></strong>
+									<!---
+									<select name="division">
+										 ${ct:genOptionSelected(ct:getConstDef("CD_USER_DIVISION"), userInfo.numbersOfRowPerPage)}
+									</select>
+									--->
+								</span>
+							</div>
+						</td>
+					</tr>
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 						<tr>
 							<th class="dCase"><span class="radioSet">
