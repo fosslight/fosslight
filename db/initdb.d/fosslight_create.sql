@@ -2374,6 +2374,10 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('226', '6', 'Specification Constraints', '', '', 6, 'Y'),
 	('226', '7', 'Restricted Redistribution', '', '', 7, 'Y'),
 	('226', '8', 'Commons Clause Restriction', '', '', 8, 'Y'),
+    ('227', '1', '15', '', '', 15,'Y')
+    ('227', '2', '30', '', '', 30,'Y')
+    ('227', '3', '50', '', '', 50,'Y')
+    ('227', '4', '100', '', '', 10,'Y')
 	('300', '001', 'licenseName', NULL, 'String|License Name', 1, 'Y'),
 	('300', '002', 'licenseType', NULL, 'String|License Type', 2, 'Y'),
 	('300', '003', 'obligationNotificationYn', NULL, 'String|Obligation Notice', 3, 'Y'),
