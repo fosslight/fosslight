@@ -463,7 +463,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					// from
 					params.add(isMainRow ? refSrcTab : "");
 					// main 정보 (license 정보 후처리)
-					params.add(isMainRow ? bean.getFilePath() : ""); // path
+//					params.add(isMainRow ? bean.getFilePath() : ""); // path
 					// vulnerability
 					params.add(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()) : "");
 					// notice
