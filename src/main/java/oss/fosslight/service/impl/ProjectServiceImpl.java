@@ -712,6 +712,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				identification.setSortAndroidFlag(CoConstDef.FLAG_YES);
 			}
 			
+			String loadToListComment = "";
+			if (!isEmpty(identification.getRefPrjId()) &&
+					(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
+				loadToListComment = "(From Prj " + identification.getRefPrjId() + ")";
+			}
+			
 			HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 			// src, bin, bin(android) 의 경우만 comment를 포함한다.
@@ -782,6 +788,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					cvssScoreMaxVendorProductList.clear();
 					cvssScoreMaxList.clear();
+					
+					String comments = "";
+					if (!isEmpty(loadToListComment)) comments = loadToListComment;
+					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+					if (!isEmpty(comments)) project.setComments(comments);
 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
