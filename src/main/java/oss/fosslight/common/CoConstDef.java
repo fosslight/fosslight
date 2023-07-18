@@ -833,4 +833,8 @@ public class CoConstDef {
 	/* SCORE CODE */
 	public static final String CD_VULNERABILITY_MAILING_SCORE					= "750";
 	public static final String CD_VULNERABILITY_MAILING_SCORE_STANDARD			= "100";
+	
+	/* SECURITY SCORE CODE */
+	public static final String CD_SECURITY_VULNERABILITY_SCORE					= "760";
+	public static final String CD_SECURITY_VULNERABILITY_DETAIL_SCORE			= "100";
 }

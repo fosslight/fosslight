@@ -306,6 +306,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String vulnerabilityCheckFlag;
 	private String sndMailCheckFlag;
 	
+	private Float securityStandardScore;
+	
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
 	}
@@ -2108,5 +2110,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setSndMailCheckFlag(String sndMailCheckFlag) {
 		this.sndMailCheckFlag = sndMailCheckFlag;
+	}
+
+	public Float getSecurityStandardScore() {
+		return securityStandardScore;
+	}
+
+	public void setSecurityStandardScore(Float securityStandardScore) {
+		this.securityStandardScore = securityStandardScore;
 	}
 }
