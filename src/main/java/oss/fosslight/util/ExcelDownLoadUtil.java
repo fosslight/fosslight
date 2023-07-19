@@ -560,7 +560,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 					
 					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
-						params.add(""); // check list > Modified or not
+//						params.add(""); // check list > Modified or not
+						params.add((new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore())); // Vuln
 					}
 					
 					if (!CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type) && !isSelfCheck) { // selfcheck에서는 출력하지 않음.
@@ -621,6 +622,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)){
 						params.add(isEmpty(bean.getComments()) ? "" : bean.getComments());
+						// notice
+						params.add(( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+						// source code
+						params.add(( (CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : ""));
+						// Restriction
+						params.add((isEmpty(bean.getRestriction()) ? "" : bean.getRestriction()));
 					}
 					
 					if (isSelfCheck){
