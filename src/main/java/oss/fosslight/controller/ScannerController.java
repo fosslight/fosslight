@@ -5,14 +5,13 @@
 
 package oss.fosslight.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
@@ -38,9 +37,9 @@ public class ScannerController {
 		try {
 
 			log.info("fl scanner start pid : " + prjId + ", url:" + wgetUrl);
-			String scannServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
+			String scanServiceUrl = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_FL_SCANNER_URL);
 			String adminToken = CoCodeManager.getCodeExpString(CoConstDef.CD_EXTERNAL_ANALYSIS_SETTING, CoConstDef.CD_DTL_ADMIN_TOKEN);
-			if (StringUtil.isEmpty(scannServiceUrl) || StringUtil.isEmpty(adminToken)) {
+			if (StringUtil.isEmpty(scanServiceUrl) || StringUtil.isEmpty(adminToken)) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE, "FL Scanner Url or Admin token is not configured");
 			}
 			
@@ -54,7 +53,7 @@ public class ScannerController {
 			parts.add("link", wgetUrl);
 			parts.add("email", user.getEmail());
 			parts.add("admin", adminToken);
-			String resBody = RequestUtil.post(scannServiceUrl, parts);
+			String resBody = RequestUtil.post(scanServiceUrl, parts);
 			log.info("fl scanner response : " + resBody);
 			
 			return responseService.getSuccessResult();
