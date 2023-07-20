@@ -5774,8 +5774,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		OssComponents oc = null;
 		OssComponents bean = null;
 		boolean activateFlag;
-		String ossVersion = "";
-		String vulnerabilityLink = "";
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
 		
@@ -5822,7 +5820,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			param.setOssName(pi.getOssName());
 			param.setOssVersion(pi.getOssVersion());
-			if(isEmpty(pi.getOssVersion()) || pi.getOssVersion().equals("N/A")) ossVersion = "-";
 			
 			List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
 			if (vulnList != null && !vulnList.isEmpty()) {
@@ -5852,130 +5849,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean = (OssComponents) securityGridMap.get(key);
 						}
 						
-						if (activateFlag) {
-							checkOssNameList.add(pi.getOssName());
-							vulnerabilityLink = CommonFunction.getProperty("server.domain");
-							vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
-						} else {
-							vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + vuln.getCveId();
-						}
-						
 						oc = new OssComponents();
 						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
+						oc.setOssId(pi.getOssId());
 						oc.setOssName(pi.getOssName());
 						oc.setOssVersion(pi.getOssVersion());
+						
 						if (!activateFlag) {
 							oc.setCveId(vuln.getCveId());
 							oc.setCvssScore(vuln.getCvssScore());
 							oc.setPublDate(vuln.getPublDate());
 						}
 						
-						oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-						oc.setVulnerabilityLink(vulnerabilityLink);
-						
-						if (!activateFlag) {
-							List<Map<String, Object>> cpeInfoList = vulnerabilityService.getCpeInfoAndRange(oc.getCveId(), oc.getOssName());
-							if (cpeInfoList != null && !cpeInfoList.isEmpty()) {
-								String criteria = "";
-								String verStartEndRange = "";
-								String checkUrl = "";
-								
-								boolean emptyFlag = false;
-								for (Map<String, Object> cpeInfo : cpeInfoList) {
-									Map<String, Object> paramMap = new HashMap<>();
-									paramMap = cpeInfo;
-									if (!paramMap.containsKey("verStartInc")) paramMap.put("verStartInc", "");
-									if (!paramMap.containsKey("verEndInc")) paramMap.put("verEndInc", "");
-									if (!paramMap.containsKey("verStartExc")) paramMap.put("verStartExc", "");
-									if (!paramMap.containsKey("verEndExc")) paramMap.put("verEndExc", "");
-									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-										continue;
-									}
-									
-									if (cpeInfo.containsKey("criteria")) {
-										String cpeInfoCriteria = (String) cpeInfo.get("criteria");
-										String[] url = cpeInfoCriteria.split(":");
-										if (!emptyFlag) checkUrl = cpeInfoCriteria;
-										if (!criteria.contains(cpeInfoCriteria) && url[5].equals("*") || url[5].equals(oc.getOssVersion())) {
-											criteria += cpeInfoCriteria + ",";
-										}
-									}
-									if (cpeInfo.containsKey("verStartInc")) {
-										verStartEndRange += "From (including) : " + (String) cpeInfo.get("verStartInc")+",";
-									}
-									if (cpeInfo.containsKey("verEndInc")) {
-										verStartEndRange += "Up to (including) : " + (String) cpeInfo.get("verEndInc")+",";
-									}
-									if (cpeInfo.containsKey("verStartExc")) {
-										verStartEndRange += "From (excluding) : " + (String) cpeInfo.get("verStartExc")+",";
-									}
-									if (cpeInfo.containsKey("verEndExc")) {
-										verStartEndRange += "Up to (excluding) : " + (String) cpeInfo.get("verEndExc")+",";
-									}
-									
-									emptyFlag = true;
-								}
-								
-								if (!isEmpty(criteria)) {
-									criteria = criteria.substring(0, criteria.length()-1);
-									oc.setCpeName(criteria);
-								} else {
-									if (!isEmpty(checkUrl)) {
-										String[] url = checkUrl.split(":");
-										String changeUrl = "";
-										int i = 0;
-										for (String urlData : url) {
-											if (i == 5) {
-												changeUrl += "*:";
-											} else {
-												changeUrl += urlData + ":";
-											}
-											i++;
-										}
-										changeUrl = changeUrl.substring(0, changeUrl.length()-1);
-										oc.setCpeName(changeUrl);
-									}
-								}
-								
-								if (!isEmpty(verStartEndRange)) {
-									verStartEndRange = verStartEndRange.substring(0, verStartEndRange.length()-1);
-									oc.setVerStartEndRange(verStartEndRange);
-								} else {
-									oc.setVerStartEndRange("N/A");
-								}
-							}
-							
-							List<String> patchLinkList = vulnerabilityService.getPatchLinkForNvdData(vuln.getCveId());
-							if (!patchLinkList.isEmpty()) {
-								String link = "";
-								for (String patchLink : patchLinkList) {
-									if (isEmpty(link)) {
-										link = patchLink;
-									} else {
-										link += "," + patchLink;
-									}
-								}
-								
-								oc.setOfficialPatchLink(link);
-								oc.setVulnerabilityResolution("Unresolved");
-							} else {
-								oc.setOfficialPatchLink("N/A");
-								oc.setVulnerabilityResolution("Deferred (Not Available)");
-							}
-							
-							oc.setSecurityPatchLink("N/A");
-						} else {
-							oc.setVulnerabilityResolution("");
-						}
+						oc.setVulnerabilityResolution("Unresolved");
 						
 						if (bean != null) {
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-							oc.setSecurityComments(bean.getSecurityComments());
-							
-							if (!isEmpty(bean.getSecurityPatchLink()) 
-									|| (oc.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
-								oc.setSecurityPatchLink(bean.getSecurityPatchLink());
-							}
 						}
 						
 						if (oc.getVulnerabilityResolution().equals("Fixed")) {

@@ -2172,7 +2172,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_prj-" + StringUtil.deleteWhitespaceWithSpecialChar(projectMaster.getPrjId());
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/Security.xlsx"));
+			inFile= new FileInputStream(new File(downloadpath+"/Security_demo.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			CreationHelper creationHelper = wb.getCreationHelper();
 			CellStyle style = wb.createCellStyle();
@@ -2209,14 +2209,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						, bean.getOssVersion()
 						, bean.getCveId()
 						, bean.getPublDate()
-						, bean.getCpeName()
 						, bean.getCvssScore()
 						, bean.getVulnerabilityResolution()
-						, bean.getVulnerabilityLink()
-						, bean.getOfficialPatchLink()
-						, bean.getSecurityPatchLink()
-						, bean.getVerStartEndRange()
-						, bean.getSecurityComments()
 					};
 					
 					rowDatas.add(rowParam);
@@ -2266,50 +2260,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			endCol = rows.get(0).length-1;
 		}
 		
-		Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
 		int rowIndex = 0;
 		for (int i = startRow; i < startRow+rows.size(); i++){
 			Row row = sheet.createRow(i);
 			for (int colNum=startCol; colNum<=endCol; colNum++){
 				Cell cell = row.createCell(colNum);
-				style.setWrapText(false);
-				if (colNum == 5 || colNum == 11) {
-					String cellData = rows.get(rowIndex)[colNum];
-					if (!isEmpty(cellData)) {
-						if (cellData.contains(",")) {
-							String[] splitData = cellData.split(",");
-							String sData = "";
-							for (int j=0; j<splitData.length; j++) {
-								sData += splitData[j];
-								sData += "\n";
-							}
-							cellData = sData.substring(0, sData.length()-1);
-							style.setWrapText(true);
-						}
-					}
-					cell.setCellValue(cellData);
-					cell.setCellStyle(style);
-				} else if (colNum == 8 || colNum == 9 || colNum == 10) {
-					String cellData = rows.get(rowIndex)[colNum];
-					if (!isEmpty(cellData)) {
-						if (cellData.contains(",")) {
-							String[] splitData = cellData.split(",");
-							String sData = "";
-							for (int j=0; j<splitData.length; j++) {
-								sData += splitData[j];
-								sData += "\n";
-							}
-							cellData = sData.substring(0, sData.length()-1);
-							hyperLinkStyle.setWrapText(true);
-						}
-						hyperlink.setAddress(cell.getStringCellValue());
-						cell.setCellValue(cellData);
-						cell.setCellStyle(hyperLinkStyle);
-					}
-				} else {
-					cell.setCellValue(rows.get(rowIndex)[colNum]);
-					cell.setCellStyle(style);
-				}
+				cell.setCellValue(rows.get(rowIndex)[colNum]);
+				cell.setCellStyle(style);
 			}
 			rowIndex++;
 		}
