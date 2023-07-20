@@ -775,6 +775,9 @@ public final class Url {
 			/** API Update Project Model */
 			public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/model_update";
 			
+			/** API Update Project Model WITH FILE */
+			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/model_update_upload_file";
+			
 			/** API Project BOM Tab Export */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export";
 

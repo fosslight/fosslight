@@ -181,7 +181,6 @@ public class ApiProjectController extends CoTopComponent {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
@@ -190,8 +189,7 @@ public class ApiProjectController extends CoTopComponent {
 	public CommonResult updateModelList(
 			@RequestHeader String _token,
 			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-			@ApiParam(value = "Model List (ex. MODEL_NAME|ETC > Etc|20220428)", required = false) @RequestParam(required = false) String[] modelListToUpdate,
-			@ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
+			@ApiParam(value = "Model List (ex. MODEL_NAME|ETC > Etc|20220428)", required = true) @RequestParam(required = true) String[] modelListToUpdate) {
 
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -211,28 +209,16 @@ public class ApiProjectController extends CoTopComponent {
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			if (searchFlag) {
 				Project project = projectService.getProjectBasicInfo(prjId);
-				if (modelReport != null) {
-					if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
-							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > modelReport.getSize()) { // Max file size :5MB
-						modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
-								project.getDistributeTarget(), prjId, CoConstDef.FLAG_YES, "0");
-					} else {
-						errorCode = CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE;
+				if (modelListToUpdate != null) {
+					List<String[]> models = new ArrayList<>();
+					for (String strModel : modelListToUpdate) {
+						String[] model = strModel.replaceAll("\"", "").split("\\|");
+						if (model.length > 2) {
+							models.add(model);
+						}
 					}
-				} else {
-					if (modelListToUpdate != null) {
-						List<String[]> models = new ArrayList<>();
-						for (String strModel : modelListToUpdate) {
-							String[] model = strModel.replaceAll("\"", "").split("\\|");
-							if (model.length > 2) {
-								models.add(model);
-							}
-						}
-						if (models.size() > 0) {
-							modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
-						}
-					} else {
-						errorCode = CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE;
+					if (models.size() > 0) {
+						modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
 					}
 				}
 
@@ -249,6 +235,65 @@ public class ApiProjectController extends CoTopComponent {
 			errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
 		}
 
+		return responseService.getFailResult(errorCode
+				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
+	}
+
+	@ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	})
+	@PostMapping(value = {API.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
+	public CommonResult updateModelListUploadFile(
+			@RequestHeader String _token,
+			@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+			@ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, List<Project>> modelList = null;
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
+		
+		if (modelReport == null) {
+			errorCode = CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE;
+		} else {
+			try {
+				Map<String, Object> paramMap = new HashMap<>();
+				List<String> prjIdList = new ArrayList<String>();
+				prjIdList.add(prjId);
+				paramMap.put("userId", userInfo.getUserId());
+				paramMap.put("userRole", userRole(userInfo));
+				paramMap.put("prjId", prjIdList);
+				paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
+				paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+				boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+				if (searchFlag) {
+					Project project = projectService.getProjectBasicInfo(prjId);
+					if (modelReport != null) {
+						if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
+								&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > modelReport.getSize()) { // Max file size :5MB
+							modelList = ExcelUtil.getModelList(modelReport, CommonFunction.emptyCheckProperty("upload.path", "/upload"),
+									project.getDistributeTarget(), prjId, CoConstDef.FLAG_YES, "0");
+						} else {
+							errorCode = CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE;
+						}
+					}
+
+					if (modelList != null) {
+						project.setModelList(modelList.get("currentModelList"));
+						projectService.insertProjectModel(project);
+						return responseService.getSingleResult(resultMap);
+					}
+				} else {
+					errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage());
+				errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+			}
+		}
+		
 		return responseService.getFailResult(errorCode
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
