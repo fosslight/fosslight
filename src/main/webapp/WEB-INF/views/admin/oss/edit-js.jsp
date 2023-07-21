@@ -1369,12 +1369,14 @@
 				
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
+		var checkLicenses = [];
 		dataIds.forEach(function(dataId){
 			var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
 			var licenseName = rowData.licenseName;
 			if( licenseName.indexOf('<div') > -1){
 				rowData['licenseName'] = '';
 			}
+			checkLicenses.push(rowData.licenseNameEx);
 			newRows.push(rowData);
 		});
 		
@@ -1404,6 +1406,25 @@
 			return false;
 		}
 
+		var duplicatedLicenseFlag = true;
+ 		if (checkLicenses.length > 0) {
+ 			$.each(checkLicenses, function(index, element){
+ 				$("[name='detectedLicenses']").each(function(idx, cur){
+ 	 				var detectedLicense = $(cur).val();
+ 	 				if (detectedLicense && element == detectedLicense) {
+ 	 					$('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("License included in Declared").show();
+ 	 					duplicatedLicenseFlag = false;
+ 	 					return true;
+ 	 				}
+ 	 			});
+ 			});
+ 		}
+	
+ 		if (!duplicatedLicenseFlag) {
+ 			alertify.error("License included in Declared", 0);
+ 			return false;
+ 		}
+		
 		return true;
 	}
 	
