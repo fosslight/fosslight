@@ -154,7 +154,7 @@ public final class Url {
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
-		public static final String DELTE_COMMENT = PATH + "/deleteComment";
+		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
 		
 		public static final String SAVE_SESSION_OSS_INFO = PATH + "/saveSessionOssInfo";
