@@ -488,7 +488,7 @@ public final class Url {
 		
 		public static final String CHECK_EMAIL = PATH + "/checkEmail";
 		
-		public static final String AUTOCOMPLETE_CRAETOR_AJAX = PATH + "/autoCompleteCreatorAjax";
+		public static final String AUTOCOMPLETE_CREATOR_AJAX = PATH + "/autoCompleteCreatorAjax";
 		public static final String AUTOCOMPLETE_REVIEWER_AJAX = PATH + "/autoCompleteReviewerAjax";
 		public static final String AUTOCOMPLETE_CREATOR_DIVISION_AJAX = PATH + "/autoCompleteCreatorDivisionAjax";
 		
