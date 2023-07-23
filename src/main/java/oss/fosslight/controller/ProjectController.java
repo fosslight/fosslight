@@ -4199,7 +4199,7 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(modelList);
 	}
 	
-	@PostMapping(value = PROJECT.SUPPLEMEMT_NOTICE_FILE)
+	@PostMapping(value = PROJECT.SUPPLEMENT_NOTICE_FILE)
 	public @ResponseBody ResponseEntity<Object> getSupplementNoticeFile(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String fileId = null;
