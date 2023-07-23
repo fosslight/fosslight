@@ -162,7 +162,7 @@ public class UserController extends CoTopComponent {
 		return makeJsonResponseHeader(resMap);
 	}
 	
-	@GetMapping(value = USER.AUTOCOMPLETE_CRAETOR_AJAX)
+	@GetMapping(value = USER.AUTOCOMPLETE_CREATOR_AJAX)
 	public @ResponseBody ResponseEntity<Object> autoCompleteCreatorAjax(T2Users t2Users, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		t2Users.setSortField("userName");
