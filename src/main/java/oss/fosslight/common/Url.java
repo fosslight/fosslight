@@ -277,7 +277,7 @@ public final class Url {
 		public static final String IDENTIFICATION_ID_DIV = PATH + "/identification/{prjId}/{initDiv}";
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
-		public static final String IDENTIFICATION_PROJECT_SERCH_CD = PATH + "/identificationProjectSearch/{code}";
+		public static final String IDENTIFICATION_PROJECT_SEARCH_CD = PATH + "/identificationProjectSearch/{code}";
 		public static final String IDENTIFIATION_THIRD = PATH + "/identificationThird";
 		public static final String IDENTIFICAITON_GRID_POST = PATH + "/identificationGridPost";
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
