@@ -325,7 +325,7 @@ public final class Url {
 		
 		public static final String MODEL_FILE = PATH + "/modelFile";
 		
-		public static final String SUPPLEMEMT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
+		public static final String SUPPLEMENT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
 		
 		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePrjId}/{afterPrjId}";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";

@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -66,7 +65,6 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.service.AutoIdService;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
@@ -4201,7 +4199,7 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(modelList);
 	}
 	
-	@PostMapping(value = PROJECT.SUPPLEMEMT_NOTICE_FILE)
+	@PostMapping(value = PROJECT.SUPPLEMENT_NOTICE_FILE)
 	public @ResponseBody ResponseEntity<Object> getSupplementNoticeFile(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String fileId = null;
