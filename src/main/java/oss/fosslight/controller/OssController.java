@@ -755,7 +755,7 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
-	@PostMapping(value=OSS.DELTE_COMMENT)
+	@PostMapping(value=OSS.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
 			, HttpServletRequest req
