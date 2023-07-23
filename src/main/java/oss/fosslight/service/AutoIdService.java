@@ -21,7 +21,7 @@ public class AutoIdService {
 	
 	@Autowired private BinaryDataMapper binaryDataMapper;
 	
-	@Cacheable(value="tlshFindOssInfoCache", key="{#root.methodName, #binaryName, #checkSum, #tish}")
+	@Cacheable(value="tlshFindOssInfoCache", key="{#root.methodName, #binaryName, #checkSum, #tlsh}")
 	public List<BinaryData> findOssInfoWithBinaryName(String binaryName, String checkSum, String tlsh) {
 		
 		List<BinaryData> dbDataList = binaryDataMapper.getBinaryListWithNameAndChecksum(binaryName, checkSum);
