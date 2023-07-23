@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -66,7 +65,6 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.service.AutoIdService;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
@@ -953,7 +951,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the oss versions
 	 */
-	@GetMapping(value = PROJECT.OSS_VERIONS)
+	@GetMapping(value = PROJECT.OSS_VERSIONS)
 	public @ResponseBody ResponseEntity<Object> getOssVersions(ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String ossName = req.getParameter("ossName");
@@ -2767,7 +2765,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@PostMapping(value = PROJECT.IDENTIFICAITON_GRID_POST)
+	@PostMapping(value = PROJECT.IDENTIFICATION_GRID_POST)
 	public @ResponseBody ResponseEntity<Object> srcMainGridAjaxPost(@RequestBody ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		return makeJsonResponseHeader(getOssComponentDataInfo(identification, identification.getReferenceDiv()));
@@ -2907,7 +2905,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFIATION_THIRD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_THIRD)
 	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		Map<String, Object> map = projectService.getIdentificationThird(ossComponents);

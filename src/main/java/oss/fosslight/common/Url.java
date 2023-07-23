@@ -264,7 +264,7 @@ public final class Url {
 		
 		public static final String OSS_NAMES = PATH + "/getOssNames";
 		
-		public static final String OSS_VERIONS = PATH + "/getOssVersions";
+		public static final String OSS_VERSIONS = PATH + "/getOssVersions";
 		public static final String UPDATE_REVIEWER = PATH + "/updateReviewer";
 		public static final String UPDATE_REJECT = PATH + "/updateReject";
 		public static final String CATEGORY_CODE = PATH + "/getCategoryCode";
@@ -278,8 +278,8 @@ public final class Url {
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
 		public static final String IDENTIFICATION_PROJECT_SERCH_CD = PATH + "/identificationProjectSearch/{code}";
-		public static final String IDENTIFIATION_THIRD = PATH + "/identificationThird";
-		public static final String IDENTIFICAITON_GRID_POST = PATH + "/identificationGridPost";
+		public static final String IDENTIFICATION_THIRD = PATH + "/identificationThird";
+		public static final String IDENTIFICATION_GRID_POST = PATH + "/identificationGridPost";
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
 		public static final String TRD_OSS = PATH + "/3rdOss";
 		
