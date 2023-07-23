@@ -152,11 +152,10 @@ public class CoMail extends ComBean {
 	private boolean toIdsCheckDivision = false;
 	
 	/**
-	 *  //.
+	 * Gets the snd seq.
 	 *
 	 * @return the snd seq
 	 */
-	
 	public String getSndSeq() {
 		return sndSeq;
 	}
