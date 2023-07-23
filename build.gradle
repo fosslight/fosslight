@@ -35,7 +35,7 @@ test {
 
 checkstyle {
     maxWarnings = 174900
-    configFile = file("${rootDir}/asset/fosslight-checkstyle.xml")
+    configFile = file("${rootDir}/config/fosslight-checkstyle.xml")
     toolVersion = "10.9.0"
 }
 
