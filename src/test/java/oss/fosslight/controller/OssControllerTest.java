@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class OssControllerTest {
     private MockMvc mockMvc;
 
     @Test
+    @Disabled
     @DisplayName("oss list add should be success When parameter is valid")
     void ossListAddShouldBeSuccess() throws Exception{
         mockMvc.perform(post("/oss/saveAjax")

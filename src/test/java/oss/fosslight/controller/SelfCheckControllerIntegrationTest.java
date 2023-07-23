@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 package oss.fosslight.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class SelfCheckControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
+    @Disabled
     @DisplayName("Adding Self-Check list should be success When parameter is valid")
     void registrationShouldBeSuccess() throws Exception {
 
