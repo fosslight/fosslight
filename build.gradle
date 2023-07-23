@@ -5,6 +5,7 @@ plugins {
 	id 'war'
 	id 'eclipse' // optional (to generate Eclipse project files)
 	id 'idea' // optional (to generate IntelliJ IDEA project files)
+	id 'checkstyle'
 }
 
 group = 'oss.fosslight'
@@ -30,6 +31,12 @@ repositories {
 
 test {
 	useJUnitPlatform()
+}
+
+checkstyle {
+    maxWarnings = 0
+    configFile = file("${rootDir}/asset/fosslight-checkstyle.xml")
+    toolVersion = "10.9.0"
 }
 
 processResources {
