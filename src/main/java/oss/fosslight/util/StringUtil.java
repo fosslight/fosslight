@@ -506,21 +506,21 @@ public final class StringUtil {
 	 * @return underscore 형태로 변환된 문자열
 	 */
 	public static String convertToUnderScore(String camelCase) {
-		String result = "";
-		
+		StringBuilder result = new StringBuilder();
+
 		for (int i = 0; i < camelCase.length(); i++) {
 			char currentChar = camelCase.charAt(i);
 			// This is starting at 1 so the result does not end up with an
 			// underscore at the begin of the value
-			
+
 			if (i > 0 && Character.isUpperCase(currentChar)) {
-				result = result.concat("_");
+				result.append('_');
 			}
-			
-			result = result.concat(Character.toString(currentChar).toLowerCase());
+
+			result.append(Character.toLowerCase(currentChar));
 		}
-		
-		return result;
+
+		return result.toString();
 	}
 
 	/**
