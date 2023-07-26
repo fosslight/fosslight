@@ -820,6 +820,9 @@ public final class Url {
 			
 			/** API Verification Packaging Upload */
 			public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/package_upload";
+
+			/** API Project Notice Download */
+			public static final String FOSSLIGHT_API_PROJECT_NOTICE_DOWNLOAD		= "/prj_notice_download";
 			
 			
 		/** VULNABILITY */

@@ -336,7 +336,7 @@ public class CoTopComponent {
 	    return responseEntity;
 	}
 	
-	public static ResponseEntity<FileSystemResource> noticeToResponseEntity(String filePath ,String downFileName) throws IOException{
+	public static ResponseEntity<FileSystemResource> noticeToResponseEntity(String filePath, String downFileName) throws IOException {
 	
 		String fullLogiPath = filePath;
 		String encodedFilename = URLEncoder.encode(downFileName,"UTF-8").replace("+", "%20");
