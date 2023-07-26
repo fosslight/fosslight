@@ -5,17 +5,8 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-
+import com.google.gson.JsonObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.ldap.core.AttributesMapper;
@@ -33,10 +24,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.JsonObject;
-
-import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.api.advice.CSigninFailedException;
 import oss.fosslight.api.advice.CUserNotFoundException;
 import oss.fosslight.common.CoCodeManager;
@@ -60,6 +47,16 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.JwtUtil;
 import oss.fosslight.util.StringUtil;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
 import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 /**
@@ -68,7 +65,9 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 @Service("userService")
 @Slf4j
 public class T2UserServiceImpl implements T2UserService {
-	
+
+	private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
 	@Autowired Environment env;
 	
 	// Service
@@ -708,5 +707,12 @@ public class T2UserServiceImpl implements T2UserService {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean isUserToken(final String _token) {
+		final T2Users loginUser = checkApiUserAuth(_token);
+
+		return ROLE_ADMIN.equals(loginUser.getAdminAuthority());
 	}
 }

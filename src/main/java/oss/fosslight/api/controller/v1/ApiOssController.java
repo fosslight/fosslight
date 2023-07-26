@@ -5,18 +5,24 @@
 
 package oss.fosslight.api.controller.v1;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
@@ -24,16 +30,15 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.T2UserService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor
@@ -47,8 +52,10 @@ public class ApiOssController extends CoTopComponent {
 	
 	private final ApiOssService apiOssService;
 
+	private final LicenseService licenseService;
+
 	private final OssService ossService;
-	
+
 	@ApiOperation(value = "Search OSS List", notes = "OSS 조회")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
@@ -107,7 +114,25 @@ public class ApiOssController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
-	
+
+	@ApiOperation(value = "Register License", notes = "License 저장")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header"),
+	})
+	@PostMapping(value=API.FOSSLIGHT_API_LICENSE_REGISTER)
+	public @ResponseBody ResponseEntity<Object> saveAjax(
+			@RequestHeader String _token,
+			@ApiParam(value = "License Master", required = true) @ModelAttribute LicenseCreateRequest licenseCreateRequest) {
+
+		if (userService.isUserToken(_token)) {
+			throw new AccessDeniedException("Access denied");
+		}
+
+		final LicenseMaster licenseMaster = licenseCreateRequest.toLicenseMaster();
+		Map<String, Object> results = licenseService.saveLicense(licenseMaster);
+		return makeJsonResponseHeader(results);
+	}
+
 	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
@@ -124,7 +149,6 @@ public class ApiOssController extends CoTopComponent {
 		try {
 			List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
 		
-			
 			if (content.size() > 0) {
 				resultMap.put("content", content);
 			}
