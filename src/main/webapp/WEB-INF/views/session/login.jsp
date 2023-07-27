@@ -1,27 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ include file="/WEB-INF/constants.jsp"%>
 <!DOCTYPE html>
 <html>
 	<head>
-<!-- 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"> -->
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<title>FOSSLight Hub</title>
-		<%@ include file="/WEB-INF/constants.jsp"%>
-<%-- Add script --%>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-<link rel="stylesheet" href="${ctxPath}/css/common.css?${cssVersion}" />
-<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-<script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
-
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
-<script src="${ctxPath}/js/basic.js?${jsVersion}"></script>
-
-<!-- alertify -->
-<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"/>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css"/>
-
+		<tiles:insertAttribute name="meta" />
+		<tiles:insertAttribute name="scripts" />
+		<script type="text/javascript" src="${ctxPath}/js/ckeditor/ckeditor.js?${jsVersion}"></script>
 		<script>
 			if (top.location!= self.location) {
 			   top.location = self.location.href;
@@ -339,6 +322,15 @@
         </script>
     </head>
     <body id="login_before">
+		<!-- Notice -->
+		<div class="pop registPop" style="width: 600px;">
+			<div class="popdata" style="padding: 10px 10px 10px;">
+				<div id="noticeTitle" style="text-align: center; font-size: 12pt; font-weight: bold; padding-bottom:15px;"></div>
+				<div id="noticeContent"></div>
+				<div style="text-align: center;"><input type="checkbox" value="checkbox" name="chkbox" id="chkday"/>&nbsp;Do not show this message again</div>
+				<input id="btnNotice" type="button" value="OK" class="okRegister" style="height:40px; cursor: pointer;" />
+			</div>
+		</div>
     	<!-- Login -->
 		<div id="login" class="loginArea">
 			<div class="back">
@@ -467,4 +459,48 @@
 		<!-- //Login -->
         <div id="blind_wrap"></div>
     </body>
+	<script>
+
+		$('#btnNotice').click(function(){
+			if($("#chkday").is(":checked")){
+				setCookie("noticeYn", "N", 1);
+			}
+
+			$('.registPop').hide();
+			$('#blind_wrap').hide();
+		});
+
+		if(getCookie("noticeYn") != "N"){
+			$.ajax({
+				url : '<c:url value="/system/notice/getPublishedNotice"/>',
+				type : "GET",
+				success : function(data){
+					if(data.noticeList){
+						var _noticeTitle = "[Notice]";
+
+						if(data.noticeList[0].title) {
+							_noticeTitle += " " + data.noticeList[0].title;
+						}
+
+						$("#noticeTitle").text(_noticeTitle);
+						$("#noticeContent").append('<div id="noticeEdit" style="width:300px; height:150px;">'+data.noticeList[0].notice+'</div>');
+
+						var _editor = CKEDITOR.instances.noticeEdit;
+
+						if(_editor) {
+							_editor.destroy();
+						}
+
+						CKEDITOR.replace('noticeEdit', {
+							customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
+						});
+
+						$('.registPop').show();
+						$('#blind_wrap').show();
+					}
+				},
+				error : function(){}
+			});
+		}
+	</script>
 </html>
