@@ -101,20 +101,18 @@
 			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 				if (e) {
 					fn_grid_com.totalGridSaveMode('fixedList');
-					fixed.exeSave();
+					var gridData = sec_com_fn.setSaveGridData('fixedList');
+					fixed.exeSave(gridData);
 				} else {
 					return false;
 				}
 			});
 		},
-		exeSave : function(){
-			var prjId = '${project.prjId}';
-			var fixedGridData = $("#fixedList").jqGrid('getGridParam','data');
-			
+		exeSave : function(data){
 			var finalData = {
-				referenceId : prjId,
+				referenceId : '${project.prjId}',
 				targetName : "FIXED",
-				gridData : JSON.stringify(fixedGridData)
+				gridData : JSON.stringify(data)
 			};
 			
 			$.ajax({
@@ -123,7 +121,6 @@
 				data : JSON.stringify(finalData),
 				dataType : 'json',
 				cache : false,
-				async : false,
 				contentType : 'application/json',
 				success: function(data){
 					if ("true" == data.isValid){

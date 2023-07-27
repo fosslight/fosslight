@@ -116,20 +116,18 @@
 			alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 				if (e) {
 					fn_grid_com.totalGridSaveMode('totalList');
-					total.exeSave();
+					var gridData = sec_com_fn.setSaveGridData('totalList');
+					total.exeSave(gridData);
 				} else {
 					return false;
 				}
 			});
 		},
-		exeSave : function() {
-			var prjId = '${project.prjId}';
-			var totalGridData = $("#totalList").jqGrid('getGridParam','data');
-			
+		exeSave : function(data) {
 			var finalData = {
-				referenceId : prjId,
+				referenceId : '${project.prjId}',
 				targetName : "TOTAL",
-				gridData : JSON.stringify(totalGridData)
+				gridData : JSON.stringify(data)
 			};
 			
 			$.ajax({
@@ -138,7 +136,6 @@
 				data : JSON.stringify(finalData),
 				dataType : 'json',
 				cache : false,
-				async : false,
 				contentType : 'application/json',
 				success: function(data){
 					if ("true" == data.isValid){
