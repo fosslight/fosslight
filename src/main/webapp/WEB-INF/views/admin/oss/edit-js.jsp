@@ -708,7 +708,7 @@
 			colModel:[
 				{name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
 				{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
-				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH", dataEvents:[{type:'change', fn:changeLicenseType}]}},
+				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
 				{name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
                         dataInit: function (elem) { 
 	                               $(elem).focus(function () { setCustomAutoComplete('multi'); }) 
@@ -1369,12 +1369,14 @@
 				
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
+		var checkLicenses = [];
 		dataIds.forEach(function(dataId){
 			var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
 			var licenseName = rowData.licenseName;
 			if( licenseName.indexOf('<div') > -1){
 				rowData['licenseName'] = '';
 			}
+			checkLicenses.push(rowData.licenseNameEx);
 			newRows.push(rowData);
 		});
 		
@@ -1404,6 +1406,25 @@
 			return false;
 		}
 
+		var duplicatedLicenseFlag = true;
+ 		if (checkLicenses.length > 0) {
+ 			$.each(checkLicenses, function(index, element){
+ 				$("[name='detectedLicenses']").each(function(idx, cur){
+ 	 				var detectedLicense = $(cur).val();
+ 	 				if (detectedLicense && element == detectedLicense) {
+ 	 					$('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("License included in Declared").show();
+ 	 					duplicatedLicenseFlag = false;
+ 	 					return true;
+ 	 				}
+ 	 			});
+ 			});
+ 		}
+	
+ 		if (!duplicatedLicenseFlag) {
+ 			alertify.error("License included in Declared", 0);
+ 			return false;
+ 		}
+		
 		return true;
 	}
 	

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -216,157 +215,10 @@ public class LicenseController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		String resCd="00";	//비정상
-		String result="";
-		LicenseMaster beforeBean = null;
-		LicenseMaster afterBean = null;
 
-		HashMap<String,Object> resMap = new HashMap<>();
-		String licenseId = licenseMaster.getLicenseId();
-		boolean isNew = isEmpty(licenseId);
-		boolean isChangeName = false;
-		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-		List<OssMaster> typeChangeOssIdList = null;
+		//License Save
+		Map<String, Object> resMap = licenseService.saveLicense(licenseMaster);
 
-		if (!isNew) {
-			beforeBean =  licenseService.getLicenseMasterOne(licenseMaster);
-		}
-
-		// webpages이 n건일때 0번째 값은 oss Master로 저장.
-		String[] webpages = licenseMaster.getWebpages();
-		if (webpages != null){
-			if (webpages.length >= 1){
-				for (String url : webpages){
-					if (!isEmpty(url)){
-						licenseMaster.setWebpage(url); // 등록된 url 중 공백을 제외한 나머지에서 첫번째 url을 만나게 되면 등록을 함.
-						break;
-					}
-				}
-			}
-		} else if (webpages == null){
-			licenseMaster.setWebpage("");
-		}
-		
-		result = licenseService.registLicenseMaster(licenseMaster);
-		
-		if (!isNew) {
-			afterBean =  licenseService.getLicenseMasterOne(licenseMaster);
-
-			// licnese type이 변경된 경우, 해당 라이선스를 사용하는 oss의 license type을 재확인 한다.
-			if (!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
-				typeChangeOssIdList = licenseService.updateOssLicenseType(result);
-			}
-			
-			isChangeName = !beforeBean.getLicenseName().equalsIgnoreCase(afterBean.getLicenseName());
-		}
-		
-		// 싱글톤 정보 refresh
-		resCd="10";		//정상
-		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
-		
-		try{
-			History h = licenseService.work(licenseMaster);
-			h.sethAction(isEmpty(licenseId) ? CoConstDef.ACTION_CODE_INSERT : CoConstDef.ACTION_CODE_UPDATE);
-			historyService.storeData(h);
-		}catch(Exception e){
-			log.error(e.getMessage(), e);
-		}
-		
-		// osdd 연동
-		boolean successType = false;
-		
-		try {			
-			if (isNew) {
-				successType = licenseService.distributeLicense(result, distributionFlag);
-			} else if (beforeBean != null && afterBean != null) {
-				if (!avoidNull(beforeBean.getLicenseName()).equals(afterBean.getLicenseName())
-						|| !avoidNull(beforeBean.getShortIdentifier()).equals(afterBean.getShortIdentifier())
-						|| !avoidNull(beforeBean.getLicenseText()).equals(afterBean.getLicenseText())) {
-					successType = licenseService.distributeLicense(result, distributionFlag);
-				} else {
-					successType = true; // license > update 일 경우에 internal url 생성과 상관없는 항목이 update될 경우는 comment를 남기지 않음.
-				}
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		try {
-			CoMail mailBean = new CoMail(isNew ? CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST : isChangeName ? CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME : CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE);
-			mailBean.setParamLicenseId(result);
-			String comment = licenseMaster.getComment();
-			
-			if (!successType) { // internal url 생성 실패시 comment 남김
-				comment += (isEmpty(comment) ? "" : "<br>") + "[Error] An error occurred when creating an internal URL file.";
-			}
-			
-			mailBean.setComment(comment);
-			
-			if (!isNew) {
-				
-				mailBean.setParamOssList(typeChangeOssIdList);
-				
-				// code convert
-				if (beforeBean != null) {
-					beforeBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, beforeBean.getLicenseType()));
-					beforeBean.setObligation(CommonFunction.makeLicenseObligationStr(beforeBean.getObligationNotificationYn(), beforeBean.getObligationDisclosingSrcYn(), beforeBean.getObligationNeedsCheckYn()));
-					beforeBean.setModifiedDate(DateUtil.dateFormatConvert(beforeBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
-					beforeBean.setModifier(CoMailManager.getInstance().makeUserNameFormat(beforeBean.getModifier()));
-					beforeBean.setDescription(CommonFunction.lineReplaceToBR(beforeBean.getDescription()));
-					beforeBean.setLicenseText(CommonFunction.lineReplaceToBR(beforeBean.getLicenseText()));
-					beforeBean.setAttribution(CommonFunction.lineReplaceToBR(beforeBean.getAttribution()));
-					if (beforeBean.getWebpages().length > 0) beforeBean.setWebpage(licenseService.webPageStringFormat(beforeBean.getWebpages()));
-				}
-				
-				if (afterBean != null) {
-					afterBean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, afterBean.getLicenseType()));
-					afterBean.setObligation(CommonFunction.makeLicenseObligationStr(afterBean.getObligationNotificationYn(), afterBean.getObligationDisclosingSrcYn(), afterBean.getObligationNeedsCheckYn()));
-					afterBean.setModifiedDate(DateUtil.dateFormatConvert(afterBean.getModifiedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
-					afterBean.setModifier(CoMailManager.getInstance().makeUserNameFormat(afterBean.getModifier()));
-					afterBean.setDescription(CommonFunction.lineReplaceToBR(afterBean.getDescription()));
-					afterBean.setLicenseText(CommonFunction.lineReplaceToBR(afterBean.getLicenseText()));
-					afterBean.setAttribution(CommonFunction.lineReplaceToBR(afterBean.getAttribution()));
-					if (afterBean.getWebpages().length > 0) afterBean.setWebpage(licenseService.webPageStringFormat(afterBean.getWebpages()));
-				}
-				
-				mailBean.setCompareDataBefore(beforeBean);
-				mailBean.setCompareDataAfter(afterBean);
-			}
-			
-			CoMailManager.getInstance().sendMail(mailBean);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		try{
-			// RESTRICTION(2) => Network Redistribution
-			String netWorkRestriction = CoConstDef.CD_LICENSE_NETWORK_RESTRICTION;
-			
-			if (isNew) {
-				if (licenseMaster.getRestriction().contains(netWorkRestriction)){
-					licenseService.registNetworkServerLicense(licenseMaster.getLicenseId(), "NEW");
-				}
-			} else {
-				String type = "";
-				
-				if (beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "";
-				}else if (beforeBean.getRestriction().contains(netWorkRestriction) && !afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "DEL";
-				}else if (!beforeBean.getRestriction().contains(netWorkRestriction) && afterBean.getRestriction().contains(netWorkRestriction)){
-					type = "INS";
-				}
-				
-				licenseService.registNetworkServerLicense(licenseMaster.getLicenseId(), type);
-			}
-		} catch (Exception e){
-			
-		}
-		
-		resMap.put("resCd", resCd);
-		resMap.put("licenseId", result);
-		
-		
 		return makeJsonResponseHeader(resMap);
 	}
 	

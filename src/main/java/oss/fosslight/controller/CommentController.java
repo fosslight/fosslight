@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.COMMENT;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.PartnerMaster;
@@ -71,10 +70,6 @@ public class CommentController extends CoTopComponent {
 	        partnerMaster.setPartnerId(rId);
 	        
 		    model.addAttribute("partner", partnerService.getPartnerMasterOne(partnerMaster));
-		} else if ("oss".equalsIgnoreCase(rDiv)) {
-			
-		} else if ("license".equalsIgnoreCase(rDiv)) {
-			
 		}
 		
 		return COMMENT.POPUP_JSP;

@@ -62,12 +62,7 @@ import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 import oss.fosslight.service.VerificationService;
 import oss.fosslight.repository.VerificationMapper;
-import oss.fosslight.domain.File;
-import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.CoMail;
-import oss.fosslight.domain.CoMailManager;
-import oss.fosslight.domain.History;
 
 @Slf4j
 @Controller

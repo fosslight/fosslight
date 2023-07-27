@@ -154,7 +154,7 @@ public final class Url {
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
-		public static final String DELTE_COMMENT = PATH + "/deleteComment";
+		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
 		
 		public static final String SAVE_SESSION_OSS_INFO = PATH + "/saveSessionOssInfo";
@@ -264,7 +264,7 @@ public final class Url {
 		
 		public static final String OSS_NAMES = PATH + "/getOssNames";
 		
-		public static final String OSS_VERIONS = PATH + "/getOssVersions";
+		public static final String OSS_VERSIONS = PATH + "/getOssVersions";
 		public static final String UPDATE_REVIEWER = PATH + "/updateReviewer";
 		public static final String UPDATE_REJECT = PATH + "/updateReject";
 		public static final String CATEGORY_CODE = PATH + "/getCategoryCode";
@@ -278,8 +278,8 @@ public final class Url {
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
 		public static final String IDENTIFICATION_PROJECT_SERCH_CD = PATH + "/identificationProjectSearch/{code}";
-		public static final String IDENTIFIATION_THIRD = PATH + "/identificationThird";
-		public static final String IDENTIFICAITON_GRID_POST = PATH + "/identificationGridPost";
+		public static final String IDENTIFICATION_THIRD = PATH + "/identificationThird";
+		public static final String IDENTIFICATION_GRID_POST = PATH + "/identificationGridPost";
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
 		public static final String TRD_OSS = PATH + "/3rdOss";
 		
@@ -325,7 +325,7 @@ public final class Url {
 		
 		public static final String MODEL_FILE = PATH + "/modelFile";
 		
-		public static final String SUPPLEMEMT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
+		public static final String SUPPLEMENT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
 		
 		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePrjId}/{afterPrjId}";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
@@ -488,7 +488,7 @@ public final class Url {
 		
 		public static final String CHECK_EMAIL = PATH + "/checkEmail";
 		
-		public static final String AUTOCOMPLETE_CRAETOR_AJAX = PATH + "/autoCompleteCreatorAjax";
+		public static final String AUTOCOMPLETE_CREATOR_AJAX = PATH + "/autoCompleteCreatorAjax";
 		public static final String AUTOCOMPLETE_REVIEWER_AJAX = PATH + "/autoCompleteReviewerAjax";
 		public static final String AUTOCOMPLETE_CREATOR_DIVISION_AJAX = PATH + "/autoCompleteCreatorDivisionAjax";
 		

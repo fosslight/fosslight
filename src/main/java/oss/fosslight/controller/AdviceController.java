@@ -52,7 +52,6 @@ public class AdviceController extends CoTopComponent{
 			
 			if (sessDetailInfo != null){
 				sessUserInfo = (T2Users)sessDetailInfo.get("sessUserInfo");
-			}else{
 			}
 		}
 		return sessUserInfo;
