@@ -1,26 +1,8 @@
 # Changelog
 
-## v1.5.1 (01/01/1970)
+## v1.6.1 (01/01/1970)
 ## Changes
-- Bug fix security tab @Min-Kyungsun (#928)
-
-## 🐛 Hotfixes
-
-- Fix typo @Min-Kyungsun (#927)
-
-## 🔧 Maintenance
-
-- Register gitignore for auto-generated files @moto3z (#889)
-- Fix a typo at Url @hseungho (#896)
-- Fix a typo from DELTE_COMMENT to DELETE_COMMENT @jiwon83 (#895)
-- Fix a typo at Url @parkcoldroad (#899)
-- Fix typo at Url @che-so (#902)
-- Delete unnecessary code @parkmuhyeun (#854)
-- Remove unused import statements @D0ri123 (#869)
-- Removed deprecated "WITH" option - #808  @moto3z (#867)
-- Fix a typo from scannServiceUrl to scanServiceUrl @cookienc (#892)
-- Delete duplicate code in LicenseController @Gseungmin (#887)
-- Fix a typo from 'publishedt' to 'published' @parkmuhyeun (#870)
+- Update release @Min-Kyungsun (#929)
 
 ---
 
@@ -52,7 +34,6 @@
 
 - When calculating max score of vulnerability, exclude oss which is checked as excluded. @FOSSLight-dev (#862)
 - Fix the bug where html tag is displayed in self-check. @FOSSLight-dev (#853)
-- When the security icon is inactive, display message about detecting no vulnerabilities higher than 8.0 on mouse hover. @FOSSLight-dev  (#851)
 - Bug fix when parentheses is included in packaging path, packaging files are not verified properly. @FOSSLight-dev (#850)
 - ddl script typo fix @d-h-k (#848)
 - Bug fix where generating oss name of android platform in "Check OSS Name" @Min-Kyungsun (#843)
