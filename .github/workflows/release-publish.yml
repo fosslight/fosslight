@@ -31,7 +31,8 @@ jobs:
 
       - name: Commit files
         run: |
-          git config --local user.name "github-actions[bot]"
+          git config --global user.email "fosslight-dev@lge.com"
+          git config --global user.name "FOSSLight-dev"
           git add CHANGELOG.md
           git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
 
