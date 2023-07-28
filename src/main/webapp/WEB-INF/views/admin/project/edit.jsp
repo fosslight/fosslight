@@ -9,13 +9,16 @@
 			<ul>
 				<li class="first"><span>Project</span><strong><label id="ePrjName"></label>
 						<c:if test="${not empty project.prjId}">
-						<span id="identificationTab" class="btnIcon identi" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
+						<span id="identificationTab" class="btnIcon identi" title="Go to Identification tab" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Identification</span>
 						</c:if>
 						<c:if test="${project.verificationStatus ne 'NA' and (not empty project.verificationStatus or project.identificationStatus eq 'CONF')}">
-						<span id="packagingTab" class="btnIcon packag" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
+						<span id="packagingTab" class="btnIcon packag" title="Go to Packaging tab" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Packaging</span>
 						</c:if>
 						<c:if test="${distributionFlag and project.destributionStatus ne 'NA' and (not empty project.destributionStatus or project.verificationStatus eq 'CONF')}">
-						<span id="distributionTab" class="btnIcon distr" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Distribution</span>
+						<span id="distributionTab" class="btnIcon distr" title="Go to Distribution tab" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Distribution</span>
+						</c:if>
+						<c:if test="${not empty project.secCode}">
+						<span id="securityTab" class="btnIcon security" title="Go to Security tab" style="display:inline-block;width:16px;padding:0;margin-left:3px;">Security</span>
 						</c:if>
 					</strong>
 				</li>

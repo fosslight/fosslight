@@ -5849,6 +5849,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean = (OssComponents) securityGridMap.get(key);
 						}
 						
+						if (activateFlag) checkOssNameList.add(pi.getOssName());
+						
 						oc = new OssComponents();
 						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
 						oc.setOssId(pi.getOssId());

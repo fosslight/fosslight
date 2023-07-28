@@ -137,6 +137,24 @@ var sec_com_fn = {
 		
 		prevEditSel = rowid;
 	},
+	setSaveGridData : function(targetStr) {
+		var target = $("#"+targetStr);
+		var rowDatas = target.jqGrid("getRowData");
+		var totalGridData = target.jqGrid('getGridParam','data');
+		var rowDatasLength = rowDatas.length;
+		var totalGridDataLength = totalGridData.length;
+		
+		for (var i=0; i<rowDatasLength; i++) {
+			for (var j=0; j<totalGridDataLength; j++) {
+				if (rowDatas[i].gridId == totalGridData[j].gridId) {
+					totalGridData[j].vulnerabilityResolution = rowDatas[i].vulnerabilityResolution;
+					continue;
+				}
+			}
+		}
+		
+		return totalGridData;
+	},
 	identificationTab : function(){
 		var prjId = $('input[name=prjId]').val();
 		var idx = getTabIndex(prjId+"_Identify");
@@ -204,7 +222,7 @@ var sec_com_fn = {
 			var _popup = null;
 			
             if(_popup == null || _popup.closed){
-            	_popup = window.open("", "bulkEditViewSecurityPopup", "width=725, height=180, toolbar=no, location=no, left=150, top=150, resizable=yes");
+            	_popup = window.open("", "bulkEditViewSecurityPopup", "width=725, height=220, toolbar=no, location=no, left=150, top=150, resizable=yes");
 
             	$("#secBulkEditForm > input[name=rowId]").val(rowCheckedArr);
             	$("#secBulkEditForm > input[name=gridId]").val(rowGirdIdArr);
@@ -216,7 +234,7 @@ var sec_com_fn = {
                 }
             } else {
                 _popup.close();
-                _popup = window.open("", "bulkEditViewSecurityPopup", "width=725, height=180, toolbar=no, location=no, left=150, top=150, resizable=yes");
+                _popup = window.open("", "bulkEditViewSecurityPopup", "width=725, height=220, toolbar=no, location=no, left=150, top=150, resizable=yes");
 
                 $("#secBulkEditForm > input[name=rowId]").val(rowCheckedArr);
                 $("#secBulkEditForm > input[name=gridId]").val(rowGirdIdArr);

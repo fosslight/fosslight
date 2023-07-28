@@ -430,6 +430,17 @@
 				}
 			});
 			
+			$("#securityTab").click(function(){
+				var prjId = $('input[name=prjId]').val();
+				var idx = getTabIndex(prjId+"_Security");
+				
+				if(idx != ""){
+					changeTabInFrame(idx);
+				}else{
+					createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+				}
+			});
+			
 			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
 				data.forEach(function(obj,index){
 					arr[index] = obj.userId+":"+obj.userName;

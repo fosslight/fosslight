@@ -260,6 +260,17 @@ var com_evt = {
 			}
 		});
 
+		$("#securityTab").click(function(){
+			var prjId = '${project.prjId}';
+			var idx = getTabIndex(prjId+"_Security");
+			
+			if(idx != ""){
+				changeTabInFrame(idx);
+			}else{
+				createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+			}
+		});
+		
 		com_fn.saveFlagObject["SRC"] = false;
 		com_fn.saveFlagObject["BIN"] = false;
 		com_fn.saveFlagObject["ANDROID"] = false;
