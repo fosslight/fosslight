@@ -1,11 +1,5 @@
 # Changelog
 
-## v1.6.1 (01/01/1970)
-## Changes
-- Update release @Min-Kyungsun (#929)
-
----
-
 ## v1.6.0 (28/07/2023)
 ## 🚀 Features
 
