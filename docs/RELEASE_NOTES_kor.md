@@ -6,6 +6,22 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
+
+### New
+* 프로젝트에 Vulnerability가 검출된 OSS가 있는 경우, CVE ID별로 확인 및 조치 상태 관리할 수 있는 **[Security탭](https://fosslight.org/fosslight-guide/started/2_try/5_security.html)** 추가
+* MyBatis Migrations를 이용하여 [DB 버전을 업그레이드](https://fosslight.org/fosslight-guide/features/3_maintenance.html#db-%EB%B2%84%EC%A0%84-%EC%97%85%EA%B7%B8%EB%A0%88%EC%9D%B4%EB%93%9C%ED%95%98%EA%B8%B0) 할 수 있습니다.
+* 비밀번호 분실시, 비밀번호를 재설정 가능
+* Self-Check 프로젝트를 Export 할 수 있는 API Endpoint([/api/v1/export_selfcheck](https://fosslight.org/fosslight-guide-en/features/2_rest_api.html#rest-api-list))가 추가
+* License List에 **Bulk registration** 버튼 추가하여 여러 license를 spread sheet에 작성 후 업로드 하면 한번에 저장 가능
+* 3rd party에 **OSS Bulk registration** 버튼 추가하여 여러 OSS를 spread sheet에 작성 후 업로드 하면 한번에 저장 가능
+* Self-Check의 OSS Table에 Homepage 정보가 추가
+* Identification tab의 3rd Party/Project Search에서 3rd Party/Project ID로 검색 할 수 있는 기능이 추가
+
+### Changed
+* FOSSLight report export시, BOM Tab에 취합되는 OSS 중 3rd Party Software에서 사용된 항목은 "From" Column에 "3rd-(3rd Party Name)" 양식으로 표기
+* Project, 3rd Party, Self-Check에서 Exclude 체크된 OSS에 대해서 보안취약점이 표시되지 않고, List에서 Exclude OSS를 제외하고 Max Vulnerability Score가 표시
+
 ## [1.4.6](https://github.com/fosslight/fosslight/releases/tag/v1.4.6) (2022-07-22)
 ### New
 * Project List에서 Change Division 버튼 추가
