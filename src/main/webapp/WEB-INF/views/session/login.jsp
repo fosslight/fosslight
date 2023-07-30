@@ -323,13 +323,7 @@
     </head>
     <body id="login_before">
 		<!-- Notice -->
-		<div class="pop registPop" style="width: 600px;">
-			<div class="popdata" style="padding: 10px 10px 10px;">
-				<div id="noticeTitle" style="text-align: center; font-size: 12pt; font-weight: bold; padding-bottom:15px;"></div>
-				<div id="noticeContent"></div>
-				<div style="text-align: center;"><input type="checkbox" value="checkbox" name="chkbox" id="chkday"/>&nbsp;Do not show this message again</div>
-				<input id="btnNotice" type="button" value="OK" class="okRegister" style="height:40px; cursor: pointer;" />
-			</div>
+		<div class="pops" style="width: 600px;">
 		</div>
     	<!-- Login -->
 		<div id="login" class="loginArea">
@@ -457,50 +451,113 @@
 			</div>
 		</div>
 		<!-- //Login -->
-        <div id="blind_wrap"></div>
     </body>
 	<script>
+		$.ajax({
+			url: '<c:url value="/system/notice/getPublishedNotice"/>',
+			type: "GET",
+			success: function (data) {
+				if (data.noticeList) {
+					for (var i = 0; i < data.noticeList.length; i++) {
+						var seq = data.noticeList[i].seq;
+						var title = data.noticeList[i].title;
+						var notice = data.noticeList[i].notice;
 
-		$('#btnNotice').click(function(){
-			if($("#chkday").is(":checked")){
-				setCookie("noticeYn", "N", 1);
+						if (getCookie("noticeYn_" + seq) != "N") {
+							addPopup(title, notice, seq);
+						}
+					}
+				}
+			},
+			error: function () {
 			}
-
-			$('.registPop').hide();
-			$('#blind_wrap').hide();
 		});
 
-		if(getCookie("noticeYn") != "N"){
-			$.ajax({
-				url : '<c:url value="/system/notice/getPublishedNotice"/>',
-				type : "GET",
-				success : function(data){
-					if(data.noticeList){
-						var _noticeTitle = "[Notice]";
+		function addPopup(title, content, seq) {
+			var popRegistPop = createPopRegistPop();
+			var popData = createPopData();
+			var noticeTitle = createNoticeTitle();
+			var noticeContent = createNoticeContent();
+			var checkboxLabel = createCheckboxLabel();
+			var okButton = createOkButton();
+			appendChild();
 
-						if(data.noticeList[0].title) {
-							_noticeTitle += " " + data.noticeList[0].title;
-						}
-
-						$("#noticeTitle").text(_noticeTitle);
-						$("#noticeContent").append('<div id="noticeEdit" style="width:300px; height:150px;">'+data.noticeList[0].notice+'</div>');
-
-						var _editor = CKEDITOR.instances.noticeEdit;
-
-						if(_editor) {
-							_editor.destroy();
-						}
-
-						CKEDITOR.replace('noticeEdit', {
-							customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'
-						});
-
-						$('.registPop').show();
-						$('#blind_wrap').show();
-					}
-				},
-				error : function(){}
+			CKEDITOR.replace('noticeEdit_' + seq, {
+				customConfig: '<c:url value="/js/customEditorConf_Comment.js"/>'
 			});
+
+			okButton.addEventListener("click", function () {
+				var checkbox = document.getElementById("chkday_" + seq);
+				if (checkbox.checked) {
+					setCookie("noticeYn_" + seq, "N", 1);
+				}
+
+				popRegistPop.style.display = "none";
+			});
+
+			popRegistPop.style.display = "block";
+
+			function createPopRegistPop() {
+				var popRegistPop = document.createElement("div");
+				popRegistPop.classList.add("pop", "registPop");
+				popRegistPop.style.width = "600px";
+				popRegistPop.style.position = "absolute";
+				return popRegistPop;
+			}
+
+			function createPopData() {
+				var popData = document.createElement("div");
+				popData.className = "popdata";
+				popData.style.padding = "10px 10px 10px";
+				return popData;
+			}
+
+			function createNoticeTitle() {
+				var noticeTitle = document.createElement("div");
+				noticeTitle.id = "noticeTitle";
+				noticeTitle.style.textAlign = "center";
+				noticeTitle.style.fontSize = "12pt";
+				noticeTitle.style.fontWeight = "bold";
+				noticeTitle.style.paddingBottom = "15px";
+				noticeTitle.innerHTML = "[Notice] " + title;
+				return noticeTitle;
+			}
+
+			function createNoticeContent() {
+				var noticeContent = document.createElement("div");
+				noticeContent.id = "noticeContent";;
+				noticeContent.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+				return noticeContent;
+			}
+
+			function createCheckboxLabel() {
+				var checkboxLabel = document.createElement("label");
+				checkboxLabel.htmlFor = "chkday_" + seq;
+				checkboxLabel.innerHTML = '<input type="checkbox" value="checkbox" name="chkbox" id="chkday_' + seq + '" />&nbsp;Do not show this message again';
+				return checkboxLabel;
+			}
+
+			function createOkButton() {
+				var okButton = document.createElement("input");
+				okButton.id = "btnNotice";
+				okButton.type = "button";
+				okButton.value = "OK";
+				okButton.className = "okRegister";
+				okButton.style.height = "40px";
+				okButton.style.cursor = "pointer";
+				return okButton;
+			}
+
+			function appendChild() {
+				popData.appendChild(noticeTitle);
+				popData.appendChild(noticeContent);
+				popData.appendChild(checkboxLabel);
+				popData.appendChild(okButton);
+				popRegistPop.appendChild(popData);
+
+				var pops = document.querySelector(".pops");
+				pops.appendChild(popRegistPop);
+			}
 		}
 	</script>
 </html>
