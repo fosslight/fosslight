@@ -223,7 +223,12 @@
 					, {name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: fn.ossNameLinkFormat}
 					</c:if>
 					, {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
-					, {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
+                    <c:if test="${searchBean.linkFlag != 'Y'}">
+                    , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left', formatter: 'linkOssName'}
+                    </c:if>
+                    <c:if test="${searchBean.linkFlag == 'Y'}">
+                    , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left', formatter:fn.ossNameLinkFormat}
+                    </c:if>
 					, {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
 					, {name: 'obligation', index: 'obligation', width: 70, align: 'left'}
 					, {name: 'downloadLocation', index: 'downloadLocation', width: 150, align: 'left', formatter: 'link', formatoptions: {target:'_blank'}}
