@@ -474,6 +474,12 @@
 				AND T1.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
 				</if>
 			</if>			
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(watchers)">
+				<foreach collection="watchers" index="index" item="watcher" separator=",">
+					AND T1.PRJ_ID IN (
+					SELECT A.PRJ_ID AS WATCHER FROM PROJECT_WATCHER A WHERE T1.PRJ_ID = A.PRJ_ID AND (A.USER_ID LIKE CONCAT('%',#{watcher},'%') OR A.EMAIL LIKE CONCAT('%',#{watcher},'%')))
+				</foreach>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
 			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
@@ -1883,8 +1889,8 @@
 		       ,A.PACKAGE_FILE_ID 
 		       ,A.NOTICE_FILE_ID 
 		       ,A.COMPLETE_YN 
-		       ,A.REVIEWER 
-		       ,A.USE_YN 
+		       ,A.REVIEWER
+		       ,A.USE_YN
 		       ,A.CREATOR 
 		       ,A.CREATED_DATE
 		       ,A.MODIFIER 

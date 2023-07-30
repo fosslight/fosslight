@@ -239,6 +239,12 @@
 		   AND A.REVIEWER IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{reviewer},'%')) 
 		  </if>
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(watchers)">
+			<foreach collection="watchers" index="index" item="watcher" separator=",">
+				AND A.PARTNER_ID IN (
+				SELECT W.PARTNER_ID AS WATCHER FROM PARTNER_WATCHER W WHERE A.PARTNER_ID = W.PARTNER_ID AND (W.USER_ID LIKE CONCAT('%',#{watcher},'%') OR W.EMAIL LIKE CONCAT('%',#{watcher},'%')))
+			</foreach>
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
 		   AND A.FILE_PATH LIKE CONCAT('%',#{binaryName})
 		</if>
