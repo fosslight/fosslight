@@ -206,8 +206,8 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				$(data.clone).prependTo('.multiTxtSet');
-				
+                $('.multiTxtSet').prepend(data.clone).find("#newIcon:first").addClass("iconSet nick");
+                $('.multiTxtSet').find("input:first").css("padding-left", '40px');
 				$('.smallDelete').on('click', function(){
 					$(this).parent().parent().remove();
 				});

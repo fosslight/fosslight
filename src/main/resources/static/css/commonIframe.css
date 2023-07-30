@@ -84,6 +84,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .multiTxtSet span .smallDelete {position:absolute;right:7px;top:7px;}
 .multiTxtSet + input {float:left;width:90px;}
 .multiTxtSet .retxt {clear:left;} /* 2016-11-05 by mj-cho*/
+.multiTxtSet span .iconSet.nick {position:absolute;left:7px;top:7px;}
 /**/
 .multiTxtSet2 {margin:3px 0 0;max-width:732px;overflow:hidden;}
 .multiTxtSet2 span {position:relative;display:inline-block;float:left;margin:3px 5px 3px 0;}
