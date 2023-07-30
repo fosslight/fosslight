@@ -329,9 +329,9 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				},
-				colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
-					, 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
-				colModel: [
+			  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
+				  	, 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
+                colModel: [
 					{name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true},
 					{name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true},
 					{name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true},
@@ -345,8 +345,8 @@
 					{name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true},
 					{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
 					{name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
-					{name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', editable:'${sessUserInfo.authority}'=="ROLE_ADMIN" ? true : false, edittype:'text', formatter:fn.getUserName
-						, editoptions: {
+				  	{name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', editable:'${sessUserInfo.authority}'=="ROLE_ADMIN" ? true : false, edittype:'text', formatter:fn.getUserName
+					  , editoptions: {
 							dataInit:
 								function (e) {
 									$(e).autocomplete({

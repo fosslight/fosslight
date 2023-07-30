@@ -125,13 +125,17 @@ $(document).ready(function() {
 								</select>
 							</span>						
 						</dd>
-						<dd class="centerAign">
+						<dd>
 							<label>Creator</label>
 							<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
 						</dd>
-						<dd class="lastAign">
+						<dd class="centerAign">
 							<label>Reviewer</label>
 							<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
+						</dd>
+						<dd class="lastAign">
+							<label>Watcher</label>
+							<input type="text" name="watchers" class="" value="${searchBean.watchers}"/>
 						</dd>
 						<dd>
 							<label>Distribution Type</label>
@@ -230,6 +234,10 @@ $(document).ready(function() {
 						<dd class="lastAign">
 							<label>Reviewer</label>
 							<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
+						</dd>
+						<dd class="lastAign">
+							<label>Watcher</label>
+							<input type="text" name="watchers"  class=""  value="${searchBean.watchers}"/>
 						</dd>
 						<c:if test="${!ct:isAdmin()}">
 							<dd class="lastAign" >
