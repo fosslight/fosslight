@@ -78,6 +78,7 @@ var com_evt = {
 							url :'<c:url value="/project/verification/reviewReportAjax?prjId=${project.prjId}"/>',
 							type : 'POST',
 							cache : false,
+                            async : false,
 							success: function(data){
 								loading.hide();
 							},
