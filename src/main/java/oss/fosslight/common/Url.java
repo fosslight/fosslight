@@ -749,6 +749,9 @@ public final class Url {
 		/** 3RD PARTY */
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partner_search";
+			
+			/** API 3rd Party Add Watcher */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partner_watcher_add";
 		
 		/** OSS */
 			/** API OSS List 조회 */
@@ -786,6 +789,9 @@ public final class Url {
 
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
+			
+			/** API Project Add Watcher */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
 			
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/oss_report_src";
