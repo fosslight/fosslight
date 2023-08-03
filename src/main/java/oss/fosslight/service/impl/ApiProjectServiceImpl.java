@@ -2110,12 +2110,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		if (ossLicenses.size() > 1) {
-			Collections.sort(ossLicenses, new Comparator<HashMap<String, Object>>() {
-				@Override
-				public int compare(HashMap<String, Object> o1, HashMap<String, Object> o2) {
-					return Integer.toString((int) o1.get("ossLicenseIdx")).compareTo(Integer.toString((int) o2.get("ossLicenseIdx")));
-				}
-			});
+			Collections.sort(ossLicenses, Comparator.comparing(o -> Integer.toString((int) o.get("ossLicenseIdx"))));
 		}
 		
 		return ossLicenses;

@@ -1232,12 +1232,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			noticeList.add(bean);
 		}
 		
-		Collections.sort(noticeList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(noticeList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		List<OssComponents> srcList = new ArrayList<>();
 		
@@ -1264,12 +1259,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			srcList.add(bean);
 		}
 		
-		Collections.sort(srcList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(srcList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		List<OssComponents> notObligationList = new ArrayList<>();
 		
@@ -1295,12 +1285,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			notObligationList.add(bean);
 		}
 		
-		Collections.sort(notObligationList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(notObligationList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		model.put("noticeObligationList", noticeList);
 		model.put("disclosureObligationList", srcList);

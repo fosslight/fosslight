@@ -1844,12 +1844,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			noticeList.add(bean);
 		}
 		
-		Collections.sort(noticeList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(noticeList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		List<OssComponents> srcList = new ArrayList<>();
 		
@@ -1876,12 +1871,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			srcList.add(bean);
 		}
 		
-		Collections.sort(srcList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(srcList,
+				(oc1, oc2) -> oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase()));
 		
 		List<OssComponentsLicense> licenseList = new ArrayList<>();
 		List<OssComponentsLicense> licenseListUrls = new ArrayList<>(); //simple version용
@@ -2466,12 +2457,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			noticeList.add(bean);
 		}
 		
-		Collections.sort(noticeList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(noticeList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		List<OssComponents> srcList = new ArrayList<>();
 		
@@ -2498,12 +2484,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			srcList.add(bean);
 		}
 		
-		Collections.sort(srcList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(srcList, Comparator.comparing(oc -> oc.getOssName().toUpperCase()));
 		
 		List<OssComponents> notObligationList = new ArrayList<>();
 		
@@ -2530,12 +2511,8 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			notObligationList.add(bean);
 		}
 		
-		Collections.sort(notObligationList, new Comparator<OssComponents>() {
-			@Override
-			public int compare(OssComponents oc1, OssComponents oc2) {
-				return oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase());
-			}
-		});
+		Collections.sort(notObligationList,
+				(oc1, oc2) -> oc1.getOssName().toUpperCase().compareTo(oc2.getOssName().toUpperCase()));
 		
 		model.put("noticeObligationList", noticeList);
 		model.put("disclosureObligationList", srcList);
