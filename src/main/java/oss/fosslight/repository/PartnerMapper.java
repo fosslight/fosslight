@@ -154,4 +154,6 @@ public interface PartnerMapper {
 	public List<OssComponents> selectOssComponentsSbomList(PartnerMaster partnerMaster);
 
 	public List<OssComponents> selectOssComponentsSbomListClassAppend(PartnerMaster partnerMaster);
+
+	public List<OssComponents> checkSelectDownloadFile(PartnerMaster partnerMaster);
 }

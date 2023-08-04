@@ -886,7 +886,6 @@
                 }
             });
         },
-
         exportList:function(){
             var buttonId = event.target.id;
             var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");
@@ -901,15 +900,47 @@
             var targetFileId = event.target.id;
             var parentId = $("#" + targetFileId).closest("div").attr("id")
             // download file
-            if (targetFileId === "report_sub") src_fn.downloadExcel();
-            else if (targetFileId === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
-            else if (targetFileId === "RDF_sub") fn.downloadSpdxRdf();
-            else if (targetFileId === "TAG_sub") fn.downloadSpdxTag();
-            else if (targetFileId === "JSON_sub") fn.downloadSpdxJson();
-            else if (targetFileId === "YAML_sub") fn.downloadSpdxYaml();
+            if (targetFileId === "report_sub") {
+            	src_fn.downloadExcel();
+            } else {
+            	if (fn.checkSelectDownloadFile()) {
+            		if (targetFileId === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+                    else if (targetFileId === "RDF_sub") fn.downloadSpdxRdf();
+                    else if (targetFileId === "TAG_sub") fn.downloadSpdxTag();
+                    else if (targetFileId === "JSON_sub") fn.downloadSpdxJson();
+                    else if (targetFileId === "YAML_sub") fn.downloadSpdxYaml();
+                    else if (targetFileId === "YAML") fn.downloadYaml();
+            	} else {
+            		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+            	}
+            }
+            
             // hide list
             $("#" + parentId).hide();
         },
+        checkSelectDownloadFile : function() {
+        	var checkEmptyFlag = false;
+        	
+        	$.ajax({
+        		type: "POST",
+    			url: '<c:url value="/selfCheck/checkSelectDownloadFile"/>',
+    			data: JSON.stringify({"prjId":'${project.prjId}'}),
+    			dataType : 'json',
+    			cache : false,
+    			async : false,
+    			contentType : 'application/json',
+    			success: function (data) {
+    				if (data.isValid) {
+    					checkEmptyFlag = true;
+    				}
+    			},
+    			error: function(data){
+    				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+    			}
+        	});
+        	
+        	return checkEmptyFlag;
+        }
 	};
 
 	// 데이타

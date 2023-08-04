@@ -762,4 +762,15 @@ public class SelfCheckController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(downloadId);
 	}
+	
+	@PostMapping(value=SELF_CHECK.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model){
+		Map<String, Object> resMap = new HashMap<>();
+		try {
+			resMap = selfCheckService.checkSelectDownloadFile(project);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader(resMap);
+	}
 }

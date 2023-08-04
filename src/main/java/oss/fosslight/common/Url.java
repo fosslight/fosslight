@@ -350,6 +350,8 @@ public final class Url {
 		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulkEditPopup";
 		
 		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class VERIFICATION {
@@ -472,6 +474,8 @@ public final class Url {
 		public static final String PARTNER_DIVISION = PATH + "/updatePartnerDivision";
 
 		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class USER {
@@ -561,6 +565,7 @@ public final class Url {
 		public static final String MAKE_NOTICE_TEXT_SIMPLE = PATH + "/makeNoticeTextSimple";	
 			
 		public static final String MAKE_YAML = PATH + "/makeYaml";
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class COMPLIANCE {

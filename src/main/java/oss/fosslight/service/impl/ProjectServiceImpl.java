@@ -6036,7 +6036,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		OssComponents ossComponent;
 		
 		for (OssComponents bean : ossComponentList) {
-			if (bean.getOssName().isEmpty()) continue;
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) continue;
 			
 			om.setOssNames(new String[] {bean.getOssName()});
 			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
@@ -6137,6 +6137,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (addOssComponentList != null) {
 			for (OssComponents bean : addOssComponentList) {
+				if (isEmpty(bean.getLicenseName())) continue;
+				
 				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				if ("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -6281,9 +6283,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
 		if (ossComponentsLicense != null) {
-			for (OssComponentsLicense bean : ossComponentsLicense) {
-				if (bean.getLicenseId().equals(license.getLicenseId())) {
-					return true;
+			if (!isEmpty(license.getLicenseId())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseId().equals(license.getLicenseId())) {
+						return true;
+					}
+				}
+			} else if (isEmpty(license.getLicenseId()) && !isEmpty(license.getLicenseName())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseName().equals(license.getLicenseName())) {
+						return true;
+					}
 				}
 			}
 		}
@@ -6343,5 +6353,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void copySecurityDataForProject(Project project) {
 		boolean copyFlag = projectMapper.copySecurityDataForProjectCnt(project) > 0 ? true : false;
 		if (copyFlag) projectMapper.copySecurityDataForProject(project);
+	}
+	
+	@Override
+	public Map<String, Object> checkSelectDownloadFile(Project project) {
+		Map<String, Object> resMap = new HashMap<>();
+		boolean emptyCheckFlag = false;
+		
+		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+		for (OssComponents oss : list) {
+			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+				emptyCheckFlag = true;
+				break;
+			}
+		}
+		
+		if (emptyCheckFlag) {
+			resMap.put("isValid", false);
+		} else {
+			resMap.put("isValid", true);
+		}
+		
+		return resMap;
 	}
 }

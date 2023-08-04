@@ -4706,4 +4706,15 @@ public class ProjectController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@PostMapping(value = PROJECT.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody HashMap<String, Object> map, HttpServletRequest req, HttpServletResponse res) {
+		Map<String, Object> resMap = new HashMap<>();
+		String prjId = (String) map.get("prjId");
+		Project project = new Project();
+		project.setPrjId(prjId);		
+		
+		resMap = projectService.checkSelectDownloadFile(project);
+		return makeJsonResponseHeader(resMap);
+	}
 }

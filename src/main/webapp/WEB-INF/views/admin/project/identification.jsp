@@ -805,10 +805,10 @@
 									<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
 									<a onclick="bom_fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
 									<a onclick="bom_fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
+									<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">YAML</a>
 								</div>
 							</div>
 						</c:if>
-                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
 	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>

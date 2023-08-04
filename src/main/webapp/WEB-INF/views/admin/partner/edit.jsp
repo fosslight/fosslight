@@ -402,9 +402,9 @@
 							<a onclick="fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
 							<a onclick="fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
 							<a onclick="fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
+							<a onclick="fn.selectDownloadFile('YAML')" style="display: block;">YAML</a>
 						</div>
                     </div>
-					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
                 </c:if>
                 <c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />
