@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ApiPartnerService {
 	Map<String, Object> getPartnerMasterList(Map<String, Object> paramMap);
-	boolean existProjectCnt(Map<String, Object> paramMap);
+	boolean existPartnertCnt(Map<String, Object> paramMap);
 	boolean existLdapUserToEmail(String email);
 	boolean existsWatcherByEmail(String partnerId, String email);
 	void insertWatcher(Map<String, Object> paramMap);

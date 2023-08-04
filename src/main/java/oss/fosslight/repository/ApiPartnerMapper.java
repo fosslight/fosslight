@@ -17,4 +17,5 @@ public interface ApiPartnerMapper {
 	List<Map<String, Object>> selectPartnerMaster(Map<String, Object> paramMap);
 	int existsWatcherByEmail(@Param("partnerId") String partnerId, @Param("email") String email);
 	void insertWatcher(Map<String, Object> paramMap);
+	int existPartnertCnt(Map<String, Object> paramMap);
 }

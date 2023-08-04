@@ -51,8 +51,8 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 	}
 
 	@Override
-	public boolean existProjectCnt(Map<String, Object> paramMap) {
-		return apiPartnerMapper.selectPartnerMaster(paramMap).size() > 0 ? true : false;
+	public boolean existPartnertCnt(Map<String, Object> paramMap) {
+		return apiPartnerMapper.existPartnertCnt(paramMap) > 0 ? true : false;
 	}
 
 	@Override

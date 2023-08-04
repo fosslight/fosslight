@@ -117,8 +117,9 @@ public class ApiPartnerController extends CoTopComponent {
 			paramMap.put("userId", userInfo.getUserId());
 			paramMap.put("userRole", userRole(userInfo));
 			paramMap.put("partnerIdList", partnerIds);
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
 			
-			boolean searchFlag = apiPartnerService.existProjectCnt(paramMap);
+			boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
 			if (searchFlag) {
 				if (emailList != null) {
 					for (String email : emailList) {
