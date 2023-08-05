@@ -693,4 +693,20 @@ public class T2UserServiceImpl implements T2UserService {
             throw new CSigninFailedException();
         }
 	}
+
+	@Override
+	public boolean isAdmin(String _token) {
+		T2Users params = new T2Users();
+		params.setToken(_token);
+		params = getUser(params);
+
+		if (params == null) {
+			throw new CUserNotFoundException();
+		}
+
+		if (params.getAuthority().equals("ROLE_ADMIN")) {
+			return true;
+		}
+		return false;
+	}
 }

@@ -763,6 +763,9 @@ public final class Url {
 		/** OSS */
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss_search";
+
+			/** API OSS List 조회 */
+			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss_register";
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
