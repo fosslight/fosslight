@@ -1459,11 +1459,58 @@ public class ApiProjectController extends CoTopComponent {
 		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
 	})
 	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_NOT_APPLICABLE})
-	public void notApplicable(
+	public CommonResult notApplicable(
 		@RequestHeader String _token,
-		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
-		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true, name = "prjId") String projectId,
+		@ApiParam(value = "project Identification Tab", required = true) @RequestParam(required = true, name = "tab") String identificationTab) {
 
+		T2Users user = userService.checkApiUserAuth(_token);
+		if (checkWritePrivilege(user)) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
+				CoCodeManager.getCodeString(
+					CoConstDef.CD_OPEN_API_MESSAGE,
+					CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
+				)
+			);
+		}
 
+		if (checkIdentificationProject(projectId)) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE,
+				CoCodeManager.getCodeString(
+					CoConstDef.CD_OPEN_API_MESSAGE,
+					CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+				)
+			);
+		}
+		return responseService.getSingleResult(applyNotApplicable());
+	}
+
+	private Map<String, Object> applyNotApplicable() {
+		/*
+		Project Identification단계 해당 탭의 'Not applicable'을 체크 후 save한 상태로 변경되도록 한다.
+		*/
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		return resultMap;
+	}
+
+	private boolean checkWritePrivilege(T2Users user) {
+		/*
+		해당 Project에 쓰기 권한이 없는 경우
+		(Watcher, creator, admin, reviewer가 아닌 경우)
+		error를 return
+		*/
+
+		//todo
+		throw new RuntimeException("not impl");
+	}
+
+	private boolean checkIdentificationProject(String projectId) {
+		/*
+		해당 Project의 Identification 탭내 Save 버튼이 활성화되지 않은 경우
+		(ex. Identification이 confirm인 상태 OR Project가 Drop 또는 Complete된 상태)
+		error를 return. (Identification이 progress 상태인 경우만 저장 가능하도록 함.)
+		*/
+		//todo
+		throw new RuntimeException("not impl");
 	}
 }
