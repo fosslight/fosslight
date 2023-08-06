@@ -693,4 +693,10 @@ public class T2UserServiceImpl implements T2UserService {
             throw new CSigninFailedException();
         }
 	}
+
+	@Override
+	public boolean checkWriteAuthority(T2Users user) {
+		return this.getUserAndAuthorities(user)
+				.hasAnyWritableAuthority();
+	}
 }

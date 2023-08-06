@@ -1463,7 +1463,7 @@ public class ApiProjectController extends CoTopComponent {
 		@ApiParam(value = "project Identification Tab", required = true) @RequestParam(required = true, name = "tab") String identificationTab) {
 
 		T2Users user = userService.checkApiUserAuth(_token);
-		if (checkWriteAuthority(user)) {
+		if (userService.checkWriteAuthority(user)) {
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
 				CoCodeManager.getCodeString(
 					CoConstDef.CD_OPEN_API_MESSAGE,
@@ -1489,17 +1489,6 @@ public class ApiProjectController extends CoTopComponent {
 		*/
 		Map<String, Object> resultMap = new HashMap<>();
 		return resultMap;
-	}
-
-	private boolean checkWriteAuthority(T2Users tokenUser) {
-		return userService
-			.getUserAndAuthorities(tokenUser)
-			.hasAnyWritableAuthority();
-		/*
-		해당 Project에 쓰기 권한이 없는 경우
-		(Watcher, creator, admin, reviewer 가 아닌 경우)
-		error를 return
-		*/
 	}
 
 	private boolean checkIdentificationProject(String projectId) {
