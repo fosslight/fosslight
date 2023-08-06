@@ -1453,4 +1453,17 @@ public class ApiProjectController extends CoTopComponent {
 		
 		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
+
+	@ApiOperation(value = "Project Not Applicable", notes = "Project Not Applicable")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	})
+	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_NOT_APPLICABLE})
+	public void notApplicable(
+		@RequestHeader String _token,
+		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+
+
+	}
 }

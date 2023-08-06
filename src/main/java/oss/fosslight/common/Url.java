@@ -797,7 +797,10 @@ public final class Url {
 			
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
-			
+
+			/** API Project Not Applicable */
+			public static final String FOSSLIGHT_API_PROJECT_NOT_APPLICABLE = "/prj_not_applicable";
+
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/oss_report_src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/oss_report_bin";
