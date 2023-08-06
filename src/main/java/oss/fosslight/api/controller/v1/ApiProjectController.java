@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +37,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
@@ -1465,7 +1463,7 @@ public class ApiProjectController extends CoTopComponent {
 		@ApiParam(value = "project Identification Tab", required = true) @RequestParam(required = true, name = "tab") String identificationTab) {
 
 		T2Users user = userService.checkApiUserAuth(_token);
-		if (checkWritePrivilege(user)) {
+		if (checkWriteAuthority(user)) {
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
 				CoCodeManager.getCodeString(
 					CoConstDef.CD_OPEN_API_MESSAGE,
@@ -1489,19 +1487,19 @@ public class ApiProjectController extends CoTopComponent {
 		/*
 		Project Identification단계 해당 탭의 'Not applicable'을 체크 후 save한 상태로 변경되도록 한다.
 		*/
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Map<String, Object> resultMap = new HashMap<>();
 		return resultMap;
 	}
 
-	private boolean checkWritePrivilege(T2Users user) {
+	private boolean checkWriteAuthority(T2Users tokenUser) {
+		return userService
+			.getUserAndAuthorities(tokenUser)
+			.hasAnyWritableAuthority();
 		/*
 		해당 Project에 쓰기 권한이 없는 경우
-		(Watcher, creator, admin, reviewer가 아닌 경우)
+		(Watcher, creator, admin, reviewer 가 아닌 경우)
 		error를 return
 		*/
-
-		//todo
-		throw new RuntimeException("not impl");
 	}
 
 	private boolean checkIdentificationProject(String projectId) {

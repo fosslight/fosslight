@@ -380,4 +380,12 @@ public class T2Users extends ComBean implements Serializable{
 	public void setExpireDate(String expireDate) {
 		this.expireDate = expireDate;
 	}
+
+	public boolean hasAnyWritableAuthority() {
+		boolean anyWritableAuthorityFlag = false;
+		for(T2Authorities authorities : this.getAuthoritiesList()) {
+			anyWritableAuthorityFlag |= authorities.isWritable();
+		}
+		return anyWritableAuthorityFlag;
+	}
 }
