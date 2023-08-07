@@ -2573,4 +2573,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		return resMap;
 	}
+
+	@Override
+	public boolean checkUserPermissions(Project project, String userId) {
+		boolean checkFlag = false;
+		
+		if (project.getWatcherList() != null) {
+			for (Project prj : project.getWatcherList()) {
+				if (prj.getPrjUserId().equals(userId)) {
+					checkFlag = true;
+					break;
+				}
+			}
+		}
+		if (project.getCreator().equals(userId)) {
+			checkFlag = true;
+		}
+		
+		return checkFlag;
+	}
 }
