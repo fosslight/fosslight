@@ -1246,16 +1246,16 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				selfCheckMapper.insertWatcher(project);
 				
 				// email 발송
-				try {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED);
-					mailBean.setParamPrjId(project.getPrjId());
-					mailBean.setParamUserId(project.getLoginUserName());
-					mailBean.setParamEmail(project.getPrjEmail());
-					
-					CoMailManager.getInstance().sendMail(mailBean);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
+//				try {
+//					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED);
+//					mailBean.setParamPrjId(project.getPrjId());
+//					mailBean.setParamUserId(project.getLoginUserName());
+//					mailBean.setParamEmail(project.getPrjEmail());
+//					
+//					CoMailManager.getInstance().sendMail(mailBean);
+//				} catch (Exception e) {
+//					log.error(e.getMessage(), e);
+//				}
 			}
 		} else {
 			// 이미 추가된 watcher 체크
