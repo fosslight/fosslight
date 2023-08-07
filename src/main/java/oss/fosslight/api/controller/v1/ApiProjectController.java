@@ -1492,6 +1492,7 @@ public class ApiProjectController extends CoTopComponent {
 	}
 
 	private boolean checkIdentificationProject(String projectId) {
+		projectService.getProjectBasicInfo(projectId).
 		/*
 		해당 Project의 Identification 탭내 Save 버튼이 활성화되지 않은 경우
 		(ex. Identification이 confirm인 상태 OR Project가 Drop 또는 Complete된 상태)
