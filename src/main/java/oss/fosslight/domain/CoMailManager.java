@@ -3441,12 +3441,12 @@ public class CoMailManager extends CoTopComponent {
 					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
 					String fileName = (String) fileInfo.get("fileName");
 					String filePath = (String) fileInfo.get("filePath");
-					log.info("filepath: " + fileInfo.get("filePath"));
+					log.debug("filepath: " + fileInfo.get("filePath"));
 					DataSource dataSource = new FileDataSource(filePath);
 					helper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"), dataSource);
 				}catch(Exception e){
 					// Don't Exist Pdf
-					log.error(e.getMessage(), e);
+					log.debug(e.getMessage(), e);
 				}
 			}
 
