@@ -1984,7 +1984,16 @@ public class ProjectController extends CoTopComponent {
 						
 						for (ProjectIdentification bean : ossComponents) {
 							if (!isEmpty(bean.getBinaryName())) {
-								componentBinaryList.put(bean.getBinaryName(), bean);
+								if (componentBinaryList.containsKey(bean.getBinaryName())) {
+									ProjectIdentification identification = componentBinaryList.get(bean.getBinaryName());
+									if (bean.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(bean.getBinaryName(), bean);
+									} else if (identification.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(identification.getBinaryName(), identification);
+									}
+								} else {
+									componentBinaryList.put(bean.getBinaryName(), bean);
+								}
 							}
 						}
 						
