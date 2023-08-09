@@ -293,7 +293,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 
 		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
+		try {
+			contents =avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
+		}catch(Exception e){
+			log.error(e.getMessage());
+			return false;
+		}
 
 		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경

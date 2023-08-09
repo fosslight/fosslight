@@ -54,7 +54,8 @@ public final class PdfUtil extends CoTopComponent {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         return inputStream;
     }
-    public String getReviewReportHtml(String prjId){
+    public String getReviewReportHtml(String prjId) throws Exception
+    {
         Map<String,Object> convertData = new HashMap<>();
         List<OssMaster> ossReview = new ArrayList<>();
         List<LicenseMaster> licenseReview = new ArrayList<>();
@@ -90,19 +91,20 @@ public final class PdfUtil extends CoTopComponent {
             }
 
             //VulnerabilityReview
-            List<Map<String, Object>> _list = vulnerabilityService.selectMaxScoreNvdInfo(oss.getOssName(), oss.getOssVersion());
-            for (Map<String, Object> m : _list) {
-                BigDecimal bdScore = new BigDecimal(Float.toString((Float) m.get("cvssScore")));
+            projectIdentification.setOssName(oss.getOssName());
+            projectIdentification.setOssVersion(oss.getOssVersion());
+            ProjectIdentification prjOssMaster =projectMapper.getOssId(projectIdentification);
+            if(prjOssMaster.getCvssScore()!=null) {
+                BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
 
-                if (bdScore.compareTo(new BigDecimal("8.0")) < 0) {
-                    continue;
+                if (bdScore.compareTo(new BigDecimal("8.0")) >= 0) {
+                    Vulnerability vulnerability = new Vulnerability();
+                    vulnerability.setOssName(oss.getOssName());
+                    vulnerability.setVersion(oss.getOssVersion());
+                    vulnerability.setCvssScore(prjOssMaster.getCvssScore());
+                    vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                    vulnerabilityReview.add(vulnerability);
                 }
-                Vulnerability vulnerability = new Vulnerability();
-                vulnerability.setOssName(oss.getOssName());
-                vulnerability.setVersion(oss.getOssVersion());
-                vulnerability.setCvssScore(Float.toString((Float) m.get("cvssScore")));
-                vulnerability.setVulnerabilityLink((String) m.get("vulnerabilityLink"));
-                vulnerabilityReview.add(vulnerability);
             }
 
             //LisenseReview
