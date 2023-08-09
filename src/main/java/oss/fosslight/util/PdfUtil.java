@@ -93,7 +93,7 @@ public final class PdfUtil extends CoTopComponent {
             //VulnerabilityReview
             projectIdentification.setOssName(oss.getOssName());
             projectIdentification.setOssVersion(oss.getOssVersion());
-            ProjectIdentification prjOssMaster =projectMapper.getOssId(projectIdentification);
+            ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
             if(prjOssMaster.getCvssScore()!=null) {
                 BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
 
@@ -182,7 +182,7 @@ public final class PdfUtil extends CoTopComponent {
     public Map<String,Object> getPdfFilePath(String prjId) throws Exception{
         Map<String,Object> fileInfo = new HashMap<>();
         String fileName = "";
-        String filePath = CommonFunction.emptyCheckProperty("notice.path", "/notice");
+        String filePath = CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
 
         Project project = new Project();
         project.setPrjId(prjId);
