@@ -398,14 +398,15 @@
 		// Grid download cell display
 		displayReportDownload : function(cellvalue, options, rowObject){
 			var display = "";
-			
-			if(rowObject.identificationStatus == "Confirm"){
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
-				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
-			} else {
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
-				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport dis\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
-			}
+
+            if(rowObject.identificationStatus == "Confirm"){
+                display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
+                if(rowObject.reviewReportFileId != ""){
+                    display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
+                }
+            } else {
+                display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
+            }
 			
 			if(rowObject.verificationStatus == "Confirm"){
 				if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
