@@ -521,7 +521,7 @@
                     </span>
                     <span class="right">
                         <div id="binExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-							<input type="button" value="Export" class="btnColor red btnExport" onclick="src_fn.exportList(this)"/>
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="bin_fn.exportList(this)"/>
 							<div id="binExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0; text-align:left;">
 								<a onclick="bin_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
 								<a onclick="bin_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
