@@ -190,12 +190,12 @@
 						<input id="Export" type="button" value="Export" class="btnColor red btnExport" onclick="fn.exportList()"/>
 						<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" onclick="fn.selectDownloadFile()">
 							<a id="report_sub" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+							<a id="YAML" style="display: block;">FOSSLight Report (YAML)</a>
 							<a id="Spreadsheet_sub" style="display: block;">SPDX (Spreadsheet)</a>
 							<a id="RDF_sub" style="display: block;">SPDX (RDF)</a>
 							<a id="TAG_sub" style="display: block;">SPDX (TAG)</a>
 							<a id="JSON_sub" style="display: block;">SPDX (JSON)</a>
 							<a id="YAML_sub" style="display: block;">SPDX (YAML)</a>
-							<a id="YAML" style="display: block;">YAML</a>
 						</div>
 					</div>
 	                <input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>

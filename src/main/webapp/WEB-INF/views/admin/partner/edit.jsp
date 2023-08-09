@@ -397,12 +397,12 @@
                 		<input type="button" value="Export" class="btnColor red btnExport" onclick="fn.exportList(this)"/>
                 		<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
 							<a onclick="fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+							<a onclick="fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
 							<a onclick="fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
 							<a onclick="fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
 							<a onclick="fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
 							<a onclick="fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
 							<a onclick="fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
-							<a onclick="fn.selectDownloadFile('YAML')" style="display: block;">YAML</a>
 						</div>
                     </div>
                 </c:if>
