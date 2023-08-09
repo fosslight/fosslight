@@ -351,7 +351,7 @@ public final class Url {
 		
 		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
 		
-		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile/{code}";
 	}
 	
 	public static final class VERIFICATION {

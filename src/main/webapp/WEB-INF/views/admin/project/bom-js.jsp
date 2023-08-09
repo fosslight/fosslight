@@ -625,7 +625,7 @@ var bom_fn = {
         $("#ExportList").hide();
     },
     selectDownloadFileValidation : function(target) {
-    	if (bom_fn.checkSelectDownloadFile()) {
+    	if (com_fn.checkSelectDownloadFile('BOM')) {
     		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
             else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
             else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
@@ -636,30 +636,7 @@ var bom_fn = {
     		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
     	}
     },
-    checkSelectDownloadFile : function () {
-    	var checkEmptyFlag = false;
-    	
-    	$.ajax({
-    		type: "POST",
-			url: '<c:url value="/project/checkSelectDownloadFile"/>',
-			data: JSON.stringify({"prjId":'${project.prjId}'}),
-			dataType : 'json',
-			cache : false,
-			async : false,
-			contentType : 'application/json',
-			success: function (data) {
-				if (data.isValid) {
-					checkEmptyFlag = true;
-				}
-			},
-			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
-			}
-    	});
-    	
-    	return checkEmptyFlag;
-    },
-	downloadSpdxSpreadSheetExcel : function(){
+    downloadSpdxSpreadSheetExcel : function(){
 		$.ajax({
 			type: "POST",
 			url: '<c:url value="/spdxdownload/getSPDXPost"/>',

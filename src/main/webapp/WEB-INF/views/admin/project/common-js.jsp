@@ -1512,6 +1512,37 @@ var com_fn = {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
+	},
+	checkSelectDownloadFile : function (target) {
+		var checkEmptyFlag = false;
+		var referenceDiv = "";
+		var params = {'prjId':'${project.prjId}'};
+		
+		switch(target.toUpperCase()){
+			case "SRC":		referenceDiv = "11";	break;
+			case "BOM":		referenceDiv = "13";	break;
+			case "BIN":		referenceDiv = "15";	break;
+		}
+		
+		$.ajax({
+    		type: "POST",
+			url: '<c:url value="/project/checkSelectDownloadFile/'+referenceDiv+'"/>',
+			data: JSON.stringify(params),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if (data.isValid) {
+					checkEmptyFlag = true;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+    	});
+    	
+    	return checkEmptyFlag;
 	}
 }
 </script>
