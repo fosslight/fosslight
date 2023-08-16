@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021 LG Electronics Inc.
- * SPDX-License-Identifier: AGPL-3.0-only 
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 package oss.fosslight.common;
@@ -8,23 +8,23 @@ package oss.fosslight.common;
 import java.util.regex.Pattern;
 
 public class CoConstDef {
-	
+
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
 	public static final String APP_DEFAULT_PACKAGE_NAME     = "oss.fosslight";
 	public final static String MAPPER_PACKAGE		= APP_DEFAULT_PACKAGE_NAME+".repository";
-	
+
 	public static final String JSP_PROPERTY_URL_PATTERN    = "*.jsp";
-	
+
 	//---------------------------------------------------------------------------------------------
 	// Tag Library Informations
 	//---------------------------------------------------------------------------------------------
 	public static final String COMM_TLD_URI  = "/WEB-INF/tlds/common-taglibs.tld";
 	public static final String COMM_TLD_PATH = "/WEB-INF/tlds/common-taglibs.tld";
-	
+
 	public static final boolean VALIDATION_USE_CAMELCASE = true;
-	
+
 	public static final String ENCRYPT_DEFAULT_SALT_KEY = "Fosslight-System";
-	
+
 	/** 정적 리소스 종류 */
 	private final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
 	/**
@@ -46,7 +46,7 @@ public class CoConstDef {
 
 	/** 정적 리소스 기본 패키지 classpath */
 	private static final String STATIC_PATH = "classpath:/static";
-	
+
 	/**
 	 * 정적 리소스 위치 ({@code STATIC_RESOURCES_URL_PATTERN}와 순서 맞출 것)
 	 * @see #STATIC_RESOURCES_URL_PATTERNS
@@ -65,7 +65,7 @@ public class CoConstDef {
 	};
 
 	public static final String HEALTH_CHECK_URL = "/healthCheck";
-	
+
 	/** Tiles definition xml path */
 	public final static String[] TILES_LAYOUT_XML_PATH = {
 		"WEB-INF/tiles.xml"
@@ -73,16 +73,16 @@ public class CoConstDef {
 
 	/** Runtime에서 JSP의 refresh 적용 여부 : {@value #REFRESH_JSP_ON_RUNTIME} */
 	public final static boolean REFRESH_JSP_ON_RUNTIME = true;
-	
+
 	public static final int DEFAULT_PAGE_NUMBER = 0;
 	public static final int DEFAULT_PAGE_SIZE = 10;
-	
+
 	/** 범용 flag YN */
 	public static final String FLAG_YES = "Y";
 	public static final String FLAG_NO = "N";
-	
+
 	public static final String NUM_ZERO = "0";
-	
+
 	/** 범용 bit flag */
 	public static final int FLAG_A = 0x01;
 	public static final int FLAG_B = 0x02;
@@ -121,7 +121,7 @@ public class CoConstDef {
 	public static final String CD_SMTP_SERVICE_ENCODING			= "300";
 	public static final String CD_SMTP_SERVICE_USERNAME			= "400";
 	public static final String CD_SMTP_SERVICE_PASSWORD			= "401";
-	
+
 	// FOSSLight Hub Menu Info
 	public static final String CD_MENU_DASHBOARD				= "001";
 	public static final String CD_MENU_STATISTICS				= "002";
@@ -131,16 +131,16 @@ public class CoConstDef {
 	public static final String CD_MENU_BINARY_DB				= "007";
 	public static final String CD_MENU_COMPLIANCE_STATUS		= "010";
 	public static final String CD_MENU_EXTERNAL_LINK			= "011";
-	
+
 	// Dashboard Notice
 	public static final String CD_DASHBOARD_DETAIL				= "801";
 //	public static final String CD_DASHBOARD_NOTICE				= "100";
-	
+
 	// Project List Detail Setting
 	public static final String CD_PROJECT_DETAIL				= "918";
 	public static final String CD_AUTO_ANALYSIS_FLAG			= "100";
 	public static final String CD_NOTICE_FLAG					= "101";
-	
+
 	// Notice Info
 	public static final String CD_NOTICE_INFO					= "927";
 	public static final String CD_NOTICE_HTML_STR				= "HTML";
@@ -148,58 +148,58 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_TEXT				= "101";
 	public static final String CD_DTL_NOTICE_SPDX				= "102";
 	public static final String CD_NOTICE_INTERNAL_URL			= "970";
-	
+
 	/** System Setting Code List End */
-	
+
 	public static final String EMPTY_STRING = "";
-	
+
 	/** 화면표시 날짜 형식 (yyyy-MM-dd hh:mm:ss) */
 	public static final String DISP_FORMAT_DATE_ALL = "yyyy-MM-dd hh:mm:ss";
-	
+
 	/** 화면표시 날짜 형식 (yyyy-MM-dd) */
 	public static final String DISP_FORMAT_DATE_YYYYMMDD = "yyyy-MM-dd";
-	
+
 	/** 모바일 화면표시 날짜 형식 (yyyy.MM.dd hh:mm:ss) */
 	public static final String DISP_MOBILE_FORMAT_DATE_ALL_DOT = "yyyy.MM.dd hh:mm:ss";
-	
+
 	/** 모바일 화면표시 날짜 형식 (yyyy.MM.dd) */
 	public static final String DISP_MOBILE_FORMAT_DATE_YYYYMMDD_DOT = "yyyy.MM.dd";
-	
+
 	/** 데이터 베이스 날짜 형식 (yyyy-MM-dd hh:mm:ss) */
 	public static final String DATABASE_FORMAT_DATE_ALL = "yyyy-MM-dd HH:mm:ss";
-	
+
 	/** 데이터 베이스 날짜 형식 (yyyy-MM-dd hh:mm:ss.SSS) */
 	public static final String DATABASE_FORMAT_DATE_TIMESTAMP = "yyyy-MM-dd HH:mm:ss.SSS";
-	
+
 	/** 화면표시 날짜 형식 taglib용 full format [yyyy-MM-dd hh:mm:ss] */
 	public static final String DISP_FORMAT_DATE_TAG_DEFAULT = "-- ::";
-	
+
 	/** 화면표시 날짜 형식 taglib용 simple format [yyyy-MM-dd] */
 	public static final String DISP_FORMAT_DATE_TAG_SIMPLE = "--";
-	
+
 	// Grid 관련
 	public static final String GRID_OPERATION_ADD = "add";
 	public static final String GRID_OPERATION_EDIT = "edit";
 	public static final String GRID_OPERATION_DELETE = "del";
 	public static final String GRID_NEWROW_DEFAULT_PREFIX = "jqg";
-	
+
 	/**범용코드정의 */
 	public static final String COMMON_SELECTED_ETC = "999";
-	
+
 	/** Header Menu Codes (=menuId : 유저 생성시 대메뉴의 비트값을 가져오기 위한 코드) */
-	
+
 	/** MAIN MENU > APP MAIN */
 	public static final String CD_DTL_MENU_MAIN_APP_MAIN = "800";
 	/** MAIN MENU > NOTICE */
 	public static final String CD_DTL_MENU_MAIN_NOTICE = "700";
-	
-	
+
+
 	/** DEFAULT MAIN MENU CODE */
 	public static final String[] DEFAULT_MENUS = {
 		CD_DTL_MENU_MAIN_APP_MAIN,				// App 메인
 		CD_DTL_MENU_MAIN_NOTICE,					// 공지사항
 	};
-		
+
 	/** AD login LDAP */
 	public static enum AD_LDAP_LOGIN {
 		LDAP_SERVER_URL(CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_SERVER_URL)),
@@ -211,10 +211,10 @@ public class CoConstDef {
     	private AD_LDAP_LOGIN(String value) {this.value = value;}
     	public String getValue(){return this.value;}
 	}
-	
+
 	public static final String PACKAGING_VERIFY_FILENAME_PROPRIETARY = "proprietaryCheckList.txt";
 	public static final String PACKAGING_VERIFY_FILENAME_FILE_LIST = "packageStructureInfo.txt";
-	
+
 	/** 페이지 설정 코드 */
 	public static final String CD_PAGENATION = "100";
 	/** BinaryDB Admin 전용 페이지 설정 코드 */
@@ -225,21 +225,21 @@ public class CoConstDef {
 	public static String DISP_PAGENATION_LIST_STR = CommonFunction.arrayToString(CoCodeManager.getCodes(CD_PAGENATION));
 	/** 페이징 선택 가능 건수 (grid에서 설정) */
 	public static String DISP_BINARYDB_PAGENATION_LIST_STR = CommonFunction.arrayToString(CoCodeManager.getCodes(CD_BINARYDB_PAGENATION));
-	
+
 	/** 페이징이 없는 GRID의 최대 표시 건수 */
 	public static String DISP_PAGENATION_MAX = "5000";
-	
+
 	public static final String CD_LICENSE_DIV = "203";
 	public static final String LICENSE_DIV_MULTI = "M";
 	public static final String LICENSE_DIV_SINGLE = "S";
-	
+
 	/** BAT 분석 결과 lgematching table에 존재하는 binary가 존재할 경우 표시명 */
 	public static final String BAT_MATCHED_STR = "matched";
-	
-	
+
+
 	public static final String FILE_GUBUN_EDITOR_IMAGE = "E";
 	public static final String FILE_GUBUN_FILE_DOWNLOAD = "DL";
-	
+
 	public static final String SESSION_KEY_UPLOAD_REPORT_PARTNER = "REPORT_PARTNER";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC = "REPORT_PROJECT_SRC";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN = "REPORT_PROJECT_BIN";
@@ -254,10 +254,10 @@ public class CoConstDef {
 	public static final String SESSION_KEY_NEWOSS_DEFAULT_DATA = "NEWOSS_DEFAULT_DATA";
 	public static final String SESSION_KEY_NICKNAME_CHANGED = "NICKNAME_CHANGED";
 	public static final String SESSION_KEY_OSS_VERSION_CHANGED = "REPORT_OSSVERSION_CHANGED";
-	
+
 	public static final String SESSION_KEY_PREFIX_DEFAULT_SEARCHVALUE = "PREFIX_DEFAULT_SEARCHVALUE_";
 	public static final String SESSION_KEY_ANALYSIS_RESULT_DATA = "ANALYSIS_RESULT_DATA";
-	
+
 	/**
 	 * Auto Fill OSS 기능에서 사용하는 Dependency 타입과 url 패턴 정의
 	 */
@@ -295,7 +295,7 @@ public class CoConstDef {
 	/** 사업부 분류 코드 - 200 */
 	public static final String CD_USER_DIVISION = "200";
 	public static final String CD_USER_DIVISION_EMPTY = "999";
-	
+
 	/** 프로젝트 상태 코드 - 205 */
 	public static final String CD_PROJECT_STATUS = "205";
 	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 	= "PROG";
@@ -311,7 +311,7 @@ public class CoConstDef {
 	public static final String CD_DTL_IDENTIFICATION_STATUS_REVIEW		= "REV";
 	public static final String CD_DTL_IDENTIFICATION_STATUS_CONFIRM 	= "CONF";
 	public static final String CD_DTL_IDENTIFICATION_STATUS_NA = "NA";
-	
+
 	/** 분류 타입 코드 - 207 */
 	public static final String CD_DISTRIBUTION_TYPE = "207";
 	public static final String CD_GENERAL_MODEL = "10";
@@ -329,7 +329,7 @@ public class CoConstDef {
 	public static final String CD_DTL_NOTICE_TYPE_ACCOMPANIED = "40";
 	public static final String CD_DTL_NOTICE_TYPE_WITHOUTCOMPANYINFO = "50";
 	public static final String CD_DTL_NOTICE_TYPE_FULLOPTION = "60";
-	
+
 	/** 3RD 파티 delivery form - 209 */
 	public static final String CD_PARTNER_DELIVERY_FORM = "209";
 	public static final String CD_DTL_PARTNER_DELIVERY_FORM_SRC = "SRC";
@@ -346,16 +346,16 @@ public class CoConstDef {
 	public static final String CD_DTL_COMPONENT_PARTNER_BAT = "22";
 	public static final String CD_DTL_COMPONENT_BAT = "30";
 	public static final String CD_DTL_COMPONENT_PACKAGING = "50";
-	
+
 	/** 3rd party status */
 	public static final String CD_PARTNER_STATUS				= "211";
 	public static final String CD_DTL_PARTNER_STATUS_PROGRESS 	= "PROG";
 	public static final String CD_DTL_PARTNER_STATUS_REQUEST 	= "REQ";
 	public static final String CD_DTL_PARTNER_STATUS_REVIEW		= "REV";
 	public static final String CD_DTL_PARTNER_STATUS_CONFIRM 	= "CONF";
-	
+
 	public static final String CD_DTL_SELF_COMPONENT_ID = "10";
-	
+
 	public static final String CD_BAT_STATUS = "212";
 	public static final String CD_DTL_BAT_STATUS_READY = "1";
 	public static final String CD_DTL_BAT_STATUS_START = "10";
@@ -369,7 +369,7 @@ public class CoConstDef {
 	public static final String CD_DTL_BAT_STATUS_DONE_NOTDETECTED = "71";
 	public static final String CD_DTL_BAT_STATUS_CANCELED = "90";
 	public static final String CD_DTL_BAT_STATUS_ERROR = "99";
-	
+
 	/** OS 타입 코드 - 213 */
 	public static final String CD_OS_TYPE = "213";
 	public static final String CD_OS_TYPE_ETC = "999";
@@ -384,7 +384,7 @@ public class CoConstDef {
 	/** Site of Distribute */
 	public static final String CD_DISTRIBUTE_SITE_LGE = "LGE";
 	public static final String CD_DISTRIBUTE_SITE_SKS = "SKS";
-	
+
 	public static final String CD_COMMENT_DIVISION = "214";
 	public static final String CD_DTL_COMMENT_PROJECT_USER = "09"; // 코멘트 통함
 	public static final String CD_DTL_COMMENT_PROJECT_HIS = "19"; // 코멘트 통함
@@ -399,7 +399,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMMENT_LICENSE = "30";
 	public static final String CD_DTL_COMMENT_OSS = "40";
 	public static final String CD_DTL_COMMENT_SECURITY_HIS = "60";
-	
+
 	/** License 타입별 백그라운드 색 - 216 */
 	public static final String CD_LICENSE_BACKGROUND = "216";
 	/** Multi or Dual license의 obligation type */
@@ -425,7 +425,7 @@ public class CoConstDef {
 	public static final String DISTIRBUTE_DUPLICATE_CHECK_URL = "/pservice/getDescKey";
 //	public static final String DISTRIBUTE_LICENSE_URL = "/license/";
 //	public static final String DISTRIBUTE_MIGRATION_TEST = "/pservice/migTest";
-	
+
 	/** Notice File Message Info - 219 */
 	public static final String CD_NOTICE_DEFAULT = "219";
 	public static final String CD_NOTICE_DEFAULT_SKS = "220";
@@ -440,13 +440,13 @@ public class CoConstDef {
 	public static final String CD_DTL_SUPPLMENT_NOTICE_TXT_TEMPLATE = "9";
 	public static final String CD_DTL_SELFCHECK_NOTICE_DEFAULT_TEMPLATE = "10";
 	public static final String CD_DTL_SELFCHECK_NOTICE_TEXT_TEMPLATE = "11";
-	
+
 	public static final String CD_NOTICE_DEFAULT_SOFTWARE_TYPE = "221";
 	public static final String CD_DTL_NOTICE_DEFAULT_SOFTWARE_TYPE_MODEL = "10";
 	public static final String CD_DTL_NOTICE_DEFAULT_SOFTWARE_TYPE_SOFTWARE = "20";
-	
+
 	public static final String CD_BINARY_FILENAME_CONVERT = "222";
-	
+
 	public static final String CD_DISTRIBUTION_HIS_TYPE = "223";
 	public static final String CD_DTL_DISTRIBUTION_HIS_DISTRIBUTE = "D";
 	public static final String CD_DTL_DISTRIBUTION_HIS_MODELONLY = "M";
@@ -458,17 +458,17 @@ public class CoConstDef {
 	public static final String CD_DTL_DISTRIBUTION_HIS_DELETED = "RJOSDD";
 	public static final String CD_DTL_DISTRIBUTION_HIS_SYNCHRONIZED_DESC = "CDOSD";
 	public static final String CD_DTL_DISTRIBUTION_HIS_SYNCHRONIZED_TYPE = "CSOSD";
-	
+
 	public static final String CD_VERIFY_EXCEPTION_WORDS = "224";
 	public static final String CD_VERIFY_IGNORE_WORDS = "225";
-	
+
 	/** Model 타입 코드 - 500 */
 	public static final String CD_MODEL_TYPE = "500";
 	/** Model 타입 코드 - 550 */
 	public static final String CD_MODEL_TYPE2 = "550";
 	/** External Link 코드 - 600 */
 	public static final String CD_EXTERNAL_LINK = "600";
-	
+
 	/** Mail Resource 타입 코드 */
 	public static final String CD_MAIL_TYPE = "102";
 	/** Mail Type [FOSSLight] OSS has been registered */
@@ -487,12 +487,12 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_OSS_RENAME = "18";
 	/** Mail Type [FOSSLight] OSS has been removed */
 	public static final String CD_MAIL_TYPE_OSS_DELETE = "19";
-	
+
 	public static final String CD_MAIL_TYPE_OSS_MODIFIED_COMMENT = "130";
 	/** Mail Type [FOSSLight] OSS bas been deactivated */
 	public static final String CD_MAIL_TYPE_OSS_DEACTIVATED = "813";
 	public static final String CD_MAIL_TYPE_OSS_ACTIVATED = "814";
-	
+
 	/** Mail Type [FOSSLight] Open source license has been registered */
 	public static final String CD_MAIL_TYPE_LICENSE_REGIST = "20";
 	/** Mail Type [FOSSLight] Open source license has been changed */
@@ -500,7 +500,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_UPDATE_TYPE = "22";
 	public static final String CD_MAIL_TYPE_LICENSE_RENAME = "23";
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
-	
+
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";
 	public static final String CD_MAIL_TYPE_PROJECT_REVIEWER_ADD = "30"; // reviewer가 없는 상태에서 새로운 reviewer를 등록한 case
@@ -509,15 +509,15 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_CHANGED = "32"; // 추가 : PROJECT 변경
 	public static final String CD_MAIL_TYPE_PROJECT_CREATED = "33"; // 추가 : PROJECT 변경
 	public static final String CD_MAIL_TYPE_PROJECT_COPIED = "37"; // 추가 : PROJECT 복사
-	
-	
+
+
 	public static final String CD_MAIL_TYPE_PROJECT_ADDED_COMMENT = "34"; // Project Comemnt 추가
 	public static final String CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT = "340"; // Project Comemnt 수정
 	public static final String CD_MAIL_TYPE_PROJECT_COMPLETED = "35"; // Project complete
 	public static final String CD_MAIL_TYPE_PROJECT_DROPPED = "812"; // Project drop
 	public static final String CD_MAIL_TYPE_PROJECT_REOPENED = "36"; // Project reopen
 	public static final String CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT = "38"; // Project RequestToOpen Comment 추가  2018-07-23 choye 추가
-	
+
 	/** Project Request Review(Identification) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW = "40";
 	/** Project Identification confirm */
@@ -560,7 +560,7 @@ public class CoConstDef {
 	/** changed USER Info */
 	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";
 	public static final String CD_MAIL_TYPE_RESET_USER_PASSWORD = "817";
-	
+
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED = "66"; // OSDD에서 DESCRIPTION이 삭제된 경우
@@ -568,7 +568,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE = "670";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_DESCRIPTION = "671";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT = "68";
-	
+
 	/* Partner Binary DB Check*/
 	public static final String CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT = "470";
 	/** 3rd party reviewer changed */
@@ -612,7 +612,7 @@ public class CoConstDef {
 	/* nvd data 중 vendor-product 가 다른 경우 */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF = "95";
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
-	
+
 	/** Mail Type엥 따른 공통 Components 구성 */
 	public static final String CD_MAIL_COMPONENT = "103";
 	public static final String CD_MAIL_COMPONENT_OSSBASICINFO = "100";
@@ -635,12 +635,12 @@ public class CoConstDef {
 	public static final String CD_MAIL_COMPONENT_VULNERABILITY_REMOVE_RECALCULATED = "214";
 	public static final String CD_MAIL_COMPONENT_PARTNER_DISCLOSEOSSINFO = "215";
 	public static final String CD_MAIL_COMPONENT_PARTNER_NOT_DISCLOSEOSSINFO = "216";
-	
+
 	/** MAIL 모듈 별 KEY NAME */
 	public static final String CD_MAIL_COMPONENT_NAME = "104";
 	public static final String CD_MAIL_COMPONENT_TEMPLATE = "110";
 	public static final String CD_MAIL_DEFAULT_CONTENTS = "111";
-	
+
 	// 이벤트 코드 : TODO MAIL-SERVICE
 	public static final String	EVENT_CODE_LICENSE = "300";
 	public static final String	EVENT_CODE_OSS = "301";
@@ -659,7 +659,7 @@ public class CoConstDef {
 	public static final String	ACTION_CODE_CANCELED = "CANCELED";
 	public static final String	ACTION_CODE_NEEDED = "NEEDED";
 	public static final String	ACTION_CODE_COMPLETED = "COMPLETED";
-	
+
 	/** 시스템 공통 상수 정의 Enum */
 	public enum CD_SYSTEM_CONSTANT_VALUE {
     	/** 상세코드 : 범용 1Page당 표시 레코드 수 */
@@ -676,7 +676,7 @@ public class CoConstDef {
     	private String value;
     	private CD_SYSTEM_CONSTANT_VALUE(String value) {this.value = value;}
     	public String getValue(){return this.value;}
-    }	
+    }
 	/** 라이센스 타입 코드 **/
 	public static final String CD_LICENSE_TYPE 									= "201";
 	public static final String CD_LICENSE_TYPE_CP 								= "CP";
@@ -684,18 +684,18 @@ public class CoConstDef {
 	public static final String CD_LICENSE_TYPE_PMS								= "PMS";
 	public static final String CD_LICENSE_TYPE_PF								= "PF"; // Proprietary Free
 	public static final String CD_LICENSE_TYPE_NA								= "NA"; // Proprietary
-	
+
 	/** 라이센스 Restriction 코드 **/
 	public static final String CD_LICENSE_RESTRICTION							= "226";
 	public static final String CD_LICENSE_NETWORK_RESTRICTION					= "2";
-	
+
 	/** 사용자별 Default Tab Menu 코드 */
 	public static final String CD_DEFAULT_TAB 									= "701";
-	
+
 	/** marquee contents */
 	public static final String CD_MARQUEE										= "702";
 	public static final String CD_DTL_CONTENTS									= "100";
-	
+
 	/** regist domain */
 	public static final String CD_REGIST_DOMAIN									= "703";
 	public static final String CD_DTL_DEFAULT_DOMAIN							= "100";
@@ -716,13 +716,13 @@ public class CoConstDef {
 	// -------------- 서브메뉴 대표 코드
 	/** 대메뉴 */
 	public static final String CD_MENU_MAIN 									= "M001";
-	
+
 	/** 서브메뉴 - Main */
 	public static final String CD_MENU_SUB_MAIN									= "M100";
-	
+
 	/** 서브메뉴 - 게시판 관리 */
 	public static final String CD_NEWS_SUB_BOARD		 						= "M600";
-	
+
 	/** 캠페인 참여 경로 코드 **/
 	public enum CAMPAIGN_ROUTE {
 		RECOMMEND	("01"),		// 기업 및 지인 추천
@@ -730,12 +730,12 @@ public class CoConstDef {
 		NOTICE		("03"),		// 각종 홈페이지 공지사항
 		BROCHURE	("04"),		// 브로셔 홍보
 		ETC			("99");		// 기타
-		
+
 		private String value;
 		private CAMPAIGN_ROUTE(String value) {this.value = value;};
 		public String getValue() {return this.value;};
 	}
-	
+
 	//license guide
 //	public static final String CD_LICENSE_GUID 									= "400";
 //	public static final String CD_LICENSE_GUID_EXPORT 							= "401";
@@ -744,34 +744,34 @@ public class CoConstDef {
 	// Excel Download/Export
 	public static final String CD_EXCEL_DOWNLOAD								= "901";
 	public static final String CD_MAX_ROW_COUNT									= "100";
-	
+
 	// Collab Info
 	public static final String CD_COLLAB_INFO									= "902";
 	public static final String CD_HELP_URL										= "100";
 	public static final String CD_PACKAGING_REQUESTED_URL						= "101";
 	public static final String CD_SUPPLEMENT_NOTICE_HELP_URL					= "102";
-	
+
 	public static final String CD_CHECK_OSS_NAME_URL							= "903";
-	
+
 	// check LicenseText Server Info
 	public static final String CD_CHECK_LICENSETEXT_SERVER_INFO					= "904";
 	public static final String CD_SERVER_URL									= "100";
 	public static final String CD_DOWNLOAD_URL									= "200";
-	
+
 	public static final String CD_AUTO_ANALYSIS									= "905";
 	public static final String CD_IDLE_TIME										= "100";
-	
+
 	public static final String CD_BAT_ERROR_STRING_LIST							= "907";
-	
+
 	public static final int CD_XLSX_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
 	public static final int CD_CSV_UPLOAD_FILE_SIZE_LIMIT						= 5248000;
-	
+
 	public static final String CD_ANDROID_NOTICE_XML							= "20";
-	
+
 	public static final String CD_CHECK_OSS_SELF 								= "SELF";
 	public static final String CD_CHECK_OSS_IDENTIFICATION 						= "IDENTIFICATION";
 	public static final String CD_CHECK_OSS_PARTNER 							= "PARTNER";
-	
+
 	// Open API Token Proc
 	public static final String CD_TOKEN_CREATE_TYPE								= "CREATE";
 	public static final String CD_TOKEN_DELETE_TYPE								= "DELETE";
@@ -781,10 +781,10 @@ public class CoConstDef {
 
 	public static final String CD_MAIL_PACKAGING_UPLOAD_SUCCESS					= "810";
 	public static final String CD_MAIL_PACKAGING_UPLOAD_FAILURE					= "811";
-	
+
 	public static final int CD_OPEN_API_CREATE_PROJECT_LIMIT					= 3;
 	public static final int CD_OPEN_API_PACKAGE_FILE_LIMIT						= 3;
-	
+
 	// Open API return messsage(error)
 	public static final String CD_OPEN_API_MESSAGE								= "908";
 	public static final String CD_OPEN_API_USER_NOTFOUND_MESSAGE				= "200";
@@ -801,12 +801,12 @@ public class CoConstDef {
 	public static final String CD_OPEN_API_PERMISSION_ERROR_MESSAGE				= "500";
 	public static final String CD_OPEN_API_COMMUNICATION_ERROR_MESSAGE			= "900";
 	public static final String CD_OPEN_API_UNKNOWN_ERROR_MESSAGE				= "999";
-	
+
 	public static final String CD_COMMA_CHAR									= ",";
-	
+
 	public static final String CD_PLATFORM_GENERATED							= "307";
 	public static final String CD_DTL_DEFAULT_PLATFORM							= "1";
-	
+
 	public static final String CD_PROJECT_PRIORITY								= "308";
 	public static final String CD_PRIORITY_P0									= "10";
 	public static final String CD_PRIORITY_P2									= "30";
@@ -818,22 +818,22 @@ public class CoConstDef {
 	public static final String CD_DISTRIBUTE_ACT_DESCRIPTION_SOFTWARE			= "DA";
 	public static final String CD_DISTRIBUTE_ACT_PACKAGING						= "DP";
 	public static final String CD_DISTRIBUTE_ACT_NOT_CHANGE						= "DNC";
-	
+
 	public static final String CD_LDAP_SEARCH_INFO								= "931";
 	public static final String CD_DTL_LDAP_SEARCH_ID							= "100";
 	public static final String CD_DTL_LDAP_SEARCH_PW							= "200";
-	
+
 	/* SPDX CODE */
 	public static final String CD_SPDX											= "spdx";
 	public static final String CD_SPDX_RPF										= "spdxRdf";
 	public static final String CD_SPDX_TAG										= "spdxTag";
 	public static final String CD_SPDX_JSON										= "spdxJson";
 	public static final String CD_SPDX_YAML										= "spdxYaml";
-	
+
 	/* SCORE CODE */
 	public static final String CD_VULNERABILITY_MAILING_SCORE					= "750";
 	public static final String CD_VULNERABILITY_MAILING_SCORE_STANDARD			= "100";
-	
+
 	/* SECURITY SCORE CODE */
 	public static final String CD_SECURITY_VULNERABILITY_SCORE					= "760";
 	public static final String CD_SECURITY_VULNERABILITY_DETAIL_SCORE			= "100";
