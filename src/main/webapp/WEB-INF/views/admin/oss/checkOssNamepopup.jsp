@@ -156,11 +156,21 @@
 								rowdata["refPrjId"] = rowdata["referenceId"];
 								rowdata["referenceId"] = commentId;
 								rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+								if(i == idArry.length - 1){
+									rowdata["tableFlag"] = "Y";
+								}else{
+									rowdata["tableFlag"] = "N";
+								}
 								</c:if>
 								<c:if test="${projectInfo.targetName eq 'partner'}">
 								rowdata["referenceId"] = rowdata["referenceId"];
 								rowdata["refPrjId"] = commentId;
 								rowdata["referenceDiv"] = referenceDiv;
+								if(i == idArry.length - 1){
+									rowdata["tableFlag"] = "Y";
+								}else{
+									rowdata["tableFlag"] = "N";
+								}
 								</c:if>
 								
 								$.ajax({

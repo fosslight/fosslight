@@ -310,6 +310,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	 */
 	private String obligationGrayFlag;
 	private String obligationMsg;
+	private String tableFlag;
 	
 	/** The oss copyright. */
 	private String copyright;
@@ -372,6 +373,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	public String getObligationGrayFlag() {
 		return obligationGrayFlag;
 	}
+
+	public String gettableFlag() { return tableFlag; }
 
 	public void setObligationGrayFlag(String obligationGrayFlag) {
 		this.obligationGrayFlag = obligationGrayFlag;
