@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -66,7 +65,6 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.service.AutoIdService;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
@@ -953,7 +951,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the oss versions
 	 */
-	@GetMapping(value = PROJECT.OSS_VERIONS)
+	@GetMapping(value = PROJECT.OSS_VERSIONS)
 	public @ResponseBody ResponseEntity<Object> getOssVersions(ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String ossName = req.getParameter("ossName");
@@ -1986,7 +1984,16 @@ public class ProjectController extends CoTopComponent {
 						
 						for (ProjectIdentification bean : ossComponents) {
 							if (!isEmpty(bean.getBinaryName())) {
-								componentBinaryList.put(bean.getBinaryName(), bean);
+								if (componentBinaryList.containsKey(bean.getBinaryName())) {
+									ProjectIdentification identification = componentBinaryList.get(bean.getBinaryName());
+									if (bean.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(bean.getBinaryName(), bean);
+									} else if (identification.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(identification.getBinaryName(), identification);
+									}
+								} else {
+									componentBinaryList.put(bean.getBinaryName(), bean);
+								}
 							}
 						}
 						
@@ -2767,7 +2774,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@PostMapping(value = PROJECT.IDENTIFICAITON_GRID_POST)
+	@PostMapping(value = PROJECT.IDENTIFICATION_GRID_POST)
 	public @ResponseBody ResponseEntity<Object> srcMainGridAjaxPost(@RequestBody ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		return makeJsonResponseHeader(getOssComponentDataInfo(identification, identification.getReferenceDiv()));
@@ -2907,7 +2914,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFIATION_THIRD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_THIRD)
 	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		Map<String, Object> map = projectService.getIdentificationThird(ossComponents);
@@ -4201,7 +4208,7 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(modelList);
 	}
 	
-	@PostMapping(value = PROJECT.SUPPLEMEMT_NOTICE_FILE)
+	@PostMapping(value = PROJECT.SUPPLEMENT_NOTICE_FILE)
 	public @ResponseBody ResponseEntity<Object> getSupplementNoticeFile(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String fileId = null;
@@ -4706,6 +4713,18 @@ public class ProjectController extends CoTopComponent {
 			resMap.put("isValid", "true");
 		}
 		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PROJECT.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody HashMap<String, Object> map, @PathVariable String code, HttpServletRequest req, HttpServletResponse res) {
+		Map<String, Object> resMap = new HashMap<>();
+		String prjId = (String) map.get("prjId");
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setReferenceDiv(code);
+		
+		resMap = projectService.checkSelectDownloadFile(project);
 		return makeJsonResponseHeader(resMap);
 	}
 }

@@ -431,20 +431,18 @@ public class T2UserServiceImpl implements T2UserService {
 			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
 			ldapTemplate.afterPropertiesSet();
 			
-			if(ldapTemplate.authenticate("", String.format("(cn=%s)", userId), userPw)) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			List<String[]> result = ldapTemplate.search(query().where("mail").is(filter), new AttributesMapper() {
+				public Object mapFromAttributes(Attributes attrs) throws NamingException {
+					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+				}
+			});
+			if(result != null && result.size() > 0) {
 				isAuthenticated = true;
-				@SuppressWarnings({ "unchecked", "rawtypes" })
-				List<String[]> result = ldapTemplate.search(query().where("mail").is(filter), new AttributesMapper() {
-					public Object mapFromAttributes(Attributes attrs) throws NamingException {
-						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
-					}
-				});
-				if(result != null && result.size() > 0) {
-					for(int i=0;i<result.size();i++) {
-						String email = result.get(i)[0];
-						if (!StringUtil.isEmpty(email)) {
-							userInfo.put("EMAIL", email);
-						}
+				for(int i=0;i<result.size();i++) {
+					String email = result.get(i)[0];
+					if (!StringUtil.isEmpty(email)) {
+						userInfo.put("EMAIL", email);
 					}
 				}
 			}

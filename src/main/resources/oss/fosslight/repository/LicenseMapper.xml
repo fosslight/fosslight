@@ -27,7 +27,7 @@
 						UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName})
 					</when>
 					<otherwise>
-						UPPER(T1.LICENSE_NAME) = UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+						UPPER(T1.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
 					</otherwise>
 				 </choose>
 				OR 

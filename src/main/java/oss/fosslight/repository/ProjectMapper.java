@@ -380,4 +380,6 @@ public interface ProjectMapper {
 	int copySecurityDataForProjectCnt(Project project);
 
 	void copySecurityDataForProject(Project project);
+	
+	List<OssComponents> checkSelectDownloadFile(Project project);
 }

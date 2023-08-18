@@ -11,6 +11,13 @@ var objs = [];
 var licenseNames = [];
 //2018-08-10 choye 추가
 var srcData;
+
+$(document).click(function(e){
+	if(!$("#srcExportContainer").has(e.target).length) {
+		$("#srcExportList").hide();
+	}
+});
+
 // SRC 이벤트
 var src_evt = {
 	csvDelFileSeq : [],
@@ -541,6 +548,43 @@ var src_fn = {
 		src_fn.getSrcGridData(param, type);
 		$('.srcProject2').hide();
 	},
+	exportList : function(obj) {
+    	var exportListId = '#' + $(obj).siblings("div").attr("id");
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        }else{
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function(target) {
+    	// download file
+        if (target === "report_sub") {
+        	src_fn.downloadExcel();
+        } else {
+        	var identificationStatus = '${project.identificationStatus}';
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+    				if (e) {
+    					src_fn.selectDownloadFileValidation();
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		src_fn.selectDownloadFileValidation();
+        	}
+        }
+        // hide list
+        $("#srcExportList").hide();
+    },
+    selectDownloadFileValidation : function() {
+    	if (com_fn.checkSelectDownloadFile('SRC')) {
+    		com_fn.downloadYaml('SRC');
+    	} else {
+    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+    	}
+    },
 	// 다운로드 엑셀
 	downloadExcel : function(){
 		$.ajax({

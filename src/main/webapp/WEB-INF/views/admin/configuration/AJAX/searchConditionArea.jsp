@@ -268,6 +268,10 @@ $(document).ready(function() {
 							<label>Creator</label>
 							<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
 						</dd>
+						<dd class="">
+							<label class="vmiddle" style="width: 50%; text-align: left;">View My Project Only</label>
+							<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
+						</dd>
 					</dl>
 				</c:when>
 			</c:choose>

@@ -82,20 +82,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
 							.collect(Collectors.toList()));
 				}
-
-				if (key.toUpperCase().startsWith("OSSVERSION") && validMap.get(key).equals(ruleMap.get("OSS_VERSION.UNCONFIRMED.MSG"))) {
-					resultData.addAll((List<ProjectIdentification>) componentData
-							.stream()
-							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
-							.collect(Collectors.toList()));
-				}
-
-				if (key.toUpperCase().startsWith("OSSNAME") && validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"))) {
-					resultData.addAll((List<ProjectIdentification>) componentData
-							.stream()
-							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
-							.collect(Collectors.toList()));
-				}
 			}
 		}
 
@@ -109,28 +95,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							.stream()
 							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
 							.collect(Collectors.toList()));
-				}
-
-				if (key.toUpperCase().startsWith("OSSVERSION") && diffMap.get(key).equals(ruleMap.get("OSS_VERSION.UNCONFIRMED.MSG"))) {
-					resultData.addAll((List<ProjectIdentification>) componentData
-							.stream()
-							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
-							.collect(Collectors.toList()));
-				}
-
-				if (key.toUpperCase().startsWith("DOWNLOADLOCATION") && diffMap.get(key).equals(ruleMap.get("DOWNLOAD_LOCATION.DIFFERENT.MSG"))) {
-					int duplicateRow = (int) resultData
-							.stream()
-							.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
-							.collect(Collectors.toList())
-							.size();
-
-					if (duplicateRow == 0) {
-						resultData.addAll((List<ProjectIdentification>) componentData
-								.stream()
-								.filter(e -> key.split("\\.")[1].equals(e.getComponentId())) // 동일한 componentId을 filter
-								.collect(Collectors.toList()));
-					}
 				}
 			}
 		}

@@ -65,4 +65,10 @@ public interface ApiProjectService {
 	public void registBom(String prjId, String string);
 
 	public int existProjectCntBomCompare(Map<String, Object> paramMap);
+
+	public boolean existLdapUserToEmail(String email);
+
+	public boolean existsWatcherByEmail(String prjId, String email);
+
+	public void insertWatcher(Map<String, Object> paramMap);
 }

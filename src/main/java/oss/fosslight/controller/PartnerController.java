@@ -1505,4 +1505,15 @@ public class PartnerController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(resultFlag, null);
 	}
+	
+	@PostMapping(value = PARTNER.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model){
+		Map<String, Object> resMap = new HashMap<>();
+		try {
+			resMap = partnerService.checkSelectDownloadFile(partnerMaster);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader(resMap);
+	}
 }

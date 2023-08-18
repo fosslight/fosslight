@@ -2172,7 +2172,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_prj-" + StringUtil.deleteWhitespaceWithSpecialChar(projectMaster.getPrjId());
 		
 		try {
-			inFile= new FileInputStream(new File(downloadpath+"/Security_demo.xlsx"));
+			inFile= new FileInputStream(new File(downloadpath+"/Security.xlsx"));
 			wb = WorkbookFactory.create(inFile);
 			CreationHelper creationHelper = wb.getCreationHelper();
 			CellStyle style = wb.createCellStyle();

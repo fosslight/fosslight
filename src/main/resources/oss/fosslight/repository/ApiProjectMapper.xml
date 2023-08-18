@@ -1195,4 +1195,18 @@
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>
+	
+	<select id="existsWatcherByEmail" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM PROJECT_WATCHER WAT
+		LEFT JOIN T2_USERS USR
+		ON WAT.USER_ID = USR.USER_ID
+		AND USR.USE_YN = 'Y'
+		WHERE WAT.PRJ_ID = #{prjId}
+		AND (WAT.EMAIL = #{email} OR USR.EMAIL = #{email})
+	</select>
+	
+	<insert id="insertWatcher" parameterType="hashMap">
+		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
+	</insert>
 </mapper>

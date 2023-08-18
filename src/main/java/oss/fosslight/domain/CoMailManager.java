@@ -18,8 +18,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -42,6 +45,7 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.StringUtil;
 
 /**
@@ -3430,7 +3434,22 @@ public class CoMailManager extends CoTopComponent {
 			helper.setBcc(coMail.getBccIds() != null ? coMail.getBccIds() : new String[]{});
 			helper.setSubject(coMail.getEmlTitle());
 			helper.setText(coMail.getEmlMessage(), true);
-			
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())){
+				try {
+					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
+					String fileName = (String) fileInfo.get("fileName");
+					String filePath = (String) fileInfo.get("filePath");
+					log.debug("filepath: " + fileInfo.get("filePath"));
+					DataSource dataSource = new FileDataSource(filePath);
+					helper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"), dataSource);
+				}catch(Exception e){
+					// Don't Exist Pdf
+					log.debug(e.getMessage(), e);
+				}
+			}
+
 			// Email Send
 			mailSender.send(message);
 			// Email History Status Update

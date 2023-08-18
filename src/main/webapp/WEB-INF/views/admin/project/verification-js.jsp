@@ -1014,7 +1014,16 @@
 					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 				}
 			});
-			
+			$("#securityTab").click(function(){
+				var prjId = '${project.prjId}';
+				var idx = getTabIndex(prjId+"_Security");
+				
+				if(idx != ""){
+					changeTabInFrame(idx);
+				} else {
+					createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+				}
+			});
 			$("#append").click(function(e){
 				var checked = $(this).prop("checked");
 				$("#editAppendedYn").val(checked ? "Y" : "N");

@@ -76,5 +76,9 @@ public interface SelfCheckService extends HistoryConfig{
 	public boolean existProjectData(Project project);
 
 	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice);
+
+	public Map<String, Object> checkSelectDownloadFile(Project project);
+
+	public boolean checkUserPermissions(Project project, String userId);
 	
 }
