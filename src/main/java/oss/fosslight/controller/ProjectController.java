@@ -2887,7 +2887,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param code the code
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SERCH_CD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SEARCH_CD)
 	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification,
 			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		int page = Integer.parseInt(req.getParameter("page"));
