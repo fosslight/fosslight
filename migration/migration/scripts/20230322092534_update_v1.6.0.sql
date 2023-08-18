@@ -1,4 +1,4 @@
--- // update v1.5.1
+-- // update v1.6.0
 -- Migration SQL that makes the change goes here.
 ALTER TABLE `NVD_DATA_SCORE_V3` MODIFY `VENDOR` varchar(128) NOT NULL DEFAULT '';
 ALTER TABLE `NVD_DATA_SCORE_V3` ADD `VENDORPRODUCT` varchar(255) NULL;
