@@ -2214,7 +2214,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('120', '13', '프로젝트 SRC ANDROID CSV FILE', '', 'xlsx,xls,xlsm', 3, 'Y'),
 	('120', '14', '프로젝트 SRC ANDROID NOTICE FILE', '', 'html,htm', 4, 'Y'),
 	('120', '15', '프로젝트 BAT FILE', '', '', 5, 'Y'),
-	('120', '16', '프로젝트 PACKAGING FILE', '', '', 6, 'Y'),
+	('120', '16', '프로젝트 PACKAGING FILE', '', 'zip,tar.gz,gz', 6, 'Y'),
 	('120', '17', '프로젝트 DISTRIBUTION FILE', '', '', 7, 'Y'),
 	('120', '18', '프로젝트 VERIFICATION FILE', '', 'xls,xlsx,xlsm', 8, 'Y'),
 	('120', '19', 'android result.txt', '', 'txt', 19, 'Y'),
