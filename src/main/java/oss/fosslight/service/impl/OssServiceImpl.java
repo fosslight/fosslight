@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2200,6 +2201,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				String semicolonStr = "";
 				String downloadLocation = bean.getDownloadLocation();
 
+				bean.setDownloadLocation(URLDecoder.decode(bean.getDownloadLocation()));
 				if (bean.getDownloadLocation().contains(";")) {
 					semicolonFlag = true;
 					int idx = 0;

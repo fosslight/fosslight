@@ -5,6 +5,7 @@
 
 package oss.fosslight.service.impl;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -161,6 +162,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			}
 
 			if (!downloadLocation.isEmpty()) {
+				oss.setDownloadLocation(URLDecoder.decode(oss.getDownloadLocation()));
 				if (oss.getDownloadLocation().contains(";")) {
 					oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
 				}
