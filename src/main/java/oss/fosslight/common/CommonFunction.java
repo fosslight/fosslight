@@ -1180,10 +1180,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				gridBean.setOssNickName(bean.getOssNickName());
 			}
 			
-			if (!isEmpty(bean.getDependencies())) {
-				gridBean.setDependencies(bean.getDependencies());
-			}
-			
 			// license 
 			int licenseIdx = 1;
 			if (bean.getOssComponentsLicense() != null) {
