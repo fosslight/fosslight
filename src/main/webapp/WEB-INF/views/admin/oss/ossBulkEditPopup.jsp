@@ -366,7 +366,7 @@
 								<th class="dCase">Copyright Text</th>
 								<td class="dCase"><input type="text" style="width:60%;" id="copyrightText" name="copyrightText"/> <input type="checkbox" class="bulkEditCheck" value="copyrightTextCheck"/></td>
 							</tr>
-							<c:if test="${(target ne 'list') and (target ne 'selfCheck')}">
+							<c:if test="${target ne 'selfCheck'}">
 							<tr>
 								<th class="dCase">Comment</th>
 								<td class="dCase"><input type="text" style="width:60%;" id="comments" name="comments"/> <input type="checkbox" class="bulkEditCheck" value="commentsCheck"/></td>
