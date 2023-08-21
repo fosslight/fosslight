@@ -5,13 +5,7 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -32,11 +26,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
 import oss.fosslight.common.ExternalLicenseServiceType;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -141,6 +131,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unused")
 	@Override
 	public Map<String, Object> checkOssLicense(List<ProjectIdentification> ossList){
+		System.out.println(" checkOssLicense ");
 		Map<String, Object> resMap = new HashMap<>();
 		List<ProjectIdentification> result = new ArrayList<>();
 		List<String> errors = new ArrayList<>();
@@ -176,6 +167,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		List<String> checkedLicenseList;
 		
 		for (ProjectIdentification oss : ossList) {
+			System.out.println("for in ossList > " + oss);
 			checkedLicenseList = null;
 			
 			List<ProjectIdentification> prjOssLicenses;
@@ -631,6 +623,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@Transactional
 	@Override
 	public Map<String, Object> saveOssCheckLicense(ProjectIdentification paramBean, String targetName) {
+		System.out.println("saveOssCheckLicense에 들어왔음.");
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			int updateCnt = 0;
@@ -653,6 +646,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 								
 				String[] checkLicense = paramBean.getCheckLicense().split(",");
+				System.out.println("-----checkLicense ------ "+ Arrays.toString(checkLicense));
 				String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
 				
 				for (String licenseName : checkLicense) {
@@ -681,21 +675,36 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				if (updateCnt >= 1) {
 					String commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
 					String checkOssLicenseComment = "";
-					String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
+					CommentAutoHistory commentAutoHistory = new CommentAutoHistory();
+					String changeOssLicenseInfo = "<tr><td>" + paramBean.getOssName()+"</td>";
+					commentAutoHistory.setOssName(paramBean.getOssName());
 
 					if (!paramBean.getOssVersion().isEmpty()) {
-						changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
+						changeOssLicenseInfo += "<td>" + paramBean.getOssVersion() + "</td>";
+						commentAutoHistory.setOssVersion(paramBean.getOssVersion());
 					} else {
-						changeOssLicenseInfo += " ";
+						changeOssLicenseInfo += "<td></td>";
+						commentAutoHistory.setOssVersion(" ");
 					}
 
-					changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
-							+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
+					changeOssLicenseInfo += "<td>"+paramBean.getDownloadLocation() + "</td> "
+							+ "<td>"+paramBean.getLicenseName()+"</td><td>"+paramBean.getCheckLicense()+"</td></tr>";
 					CommentsHistory commentInfo = null;
+					commentAutoHistory.setDownloadLocation(paramBean.getDownloadLocation());
+					commentAutoHistory.setBeforeLicense(paramBean.getLicenseName());
+					commentAutoHistory.setAfterLicense(paramBean.getCheckLicense());
 
 					if (isEmpty(commentId)) {
 						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
+						checkOssLicenseComment += "<table>";
+						//header 작성
+						checkOssLicenseComment += "<tr><th>OSS Name</th><th>OSS Version</th><th>Download location</th><th>Before Change</th><th>After Change</th></tr>";
 						checkOssLicenseComment += changeOssLicenseInfo;
+
+						if(paramBean.getTableFlag().equals("Y")){
+							checkOssLicenseComment +="</table>";
+						}
+
 						CommentsHistory commHisBean = new CommentsHistory();
 						
 						if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
@@ -708,13 +717,19 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						
 						commHisBean.setContents(checkOssLicenseComment);
 						commentInfo = commentService.registComment(commHisBean, false);
+						//만약 commentInfo에 잘 들어온다면, 이 값을 table로 표현해주기만 하면 된다.
+						System.out.println("commentInfo > "+ commentInfo);
 					} else {
+
 						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
 
 						if (commentInfo != null) {
 							if (!isEmpty(commentInfo.getContents())) {
 								checkOssLicenseComment  = commentInfo.getContents();
 								checkOssLicenseComment += changeOssLicenseInfo;
+								if(paramBean.getTableFlag().equals("Y")){
+									checkOssLicenseComment +="</table>";
+								}
 								commentInfo.setContents(checkOssLicenseComment);
 
 								commentService.updateComment(commentInfo, false);
@@ -740,7 +755,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			map.put("isValid", false);
 			map.put("returnType", "");
 		}
-
+		System.out.println("map > "+ map); // map > {isValid=true, commentId=5, returnType=Success}
 		return map;
 	}
 }

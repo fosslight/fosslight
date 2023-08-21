@@ -340,7 +340,17 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String checkOssList = "N";
 	private String publDate;
 	private String patchLink;
-	
+
+	private String tableFlag ="N";
+
+	public String getTableFlag() {
+		return tableFlag;
+	}
+
+	public void setTableFlag(String tableFlag) {
+		this.tableFlag = tableFlag;
+	}
+
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
