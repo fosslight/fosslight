@@ -2003,7 +2003,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	private String generateCheckOSSName(int urlSearchSeq, String downloadlocationUrl, Pattern p) {
 		String checkName = "";
-		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
+		String customDownloadlocationUrl = "";
+		if (downloadlocationUrl.contains("?")) {
+			customDownloadlocationUrl = downloadlocationUrl.split("[?]")[0];
+		} else {
+			customDownloadlocationUrl = downloadlocationUrl;
+		}
+		Matcher ossNameMatcher = p.matcher("https://" + customDownloadlocationUrl);
 		while (ossNameMatcher.find()){
 			switch(urlSearchSeq) {
 				case 0: // github
