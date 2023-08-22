@@ -1654,6 +1654,7 @@ function openNVD2(_ossName, _url){
 
 function openCommentHistory(_url) {	
 	if(_popupComment == null || _popupComment.closed){
+		console.log("openCommerntHistory / _url > "+ _url);
 		_popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
 		if(!_popupComment || _popupComment.closed || typeof _popupComment.closed=='undefined') {

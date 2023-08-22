@@ -21,23 +21,23 @@
 			var evt_fn = {
 				init : function(){
 					$("#btnChangeOss").on("click", function(){
-						Ctrl_fn.changeProc();				
+						Ctrl_fn.changeProc();
 					});
 				}
 			};
-			
+
 			var Ctrl_fn = {
 				loadGridData : function(){
 					$('#loading_wrap_popup').show();
-					
+
 					var params = {};
 					params["referenceId"] = referenceId;
 					params["referenceDiv"] = referenceDiv;
-					
+
 					if('identification' == targetName) {
 						params["referenceDiv"] = params["referenceDiv"].split("-")[0];
 					}
-					
+
 					$.ajax({
 						url : '/oss/getCheckOssLicenseAjax/${projectInfo.targetName}',
 						dataType : 'json',
@@ -50,7 +50,7 @@
 							ossErrorMsg = resultData.error;
 
 							grid_fn.displayErrorMsg(ossErrorMsg);
-							
+
 							$('#ossList').jqGrid({
 									datatype: 'local',
 									data : resultData.list,
@@ -82,54 +82,56 @@
 									loadComplete: function(data){
 										if(data.total > 0){
 											$("#btnChangeOss").show();
-											
+
 											var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 											for(var _idx=0;_idx<rowsCount;_idx++) {
 												row = rows[_idx];
 												className = row.className;
-												
+
 												if (className.indexOf('jqgrow') !== -1) {
 													rowid = row.id;
 													rowData = data.rows[rowIdx++];
 													var dataObject = datas.filter(function(a){return a.componentId==rowid})[0];
-													
+
 													if(dataObject.checkLicense.indexOf("|") > -1) {
 														className= className + ' excludeRow';
 													}
-													
+
 													row.className = className;
 												} else if(className.indexOf('ui-subgrid') !== -1){
 													rowIdx++;
 												}
 											}
 										}
-										
+
 										$('#loading_wrap_popup').hide();
 
 										if(ossValidMsg) {
 											gridValidMsgNew(ossValidMsg, "ossList", "SELF");
 										}
-										
+
 										if(ossDiffMsg){
 											gridDiffMsg(ossDiffMsg, "ossList", "SELF");
 										}
-										
+
 									},
 									onSelectRow: function(rowid){},
 									gridComplete:function (){}
 							});
-							
+
 							$('#ossList').closest(".ui-jqgrid-bdiv").css({"height":"373px", "overflow-y" : "scroll"});
 						},
 						error : function(){
 							alertify.error('<spring:message code="msg.common.valid2" />', 0);
 						}
-					});	
+					});
 				},
 				changeProc : function(){
 					$('#loading_wrap_popup').show();
+					console.log("changoProc log ");
 
 					var target = $("#ossList");
+					console.log(target);
 					var result = [];
 					var failFlag = false;
 					var idArry = grid_fn.getCheckedRow("CHANGE");
@@ -143,16 +145,26 @@
 
 								var rowdata = target.getRowData(rowId);
 								rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
-								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");							
+								rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
 								if("identification" == targetName) {
+									rowdata["tableFlag"] = "N";
 									rowdata["refPrjId"] = rowdata["referenceId"];
 									rowdata["referenceId"] = commentId;
 									rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+									if( i == idArry.length -1 ){
+										rowdata["tableFlag"] = "Y";
+									}
 								} else if("partner" == targetName) {
+									rowdata["tableFlag"] = "N";
 									rowdata["referenceId"] = rowdata["referenceId"];
 									rowdata["refPrjId"] = commentId;
 									rowdata["referenceDiv"] = referenceDiv;
+									if( i == idArry.length -1 ){
+										rowdata["tableFlag"] = "Y";
+									}
 								}
+
+								console.log(rowdata);
 
 								$.ajax({
 									url : '/oss/saveOssCheckLicense/${projectInfo.targetName}',
@@ -163,6 +175,8 @@
 									async: false,
 									contentType : 'application/json',
 									success: function(resultData){
+
+										console.log("/oss/saveOssCheckLicense "+resultData);
 										if(resultData.isValid == true){
 											$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'Y'); // popup grid Data change => success
 											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
@@ -214,7 +228,7 @@
 													 */
 													opener.location.href = `/project/identification/\${rowdata["refPrjId"]}/\${identificationTabOrder}`;
 												}
-												
+
 												alertify.success(successMsg, 5); // 5sec동안 message 출력
 											}
 
