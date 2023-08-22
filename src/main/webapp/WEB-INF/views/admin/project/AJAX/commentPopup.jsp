@@ -40,7 +40,7 @@
 					dataType : 'html',
 					cache : false,
 					data : $('#commentSchForm').serialize(),
-					success : function(data){
+					success : function(data)
 						$('#commentListArea').html(data);
 					},
 					error : function(xhr, ajaxOptions, thrownError){

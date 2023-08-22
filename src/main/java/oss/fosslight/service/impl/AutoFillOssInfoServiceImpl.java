@@ -5,7 +5,13 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -26,7 +32,11 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.DependencyType;
 import oss.fosslight.common.ExternalLicenseServiceType;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -131,7 +141,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@SuppressWarnings("unused")
 	@Override
 	public Map<String, Object> checkOssLicense(List<ProjectIdentification> ossList){
-		System.out.println(" checkOssLicense ");
 		Map<String, Object> resMap = new HashMap<>();
 		List<ProjectIdentification> result = new ArrayList<>();
 		List<String> errors = new ArrayList<>();
@@ -167,7 +176,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		List<String> checkedLicenseList;
 		
 		for (ProjectIdentification oss : ossList) {
-			System.out.println("for in ossList > " + oss);
+
 			checkedLicenseList = null;
 			
 			List<ProjectIdentification> prjOssLicenses;
@@ -645,7 +654,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				}
 								
 				String[] checkLicense = paramBean.getCheckLicense().split(",");
-				System.out.println("-----checkLicense ------ "+ Arrays.toString(checkLicense));
 				String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
 				
 				for (String licenseName : checkLicense) {
@@ -746,7 +754,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			map.put("isValid", false);
 			map.put("returnType", "");
 		}
-		System.out.println("map > "+ map); // map > {isValid=true, commentId=5, returnType=Success}
 		return map;
 	}
 }

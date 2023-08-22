@@ -128,10 +128,8 @@
 				},
 				changeProc : function(){
 					$('#loading_wrap_popup').show();
-					console.log("changoProc log ");
 
 					var target = $("#ossList");
-					console.log(target);
 					var result = [];
 					var failFlag = false;
 					var idArry = grid_fn.getCheckedRow("CHANGE");
@@ -164,8 +162,6 @@
 									}
 								}
 
-								console.log(rowdata);
-
 								$.ajax({
 									url : '/oss/saveOssCheckLicense/${projectInfo.targetName}',
 									type : 'POST',
@@ -176,7 +172,6 @@
 									contentType : 'application/json',
 									success: function(resultData){
 
-										console.log("/oss/saveOssCheckLicense "+resultData);
 										if(resultData.isValid == true){
 											$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'Y'); // popup grid Data change => success
 											$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
