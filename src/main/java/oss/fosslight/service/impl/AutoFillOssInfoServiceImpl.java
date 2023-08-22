@@ -623,7 +623,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	@Transactional
 	@Override
 	public Map<String, Object> saveOssCheckLicense(ProjectIdentification paramBean, String targetName) {
-		System.out.println("saveOssCheckLicense에 들어왔음.");
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			int updateCnt = 0;
@@ -675,24 +674,17 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				if (updateCnt >= 1) {
 					String commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
 					String checkOssLicenseComment = "";
-					CommentAutoHistory commentAutoHistory = new CommentAutoHistory();
 					String changeOssLicenseInfo = "<tr><td>" + paramBean.getOssName()+"</td>";
-					commentAutoHistory.setOssName(paramBean.getOssName());
 
 					if (!paramBean.getOssVersion().isEmpty()) {
 						changeOssLicenseInfo += "<td>" + paramBean.getOssVersion() + "</td>";
-						commentAutoHistory.setOssVersion(paramBean.getOssVersion());
 					} else {
 						changeOssLicenseInfo += "<td></td>";
-						commentAutoHistory.setOssVersion(" ");
 					}
 
 					changeOssLicenseInfo += "<td>"+paramBean.getDownloadLocation() + "</td> "
 							+ "<td>"+paramBean.getLicenseName()+"</td><td>"+paramBean.getCheckLicense()+"</td></tr>";
 					CommentsHistory commentInfo = null;
-					commentAutoHistory.setDownloadLocation(paramBean.getDownloadLocation());
-					commentAutoHistory.setBeforeLicense(paramBean.getLicenseName());
-					commentAutoHistory.setAfterLicense(paramBean.getCheckLicense());
 
 					if (isEmpty(commentId)) {
 						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
@@ -717,8 +709,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						
 						commHisBean.setContents(checkOssLicenseComment);
 						commentInfo = commentService.registComment(commHisBean, false);
-						//만약 commentInfo에 잘 들어온다면, 이 값을 table로 표현해주기만 하면 된다.
-						System.out.println("commentInfo > "+ commentInfo);
+
 					} else {
 
 						commentInfo = (CommentsHistory) commentService.getCommnetInfo(commentId).get("info");
