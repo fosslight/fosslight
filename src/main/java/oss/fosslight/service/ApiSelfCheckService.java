@@ -5,9 +5,12 @@
 
 package oss.fosslight.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+
+import oss.fosslight.domain.ProjectIdentification;
 
 @Service
 public interface ApiSelfCheckService {
@@ -16,4 +19,8 @@ public interface ApiSelfCheckService {
 	Map<String, Object> createSelfCheck(Map<String, Object> paramMap);
 	
 	boolean existProjectCnt(Map<String, Object> paramMap);
+
+	Map<String, Object> selectProjectMaster(String prjId);
+
+	void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList);
 }

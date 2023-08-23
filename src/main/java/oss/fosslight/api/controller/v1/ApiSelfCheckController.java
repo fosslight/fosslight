@@ -135,7 +135,8 @@ public class ApiSelfCheckController extends CoTopComponent {
     public CommonResult ossReportSelfCheck(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport){
+    		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
+    		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -148,8 +149,22 @@ public class ApiSelfCheckController extends CoTopComponent {
 			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
 			if (searchFlag) {
+				String oldFileId = "";
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					Map<String, Object> prjInfo = apiSelfCheckService.selectProjectMaster(prjId);
+					if (prjInfo.get("srcCsvFileId") != null) {
+						oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
+					}
+				}
+				
 				if (ossReport != null) {
-					UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					UploadFile bean = null;
+					if (!isEmpty(oldFileId)) {
+						bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+					} else {
+						bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					}
+
 					List<UploadFile> list = new ArrayList<UploadFile>();
 					list.add(bean);
 					ArrayList<Object> checkFileLimit = null;
@@ -193,10 +208,20 @@ public class ApiSelfCheckController extends CoTopComponent {
 						if (!vr.isValid()) {
 							return responseService.getFailResult(getMessage("api.dataValidationError.code"), getMessage("api.dataValidationError.msg")); // data validation error
 						} else {
+							List<ProjectIdentification> ossComponentList = new ArrayList<>();
+							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+							
+							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+								apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
+							}
+							
+							ossComponentList.addAll(ossComponents);
+							ossComponentsLicenseList.addAll(ossComponentsLicense);
+							
 							Project project = new Project();
 							project.setPrjId(prjId);
 							project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
-							selfCheckService.registSrcOss(ossComponents, ossComponentsLicense, project);
+							selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 							
 							// 정상처리된 경우 세션 삭제
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));

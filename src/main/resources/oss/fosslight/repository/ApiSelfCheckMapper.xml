@@ -69,4 +69,30 @@
 			   ) A
 		 WHERE 1=1
 	</select>
+	
+	<select id="selectProjectMaster" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+		/* apiSelfCheckMapper.selectProjectMaster */
+		SELECT A.PRJ_ID 
+			, A.PRJ_NAME 
+			, A.PRJ_VERSION 
+			, A.DISTRIBUTION_TYPE 
+			, CASE WHEN B.CONTENTS IS NULL THEN A.COMMENT ELSE B.CONTENTS END AS COMMENT
+			, B.COMM_ID AS COMMENT_IDX
+			, A.OS_TYPE
+			, A.OS_TYPE_ETC 
+			, A.USE_YN 
+			
+			/** FILE_ID **/
+			, A.SRC_CSV_FILE_ID
+			, A.CREATOR 
+			, A.CREATED_DATE
+			, A.MODIFIER 
+			, A.MODIFIED_DATE 
+            , (SELECT USER_NAME FROM T2_USERS WHERE USER_ID = A.CREATOR) AS PRJ_USER_NAME
+            , (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = A.DIVISION) AS PRJ_DIVISION_NAME
+		FROM
+			PRE_PROJECT_MASTER A 
+			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
+		 WHERE A.PRJ_ID = #{prjId}
+	</select>
 </mapper>

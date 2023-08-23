@@ -2856,4 +2856,29 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public void insertWatcher(Map<String, Object> paramMap) {
 		apiProjectMapper.insertWatcher(paramMap);
 	}
+
+	@Override
+	public Map<String, Object> selectProjectMaster(String prjId) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("prjId", prjId);
+		return apiProjectMapper.selectProjectMaster(param);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList) {
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(code);
+		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
+		if (map.containsKey("mainData")) {
+			List<ProjectIdentification> gridDatas = (List<ProjectIdentification>) map.get("mainData");
+			if (gridDatas != null && !gridDatas.isEmpty()) {
+				List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
+				Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
+				ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
+				ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
+			}
+		}
+	}
 }

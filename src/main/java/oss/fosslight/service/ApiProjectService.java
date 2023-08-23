@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.UploadFile;
 
 @Service
@@ -71,4 +72,8 @@ public interface ApiProjectService {
 	public boolean existsWatcherByEmail(String prjId, String email);
 
 	public void insertWatcher(Map<String, Object> paramMap);
+
+	public Map<String, Object> selectProjectMaster(String prjId);
+
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList);
 }

@@ -629,7 +629,8 @@ public class ApiProjectController extends CoTopComponent {
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
     		@ApiParam(value = "OSS Report > sheetName : all sheets starting with 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
-    		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment){
+    		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
+    		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -647,6 +648,14 @@ public class ApiProjectController extends CoTopComponent {
 			
 			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			if (searchFlag) {
+				String oldFileId = "";
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+					if (prjInfo.get("srcCsvFileId") != null) {
+						oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
+					}
+				}
+				
 				if (ossReport != null) {
 					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
 							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
@@ -657,7 +666,12 @@ public class ApiProjectController extends CoTopComponent {
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 						}
 						
-						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+						UploadFile bean = null;
+						if (!isEmpty(oldFileId)) {
+							bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+						} else {
+							bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+						}
 
 						// get Excel Sheet name starts with SRC
 						List<String> sheet = null;
@@ -689,10 +703,21 @@ public class ApiProjectController extends CoTopComponent {
 							return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
 						} else {
+							List<ProjectIdentification> ossComponentList = new ArrayList<>();
+							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+							
+							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList);
+							}
+							
+							ossComponentList.addAll(ossComponents);
+							ossComponentsLicenseList.addAll(ossComponentsLicense);
+							
 							Project project = new Project();
 							project.setPrjId(prjId);
 							project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
-							projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+							
+							projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 							
 							// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
 							try {
@@ -770,7 +795,8 @@ public class ApiProjectController extends CoTopComponent {
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
     		@ApiParam(value = "OSS Report > sheetName : 'BIN'", required = false) @RequestPart(required = false) MultipartFile ossReport,
     		@ApiParam(value = "Binary.txt", required = false) @RequestPart(required = false) MultipartFile binartTxt,
-    		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment){
+    		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
+    		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
 		
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token); // token이 정상적인 값인지 확인 
@@ -798,6 +824,14 @@ public class ApiProjectController extends CoTopComponent {
 				UploadFile ossReportBean = null;
 				UploadFile binartTxtBean = null;
 				
+				String oldFileId = "";
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+					if (prjInfo.get("binCsvFileId") != null) {
+						oldFileId = String.valueOf((int) prjInfo.get("binCsvFileId"));
+					}
+				}
+				
 				if (ossReport != null) {
 					if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE
@@ -813,7 +847,12 @@ public class ApiProjectController extends CoTopComponent {
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
 						}
 						
-						ossReportBean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+						if (!isEmpty(oldFileId)) {
+							ossReportBean = apiFileService.uploadFile(ossReport, null, oldFileId);
+						} else {
+							ossReportBean = apiFileService.uploadFile(ossReport);
+						}
+						
 						String[] sheet = new String[1];
 						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN", sheet);
 						String errorMsg = (String) result.get("errorMessage");
@@ -892,8 +931,18 @@ public class ApiProjectController extends CoTopComponent {
 						return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
 								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
 					} else {
+						List<ProjectIdentification> ossComponentList = new ArrayList<>();
+						List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+						
+						if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+							apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN, ossComponentList, ossComponentsLicenseList);
+						}
+						
+						ossComponentList.addAll(ossComponents);
+						ossComponentsLicenseList.addAll(ossComponentsLicense);
+						
 						project.setPrjId(prjId);
-						projectService.registSrcOss(ossComponents, ossComponentsLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN); // bin tab
+						projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN); // bin tab
 						
 						String csvFileId = project.getBinCsvFileId();
 						
