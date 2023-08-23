@@ -697,7 +697,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					if (isEmpty(commentId)) {
 						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
 						checkOssLicenseComment += "<table>";
-						//header 작성
+						
 						checkOssLicenseComment += "<tr><th>OSS Name</th><th>OSS Version</th><th>Download location</th><th>Before Change</th><th>After Change</th></tr>";
 						checkOssLicenseComment += changeOssLicenseInfo;
 
