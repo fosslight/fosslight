@@ -681,21 +681,27 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				if (updateCnt >= 1) {
 					String commentId = CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase()) ? paramBean.getRefPrjId() : paramBean.getReferenceId();
 					String checkOssLicenseComment = "";
-					String changeOssLicenseInfo = "<p>" + paramBean.getOssName();
-
+					String changeOssLicenseInfo = "<tr><td>" + paramBean.getOssName()+"</td>";
 					if (!paramBean.getOssVersion().isEmpty()) {
-						changeOssLicenseInfo += " (" + paramBean.getOssVersion() + ") ";
+						changeOssLicenseInfo += "<td>" + paramBean.getOssVersion() + "</td>";
 					} else {
-						changeOssLicenseInfo += " ";
+						changeOssLicenseInfo += "<td></td>";
 					}
 
-					changeOssLicenseInfo += paramBean.getDownloadLocation() + " "
-							+ paramBean.getLicenseName() + " => " + paramBean.getCheckLicense() + "</p>";
+					changeOssLicenseInfo += "<td>"+paramBean.getDownloadLocation() + "</td> "
+							+ "<td>"+paramBean.getLicenseName()+"</td><td>"+paramBean.getCheckLicense()+"</td></tr>";
 					CommentsHistory commentInfo = null;
 
 					if (isEmpty(commentId)) {
 						checkOssLicenseComment  = "<p><b>The following Licenses were modified by \"Check License\"</b></p>";
+						checkOssLicenseComment += "<table>";
+						checkOssLicenseComment += "<tr><th>OSS Name</th><th>OSS Version</th><th>Download location</th><th>Before Change</th><th>After Change</th></tr>";
 						checkOssLicenseComment += changeOssLicenseInfo;
+
+						if(paramBean.getTableFlag().equals("Y")){
+							checkOssLicenseComment +="</table>";
+						}
+
 						CommentsHistory commHisBean = new CommentsHistory();
 						
 						if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())) {
@@ -715,6 +721,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 							if (!isEmpty(commentInfo.getContents())) {
 								checkOssLicenseComment  = commentInfo.getContents();
 								checkOssLicenseComment += changeOssLicenseInfo;
+								if(paramBean.getTableFlag().equals("Y")){
+									checkOssLicenseComment +="</table>";
+								}
 								commentInfo.setContents(checkOssLicenseComment);
 
 								commentService.updateComment(commentInfo, false);

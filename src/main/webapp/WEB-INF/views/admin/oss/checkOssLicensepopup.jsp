@@ -148,10 +148,12 @@
 									rowdata["refPrjId"] = rowdata["referenceId"];
 									rowdata["referenceId"] = commentId;
 									rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+									rowdata["tableFlag"] = ( i == idArry.length -1 )? "Y" : "N";
 								} else if("partner" == targetName) {
 									rowdata["referenceId"] = rowdata["referenceId"];
 									rowdata["refPrjId"] = commentId;
 									rowdata["referenceDiv"] = referenceDiv;
+									rowdata["tableFlag"] = ( i == idArry.length -1 )? "Y" : "N";
 								}
 
 								$.ajax({

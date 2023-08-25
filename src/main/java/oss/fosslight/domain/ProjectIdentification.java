@@ -224,7 +224,16 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The oss license comb. */
 	// OSS_LICENSE
 	private String ossLicenseComb;
-	
+
+	/** The oss license check flag. */
+	private String tableFlag ="N";
+	public String getTableFlag() {
+		return tableFlag;
+	}
+	public void setTableFlag(String tableFlag) {
+		this.tableFlag = tableFlag;
+	}
+
 	/** The oss copyright. */
 	private String ossCopyright;
 	
