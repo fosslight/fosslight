@@ -2100,6 +2100,9 @@
 			, OBLIGATION_TYPE
 			</if>
 			, ADMIN_CHECK_YN
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
+			, COMMENTS
+			</if>
 			)
 			VALUES
 			(
@@ -2137,6 +2140,9 @@
 			, #{obligationType}
 			</if>
 			, #{adminCheckYn}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
+			, #{comments}
+			</if>
 			)
 	</insert>
 	
