@@ -2201,7 +2201,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				String semicolonStr = "";
 				String downloadLocation = bean.getDownloadLocation();
 
-				bean.setDownloadLocation(URLDecoder.decode(bean.getDownloadLocation()));
 				if (bean.getDownloadLocation().contains(";")) {
 					semicolonFlag = true;
 					int idx = 0;
@@ -2226,6 +2225,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if ( urlSearchSeq > -1 ) {
 					bean = downloadlocationFormatter(bean, urlSearchSeq);
 					String downloadlocationUrl = bean.getDownloadLocation();
+					
+					if (urlSearchSeq == 7) {
+						if (downloadlocationUrl.contains("+")) {
+							downloadlocationUrl = downloadlocationUrl.split("[+]")[0];
+							downloadlocationUrl = downloadlocationUrl.substring(0, downloadlocationUrl.lastIndexOf("/"));
+						}
+					}
+					
+					downloadlocationUrl = URLDecoder.decode(downloadlocationUrl);
+					
 					Pattern p = generatePattern(urlSearchSeq, downloadlocationUrl);
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
 					if (cnt == 0) {
