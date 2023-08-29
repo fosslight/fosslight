@@ -201,7 +201,9 @@
 	                        <dt>Basic Search Area</dt>
 	                        <dd>
 	                            <label>OSS Name</label>
-	                            <input name="schOssName" type="text" class="autoCom ui-autocomplete-input"/>
+	                            <input name="schOssName" type="text" class="autoCom ui-autocomplete-input" style="width:340px"/>
+	                            <input type="checkbox" id="ossNameAllSearchFlag"/><span>&nbsp;Exact Match</span>
+	                            <input type="hidden" name="ossNameAllSearchFlag"/>
 	                        </dd>
 	                    </dl>
 	                    <input type="button" value="Search" class="btnColor search">

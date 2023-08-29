@@ -445,7 +445,14 @@
 			) T2 ON T1.OSS_NAME = T2.OSS_NAME
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
-			AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+	    	<choose>
+	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
+					AND T1.OSS_NAME = #{schOssName}
+				</when>
+				<otherwise>
+					AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+				</otherwise>
+	    	</choose>
 		</if>
 	</select>
 	
@@ -461,7 +468,14 @@
 			) T2 ON T1.OSS_NAME = T2.OSS_NAME
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
-			AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+	    	<choose>
+	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
+					AND T1.OSS_NAME = #{schOssName}
+				</when>
+				<otherwise>
+					AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+				</otherwise>
+	    	</choose>
 		</if>
 		ORDER BY T1.OSS_NAME, T1.OSS_VERSION DESC
 		<include refid="limitPage"/>

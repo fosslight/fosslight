@@ -300,6 +300,10 @@
 				$("#_ossSelectList").jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
 			});
 			
+			$("#ossNameAllSearchFlag").on("change", function(e){
+				$("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+			});
+			
 			//select oss 팝업 확인 버튼 
 			$("#wrapIframe > div > div.pop.ossSelectPop > div.pbtn input:eq(1)").on('click', function(){
 				var rowId = $('#_ossSelectList').jqGrid('getGridParam', 'selrow');
