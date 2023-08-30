@@ -278,4 +278,66 @@ public class ApiSelfCheckController extends CoTopComponent {
 			return null;
 		}
 	}
+	
+	@ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
+    public CommonResult addPrjWatcher(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+    		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
+		
+		Map<String, Object> resultMap = new HashMap<>();
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
+		
+		try {
+			T2Users userInfo = userService.checkApiUserAuth(_token);
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjId);
+			
+			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
+			if (searchFlag) {
+				if (emailList != null) {
+					for (String email : emailList) {
+						boolean ldapCheck = apiProjectService.existLdapUserToEmail(email);
+						if (ldapCheck) {
+							boolean watcherFlag = apiSelfCheckService.existsWatcherByEmail(prjId, email);
+							if (watcherFlag) {
+								Map<String, Object> param = new HashMap<>();
+								param.put("prjId", prjId);
+								param.put("division", "");
+								param.put("userId", "");
+								param.put("email", email);
+								apiSelfCheckService.insertWatcher(param);
+							} else {
+								errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+								break;
+							}
+						} else {
+							errorCode = CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE;
+							break;
+						}
+					}
+					
+					if (!errorCode.equals(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE)
+							&& !errorCode.equals(CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE)) {
+						return responseService.getSingleResult(resultMap);
+					}
+				} else {
+					errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+				}
+			} else {
+				errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+		
+		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
+	}
 }

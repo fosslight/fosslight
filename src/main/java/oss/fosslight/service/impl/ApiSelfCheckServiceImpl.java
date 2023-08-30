@@ -72,4 +72,14 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 			}
 		}
 	}
+
+	@Override
+	public boolean existsWatcherByEmail(String prjId, String email) {
+		return apiSelfcheckMapper.existsWatcherByEmail(prjId, email) > 0 ? false : true;
+	}
+
+	@Override
+	public void insertWatcher(Map<String, Object> paramMap) {
+		apiSelfcheckMapper.insertWatcher(paramMap);
+	}
 }

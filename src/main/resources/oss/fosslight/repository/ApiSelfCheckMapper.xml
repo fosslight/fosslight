@@ -95,4 +95,18 @@
 			LEFT JOIN COMMENTS_HISTORY B ON A.COMMENT = B.COMM_ID
 		 WHERE A.PRJ_ID = #{prjId}
 	</select>
+	
+	<select id="existsWatcherByEmail" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM PRE_PROJECT_WATCHER WAT
+		LEFT JOIN T2_USERS USR
+		ON WAT.USER_ID = USR.USER_ID
+		AND USR.USE_YN = 'Y'
+		WHERE WAT.PRJ_ID = #{prjId}
+		AND (WAT.EMAIL = #{email} OR USR.EMAIL = #{email})
+	</select>
+	
+	<insert id="insertWatcher" parameterType="hashMap">
+		INSERT INTO PRE_PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{email})
+	</insert>
 </mapper>

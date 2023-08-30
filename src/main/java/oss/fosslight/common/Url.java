@@ -829,6 +829,9 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
+			
+			/** API SelfCheck Add Watcher */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfcheck_watcher_add";
 		
 		/** BINARY */
 			/** API Binary List 조회 */
