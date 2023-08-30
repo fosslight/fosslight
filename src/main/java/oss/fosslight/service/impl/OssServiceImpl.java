@@ -2038,6 +2038,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 8:
 					checkName = "nuget:" + ossNameMatcher.group(3);
 					break;
+				case 9:
+					checkName = "stackoverflow-" + ossNameMatcher.group(3);
+					break;
 				default:
 					break;
 			}
@@ -2091,8 +2094,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			case 7:
 				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
 				break;
-			case 8 :
+			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
+				break;
+			case 9:
+				p = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
