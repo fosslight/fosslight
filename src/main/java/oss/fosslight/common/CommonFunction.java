@@ -4952,6 +4952,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
 				String vendorProductName = cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2];
 				String existenceOssName = (cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2] + "_" + ossVersion).toUpperCase();
+				Float cvssScore = Float.valueOf(cvssScoreMaxString[3]);
 				
 				if (!isEmpty(ossName)) {
 					om.setOssName(ossName);
@@ -5008,8 +5009,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					om.setDashOssNameList(null);
 					om.setOssVersion(om.getOssVersion().isEmpty() ? "-" : om.getOssVersion());
 					
-					if (existsVendorProductBooleanFlag) {
-						if (convertNicknameList != null && !containsDashNameList.isEmpty()) {
+					if (existsVendorProductBooleanFlag || cvssScore > 8.0) {
+						if (existsVendorProductBooleanFlag && convertNicknameList != null && !containsDashNameList.isEmpty()) {
 							om.setConversionNameList(convertNicknameList.toArray(new String[convertNicknameList.size()]));
 						}
 						List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
