@@ -2467,6 +2467,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('903', '007', 'www.npmjs.org/package/', '', 'npm url', 7, 'Y'),
 	('903', '008', 'android.googlesource.com/platform', '', 'android url', 8, 'Y'),
 	('903', '009', 'www.nuget.org/packages/', '', 'nuget url', 9, 'Y'),
+	('903', '010', 'stackoverflow.com/revisions/', '', 'stackoverflow url', 10, 'Y'),
 	('904', '100', 'server url', '', '180', 1, 'Y'),
 	('904', '200', 'download url', '', '180', 2, 'Y'),
 	('905', '100', 'idleTime', '', '180', 1, 'Y'),
