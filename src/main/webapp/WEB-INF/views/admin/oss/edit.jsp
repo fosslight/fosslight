@@ -42,7 +42,7 @@
 							<td class="dCase">
 								<div class="multiTxtSet">
 									<div class="required">
-										<span><input type="text" name="ossNicknames" class="w350" onblur="fn.checkNickName(this)"/><input type="button" value="Delete" class="smallDelete"/></span>
+										<span><input type="text" name="ossNicknames" class="w350" onblur="fn.checkNickName(this)"/><input type="button" value="Delete" class="smallDelete"/><img id="newIcon"></span>
 										<span class="retxt"></span>
 									</div>
 								</div>
