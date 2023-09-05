@@ -122,6 +122,8 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 							break;
 						case "priority" : project.setPriority(value);
 							break;
+						case "publicYn" : project.setPublicYn(value);
+							break;
 						default : break;
 					}
 				}
@@ -156,6 +158,8 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 						case "watchers" : partner.setWatchers(new String[] {value});
 							break;
 						case "status" : partner.setStatus(value);
+							break;
+						case "publicYn" : partner.setPublicYn(value);
 							break;
 						default : break;
 					}
