@@ -1283,6 +1283,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					p = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
 					break;
 				default:
+					p = Pattern.compile("(.*)");
 					break;
 			}
 		
