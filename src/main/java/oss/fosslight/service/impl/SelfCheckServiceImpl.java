@@ -283,7 +283,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					bean.setCvssScore(conversionCveData[3]);
