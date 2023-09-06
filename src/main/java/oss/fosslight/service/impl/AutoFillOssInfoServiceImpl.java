@@ -156,11 +156,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
 			checkedLicense1 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense1.isEmpty()) {
-				checkedLicenseList = new ArrayList<>();
-				checkedLicenseList.add(checkedLicense1);
-			}
-
 			if (!downloadLocation.isEmpty()) {
 				oss.setDownloadLocation(URLDecoder.decode(oss.getDownloadLocation()));
 				if (oss.getDownloadLocation().contains(";")) {
@@ -203,11 +198,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-				if (!checkedLicense2.isEmpty()) {
-					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-					checkedLicenseList.add(checkedLicense2);
-				}
-				
 				// Search Priority 3. find by oss download location
 				prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
 						.filter(CommonFunction.distinctByKeys(
@@ -216,53 +206,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						))
 						.collect(Collectors.toList());
 				checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
-
-				if (!checkedLicense3.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
-					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-					checkedLicenseList.add(checkedLicense3);
-				}
 			}
 
-			if (checkedLicenseList != null) {
-				boolean permissiveLicenseCheckFlag = false;
-				List<String> currentLicenseList = Arrays.asList(currentLicense.split(","));
-				int currentLicenseListCnt = currentLicenseList.size();
-				
-				fLoop :
-				for (String li : checkedLicenseList) {
-					List<String> checkedLicenses = Arrays.asList(li.split("[|]"));
-					
-					sLoop :
-					for (String chkedLicense : checkedLicenses) {
-						List<String> licenseList = Arrays.asList(chkedLicense.split(","));
-						List<String> permissiveLicenseList = new ArrayList<>();
-						for (String license : licenseList) {
-							LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
-							if (master != null && master.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) {
-								permissiveLicenseList.add(license);
-							}
-						}
-						
-						if (licenseList.size() == permissiveLicenseList.size()) {
-							int duplicateCnt = permissiveLicenseList.stream()
-																	.filter(permissiveLicense -> currentLicenseList.stream()
-            														.anyMatch(Predicate.isEqual(permissiveLicense)))
-            														.collect(Collectors.toList()).size();
-							if (currentLicenseListCnt == duplicateCnt) {
-								permissiveLicenseCheckFlag = true;
-								break fLoop;
-							}
-						}
-					}
-				}
-				
-				if (permissiveLicenseCheckFlag) {
-					continue;
-				}
-			} else {
-				continue;
-			}
-			
 			oss.setDownloadLocation(downloadLocation);
 			
 			if (!isEmpty(checkedLicense1)) {
