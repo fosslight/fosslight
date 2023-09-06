@@ -2287,17 +2287,7 @@
     	ON OM.OSS_NAME = NICK.OSS_NAME
     	AND OM.USE_YN = 'Y'
     	WHERE OM.OSS_VERSION = #{ossVersion}
-    	<choose>
-    		<when test="dashOssNameList != null">
-    			AND (NICK.OSS_NICKNAME = #{schOssName}
-    			<foreach item="item" collection="dashOssNameList">
-    				OR NICK.OSS_NICKNAME = #{item}
-    			</foreach>)
-    		</when>
-    		<otherwise>
-    			AND NICK.OSS_NAME = #{schOssName}
-    		</otherwise>
-    	</choose>
+    	AND NICK.OSS_NAME = #{schOssName}
 	</select>
 
 	<select id="selectVulnInfoForOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
@@ -2319,13 +2309,11 @@
     		AND VERSION = #{ossVersion}
     		</if>
     		AND (PRODUCT = #{ossName}
-    		<if test="conversionNameList != null">
-				<foreach item="item" collection="conversionNameList">
+    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+				<foreach item="item" collection="ossNicknames">
 					OR PRODUCT = #{item}
 				</foreach>
-			</if>
-			<if test="dashOssNameList != null">
-				<foreach item="item" collection="dashOssNameList">
+				<foreach item="item" collection="ossNicknames">
 					OR VENDORPRODUCT = #{item}
 				</foreach>
 			</if>
@@ -2339,6 +2327,7 @@
 								<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
 								AND OSS_VERSION = ''
 								</if>
+								AND REFERENCE_ID = #{prjId}
 								AND VULNERABILITY_RESOLUTION = 'Fixed')
     		</if>
     	) NVD
