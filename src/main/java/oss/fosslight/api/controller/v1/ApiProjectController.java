@@ -455,6 +455,7 @@ public class ApiProjectController extends CoTopComponent {
 						commentHisBean.setReferenceId(resultPrjId);
 						commentHisBean.setExpansion1("SRC");
 						commentHisBean.setContents(comment);
+						commentHisBean.setLoginUserName(userInfo.getUserId());
 						commentService.registComment(commentHisBean, false);
 					}
 					
@@ -731,6 +732,7 @@ public class ApiProjectController extends CoTopComponent {
 										commentHisBean.setReferenceId(prjId);
 										commentHisBean.setExpansion1("SRC");
 										commentHisBean.setContents(changedLicenseName);
+										commentHisBean.setLoginUserName(userInfo.getUserId());
 										commentService.registComment(commentHisBean, false);
 									}
 								}
@@ -744,6 +746,7 @@ public class ApiProjectController extends CoTopComponent {
 								commentHisBean.setReferenceId(prjId);
 								commentHisBean.setExpansion1("SRC");
 								commentHisBean.setContents(comment);
+								commentHisBean.setLoginUserName(userInfo.getUserId());
 								commentService.registComment(commentHisBean, false);
 							}
 							
@@ -966,6 +969,7 @@ public class ApiProjectController extends CoTopComponent {
 							commentHisBean.setReferenceId(prjId);
 							commentHisBean.setExpansion1("BIN");
 							commentHisBean.setContents(changedByResultTxt);
+							commentHisBean.setLoginUserName(userInfo.getUserId());
 							commentService.registComment(commentHisBean, false);
 						}
 						
@@ -981,6 +985,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN");
 									commentHisBean.setContents(changedLicenseName);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1003,6 +1008,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN");
 									commentHisBean.setContents(changedLicenseName);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1019,6 +1025,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN");
 									commentHisBean.setContents(chagedOssVersion);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1032,6 +1039,7 @@ public class ApiProjectController extends CoTopComponent {
 							commentHisBean.setReferenceId(prjId);
 							commentHisBean.setExpansion1("BIN");
 							commentHisBean.setContents(comment);
+							commentHisBean.setLoginUserName(userInfo.getUserId());
 							commentService.registComment(commentHisBean, false);
 						}
 						
@@ -1188,6 +1196,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN(Android)");
 									commentHisBean.setContents(changedByResultTxt);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1206,6 +1215,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN(Android)");
 									commentHisBean.setContents(changedLicenseName);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1227,6 +1237,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN(Android)");
 									commentHisBean.setContents(changedLicenseName);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1243,6 +1254,7 @@ public class ApiProjectController extends CoTopComponent {
 									commentHisBean.setReferenceId(prjId);
 									commentHisBean.setExpansion1("BIN(Android)");
 									commentHisBean.setContents(chagedOssVersion);
+									commentHisBean.setLoginUserName(userInfo.getUserId());
 									commentService.registComment(commentHisBean, false);
 								}
 							}
@@ -1256,6 +1268,7 @@ public class ApiProjectController extends CoTopComponent {
 							commentHisBean.setReferenceId(prjId);
 							commentHisBean.setExpansion1("BIN(Android)");
 							commentHisBean.setContents(comment);
+							commentHisBean.setLoginUserName(userInfo.getUserId());
 							commentService.registComment(commentHisBean, false);
 						}
 						
@@ -1344,6 +1357,7 @@ public class ApiProjectController extends CoTopComponent {
 				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 				commHisBean.setReferenceId(prjId);
 				commHisBean.setContents(uploadComment);
+				commHisBean.setLoginUserName(userInfo.getUserId());
 				commentService.registComment(commHisBean);
 				
 				errorMsg = null; // 정상적으로 처리됨.
