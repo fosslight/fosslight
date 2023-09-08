@@ -67,6 +67,8 @@ public class ApiSelfCheckController extends CoTopComponent {
 		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	}
 	
+	private boolean ldapCheckFlag = CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag"))) ? true : false;
+	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	private final ResponseService responseService;
@@ -303,7 +305,13 @@ public class ApiSelfCheckController extends CoTopComponent {
 			if (searchFlag) {
 				if (emailList != null) {
 					for (String email : emailList) {
-						boolean ldapCheck = apiProjectService.existLdapUserToEmail(email);
+						boolean ldapCheck = false;
+						if (ldapCheckFlag) {
+							ldapCheck = apiProjectService.existLdapUserToEmail(email);
+						} else {
+							ldapCheck = true;
+						}
+						
 						if (ldapCheck) {
 							boolean watcherFlag = apiSelfCheckService.existsWatcherByEmail(prjId, email);
 							if (watcherFlag) {

@@ -161,7 +161,7 @@
 			$("#list").jqGrid('saveRow', rowId); // editMode exit
 
 			if(rowId != ""){
-				var url = '<c:url value="/system/user/tokenProc/"/>'+type;
+				var url = '<c:url value="/system/user/tokenProc/'+type+'"/>';
 				var mainData = $("#list").getRowData(rowId);
 				var params = {
 					mainData : JSON.stringify(mainData)
@@ -257,11 +257,7 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				}
-				, colNames: ['AD ID',
-					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_HIDE_EMAIL_FLAG')) ne 'Y'}">
-					'E-mail',
-					</c:if>
-					'Name', 'Division', 'Registered Date', 'Token', 'Expire Date', 'Token Proc'
+				, colNames: ['AD ID', 'E-mail', 'Name', 'Division', 'Registered Date', 'Token', 'Expire Date', 'Token Proc'
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_LDAP_USED_FLAG')) eq 'N'}">
 					, 'password'
 					</c:if>
@@ -269,7 +265,10 @@
 				, colModel: [
 					{name: 'userId', index: 'userId', width: 150, allign: 'center'},
 					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_HIDE_EMAIL_FLAG')) ne 'Y'}">
-					    {name: 'email', index: 'email', width: 200, allign: 'center'},
+					{name: 'email', index: 'email', width: 200, allign: 'center'},
+					</c:if>
+					<c:if test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_HIDE_EMAIL_FLAG')) eq 'Y'}">
+					{name: 'email', index: 'email', width: 200, allign: 'center', hidden: true},
 					</c:if>
 					{name: 'userName', index: 'userName', width: 100, allign: 'center', editable: true},
 					{name: 'division', index: 'division', width: 150, allign: 'right', editable: true, formatter: 'select', edittype:"select",
