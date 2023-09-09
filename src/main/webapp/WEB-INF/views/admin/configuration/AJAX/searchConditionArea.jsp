@@ -97,6 +97,10 @@ $(document).ready(function() {
 							<label>Deactivate</label>
 							<input type="checkbox" name="deactivateFlag" value="Y" ${searchBean.deactivateFlag eq 'Y' ? 'checked="checked"' : ''} style="margin:0 5px;"/>
 						</dd>
+						<dd>
+							<label>Vulnerability (>=)</label>
+							<input name="cvssScore" type="text" value="${searchBean.cvssScore}" style="width:230px"/>
+						</dd>
 					</dl>
 				</c:when>
 				<c:when test="${defaultSearchType eq 'PROJECT'}">

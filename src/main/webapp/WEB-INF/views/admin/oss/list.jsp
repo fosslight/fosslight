@@ -39,7 +39,7 @@
 					</dd>
 					<dd>
 						<label>Vulnerability (>=)</label>
-						<input name="cvssScore" type="text" value="${searchBean.cvssScore}" style="width:230px"/> >=
+						<input name="cvssScore" type="text" value="${searchBean.cvssScore}" style="width:230px"/>
 
 					</dd>
 					<dd>
