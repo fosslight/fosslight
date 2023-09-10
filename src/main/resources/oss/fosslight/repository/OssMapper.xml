@@ -434,7 +434,9 @@
 			)
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
-		AND	CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			<![CDATA[
+			AND	CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
 		</if>
 		GROUP BY T1.OSS_NAME
 		) RESULT
@@ -660,15 +662,12 @@
 			</if>
 			)
 		</if>
-		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
-
-
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			<![CDATA[
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
 		</if>
-
-
-
+		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
 		GROUP BY T1.OSS_NAME
 		</if>
 		<include refid="orderby"/>
