@@ -4715,12 +4715,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	private static boolean checkIncludeNotDeclaredLicense(String ossName, String ossVer,
 			List<ProjectIdentification> licenseList) {
-		
-		List<String> licenseNameList = getAllAvailableLicenseUpperCaseName(ossName, ossVer);
-		for (ProjectIdentification license : licenseList) {
-			if (license.getLicenseName() != null) {
-				if (!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
-					return true;
+		if (licenseList != null) {
+			List<String> licenseNameList = getAllAvailableLicenseUpperCaseName(ossName, ossVer);
+			for (ProjectIdentification license : licenseList) {
+				if (license.getLicenseName() != null) {
+					if (!licenseNameList.contains(license.getLicenseName().toUpperCase())) {
+						return true;
+					}
 				}
 			}
 		}
