@@ -1539,6 +1539,51 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 	}
+
+	@Override
+	public String changePackageFileNameCombine(String prjId) {
+
+		String contents = "";
+		// 프로젝트 기본정보 취득
+		Project prjBean = new Project();
+		prjBean.setPrjId(prjId);
+		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		List<String> packageFileIds = new ArrayList<String>();
+
+		if (!isEmpty(prjBean.getPackageFileId())) {
+			packageFileIds.add(prjBean.getPackageFileId());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId2())) {
+			packageFileIds.add(prjBean.getPackageFileId2());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId3())) {
+			packageFileIds.add(prjBean.getPackageFileId3());
+		}
+
+		int fileSeq = 1;
+
+		for (String packageFileId : packageFileIds){
+			T2File packageFileInfo = new T2File();
+			packageFileInfo.setFileSeq(packageFileId);
+			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
+
+			if (packageFileInfo != null) {
+				String orgFileName = packageFileInfo.getOrigNm();
+				// Packaging > Confirm시 Packaging 파일명 변경 건
+				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : "");
+				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
+
+				packageFileInfo.setOrigNm(chgFileName);
+
+				fileMapper.upateOrgFileName(packageFileInfo);
+
+				contents += "<p>Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\" </p> ";
+			}
+		}
+		return contents;
+	}
 	
 	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
 		String fileName = prjName;

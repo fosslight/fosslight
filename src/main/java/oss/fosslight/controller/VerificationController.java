@@ -477,7 +477,7 @@ public class VerificationController extends CoTopComponent {
 				}
 				
 				verificationService.updateStatusWithConfirm(project, ossNotice, false);
-				
+
 				try {
 					History h = new History();
 					h = projectService.work(project);
@@ -489,7 +489,8 @@ public class VerificationController extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-				
+
+				userComment += verificationService.changePackageFileNameCombine(ossNotice.getPrjId());
 				try {
 					CommentsHistory commHisBean = new CommentsHistory();
 					commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
@@ -527,8 +528,6 @@ public class VerificationController extends CoTopComponent {
 					}
 				}
 
-				// package file 이 존재하는 경우 파일명을 변경한다.
-				verificationService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
 			} else { // preview 인 경우
 				// 저장된 고지문구가 없을 경우
 				if (isEmpty(noticeFileId) || !CoConstDef.FLAG_YES.equals(useCustomNoticeYn)) {
