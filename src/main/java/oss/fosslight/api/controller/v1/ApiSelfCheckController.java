@@ -189,15 +189,24 @@ public class ApiSelfCheckController extends CoTopComponent {
 						String[] sheet = new String[1];
 						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check", sheet);
 						String errorMsg = "";
-						if (result.containsKey("errorMessage")) {
-							errorMsg = (String) result.get("errorMessage");
+						if (result.containsKey("errorMsg")) {
+							errorMsg = (String) result.get("errorMsg");
+						}
+						
+						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE
+									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+						}
+						
+						if (!isEmpty(errorMsg)) {
+							resultMap.put("errorMessage", errorMsg);
 						}
 						
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if (!isEmpty(errorMsg)) {
-							throw new Exception(); // readData시 문제가 발생할 경우 parameter error로 return 함.
+						if (ossComponents.isEmpty()) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
 						}
 						
 						T2CoProjectValidator pv = new T2CoProjectValidator();

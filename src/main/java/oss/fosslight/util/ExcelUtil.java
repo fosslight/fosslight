@@ -545,8 +545,6 @@ public class ExcelUtil extends CoTopComponent {
 				Sheet sheet = wb.getSheetAt(Integer.parseInt(targetSheetNums[0]));
 			} catch (Exception e) {
 				
-				String [] types = {"Self-Check", "SRC", "BIN"};
-
 				List<String> sheetNames = new ArrayList<String>();
 				for (int i=0; i<wb.getNumberOfSheets(); i++) {
 					sheetNames.add( wb.getSheetName(i) );
@@ -556,15 +554,13 @@ public class ExcelUtil extends CoTopComponent {
 
 				int idx = 0;
 				for (String sheetName : sheetNames){
-					for (String type : types){
-						if (sheetName.startsWith(type)){
-							targetSheetNumsArrayList.add(Integer.toString(idx));
-						}
+					if (sheetName.startsWith(readType)){
+						targetSheetNumsArrayList.add(Integer.toString(idx));
 					}
 					idx++;
 				}
 				if (targetSheetNumsArrayList.isEmpty()){
-					targetSheetNums[0] = "-1";
+					targetSheetNums = new String[] {"-1"};
 				}else{
 					targetSheetNums = targetSheetNumsArrayList.toArray(new String[0]);
 				}

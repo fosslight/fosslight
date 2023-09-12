@@ -687,12 +687,26 @@ public class ApiProjectController extends CoTopComponent {
 
 						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "SRC", 
 							sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
-						String errorMsg = (String) result.get("errorMessage");
-						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
-						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+						String errorMsg = "";
+						if (result.containsKey("errorMsg")) {
+							errorMsg = (String) result.get("errorMsg");
+						}
+						
+						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE
+									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+						}
 						
 						if (!isEmpty(errorMsg)) {
 							resultMap.put("errorMessage", errorMsg);
+						}
+						
+						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+						ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>()); 
+						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+						
+						if (ossComponents.isEmpty()) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"SRC*"}));
 						}
 						
 						T2CoProjectValidator pv = new T2CoProjectValidator();
@@ -860,18 +874,26 @@ public class ApiProjectController extends CoTopComponent {
 						
 						String[] sheet = new String[1];
 						Map<String, Object> result = apiProjectService.getSheetData(ossReportBean, prjId, "BIN", sheet);
-						String errorMsg = (String) result.get("errorMsg");
+						String errorMsg = "";
+						if (result.containsKey("errorMsg")) {
+							errorMsg = (String) result.get("errorMsg");
+						}
+						
 						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
 							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE
 									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+						}
+						
+						if (!isEmpty(errorMsg)) {
+							resultMap.put("errorMessage", errorMsg);
 						}
 						
 						ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>()); 
 						ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if (!isEmpty(errorMsg)) {
-							resultMap.put("errorMessage", errorMsg);
+						if (ossComponents.isEmpty()) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"BIN*"}));
 						}
 						
 						project.setBinCsvFileId(ossReportBean.getRegistFileId()); // set file id
