@@ -2320,7 +2320,7 @@
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
     		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
-								WHERE OSS_NAME = #{ossName}
+								WHERE OSS_NAME = #{schOssName}
 								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 								AND OSS_VERSION = #{ossVersion}
 								</if>
@@ -2335,4 +2335,14 @@
     	ON NVD.CVE_ID = CVE.CVE_ID
     	ORDER BY CVE.CVSS_SCORE*1 DESC LIMIT 5
     </select>
+    
+    <select id="checkOssVersionDiff" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		FROM OSS_MASTER OM
+		INNER JOIN OSS_MASTER_LICENSE_FLAG OMF
+		ON OM.OSS_ID = OMF.OSS_ID
+		WHERE OM.USE_YN = 'Y'
+		AND OM.OSS_NAME = #{ossName}
+		AND OMF.VERSION_DIFF_FLAG = 'Y'
+	</select>
 </mapper>
