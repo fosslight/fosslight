@@ -381,6 +381,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
 			, DIVISION                    = #{division}
 			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(division)">
+			, DIVISION                    = (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
+			</if>
 	</insert>
 	
 	<insert id="insertProjectModel" parameterType="oss.fosslight.domain.Project">
