@@ -375,7 +375,6 @@
 			, OS_TYPE                     = #{osType}
 			, OS_TYPE_ETC                 = #{osTypeEtc}
 			, MODIFIER                    = #{loginUserName}
-			, DIVISION                    = #{division}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
