@@ -5,6 +5,8 @@
 
 package oss.fosslight.api.controller.v1;
 
+import static oss.fosslight.common.CommonFunction.isAdmin;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +147,8 @@ public class ApiOssController extends CoTopComponent {
 			@RequestHeader String _token,
 			@ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
-		if (userService.isAdmin(_token)) {
+		userService.checkApiUserAuthAndSetSession(_token);
+		if (isAdmin()) {
 			Map<String, Object> resultMap = new HashMap<String, Object>();
 			try {
 				resultMap = ossService.saveOss(ossMaster);
