@@ -1507,6 +1507,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 									dualLicenseFlag = true;
 								}
 							}
+							
+							ossIdListByName.add(_bean.getOssId());
 						}
 					}
 				}else {
@@ -1582,12 +1584,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public String checkVdiff(Map<String, Object> reqMap) {
+	public Map<String, Object> checkVdiff(Map<String, Object> reqMap) {
+		Map<String, Object> rtnMap = new HashMap<>();
 		boolean vDiffFlag = false;
 		// version 에 따라 라이선스가 달라지는지 체크 (v-diff)
 		OssMaster param = new OssMaster();
 		String ossId = avoidNull((String) reqMap.get("ossId"));
 		String ossName = (String) reqMap.get("ossName");
+		String ossVersion = "";
+		if (reqMap.containsKey("ossVersion")) ossVersion = (String) reqMap.get("ossVersion");
 		List<OssLicense> license = (List<OssLicense>) reqMap.get("license");
 		String[] ossNames = new String[1];
 		ossNames[0] = ossName;
@@ -1617,7 +1622,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 		
-		return vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
+		rtnMap.put("vFlag", vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+		
+		if (vDiffFlag && isEmpty(ossVersion)) {
+			if (ossMapper.checkOssVersionDiff(ossName) == 0) {
+				List<String> firstVersionDiffList = new ArrayList<>();
+				for (String key : ossMap.keySet()) {
+					OssMaster om = ossMap.get(key);
+					firstVersionDiffList.add(om.getOssName() + " (" + om.getOssVersion() + ")|" + CommonFunction.makeLicenseExpression(om.getOssLicenses()));
+				}
+				rtnMap.put("resultData", firstVersionDiffList);
+			}
+		}
+		
+		return rtnMap;
 	}
 	
 	private List<List<OssLicense>> makeLicenseKeyList(List<OssLicense> list) {
@@ -3845,6 +3863,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster) {
 		return ossMapper.checkExistsVendorProductMatchOss(ossMaster);
+	}
+
+	@Override
+	public int checkOssVersionDiff(String ossName) {
+		return ossMapper.checkOssVersionDiff(ossName);
 	}
 
 }
