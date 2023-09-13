@@ -3010,6 +3010,16 @@ public class ExcelUtil extends CoTopComponent {
 								return null;
 							}
 						} else {
+							short firstCell = row.getFirstCellNum();
+							short lastCell = row.getLastCellNum();
+							
+							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
+								HSSFCell cell = row.getCell(cellIdx);
+								if (cell == null) {
+									row.createCell(cellIdx);
+								}
+							}
+							
 							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
 							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
@@ -3033,12 +3043,22 @@ public class ExcelUtil extends CoTopComponent {
 					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						XSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							boolean validHeader = checkHeaderColumnValidate(row.cellIterator());
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
 							if (!validHeader) {
 								log.info("The order and content of header columns must match.");
 								return null;
 							}
 						} else {
+							short firstCell = row.getFirstCellNum();
+							short lastCell = row.getLastCellNum();
+							
+							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
+								XSSFCell cell = row.getCell(cellIdx);
+								if (cell == null) {
+									row.createCell(cellIdx);
+								}
+							}
+							
 							//licenseMaster Object
 							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
 							if (licenseMaster != null) {
