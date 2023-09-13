@@ -381,9 +381,11 @@ public class PartnerController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model) throws Exception{
 		PartnerMaster orgPartnerMaster = null;
+		boolean reviewerEmptyFlag = false;
 		
 		if (!isEmpty(vo.getReviewer())) {
 			orgPartnerMaster = partnerService.getPartnerMasterOne(vo);
+			if (isEmpty(orgPartnerMaster.getReviewer())) reviewerEmptyFlag = true;
 		}
 		
 		int result = partnerService.updateReviewer(vo);
@@ -399,9 +401,13 @@ public class PartnerController extends CoTopComponent{
 		try {
 			if (orgPartnerMaster != null) {
 				if (orgPartnerMaster != null && !vo.getReviewer().equals(orgPartnerMaster.getReviewer())) {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED);
+					CoMail mailBean = reviewerEmptyFlag ? new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED) : new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED);
 					mailBean.setParamPartnerId(vo.getPartnerId());
-					mailBean.setToIds(new String[]{vo.getReviewer()});
+					if (reviewerEmptyFlag) {
+						mailBean.setToIds(new String[]{vo.getReviewer()});
+					} else {
+						mailBean.setToIds(new String[]{orgPartnerMaster.getReviewer(), vo.getReviewer()});
+					}
 					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			}

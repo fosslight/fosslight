@@ -573,6 +573,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT = "470";
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
+	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED = "701";
 	/** 3rd party changed */
 	public static final String CD_MAIL_TYPE_PARTNER_CHANGED = "700";
 	/** 3rd party reviewer changed */

@@ -1028,6 +1028,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED:
+    		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED:
@@ -1114,7 +1115,8 @@ public class CoMailManager extends CoTopComponent {
         			// to list ------------------------------------------------------------
         			
         			// reviewer
-    				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())) {
+    				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())) {
     					if (bean.getToIds() != null && bean.getToIds().length > 0) {
     						toList.addAll(Arrays.asList(selectMailAddrFromIds(bean.getToIds())));
     					} else if (!isEmpty(partnerInfo.getReviewer())) {
@@ -1152,13 +1154,15 @@ public class CoMailManager extends CoTopComponent {
 
     				// Creator, Watcher
     				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REQ_REVIEW.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED.equals(bean.getMsgType())
     						) {
     					ccList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
-    					if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())) {
+    					if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    							|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())) {
     						ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
     					}
     				} 
@@ -1670,7 +1674,13 @@ public class CoMailManager extends CoTopComponent {
 				title = StringUtil.replace(title, "${Creator}", _s2);
 			}
 			
-			if (title.indexOf("${Reviewer}") > -1) {
+			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") > -1) {
+				String[] toIds = bean.getToIds();
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(makeUserNameFormat(toIds[0])));
+				title = StringUtil.replace(title, "${ReviewerTo}", avoidNull(makeUserNameFormat(toIds[1])));
+			}
+			
+			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") == -1) {
 				title = StringUtil.replace(title, "${Reviewer}", _s3);
 			}
 			
