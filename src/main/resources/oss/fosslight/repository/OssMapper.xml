@@ -2320,7 +2320,7 @@
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
     		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
-								WHERE OSS_NAME = #{schOssName}
+								WHERE OSS_NAME = #{ossName}
 								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 								AND OSS_VERSION = #{ossVersion}
 								</if>
