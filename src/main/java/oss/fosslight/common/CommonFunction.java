@@ -592,7 +592,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static String licenseStrToSPDXLicenseFormat(String licenseStr) {
 		if (CoCodeManager.LICENSE_INFO.containsKey(licenseStr) && isEmpty(CoCodeManager.LICENSE_INFO.get(licenseStr).getShortIdentifier())) {
 			licenseStr = "LicenseRef-" + licenseStr;
-			licenseStr = CommonFunction.removeSpecialCharacters(licenseStr);
+			licenseStr = CommonFunction.removeSpecialCharacters(licenseStr.replaceAll("\\(", "-").replaceAll("\\)", ""));
 		}
 		return licenseStr;
 	}
@@ -606,7 +606,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				if (booleanflag) {
 					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 					if (licenseName.startsWith("LicenseRef-")) {
-						licenseName = CommonFunction.removeSpecialCharacters(licenseName);
+						licenseName = CommonFunction.removeSpecialCharacters(licenseName).replaceAll("\\(", "-").replaceAll("\\)", "");
 					}
 				}
 				
@@ -621,7 +621,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (booleanflag) {
 						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 						if (licenseName.startsWith("LicenseRef-")) {
-							licenseName = CommonFunction.removeSpecialCharacters(licenseName);
+							licenseName = CommonFunction.removeSpecialCharacters(licenseName).replaceAll("\\(", "-").replaceAll("\\)", "");
 						}
 					}
 					
@@ -636,14 +636,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static String removeSpecialCharacters(String licenseStr) {
-		String[] patternCheckList = new String[] {"!", "@", "#", "$", "%", "^", "&", "*", ",", "?", "\\", "\"", ":", "{", "}", "|", "<", ">", "/", ")", "_"};
+		String[] patternCheckList = new String[] {"!", "@", "#", "$", "%", "^", "&", "*", ",", "?", "\\", "\"", ":", "{", "}", "|", "<", ">", "/", "_"};
 		for (String pattern : patternCheckList) {
 			if (licenseStr.contains(pattern)) {
 				licenseStr = licenseStr.replaceAll(pattern, "");
 			}
 		}
 		
-		String[] dashConversionPatternCheckList = new String[] {"(", "--", " "};
+		String[] dashConversionPatternCheckList = new String[] {"--", " "};
 		for (String pattern : dashConversionPatternCheckList) {
 			if (licenseStr.contains(pattern)) {
 				licenseStr = licenseStr.replaceAll(pattern, "-");
