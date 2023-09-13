@@ -592,9 +592,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static String licenseStrToSPDXLicenseFormat(String licenseStr) {
 		if (CoCodeManager.LICENSE_INFO.containsKey(licenseStr) && isEmpty(CoCodeManager.LICENSE_INFO.get(licenseStr).getShortIdentifier())) {
 			licenseStr = "LicenseRef-" + licenseStr;
+			licenseStr = CommonFunction.removeSpecialCharacters(licenseStr);
 		}
-
-		licenseStr = licenseStr.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "-").replaceAll(" ", "-").replaceAll("--", "-");
 		return licenseStr;
 	}
 
@@ -606,7 +605,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String licenseName = license.getLicenseName();
 				if (booleanflag) {
 					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-					licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "-").replaceAll("_", "-").replaceAll(" ", "-").replaceAll("--", "-");
+					if (licenseName.startsWith("LicenseRef-")) {
+						licenseName = CommonFunction.removeSpecialCharacters(licenseName);
+					}
 				}
 				
 				if (!resultList.contains(licenseName)) {
@@ -619,7 +620,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				for (String licenseName : detectedLicenseList) {
 					if (booleanflag) {
 						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
-						licenseName = licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "-").replaceAll("_", "-").replaceAll(" ", "-").replaceAll("--", "-");
+						if (licenseName.startsWith("LicenseRef-")) {
+							licenseName = CommonFunction.removeSpecialCharacters(licenseName);
+						}
 					}
 					
 					if (!resultList.contains(licenseName)) {
@@ -633,10 +636,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static String removeSpecialCharacters(String licenseStr) {
-		String[] patternCheckList = new String[] {"!", "@", "#", "$", "%", "^", "&", "*", ",", "?", "\\", "\"", ":", "{", "}", "|", "<", ">"};
+		String[] patternCheckList = new String[] {"!", "@", "#", "$", "%", "^", "&", "*", ",", "?", "\\", "\"", ":", "{", "}", "|", "<", ">", "/", ")", "_"};
 		for (String pattern : patternCheckList) {
 			if (licenseStr.contains(pattern)) {
 				licenseStr = licenseStr.replaceAll(pattern, "");
+			}
+		}
+		
+		String[] dashConversionPatternCheckList = new String[] {"(", "--", " "};
+		for (String pattern : dashConversionPatternCheckList) {
+			if (licenseStr.contains(pattern)) {
+				licenseStr = licenseStr.replaceAll(pattern, "-");
 			}
 		}
 		return licenseStr;
