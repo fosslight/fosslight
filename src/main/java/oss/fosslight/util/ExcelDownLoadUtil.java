@@ -2543,7 +2543,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
 						String licenseStr = CommonFunction.makeLicenseExpression(_ossBean.getOssLicenses(), false, true);
-						if (licenseStr.contains("LicenseRef-")) CommonFunction.removeSpecialCharacters(licenseStr);
+						if (licenseStr.contains("LicenseRef-")) licenseStr = CommonFunction.removeSpecialCharacters(licenseStr);
 						
 						if (_ossBean.getOssLicenses().size() > 1) {
 							licenseStr = "(" + licenseStr + ")";
