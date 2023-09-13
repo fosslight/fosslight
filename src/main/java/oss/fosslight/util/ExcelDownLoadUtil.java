@@ -2579,7 +2579,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						}
 						
 						if (liBean.getLicenseName().startsWith("LicenseRef-")) {
-							liBean.setLicenseName(CommonFunction.removeSpecialCharacters(liBean.getLicenseName());
+							liBean.setLicenseName(CommonFunction.removeSpecialCharacters(liBean.getLicenseName()));
 						}
 						
 						srtLicenseName += liBean.getLicenseName();
