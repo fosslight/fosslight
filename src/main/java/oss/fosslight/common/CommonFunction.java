@@ -592,7 +592,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static String licenseStrToSPDXLicenseFormat(String licenseStr) {
 		if (CoCodeManager.LICENSE_INFO.containsKey(licenseStr) && isEmpty(CoCodeManager.LICENSE_INFO.get(licenseStr).getShortIdentifier())) {
 			licenseStr = "LicenseRef-" + licenseStr;
-			licenseStr = CommonFunction.removeSpecialCharacters(licenseStr.replaceAll("\\(", "-").replaceAll("\\)", ""));
+			licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", "");
 		}
 		return licenseStr;
 	}
@@ -606,7 +606,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				if (booleanflag) {
 					licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 					if (licenseName.startsWith("LicenseRef-")) {
-						licenseName = CommonFunction.removeSpecialCharacters(licenseName).replaceAll("\\(", "-").replaceAll("\\)", "");
+						licenseName = CommonFunction.removeSpecialCharacters(licenseName, true).replaceAll("\\(", "-").replaceAll("\\)", "");
 					}
 				}
 				
@@ -621,7 +621,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (booleanflag) {
 						licenseName = avoidNull(CoCodeManager.LICENSE_INFO.get(licenseName).getShortIdentifier(), "LicenseRef-" + licenseName);
 						if (licenseName.startsWith("LicenseRef-")) {
-							licenseName = CommonFunction.removeSpecialCharacters(licenseName).replaceAll("\\(", "-").replaceAll("\\)", "");
+							licenseName = CommonFunction.removeSpecialCharacters(licenseName, true).replaceAll("\\(", "-").replaceAll("\\)", "");
 						}
 					}
 					
@@ -635,7 +635,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return String.join(",", resultList);
 	}
 	
-	public static String removeSpecialCharacters(String licenseStr) {
+	public static String removeSpecialCharacters(String licenseStr, boolean convertDashFlag) {
 		String[] patternCheckList = new String[] {"!", "@", "#", "$", "%", "^", "&", "*", ",", "?", "\\", "\"", ":", "{", "}", "|", "<", ">", "/", "_"};
 		for (String pattern : patternCheckList) {
 			if (licenseStr.contains(pattern)) {
@@ -643,10 +643,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		
-		String[] dashConversionPatternCheckList = new String[] {"--", " "};
-		for (String pattern : dashConversionPatternCheckList) {
-			if (licenseStr.contains(pattern)) {
-				licenseStr = licenseStr.replaceAll(pattern, "-");
+		if (convertDashFlag) {
+			String[] dashConversionPatternCheckList = new String[] {"--", " "};
+			for (String pattern : dashConversionPatternCheckList) {
+				if (licenseStr.contains(pattern)) {
+					licenseStr = licenseStr.replaceAll(pattern, "-");
+				}
 			}
 		}
 		return licenseStr;
