@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -2943,11 +2944,10 @@ public class ExcelUtil extends CoTopComponent {
 	}
 
 	/**Excel 헤더 체크*/
-	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator) {
-		String[] definedColData = new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
+	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator, Map<Integer, String> columnCheckMap) {
+		List<String> definedColData = Arrays.asList(new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
 				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE",
-				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"};
-		boolean allColumnsExist = true;
+				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"});
 
 		List<String> firstRowColData = new ArrayList<>();
 		while (cellIterator.hasNext()) {
@@ -2955,16 +2955,16 @@ public class ExcelUtil extends CoTopComponent {
 			firstRowColData.add(getCellData(cell));
 		}
 
-		for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
+		int validationCnt = 0;
+		for (int cIdx = 0; cIdx < firstRowColData.size(); cIdx++) {
 			String colData = firstRowColData.get(cIdx);
-			if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
-				continue;
-			} else {
-				allColumnsExist = false;
-				break;
+			if (colData != null && definedColData.contains(colData.toUpperCase())){
+				validationCnt++;
+				columnCheckMap.put(cIdx, colData.toUpperCase());
 			}
 		}
-		return allColumnsExist;
+		
+		return validationCnt == definedColData.size() ? true : false;
 	}
 
 	/**make Grid data to return UI*/
@@ -2986,6 +2986,7 @@ public class ExcelUtil extends CoTopComponent {
 			String extType = ext[ext.length - 1];
 			String codeExt[] = StringUtil.split(codeMapper.selectExtType("11"), ","); // The codeExt array contains the allowed extension types.
 			int count = 0;
+			Map<Integer, String> columnCheckMap = new HashMap<>();
 
 			for (int i = 0; i < codeExt.length; i++) {
 				if (codeExt[i].equalsIgnoreCase(extType)) {
@@ -3004,7 +3005,7 @@ public class ExcelUtil extends CoTopComponent {
 						HSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
 							//check header in here
-							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
 							if (!validHeader){
 								log.info("The order and content of header columns must match.");
 								return null;
@@ -3020,7 +3021,7 @@ public class ExcelUtil extends CoTopComponent {
 								}
 							}
 							
-							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator(), columnCheckMap);
 							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
 							}
@@ -3043,7 +3044,7 @@ public class ExcelUtil extends CoTopComponent {
 					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						XSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
 							if (!validHeader) {
 								log.info("The order and content of header columns must match.");
 								return null;
@@ -3060,7 +3061,7 @@ public class ExcelUtil extends CoTopComponent {
 							}
 							
 							//licenseMaster Object
-							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator(), columnCheckMap);
 							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
 							}
@@ -3080,74 +3081,98 @@ public class ExcelUtil extends CoTopComponent {
 		return licenseMasterList;
 	}
 
-	public static LicenseMaster getLicenseDataByColumn(Iterator<Cell> cellIterator) {
+	public static LicenseMaster getLicenseDataByColumn(Iterator<Cell> cellIterator, Map<Integer, String> columnCheckMap) {
 		LicenseMaster licenseMaster = new LicenseMaster();
 		int colIndex = 0;
+		Integer maxKey = Collections.max(columnCheckMap.keySet());
+		
 		for (; cellIterator.hasNext(); colIndex++) {
-			Cell cell = (Cell) cellIterator.next();
-			String value = getCellData(cell);
-			if (colIndex == 0) {
-				if (value == null || value.trim().isEmpty()) {
-					log.debug("License Name must not be null.");
-					return null;
-				} else {
-					licenseMaster.setLicenseName(value);
+			if (colIndex > maxKey) break;
+			
+			if (!columnCheckMap.containsKey(colIndex)) {
+				cellIterator.next();
+				continue;
+			} else {
+				String columnName = columnCheckMap.get(colIndex);
+				
+				Cell cell = (Cell) cellIterator.next();
+				String value = getCellData(cell);
+				
+				switch (columnName) {
+				case "LICENSE NAME" :
+					if (value == null || value.trim().isEmpty()) {
+						log.debug("License Name must not be null.");
+						return null;
+					} else {
+						licenseMaster.setLicenseName(value);
+					}
+					break;
+				case "LICENSE TYPE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setLicenseType(value);
+					break;
+				case "NOTICE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setObligationNotificationYn(value);
+					break;
+				case "SOURCE CODE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setObligationDisclosingSrcYn(value);
+					break;
+				case "SPDX SHORT IDENTIFIER" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setShortIdentifier(value);
+					break;
+				case "NICKNAME" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
+					licenseMaster.setLicenseNicknames(nicknames);
+					break;
+				case "WEBSITE FOR THE LICENSE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
+					Arrays.stream(webpages).forEach((webpage)->{
+						webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
+					});
+					licenseMaster.setWebpages(webpages);
+					break;
+				case "USER GUIDE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setDescription(value);
+					break;
+				case "LICENSE TEXT" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setLicenseText(value);
+					break;
+				case "ATTRIBUTION" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setAttribution(value);
+					break;
+				case "COMMENT" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setComment(value);
+					break;
 				}
-			} else if (colIndex == 1) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setLicenseType(value);
-			} else if (colIndex == 2) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setObligationNotificationYn(value);
-			} else if (colIndex == 3) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setObligationDisclosingSrcYn(value);
-			} else if (colIndex == 4) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setShortIdentifier(value);
-			} else if (colIndex == 5) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
-				licenseMaster.setLicenseNicknames(nicknames);
-			} else if (colIndex == 6) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
-				Arrays.stream(webpages).forEach((webpage)->{
-					webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
-				});
-				licenseMaster.setWebpages(webpages);
-			} else if (colIndex == 7) { //userGuide string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setDescription(value);
-			} else if (colIndex == 8) { //licenseText string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setLicenseText(value);
-			} else if (colIndex == 9) { //attribute string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setAttribution(value);
-			} else if (colIndex == 10) { //comment string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setComment(value);
 			}
 		}
 		return licenseMaster;
