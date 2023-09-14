@@ -2964,7 +2964,7 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 		
-		return validationCnt == definedColData.size() ? true : false;
+		return validationCnt > 0 ? true : false;
 	}
 
 	/**make Grid data to return UI*/
