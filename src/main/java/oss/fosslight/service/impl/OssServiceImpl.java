@@ -1624,7 +1624,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		rtnMap.put("vFlag", vDiffFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 		
-		if (vDiffFlag && isEmpty(ossVersion)) {
+		if (vDiffFlag && !isEmpty(ossVersion)) {
 			if (ossMapper.checkOssVersionDiff(ossName) == 0) {
 				List<String> firstVersionDiffList = new ArrayList<>();
 				for (String key : ossMap.keySet()) {
