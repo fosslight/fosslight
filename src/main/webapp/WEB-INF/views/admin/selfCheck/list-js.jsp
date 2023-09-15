@@ -37,8 +37,12 @@
 	//OSS 쪽에서 프로젝트 검색을 위한 데이터
 	var evt = {
 		init : function(){
-
 			refreshParam = $('#projectSearch').serializeObject();
+			if($('#checkbox3').is(':checked')) {
+				refreshParam.publicYn = 'N';
+			} else {
+				refreshParam.publicYn = 'Y';
+			}
 			
 			$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
 			$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
@@ -49,7 +53,11 @@
 				var exPostdata = $("#list").jqGrid('getGridParam','postData');
 				exPostdata.ossId = ''; 
 				var postData=$('#projectSearch').serializeObject();
-
+				if($('#checkbox3').is(':checked')) {
+					postData.publicYn = 'N';
+				} else {
+					postData.publicYn = 'Y';
+				}
 				$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 			});
 			

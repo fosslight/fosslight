@@ -17,7 +17,11 @@
 						<label>3rd Party Name</label>
 						<input type="text" name="partnerName" class="autoComParty" value="${searchBean.partnerName}"/>
 					</dd>
-					<dd class="lastAign"></dd>
+					<dd class="lastAign">
+						<label>Created Date</label>
+						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" maxlength="8" autocomplete="off" style="width:77px;"/> ~
+						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" maxlength="8" autocomplete="off" style="width:77px;"/>
+					</dd>
 					<dd>
 						<label style="width:100px;">3rd Party<br/>Software Name</label>
 						<input type="text" name="softwareName" class="autoComSwNm" value="${searchBean.softwareName}" style="width:150px;"/>
@@ -27,7 +31,7 @@
 						<input type="text" name="softwareVersion" value="${searchBean.softwareVersion}"/>
 					</dd>
 					<dd class="lastAign">
-						<label>Division</label>
+						<label><br/>Division</label>
 						<span class="selectSet">
 							<strong title="Status selected value"></strong>
 							<select name="division">
@@ -42,18 +46,17 @@
 						${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", searchBean.status, false)}
             			</span>
 					</dd>
-					<dd class="">
-						<label style="width:100px;">Created Date</label>
-						<input type="text" class="cal" name="createdDate1" id="createdDate1" title="Search Start Date" value="${searchBean.createdDate1}" style="width:70px;" maxlength="8" autocomplete="off"/> ~ 
-						<input type="text" class="cal" name="createdDate2" id="createdDate2" title="Search End Date" value="${searchBean.createdDate2}" style="width:70px;" maxlength="8" autocomplete="off"/> 			
+					<dd>
+						<label style="width:100px;">Creator</label>
+						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}" style="width:150px;"/>
 					</dd>
 					<dd class="centerAign">
-						<label>Creator</label>
-						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
-					</dd>
-					<dd class="lastAign">
 						<label>Reviewer</label>
 						<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
+					</dd>
+					<dd class="lastAign">
+						<label>Watcher</label>
+						<input type="text" name="watchers"  class=""  value="${searchBean.watchers[0]}"/>
 					</dd>
 					<c:if test="${!ct:isAdmin()}">
 					<dd class="lastAign" >
@@ -101,7 +104,7 @@
 				<h1 class="orange">Change Division</h1>
 				<div class="popdata">
 					<div class="mtb20">
-						<span>Division</label>
+						<label>Division</label>
 						<span id="partnerChangeDivisionSelect" class="selectSet" style="width: 200px;">
 							<strong title="Division selected value"></strong>
 							<select name="partnerDivision">

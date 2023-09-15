@@ -35,13 +35,24 @@ public class ApiFileServiceImpl implements ApiFileService {
 	
 	@Override
 	public UploadFile uploadFile(MultipartFile mFile){
-		return uploadFile(mFile, null);
+		return uploadFile(mFile, null, null);
 	}
 	
 	@Override
 	public UploadFile uploadFile(MultipartFile mFile, String filePath){
+		return uploadFile(mFile, filePath, null);
+	}
+	
+	@Override
+	public UploadFile uploadFile(MultipartFile mFile, String filePath, String oldFileId) {
 		boolean uploadSucc = false;
-		String fileId = StringUtil.avoidNull(fileMapper.getFileId(), "1");//max+1 file Id 가져옴 20160524 ms-kwon
+		String fileId = "";
+		if (oldFileId != null) {
+			fileId = oldFileId;
+		} else {
+			fileId = StringUtil.avoidNull(fileMapper.getFileId(), "1");//max+1 file Id 가져옴 20160524 ms-kwon
+		}
+
 		int indexNum = 0;
 		UploadFile upFile = new UploadFile();
 		T2File registFile = new T2File();

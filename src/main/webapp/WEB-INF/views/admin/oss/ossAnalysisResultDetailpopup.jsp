@@ -880,7 +880,7 @@
 					colModel:[
 						{name:'no', index: 'ossLicenseIdx', width:18, hidden:true},
 						{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:18, key:true, hidden:true},
-						{name:'ossLicenseComb',index:'ossLicenseComb', width:40, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH", dataEvents:[{type:'change', fn:grid_fn.changeLicenseType(_target, seq)}]}},
+						{name:'ossLicenseComb',index:'ossLicenseComb', width:40, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:grid_fn.changeLicenseType(_target, seq)}]}},
 						{name:'licenseNameEx',index:'licenseNameEx', width:100, editable:true
 							, editoptions: {
 								dataInit: function (elem) {

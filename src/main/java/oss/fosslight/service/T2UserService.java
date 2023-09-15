@@ -61,5 +61,7 @@ public interface T2UserService extends UserDetailsService {
 	
 	public boolean existUserIdOrEmail(String userId);
 	public int updateUserNameDivision(T2Users userInfo);
-	public String[] checkUserInfo(T2Users userInfo) ;
+	public String[] checkUserInfo(T2Users userInfo);
+
+	public boolean isAdmin(String _token);
 }

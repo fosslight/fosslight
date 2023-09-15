@@ -61,7 +61,7 @@ public interface OssService extends HistoryConfig{
 	
 	OssMaster getLastModifiedOssInfoByName(OssMaster bean);
 	
-	String checkVdiff(Map<String, Object> reqMap);
+	Map<String, Object> checkVdiff(Map<String, Object> reqMap);
 	
 	String[] checkNickNameRegOss(String ossName, String[] ossNicknames);
 	
@@ -138,4 +138,6 @@ public interface OssService extends HistoryConfig{
 	List<String> selectVulnInfoForOss(OssMaster ossMaster);
 
 	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
+
+	int checkOssVersionDiff(String ossName);
 }

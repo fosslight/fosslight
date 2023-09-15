@@ -1984,7 +1984,16 @@ public class ProjectController extends CoTopComponent {
 						
 						for (ProjectIdentification bean : ossComponents) {
 							if (!isEmpty(bean.getBinaryName())) {
-								componentBinaryList.put(bean.getBinaryName(), bean);
+								if (componentBinaryList.containsKey(bean.getBinaryName())) {
+									ProjectIdentification identification = componentBinaryList.get(bean.getBinaryName());
+									if (bean.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(bean.getBinaryName(), bean);
+									} else if (identification.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(identification.getBinaryName(), identification);
+									}
+								} else {
+									componentBinaryList.put(bean.getBinaryName(), bean);
+								}
 							}
 						}
 						
@@ -2878,7 +2887,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param code the code
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SERCH_CD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SEARCH_CD)
 	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification,
 			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		int page = Integer.parseInt(req.getParameter("page"));
@@ -4704,6 +4713,18 @@ public class ProjectController extends CoTopComponent {
 			resMap.put("isValid", "true");
 		}
 		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PROJECT.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody HashMap<String, Object> map, @PathVariable String code, HttpServletRequest req, HttpServletResponse res) {
+		Map<String, Object> resMap = new HashMap<>();
+		String prjId = (String) map.get("prjId");
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setReferenceDiv(code);
+		
+		resMap = projectService.checkSelectDownloadFile(project);
 		return makeJsonResponseHeader(resMap);
 	}
 }

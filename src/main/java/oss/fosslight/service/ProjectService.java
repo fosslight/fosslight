@@ -203,6 +203,8 @@ public interface ProjectService extends HistoryConfig{
 	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 
 	public void copySecurityDataForProject(Project project);
+	
+	public Map<String, Object> checkSelectDownloadFile(Project project);
 }
 
 

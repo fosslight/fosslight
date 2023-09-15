@@ -5,9 +5,13 @@
 
 package oss.fosslight.api.controller.v1;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,11 +41,15 @@ import oss.fosslight.service.T2UserService;
 @RequestMapping(value = "/api/v1")
 public class ApiPartnerController extends CoTopComponent {
 	
+	private boolean ldapCheckFlag = CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag"))) ? true : false;
+	
 	private final ResponseService responseService;
 	
 	private final T2UserService userService;
 	
 	private final ApiPartnerService apiPartnerService; 
+	
+	protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 	
 	@ApiOperation(value = "3rd Party Search", notes = "3rd party 조회")
     @ApiImplicitParams({
@@ -87,4 +95,77 @@ public class ApiPartnerController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
+	
+	@ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {API.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
+    public CommonResult addPrjWatcher(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "3rd Party ID", required = true) @RequestParam(required = true) String partnerId,
+    		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
+		
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<>();
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
+		
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+			List<String> partnerIdList = new ArrayList<String>();
+			partnerIdList.add(partnerId);
+			String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+			
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("partnerIdList", partnerIds);
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
+			
+			boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
+			if (searchFlag) {
+				if (emailList != null) {
+					for (String email : emailList) {
+						boolean ldapCheck = false;
+						if (ldapCheckFlag) {
+							ldapCheck = apiPartnerService.existLdapUserToEmail(email);
+						} else {
+							ldapCheck = true;
+						}
+						
+						if (ldapCheck) {
+							boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
+							if (watcherFlag) {
+								Map<String, Object> param = new HashMap<>();
+								param.put("partnerId", partnerId);
+								param.put("division", "");
+								param.put("userId", "");
+								param.put("partnerEmail", email);
+								apiPartnerService.insertWatcher(param);
+							} else {
+								errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+								break;
+							}
+						} else {
+							errorCode = CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE;
+							break;
+						}
+					}
+					
+					if (!errorCode.equals(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE)
+							&& !errorCode.equals(CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE)) {
+						return responseService.getSingleResult(resultMap);
+					}
+				} else {
+					errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+				}
+			} else {
+				errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+		
+		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
+	}
 }

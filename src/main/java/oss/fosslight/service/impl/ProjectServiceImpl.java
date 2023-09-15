@@ -521,7 +521,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(ll.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					ll.setCvssScore(conversionCveData[3]);
@@ -778,7 +778,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
 					}
 					
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getReferenceId(), ossInfoMap, project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 					if (conversionCveInfo != null) {
 						String[] conversionCveData = conversionCveInfo.split("\\@");
 						project.setCvssScore(conversionCveData[3]);
@@ -2779,7 +2779,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(pi.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(pi.getReferenceId(), ossInfoMap, pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
@@ -2856,7 +2856,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
@@ -5816,7 +5816,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		int gridIdx = 1;
 		for (ProjectIdentification pi : list) {
 			activateFlag = false;
-			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
+			if (isEmpty(pi.getOssName()) || pi.getOssName().equals("-") || pi.getExcludeYn().equals(CoConstDef.FLAG_YES)) continue;
 			
 			param.setOssName(pi.getOssName());
 			param.setOssVersion(pi.getOssVersion());
@@ -6036,7 +6036,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		OssComponents ossComponent;
 		
 		for (OssComponents bean : ossComponentList) {
-			if (bean.getOssName().isEmpty()) continue;
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) continue;
 			
 			om.setOssNames(new String[] {bean.getOssName()});
 			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
@@ -6137,6 +6137,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (addOssComponentList != null) {
 			for (OssComponents bean : addOssComponentList) {
+				if (isEmpty(bean.getLicenseName())) continue;
+				
 				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				if ("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -6281,9 +6283,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
 		if (ossComponentsLicense != null) {
-			for (OssComponentsLicense bean : ossComponentsLicense) {
-				if (bean.getLicenseId().equals(license.getLicenseId())) {
-					return true;
+			if (!isEmpty(license.getLicenseId())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseId().equals(license.getLicenseId())) {
+						return true;
+					}
+				}
+			} else if (isEmpty(license.getLicenseId()) && !isEmpty(license.getLicenseName())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseName().equals(license.getLicenseName())) {
+						return true;
+					}
 				}
 			}
 		}
@@ -6343,5 +6353,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void copySecurityDataForProject(Project project) {
 		boolean copyFlag = projectMapper.copySecurityDataForProjectCnt(project) > 0 ? true : false;
 		if (copyFlag) projectMapper.copySecurityDataForProject(project);
+	}
+	
+	@Override
+	public Map<String, Object> checkSelectDownloadFile(Project project) {
+		Map<String, Object> resMap = new HashMap<>();
+		boolean emptyCheckFlag = false;
+		
+		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+		for (OssComponents oss : list) {
+			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+				emptyCheckFlag = true;
+				break;
+			}
+		}
+		
+		if (emptyCheckFlag) {
+			resMap.put("isValid", false);
+		} else {
+			resMap.put("isValid", true);
+		}
+		
+		return resMap;
 	}
 }

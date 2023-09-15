@@ -67,6 +67,8 @@ public class ApiSelfCheckController extends CoTopComponent {
 		RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	}
 	
+	private boolean ldapCheckFlag = CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag"))) ? true : false;
+	
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	
 	private final ResponseService responseService;
@@ -135,7 +137,8 @@ public class ApiSelfCheckController extends CoTopComponent {
     public CommonResult ossReportSelfCheck(
     		@RequestHeader String _token,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport){
+    		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
+    		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
 		
 		T2Users userInfo = userService.checkApiUserAuth(_token);
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -148,8 +151,22 @@ public class ApiSelfCheckController extends CoTopComponent {
 			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 			
 			if (searchFlag) {
+				String oldFileId = "";
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					Map<String, Object> prjInfo = apiSelfCheckService.selectProjectMaster(prjId);
+					if (prjInfo.get("srcCsvFileId") != null) {
+						oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
+					}
+				}
+				
 				if (ossReport != null) {
-					UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					UploadFile bean = null;
+					if (!isEmpty(oldFileId)) {
+						bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+					} else {
+						bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+					}
+
 					List<UploadFile> list = new ArrayList<UploadFile>();
 					list.add(bean);
 					ArrayList<Object> checkFileLimit = null;
@@ -172,15 +189,24 @@ public class ApiSelfCheckController extends CoTopComponent {
 						String[] sheet = new String[1];
 						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check", sheet);
 						String errorMsg = "";
-						if (result.containsKey("errorMessage")) {
-							errorMsg = (String) result.get("errorMessage");
+						if (result.containsKey("errorMsg")) {
+							errorMsg = (String) result.get("errorMsg");
+						}
+						
+						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE
+									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+						}
+						
+						if (!isEmpty(errorMsg)) {
+							resultMap.put("errorMessage", errorMsg);
 						}
 						
 						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 						
-						if (!isEmpty(errorMsg)) {
-							throw new Exception(); // readData시 문제가 발생할 경우 parameter error로 return 함.
+						if (ossComponents.isEmpty()) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
 						}
 						
 						T2CoProjectValidator pv = new T2CoProjectValidator();
@@ -193,10 +219,20 @@ public class ApiSelfCheckController extends CoTopComponent {
 						if (!vr.isValid()) {
 							return responseService.getFailResult(getMessage("api.dataValidationError.code"), getMessage("api.dataValidationError.msg")); // data validation error
 						} else {
+							List<ProjectIdentification> ossComponentList = new ArrayList<>();
+							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+							
+							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+								apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
+							}
+							
+							ossComponentList.addAll(ossComponents);
+							ossComponentsLicenseList.addAll(ossComponentsLicense);
+							
 							Project project = new Project();
 							project.setPrjId(prjId);
 							project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
-							selfCheckService.registSrcOss(ossComponents, ossComponentsLicense, project);
+							selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
 							
 							// 정상처리된 경우 세션 삭제
 							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
@@ -252,5 +288,73 @@ public class ApiSelfCheckController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 			return null;
 		}
+	}
+	
+	@ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
+    public CommonResult addPrjWatcher(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+    		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
+		
+		Map<String, Object> resultMap = new HashMap<>();
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
+		
+		try {
+			T2Users userInfo = userService.checkApiUserAuth(_token);
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjId);
+			
+			boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
+			if (searchFlag) {
+				if (emailList != null) {
+					for (String email : emailList) {
+						boolean ldapCheck = false;
+						if (ldapCheckFlag) {
+							ldapCheck = apiProjectService.existLdapUserToEmail(email);
+						} else {
+							ldapCheck = true;
+						}
+						
+						if (ldapCheck) {
+							boolean watcherFlag = apiSelfCheckService.existsWatcherByEmail(prjId, email);
+							if (watcherFlag) {
+								Map<String, Object> param = new HashMap<>();
+								param.put("prjId", prjId);
+								param.put("division", "");
+								param.put("userId", "");
+								param.put("email", email);
+								apiSelfCheckService.insertWatcher(param);
+							} else {
+								errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+								break;
+							}
+						} else {
+							errorCode = CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE;
+							break;
+						}
+					}
+					
+					if (!errorCode.equals(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE)
+							&& !errorCode.equals(CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE)) {
+						return responseService.getSingleResult(resultMap);
+					}
+				} else {
+					errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+				}
+			} else {
+				errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+		
+		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
 }

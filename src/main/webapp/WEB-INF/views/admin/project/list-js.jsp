@@ -1101,10 +1101,10 @@
 					total:function(obj){return obj.total;},
 					records:function(obj){return obj.records;}
 				},
-				colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
-				           , 'Packaging', 'Distribution', 'Download', 'Security', 'Distribution Type', 'CVE ID'
-				           , 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
-				colModel: [
+			  	colNames: ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
+				  	, 'Packaging', 'Distribution', 'Download', 'Security', 'Vulnera<br/>bility', 'Distribution Type', 'CVE ID'
+				  	, 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'],
+                colModel: [
 					{name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'},
 					{name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick},
 					{name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true},
@@ -1121,8 +1121,8 @@
 					{name: 'creator', index: 'creator', width: 70, align: 'left', sortable : true},
 					{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
 					{name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
-					{name: 'reviewer', index: 'reviewer', width: 80, align: 'left', editable:'${sessUserInfo.authority}'=="ROLE_ADMIN" ? true : false, edittype:'text', formatter:fn.getUserName
-							, editoptions: {
+				  	{name: 'reviewer', index: 'reviewer', width: 80, align: 'left', editable:'${sessUserInfo.authority}'=="ROLE_ADMIN" ? true : false, edittype:'text', formatter:fn.getUserName
+                        , editoptions: {
 								dataInit:
 									function (e) {
 										$(e).autocomplete({

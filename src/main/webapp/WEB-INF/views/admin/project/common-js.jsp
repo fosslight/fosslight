@@ -84,6 +84,7 @@ var com_evt = {
 							url :'<c:url value="/project/verification/reviewReportAjax?prjId=${project.prjId}"/>',
 							type : 'POST',
 							cache : false,
+                            async : false,
 							success: function(data){
 								loading.hide();
 							},
@@ -1297,6 +1298,13 @@ var com_fn = {
         }
 
         if(rowCheckedArr.length > 0){
+        	for (var i in rowCheckedArr) {
+        		var licenseName = com_fn.getLicenseName(gridList.getRowData(rowCheckedArr[i]));
+        		gridList.jqGrid("setCell", rowCheckedArr[i], "licenseName", licenseName);
+				fn_grid_com.saveCellData(gridList.attr("id"), rowCheckedArr[i], "licenseName", licenseName, null, null);
+				gridList.jqGrid('saveRow', rowCheckedArr[i]);
+        	}
+        	
             fn_grid_com.totalGridSaveMode(targetGird);
 
 			var _popup = null;
@@ -1504,6 +1512,37 @@ var com_fn = {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
+	},
+	checkSelectDownloadFile : function (target) {
+		var checkEmptyFlag = false;
+		var referenceDiv = "";
+		var params = {'prjId':'${project.prjId}'};
+		
+		switch(target.toUpperCase()){
+			case "SRC":		referenceDiv = "11";	break;
+			case "BOM":		referenceDiv = "13";	break;
+			case "BIN":		referenceDiv = "15";	break;
+		}
+		
+		$.ajax({
+    		type: "POST",
+			url: '<c:url value="/project/checkSelectDownloadFile/'+referenceDiv+'"/>',
+			data: JSON.stringify(params),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if (data.isValid) {
+					checkEmptyFlag = true;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+    	});
+    	
+    	return checkEmptyFlag;
 	}
 }
 </script>

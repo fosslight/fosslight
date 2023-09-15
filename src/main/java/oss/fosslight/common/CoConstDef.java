@@ -573,6 +573,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT = "470";
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
+	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED = "701";
 	/** 3rd party changed */
 	public static final String CD_MAIL_TYPE_PARTNER_CHANGED = "700";
 	/** 3rd party reviewer changed */
@@ -798,6 +799,7 @@ public class CoConstDef {
 	public static final String CD_OPEN_API_FILE_SIZEOVER_MESSAGE				= "410";
 	public static final String CD_OPEN_API_EXT_UNSUPPORT_MESSAGE				= "420";
 	public static final String CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE			= "430";
+	public static final String CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE				= "440";
 	public static final String CD_OPEN_API_PERMISSION_ERROR_MESSAGE				= "500";
 	public static final String CD_OPEN_API_COMMUNICATION_ERROR_MESSAGE			= "900";
 	public static final String CD_OPEN_API_UNKNOWN_ERROR_MESSAGE				= "999";
