@@ -6,6 +6,17 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-15)
+
+### New
+* Project, 3rd party, Self-check에 watcher를 추가 할 수 있는 API Endpoint가 추가 (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
+* Project, Self-check의 report 업로드 시 reset 여부를 선택할 수 있도록 parameter가 추가 (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck)
+* Yaml형식의 FOSSLight Report를 다운로드 받을 수 있는 버튼이 "Export"에 추가
+* 버전 별로 다른 license를 가진 OSS가 시스템에 처음 저장이 될 때, 기존 저장된 detected license를 보여주는 팝업이 추가 
+
+### Changed
+* Proejct, 3rd party에서 Export 시 모든 OSS가 고지 의무와 상관 없이 BOM에 출력
+
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 
 ### New
