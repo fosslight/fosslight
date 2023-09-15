@@ -2835,6 +2835,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
 								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
 							}
+							
+							bean.setDownloadLocation(gridData.getDownloadLocation());
+							bean.setHomepage(gridData.getHomepage());
+							bean.setCopyrightText(gridData.getCopyrightText());
 						}
 						
 						break;
