@@ -1,6 +1,7 @@
 # Changelog
 
 ## v1.6.0 (28/07/2023)
+
 ## 🚀 Features
 
 - If project is loaded through "Load" feature in the SRC/BIN tab, the loaded project ID will be displayed in the comment field. @FOSSLight-dev 
@@ -73,9 +74,9 @@
 - Remove all files and folder related to compressed notice file. @Min-Kyungsun (#800)
 - Add space after if and for, while statements @jongwooo (#794)
 - Print partner name in excel BOM @soimkim (#787, #786)
----
 
 ## v1.5.0 (23/12/2022)
+
 ## 🚀 Features
 
 - OSS Bulk Registration > Fix type of some fields to textarea @FRESH-TUNA (#771)
