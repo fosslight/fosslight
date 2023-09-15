@@ -778,7 +778,8 @@ public class ExcelUtil extends CoTopComponent {
 		int spdxIdentifierCol = -1;
 		// Pacakge Identifier
 		int packageIdentifierCol = -1;
-
+		// Dependencies
+		int dependenciesCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -986,6 +987,12 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						
 						spdxIdentifierCol = colIdx;
+					case "DEPENDENCIES":
+						if (dependenciesCol > -1) {
+							dupColList.add(value);
+						}
+
+						dependenciesCol = colIdx;
 					default:
 						break;
 				}
@@ -1206,6 +1213,10 @@ public class ExcelUtil extends CoTopComponent {
     				// default
     				bean.setExcludeYn(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
     
+    				if (dependenciesCol > -1) {
+						bean.setDependencies(dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", ""));
+					}
+    				
     				// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌
 //    				if (!isEmpty(bean.getHomepage()) 
 //    						&& !(bean.getHomepage().toLowerCase().startsWith("http://") 

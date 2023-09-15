@@ -137,6 +137,9 @@ public class Project extends ComBean implements Serializable {
 	/** The identification sub status partner. */
 	private String identificationSubStatusPartner;
 	
+	/** The identification sub status dep. */
+	private String identificationSubStatusDep;
+	
 	/** The identification sub status src. */
 	private String identificationSubStatusSrc;
 	
@@ -329,16 +332,12 @@ public class Project extends ComBean implements Serializable {
 	
 	private String ossNameMergeFlag;
 	
+	private String depCsvFileFlag = "N";
 	private String srcCsvFileFlag = "N";
-	
 	private String binCsvFileFlag = "N";
-	
 	private String binBinaryFileFlag = "N";
-	
 	private String srcAndroidCsvFileFlag = "N";
-	
 	private String srcAndroidNoticeFileFlag = "N";
-
 	private String srcAndroidNoticeXmlFileFlag = "N";
 	private String srcAndroidResultFileFlag = "N";
 	
@@ -374,6 +373,9 @@ public class Project extends ComBean implements Serializable {
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
 
+	/** The bin csv file id. */
+	private String depCsvFileId;
+	
 	/** The src csv file id. */
 	// FILE_ID
 	private String srcCsvFileId;
@@ -417,6 +419,9 @@ public class Project extends ComBean implements Serializable {
 	private List<T2File> packageFile; // 오픈소스 파일객체
 	private List<T2File> packageFile2; // 오픈소스 파일객체
 	private List<T2File> packageFile3; // 오픈소스 파일객체
+	
+	/** The dep csv file. */
+	private List<T2File> depCsvFile; // csv 파일 객체
 	
 	/** The csv file. */
 	private List<T2File> csvFile; // csv 파일 객체
@@ -678,6 +683,8 @@ public class Project extends ComBean implements Serializable {
 	private String changeStatusFlag;
 
 	private String ossNameTemp;
+	
+	private String dependencies;
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -1325,6 +1332,14 @@ public class Project extends ComBean implements Serializable {
 		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
+	public void setWatchers(String watcher) {
+		if (!isEmpty(watcher)) {
+			this.watchers = new String[] {watcher};
+		} else {
+			this.watchers = null;
+		}
+	}
+	
 	/**
 	 * Gets the watcher list.
 	 *
@@ -4255,5 +4270,45 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSecCode(String secCode) {
 		this.secCode = secCode;
+	}
+
+	public String getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public String getIdentificationSubStatusDep() {
+		return identificationSubStatusDep;
+	}
+
+	public void setIdentificationSubStatusDep(String identificationSubStatusDep) {
+		this.identificationSubStatusDep = identificationSubStatusDep;
+	}
+
+	public String getDepCsvFileId() {
+		return depCsvFileId;
+	}
+
+	public void setDepCsvFileId(String depCsvFileId) {
+		this.depCsvFileId = depCsvFileId;
+	}
+
+	public List<T2File> getDepCsvFile() {
+		return depCsvFile;
+	}
+
+	public void setDepCsvFile(List<T2File> depCsvFile) {
+		this.depCsvFile = depCsvFile;
+	}
+
+	public String getDepCsvFileFlag() {
+		return depCsvFileFlag;
+	}
+
+	public void setDepCsvFileFlag(String depCsvFileFlag) {
+		this.depCsvFileFlag = depCsvFileFlag;
 	}
 }

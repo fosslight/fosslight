@@ -205,6 +205,8 @@ public interface ProjectService extends HistoryConfig{
 	public void copySecurityDataForProject(Project project);
 	
 	public Map<String, Object> checkSelectDownloadFile(Project project);
+
+	public List<OssComponents> getDependenciesDataList(Project project);
 }
 
 

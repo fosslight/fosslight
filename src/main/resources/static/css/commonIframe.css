@@ -248,7 +248,8 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnPG {margin:0 2px;display:inline-block;width:30px;height:16px;line-height:16px;text-align:center;font-family:Tahoma;font-size:11px;font-weight:bold;color:#666;cursor:pointer;border:1px solid #393a5a;border-radius:1px;background: url("../images/bg_pg.png") no-repeat;background-position:right top;}
 .btnPG.wauto {margin:0 0;width:80%;max-width:150px;}
 .btnPG.on3rd {color:#fff;background-position:right -30px;}
-.btnPG.onSrc {color:#fff;border-color: #6e3c60;background-position:right -90px;}
+.btnPG.onDep {color:#fff;border-color:#2E75B6;background-position:-80px -90px;}
+.btnPG.onSrc {color:#fff;border-color:#6e3c60;background-position:right -90px;}
 .btnPG.onBat {color:#fff;border-color:#897a46;background-position:right -60px;}
 .btnPG.onBom {color:#fff;border-color:#897a46;background-position:right -60px;}
 .btnPG.onBin {color:#fff;border-color:#478786;background-position:right -60px;}
