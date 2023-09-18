@@ -3104,15 +3104,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String spdxRefId = "";
 					
 					if (ossName.equals("-") || (bean.getOssId() == null || bean.getOssId().isEmpty())) {
-						spdxRefId = "SPDXRef-File-" + bean.getComponentId();
-						cellSPDXIdentifier.setCellValue("SPDXRef-File-" + bean.getComponentId());
-						packageInfoidentifierList.add("SPDXRef-File-" + bean.getComponentId());
+						spdxRefId = "SPDXRef-File-";
 					} else {
-						spdxRefId = "SPDXRef-Package-" + bean.getOssId();
-						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
-						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
+						spdxRefId = "SPDXRef-Package-";
 					}
-
+					spdxRefId += bean.getComponentId();
+					
+					cellSPDXIdentifier.setCellValue(spdxRefId);
+					packageInfoidentifierList.add(spdxRefId);
 					relationshipsMap.put(relationshipsKey, spdxRefId);
 					
 					// Package Version
