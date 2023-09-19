@@ -87,4 +87,6 @@ public interface VerificationService {
 	public void updateProjectAllowDownloadBitFlag(Project project);
 
 	void registOssNoticeConfirmStatus(OssNotice ossNotice);
+
+	String changePackageFileNameCombine(String prjId);
 }
