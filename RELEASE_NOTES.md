@@ -6,6 +6,33 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-15)
+### New
+* Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
+* The parameter whether to reset or not when uploading report in Project/Self-check is newly added. (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck)
+* A button to download the FOSSLight Report in yaml format has been added to “export” button.
+* Added a new popup which displays the detected license information for each saved version when an open source with a different license for each version is saved to the system for the first time.
+  
+### Changed
+* All OSS are included in the BOM when exported in project and 3rd party, regardless of the notification obligation.
+
+## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
+
+### New
+* Add **[the Security tab](https://fosslight.org/fosslight-guide-en/started/2_try/5_security.html)**. You can check the vulnerability information by each CVE ID of OSS lists which has vulnerabilities based on the BOM tab of the Identification step and manage it for each project.
+* Available to [upgrade DB version](https://fosslight.org/fosslight-guide-en/features/3_maintenance.html#upgrading-the-db-version) using MyBatis Migrations.
+* Add the reset password button.
+* Add the API([/api/v1/export_selfcheck](https://fosslight.org/fosslight-guide-en/features/2_rest_api.html#rest-api-list)) that can download the result file exported from the Self-Check project
+* Add a **Bulk registration** button to the License List. Multiple Licenses can be saved at once by entering License information in the spread sheet and uploading it.
+* Add a **OSS Bulk Registration** button to the 3rd party. Multiple OSS can be saved at once by entering OSS information in the spread sheet and uploading it.
+* Homepage information is added to the OSS table of Self-Check tab.
+* New features have been added to the Identification tab, allowing users to search for 3rd parties  and projects using their ID for Search function.
+
+### Changed
+* When export the FOSSLight report, the items from 3rd party software are described as the form of "3rd-(3rd Party Name)" in the "From" column of BOM tab.
+* Changes have been made to the Project, 3rd party, and Self-check tabs, where excluded OSS with the "exclude" checkbox will no longer display security vulnerabilities. If the OSS is excluded, it will be excluded when calculating max vulnerability score at the each List tab.
+
+
 ## [1.4.6](https://github.com/fosslight/fosslight/releases/tag/v1.4.6) (2022-07-22)
 ### New
 * Add 'Change Division' button in Project List

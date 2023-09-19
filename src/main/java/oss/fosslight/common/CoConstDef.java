@@ -241,6 +241,7 @@ public class CoConstDef {
 	public static final String FILE_GUBUN_FILE_DOWNLOAD = "DL";
 	
 	public static final String SESSION_KEY_UPLOAD_REPORT_PARTNER = "REPORT_PARTNER";
+	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP = "REPORT_PROJECT_DEP";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC = "REPORT_PROJECT_SRC";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN = "REPORT_PROJECT_BIN";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID = "REPORT_PROJECT_ANDROID";
@@ -338,6 +339,7 @@ public class CoConstDef {
 	public static final String CD_COMPONENT_DIVISION = "210";
 	public static final String CD_DTL_COMPONENT_ID_PARTNER = "10";
 	public static final String CD_DTL_COMPONENT_ID_SRC = "11";
+	public static final String CD_DTL_COMPONENT_ID_DEP = "16";
 	public static final String CD_DTL_COMPONENT_ID_BAT = "12";
 	public static final String CD_DTL_COMPONENT_ID_BOM = "13";
 	public static final String CD_DTL_COMPONENT_ID_ANDROID = "14";
@@ -573,6 +575,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT = "470";
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
+	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED = "701";
 	/** 3rd party changed */
 	public static final String CD_MAIL_TYPE_PARTNER_CHANGED = "700";
 	/** 3rd party reviewer changed */
@@ -798,6 +801,7 @@ public class CoConstDef {
 	public static final String CD_OPEN_API_FILE_SIZEOVER_MESSAGE				= "410";
 	public static final String CD_OPEN_API_EXT_UNSUPPORT_MESSAGE				= "420";
 	public static final String CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE			= "430";
+	public static final String CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE				= "440";
 	public static final String CD_OPEN_API_PERMISSION_ERROR_MESSAGE				= "500";
 	public static final String CD_OPEN_API_COMMUNICATION_ERROR_MESSAGE			= "900";
 	public static final String CD_OPEN_API_UNKNOWN_ERROR_MESSAGE				= "999";
@@ -833,4 +837,8 @@ public class CoConstDef {
 	/* SCORE CODE */
 	public static final String CD_VULNERABILITY_MAILING_SCORE					= "750";
 	public static final String CD_VULNERABILITY_MAILING_SCORE_STANDARD			= "100";
+	
+	/* SECURITY SCORE CODE */
+	public static final String CD_SECURITY_VULNERABILITY_SCORE					= "760";
+	public static final String CD_SECURITY_VULNERABILITY_DETAIL_SCORE			= "100";
 }

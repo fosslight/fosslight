@@ -2,7 +2,6 @@
 # 2. Build the exe file and upload it in the release assets
 # 3. Deploy the latest release to demo.fosslight.org
 # 4. Deploy Image to Docker Hub
-# 5. Notify the results to the Slack channel
 
 name: Release FOSSLight
 
@@ -31,7 +30,8 @@ jobs:
 
       - name: Commit files
         run: |
-          git config --local user.name "github-actions[bot]"
+          git config --global user.email "fosslight-dev@lge.com"
+          git config --global user.name "FOSSLight-dev"
           git add CHANGELOG.md
           git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
 
@@ -132,22 +132,3 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:${{ github.event.release.tag_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  notify:
-    if: always()
-    needs:
-      - update-changelog
-      - build
-      - deploy-demo
-      - deploy-image
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Slack Workflow Notification
-        uses: Gamesight/slack-workflow-status@master
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          channel: '#release'
-          name: 'FOSSLight Bot'
-          icon_url: https://github.com/fosslight.png

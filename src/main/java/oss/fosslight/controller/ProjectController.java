@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import com.nhncorp.lucy.security.xss.XssPreventer;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -66,7 +65,6 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.service.AutoIdService;
 import oss.fosslight.service.BinaryDataService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
@@ -953,7 +951,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the oss versions
 	 */
-	@GetMapping(value = PROJECT.OSS_VERIONS)
+	@GetMapping(value = PROJECT.OSS_VERSIONS)
 	public @ResponseBody ResponseEntity<Object> getOssVersions(ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String ossName = req.getParameter("ossName");
@@ -1986,7 +1984,16 @@ public class ProjectController extends CoTopComponent {
 						
 						for (ProjectIdentification bean : ossComponents) {
 							if (!isEmpty(bean.getBinaryName())) {
-								componentBinaryList.put(bean.getBinaryName(), bean);
+								if (componentBinaryList.containsKey(bean.getBinaryName())) {
+									ProjectIdentification identification = componentBinaryList.get(bean.getBinaryName());
+									if (bean.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(bean.getBinaryName(), bean);
+									} else if (identification.getExcludeYn().equals(CoConstDef.FLAG_NO)) {
+										componentBinaryList.put(identification.getBinaryName(), identification);
+									}
+								} else {
+									componentBinaryList.put(bean.getBinaryName(), bean);
+								}
 							}
 						}
 						
@@ -2767,7 +2774,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@PostMapping(value = PROJECT.IDENTIFICAITON_GRID_POST)
+	@PostMapping(value = PROJECT.IDENTIFICATION_GRID_POST)
 	public @ResponseBody ResponseEntity<Object> srcMainGridAjaxPost(@RequestBody ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		return makeJsonResponseHeader(getOssComponentDataInfo(identification, identification.getReferenceDiv()));
@@ -2880,7 +2887,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param code the code
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SERCH_CD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_PROJECT_SEARCH_CD)
 	public @ResponseBody ResponseEntity<Object> thirdProject(ProjectIdentification projectIdentification,
 			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String code) {
 		int page = Integer.parseInt(req.getParameter("page"));
@@ -2907,7 +2914,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the response entity
 	 */
-	@GetMapping(value = PROJECT.IDENTIFIATION_THIRD)
+	@GetMapping(value = PROJECT.IDENTIFICATION_THIRD)
 	public @ResponseBody ResponseEntity<Object> identificationThird(OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
 		Map<String, Object> map = projectService.getIdentificationThird(ossComponents);
@@ -4201,7 +4208,7 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader(modelList);
 	}
 	
-	@PostMapping(value = PROJECT.SUPPLEMEMT_NOTICE_FILE)
+	@PostMapping(value = PROJECT.SUPPLEMENT_NOTICE_FILE)
 	public @ResponseBody ResponseEntity<Object> getSupplementNoticeFile(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String fileId = null;
@@ -4627,5 +4634,97 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("target", target);
 		
 		return PROJECT.SEC_BULK_EDIT_POPUP_JSP;
+	}
+	
+	@GetMapping(value = PROJECT.SECURITY)
+	public String security(@ModelAttribute ProjectIdentification identification, HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		Project projectMaster = projectService.getProjectDetail(project);
+		
+		if (!StringUtil.isEmpty(projectMaster.getCreator())){
+			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+		comHisBean.setReferenceId(projectMaster.getPrjId());
+		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+		
+		model.addAttribute("project", projectMaster);
+		
+		return PROJECT.SECURITY_JSP;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping(value = PROJECT.SECURITY_GRID)
+	public @ResponseBody ResponseEntity<Object> srcSecurityGridAjax(@ModelAttribute ProjectIdentification identification,
+			HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String code) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		try {
+			result = projectService.getSecurityGridList(project);
+			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
+			rtnMap.put("fixedGridData", (List<OssComponents>) result.get("fixedList"));
+			rtnMap.put("notFixedGridData", (List<OssComponents>) result.get("notFixedList"));
+			if (result.containsKey("msg")) {
+				rtnMap.put("msg", result.get("msg"));
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return makeJsonResponseHeader(rtnMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.SAVE_SECURITY)
+	public @ResponseBody ResponseEntity<Object> saveSecurity(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		String prjId = (String) map.get("referenceId");
+		String tabName = (String) map.get("targetName");
+		String gridString = (String) map.get("gridData");
+		
+		Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
+		List<OssComponents> ossComponents = new ArrayList<>();
+		ossComponents = (List<OssComponents>) fromJson(gridString, collectionType);
+		
+		Map<String, String> resMap = new HashMap<>();
+		
+		try {
+			projectService.registSecurity(prjId, tabName, ossComponents);
+			
+			Project param = new Project();
+			param.setPrjId(prjId);
+			Project pDat = projectService.getProjectDetail(param);
+			resMap.put("identificationStatus", pDat.getIdentificationStatus());
+			History h = projectService.work(pDat);
+			h.sethAction(CoConstDef.ACTION_CODE_NEEDED);
+			historyService.storeData(h); // 메일로 보낼 데이터를 History에 저장합니다. -> h.gethData()로 확인 가능
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resMap.put("isValid", "false");
+		} finally {
+			resMap.put("isValid", "true");
+		}
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PROJECT.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody HashMap<String, Object> map, @PathVariable String code, HttpServletRequest req, HttpServletResponse res) {
+		Map<String, Object> resMap = new HashMap<>();
+		String prjId = (String) map.get("prjId");
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setReferenceDiv(code);
+		
+		resMap = projectService.checkSelectDownloadFile(project);
+		return makeJsonResponseHeader(resMap);
 	}
 }

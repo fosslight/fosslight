@@ -39,3 +39,5 @@ out/
 /mail/maildata/
 /mail/maillogs/
 /mail/mailstate/
+
+/service/docx/license/*

@@ -16,5 +16,7 @@ public interface ApiFileService {
 	
 	public UploadFile uploadFile(MultipartFile uploadFile, String filePath);
 	
+	public UploadFile uploadFile(MultipartFile uploadFile, String filePath, String fileId);
+	
 	public Map<String, UploadFile> uploadNoticeXMLFile(MultipartFile uploadFile, String prjId);
 }

@@ -70,6 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
 		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
 		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and() // 공지사항 조회 요청처리 예외
+
 		// 요청에 대한 권한 매핑
 		.authorizeRequests().anyRequest().authenticated()		// 모든 요청에 대해 권한 확인이 필요
 

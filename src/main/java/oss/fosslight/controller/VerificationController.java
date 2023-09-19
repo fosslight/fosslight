@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.gson.reflect.TypeToken;
@@ -51,6 +53,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
+import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.VerificationMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
@@ -72,6 +75,7 @@ public class VerificationController extends CoTopComponent {
 	@Autowired HistoryService historyService;
 	
 	@Autowired VerificationMapper verificationMapper;
+	@Autowired CodeMapper codeMapper;
 	
 	@GetMapping(value = VERIFICATION.PAGE_ID, produces = "text/html; charset=utf-8")
 	public String list(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
@@ -221,11 +225,31 @@ public class VerificationController extends CoTopComponent {
 		String fileId = StringUtil.isEmpty(req.getParameter("fileId")) ? null : req.getParameter("fileId");
 		String prjId = req.getParameter("prjId");
 		String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
-		
+
+		Map<String, MultipartFile> fileMap = req.getFileMap();
+		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+
 		//파일 등록
 		if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
 			file.setCreator(loginUserName());
-			
+
+			//파일 확장자 체크
+			String codeExp = codeMapper.getCodeDetail("120", "16").getCdDtlExp();
+			String[] exts = codeExp.split(",");
+			boolean fileExtCheck = false;
+			for (String s : exts) {
+				if (s.equals(fileExtension)) {
+					fileExtCheck = true;
+				}
+			}
+
+			if(!fileExtCheck) {
+				resultList.add("UNSUPPORTED_FILE");
+				String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{codeExp});
+				resultList.add(msg);
+				return toJson(resultList);
+			}
+
 			list = fileService.uploadFile(req, file, null, fileId, true, filePath);
 		}
 		
@@ -453,7 +477,7 @@ public class VerificationController extends CoTopComponent {
 				}
 				
 				verificationService.updateStatusWithConfirm(project, ossNotice, false);
-				
+
 				try {
 					History h = new History();
 					h = projectService.work(project);
@@ -465,7 +489,8 @@ public class VerificationController extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-				
+
+				userComment += verificationService.changePackageFileNameCombine(ossNotice.getPrjId());
 				try {
 					CommentsHistory commHisBean = new CommentsHistory();
 					commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
@@ -503,8 +528,6 @@ public class VerificationController extends CoTopComponent {
 					}
 				}
 
-				// package file 이 존재하는 경우 파일명을 변경한다.
-				verificationService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
 			} else { // preview 인 경우
 				// 저장된 고지문구가 없을 경우
 				if (isEmpty(noticeFileId) || !CoConstDef.FLAG_YES.equals(useCustomNoticeYn)) {

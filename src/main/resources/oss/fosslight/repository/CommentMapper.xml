@@ -248,7 +248,7 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schKeyword)">
 				CASE WHEN T1.CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 			</if>
-		T1.CREATED_DATE DESC
+		T1.COMM_ID DESC
 		) AS G1
 	WHERE G1.RNUM > 5
 	ORDER BY RNUM

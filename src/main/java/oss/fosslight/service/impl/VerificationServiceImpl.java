@@ -644,9 +644,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String packageFileName = rePath;
 			String decompressionRootPath = "";
-			
-			boolean parenthesisCheckFlag = false;
-			if (packageFileName.contains("(") || packageFileName.contains(")")) parenthesisCheckFlag = true;
+			List<String> collectDataDeCompResultList = new ArrayList<>();
 			
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
@@ -657,7 +655,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				for (String s : result) {
 					if (s.contains("?")) s = s.replaceAll("[?]", "0x3F");
-					if (s.startsWith(packageFileName) && parenthesisCheckFlag) s = s.replace(packageFileName, "");
 					
 					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
@@ -668,6 +665,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						
 						if (s.startsWith("/")) {
 							s = s.substring(1);
+						}
+						
+						if (s.startsWith(packageFileName)) {
+							collectDataDeCompResultList.add(s);
+							s = s.replace(packageFileName, "");
+							
+							if (s.startsWith("/")) {
+								s = s.substring(1);
+							}
+						} else {
+							collectDataDeCompResultList.add(packageFileName + "/" + s);
 						}
 						
 						if (s.endsWith("*")) {
@@ -712,6 +720,32 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						
 						deCompResultMap.put(s, 0);
 					}
+				}
+			}
+			
+			if (collectDataDeCompResultList != null && !collectDataDeCompResultList.isEmpty()) {
+				for (String s : collectDataDeCompResultList) {
+					boolean isFile = s.endsWith("*");
+					
+					int cnt = 0;
+					
+					if (isFile){
+						String _dir = s;
+						
+						if (s.indexOf("/") > -1) {
+							_dir = s.substring(0, s.lastIndexOf("/"));
+						}
+						
+						if (deCompResultMap.containsKey(_dir)) {
+							cnt = deCompResultMap.get(_dir);
+						}
+						
+						cnt++;
+						
+						deCompResultMap.put(_dir, cnt);
+					}
+					
+					deCompResultMap.put(s, 0);
 				}
 			}
 			
@@ -1539,6 +1573,51 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 	}
+
+	@Override
+	public String changePackageFileNameCombine(String prjId) {
+
+		String contents = "";
+		// 프로젝트 기본정보 취득
+		Project prjBean = new Project();
+		prjBean.setPrjId(prjId);
+		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		List<String> packageFileIds = new ArrayList<String>();
+
+		if (!isEmpty(prjBean.getPackageFileId())) {
+			packageFileIds.add(prjBean.getPackageFileId());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId2())) {
+			packageFileIds.add(prjBean.getPackageFileId2());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId3())) {
+			packageFileIds.add(prjBean.getPackageFileId3());
+		}
+
+		int fileSeq = 1;
+
+		for (String packageFileId : packageFileIds){
+			T2File packageFileInfo = new T2File();
+			packageFileInfo.setFileSeq(packageFileId);
+			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
+
+			if (packageFileInfo != null) {
+				String orgFileName = packageFileInfo.getOrigNm();
+				// Packaging > Confirm시 Packaging 파일명 변경 건
+				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : "");
+				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
+
+				packageFileInfo.setOrigNm(chgFileName);
+
+				fileMapper.upateOrgFileName(packageFileInfo);
+
+				contents += "<p>Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\" </p> ";
+			}
+		}
+		return contents;
+	}
 	
 	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
 		String fileName = prjName;
@@ -1864,15 +1943,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		for (OssComponents bean : ossComponentList) {
 			OssComponents oc = verificationMapper.checkOssNickName2(bean);
 			if (oc != null) {
-				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getCopyright();
-				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getHomepage();
-				
-				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
-					bean.setCopyrightText(copyright);
-				}
-				
-				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
-					bean.setHomepage(homepage);
+				OssMaster om = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId());
+				if (om != null) {
+					String copyright = om.getCopyright();
+					String homepage = om.getHomepage();
+					
+					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+						bean.setCopyrightText(copyright);
+					}
+					
+					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+						bean.setHomepage(homepage);
+					}
 				}
 			}
 			

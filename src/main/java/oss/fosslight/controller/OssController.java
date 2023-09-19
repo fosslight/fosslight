@@ -716,6 +716,7 @@ public class OssController extends CoTopComponent{
 		Map<String, Object> reqMap = new HashMap<>();
 		reqMap.put("ossId", (String) map.get("ossId"));
 		reqMap.put("ossName", (String) map.get("ossName"));
+		if (map.containsKey("ossVersion")) reqMap.put("ossVersion", (String) map.get("ossVersion"));
 		
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
 		List<OssLicense> list = ossService.checkLicenseId((List<OssLicense>) fromJson((String) map.get("license"), collectionType));
@@ -755,7 +756,7 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
-	@PostMapping(value=OSS.DELTE_COMMENT)
+	@PostMapping(value=OSS.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
 			, HttpServletRequest req

@@ -289,19 +289,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setWatcherList(watcherList);
 
 		// file
-		project.setCsvFile(projectMapper.selectCsvFile(project));
-		project.setAndroidCsvFile(projectMapper.selectAndroidCsvFile(project));
-		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
-		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		if (!isEmpty(project.getSrcCsvFileId())) {
+			project.setCsvFile(projectMapper.selectCsvFile(project.getSrcCsvFileId()));
+		}
+		
+		if (!isEmpty(project.getDepCsvFileId())) {
+			project.setDepCsvFile(projectMapper.selectCsvFile(project.getDepCsvFileId()));
+		}
 		
 		if (!isEmpty(project.getBinCsvFileId())) {
-			project.setBinCsvFile(projectMapper.selectBinCsvFile(project));
+			project.setBinCsvFile(projectMapper.selectCsvFile(project.getBinCsvFileId()));
 		}
 		
 		if (!isEmpty(project.getBinBinaryFileId())) {
 			project.setBinBinaryFile(projectMapper.selectFileInfoById(project.getBinBinaryFileId()));
 		}
-
+		
+		project.setAndroidCsvFile(projectMapper.selectAndroidCsvFile(project));
+		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
+		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		
 		//  button(삭제/복사/저장) view 여부
 		if (CommonFunction.isAdmin()) {
 			project.setViewOnlyFlag(CoConstDef.FLAG_NO);
@@ -436,6 +443,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			
+			Map<String, ProjectIdentification> mergeDepMap = new HashMap<>();
 			Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
 			Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
 			
@@ -521,7 +529,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(ll.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					ll.setCvssScore(conversionCveData[3]);
@@ -531,6 +539,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				cvssScoreMaxVendorProductList.clear();
 				cvssScoreMaxList.clear();
+				
+				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
+					String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
+					mergeDepMap.put(_key, ll);
+				}
 			}
 			
 			// bat merget
@@ -712,12 +725,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				identification.setSortAndroidFlag(CoConstDef.FLAG_YES);
 			}
 			
+			String loadToListComment = "";
+			if (!isEmpty(identification.getRefPrjId()) &&
+					(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
+				loadToListComment = "(From Prj " + identification.getRefPrjId() + ")";
+			}
+			
 			HashMap<String, Object> subMap = new HashMap<String, Object>();
 			
 			// src, bin, bin(android) 의 경우만 comment를 포함한다.
 			if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) 
 					|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(identification.getReferenceDiv())
-					|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv())) {
+					|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv())
+					|| CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
 				identification.setIncCommentsFlag(CoConstDef.FLAG_YES);
 			}
 			
@@ -772,7 +792,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
 					}
 					
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getReferenceId(), ossInfoMap, project, cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
 					if (conversionCveInfo != null) {
 						String[] conversionCveData = conversionCveInfo.split("\\@");
 						project.setCvssScore(conversionCveData[3]);
@@ -782,6 +802,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					cvssScoreMaxVendorProductList.clear();
 					cvssScoreMaxList.clear();
+					
+					String comments = "";
+					if (!isEmpty(loadToListComment)) comments = loadToListComment;
+					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+					if (!isEmpty(comments)) project.setComments(comments);
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) project.setDependencies(avoidNull(project.getDependencies()));
 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
@@ -1468,6 +1495,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				newBean.setIdentificationSubStatusPartner(orgBean.getIdentificationSubStatusPartner());
+				newBean.setIdentificationSubStatusDep(orgBean.getIdentificationSubStatusDep());
 				newBean.setIdentificationSubStatusSrc(orgBean.getIdentificationSubStatusSrc());
 				newBean.setIdentificationSubStatusBin(orgBean.getIdentificationSubStatusBin());
 				newBean.setIdentificationSubStatusAndroid(orgBean.getIdentificationSubStatusAndroid());
@@ -2768,7 +2796,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(pi.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(pi.getReferenceId(), ossInfoMap, pi, cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
@@ -2824,6 +2852,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
 								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
 							}
+							
+							bean.setDownloadLocation(gridData.getDownloadLocation());
+							bean.setHomepage(gridData.getHomepage());
+							bean.setCopyrightText(gridData.getCopyrightText());
 						}
 						
 						break;
@@ -2845,7 +2877,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
 					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
@@ -4767,6 +4799,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				}
+				
+				if (isEmpty(rtnBean.getDependencies())) {
+					if (!isEmpty(temp.getDependencies())) {
+						rtnBean.setDependencies(temp.getDependencies());
+					}
+				}
 			}
 			
 			resultGridData.add(rtnBean);
@@ -5655,8 +5693,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 																.filter(obj -> {
 																	String ossName = (avoidNull(obj.getOssName())).toUpperCase();
 																	String compareOssName = (avoidNull(CoCodeManager.OSS_INFO_UPPER_NAMES.get(obj.getOssName().toUpperCase()))).toUpperCase();
-						
-																	return CoConstDef.FLAG_NO.equals(obj.getAdminCheckYn()) && !isEmpty(compareOssName) && !ossName.equals(compareOssName);
+																	String referenceDiv = obj.getReferenceDiv();
+																	return CoConstDef.FLAG_NO.equals(obj.getAdminCheckYn()) && !isEmpty(compareOssName) && !ossName.equals(compareOssName) && !CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(referenceDiv);
 																}).collect(Collectors.toList());
 			
 			if (checkList.size() > 0) {
@@ -5763,8 +5801,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		OssComponents oc = null;
 		OssComponents bean = null;
 		boolean activateFlag;
-		String ossVersion = "";
-		String vulnerabilityLink = "";
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
 		
@@ -5807,11 +5843,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		int gridIdx = 1;
 		for (ProjectIdentification pi : list) {
 			activateFlag = false;
-			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
+			if (isEmpty(pi.getOssName()) || pi.getOssName().equals("-") || pi.getExcludeYn().equals(CoConstDef.FLAG_YES)) continue;
 			
-			param.setOssName(pi.getOssName());
+			param.setOssName(avoidNull(pi.getRefOssName(), pi.getOssName()));
 			param.setOssVersion(pi.getOssVersion());
-			if(isEmpty(pi.getOssVersion()) || pi.getOssVersion().equals("N/A")) ossVersion = "-";
 			
 			List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
 			if (vulnList != null && !vulnList.isEmpty()) {
@@ -5841,130 +5876,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean = (OssComponents) securityGridMap.get(key);
 						}
 						
-						if (activateFlag) {
-							checkOssNameList.add(pi.getOssName());
-							vulnerabilityLink = CommonFunction.getProperty("server.domain");
-							vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
-						} else {
-							vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + vuln.getCveId();
-						}
+						if (activateFlag) checkOssNameList.add(pi.getOssName());
 						
 						oc = new OssComponents();
 						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
+						oc.setOssId(pi.getOssId());
 						oc.setOssName(pi.getOssName());
 						oc.setOssVersion(pi.getOssVersion());
+						
 						if (!activateFlag) {
 							oc.setCveId(vuln.getCveId());
 							oc.setCvssScore(vuln.getCvssScore());
 							oc.setPublDate(vuln.getPublDate());
 						}
 						
-						oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-						oc.setVulnerabilityLink(vulnerabilityLink);
-						
-						if (!activateFlag) {
-							List<Map<String, Object>> cpeInfoList = vulnerabilityService.getCpeInfoAndRange(oc.getCveId(), oc.getOssName());
-							if (cpeInfoList != null && !cpeInfoList.isEmpty()) {
-								String criteria = "";
-								String verStartEndRange = "";
-								String checkUrl = "";
-								
-								boolean emptyFlag = false;
-								for (Map<String, Object> cpeInfo : cpeInfoList) {
-									Map<String, Object> paramMap = new HashMap<>();
-									paramMap = cpeInfo;
-									if (!paramMap.containsKey("verStartInc")) paramMap.put("verStartInc", "");
-									if (!paramMap.containsKey("verEndInc")) paramMap.put("verEndInc", "");
-									if (!paramMap.containsKey("verStartExc")) paramMap.put("verStartExc", "");
-									if (!paramMap.containsKey("verEndExc")) paramMap.put("verEndExc", "");
-									if (!vulnerabilityService.getCpeMatchForCpeInfoCnt(paramMap)) {
-										continue;
-									}
-									
-									if (cpeInfo.containsKey("criteria")) {
-										String cpeInfoCriteria = (String) cpeInfo.get("criteria");
-										String[] url = cpeInfoCriteria.split(":");
-										if (!emptyFlag) checkUrl = cpeInfoCriteria;
-										if (!criteria.contains(cpeInfoCriteria) && url[5].equals("*") || url[5].equals(oc.getOssVersion())) {
-											criteria += cpeInfoCriteria + ",";
-										}
-									}
-									if (cpeInfo.containsKey("verStartInc")) {
-										verStartEndRange += "From (including) : " + (String) cpeInfo.get("verStartInc")+",";
-									}
-									if (cpeInfo.containsKey("verEndInc")) {
-										verStartEndRange += "Up to (including) : " + (String) cpeInfo.get("verEndInc")+",";
-									}
-									if (cpeInfo.containsKey("verStartExc")) {
-										verStartEndRange += "From (excluding) : " + (String) cpeInfo.get("verStartExc")+",";
-									}
-									if (cpeInfo.containsKey("verEndExc")) {
-										verStartEndRange += "Up to (excluding) : " + (String) cpeInfo.get("verEndExc")+",";
-									}
-									
-									emptyFlag = true;
-								}
-								
-								if (!isEmpty(criteria)) {
-									criteria = criteria.substring(0, criteria.length()-1);
-									oc.setCpeName(criteria);
-								} else {
-									if (!isEmpty(checkUrl)) {
-										String[] url = checkUrl.split(":");
-										String changeUrl = "";
-										int i = 0;
-										for (String urlData : url) {
-											if (i == 5) {
-												changeUrl += "*:";
-											} else {
-												changeUrl += urlData + ":";
-											}
-											i++;
-										}
-										changeUrl = changeUrl.substring(0, changeUrl.length()-1);
-										oc.setCpeName(changeUrl);
-									}
-								}
-								
-								if (!isEmpty(verStartEndRange)) {
-									verStartEndRange = verStartEndRange.substring(0, verStartEndRange.length()-1);
-									oc.setVerStartEndRange(verStartEndRange);
-								} else {
-									oc.setVerStartEndRange("N/A");
-								}
-							}
-							
-							List<String> patchLinkList = vulnerabilityService.getPatchLinkForNvdData(vuln.getCveId());
-							if (!patchLinkList.isEmpty()) {
-								String link = "";
-								for (String patchLink : patchLinkList) {
-									if (isEmpty(link)) {
-										link = patchLink;
-									} else {
-										link += "," + patchLink;
-									}
-								}
-								
-								oc.setOfficialPatchLink(link);
-								oc.setVulnerabilityResolution("Unresolved");
-							} else {
-								oc.setOfficialPatchLink("N/A");
-								oc.setVulnerabilityResolution("Deferred (Not Available)");
-							}
-							
-							oc.setSecurityPatchLink("N/A");
-						} else {
-							oc.setVulnerabilityResolution("");
-						}
+						oc.setVulnerabilityResolution("Unresolved");
 						
 						if (bean != null) {
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-							oc.setSecurityComments(bean.getSecurityComments());
-							
-							if (!isEmpty(bean.getSecurityPatchLink()) 
-									|| (oc.getVulnerabilityResolution().equals("Fixed") && isEmpty(bean.getSecurityPatchLink()))) {
-								oc.setSecurityPatchLink(bean.getSecurityPatchLink());
-							}
 						}
 						
 						if (oc.getVulnerabilityResolution().equals("Fixed")) {
@@ -6134,22 +6063,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		OssComponents ossComponent;
 		
 		for (OssComponents bean : ossComponentList) {
-			if (bean.getOssName().isEmpty()) continue;
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) continue;
 			
 			om.setOssNames(new String[] {bean.getOssName()});
 			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
 			if (ossList != null && !ossList.isEmpty()) {
 				om = ossList.get(0);
-				
-				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getCopyright();
-				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getHomepage();
-				
-				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
-					bean.setCopyrightText(copyright);
-				}
-				
-				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
-					bean.setHomepage(homepage);
+				OssMaster ossInfo = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId());
+				if (ossInfo != null) {
+					String copyright = ossInfo.getCopyright();
+					String homepage = ossInfo.getHomepage();
+					
+					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+						bean.setCopyrightText(copyright);
+					}
+					
+					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+						bean.setHomepage(homepage);
+					}
 				}
 			}
 			
@@ -6235,6 +6166,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (addOssComponentList != null) {
 			for (OssComponents bean : addOssComponentList) {
+				if (isEmpty(bean.getLicenseName())) continue;
+				
 				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				if ("-".equals(bean.getOssName())) {
 					componentKey += dashSeq++;
@@ -6379,9 +6312,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
 		if (ossComponentsLicense != null) {
-			for (OssComponentsLicense bean : ossComponentsLicense) {
-				if (bean.getLicenseId().equals(license.getLicenseId())) {
-					return true;
+			if (!isEmpty(license.getLicenseId())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseId().equals(license.getLicenseId())) {
+						return true;
+					}
+				}
+			} else if (isEmpty(license.getLicenseId()) && !isEmpty(license.getLicenseName())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseName().equals(license.getLicenseName())) {
+						return true;
+					}
 				}
 			}
 		}
@@ -6441,5 +6382,32 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void copySecurityDataForProject(Project project) {
 		boolean copyFlag = projectMapper.copySecurityDataForProjectCnt(project) > 0 ? true : false;
 		if (copyFlag) projectMapper.copySecurityDataForProject(project);
+	}
+	
+	@Override
+	public Map<String, Object> checkSelectDownloadFile(Project project) {
+		Map<String, Object> resMap = new HashMap<>();
+		boolean emptyCheckFlag = false;
+		
+		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+		for (OssComponents oss : list) {
+			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+				emptyCheckFlag = true;
+				break;
+			}
+		}
+		
+		if (emptyCheckFlag) {
+			resMap.put("isValid", false);
+		} else {
+			resMap.put("isValid", true);
+		}
+		
+		return resMap;
+	}
+
+	@Override
+	public List<OssComponents> getDependenciesDataList(Project project) {
+		return projectMapper.getDependenciesDataList(project);
 	}
 }

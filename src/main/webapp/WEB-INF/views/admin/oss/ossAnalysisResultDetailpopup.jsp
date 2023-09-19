@@ -758,6 +758,33 @@
 							return false;
 						}
 					
+						var gridParam = $('#_licenseChoice'+seq).jqGrid('getGridParam', 'data');
+						var checkLicenses = [];
+						if (gridParam.length > 0) {
+							$.each(gridParam, function(index, element){
+								checkLicenses.push(element.licenseNameEx);
+							});
+						}
+						
+						var duplicatedLicenseFlag = true;
+						if (checkLicenses.length > 0) {
+							$.each(checkLicenses, function(index, element){
+								$(".autoComOssLicense"+seq).each(function() {
+									var detectedLicense = $(this).val();
+									if (detectedLicense && element == detectedLicense) {
+				 	 					$(this).parent().next("span.retxt").html("License included in Declared").show();
+				 	 					duplicatedLicenseFlag = false;
+				 	 					return true;
+				 	 				}
+								});
+							});
+						}
+						
+						if (!duplicatedLicenseFlag) {
+				 			alertify.error("License included in Declared", 0);
+				 			return false;
+				 		}
+						
 						alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 							if (e) {
 								// 세이브 전 그리드 처리
@@ -853,7 +880,7 @@
 					colModel:[
 						{name:'no', index: 'ossLicenseIdx', width:18, hidden:true},
 						{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:18, key:true, hidden:true},
-						{name:'ossLicenseComb',index:'ossLicenseComb', width:40, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH", dataEvents:[{type:'change', fn:grid_fn.changeLicenseType(_target, seq)}]}},
+						{name:'ossLicenseComb',index:'ossLicenseComb', width:40, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:grid_fn.changeLicenseType(_target, seq)}]}},
 						{name:'licenseNameEx',index:'licenseNameEx', width:100, editable:true
 							, editoptions: {
 								dataInit: function (elem) {

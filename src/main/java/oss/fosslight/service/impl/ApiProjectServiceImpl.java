@@ -5,6 +5,7 @@
 
 package oss.fosslight.service.impl;
 
+import static org.springframework.ldap.query.LdapQueryBuilder.query;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -24,6 +25,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +38,9 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.ShellCommander;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
@@ -52,6 +58,10 @@ import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
+
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
 
 @Service
 @Slf4j
@@ -2795,5 +2805,367 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		return 0;
+	}
+
+	@Override
+	public boolean existLdapUserToEmail(String email) {
+		boolean ldapCheckFlag = false;
+		try {
+			LdapTemplate ldapTemplate = new LdapTemplate(makeLdapContextSource());
+			ldapTemplate.afterPropertiesSet();
+		
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			List<String[]> result = ldapTemplate.search(query().where("mail").is(email), new AttributesMapper() {
+				public Object mapFromAttributes(Attributes attrs) throws NamingException {
+					return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+				}
+			});
+			
+			if (result != null && !result.isEmpty()) ldapCheckFlag = true;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return ldapCheckFlag;
+	}
+	
+	private LdapContextSource makeLdapContextSource() {
+		String LDAP_SEARCH_DOMAIN = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
+		String LDAP_SEARCH_ID = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID);
+		String LDAP_SEARCH_PW = CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW);
+		
+		LdapContextSource contextSource = new LdapContextSource();
+		try {
+			contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+			contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+			contextSource.setUserDn(LDAP_SEARCH_ID+LDAP_SEARCH_DOMAIN);
+			contextSource.setPassword(LDAP_SEARCH_PW);
+			CommonFunction.setSslWithCert();
+			contextSource.afterPropertiesSet();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return contextSource;
+	}
+
+	@Override
+	public boolean existsWatcherByEmail(String prjId, String email) {
+		return apiProjectMapper.existsWatcherByEmail(prjId, email) > 0 ? false : true;
+	}
+
+	@Override
+	public void insertWatcher(Map<String, Object> paramMap) {
+		apiProjectMapper.insertWatcher(paramMap);
+	}
+
+	@Override
+	public Map<String, Object> selectProjectMaster(String prjId) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("prjId", prjId);
+		return apiProjectMapper.selectProjectMaster(param);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList) {
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(code);
+		Map<String, Object> map = projectService.getIdentificationGridList(identification, true);
+		if (map.containsKey("mainData")) {
+			List<ProjectIdentification> gridDatas = (List<ProjectIdentification>) map.get("mainData");
+			if (gridDatas != null && !gridDatas.isEmpty()) {
+				List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
+				Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
+				ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
+				ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
+			}
+		}
+	}
+
+	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
+		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
+		if(ossComponent.size()==0){
+			Project projectSubStatus = new Project();
+			projectSubStatus.setPrjId(project.getPrjId());
+			
+			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+				projectSubStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+			} else {
+				projectSubStatus.setIdentificationSubStatusDep("X");
+			}
+			
+			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
+			projectSubStatus.setReferenceDiv(refDiv);
+			projectMapper.updateProjectMaster(projectSubStatus);
+		}
+		
+		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
+		String refId = project.getReferenceId();
+		
+		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
+
+		// 파일 등록
+		if(!isEmpty(project.getDepCsvFileId())){
+			projectMapper.updateFileId(project);
+			
+			if(project.getCsvFileSeq() != null) {
+				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
+					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
+				}
+			}
+		}
+	}
+
+	private void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
+		// 컴포넌트 마스터 라이센스 지우기
+		ProjectIdentification prj = new ProjectIdentification();
+				
+		if(isEmpty(refId)) {
+			refId = project.getPrjId();
+		}
+				
+		prj.setReferenceId(refId);
+		prj.setReferenceDiv(refDiv);
+		List<OssComponents> componentId = projectMapper.selectComponentId(prj);
+				
+		for (int i = 0; i < componentId.size(); i++) {
+			projectMapper.deleteOssComponentsLicense(componentId.get(i));
+		}
+		
+		if(!ossComponent.isEmpty()) {
+			Project projectStatus = new Project();
+			projectStatus.setPrjId(refId);
+			projectStatus = projectMapper.selectProjectMaster(projectStatus);
+			
+			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+				projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+			} else {
+				projectStatus.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+			}
+			
+			projectStatus.setModifier(projectStatus.getLoginUserName());
+			projectMapper.updateProjectMaster(projectStatus);
+		}
+		
+		project.setReferenceDiv(refDiv);
+		project.setReferenceId(refId);
+		
+		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(project);
+		
+		//deleteRows
+		List<String> deleteRows = new ArrayList<String>();
+		
+		// 컴포넌트 등록	
+		for (int i = 0; i < ossComponent.size(); i++) {
+			// SRC STATUS 등록
+			ProjectIdentification ossBean = ossComponent.get(i);
+			
+			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
+			ossBean = CommonFunction.findOssIdAndName(ossBean);
+			if (isEmpty(ossBean.getOssId())) {
+				ossBean.setOssId(null);
+			}
+			
+			String downloadLocationUrl = ossBean.getDownloadLocation();
+			String homepageUrl = ossBean.getHomepage();
+			
+			if (!isEmpty(downloadLocationUrl)) {
+				if (downloadLocationUrl.endsWith("/")) {
+					ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+				}
+			}
+			
+			if (!isEmpty(homepageUrl)) {
+				if (homepageUrl.endsWith("/")) {
+					ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+				}
+			}
+			
+			//update
+			if (!ossBean.getGridId().contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+				//ossComponents 등록
+				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+					List<OssComponentsLicense> _list = new ArrayList<>();
+					
+					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
+						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+							for (ProjectIdentification comLicense : comLicenseList) {
+								if (ossBean.getComponentId().equals(comLicense.getComponentId())){
+									// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+									if (isEmpty(comLicense.getLicenseName()) && isEmpty(comLicense.getLicenseText()) && isEmpty(comLicense.getOssCopyright())) {
+										continue;
+									}
+									
+									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
+								}
+							}
+						}
+					} else {
+						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
+					}
+					
+					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
+					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
+				}
+				
+				projectMapper.updateSrcOssList(ossBean);
+				deleteRows.add(ossBean.getComponentId());
+				
+				//멀티라이센스일 경우
+				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
+					List<String> duplicateLicense = new ArrayList<String>();
+					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+						for (ProjectIdentification comLicense : comLicenseList) {
+							if (ossBean.getComponentId().equals(comLicense.getComponentId())){
+								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+									continue;
+								}
+								
+								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+								if ((isEmpty(comLicense.getLicenseName()) 
+										&& isEmpty(comLicense.getLicenseText()) 
+										&& isEmpty(comLicense.getOssCopyright()))) {
+									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+									projectMapper.registComponentLicense(license);
+									break;
+								}
+								
+								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
+								duplicateLicense.add(comLicense.getLicenseId());
+								
+								// 라이센스 등록
+								projectMapper.registComponentLicense(license);
+							}
+						}
+					}
+				} else { //싱글라이센스일경우
+					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+					// 라이센스 등록
+					projectMapper.registComponentLicense(license);
+				}
+			} else { //insert
+				//ossComponents 등록
+				String exComponentId = ossBean.getGridId();
+				ossBean.setReferenceId(refId);
+				ossBean.setReferenceDiv(refDiv);
+				
+				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+					List<OssComponentsLicense> _list = new ArrayList<>();
+					
+					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
+
+						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+							for (ProjectIdentification comLicense : comLicenseList) {
+								String gridId = comLicense.getGridId();
+								
+								if (isEmpty(gridId)) {
+									continue;
+								}
+								
+								gridId = gridId.split("-")[0];
+								
+								if (exComponentId.equals(comLicense.getComponentId())
+										|| exComponentId.equals(gridId)){
+									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
+								}
+							}
+						}
+					} else {
+						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
+					}
+					
+					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
+					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
+				}
+				
+				// insert시 매번 max idx를 select 하면 
+				ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
+				projectMapper.insertSrcOssList(ossBean);
+				deleteRows.add(ossBean.getComponentId());
+				
+				//멀티라이센스일 경우
+				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
+					List<String> duplicateLicense = new ArrayList<String>();
+					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+						for (ProjectIdentification comLicense : comLicenseList) {
+							String gridId = comLicense.getGridId();
+							
+							if (isEmpty(gridId)) {
+								continue;
+							}
+							
+							gridId = gridId.split("-")[0];
+							
+							if (exComponentId.equals(comLicense.getComponentId()) || exComponentId.equals(gridId)){
+								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+									continue;
+								}
+								
+								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+								if ((isEmpty(comLicense.getLicenseName()) 
+									&& isEmpty(comLicense.getLicenseText()) 
+									&& isEmpty(comLicense.getOssCopyright()))) {
+									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+									projectMapper.registComponentLicense(license);
+									break;
+								}
+								
+								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
+								// 컴포넌트 ID 설정
+								license.setComponentId(ossBean.getComponentId());
+								duplicateLicense.add(comLicense.getLicenseName()); 
+								
+								// 라이센스 등록
+								projectMapper.registComponentLicense(license);
+							}
+						}
+					}
+				} else { // 싱글라이센스일경우
+					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+					// 라이센스 등록
+					projectMapper.registComponentLicense(license);
+				}
+			}
+		}
+		
+		// delete
+		OssComponents param = new OssComponents();
+		param.setReferenceDiv(refDiv);
+		param.setReferenceId(refId);
+		param.setOssComponentsIdList(deleteRows);
+		
+		projectMapper.deleteOssComponentsWithIds(param);
+	}
+
+	private List<List<ProjectIdentification>> convertLicenseNickName(List<List<ProjectIdentification>> ossComponentLicenseList) {
+		if(ossComponentLicenseList != null) {
+			for(List<ProjectIdentification> licenseList : ossComponentLicenseList) {
+				for (ProjectIdentification licenseBean : licenseList) {
+					String _licenseName = avoidNull(licenseBean.getLicenseName()).trim();
+					if(CoCodeManager.LICENSE_INFO_UPPER.containsKey(_licenseName.toUpperCase())) {
+						LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_UPPER.get(_licenseName.toUpperCase());
+						if(licenseMaster.getLicenseNicknameList() != null && !licenseMaster.getLicenseNicknameList().isEmpty()) {
+							for(String s : licenseMaster.getLicenseNicknameList()) {
+								if(_licenseName.equalsIgnoreCase(s)) {
+									licenseBean.setLicenseName(avoidNull(licenseMaster.getShortIdentifier(), licenseMaster.getLicenseNameTemp()));
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return ossComponentLicenseList;
+	}
+	
+	private void deleteUploadFile(Project project, String refDiv) {
+		
 	}
 }

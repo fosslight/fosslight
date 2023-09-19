@@ -430,6 +430,17 @@
 				}
 			});
 			
+			$("#securityTab").click(function(){
+				var prjId = $('input[name=prjId]').val();
+				var idx = getTabIndex(prjId+"_Security");
+				
+				if(idx != ""){
+					changeTabInFrame(idx);
+				}else{
+					createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+				}
+			});
+			
 			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
 				data.forEach(function(obj,index){
 					arr[index] = obj.userId+":"+obj.userName;
@@ -907,6 +918,11 @@
 			saveModelSubmit : function(){
 				var rows = fn.getModelGridRows('#_modelList');
 				$('input[name=prjModelJson]').val(JSON.stringify(rows));
+				
+				//disabled일경우 제거
+				if($("input[name=distributeTarget]").is(":disabled")){
+					$("input[name=distributeTarget]").removeAttr("disabled");
+				}
 				
 				$("#projectForm").ajaxForm({
 					url : '<c:url value="/project/saveModelAjax"/>',

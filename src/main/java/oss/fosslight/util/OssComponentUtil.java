@@ -157,10 +157,10 @@ public class OssComponentUtil {
 			if (StringUtil.isEmpty(ossComponent.getHomepage())) {
 				ossComponent.setHomepage(master.getHomepage());
 			}
-		}
-
-		if (StringUtil.isEmpty(ossComponent.getCopyrightText())) {
-			ossComponent.setCopyrightText(master.getCopyright());
+			
+			if (StringUtil.isEmpty(ossComponent.getCopyrightText())) {
+				ossComponent.setCopyrightText(master.getCopyright());
+			}
 		}
 		
 		// AND OR 연산표현식으로 변경

@@ -42,7 +42,7 @@
 							<td class="dCase">
 								<div class="multiTxtSet">
 									<div class="required">
-										<span><input type="text" name="ossNicknames" class="w350" onblur="fn.checkNickName(this)"/><input type="button" value="Delete" class="smallDelete"/></span>
+										<span><input type="text" name="ossNicknames" class="w350" onblur="fn.checkNickName(this)"/><input type="button" value="Delete" class="smallDelete"/><img id="newIcon"></span>
 										<span class="retxt"></span>
 									</div>
 								</div>
@@ -201,7 +201,9 @@
 	                        <dt>Basic Search Area</dt>
 	                        <dd>
 	                            <label>OSS Name</label>
-	                            <input name="schOssName" type="text" class="autoCom ui-autocomplete-input"/>
+	                            <input name="schOssName" type="text" class="autoCom ui-autocomplete-input" style="width:340px"/>
+	                            <input type="checkbox" id="ossNameAllSearchFlag"/><span>&nbsp;Exact Match</span>
+	                            <input type="hidden" name="ossNameAllSearchFlag"/>
 	                        </dd>
 	                    </dl>
 	                    <input type="button" value="Search" class="btnColor search">

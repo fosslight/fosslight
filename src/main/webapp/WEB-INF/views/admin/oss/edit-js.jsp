@@ -206,8 +206,8 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				$(data.clone).prependTo('.multiTxtSet');
-				
+				$('.multiTxtSet').prepend(data.clone).find("#newIcon:first").addClass("iconSet nick");
+				$('.multiTxtSet').find("input:first").css("padding-left", '40px');
 				$('.smallDelete').on('click', function(){
 					$(this).parent().parent().remove();
 				});
@@ -276,6 +276,8 @@
 				
 				alertify.confirm('<spring:message code="msg.oss.warn.remove" />', function (e) {
 					if (e) {
+						loading.show();
+						
 						$('input[name=comment]').val(editorVal);
 						
 						if(validationDataSet()){
@@ -287,6 +289,8 @@
 						        success : onDeleteValidSuccess,
 					            error : onError
 						    }).submit();
+						} else {
+							loading.hide();
 						}
 					} else {
 						return false;
@@ -298,6 +302,10 @@
 			$('.search').on('click', function(){
 				var postData=$('#listSearch').serializeObject();
 				$("#_ossSelectList").jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+			});
+			
+			$("#ossNameAllSearchFlag").on("change", function(e){
+				$("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
 			});
 			
 			//select oss 팝업 확인 버튼 
@@ -708,7 +716,7 @@
 			colModel:[
 				{name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
 				{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
-				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH", dataEvents:[{type:'change', fn:changeLicenseType}]}},
+				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
 				{name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
                         dataInit: function (elem) { 
 	                               $(elem).focus(function () { setCustomAutoComplete('multi'); }) 
@@ -1369,12 +1377,14 @@
 				
 		var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
 		var newRows = [];
+		var checkLicenses = [];
 		dataIds.forEach(function(dataId){
 			var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
 			var licenseName = rowData.licenseName;
 			if( licenseName.indexOf('<div') > -1){
 				rowData['licenseName'] = '';
 			}
+			checkLicenses.push(rowData.licenseNameEx);
 			newRows.push(rowData);
 		});
 		
@@ -1404,6 +1414,25 @@
 			return false;
 		}
 
+		var duplicatedLicenseFlag = true;
+ 		if (checkLicenses.length > 0) {
+ 			$.each(checkLicenses, function(index, element){
+ 				$("[name='detectedLicenses']").each(function(idx, cur){
+ 	 				var detectedLicense = $(cur).val();
+ 	 				if (detectedLicense && element == detectedLicense) {
+ 	 					$('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("License included in Declared").show();
+ 	 					duplicatedLicenseFlag = false;
+ 	 					return true;
+ 	 				}
+ 	 			});
+ 			});
+ 		}
+	
+ 		if (!duplicatedLicenseFlag) {
+ 			alertify.error("License included in Declared", 0);
+ 			return false;
+ 		}
+		
 		return true;
 	}
 	
@@ -1433,15 +1462,19 @@
 			data : {'ossId' : ossId},
 			success : function(data){
 				if(parseInt(data) > 0){
+					loading.hide();
+					
 					$('.ossSelectPop').show();
 					$('#blind_wrap').show();
 				}else if(parseInt(data) == 0){
 					deleteOssByOne();
 				}else{
+					loading.hide();
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			},
 			error : function(){
+				loading.hide();
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
@@ -1449,7 +1482,6 @@
 	
 	// OSS 삭제
 	function deleteOssByOne(){
-		loading.show();
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
 		var editorVal = CKEDITOR.instances['editor'].getData();
@@ -1647,9 +1679,9 @@
 
 	//유효성 체크 콜백함수
 	function onDeleteValidSuccess(json, status){
-		loading.hide();
-		
 		if(json.isValid == 'false') {
+			loading.hide();
+			
 			if(json.validMsg == "hasDelNick") {
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
@@ -1694,6 +1726,7 @@
 			var v_flag = checkVdiff();
 
 			if(v_flag == ""){
+				loading.hide();
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				return;
 				
