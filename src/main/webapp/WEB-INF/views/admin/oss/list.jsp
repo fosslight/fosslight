@@ -38,6 +38,11 @@
 						<input type="hidden" name="homepageAllSearchFlag" value="${searchBean.homepageAllSearchFlag}"/>
 					</dd>
 					<dd>
+						<label>Vulnerability (>=)</label>
+						<input name="cvssScore" type="text" value="${searchBean.cvssScore}" style="width:230px"/>
+
+					</dd>
+					<dd>
 						<label>Deactivate</label>
 						<input type="checkbox" id="deactivateFlag" ${searchBean.deactivateFlag eq 'Y' ? 'checked="checked"' : ''} style="margin:0 5px;"/>
 						<input type="hidden" name="deactivateFlag" value="${searchBean.deactivateFlag}"/>
