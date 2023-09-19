@@ -430,8 +430,15 @@
 		            cache : false,
 			        success : function(json) {
 			        	if(json.externalData2) {
-				        	$(target).parent().next("span.urltxt").empty();
-							$(target).parent().next("span.urltxt").html(json.externalData2.downloadLocation).show();
+			        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+			        			var downloadLocationHtml = json.externalData2.downloadLocation;
+				        		if (downloadLocationHtml.indexOf("createTabInFrame") > -1) {
+				        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				        		}
+				        		
+				        		$(target).parent().next("span.urltxt").empty();
+								$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
+			        		}
 			        	} else {
 				        	$(target).parent().next("span.urltxt").empty();
 			        	}
@@ -501,14 +508,24 @@
 		            cache : false,
 			        success : function(json) {
 			        	if(json.externalData2) {
-							$(target).next("span.urltxt").empty();
-							$(target).next("span.urltxt").html(json.externalData2.homepage).show();
+			        		if (typeof json.externalData2.homepage !== 'undefined') {
+			        			var homepageHtml = json.externalData2.homepage;
+				        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+				        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				        		}
+				        		
+								$(target).next("span.urltxt").empty();
+								$(target).next("span.urltxt").html(homepageHtml).show();
+			        		}
 			        	} else {
 							$(target).next("span.urltxt").empty();
 			        	}
 			        },
 		            error : Ctrl_fn.onError
 			    }).submit();
+			},
+			loadUrl : function (target, url) {
+				window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
 			},
 			onSuccess : function(){},
 			onError : function(data, status){
