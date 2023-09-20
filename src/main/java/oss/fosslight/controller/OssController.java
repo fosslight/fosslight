@@ -1834,7 +1834,20 @@ public class OssController extends CoTopComponent{
 		if (!isEmpty(analysisBean.getLicenseName())) {
 //			for (String s : analysisBean.getLicenseName().toUpperCase().split(" OR ")) {
 				// 순서가 중요
-				String orGroupStr = analysisBean.getLicenseName().replaceAll("\\(", " ").replaceAll("\\)", " ");
+				String orGroupStr = analysisBean.getLicenseName();
+				boolean multiLicenseFlag = false;
+			
+				if (orGroupStr.contains(",")) {
+					multiLicenseFlag = true;
+			
+					if (orGroupStr.startsWith("(")) {
+						orGroupStr = orGroupStr.substring(1, orGroupStr.length());
+						if (orGroupStr.endsWith(")")) {
+							orGroupStr = orGroupStr.substring(0, orGroupStr.length()-1);
+						}
+					}
+				}
+			
 //				boolean groupFirst = true;
 				for (String s2 : orGroupStr.split(",")) {
 					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(s2.trim().toUpperCase());
@@ -1844,12 +1857,12 @@ public class OssController extends CoTopComponent{
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId(license.getLicenseId());
 						licenseBean.setLicenseName(license.getLicenseNameTemp());
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					} else {
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId("");
 						licenseBean.setLicenseName(s2);
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					}
 					
 					ossLicenseList.add(licenseBean);
