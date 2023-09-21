@@ -433,6 +433,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .listSearch .adminSearch dd input[type=checkbox] {width: 13px;}
 .listSearch .adminSearch dd input.cal {width:92px;}
 .listSearch .adminSearch dd label {display:inline-block;width:100px;text-align:right;}
+.listSearch .adminSearch dd .selectSet {width:70%;}
 .listSearch .hiddenSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:135px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
 .listSearch .hiddenSearch dt {float:left;padding:6px 18px 0 0;width:120px;text-align:right;}
 .listSearch .hiddenSearch dt strong {display:none;}
