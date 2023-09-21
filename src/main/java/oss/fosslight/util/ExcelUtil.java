@@ -881,6 +881,7 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY NAME OR (IF DELIVERY FORM IS SOURCE CODE) SOURCE PATH":
 					case "FILE NAME OR PATH":
 					case "SOURCE NAME OR PATH":
+					case "MANIFEST FILE":
 						if (pathOrFileCol > -1) {
 							dupColList.add(value);
 						}
