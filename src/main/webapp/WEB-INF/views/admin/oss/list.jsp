@@ -83,7 +83,7 @@
 					</dd>
 					<dd>
 						<label>License Type</label>
-						<span class="selectSet" style="width: 257px;">
+						<span class="selectSet">
 							<strong for="licenseType" title="selected value"></strong>
 							<select id="licenseType" name="licenseType">
 								<option></option>
