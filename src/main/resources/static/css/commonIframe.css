@@ -424,15 +424,15 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .listSearch .detailArea > dl.col1 dd label + input[type='text'] {width:calc(100% - 155px);vertical-align:middle;}
 .listSearch .detailArea > dl.col1 dd label + input[type='password'] {width:calc(100% - 155px);vertical-align:middle;}
 .listSearch .basicSearch dt {display:none;}
-.listSearch .adminSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:40px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
+.listSearch .adminSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:0 90px 8px 0;height:40px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
 .listSearch .adminSearch dt {float:left;padding:6px 18px 0 0;width:120px;text-align:right;}
 .listSearch .adminSearch dt strong {display:none;}
 .listSearch .adminSearch dt span {font-size:13px;color:#c00c3f;}
-.listSearch .adminSearch dd {padding:0 17px 0 0;}
+.listSearch .adminSearch dd {width:44%; padding:10px 20px 0;}
 .listSearch .adminSearch dd input {width:60px;}
 .listSearch .adminSearch dd input[type=checkbox] {width: 13px;}
 .listSearch .adminSearch dd input.cal {width:92px;}
-.listSearch .adminSearch dd label {padding:0 15px 0 0;color:#454545;}
+.listSearch .adminSearch dd label {display:inline-block;width:100px;text-align:right;}
 .listSearch .hiddenSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:135px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
 .listSearch .hiddenSearch dt {float:left;padding:6px 18px 0 0;width:120px;text-align:right;}
 .listSearch .hiddenSearch dt strong {display:none;}
@@ -785,7 +785,7 @@ td .retxt, div .retxt {padding-top:2px;font-size:11px;color:red !important;}				
 	border-color: #ccc;
 	border-width: 0;
 }
-.commentBack dd,p{margin: 20px 5px 20px 5px; !important;}
+.commentBack dd,p{margin: 20px 5px 20px 5px !important;}
 div .retxtb {padding-top:2px;font-size:11px;color:blue !important;}
 div .retxtg {padding-top:2px;font-size:11px;color:gray !important;}
 
