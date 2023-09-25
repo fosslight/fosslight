@@ -1253,7 +1253,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return ossComponentList == null || ossComponentList.isEmpty();
 	}
 	
-	@Transactional
+
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	private void updateProjectStatus(Project project) {
 		//다운로드 허용 플래그

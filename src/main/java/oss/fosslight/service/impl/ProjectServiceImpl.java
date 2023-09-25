@@ -2104,7 +2104,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		updateOssComponentList(new Project(), refDiv, refId, ossComponent, ossComponentLicense);
 	}
 	
-	@Transactional
+
 	private void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
 			List<List<ProjectIdentification>> ossComponentLicense) {
 		// 컴포넌트 마스터 라이센스 지우기
@@ -2354,7 +2354,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		projectMapper.deleteOssComponentsWithIds(param);
 	}
 	
-	@Transactional
+
 	private void addOssComponentByBinaryInfo(List<OssComponents> componentList, Map<String, List<Map<String, Object>>> binaryRegInfoMap) {
 		for (OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
@@ -2513,7 +2513,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
-	@Transactional
+
 	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList, Map<String, List<Map<String, Object>>> binaryRegInfoMap) {
 		for (OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
