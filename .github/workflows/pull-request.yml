@@ -12,7 +12,7 @@ jobs:
     uses: fosslight/.github/.github/workflows/base-check-commit-message.yml@main
     secrets:
       envPAT: ${{ secrets.GITHUB_TOKEN }}
-
+#TODO: remove saving logs step
   build:
     runs-on: ubuntu-latest
 
