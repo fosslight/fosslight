@@ -138,6 +138,30 @@ dependencies {
 jib {
 	from {
 		image = 'adoptopenjdk/openjdk11:jre-11.0.15_10-ubuntu'
+        if (project.hasProperty('jib.multiplatform')) {
+            platforms {
+                platform {
+                    architecture = 'arm64'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'arm'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'ppc64le'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 's390x'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'amd64'
+                    os = 'linux'
+                }
+            }
+        }
 	}
 
 	container {
