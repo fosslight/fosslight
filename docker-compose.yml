@@ -19,7 +19,7 @@ services:
     expose:
       - "3306"
   web:
-    build: .
+    image: fosslight/fosslight
     container_name: fosslight_web
     depends_on:
       - db
