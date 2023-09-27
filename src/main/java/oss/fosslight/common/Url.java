@@ -249,6 +249,7 @@ public final class Url {
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
+		public static final String SAVE_DEP = PATH + "/saveDep";
 		public static final String SAVE_SRC = PATH + "/saveSrc"; 
 		public static final String SAVE_BIN = PATH + "/saveBin";
 		public static final String SAVE_BINANDROID = PATH + "/saveBinAndroid";
@@ -804,6 +805,7 @@ public final class Url {
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
 			
 			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT_DEP			= "/oss_report_dep";
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/oss_report_src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/oss_report_bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/oss_report_android";

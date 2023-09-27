@@ -38,6 +38,11 @@
 						<input type="hidden" name="homepageAllSearchFlag" value="${searchBean.homepageAllSearchFlag}"/>
 					</dd>
 					<dd>
+						<label>Vulnerability (>=)</label>
+						<input name="cvssScore" type="text" value="${searchBean.cvssScore}" style="width:230px"/>
+
+					</dd>
+					<dd>
 						<label>Deactivate</label>
 						<input type="checkbox" id="deactivateFlag" ${searchBean.deactivateFlag eq 'Y' ? 'checked="checked"' : ''} style="margin:0 5px;"/>
 						<input type="hidden" name="deactivateFlag" value="${searchBean.deactivateFlag}"/>
@@ -45,8 +50,7 @@
 				</dl>
 				<c:if test="${ct:isAdmin()}">
 				<input type="button" value="Admin Expand apply" class="btnExpand" />
-				<dl class="adminSearch" style="display:none; height: 70px;">
-					<dt style="width:20px;"></dt>
+				<dl class="adminSearch" style="display:none; height: 105px;">
 					<dd>
 						<label>Creator</label>
 						<span class="selectSet">
@@ -77,10 +81,9 @@
 						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" value="${searchBean.mStartDate}" maxlength="8" autocomplete="off"/> ~ 
 						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.mEndDate}" maxlength="8" autocomplete="off"/> 
 					</dd>
-					<dt style="width:20px;"></dt>
-					<dd style="padding-top: 6px;">
+					<dd>
 						<label>License Type</label>
-						<span class="selectSet" style="width: 257px;">
+						<span class="selectSet">
 							<strong for="licenseType" title="selected value"></strong>
 							<select id="licenseType" name="licenseType">
 								<option></option>
@@ -88,7 +91,7 @@
 							</select>
 						</span>
 					</dd>
-					<dd style="padding-top: 6px;">
+					<dd>
 						<label>OSS Type</label>
 						<span class="iconSet none" title="None">None</span><input type="checkbox" id="noneLicenseFlag" name="ossTypeSearch" value = "N"/>
 						<span class="iconSet multi" title="Multi">Multi</span><input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" value = "M"/>

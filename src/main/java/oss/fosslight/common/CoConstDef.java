@@ -241,6 +241,7 @@ public class CoConstDef {
 	public static final String FILE_GUBUN_FILE_DOWNLOAD = "DL";
 	
 	public static final String SESSION_KEY_UPLOAD_REPORT_PARTNER = "REPORT_PARTNER";
+	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP = "REPORT_PROJECT_DEP";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC = "REPORT_PROJECT_SRC";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN = "REPORT_PROJECT_BIN";
 	public static final String SESSION_KEY_UPLOAD_REPORT_PROJECT_ANDROID = "REPORT_PROJECT_ANDROID";
@@ -338,6 +339,7 @@ public class CoConstDef {
 	public static final String CD_COMPONENT_DIVISION = "210";
 	public static final String CD_DTL_COMPONENT_ID_PARTNER = "10";
 	public static final String CD_DTL_COMPONENT_ID_SRC = "11";
+	public static final String CD_DTL_COMPONENT_ID_DEP = "16";
 	public static final String CD_DTL_COMPONENT_ID_BAT = "12";
 	public static final String CD_DTL_COMPONENT_ID_BOM = "13";
 	public static final String CD_DTL_COMPONENT_ID_ANDROID = "14";

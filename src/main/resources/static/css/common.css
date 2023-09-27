@@ -323,7 +323,7 @@ body,html {overflow:hidden !important;/*letter-spacing:0.06em;*/background:#efef
 .loading div p {padding:16px 0 0;line-height:20px;}
 /* Pop Common */
 .pop h1 {height:58px;font-family:Verdana;font-size:28px;font-weight:600;line-height:58px !important;color:#ff5a00;letter-spacing:-0.05em;text-align:center;}
-.registPop {margin:-235px 0 0 -225px;padding-bottom:35px;width:450px;/*height:470px;*/}
+.registPop {margin:-235px 0 0 -300px;padding-bottom:35px;width:450px;/*height:470px;*/}
 .registPop h1 {height:80px;}
 .registPop .popdata {padding:40px 70px 0;}
 .registPop table {border-collapse:separate;border-spacing:0;}

@@ -735,6 +735,9 @@ var bom_fn = {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
+	},
+	loadAnalysisUrl : function (target, url) {
+		createTabInFrame(target, url);
 	}
 }
 

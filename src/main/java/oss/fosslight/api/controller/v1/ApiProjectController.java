@@ -623,6 +623,173 @@ public class ApiProjectController extends CoTopComponent {
 	}
 	
 	@SuppressWarnings("unchecked")
+	@ApiOperation(value = "Identification OSS Report", notes = "Identification > dep > oss report")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@PostMapping(value = {Url.API.FOSSLIGHT_API_OSS_REPORT_DEP})
+	public CommonResult ossReportDep(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+    		@ApiParam(value = "OSS Report > sheetName : all sheets starting with 'DEP'", required = false) @RequestPart(required = false) MultipartFile ossReport,
+    		@ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
+    		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
+		
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
+		
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+			List<String> prjIdList = new ArrayList<String>();
+			prjIdList.add(prjId);
+			paramMap.put("userId", userInfo.getUserId());
+			paramMap.put("userRole", userRole(userInfo));
+			paramMap.put("prjId", prjIdList);
+			paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+			paramMap.put("readOnly", CoConstDef.FLAG_NO);
+			paramMap.put("distributionType", "normal");
+			
+			boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+			if (searchFlag) {
+				String oldFileId = "";
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
+					if (prjInfo.get("depCsvFileId") != null) {
+						oldFileId = String.valueOf((int) prjInfo.get("depCsvFileId"));
+					}
+				}
+				
+				if (ossReport != null) {
+					if (ossReport.getOriginalFilename().contains("xls") // 확장자 xls, xlsx, xlsm 허용
+							&& CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT > ossReport.getSize()) { // file size 5MB 이하만 허용.
+						
+						boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap);
+						if (!checkDistributionTypeFlag) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE
+									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
+						}
+						
+						UploadFile bean = null;
+						if (!isEmpty(oldFileId)) {
+							bean = apiFileService.uploadFile(ossReport, null, oldFileId);
+						} else {
+							bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
+						}
+
+						// get Excel Sheet name starts with SRC
+						List<String> sheet = null;
+						try {
+							sheet = ExcelUtil.getSheetNoStartsWith("DEP", Arrays.asList(bean),
+									CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+						}  catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+
+						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "DEP", 
+							sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
+						String errorMsg = (String) result.get("errorMessage");
+						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+						
+						if (!isEmpty(errorMsg)) {
+							resultMap.put("errorMessage", errorMsg);
+						}
+						
+						T2CoProjectValidator pv = new T2CoProjectValidator();
+						pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+						pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+						pv.setAppendix("mainList", ossComponents); // sub grid
+						pv.setAppendix("subList", ossComponentsLicense);
+						T2CoValidationResult vr = pv.validate(new HashMap<>());
+						
+						if (!vr.isValid()) {
+							return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
+									, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+						} else {
+							List<ProjectIdentification> ossComponentList = new ArrayList<>();
+							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+							
+							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP, ossComponentList, ossComponentsLicenseList);
+							}
+							
+							ossComponentList.addAll(ossComponents);
+							ossComponentsLicenseList.addAll(ossComponentsLicense);
+							
+							Project project = new Project();
+							project.setPrjId(prjId);
+							project.setDepCsvFileId(bean.getRegistFileId()); // set file id
+							
+							apiProjectService.registDepOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+							
+							// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
+							try {
+								if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+										CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+									String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+											CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+									if (!isEmpty(changedLicenseName)) {
+										CommentsHistory commentHisBean = new CommentsHistory();
+										commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+										commentHisBean.setReferenceId(prjId);
+										commentHisBean.setExpansion1("DEP");
+										commentHisBean.setContents(changedLicenseName);
+										commentHisBean.setLoginUserName(userInfo.getUserId());
+										commentService.registComment(commentHisBean, false);
+									}
+								}
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}
+							
+							if (comment != null) {
+								CommentsHistory commentHisBean = new CommentsHistory();
+								commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+								commentHisBean.setReferenceId(prjId);
+								commentHisBean.setExpansion1("DEP");
+								commentHisBean.setContents(comment);
+								commentHisBean.setLoginUserName(userInfo.getUserId());
+								commentService.registComment(commentHisBean, false);
+							}
+							
+							try {
+								History h = new History();
+								h = projectService.work(project);
+								h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+								project = (Project) h.gethData();
+								h.sethEtc(project.etcStr());
+								historyService.storeData(h);
+							} catch (Exception e) {
+								log.error(e.getMessage(), e);
+							}
+							
+							// 정상처리된 경우 세션 삭제
+							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+							deleteSession(
+									CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+						}
+						
+						return responseService.getSingleResult(resultMap);
+						
+					} else {
+						return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE
+								, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
+					}
+				} else {
+					return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE
+							, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
+				}
+			} else {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "Identification OSS Report", notes = "Identification > src > oss report")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")

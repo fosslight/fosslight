@@ -50,7 +50,7 @@
 	<!-- Login Page -->
     <definition name="tiles/session/login"    template="/WEB-INF/views/session/login.jsp">
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
-        <put-attribute name="header"            value="/WEB-INF/views/template/layout/admin/header.jsp" />
+		<put-attribute name="scripts" 			value="/WEB-INF/views/template/layout/admin/scripts.jsp" />
     </definition>
     <!-- identification -->
    	<definition name="tiles/admin/project/identification" extends="tiles/layout/identification" >

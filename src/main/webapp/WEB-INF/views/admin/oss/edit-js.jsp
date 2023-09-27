@@ -276,6 +276,8 @@
 				
 				alertify.confirm('<spring:message code="msg.oss.warn.remove" />', function (e) {
 					if (e) {
+						loading.show();
+						
 						$('input[name=comment]').val(editorVal);
 						
 						if(validationDataSet()){
@@ -287,6 +289,8 @@
 						        success : onDeleteValidSuccess,
 					            error : onError
 						    }).submit();
+						} else {
+							loading.hide();
 						}
 					} else {
 						return false;
@@ -1458,15 +1462,19 @@
 			data : {'ossId' : ossId},
 			success : function(data){
 				if(parseInt(data) > 0){
+					loading.hide();
+					
 					$('.ossSelectPop').show();
 					$('#blind_wrap').show();
 				}else if(parseInt(data) == 0){
 					deleteOssByOne();
 				}else{
+					loading.hide();
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			},
 			error : function(){
+				loading.hide();
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
@@ -1474,7 +1482,6 @@
 	
 	// OSS 삭제
 	function deleteOssByOne(){
-		loading.show();
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
 		var editorVal = CKEDITOR.instances['editor'].getData();
@@ -1672,9 +1679,9 @@
 
 	//유효성 체크 콜백함수
 	function onDeleteValidSuccess(json, status){
-		loading.hide();
-		
 		if(json.isValid == 'false') {
+			loading.hide();
+			
 			if(json.validMsg == "hasDelNick") {
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
@@ -1719,6 +1726,7 @@
 			var v_flag = checkVdiff();
 
 			if(v_flag == ""){
+				loading.hide();
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				return;
 				

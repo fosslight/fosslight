@@ -20,11 +20,11 @@ COPY ./LICENSES /app/LICENSES
 
 ADD ./src/main/resources/template /app/template
 
-RUN chmod +x /app/wait-for /app/verify/verify  \
-    && apt-get update  \
-    && apt-get install -y --no-install-recommends netcat  \
-    && rm -rf /var/lib/apt/lists/*  \
-    && ln -s /bin/sh bash
+RUN chmod +x /app/wait-for /app/verify/verify && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends netcat && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s /bin/sh bash
 
 WORKDIR /app
 CMD ["java" , "-jar", "FOSSLight.war", "--root.dir=/data/fosslight", "--server.port=8180"]

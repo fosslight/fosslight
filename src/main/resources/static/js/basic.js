@@ -2019,7 +2019,7 @@ function moveTabInFrameByCommentPopup(prjId, stage){
 		urlTxt = '#/project/edit/'+prjId;
 	} else if(stage == "identification") {
 		tabIdx = prjId+"_Identify";
-		urlTxt = '#/project/identification/'+prjId+'/4';
+		urlTxt = '#/project/identification/'+prjId+'/5';
 	} else if(stage == "packaging") {
 		tabIdx = prjId+"_Packaging";
 		urlTxt = '#/project/verification/'+prjId;
