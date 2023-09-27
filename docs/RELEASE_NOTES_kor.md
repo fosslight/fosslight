@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
-## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-15)
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-27)
 
 ### New
 * Project, 3rd party, Self-check에 watcher를 추가 할 수 있는 API Endpoint가 추가 (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
