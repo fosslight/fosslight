@@ -28,6 +28,9 @@
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 		   AND OM.OSS_VERSION = #{ossVersion}
 		 </if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(downloadLocation)">
+			AND OM.DOWNLOAD_LOCATION = #{downloadLocation}
+		</if>
 		 GROUP BY OM.OSS_ID
 	</select>
 	

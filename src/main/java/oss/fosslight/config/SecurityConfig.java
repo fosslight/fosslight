@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021 LG Electronics Inc.
- * SPDX-License-Identifier: AGPL-3.0-only 
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 package oss.fosslight.config;
@@ -38,7 +38,7 @@ import oss.fosslight.util.ResponseUtil;
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
-public class SecurityConfig {    
+public class SecurityConfig {
     /** The jwt token provider. */
     private final JwtTokenProvider jwtTokenProvider;
     private final CookieUtil cookieUtil;
