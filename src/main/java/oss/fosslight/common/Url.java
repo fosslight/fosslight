@@ -844,6 +844,96 @@ public final class Url {
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
 	}
 
+	public static final class APIV2 {
+		public static final String PATH = "/api/v2";
+
+		/** 3RD PARTY */
+		/** API 3rd Party 조회 */
+		public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partners";
+
+		/** OSS */
+		/** API OSS List 조회 */
+		public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss";
+
+		/** API OSS List 조회 */
+		public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss";
+
+//		/** API DOWNLOAD LOCATION 조회 */
+//		public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
+
+		/** LICENSE */
+		/** API License List 조회 */
+		public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/licenses";
+
+
+		/** PROJECT */
+		/** API create Project  */
+		public static final String FOSSLIGHT_API_PROJECT_CREATE			= "/projects";
+
+		/** API Project List 조회 */
+		public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/projects";
+
+		/** API Project Model List 조회 */
+		public static final String FOSSLIGHT_API_MODEL_SEARCH			= "/projects/models";
+
+		/** API Update Project Model */
+		public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/projects/{id}/models";
+
+		/** API Update Project Model WITH FILE */
+		public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/model_update_upload_file";
+
+		/** API Project BOM Tab Export */
+		public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export";
+
+		/** API Project BOM Tab Export JSON*/
+		public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/projects/{id}/bom/json";
+
+		/** API BOM COMPARE */
+		public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/compareBom";
+
+		/** API Project Add Watcher */
+		public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
+
+		/** API OSS Report upload */
+		public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
+		public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
+		public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/reportAndroid";
+
+		/** API Verification Packaging Upload */
+		public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/projects/{id}/packages";
+
+
+		/** VULNABILITY */
+		/** vulnerability info search */
+		public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerability_data";
+
+		/** vulnerability max score info search */
+		public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/vulnerability_max_data";
+
+
+		/** SELFCHECK */
+		/** create SelfCheck */
+		public static final String FOSSLIGHT_API_SELFCHECK_CREATE			= "/create_selfcheck";
+
+		/** OSS Report upload */
+		public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/oss_report_selfcheck";
+
+		/** OSS Report upload */
+		public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
+
+		/** API SelfCheck Add Watcher */
+		public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfcheck_watcher_add";
+
+		/** BINARY */
+		/** API Binary List 조회 */
+		public static final String FOSSLIGHT_API_BINARY_SEARCH			= "/binary_search";
+
+		/** CODE */
+		/** Code 조회 */
+		public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
+	}
+
+
 	public static final class SEARCH {
 
 		public static final String PATH = "/searchFilter";

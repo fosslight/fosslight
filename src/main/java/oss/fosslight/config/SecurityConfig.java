@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021 LG Electronics Inc.
- * SPDX-License-Identifier: AGPL-3.0-only 
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 package oss.fosslight.config;
@@ -46,7 +46,7 @@ import oss.fosslight.util.StringUtil;
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_VALIDATION_PROPERTIES)})
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig extends WebSecurityConfigurerAdapter {    
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired private T2UserService userService;
 	
 	@Autowired private CustomAuthenticationProvider customAuthenticationProvider;
@@ -69,8 +69,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests().antMatchers("/*" + Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
 		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
 		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
-		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and() // 공지사항 조회 요청처리 예외
-
+		.authorizeRequests().antMatchers(Url.APIV2.PATH+"/**").permitAll().and()
+		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and()
 		// 요청에 대한 권한 매핑
 		.authorizeRequests().anyRequest().authenticated()		// 모든 요청에 대해 권한 확인이 필요
 

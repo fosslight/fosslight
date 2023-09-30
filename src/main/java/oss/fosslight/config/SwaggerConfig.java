@@ -31,6 +31,7 @@ public class SwaggerConfig {
         		.consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
                 .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
                 .paths(PathSelectors.ant("/api/v1/**"))
+                .paths(PathSelectors.ant("/api/v2/**"))
                 .build()
                 .useDefaultResponseMessages(false); // 기본으로 세팅되는 200,401,403,404 메시지를 표시 하지 않음
     }
