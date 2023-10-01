@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -24,6 +26,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.CoMail;
+import oss.fosslight.domain.CoMailManager;
+import oss.fosslight.repository.VulnerabilityMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.NvdDataService;
@@ -40,7 +45,8 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired CommentService commentService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
-	
+	@Autowired VulnerabilityMapper vulnerabilityMapper;
+
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 	
@@ -87,6 +93,16 @@ public class SchedulerWorkerTask extends CoTopComponent {
 			}
 		} catch (IOException ioe) {
 			log.error(ioe.getMessage() + " (resCd : " + resCd + ")", ioe);
+		}
+	}
+
+	@Scheduled(cron="${nvd.sync.mail.cron.value}")
+	public void nvdDataCheckSync() {
+		try {
+			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNCINFO);
+			CoMailManager.getInstance().sendMail(mailBean);
+		} catch (Exception e) {
+			scheduler_log.error(e.getMessage(), e);
 		}
 	}
 	

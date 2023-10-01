@@ -24,8 +24,8 @@ public class CoConstDef {
 	public static final boolean VALIDATION_USE_CAMELCASE = true;
 	
 	public static final String ENCRYPT_DEFAULT_SALT_KEY = "Fosslight-System";
-	
-	/** 정적 리소스 종류 */
+
+    /** 정적 리소스 종류 */
 	private final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
 	/**
 	 *  정적 리소스 매핑 URL 패턴 ({@code CLASSPATH_RESOURCE_LOCATIONS}와 순서 맞출 것)
@@ -614,6 +614,9 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED = "94";
 	/* nvd data 중 vendor-product 가 다른 경우 */
 	public static final String CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF = "95";
+
+	public static final String CD_MAIL_TYPE_VULNERABILITY_SYNCINFO = "96";
+
 	public static final String CD_MAIL_TYPE_SYSTEM_ERROR = "99";
 	
 	/** Mail Type엥 따른 공통 Components 구성 */

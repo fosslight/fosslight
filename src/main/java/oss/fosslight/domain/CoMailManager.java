@@ -27,6 +27,7 @@ import javax.mail.internet.MimeUtility;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -42,8 +43,11 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.MailManagerMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.T2UserMapper;
+import oss.fosslight.repository.VulnerabilityMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.VulnerabilityService;
+import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.StringUtil;
@@ -63,7 +67,10 @@ public class CoMailManager extends CoTopComponent {
 	private static ProjectService projectService;
 	private static FileService fileService;
 	private static OssMapper ossMapper;
-	
+	private static VulnerabilityMapper vulnerabilityMapper;
+
+	private static VulnerabilityServiceImpl vulnerabilityServiceimpl;
+
 	private static String DEFAULT_BCC;
 	private static String[] BAT_FAILED_BCC;
 	private static String[] MAIL_LIST_SECURITY;
@@ -96,6 +103,8 @@ public class CoMailManager extends CoTopComponent {
         	projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
         	fileService = (FileService) getWebappContext().getBean(FileService.class);
         	ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
+			vulnerabilityMapper = (VulnerabilityMapper) getWebappContext().getBean(VulnerabilityMapper.class);
+			vulnerabilityServiceimpl = (VulnerabilityServiceImpl) getWebappContext().getBean(VulnerabilityServiceImpl.class);
             DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
             BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// (To be added) BAT Detail setting
             MAIL_LIST_SECURITY = avoidNull(CommonFunction.getProperty("smtp.default.security")).split(","); // (To be added) Vulnerability Detail setting
@@ -237,6 +246,17 @@ public class CoMailManager extends CoTopComponent {
     			convertDataMap.put("vulnerability_prj_recalc_oss_info", _reMakeContents);
     			
     		}
+
+			if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNCINFO.equals(bean.getMsgType())) {
+
+				List<Map<String, Object>> discoveredNvdData = vulnerabilityMapper.selectDiscoveredNvdData();
+				List<Map<String, Object>> recalculatedNvdData = vulnerabilityMapper.selectRecalculatedNvdData();
+				Map<String, Object> nvdDataResult = vulnerabilityServiceimpl.checkNvdSyncStatus();
+
+				convertDataMap.put("vulnerability_sync_info_discovered", discoveredNvdData);
+				convertDataMap.put("vulnerability_sync_info_recalculated", recalculatedNvdData);
+				convertDataMap.put("vulnerability_sync_info_result", nvdDataResult);
+			}
     		
     		if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF.equals(bean.getMsgType())) {
     			convertDataMap.put("vulnerability_diff_vendor_info", bean.getParamList());
@@ -737,6 +757,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
+			case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNCINFO:
     			bean.setToIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
