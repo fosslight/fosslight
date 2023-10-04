@@ -1910,7 +1910,14 @@ public class ProjectController extends CoTopComponent {
 			ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 			
 			List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
-			
+			for(ProjectIdentification idx : ossComponents){
+				String ossVersion = idx.getOssVersion();
+				if (ossVersion.matches("[vV]\\.(\\d+).*") || ossVersion.matches("[vV](\\d+).*")) {
+					ossVersion = ossVersion.replaceAll("[vV]\\.", "").replaceAll("[vV]", "");
+					idx.setOssVersion(ossVersion);
+				}
+			}
+
 			Type collectionType4 = new TypeToken<List<Project>>() {
 			}.getType();
 			List<Project> binAddList = new ArrayList<Project>();
@@ -2185,7 +2192,15 @@ public class ProjectController extends CoTopComponent {
 		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
 		
 		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
-		
+
+		for(ProjectIdentification idx : ossComponents){
+			String ossVersion = idx.getOssVersion();
+			if (ossVersion.matches("[vV]\\.(\\d+).*") || ossVersion.matches("[vV](\\d+).*")) {
+				ossVersion = ossVersion.replaceAll("[vV]\\.", "").replaceAll("[vV]", "");
+				idx.setOssVersion(ossVersion);
+			}
+		}
+
 		Type collectionType4 = new TypeToken<List<Project>>() {}.getType();
 		List<Project> srcAddList = new ArrayList<Project>();
 		srcAddList = (List<Project>) fromJson(srcAddListDataString, collectionType4);
