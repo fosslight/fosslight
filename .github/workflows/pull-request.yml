@@ -7,6 +7,9 @@ on:
   pull_request:
     branches:
       - '*'
+  push :
+    branches:
+      - '*'
 jobs:
   check-commit-message:
     uses: fosslight/.github/.github/workflows/base-check-commit-message.yml@main
