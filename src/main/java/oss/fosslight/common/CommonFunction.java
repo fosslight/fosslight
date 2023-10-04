@@ -3750,6 +3750,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			userData.setTitle("사용자 작성 정보");
 			
+			String ossName = userData.getOssName();
+			String ossNameTemp = "";
+			boolean ossNicknameFlag = false;
+			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				int ossNameCnt = errorMsg.entrySet()
 						.stream()
@@ -3885,8 +3889,22 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					OssAnalysis totalNewestOssInfo = null;
 					
 					try {
+						// check if oss name is nickname
+						if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(userData.getOssName().toUpperCase())) {
+							ossNameTemp = CoCodeManager.OSS_INFO_UPPER_NAMES.get(userData.getOssName().toUpperCase());
+						}
+						
+						if (!isEmpty(ossName) && !isEmpty(ossNameTemp) && !ossName.equals(ossNameTemp)) {
+							userData.setOssName(ossNameTemp);
+							ossNicknameFlag = true;
+						}
+						
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
+							if (ossNicknameFlag) {
+								newestOssInfo.setOssName(ossName);
+								newestOssInfo.setOssNickname(null);
+							}
 							newestOssInfo.setGridId(""+gridSeq++);
 							newestOssInfo.setOssVersion(userData.getOssVersion());
 							newestOssInfo.setComment(comment);
@@ -3894,7 +3912,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						if (userData.getOssName().toUpperCase().equals(totalAnalysis.getOssName().toUpperCase())) {
 							String newestMergeNickName = "";
-							if (newestOssInfo != null) {
+							if (newestOssInfo != null && !ossNicknameFlag) {
 								newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, newestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
 								newestOssInfo.setOssNickname(newestMergeNickName);
 							}else {
@@ -3955,13 +3973,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						changeAnalysisResultList.add(newestOssInfo); // seq 4 : 최신등록 정보
 						
 						if (newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
-							if (newestOssInfo.getOssNickname() != null) {
+							if (newestOssInfo.getOssNickname() != null && !ossNicknameFlag) {
 								userData.setOssNickname(CommonFunction.mergeNickname(userData, newestOssInfo.getOssNickname()));
 							}
 							if (userData.getOssNickname() != null) {
 								newestOssInfo.setOssNickname(CommonFunction.mergeNickname(newestOssInfo, userData.getOssNickname()));
 							}
 						}
+					}
+					
+					if (ossNicknameFlag) {
+						userData.setOssName(ossName);
 					}
 					
 					changeAnalysisResultList.add(askalono);		 // seq 5 : askalono 정보
@@ -4031,9 +4053,20 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				if (ossNameCnt == 0 && ossVersionCnt > 0){
 					try {
+						// check if oss name is nickname
+						if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(userData.getOssName().toUpperCase())) {
+							ossNameTemp = CoCodeManager.OSS_INFO_UPPER_NAMES.get(userData.getOssName().toUpperCase());
+						}
+						
+						if (!isEmpty(ossName) && !isEmpty(ossNameTemp) && !ossName.equals(ossNameTemp)) {
+							userData.setOssName(ossNameTemp);
+							ossNicknameFlag = true;
+						}
+						
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
+							if (ossNicknameFlag) newestOssInfo.setOssName(ossName);
 							newestOssInfo.setGridId(""+gridSeq++);
 							newestOssInfo.setOssVersion(userData.getOssVersion());
 							
