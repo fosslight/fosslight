@@ -15,7 +15,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-
     services:
       web:
          image: appropriate/curl
