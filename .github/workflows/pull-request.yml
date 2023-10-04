@@ -10,9 +10,12 @@ on:
 jobs:
   check-commit-message:
     uses: ./jobs/check-commit-message.yml
+    version: owner/repo@version
 
   check-the-site:
     uses: ./jobs/check-site.yml
+    version: owner/repo@version
 
   test:
     uses: ./jobs/test.yml
+    version: owner/repo@version
