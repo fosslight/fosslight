@@ -1,0 +1,13 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      web:
+        image: appropriate/curl
+        ports:
+          - 8180:8180
+
+    steps:
+      - name: Check the site
+        run: docker run --network host appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
