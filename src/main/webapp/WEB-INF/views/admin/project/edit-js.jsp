@@ -156,13 +156,8 @@
 			})				
 			
 			$('#drop').on('click', function(){
-				var comment = CKEDITOR.instances.editor2.getData();
-				if(comment == ""){
-					alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
-				}else{
 					if(distributionStatus == "PROC"){
 						var comment = '<spring:message code="msg.project.distribution.loading" />';
-						
 						alertify.error(comment, 0);
 
 						return false;
@@ -187,10 +182,33 @@
 							}
 						});
 					} else {
-						fn.exeProjectDrop();
+                        var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to drop this project?\nThis will permanently delete all datas.';
+                        innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+                        innerHtml    += '		<div id="editor3" style="width:470px; height:300px;">' + CKEDITOR.instances['editor2'].getData() + '</div>';
+                        innerHtml    += '	</div>';
+                        innerHtml    += '</div>';
+
+                        alertify.confirm(innerHtml, function () {
+                            if (CKEDITOR.instances['editor3'].getData() == "") {
+                                alertify.alert('<spring:message code="msg.project.required.comments" />', function () {
+                                });
+
+                                return false;
+                            } else {
+                                fn.exeProjectDrop();
+                            }
+                        })
+
+                        var _editor = CKEDITOR.instances.editor3;
+
+                        if(_editor) {
+                            _editor.destroy();
+                        }
+
+                        CKEDITOR.replace('editor3', {});
 					}
 				}
-			});
+			);
 			
 			// 저장
 			$("#save").click(function(){
