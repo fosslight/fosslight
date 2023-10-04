@@ -476,9 +476,10 @@
 							    })[0];
 								
 								if(msg){
-									msg = msg.split("@@")[1];	
+									msg = msg.split("@@")[1];
+									var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
 									$(cur).parent().next("span.urltxt").empty();
-									$(cur).parent().next("span.urltxt").html(msg).show();
+									$(cur).parent().next("span.urltxt").html(downloadLocation).show();
 								}						
 							});
 			        	} else {
@@ -525,7 +526,64 @@
 			    }).submit();
 			},
 			loadUrl : function (target, url) {
-				window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
+				var ossNameObj = url.split("?")[1];
+				var ossName = ossNameObj.split("=")[1];
+				
+				var ossVersionLength = $("input[name=ossVersion]").length;
+				var ossVersionArr = new Array(ossVersionLength);
+				for(var i=0; i<ossVersionLength; i++){                          
+					ossVersionArr[i] = $("input[name=ossVersion]").eq(i).val();
+			    }
+				
+				var ossVersion = "";
+				if (ossVersionLength > 0) {
+					ossVersion = ossVersionArr[0];
+				}
+				
+				Ctrl_fn.showDetailPopup(ossName, ossVersion);
+//				window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
+			},
+			showOssViewPage : function (obj) {
+				var ossName = $(obj).parent().next().find('input').val();
+				var ossVersion = $(obj).parent().parent().next().find('input').val();
+				Ctrl_fn.showDetailPopup(ossName, ossVersion);
+			},
+			showDetailPopup : function (ossName, ossVersion) {
+				var _popup = null;
+				
+				if ("N/A" == ossVersion) {
+					ossVersion = "";
+				}
+				
+				if("" != ossName) {
+					$.ajax({
+						url : '<c:url value="/oss/checkExistsOssByname"/>',
+						type : 'GET',
+						dataType : 'json',
+						cache : false,
+						data : {ossName : ossName},
+						contentType : 'application/json',
+						success : function(data){
+							if(data.isValid == 'true') {
+								if(_popup == null || _popup.closed) {
+									_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+									if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+										alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+									}
+								} else {
+									_popup.close();
+									_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+								}
+							} else {
+								alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				}
 			},
 			onSuccess : function(){},
 			onError : function(data, status){
@@ -1678,7 +1736,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName1" />
@@ -1816,7 +1874,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName2" />
@@ -1955,7 +2013,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName3" />
