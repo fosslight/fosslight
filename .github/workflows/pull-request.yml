@@ -8,11 +8,11 @@ on:
     branches:
       - '*'
 jobs:
-  - name: Check Commit Message
+  check-commit-message:
     uses: ./jobs/check-commit-message.yml
 
-  - name: Check the site
+  check-the-site:
     uses: ./jobs/check-site.yml
 
-  - name: Test
+  test:
     uses: ./jobs/test.yml
