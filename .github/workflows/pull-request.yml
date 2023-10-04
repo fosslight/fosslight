@@ -15,33 +15,15 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    services:
+      web:
+        image: appropriate/curl
+      ports:
+        - 8180:8180
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Build the stack
-        run: docker-compose up --build -d
-      - name: Sleep for 30 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '30s'
-      - name: Check running containers
-        run: docker-compose ps
-      - name: Save docker-compose logs
-        run:
-          docker-compose logs --no-color web > docker-compose-web.log &&
-          docker-compose logs --no-color db > docker-compose-db.log &&
-          docker-compose logs --no-color mail > docker-compose-mail.log
       - name: Check the site
-        run: docker run --network container:fosslight_web appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
-      - name: Stop containers
-        if: always()
-        run: docker-compose down
-      - name: Show db container log
-        run: cat docker-compose-db.log
-      - name: Show web container log
-        run: cat docker-compose-web.log
-      - name: Show mail container log
-        run: cat docker-compose-mail.log
+        run: docker run --network host appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
 
   test:
     runs-on: ubuntu-latest
@@ -77,3 +59,6 @@ jobs:
         if: ${{ always() }}
         with:
           files: build/test-results/**/*.xml
+https://github:
+  com/fosslight/fosslight:
+    git:
