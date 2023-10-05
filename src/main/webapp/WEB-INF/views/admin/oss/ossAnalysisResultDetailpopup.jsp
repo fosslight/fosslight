@@ -135,6 +135,40 @@
 				common_data["list"+seq] = {rows:[]};
 				var licenseName = "";
 				
+				var vDiffFlag = false;
+				var multiFlag = false;
+				var dualFlag = false;
+				
+				if (typeof selectData.ossType !== "undefined") {
+					vDiffFlag = true;
+				}
+				
+				if ("M" == licenseDiv) {
+					if (replaceLicenseData.indexOf(' AND ') > -1 || replaceLicenseData.indexOf(' and ') > -1) {
+						multiFlag = true;
+					}
+					if (replaceLicenseData.indexOf(' OR ') > -1 || replaceLicenseData.indexOf(' or ') > -1) {
+						dualFlag = true;
+					}
+				}
+				
+				var colOssType = '';
+				if (multiFlag) {
+					colOssType += '<span class="iconSet multi">Multi</span>';
+				}
+				
+				if (dualFlag) {
+					colOssType += '<span class="iconSet dual">Dual</span>';
+				}
+				
+				if (vDiffFlag){
+					colOssType += '<span class="iconSet vdif">v-Diff</span>';
+				}
+				
+				if ('' != colOssType) {
+					$("[name='ossType"+seq+"']").html(colOssType);
+				}
+				
 				for(var i in licenseData){
 					var ossLicenseComb = "";
 					var filteredLicenseData = "";
@@ -1766,6 +1800,10 @@
 										</td>
 									</tr>
 									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType1"></span></td>
+									</tr>
+									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
 										<td class="dCase">
 											<div class="required detailLicense1">
@@ -1905,6 +1943,10 @@
 										</td>
 									</tr>
 									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType2"></span></td>
+									</tr>
+									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
 										<td class="dCase">
 											<div class="required detailLicense2">
@@ -2042,6 +2084,10 @@
 											</div>
 											<input id="nickAdd3" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
+									</tr>
+									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType3"></span></td>
 									</tr>
 									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
