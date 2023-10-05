@@ -3901,18 +3901,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
-							if (ossNicknameFlag) {
-								newestOssInfo.setOssName(ossName);
-								newestOssInfo.setOssNickname(null);
-							}
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(userData.getOssVersion());
 							newestOssInfo.setComment(comment);
 						}
 						
 						if (userData.getOssName().toUpperCase().equals(totalAnalysis.getOssName().toUpperCase())) {
 							String newestMergeNickName = "";
-							if (newestOssInfo != null && !ossNicknameFlag) {
+							if (newestOssInfo != null) {
 								newestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, newestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
 								newestOssInfo.setOssNickname(newestMergeNickName);
 							}else {
@@ -3973,7 +3968,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						changeAnalysisResultList.add(newestOssInfo); // seq 4 : 최신등록 정보
 						
 						if (newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
-							if (newestOssInfo.getOssNickname() != null && !ossNicknameFlag) {
+							if (newestOssInfo.getOssNickname() != null) {
 								userData.setOssNickname(CommonFunction.mergeNickname(userData, newestOssInfo.getOssNickname()));
 							}
 							if (userData.getOssNickname() != null) {
@@ -4066,11 +4061,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
-							if (ossNicknameFlag) newestOssInfo.setOssName(ossName);
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(userData.getOssVersion());
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						}
+						
+						if (ossNicknameFlag) {
+							userData.setOssName(ossName);
 						}
 					} catch (Exception newestException) {
 						log.error(newestException.getMessage());
