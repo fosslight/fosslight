@@ -16,10 +16,54 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
+      db:
+        image: mariadb:10
+        container_name: fosslight_db
+        ports:
+          - "3306:3306"
+        volumes:
+          - ./db/conf.d:/etc/mysql/conf.d
+          - ./db/data:/var/lib/mysql
+          - ./db/initdb.d:/docker-entrypoint-initdb.d
+        env_file: docker.env
+        environment:
+          TZ: Asia/Seoul
+        restart: always
+        expose:
+          - "3306"
       web:
         image: appropriate/curl
-      ports:
-        - 8180:8180
+        ports:
+          - "8180:8180"
+      mail:
+        image: mailserver/docker-mailserver:10
+        container_name: fosslight_mail
+        hostname: mail
+        domainname: fosslight.org
+        ports:
+          - "25:25"
+          - "587:587"
+        expose:
+          - "25"
+          - "587"
+        volumes:
+          - ./mail/maildata/:/var/mail
+          - ./mail/mailstate/:/var/mail-state
+          - ./mail/maillogs/:/var/log/mail
+          - ./mail/config/:/tmp/docker-mailserver/
+        environment:
+          - ENABLE_SPAMASSASSIN=1
+          - SPAMASSASSIN_SPAM_TO_INBOX=1
+          - ENABLE_CLAMAV=0
+          - ENABLE_FAIL2BAN=1
+          - ENABLE_POSTGREY=1
+          - ENABLE_SASLAUTHD=0
+          - ONE_DIR=1
+          - DMS_DEBUG=0
+        cap_add:
+          - NET_ADMIN
+          - SYS_PTRACE
+        restart: always
 
     steps:
       - name: Check the site
