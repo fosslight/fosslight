@@ -15,17 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.domain.CoMail;
+import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2CodeDtl;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CodeService;
 
+@Slf4j
 @Service
 public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	@Autowired CodeMapper codeMapper;
+	@Autowired T2UserMapper t2UserMapper;
 
 	/**
 	 * 코드 목록 조회
@@ -99,7 +105,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			T2CodeDtl codeDtlVO = new T2CodeDtl();
 			codeDtlVO.setCdNo(cdNo);
 			List<T2CodeDtl> beforeCodeDetailList = codeMapper.selectCodeDetailList(codeDtlVO);
-			
+
 			List<T2CodeDtl> filteredCodeDetailList = beforeCodeDetailList
 							.stream()
 							.filter(before->
@@ -108,7 +114,7 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 										.filter(after->
 											(before.getCdDtlNm()).equalsIgnoreCase(after.getCdDtlNm()) && before.getUseYn().equals(after.getUseYn()) && !before.getCdDtlNo().equals(after.getCdDtlNo())).collect(Collectors.toList()).size() > 0
 									).collect(Collectors.toList());
-			
+
 			List<T2CodeDtl> filteredAfterCodeDetailList = dtlList
 					.stream()
 					.filter(before->
@@ -129,6 +135,31 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 					}
 				}
 			}
+
+			// send email if useYn changed from "Y" to "N"
+			for (T2CodeDtl cdDtlBefore : beforeCodeDetailList){
+				for(T2CodeDtl cdDtlAfter : dtlList){
+					if( cdDtlBefore.getUseYn().equalsIgnoreCase("Y")
+							&& cdDtlAfter.getUseYn().equalsIgnoreCase("N")){
+						List<T2Users> t2UsersList = t2UserMapper.selectAllUsersUpdatedDivision(cdDtlAfter.getCdDtlNo());
+						List<String> toIds = new ArrayList<>();
+						for (T2Users users: t2UsersList){
+							toIds.add(users.getEmail());
+						}
+						try {
+							CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_UPDATE);
+							mailBean.setEmlTitle("Division이 비활성화되었습니다. 로그인 후 왼쪽 메뉴바의 User name을 클릭하여 Division을 업데이트해주십시오.");
+							mailBean.setEmlMessage("Division이 비활성화되었습니다. 로그인 후 왼쪽 메뉴바의 User name을 클릭하여 Division을 업데이트해주십시오.");
+							mailBean.setToIds(toIds.toArray(new String[toIds.size()]));
+
+							CoMailManager.getInstance().sendMail(mailBean);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+					}
+				}
+			}
+
 		}
 
 		if (isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
