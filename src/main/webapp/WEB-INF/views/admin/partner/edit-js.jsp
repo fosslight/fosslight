@@ -27,7 +27,6 @@ var saveFlag = false;
 		evt.init();
 		evt.tabInit();
 		datas.init();
-		grid.init();
 
 		<c:if test="${batFlag}">
 		//if('${detail.partnerId}' != ""){
@@ -2076,15 +2075,61 @@ var saveFlag = false;
 	    },
 	    selectDownloadFile : function(target) {
 	    	// download file
-	        if (target === "report_sub") fn.downloadExcel();
-	        else if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
-	        else if (target === "RDF_sub") fn.downloadSpdxRdf();
-	        else if (target === "TAG_sub") fn.downloadSpdxTag();
-	        else if (target === "JSON_sub") fn.downloadSpdxJson();
-	        else if (target === "YAML_sub") fn.downloadSpdxYaml();
-	        // hide list
+	    	if (target === "report_sub") {
+	    		fn.downloadExcel();
+	    	} else {
+	    		var status = '${detail.status}';
+	        	if ('CONF' != status) {
+	        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+	    				if (e) {
+	    					fn.selectDownloadFileValidation(target);
+	    				} else {
+	    					return false;
+	    				}
+	    			});
+	        	} else {
+	        		fn.selectDownloadFileValidation(target);
+	        	}
+	    	}
+	        
+	    	// hide list
 	        $("#ExportList").hide();
 	    },
+	    selectDownloadFileValidation : function(target) {
+	    	if (fn.checkSelectDownloadFile()) {
+        		if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+    	        else if (target === "RDF_sub") fn.downloadSpdxRdf();
+    	        else if (target === "TAG_sub") fn.downloadSpdxTag();
+    	        else if (target === "JSON_sub") fn.downloadSpdxJson();
+    	        else if (target === "YAML_sub") fn.downloadSpdxYaml();
+    	        else if (target === "YAML") fn.downloadYaml();
+			} else {
+	    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+	    	}
+	    },
+		checkSelectDownloadFile : function() {
+			var checkEmptyFlag = false;
+			
+			$.ajax({
+	    		type: "POST",
+				url: '<c:url value="/partner/checkSelectDownloadFile"/>',
+				data: JSON.stringify({"partnerId":'${detail.partnerId}'}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+	    	});
+	    	
+	    	return checkEmptyFlag;
+		}
 		downloadSpdxSpreadSheetExcel : function(){
 			var partnerId = "${detail.partnerId}";
 			if ("" !== partnerId) {

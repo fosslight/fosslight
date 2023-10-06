@@ -341,6 +341,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String publDate;
 	private String patchLink;
 	
+	private String dependencies;
+	private String refOssName;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2089,5 +2092,21 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setOssVersionEmptyFlag(String ossVersionEmptyFlag) {
 		this.ossVersionEmptyFlag = ossVersionEmptyFlag;
+	}
+
+	public String getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public String getRefOssName() {
+		return refOssName;
+	}
+
+	public void setRefOssName(String refOssName) {
+		this.refOssName = refOssName;
 	}
 }

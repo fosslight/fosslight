@@ -6,6 +6,25 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+# [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-27)
+### New
+* Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
+* The parameter whether to reset or not when uploading report in Project/Self-check is newly added. (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck)
+* A button to download the FOSSLight Report in yaml format has been added to “export” button.
+* Added a new popup which displays the detected license information for each saved version when an open source with a different license for each version is saved to the system for the first time.
+* The DEP tab has been added to upload the results of FOSSLight Dependency Scanner.
+  - Relationship information for each package is added to the “Dependencies” column.
+  - The rename function does not apply to OSS names in the DEP tab.
+  - Relationship information is displayed when clicking the Dependencies icon on the BOM tab.
+  - When exporting a document in SPDX format, relationship information is included.
+
+### Changed
+* All OSS are included in the BOM when exported in project and 3rd party, regardless of the notification obligation.
+* The OSS report form has been updated. 
+  - The "DEP" sheet has been added for the dependency analysis results
+  - The automatic selection form for the Operating System field and Category field within the Model Info sheet has also been updated with the latest information.
+* "Notice" shows before login screen.
+
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 
 ### New

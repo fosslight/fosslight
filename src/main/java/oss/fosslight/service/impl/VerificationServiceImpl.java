@@ -85,6 +85,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	private static String REVIEW_REPORT_PATH=CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
+	
 
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
@@ -279,21 +281,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException {
-		return getReviewReportPdfFile(ossNotice, null);
+	public boolean getReviewReportPdfFile(String prjId) throws IOException {
+		return getReviewReportPdfFile(prjId, null);
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice, String contents) throws IOException {
-		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
+	public boolean getReviewReportPdfFile(String prjId, String contents) throws IOException {
+		Project prjInfo = projectService.getProjectBasicInfo(prjId);
 
-		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
-			return true;
+		try {
+			contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(prjId));
+		}catch(Exception e){
+			log.error(e.getMessage());
+			return false;
 		}
-
-		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
 
 		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
@@ -424,9 +425,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		try {
 			// file path and name 설정
-			// 파일 path : <upload_home>/notice/
+			// 파일 path : <upload_home>/reviewReport/
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
-			String filePath = NOTICE_PATH + "/" + project.getPrjId();
+			String filePath = REVIEW_REPORT_PATH + "/" + project.getPrjId();
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
@@ -489,7 +490,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
 
 				// Convert Map to Apache Velocity Template
-				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
+				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice, true));
 			}
 		}
 	}
@@ -648,6 +649,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			boolean parenthesisCheckFlag = false;
 			if (packageFileName.contains("(") || packageFileName.contains(")")) parenthesisCheckFlag = true;
 
+			List<String> collectDataDeCompResultList = new ArrayList<>();
+
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
@@ -668,6 +671,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 						if (s.startsWith("/")) {
 							s = s.substring(1);
+						}
+						
+						if (s.startsWith(packageFileName)) {
+							collectDataDeCompResultList.add(s);
+							s = s.replace(packageFileName, "");
+							
+							if (s.startsWith("/")) {
+								s = s.substring(1);
+							}
+						} else {
+							collectDataDeCompResultList.add(packageFileName + "/" + s);
 						}
 
 						if (s.endsWith("*")) {
@@ -712,6 +726,32 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 						deCompResultMap.put(s, 0);
 					}
+				}
+			}
+
+			if (collectDataDeCompResultList != null && !collectDataDeCompResultList.isEmpty()) {
+				for (String s : collectDataDeCompResultList) {
+					boolean isFile = s.endsWith("*");
+					
+					int cnt = 0;
+					
+					if (isFile){
+						String _dir = s;
+						
+						if (s.indexOf("/") > -1) {
+							_dir = s.substring(0, s.lastIndexOf("/"));
+						}
+						
+						if (deCompResultMap.containsKey(_dir)) {
+							cnt = deCompResultMap.get(_dir);
+						}
+						
+						cnt++;
+						
+						deCompResultMap.put(_dir, cnt);
+					}
+					
+					deCompResultMap.put(s, 0);
 				}
 			}
 
@@ -1537,6 +1577,51 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 	}
 
+	@Override
+	public String changePackageFileNameCombine(String prjId) {
+
+		String contents = "";
+		// 프로젝트 기본정보 취득
+		Project prjBean = new Project();
+		prjBean.setPrjId(prjId);
+		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		List<String> packageFileIds = new ArrayList<String>();
+
+		if (!isEmpty(prjBean.getPackageFileId())) {
+			packageFileIds.add(prjBean.getPackageFileId());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId2())) {
+			packageFileIds.add(prjBean.getPackageFileId2());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId3())) {
+			packageFileIds.add(prjBean.getPackageFileId3());
+		}
+
+		int fileSeq = 1;
+
+		for (String packageFileId : packageFileIds){
+			T2File packageFileInfo = new T2File();
+			packageFileInfo.setFileSeq(packageFileId);
+			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
+
+			if (packageFileInfo != null) {
+				String orgFileName = packageFileInfo.getOrigNm();
+				// Packaging > Confirm시 Packaging 파일명 변경 건
+				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : "");
+				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
+
+				packageFileInfo.setOrigNm(chgFileName);
+
+				fileMapper.upateOrgFileName(packageFileInfo);
+
+				contents += "<p>Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\" </p> ";
+			}
+		}
+		return contents;
+	}
+
 	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
 		String fileName = prjName;
 
@@ -1812,6 +1897,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 	@Override
 	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice) {
+		return getNoticeHtmlInfo(ossNotice, false);
+	}
+	
+	@Override
+	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		String noticeType = "";
@@ -1870,6 +1960,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
 					bean.setHomepage(homepage);
+
+				OssMaster om = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId());
+				if (om != null) {
+					String copyright = om.getCopyright();
+					String homepage = om.getHomepage();
+					
+					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+						bean.setCopyrightText(copyright);
+					}
+					
+					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+						bean.setHomepage(homepage);
+					}
+
 				}
 			}
 
@@ -2124,6 +2228,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
+			
+			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
 
 			noticeList.add(bean);
 		}
@@ -2156,6 +2262,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
+			
+			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
 
 			srcList.add(bean);
 		}

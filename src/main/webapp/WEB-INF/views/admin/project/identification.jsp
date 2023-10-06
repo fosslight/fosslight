@@ -341,8 +341,13 @@
                     	</c:if>
                     </span>
                     <span class="right">
-                        <input type="button" value="Export" onclick="src_fn.downloadExcel()" class="btnColor red btnExpor srcBtn" />
-                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('SRC')"/>
+                    	<div id="srcExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="src_fn.exportList(this)"/>
+							<div id="srcExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0; text-align:left;">
+								<a onclick="src_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a onclick="src_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
+							</div>
+						</div>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
 	                        <input id="srcSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -515,8 +520,13 @@
                     	</c:if>
                     </span>
                     <span class="right">
-                        <input type="button" value="Export" onclick="bin_fn.downloadExcel()" class="btnColor red btnExpor binBtn" />
-                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BIN')"/>
+                        <div id="binExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="bin_fn.exportList(this)"/>
+							<div id="binExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0; text-align:left;">
+								<a onclick="bin_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a onclick="bin_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
+							</div>
+						</div>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="binReset" type="button" value="Reset" class="btnColor btnReset binBtn idenReset" />
 	                        <input id="binSave" type="button" value="Save" class="btnSave btnColor red idenSave"/>
@@ -800,6 +810,7 @@
 								<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList(this);"/>
 								<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
 									<a onclick="bom_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+									<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
 									<a onclick="bom_fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
 									<a onclick="bom_fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
 									<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
@@ -808,7 +819,6 @@
 								</div>
 							</div>
 						</c:if>
-                        <input type="button" value="Yaml" class="btnColor red btnExport" onclick="com_fn.downloadYaml('BOM')"/>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
 	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>

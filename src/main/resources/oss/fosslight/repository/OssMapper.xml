@@ -433,6 +433,11 @@
 			</if>
 			)
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			<![CDATA[
+			AND	CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
+		</if>
 		GROUP BY T1.OSS_NAME
 		) RESULT
    	</select>
@@ -445,7 +450,14 @@
 			) T2 ON T1.OSS_NAME = T2.OSS_NAME
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
-			AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+	    	<choose>
+	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
+					AND T1.OSS_NAME = #{schOssName}
+				</when>
+				<otherwise>
+					AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+				</otherwise>
+	    	</choose>
 		</if>
 	</select>
 	
@@ -461,7 +473,14 @@
 			) T2 ON T1.OSS_NAME = T2.OSS_NAME
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
-			AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+	    	<choose>
+	    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
+					AND T1.OSS_NAME = #{schOssName}
+				</when>
+				<otherwise>
+					AND	T1.OSS_NAME LIKE CONCAT('%',#{schOssName},'%')
+				</otherwise>
+	    	</choose>
 		</if>
 		ORDER BY T1.OSS_NAME, T1.OSS_VERSION DESC
 		<include refid="limitPage"/>
@@ -657,6 +676,11 @@
 			</if>
 			)
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			<![CDATA[
+			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
+		</if>
 		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
 		GROUP BY T1.OSS_NAME
 		</if>
@@ -840,6 +864,11 @@
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
             AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
         </if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			<![CDATA[
+			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
+		</if>
 		GROUP BY T1.OSS_ID
 		ORDER BY
 		T1.OSS_VERSION DESC
@@ -1743,8 +1772,8 @@
 						   ON OM.OSS_ID = DOWN.OSS_ID
 		WHERE OM.OSS_NAME != #{ossName}
 		  AND (
-			OM.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'),'%')
-		   	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'),'%')
+			OM.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+		   	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
 			)
 		GROUP BY OM.OSS_NAME
 		UNION
@@ -2273,17 +2302,7 @@
     	ON OM.OSS_NAME = NICK.OSS_NAME
     	AND OM.USE_YN = 'Y'
     	WHERE OM.OSS_VERSION = #{ossVersion}
-    	<choose>
-    		<when test="dashOssNameList != null">
-    			AND (NICK.OSS_NICKNAME = #{schOssName}
-    			<foreach item="item" collection="dashOssNameList">
-    				OR NICK.OSS_NICKNAME = #{item}
-    			</foreach>)
-    		</when>
-    		<otherwise>
-    			AND NICK.OSS_NAME = #{schOssName}
-    		</otherwise>
-    	</choose>
+    	AND NICK.OSS_NAME = #{schOssName}
 	</select>
 
 	<select id="selectVulnInfoForOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
@@ -2305,26 +2324,25 @@
     		AND VERSION = #{ossVersion}
     		</if>
     		AND (PRODUCT = #{ossName}
-    		<if test="conversionNameList != null">
-				<foreach item="item" collection="conversionNameList">
+    		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
+				<foreach item="item" collection="ossNicknames">
 					OR PRODUCT = #{item}
 				</foreach>
-			</if>
-			<if test="dashOssNameList != null">
-				<foreach item="item" collection="dashOssNameList">
+				<foreach item="item" collection="ossNicknames">
 					OR VENDORPRODUCT = #{item}
 				</foreach>
 			</if>
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
     		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
-								WHERE OSS_NAME = #{ossName}
+								WHERE OSS_NAME = #{schOssName}
 								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 								AND OSS_VERSION = #{ossVersion}
 								</if>
 								<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
 								AND OSS_VERSION = ''
 								</if>
+								AND REFERENCE_ID = #{prjId}
 								AND VULNERABILITY_RESOLUTION = 'Fixed')
     		</if>
     	) NVD
@@ -2332,4 +2350,14 @@
     	ON NVD.CVE_ID = CVE.CVE_ID
     	ORDER BY CVE.CVSS_SCORE*1 DESC LIMIT 5
     </select>
+    
+    <select id="checkOssVersionDiff" parameterType="string" resultType="int">
+		SELECT COUNT(*)
+		FROM OSS_MASTER OM
+		INNER JOIN OSS_MASTER_LICENSE_FLAG OMF
+		ON OM.OSS_ID = OMF.OSS_ID
+		WHERE OM.USE_YN = 'Y'
+		AND OM.OSS_NAME = #{ossName}
+		AND OMF.VERSION_DIFF_FLAG = 'Y'
+	</select>
 </mapper>

@@ -246,4 +246,6 @@ public interface OssMapper {
 	List<String> selectVulnInfoForOss(OssMaster ossMaster);
 
 	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
+
+	int checkOssVersionDiff(String ossName);
 }

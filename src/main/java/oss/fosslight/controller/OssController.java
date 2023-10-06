@@ -716,6 +716,7 @@ public class OssController extends CoTopComponent{
 		Map<String, Object> reqMap = new HashMap<>();
 		reqMap.put("ossId", (String) map.get("ossId"));
 		reqMap.put("ossName", (String) map.get("ossName"));
+		if (map.containsKey("ossVersion")) reqMap.put("ossVersion", (String) map.get("ossVersion"));
 		
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
 		List<OssLicense> list = ossService.checkLicenseId((List<OssLicense>) fromJson((String) map.get("license"), collectionType));
@@ -1764,6 +1765,10 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			for (OssAnalysis oa : detailData) {
+				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+			}
+			
 			result.put("isValid", true);
 			result.put("detailData", detailData);
 			result.put("cloneLicenseData", new OssMaster());
@@ -1833,7 +1838,20 @@ public class OssController extends CoTopComponent{
 		if (!isEmpty(analysisBean.getLicenseName())) {
 //			for (String s : analysisBean.getLicenseName().toUpperCase().split(" OR ")) {
 				// 순서가 중요
-				String orGroupStr = analysisBean.getLicenseName().replaceAll("\\(", " ").replaceAll("\\)", " ");
+				String orGroupStr = analysisBean.getLicenseName();
+				boolean multiLicenseFlag = false;
+			
+				if (orGroupStr.contains(",")) {
+					multiLicenseFlag = true;
+			
+					if (orGroupStr.startsWith("(")) {
+						orGroupStr = orGroupStr.substring(1, orGroupStr.length());
+						if (orGroupStr.endsWith(")")) {
+							orGroupStr = orGroupStr.substring(0, orGroupStr.length()-1);
+						}
+					}
+				}
+			
 //				boolean groupFirst = true;
 				for (String s2 : orGroupStr.split(",")) {
 					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(s2.trim().toUpperCase());
@@ -1843,12 +1861,12 @@ public class OssController extends CoTopComponent{
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId(license.getLicenseId());
 						licenseBean.setLicenseName(license.getLicenseNameTemp());
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					} else {
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId("");
 						licenseBean.setLicenseName(s2);
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					}
 					
 					ossLicenseList.add(licenseBean);

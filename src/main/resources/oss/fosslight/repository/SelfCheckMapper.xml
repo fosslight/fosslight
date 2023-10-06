@@ -86,16 +86,28 @@
 						    GROUP BY REFERENCE_ID
 							) T2 ON T1.PRJ_ID = T2.REFERENCE_ID
 	    WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1 
 						  FROM PRE_PROJECT_WATCHER A1 
-						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
 						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
+			</if> -->
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						T1.CREATOR = #{loginUserName} 
+						OR EXISTS (
+						SELECT 1
+						  FROM PRE_PROJECT_WATCHER A1
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+						)
+					)
+				</if>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
@@ -164,16 +176,28 @@
 			FROM PRE_PROJECT_MASTER T1
 						
 	    WHERE T1.USE_YN = 'Y'
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!--		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 				AND (
 					T1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1 
 						  FROM PRE_PROJECT_WATCHER A1 
-						 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
+						 INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} 
 						 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
 					)
 				)
+			</if> -->
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						T1.CREATOR = #{loginUserName} 
+						OR EXISTS (
+						SELECT 1
+						  FROM PRE_PROJECT_WATCHER A1
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+						)
+					)
+				</if>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
@@ -351,12 +375,14 @@
 			, OS_TYPE                     = #{osType}
 			, OS_TYPE_ETC                 = #{osTypeEtc}
 			, MODIFIER                    = #{loginUserName}
-			, DIVISION                    = #{division}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
 			, DIVISION                    = #{division}
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(division)">
+			, DIVISION                    = (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 			</if>
 	</insert>
 	
@@ -2666,16 +2692,17 @@
 			, T2.DOWNLOAD_LOCATION
 			, T2.HOMEPAGE
 			, T2.OBLIGATION_TYPE
-			, T3.LICENSE_ID
-			, T5.LICENSE_TEXT
- 			, IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER) AS LICENSE_NAME
- 			, T5.ATTRIBUTION
-			, T5.LICENSE_TYPE
+			, IFNULL(T3.LICENSE_ID, '') AS LICENSE_ID
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TEXT) AS LICENSE_TEXT
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', REGEXP_REPLACE(T3.COPYRIGHT_TEXT, '$\n', '')) AS COPYRIGHT_TEXT
+ 			, IF(IFNULL(T3.LICENSE_ID, '') = '', IFNULL(T3.LICENSE_NAME, ''), IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER)) AS LICENSE_NAME
+ 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS ATTRIBUTION
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
 			, CONCAT(T1.PRJ_ID, T2.COMPONENT_IDX) AS COMPONENT_ID
 		FROM PRE_PROJECT_MASTER T1 
 			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.OSS_NAME != '-'
 			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
-			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
+			 LEFT JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
 		  AND T2.EXCLUDE_YN = 'N'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(refDivUnExists)">
@@ -2692,17 +2719,18 @@
 		SELECT 
 			T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION
 			, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION, T2.DOWNLOAD_LOCATION, T2.HOMEPAGE, T2.OBLIGATION_TYPE
-			, T5.LICENSE_ID
-			, T5.LICENSE_TEXT
-			, REGEXP_REPLACE(T3.COPYRIGHT_TEXT, '$\n', '') AS COPYRIGHT_TEXT, IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER) AS LICENSE_NAME
-			, T5.ATTRIBUTION
+			, IFNULL(T5.LICENSE_ID, '') AS LICENSE_ID
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TEXT) AS LICENSE_TEXT
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', REGEXP_REPLACE(T3.COPYRIGHT_TEXT, '$\n', '')) AS COPYRIGHT_TEXT
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', IFNULL(T3.LICENSE_NAME, ''), IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER)) AS LICENSE_NAME
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS LICENSE_TYPE
 			, T2.FILE_PATH
-			, T5.LICENSE_TYPE
+			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
 			, CONCAT(T1.PRJ_ID, T2.COMPONENT_IDX) AS COMPONENT_ID
 		FROM PRE_PROJECT_MASTER T1 
 			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.EXCLUDE_YN = 'N' AND T2.OSS_ID IS NULL
 			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
-			INNER JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
+			 LEFT JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
 		WHERE T1.PRJ_ID = #{prjId}
 		  AND T2.EXCLUDE_YN = 'N'
 		<!-- ORDER BY LICENSE_NAME -->
@@ -3089,5 +3117,20 @@
 			ORDER BY NVD.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL
+	</select>
+	
+	<select id="checkSelectDownloadFile" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
+		SELECT T2.OSS_ID
+				, T2.OSS_NAME
+				, T2.OSS_VERSION 
+				, T3.LICENSE_ID
+				, IF(IFNULL(T3.LICENSE_ID, '') = '', T3.LICENSE_NAME, IF(IFNULL(T5.SHORT_IDENTIFIER,'') = '', T5.LICENSE_NAME, T5.SHORT_IDENTIFIER)) AS LICENSE_NAME
+		FROM PRE_PROJECT_MASTER T1 
+			INNER JOIN PRE_OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '10' AND T2.OSS_NAME != '-'
+			INNER JOIN PRE_OSS_COMPONENTS_LICENSE T3 ON CONCAT(T2.REFERENCE_ID, '-', T2.REFERENCE_DIV, '-', T2.COMPONENT_IDX) = T3.COMPONENT_ID
+			 LEFT JOIN OSS_MASTER T4 ON T2.OSS_NAME = T4.OSS_NAME AND IFNULL(T2.OSS_VERSION, '') = IFNULL(T4.OSS_VERSION, '') AND T4.USE_YN = 'Y'
+			 LEFT JOIN LICENSE_MASTER T5 ON T3.LICENSE_ID = T5.LICENSE_ID
+		WHERE T1.PRJ_ID = #{prjId}
+		  AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 	</select>
 </mapper>

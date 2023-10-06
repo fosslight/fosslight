@@ -919,6 +919,11 @@
 				var rows = fn.getModelGridRows('#_modelList');
 				$('input[name=prjModelJson]').val(JSON.stringify(rows));
 				
+				//disabled일경우 제거
+				if($("input[name=distributeTarget]").is(":disabled")){
+					$("input[name=distributeTarget]").removeAttr("disabled");
+				}
+				
 				$("#projectForm").ajaxForm({
 					url : '<c:url value="/project/saveModelAjax"/>',
 					type : 'POST',

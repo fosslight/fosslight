@@ -95,10 +95,8 @@ public interface ProjectMapper {
 
 	void updateFileId(Project project);
 
-	List<T2File> selectCsvFile(Project project);
+	List<T2File> selectCsvFile(@Param("csvFileId") String csvFileId);
 	
-	List<T2File> selectBinCsvFile(Project project);
-
 	void deleteFileBySeq(T2File file);
 
 	List<T2File> selectAndroidCsvFile(Project project);
@@ -380,4 +378,8 @@ public interface ProjectMapper {
 	int copySecurityDataForProjectCnt(Project project);
 
 	void copySecurityDataForProject(Project project);
+	
+	List<OssComponents> checkSelectDownloadFile(Project project);
+
+	List<OssComponents> getDependenciesDataList(Project project);
 }

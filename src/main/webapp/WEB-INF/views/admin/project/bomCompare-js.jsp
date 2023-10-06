@@ -7,7 +7,11 @@
 		$("#beforePrjId").val("${beforePrjId}");
 		$("#afterPrjId").val("${afterPrjId}");
 
-		'use strict';
+                if (beforePrjId !== "0000" && afterPrjId !== "0000") {
+                    bomCompareList.search();
+                }
+
+                'use strict';
 		
 		evt.init();
 		setGrid.load();

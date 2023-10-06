@@ -34,6 +34,10 @@
 						<label>Creator</label>
 						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
 					</dd>
+					<dd class="">
+						<label class="vmiddle" style="width: 50%;">View My Projects Only</label>
+						<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
+					</dd>
 				</dl>
 				<input name="act" type="hidden" value="search"/>
 				<input id="search" type="submit" value="Search" class="btnColor search" />

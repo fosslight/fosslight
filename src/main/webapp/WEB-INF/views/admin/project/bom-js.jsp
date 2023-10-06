@@ -594,7 +594,7 @@ var bom_fn = {
 		});
     },
     exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");console.log(exportListId);
+    	var exportListId = '#' + $(obj).siblings("div").attr("id");
         if ($(exportListId).css('display')=='none') {
             $(exportListId).show();
         }else{
@@ -604,16 +604,39 @@ var bom_fn = {
     },
     selectDownloadFile : function(target) {
     	// download file
-        if (target === "report_sub") bom_fn.downloadExcel();
-        else if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
-        else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
-        else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
-        else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
-        else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+    	if (target === "report_sub") {
+        	bom_fn.downloadExcel();
+        } else {
+        	var identificationStatus = '${project.identificationStatus}';
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+    				if (e) {
+    					bom_fn.selectDownloadFileValidation(target);
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		bom_fn.selectDownloadFileValidation(target);
+        	}
+        }
+        
         // hide list
         $("#ExportList").hide();
     },
-	downloadSpdxSpreadSheetExcel : function(){
+    selectDownloadFileValidation : function(target) {
+    	if (com_fn.checkSelectDownloadFile('BOM')) {
+    		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
+            else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
+            else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
+            else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
+            else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+            else if (target === "YAML") com_fn.downloadYaml('BOM');
+    	} else {
+    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+    	}
+    },
+    downloadSpdxSpreadSheetExcel : function(){
 		$.ajax({
 			type: "POST",
 			url: '<c:url value="/spdxdownload/getSPDXPost"/>',
@@ -712,6 +735,9 @@ var bom_fn = {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
+	},
+	loadAnalysisUrl : function (target, url) {
+		createTabInFrame(target, url);
 	}
 }
 

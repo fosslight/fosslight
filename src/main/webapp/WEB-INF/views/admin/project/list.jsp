@@ -23,22 +23,16 @@
 						<input name="schEndDate" id="schEndDate" type="text" class="cal" title="Search End Date" value="${searchBean.schEndDate}" maxlength="8" autocomplete="off" style="width:77px;"/> 
 					</dd>
 					<dd>
-						<label>Division</label>
-						<span class="selectSet">
-							<strong title="Status selected value"></strong>
-							<select name="prjDivision">
-								<option value=""></option>
-								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
-							</select>
-						</span>						
-					</dd>
-					<dd class="centerAign">
 						<label>Creator</label>
 						<input type="text" name="creator" class="autoComCreatorDivision" value="${searchBean.creator}"/>
 					</dd>
-					<dd class="lastAign">
+					<dd class="centerAign">
 						<label>Reviewer</label>
 						<input type="text" name="reviewer" class="autoComReviewer" value="${searchBean.reviewer}"/>
+					</dd>
+					<dd class="lastAign">
+						<label>Watcher</label>
+						<input type="text" name="watchers" class="" value="${searchBean.watchers[0]}"/>
 					</dd>
 					<dd>
 						<label>Distribution Type</label>
@@ -78,6 +72,16 @@
 							<select name="priority">
 								<option value=""></option>
 								${ct:genOption(ct:getConstDef("CD_PROJECT_PRIORITY"))}
+							</select>
+						</span>
+					</dd>
+					<dd class="centerAign">
+						<label>Division</label>
+						<span class="selectSet">
+							<strong title="Status selected value"></strong>
+							<select name="prjDivision">
+								<option value=""></option>
+								${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
 							</select>
 						</span>
 					</dd>
@@ -164,7 +168,7 @@
 				<h1 class="orange">Change Division</h1>
 				<div class="popdata">
 					<div class="mtb20">
-						<span>Division</label>
+						<label>Division</label>
 						<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
 							<strong title="Division selected value"></strong>
 							<select name="division">

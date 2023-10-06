@@ -148,6 +148,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		
+		boolean permissionFlag = false;
 		// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
 		if (CommonFunction.isAdmin()) {
 			List<T2Users> userList = userService.selectAllUsers();
@@ -155,6 +156,11 @@ public class SelfCheckController extends CoTopComponent {
 			if (userList != null) {
 				model.addAttribute("userWithDivisionList", userList);
 			}
+		} else {
+			if (selfCheckService.checkUserPermissions(project, loginUserName())) {
+				permissionFlag = true;
+			}
+			if (!permissionFlag) model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 		}
 		
 		return SELF_CHECK.EDIT_JSP;
@@ -761,5 +767,16 @@ public class SelfCheckController extends CoTopComponent {
 		}
 		
 		return makeJsonResponseHeader(downloadId);
+	}
+	
+	@PostMapping(value=SELF_CHECK.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody Project project, HttpServletRequest req, HttpServletResponse res, Model model){
+		Map<String, Object> resMap = new HashMap<>();
+		try {
+			resMap = selfCheckService.checkSelectDownloadFile(project);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader(resMap);
 	}
 }

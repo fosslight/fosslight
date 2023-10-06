@@ -249,6 +249,7 @@ public final class Url {
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
+		public static final String SAVE_DEP = PATH + "/saveDep";
 		public static final String SAVE_SRC = PATH + "/saveSrc"; 
 		public static final String SAVE_BIN = PATH + "/saveBin";
 		public static final String SAVE_BINANDROID = PATH + "/saveBinAndroid";
@@ -277,9 +278,11 @@ public final class Url {
 		public static final String IDENTIFICATION_ID_DIV = PATH + "/identification/{prjId}/{initDiv}";
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
-		public static final String IDENTIFICATION_PROJECT_SERCH_CD = PATH + "/identificationProjectSearch/{code}";
+
+		public static final String IDENTIFICATION_PROJECT_SEARCH_CD = PATH + "/identificationProjectSearch/{code}";
 		public static final String IDENTIFICATION_THIRD = PATH + "/identificationThird";
 		public static final String IDENTIFICATION_GRID_POST = PATH + "/identificationGridPost";
+
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
 		public static final String TRD_OSS = PATH + "/3rdOss";
 		
@@ -350,6 +353,8 @@ public final class Url {
 		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulkEditPopup";
 		
 		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile/{code}";
 	}
 	
 	public static final class VERIFICATION {
@@ -472,6 +477,8 @@ public final class Url {
 		public static final String PARTNER_DIVISION = PATH + "/updatePartnerDivision";
 
 		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class USER {
@@ -561,6 +568,7 @@ public final class Url {
 		public static final String MAKE_NOTICE_TEXT_SIMPLE = PATH + "/makeNoticeTextSimple";	
 			
 		public static final String MAKE_YAML = PATH + "/makeYaml";
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class COMPLIANCE {
@@ -749,10 +757,16 @@ public final class Url {
 		/** 3RD PARTY */
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partner_search";
+			
+			/** API 3rd Party Add Watcher */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partner_watcher_add";
 		
 		/** OSS */
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss_search";
+
+			/** API OSS List 조회 */
+			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss_register";
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
@@ -787,7 +801,11 @@ public final class Url {
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
 			
+			/** API Project Add Watcher */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
+			
 			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT_DEP			= "/oss_report_dep";
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/oss_report_src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/oss_report_bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/oss_report_android";
@@ -813,6 +831,9 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
+			
+			/** API SelfCheck Add Watcher */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfcheck_watcher_add";
 		
 		/** BINARY */
 			/** API Binary List 조회 */

@@ -44,7 +44,7 @@ public class AutoIdService {
 			
 			List<BinaryData> list = new ArrayList<>();
 			// tlsh distance를 비교하여 근접값을 찾는다.
-			BinaryData binaryData = findCloseBatOssWithTlshDistance(binaryName, tlsh, dbDataList);
+			BinaryData binaryData = findCloseBatOssWithTlshDistance(tlsh, dbDataList);
 			if(binaryData != null) {
 				list.add(binaryData);
 				return list;
@@ -56,12 +56,11 @@ public class AutoIdService {
 	
 	/**
 	 * tlsh distance가 가장 가까운 binary 정보를 찾는다.
-	 * @param binaryName
 	 * @param tish
 	 * @param dbDataList
 	 * @return
 	 */
-	private BinaryData findCloseBatOssWithTlshDistance(String binaryName, String tlsh, List<BinaryData> dbDataList) {
+	private BinaryData findCloseBatOssWithTlshDistance(String tlsh, List<BinaryData> dbDataList) {
 		
 		int currentDistance = 999999;
 		BinaryData currentBinaryBean = null;

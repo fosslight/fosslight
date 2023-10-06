@@ -242,7 +242,7 @@
 			colNames:['','','License', 'Copyright','',''],
 			colModel:[
 				{name:'no', index: 'no', key:true, hidden:true},
-				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, edittype:"select", editoptions:{value:"AND:AND;OR:OR;WITH:WITH"}},
+				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, edittype:"select", editoptions:{value:"AND:AND;OR:OR"}},
 				{name:'licenseNameEx',index:'licenseNameEx', width:300, editable:false},
 				{name:'ossCopyright',index:'ossCopyright', width:400, edittype:"textarea"},
 				{name:'licenseName',index:'licenseName', width:50, editable:true,hidden:true},

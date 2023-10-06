@@ -59,8 +59,7 @@
 				</dl>
 				<c:if test="${ct:isAdmin()}">
 				<input type="button" value="Admin Expand apply" class="btnExpand" />
-				<dl class="adminSearch" style="display:none;">
-					<dt style="width:20px;"></dt>
+				<dl class="adminSearch" style="display:none; height: 70px;">
 					<dd>
 						<label>Creator</label>
 						<span class="selectSet">

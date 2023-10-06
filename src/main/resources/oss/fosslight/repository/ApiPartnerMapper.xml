@@ -143,4 +143,57 @@
 		ORDER BY RESULT.PARTNER_ID DESC
 		LIMIT 0, 1000
 	</select>
+	
+	<select id="existPartnertCnt" parameterType="hashMap" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		(
+			SELECT T1.PARTNER_ID
+				, T1.PARTNER_NAME
+				, T1.SOFTWARE_NAME
+				, CASE WHEN T1.STATUS = 'PROG' THEN 'Progress'
+					   WHEN T1.STATUS = 'REQ' THEN 'Request'
+					   WHEN T1.STATUS = 'REV' THEN 'Review'
+					   WHEN T1.STATUS = 'CONF' THEN 'Confirm' 
+				END AS STATUS
+				, T1.MODIFIED_DATE
+				, T1.CREATED_DATE
+				, T1.CREATOR
+			FROM PARTNER_MASTER T1
+			WHERE T1.USE_YN = 'Y'
+			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', userRole)">
+				AND (
+					T1.CREATOR = #{userId} 
+					OR EXISTS (
+						SELECT 1 
+						FROM PARTNER_WATCHER A1 
+						WHERE A1.PARTNER_ID = T1.PARTNER_ID AND (A1.USER_ID = #{userId} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{userId}) ))
+					)
+				<if test="@oss.fosslight.util.StringUtil@notEquals('N', readOnly)">
+					OR PUBLIC_YN = 'Y'
+				</if>
+				)
+			</if>
+		) RESULT
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerIdList)">
+			<foreach item="item" index="index" collection="partnerIdList" open=" AND (" close=")" separator="OR">
+		     	RESULT.PARTNER_ID = #{item}
+		    </foreach>
+		</if>
+	</select>
+	
+	<select id="existsWatcherByEmail" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM PARTNER_WATCHER WAT
+		LEFT JOIN T2_USERS USR
+		ON WAT.USER_ID = USR.USER_ID
+		AND USR.USE_YN = 'Y'
+		WHERE WAT.PARTNER_ID = #{partnerId}
+		AND (WAT.EMAIL = #{email} OR USR.EMAIL = #{email})
+	</select>
+	
+	<insert id="insertWatcher" parameterType="hashMap">
+		INSERT INTO PARTNER_WATCHER (PARTNER_ID, DIVISION, USER_ID, EMAIL) VALUES (#{partnerId}, #{division}, #{userId}, #{partnerEmail})
+	</insert>
 </mapper>

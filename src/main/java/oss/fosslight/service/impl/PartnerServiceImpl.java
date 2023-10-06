@@ -1054,6 +1054,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String ossInfoUpperKey = "";
 		
 		for (OssComponents bean : ossComponentList) {
+			if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) continue;
+			
 			ossInfoUpperKey = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 			if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoUpperKey) && isEmpty(bean.getHomepage())) {
 				bean.setHomepage(CoCodeManager.OSS_INFO_UPPER.get(ossInfoUpperKey).getHomepage());
@@ -1131,6 +1133,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			Map<String, List<String>> addOssComponentCopyright = new HashMap<>();
 			
 			for (OssComponents bean : addOssComponentList) {
+				if (isEmpty(bean.getLicenseName())) continue;
+				
 				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				
 				List<String> copyrightList = addOssComponentCopyright.containsKey(componentKey) 
@@ -1297,9 +1301,17 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 
 	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
 		if (ossComponentsLicense != null) {
-			for (OssComponentsLicense bean : ossComponentsLicense) {
-				if (bean.getLicenseId().equals(license.getLicenseId())) {
-					return true;
+			if (!isEmpty(license.getLicenseId())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseId().equals(license.getLicenseId())) {
+						return true;
+					}
+				}
+			} else if (isEmpty(license.getLicenseId()) && !isEmpty(license.getLicenseName())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseName().equals(license.getLicenseName())) {
+						return true;
+					}
 				}
 			}
 		}
@@ -1320,5 +1332,27 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		}
 
 		return ossCopyright;
+	}
+
+	@Override
+	public Map<String, Object> checkSelectDownloadFile(PartnerMaster partnerMaster) {
+		Map<String, Object> resMap = new HashMap<>();
+		boolean emptyCheckFlag = false;
+		
+		List<OssComponents> list = partnerMapper.checkSelectDownloadFile(partnerMaster);
+		for (OssComponents oss : list) {
+			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+				emptyCheckFlag = true;
+				break;
+			}
+		}
+		
+		if (emptyCheckFlag) {
+			resMap.put("isValid", false);
+		} else {
+			resMap.put("isValid", true);
+		}
+		
+		return resMap;
 	}
 }

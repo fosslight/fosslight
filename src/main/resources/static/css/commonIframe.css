@@ -84,6 +84,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .multiTxtSet span .smallDelete {position:absolute;right:7px;top:7px;}
 .multiTxtSet + input {float:left;width:90px;}
 .multiTxtSet .retxt {clear:left;} /* 2016-11-05 by mj-cho*/
+.multiTxtSet span .iconSet.nick {position:absolute;left:7px;top:7px;}
 /**/
 .multiTxtSet2 {margin:3px 0 0;max-width:732px;overflow:hidden;}
 .multiTxtSet2 span {position:relative;display:inline-block;float:left;margin:3px 5px 3px 0;}
@@ -247,7 +248,8 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnPG {margin:0 2px;display:inline-block;width:30px;height:16px;line-height:16px;text-align:center;font-family:Tahoma;font-size:11px;font-weight:bold;color:#666;cursor:pointer;border:1px solid #393a5a;border-radius:1px;background: url("../images/bg_pg.png") no-repeat;background-position:right top;}
 .btnPG.wauto {margin:0 0;width:80%;max-width:150px;}
 .btnPG.on3rd {color:#fff;background-position:right -30px;}
-.btnPG.onSrc {color:#fff;border-color: #6e3c60;background-position:right -90px;}
+.btnPG.onDep {color:#fff;border-color:#2E75B6;background-position:-80px -90px;}
+.btnPG.onSrc {color:#fff;border-color:#6e3c60;background-position:right -90px;}
 .btnPG.onBat {color:#fff;border-color:#897a46;background-position:right -60px;}
 .btnPG.onBom {color:#fff;border-color:#897a46;background-position:right -60px;}
 .btnPG.onBin {color:#fff;border-color:#478786;background-position:right -60px;}
@@ -422,15 +424,16 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .listSearch .detailArea > dl.col1 dd label + input[type='text'] {width:calc(100% - 155px);vertical-align:middle;}
 .listSearch .detailArea > dl.col1 dd label + input[type='password'] {width:calc(100% - 155px);vertical-align:middle;}
 .listSearch .basicSearch dt {display:none;}
-.listSearch .adminSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:40px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
+.listSearch .adminSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:0 90px 8px 0;height:40px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
 .listSearch .adminSearch dt {float:left;padding:6px 18px 0 0;width:120px;text-align:right;}
 .listSearch .adminSearch dt strong {display:none;}
 .listSearch .adminSearch dt span {font-size:13px;color:#c00c3f;}
-.listSearch .adminSearch dd {padding:0 17px 0 0;}
+.listSearch .adminSearch dd {width:44%; padding:10px 20px 0;}
 .listSearch .adminSearch dd input {width:60px;}
 .listSearch .adminSearch dd input[type=checkbox] {width: 13px;}
 .listSearch .adminSearch dd input.cal {width:92px;}
-.listSearch .adminSearch dd label {padding:0 15px 0 0;color:#454545;}
+.listSearch .adminSearch dd label {display:inline-block;width:100px;text-align:right;}
+.listSearch .adminSearch dd .selectSet {width:70%;}
 .listSearch .hiddenSearch {clear:left;display:inline-block;margin:10px -20px 0;padding:12px 0 0;width:1023px;height:135px;border-radius:0 0 5px 5px;border-top:1px solid #e3dbd0;background:#faf6ed;}
 .listSearch .hiddenSearch dt {float:left;padding:6px 18px 0 0;width:120px;text-align:right;}
 .listSearch .hiddenSearch dt strong {display:none;}
@@ -783,7 +786,7 @@ td .retxt, div .retxt {padding-top:2px;font-size:11px;color:red !important;}				
 	border-color: #ccc;
 	border-width: 0;
 }
-.commentBack dd,p{margin: 20px 5px 20px 5px; !important;}
+.commentBack dd,p{margin: 20px 5px 20px 5px !important;}
 div .retxtb {padding-top:2px;font-size:11px;color:blue !important;}
 div .retxtg {padding-top:2px;font-size:11px;color:gray !important;}
 

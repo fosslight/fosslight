@@ -283,7 +283,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
 				if (conversionCveInfo != null) {
 					String[] conversionCveData = conversionCveInfo.split("\\@");
 					bean.setCvssScore(conversionCveData[3]);
@@ -1246,16 +1246,16 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 				selfCheckMapper.insertWatcher(project);
 				
 				// email 발송
-				try {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED);
-					mailBean.setParamPrjId(project.getPrjId());
-					mailBean.setParamUserId(project.getLoginUserName());
-					mailBean.setParamEmail(project.getPrjEmail());
-					
-					CoMailManager.getInstance().sendMail(mailBean);
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
+//				try {
+//					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_SELFCHECK_PROJECT_WATCHER_INVATED);
+//					mailBean.setParamPrjId(project.getPrjId());
+//					mailBean.setParamUserId(project.getLoginUserName());
+//					mailBean.setParamEmail(project.getPrjEmail());
+//					
+//					CoMailManager.getInstance().sendMail(mailBean);
+//				} catch (Exception e) {
+//					log.error(e.getMessage(), e);
+//				}
 			}
 		} else {
 			// 이미 추가된 watcher 체크
@@ -1978,12 +1978,19 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		return model;
 	}
 
-	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense,
-			OssComponentsLicense license) {
+	private boolean checkLicenseDuplicated(List<OssComponentsLicense> ossComponentsLicense, OssComponentsLicense license) {
 		if (ossComponentsLicense != null) {
-			for (OssComponentsLicense bean : ossComponentsLicense) {
-				if (bean.getLicenseId().equals(license.getLicenseId())) {
-					return true;
+			if (!isEmpty(license.getLicenseId())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseId().equals(license.getLicenseId())) {
+						return true;
+					}
+				}
+			} else if (isEmpty(license.getLicenseId()) && !isEmpty(license.getLicenseName())) {
+				for (OssComponentsLicense bean : ossComponentsLicense) {
+					if (bean.getLicenseName().equals(license.getLicenseName())) {
+						return true;
+					}
 				}
 			}
 		}
@@ -2272,7 +2279,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		String ossInfoUpperKey = "";
 		
 		for (OssComponents bean : ossComponentList) {
-			if (bean.getOssName().isEmpty()) continue;
+			if (bean.getOssName().isEmpty() || isEmpty(bean.getLicenseName())) continue;
 			
 			ossInfoUpperKey = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 			if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoUpperKey) && isEmpty(bean.getHomepage())) {
@@ -2355,9 +2362,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			Map<String, List<String>> addOssComponentCopyright = new HashMap<>();
 			
 			for (OssComponents bean : addOssComponentList) {
-				if (bean.getOssName().isEmpty()) continue;
+				if (isEmpty(bean.getLicenseName())) continue;
 				
-				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();	
+				String componentKey = (bean.getOssName() + "|" + bean.getOssVersion()).toUpperCase();
 				List<String> copyrightList = addOssComponentCopyright.containsKey(componentKey) 
 						? (List<String>) addOssComponentCopyright.get(componentKey) 
 						: new ArrayList<>();
@@ -2520,5 +2527,46 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		model.put("addOssComponentList", addOssComponentList);
 		
 		return model;
+	}
+
+	@Override
+	public Map<String, Object> checkSelectDownloadFile(Project project) {
+		Map<String, Object> resMap = new HashMap<>();
+		boolean emptyCheckFlag = false;
+		
+		List<OssComponents> list = selfCheckMapper.checkSelectDownloadFile(project);
+		for (OssComponents oss : list) {
+			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+				emptyCheckFlag = true;
+				break;
+			}
+		}
+		
+		if (emptyCheckFlag) {
+			resMap.put("isValid", false);
+		} else {
+			resMap.put("isValid", true);
+		}
+		
+		return resMap;
+	}
+
+	@Override
+	public boolean checkUserPermissions(Project project, String userId) {
+		boolean checkFlag = false;
+		
+		if (project.getWatcherList() != null) {
+			for (Project prj : project.getWatcherList()) {
+				if (prj.getPrjUserId().equals(userId)) {
+					checkFlag = true;
+					break;
+				}
+			}
+		}
+		if (project.getCreator().equals(userId)) {
+			checkFlag = true;
+		}
+		
+		return checkFlag;
 	}
 }

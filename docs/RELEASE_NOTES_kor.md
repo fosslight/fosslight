@@ -6,6 +6,26 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-09-27)
+
+### New
+* Project, 3rd party, Self-check에 watcher를 추가 할 수 있는 API Endpoint가 추가 (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
+* Project, Self-check의 report 업로드 시 reset 여부를 선택할 수 있도록 parameter가 추가 (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck)
+* Yaml형식의 FOSSLight Report를 다운로드 받을 수 있는 버튼이 "Export"에 추가
+* 버전 별로 다른 license를 가진 OSS가 시스템에 처음 저장이 될 때, 기존 저장된 detected license를 보여주는 팝업이 추가
+* FOSSLight Dependency Scanner를 통해 분석한 결과를 작성할 수 있는 DEP 탭이 추가
+  - "Dependencies" Column에 각 Package의 Relationship 정보가 추가
+  - DEP 탭의 OSS Name에는 Rename 기능이 적용되지 않음
+  - BOM 탭에서 Dependencies 아이콘을 클릭 시, Relationship 정보를 확인
+  - SPDX 형식의 문서로 Export시, Relationship 정보가 포함
+
+### Changed
+* Proejct, 3rd party에서 Export 시 모든 OSS가 고지 의무와 상관 없이 BOM에 출력
+* OSS 보고서 양식이 업데이트
+  - Dependency 분석 결과를 기록할 수 있는 "DEP" Sheet가 추가
+  - Operating System 필드 및 Model Info sheet 내 카테고리 필드 자동 선택 양식 또한 최신 정보로 업데이트
+* Notice를 login 전에 확인 가능
+
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 
 ### New
