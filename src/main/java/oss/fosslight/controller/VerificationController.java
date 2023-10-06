@@ -555,25 +555,14 @@ public class VerificationController extends CoTopComponent {
 		log.info("URI: "+ "/project/verification/reportAjax");
 		log.debug("PARAM: "+ "prjId="+prjId);
 
-		OssNotice ossNotice = new OssNotice();
-		ossNotice.setDomain(CommonFunction.getDomain(req));
-		ossNotice.setPrjId(prjId);
-
 		String resultHtml = "";
 
 		try {
-			ossNotice.setDomain(CommonFunction.getDomain(req)); // domain Setting
-
-			Project prjMasterInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-			String noticeFileId = prjMasterInfo.getNoticeFileId();
-			log.debug("PARAM: "+ "noticeFileId="+noticeFileId);
-
 			// create review file
-			if (isEmpty(noticeFileId)) {
-				if (!verificationService.getReviewReportPdfFile(ossNotice)) {
-					return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
-				}
+			if (!verificationService.getReviewReportPdfFile(prjId)) {
+				return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
 			}
+
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -950,7 +939,7 @@ public class VerificationController extends CoTopComponent {
 
 		ResponseEntity<FileSystemResource> result = null;
 		String prjId = req.getParameter("prjId");
-		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("notice.path", "/notice"));
+		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport"));
 
 		return result;
 	}

@@ -85,6 +85,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	private static String REVIEW_REPORT_PATH=CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
 	
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
@@ -279,21 +280,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException {
-		return getReviewReportPdfFile(ossNotice, null);
+	public boolean getReviewReportPdfFile(String prjId) throws IOException {
+		return getReviewReportPdfFile(prjId, null);
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice, String contents) throws IOException {
-		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
+	public boolean getReviewReportPdfFile(String prjId, String contents) throws IOException {
+		Project prjInfo = projectService.getProjectBasicInfo(prjId);
 
-		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
-			return true;
+		try {
+			contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(prjId));
+		}catch(Exception e){
+			log.error(e.getMessage());
+			return false;
 		}
-
-		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
 
 		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
@@ -424,9 +424,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		try {
 			// file path and name 설정
-			// 파일 path : <upload_home>/notice/
+			// 파일 path : <upload_home>/reviewReport/
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
-			String filePath = NOTICE_PATH + "/" + project.getPrjId();
+			String filePath = REVIEW_REPORT_PATH + "/" + project.getPrjId();
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
