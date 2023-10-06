@@ -296,7 +296,10 @@ public class CoConstDef {
 	/** 사업부 분류 코드 - 200 */
 	public static final String CD_USER_DIVISION = "200";
 	public static final String CD_USER_DIVISION_EMPTY = "999";
-	
+
+	/** 화면당 출력 ROW 수 기본값*/
+	public static final Integer NUMBERS_OF_ROWS_PER_PAGE_DEFAULT = 15;
+
 	/** 프로젝트 상태 코드 - 205 */
 	public static final String CD_PROJECT_STATUS = "205";
 	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 	= "PROG";

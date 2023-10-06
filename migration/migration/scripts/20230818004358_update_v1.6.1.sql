@@ -23,6 +23,13 @@ ALTER TABLE `PROJECT_MASTER` ADD `DEP_CSV_FILE_ID` int(11) NULL DEFAULT NULL;
 ALTER TABLE `OSS_COMPONENTS` ADD `DEPENDENCIES` varchar(2000) NULL DEFAULT NULL;
 ALTER TABLE `OSS_COMPONENTS` ADD `REF_OSS_NAME` varchar(200) NULL DEFAULT NULL;
 
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`,
+                           `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`)
+VALUES ('227', '1', '15', '', '', 15, 'Y'),
+       ('227', '2', '30', '', '', 30, 'Y'),
+       ('227', '3', '50', '', '', 50, 'Y'),
+       ('227', '4', '100', '', '', 10, 'Y');
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
