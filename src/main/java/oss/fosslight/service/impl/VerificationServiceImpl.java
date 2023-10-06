@@ -668,8 +668,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if (s.startsWith(packageFileName)) {
-							collectDataDeCompResultList.add(s);
-							s = s.replace(packageFileName, "");
+							String removePackageFileName = s.replace(packageFileName, "");
+							if (removePackageFileName.startsWith("/")) {
+								removePackageFileName = removePackageFileName.substring(1);
+							}
+							collectDataDeCompResultList.add(removePackageFileName);
 							
 							if (s.startsWith("/")) {
 								s = s.substring(1);
