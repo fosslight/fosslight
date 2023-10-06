@@ -67,7 +67,6 @@ public class CoMailManager extends CoTopComponent {
 	private static ProjectService projectService;
 	private static FileService fileService;
 	private static OssMapper ossMapper;
-	private static VulnerabilityMapper vulnerabilityMapper;
 
 	private static VulnerabilityServiceImpl vulnerabilityServiceimpl;
 
@@ -103,7 +102,6 @@ public class CoMailManager extends CoTopComponent {
         	projectService = (ProjectService) getWebappContext().getBean(ProjectService.class);
         	fileService = (FileService) getWebappContext().getBean(FileService.class);
         	ossMapper = (OssMapper) getWebappContext().getBean(OssMapper.class);
-			vulnerabilityMapper = (VulnerabilityMapper) getWebappContext().getBean(VulnerabilityMapper.class);
 			vulnerabilityServiceimpl = (VulnerabilityServiceImpl) getWebappContext().getBean(VulnerabilityServiceImpl.class);
             DEFAULT_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bcc"));
             BAT_FAILED_BCC = avoidNull(CommonFunction.getProperty("smtp.default.bat")).split(",");	// (To be added) BAT Detail setting
@@ -249,8 +247,8 @@ public class CoMailManager extends CoTopComponent {
 
 			if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_SYNCINFO.equals(bean.getMsgType())) {
 
-				List<Map<String, Object>> discoveredNvdData = vulnerabilityMapper.selectDiscoveredNvdData();
-				List<Map<String, Object>> recalculatedNvdData = vulnerabilityMapper.selectRecalculatedNvdData();
+				List<Map<String, Object>> discoveredNvdData = vulnerabilityServiceimpl.getDiscoveredNvdData();
+				List<Map<String, Object>> recalculatedNvdData = vulnerabilityServiceimpl.getRecalculatedNvdData();
 				Map<String, Object> nvdDataResult = vulnerabilityServiceimpl.checkNvdSyncStatus();
 
 				convertDataMap.put("vulnerability_sync_info_discovered", discoveredNvdData);
