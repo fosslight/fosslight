@@ -137,25 +137,28 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			}
 
 			// send email if useYn changed from "Y" to "N"
-			for (T2CodeDtl cdDtlBefore : beforeCodeDetailList){
-				for(T2CodeDtl cdDtlAfter : dtlList){
-					if( cdDtlBefore.getUseYn().equalsIgnoreCase("Y")
-							&& cdDtlAfter.getUseYn().equalsIgnoreCase("N")){
-						List<T2Users> t2UsersList = t2UserMapper.selectAllUsersUpdatedDivision(cdDtlAfter.getCdDtlNo());
+			for (T2CodeDtl before : beforeCodeDetailList) {
+				for (T2CodeDtl after : dtlList) {
+					if (before.getCdDtlNo().equals(after.getCdDtlNo()) &&
+							before.getUseYn().equalsIgnoreCase("Y") &&
+							after.getUseYn().equalsIgnoreCase("N")) {
+
+						List<T2Users> t2UsersList = t2UserMapper.selectAllUsersUpdatedDivision(after.getCdDtlNo());
 						List<String> toIds = new ArrayList<>();
-						for (T2Users users: t2UsersList){
-							toIds.add(users.getEmail());
+						for (T2Users user: t2UsersList){
+							System.out.println(user);
+							toIds.add(user.getEmail());
 						}
 						try {
 							CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_UPDATE);
 							mailBean.setEmlTitle("Division이 비활성화되었습니다. 로그인 후 왼쪽 메뉴바의 User name을 클릭하여 Division을 업데이트해주십시오.");
 							mailBean.setEmlMessage("Division이 비활성화되었습니다. 로그인 후 왼쪽 메뉴바의 User name을 클릭하여 Division을 업데이트해주십시오.");
 							mailBean.setToIds(toIds.toArray(new String[toIds.size()]));
-
 							CoMailManager.getInstance().sendMail(mailBean);
 						} catch (Exception e) {
 							log.error(e.getMessage(), e);
 						}
+
 					}
 				}
 			}
