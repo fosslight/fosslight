@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - '*'
+    paths-ignore:
+      - 'lite/**'
 jobs:
   # TODO: revert back when merging to fosslight/fosslight
   # check-commit-message:
