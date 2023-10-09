@@ -1,38 +1,11 @@
 'use client';
 
+import { menus, rootMenu } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-const menus = [
-  {
-    name: 'Database',
-    icon: 'fa-solid fa-database',
-    path: '/database',
-    sub: [
-      { name: 'OSS', path: '/oss' },
-      { name: 'License', path: '/license' },
-      { name: 'Vulnerability', path: '/vulnerability' }
-    ]
-  },
-  {
-    name: 'Self-Check',
-    icon: 'fa-solid fa-list-check',
-    path: '/self-check',
-    sub: [{ name: 'Project', path: '/project' }]
-  },
-  {
-    name: 'Etc',
-    icon: 'fa-solid fa-gear',
-    path: '/etc',
-    sub: [
-      { name: 'User Management', path: '/user' },
-      { name: 'Code Management', path: '/code' }
-    ]
-  }
-];
 
 export default function SideBar({ isShown }: { isShown: boolean }) {
   const [isMenuShown, setIsMenuShown] = useState(
@@ -87,7 +60,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
             }`}
             href="/"
           >
-            <i className="fa-solid fa-chart-line"></i>&ensp;Dashboard
+            <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
           </Link>
           {menus.map((menu) => {
             return (
