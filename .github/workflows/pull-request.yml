@@ -8,10 +8,11 @@ on:
     branches:
       - '*'
 jobs:
-  check-commit-message:
-    uses: fosslight/.github/.github/workflows/base-check-commit-message.yml@main
-    secrets:
-      envPAT: ${{ secrets.GITHUB_TOKEN }}
+  # TODO: revert back when merging to fosslight/fosslight
+  # check-commit-message:
+  #   uses: fosslight/.github/.github/workflows/base-check-commit-message.yml@main
+  #   secrets:
+  #     envPAT: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
