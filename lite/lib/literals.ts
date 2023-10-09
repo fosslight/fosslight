@@ -1,11 +1,13 @@
 export const rootMenu = {
   name: 'Dashboard',
+  short: 'Home',
   icon: 'fa-solid fa-chart-line'
 };
 
 export const menus = [
   {
     name: 'Database',
+    short: 'DB',
     icon: 'fa-solid fa-database',
     path: '/database',
     sub: [
@@ -16,12 +18,14 @@ export const menus = [
   },
   {
     name: 'Self-Check',
+    short: 'Check',
     icon: 'fa-solid fa-list-check',
     path: '/self-check',
     sub: [{ name: 'Project', path: '/project' }]
   },
   {
     name: 'Etc',
+    short: 'Etc',
     icon: 'fa-solid fa-gear',
     path: '/etc',
     sub: [

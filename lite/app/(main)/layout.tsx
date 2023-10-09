@@ -1,5 +1,6 @@
 'use client';
 
+import BottomBar from '@/components/bottom-bar';
 import FullSearchBar from '@/components/full-search-bar';
 import SideBar from '@/components/side-bar';
 import Logo from '@/public/images/logo.png';
@@ -35,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <i className="text-lg fa-solid fa-user"></i>
         </div>
         <div className="pt-4 px-4 pb-24">{children}</div>
-        <div className="fixed right-0 bottom-0 left-0 h-16 bg-charcol"></div>
+        <BottomBar />
       </main>
     );
   }
