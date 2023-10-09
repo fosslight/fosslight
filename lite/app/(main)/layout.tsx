@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex min-h-screen">
       <SideBar isShown={isSideBarShown} />
-      <div className="flex-1 px-4 pb-8">
+      <div className="flex-1 min-w-0 px-4">
         <div className="sticky top-0 flex flex-col gap-y-10 pt-4 pb-8 bg-white">
           <button
             className="w-6 h-6 text-xl text-charcol"
@@ -20,7 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </button>
           <FullSearchBar />
         </div>
-        {children}
+        <div className="pb-8 overflow-x-auto no-scrollbar">{children}</div>
       </div>
     </main>
   );
