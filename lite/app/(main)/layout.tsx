@@ -3,20 +3,22 @@
 import BottomBar from '@/components/bottom-bar';
 import FullSearchBar from '@/components/full-search-bar';
 import SideBar from '@/components/side-bar';
+import { viewState } from '@/lib/atoms';
 import Logo from '@/public/images/logo.png';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
+import { useRecoilState } from 'recoil';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isSideBarShown, setIsSideBarShown] = useState(true);
-  const [view, setView] = useState<'pc' | 'mobile' | 'none'>('none');
+  const [view, setView] = useRecoilState(viewState);
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
     if (isMobile) setView('mobile');
     else setView('pc');
-  }, [isMobile]);
+  }, [setView, isMobile]);
 
   // Wait until detecting appropriate view
   if (view === 'none') return null;
