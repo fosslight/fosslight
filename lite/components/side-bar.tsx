@@ -55,7 +55,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
     <div
       className={`sticky top-0 ${
         isShown ? 'w-56' : 'w-0'
-      } h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300`}
+      } shrink-0 h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300`}
     >
       <div className="absolute top-0 right-0 bottom-0 w-56 overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-charcol">
