@@ -27,15 +27,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (view === 'mobile') {
     return (
       <main className="flex flex-col min-h-screen">
-        <div className="sticky top-0 flex justify-between items-center h-12 px-4 bg-white shadow-[0_0_3px_2px_rgba(0,0,0,0.2)]">
-          <div className="relative w-6 h-6">
-            <Image src={Logo} fill sizes="48px" alt="fosslight" />
+        <div className="sticky top-0 shadow-[0_0_3px_2px_rgba(0,0,0,0.2)]">
+          <div className="flex justify-between items-center h-12 px-4 bg-white">
+            <div className="relative w-6 h-6">
+              <Image src={Logo} fill sizes="48px" alt="fosslight" />
+            </div>
+            <div className="text-xl font-semibold">
+              FOSSLight Hub&nbsp;
+              <span className="text-lg font-light">Lite</span>
+            </div>
+            <i className="text-lg fa-solid fa-user"></i>
           </div>
-          <div className="text-xl font-semibold">
-            FOSSLight Hub&nbsp;
-            <span className="text-lg font-light">Lite</span>
-          </div>
-          <i className="text-lg fa-solid fa-user"></i>
+          <FullSearchBar />
         </div>
         <div className="pt-4 px-4 pb-24">{children}</div>
         <BottomBar />
