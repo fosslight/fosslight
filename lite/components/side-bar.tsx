@@ -1,38 +1,12 @@
 'use client';
 
+import { menus, rootMenu } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
+import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-const menus = [
-  {
-    name: 'Database',
-    icon: 'fa-solid fa-database',
-    path: '/database',
-    sub: [
-      { name: 'OSS', path: '/oss' },
-      { name: 'License', path: '/license' },
-      { name: 'Vulnerability', path: '/vulnerability' }
-    ]
-  },
-  {
-    name: 'Self-Check',
-    icon: 'fa-solid fa-list-check',
-    path: '/self-check',
-    sub: [{ name: 'Project', path: '/project' }]
-  },
-  {
-    name: 'Etc',
-    icon: 'fa-solid fa-gear',
-    path: '/etc',
-    sub: [
-      { name: 'User Management', path: '/user' },
-      { name: 'Code Management', path: '/code' }
-    ]
-  }
-];
 
 export default function SideBar({ isShown }: { isShown: boolean }) {
   const [isMenuShown, setIsMenuShown] = useState(
@@ -43,7 +17,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
   useEffect(() => {
     const currentMenu = menus.filter((menu) => pathname.startsWith(menu.path))[0];
 
-    if (currentMenu && !isMenuShown[currentMenu.name]) {
+    if (currentMenu && currentMenu.sub && !isMenuShown[currentMenu.name]) {
       const newIsMenuShown = { ...isMenuShown };
       newIsMenuShown[currentMenu.name] = true;
       setIsMenuShown(newIsMenuShown);
@@ -53,9 +27,10 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
 
   return (
     <div
-      className={`sticky top-0 ${
+      className={clsx(
+        'sticky top-0 shrink-0 h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10',
         isShown ? 'w-56' : 'w-0'
-      } h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300`}
+      )}
     >
       <div className="absolute top-0 right-0 bottom-0 w-56 overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-charcol">
@@ -82,14 +57,30 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
         </div>
         <div className="flex flex-col gap-y-4 py-8">
           <Link
-            className={`px-4 text-lg font-semibold leading-loose ${
-              pathname === '/' ? 'bg-[rgb(104,114,126,0.2)]' : ''
-            }`}
+            className={clsx(
+              'px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50',
+              pathname === '/' && 'bg-semicharcol/20'
+            )}
             href="/"
           >
-            <i className="fa-solid fa-chart-line"></i>&ensp;Dashboard
+            <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
           </Link>
           {menus.map((menu) => {
+            if (!menu.sub) {
+              return (
+                <Link
+                  key={menu.name}
+                  className={clsx(
+                    'px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50',
+                    pathname.startsWith(menu.path) && 'bg-semicharcol/20'
+                  )}
+                  href={menu.path}
+                >
+                  <i className={menu.icon}></i>&ensp;{menu.name}
+                </Link>
+              );
+            }
+
             return (
               <div key={menu.name}>
                 <div
@@ -110,18 +101,18 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                   )}
                 </div>
                 <div
-                  className={`flex flex-col ${
+                  className={clsx(
+                    'flex flex-col overflow-y-hidden transition-[max-height] duration-[500ms]',
                     !isMenuShown[menu.name] ? 'max-h-0' : 'max-h-40'
-                  } overflow-y-hidden transition-[max-height] duration-300`}
+                  )}
                 >
                   {menu.sub.map((subMenu) => (
                     <Link
                       key={subMenu.name}
-                      className={`px-4 ${
-                        pathname.startsWith(menu.path + subMenu.path)
-                          ? 'bg-[rgb(127,141,157,0.2)]'
-                          : ''
-                      } leading-loose cursor-pointer hover:bg-[rgb(104,114,126,0.5)]`}
+                      className={clsx(
+                        'px-4 leading-loose cursor-pointer hover:bg-semicharcol/50',
+                        pathname.startsWith(menu.path + subMenu.path) && 'bg-semicharcol/20'
+                      )}
                       href={menu.path + subMenu.path}
                     >
                       <i className="fa-solid fa-caret-right"></i>&emsp;{subMenu.name}

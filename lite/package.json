@@ -11,12 +11,14 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "axios": "^1.5.1",
+    "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "next": "13.5.4",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.47.0",
     "react-query": "^3.39.3",
+    "react-responsive": "^9.0.2",
     "recoil": "^0.7.7"
   },
   "devDependencies": {

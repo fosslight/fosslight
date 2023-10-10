@@ -10,4 +10,9 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent; /* Safari and other WebKit-based browsers */
+    tap-highlight-color: transparent; /* Most other browsers */
+  }
 }
