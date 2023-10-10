@@ -2748,8 +2748,8 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("project", projectMaster);
 		// android model이면서 bom화면을 표시하려고하는 경우, android bin tab index로 치환한다.
 		
-		if (!"4".equals(initDiv) && CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
-			initDiv = "4";
+		if (!"3".equals(initDiv) && CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
+			initDiv = "3";
 		}
 		
 		if (!partnerFlag && "0".equals(initDiv)) {
