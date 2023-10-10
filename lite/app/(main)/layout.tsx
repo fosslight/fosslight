@@ -5,6 +5,7 @@ import FullSearchBar from '@/components/full-search-bar';
 import SideBar from '@/components/side-bar';
 import TopBar from '@/components/top-bar';
 import { viewState } from '@/lib/atoms';
+import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useRecoilState } from 'recoil';
@@ -23,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (view === 'none') return null;
 
   return (
-    <main className={`min-h-screen ${view === 'pc' ? 'flex' : ''}`}>
+    <main className={clsx('min-h-screen', view === 'pc' && 'flex')}>
       {/* Left navigation bar (PC) */}
       {view === 'pc' && <SideBar isShown={isSideBarShown} />}
 
@@ -31,9 +32,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className={view === 'pc' ? 'flex-1 min-w-0' : ''}>
         {/* Areas fixed at the top of the page */}
         <div
-          className={`sticky top-0 bg-white ${
-            view === 'pc' ? 'flex flex-col gap-y-10 pt-4 px-4 pb-8' : ''
-          }`}
+          className={clsx(
+            'sticky top-0 bg-white',
+            view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-8'
+          )}
         >
           {/* Hamburger button (PC) or Top bar (Mobile) */}
           {view === 'pc' ? (
@@ -53,7 +55,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Page content */}
         <div
-          className={`mx-4 overflow-x-auto no-scrollbar ${view === 'pc' ? 'mb-8' : 'mt-4 mb-24'}`}
+          className={clsx(
+            'mx-4 overflow-x-auto no-scrollbar',
+            view === 'pc' ? 'mb-8' : 'mt-4 mb-24'
+          )}
         >
           {children}
         </div>
