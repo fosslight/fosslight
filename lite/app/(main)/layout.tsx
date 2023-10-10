@@ -3,9 +3,8 @@
 import BottomBar from '@/components/bottom-bar';
 import FullSearchBar from '@/components/full-search-bar';
 import SideBar from '@/components/side-bar';
+import TopBar from '@/components/top-bar';
 import { viewState } from '@/lib/atoms';
-import Logo from '@/public/images/logo.png';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useRecoilState } from 'recoil';
@@ -45,16 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <i className="fa-solid fa-bars"></i>
             </button>
           ) : (
-            <div className="flex justify-between items-center h-12 px-4">
-              <div className="relative w-6 h-6">
-                <Image src={Logo} fill sizes="48px" alt="fosslight" />
-              </div>
-              <div className="text-xl font-semibold">
-                FOSSLight Hub&nbsp;
-                <span className="text-lg font-light">Lite</span>
-              </div>
-              <i className="text-lg fa-solid fa-user"></i>
-            </div>
+            <TopBar />
           )}
 
           {/* Full search bar */}
