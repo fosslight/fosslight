@@ -6,6 +6,12 @@ export const rootMenu = {
 
 export const menus = [
   {
+    name: 'Project',
+    short: 'Project',
+    icon: 'fa-solid fa-list-check',
+    path: '/project'
+  },
+  {
     name: 'Database',
     short: 'DB',
     icon: 'fa-solid fa-database',
@@ -15,13 +21,6 @@ export const menus = [
       { name: 'License', path: '/license' },
       { name: 'Vulnerability', path: '/vulnerability' }
     ]
-  },
-  {
-    name: 'Self-Check',
-    short: 'Check',
-    icon: 'fa-solid fa-list-check',
-    path: '/self-check',
-    sub: [{ name: 'Project', path: '/project' }]
   },
   {
     name: 'Etc',

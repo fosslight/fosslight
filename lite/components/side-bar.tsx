@@ -16,7 +16,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
   useEffect(() => {
     const currentMenu = menus.filter((menu) => pathname.startsWith(menu.path))[0];
 
-    if (currentMenu && !isMenuShown[currentMenu.name]) {
+    if (currentMenu && currentMenu.sub && !isMenuShown[currentMenu.name]) {
       const newIsMenuShown = { ...isMenuShown };
       newIsMenuShown[currentMenu.name] = true;
       setIsMenuShown(newIsMenuShown);
@@ -55,14 +55,28 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
         </div>
         <div className="flex flex-col gap-y-4 py-8">
           <Link
-            className={`px-4 text-lg font-semibold leading-loose ${
+            className={`px-4 ${
               pathname === '/' ? 'bg-[rgb(104,114,126,0.2)]' : ''
-            }`}
+            } text-lg font-semibold leading-loose hover:bg-[rgb(104,114,126,0.5)]`}
             href="/"
           >
             <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
           </Link>
           {menus.map((menu) => {
+            if (!menu.sub) {
+              return (
+                <Link
+                  key={menu.name}
+                  className={`px-4 ${
+                    pathname.startsWith(menu.path) ? 'bg-[rgb(127,141,157,0.2)]' : ''
+                  } text-lg font-semibold leading-loose hover:bg-[rgb(104,114,126,0.5)]`}
+                  href={menu.path}
+                >
+                  <i className={menu.icon}></i>&ensp;{menu.name}
+                </Link>
+              );
+            }
+
             return (
               <div key={menu.name}>
                 <div
