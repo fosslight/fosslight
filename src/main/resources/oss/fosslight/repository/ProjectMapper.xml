@@ -961,6 +961,10 @@
 		 DELETE FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}
 	</delete>
 	
+	<select id="checkProjectDistributeHis" parameterType="oss.fosslight.domain.Project" resultType="int">
+		SELECT COUNT(*) FROM PROJECT_DISTRIBUTE_HIS WHERE PRJ_ID = #{prjId}
+	</select>
+	
 	<delete id="deleteProjectDistributeHis" parameterType="oss.fosslight.domain.Project">
 		DELETE FROM PROJECT_DISTRIBUTE_HIS WHERE PRJ_ID = #{prjId}
 	</delete>

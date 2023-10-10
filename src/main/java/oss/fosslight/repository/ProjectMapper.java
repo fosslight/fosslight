@@ -382,4 +382,6 @@ public interface ProjectMapper {
 	List<OssComponents> checkSelectDownloadFile(Project project);
 
 	List<OssComponents> getDependenciesDataList(Project project);
+
+	int checkProjectDistributeHis(Project project);
 }

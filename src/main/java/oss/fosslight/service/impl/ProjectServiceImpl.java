@@ -1675,7 +1675,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
-		if (project.getDeleteOsddFlag().equals(CoConstDef.FLAG_YES)) {
+		if (projectMapper.checkProjectDistributeHis(project) > 0) {
 			projectMapper.deleteProjectDistributeHis(project);
 		}
 		projectMapper.deleteProjectModel(project);
