@@ -3928,6 +3928,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
 							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setOssVersion(userData.getOssVersion());
 							newestOssInfo.setComment(comment);
 						}
 						
@@ -4087,6 +4088,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
+							newestOssInfo.setOssVersion(userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
