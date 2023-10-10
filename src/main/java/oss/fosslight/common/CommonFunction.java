@@ -3775,13 +3775,39 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				String duplicateNickname = bean.getOssNickname();
 				
+				String customOssName = "";
+				if (bean.getOssName().contains(";")) {
+					customOssName = bean.getOssName().split(";")[0];
+				} else {
+					customOssName = bean.getOssName();
+				}
+				
+				if (customOssName.endsWith(".git")) {
+					customOssName = customOssName.substring(0, customOssName.length()-4);
+				}
+				
 				if (ossNameCnt == 0 && ossVersionCnt > 0) { // ossVersion 대상
 					// 사용자 작성정보의 oss name이 취합정보의 nickname에 들어가는 case를 방지함.
 					if (!userData.getOssName().toUpperCase().equals(bean.getOssName().toUpperCase())) {
-						duplicateNickname = String.join(",", Arrays.asList(duplicateNickname.split(","))
-								.stream()
-								.filter(n -> !n.equals(userData.getOssName()))
-								.collect(Collectors.toList()));
+						List<String> duplicateNicknameList = Arrays.asList(duplicateNickname.split(","));
+						List<String> nicknameList = new ArrayList<>();
+						
+						for (String nick : duplicateNicknameList) {
+							String customNick = "";
+							if (nick.contains(";")) {
+								customNick = nick.split(";")[0];
+							} else {
+								customNick = nick;
+							}
+							
+							if (customNick.endsWith(".git")) {
+								customNick = customNick.substring(0, customNick.length()-4);
+							}
+							
+							if (!userData.getOssName().equalsIgnoreCase(customNick)) nicknameList.add(customNick);
+						}
+						
+						if (nicknameList != null && !nicknameList.isEmpty()) duplicateNickname = String.join(",", nicknameList);
 					}
 				}
 				
@@ -3815,13 +3841,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					downloadLocation = bean.getDownloadLocation();
 				}
 				
-				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, avoidNull(bean.getConcludedLicense(), null), copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
-				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, askalonoLicense, null, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
-				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, scancodeLicense, copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
 				
