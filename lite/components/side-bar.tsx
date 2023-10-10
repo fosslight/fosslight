@@ -26,9 +26,9 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
 
   return (
     <div
-      className={`sticky top-0 ${
+      className={`sticky top-0 shrink-0 h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10 ${
         isShown ? 'w-56' : 'w-0'
-      } shrink-0 h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300`}
+      }`}
     >
       <div className="absolute top-0 right-0 bottom-0 w-56 overflow-y-auto no-scrollbar">
         <div className="sticky top-0 bg-charcol">
@@ -55,9 +55,9 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
         </div>
         <div className="flex flex-col gap-y-4 py-8">
           <Link
-            className={`px-4 ${
+            className={`px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50 ${
               pathname === '/' ? 'bg-semicharcol/20' : ''
-            } text-lg font-semibold leading-loose hover:bg-semicharcol/50`}
+            }`}
             href="/"
           >
             <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
@@ -67,9 +67,9 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
               return (
                 <Link
                   key={menu.name}
-                  className={`px-4 ${
+                  className={`px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50 ${
                     pathname.startsWith(menu.path) ? 'bg-semicharcol/20' : ''
-                  } text-lg font-semibold leading-loose hover:bg-semicharcol/50`}
+                  }`}
                   href={menu.path}
                 >
                   <i className={menu.icon}></i>&ensp;{menu.name}
@@ -97,16 +97,16 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                   )}
                 </div>
                 <div
-                  className={`flex flex-col ${
+                  className={`flex flex-col overflow-y-hidden transition-[max-height] duration-[500ms] ${
                     !isMenuShown[menu.name] ? 'max-h-0' : 'max-h-40'
-                  } overflow-y-hidden transition-[max-height] duration-[500ms]`}
+                  }`}
                 >
                   {menu.sub.map((subMenu) => (
                     <Link
                       key={subMenu.name}
-                      className={`px-4 ${
+                      className={`px-4 leading-loose cursor-pointer hover:bg-semicharcol/50 ${
                         pathname.startsWith(menu.path + subMenu.path) ? 'bg-semicharcol/20' : ''
-                      } leading-loose cursor-pointer hover:bg-semicharcol/50`}
+                      }`}
                       href={menu.path + subMenu.path}
                     >
                       <i className="fa-solid fa-caret-right"></i>&emsp;{subMenu.name}
