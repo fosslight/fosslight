@@ -10,24 +10,18 @@ export default function FullSearchBar() {
   // Wait until detecting appropriate view
   if (view === 'none') return null;
 
-  // Mobile View (≤ 768px)
-  if (view === 'mobile') {
-    return (
-      <div className="flex gap-x-4 px-4 py-3 bg-semiwhite">
-        <input
-          className="flex-1 bg-transparent outline-none font-semibold"
-          placeholder={placeholder}
-        />
-        <i className="text-xl text-darkgray fa-solid fa-magnifying-glass"></i>
-      </div>
-    );
-  }
-
-  // PC View (> 768px)
   return (
-    <div className="flex gap-x-4 px-4 py-3 bg-semiwhite rounded shadow-[4px_4px_6px_0_rgba(0,0,0,0.3)] focus-within:shadow-[4px_4px_6px_0_rgb(52,57,63,0.8)]">
+    <div
+      className={`flex gap-x-4 px-4 py-3 bg-semiwhite ${
+        view === 'pc'
+          ? 'rounded shadow-[4px_4px_6px_0_rgba(0,0,0,0.3)] focus-within:shadow-[4px_4px_6px_0_rgb(52,57,63,0.7)]'
+          : 'shadow-[0_2px_2px_0_rgba(0,0,0,0.2)] focus-within:shadow-[0_2px_2px_0_rgba(52,57,63,0.7)]'
+      }`}
+    >
       <input
-        className="flex-1 bg-transparent outline-none text-lg font-semibold"
+        className={`flex-1 bg-transparent outline-none font-semibold ${
+          view === 'pc' ? 'text-lg' : ''
+        }`}
         placeholder={placeholder}
       />
       <i className="text-2xl text-darkgray fa-solid fa-magnifying-glass"></i>

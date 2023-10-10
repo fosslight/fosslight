@@ -23,45 +23,54 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // Wait until detecting appropriate view
   if (view === 'none') return null;
 
-  // Mobile View (≤ 768px)
-  if (view === 'mobile') {
-    return (
-      <main className="flex flex-col min-h-screen">
-        <div className="sticky top-0 shadow-[0_0_3px_2px_rgba(0,0,0,0.2)]">
-          <div className="flex justify-between items-center h-12 px-4 bg-white">
-            <div className="relative w-6 h-6">
-              <Image src={Logo} fill sizes="48px" alt="fosslight" />
-            </div>
-            <div className="text-xl font-semibold">
-              FOSSLight Hub&nbsp;
-              <span className="text-lg font-light">Lite</span>
-            </div>
-            <i className="text-lg fa-solid fa-user"></i>
-          </div>
-          <FullSearchBar />
-        </div>
-        <div className="pt-4 px-4 pb-24">{children}</div>
-        <BottomBar />
-      </main>
-    );
-  }
-
-  // PC View (> 768px)
   return (
-    <main className="flex min-h-screen">
-      <SideBar isShown={isSideBarShown} />
-      <div className="flex-1 min-w-0 px-4">
-        <div className="sticky top-0 flex flex-col gap-y-10 pt-4 pb-8 bg-white">
-          <button
-            className="w-6 h-6 text-xl text-charcol"
-            onClick={() => setIsSideBarShown(!isSideBarShown)}
-          >
-            <i className="fa-solid fa-bars"></i>
-          </button>
+    <main className={`min-h-screen ${view === 'pc' ? 'flex' : ''}`}>
+      {/* Left navigation bar (PC) */}
+      {view === 'pc' && <SideBar isShown={isSideBarShown} />}
+
+      {/* Page body */}
+      <div className={view === 'pc' ? 'flex-1 min-w-0' : ''}>
+        {/* Areas fixed at the top of the page */}
+        <div
+          className={`sticky top-0 bg-white ${
+            view === 'pc' ? 'flex flex-col gap-y-10 pt-4 px-4 pb-8' : ''
+          }`}
+        >
+          {/* Hamburger button (PC) or Top bar (Mobile) */}
+          {view === 'pc' ? (
+            <button
+              className="w-6 h-6 text-xl text-charcol"
+              onClick={() => setIsSideBarShown(!isSideBarShown)}
+            >
+              <i className="fa-solid fa-bars"></i>
+            </button>
+          ) : (
+            <div className="flex justify-between items-center h-12 px-4">
+              <div className="relative w-6 h-6">
+                <Image src={Logo} fill sizes="48px" alt="fosslight" />
+              </div>
+              <div className="text-xl font-semibold">
+                FOSSLight Hub&nbsp;
+                <span className="text-lg font-light">Lite</span>
+              </div>
+              <i className="text-lg fa-solid fa-user"></i>
+            </div>
+          )}
+
+          {/* Full search bar */}
           <FullSearchBar />
         </div>
-        <div className="pb-8 overflow-x-auto no-scrollbar">{children}</div>
+
+        {/* Page content */}
+        <div
+          className={`mx-4 overflow-x-auto no-scrollbar ${view === 'pc' ? 'mb-8' : 'mt-4 mb-24'}`}
+        >
+          {children}
+        </div>
       </div>
+
+      {/* Bottom navigation bar (Mobile) */}
+      {view === 'mobile' && <BottomBar />}
     </main>
   );
 }
