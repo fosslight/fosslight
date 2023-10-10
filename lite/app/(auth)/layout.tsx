@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="flex flex-col justify-center items-center gap-y-6 min-h-screen py-8 bg-charcol">
+    <main className="flex flex-col justify-center items-center gap-y-6 min-h-screen py-8 bg-charcoal">
       <div className="flex items-center gap-x-3">
         <div className="w-10 h-10 p-2 bg-white rounded-full">
           <div className="relative w-6 h-6">

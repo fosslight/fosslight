@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        charcol: '#34393f',
-        semicharcol: '#68727e',
+        charcoal: '#34393f',
+        semicharcoal: '#68727e',
         crimson: '#b02a42',
         semiwhite: '#eeeeee',
         semiblack: '#222222',

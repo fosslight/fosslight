@@ -28,12 +28,12 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
   return (
     <div
       className={clsx(
-        'sticky top-0 shrink-0 h-screen bg-charcol shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10',
+        'sticky top-0 shrink-0 h-screen bg-charcoal shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10',
         isShown ? 'w-56' : 'w-0'
       )}
     >
       <div className="absolute top-0 right-0 bottom-0 w-56 overflow-y-auto no-scrollbar">
-        <div className="sticky top-0 bg-charcol">
+        <div className="sticky top-0 bg-charcoal">
           <div className="flex justify-center items-center gap-x-4 py-4">
             <div className="w-12 h-12 p-3 bg-white rounded-full">
               <div className="relative w-6 h-6">
@@ -58,8 +58,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
         <div className="flex flex-col gap-y-4 py-8">
           <Link
             className={clsx(
-              'px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50',
-              pathname === '/' && 'bg-semicharcol/20'
+              'px-4 text-lg font-semibold leading-loose hover:bg-semicharcoal/50',
+              pathname === '/' && 'bg-semicharcoal/20'
             )}
             href="/"
           >
@@ -71,8 +71,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                 <Link
                   key={menu.name}
                   className={clsx(
-                    'px-4 text-lg font-semibold leading-loose hover:bg-semicharcol/50',
-                    pathname.startsWith(menu.path) && 'bg-semicharcol/20'
+                    'px-4 text-lg font-semibold leading-loose hover:bg-semicharcoal/50',
+                    pathname.startsWith(menu.path) && 'bg-semicharcoal/20'
                   )}
                   href={menu.path}
                 >
@@ -110,8 +110,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                     <Link
                       key={subMenu.name}
                       className={clsx(
-                        'px-4 leading-loose cursor-pointer hover:bg-semicharcol/50',
-                        pathname.startsWith(menu.path + subMenu.path) && 'bg-semicharcol/20'
+                        'px-4 leading-loose cursor-pointer hover:bg-semicharcoal/50',
+                        pathname.startsWith(menu.path + subMenu.path) && 'bg-semicharcoal/20'
                       )}
                       href={menu.path + subMenu.path}
                     >
