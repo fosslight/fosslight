@@ -57,7 +57,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div
           className={clsx(
             'mx-4 overflow-x-auto no-scrollbar',
-            view === 'pc' ? 'mb-8' : 'mt-4 mb-24'
+            view === 'pc' ? 'pb-8' : 'pt-4 pb-24'
           )}
         >
           {children}
