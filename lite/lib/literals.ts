@@ -17,9 +17,9 @@ export const menus = [
     icon: 'fa-solid fa-database',
     path: '/database',
     sub: [
-      { name: 'OSS', path: '/oss' },
-      { name: 'License', path: '/license' },
-      { name: 'Vulnerability', path: '/vulnerability' }
+      { name: 'OSS', short: 'OSS', path: '/oss' },
+      { name: 'License', short: 'License', path: '/license' },
+      { name: 'Vulnerability', short: 'Vunl', path: '/vulnerability' }
     ]
   },
   {
@@ -28,8 +28,8 @@ export const menus = [
     icon: 'fa-solid fa-gear',
     path: '/etc',
     sub: [
-      { name: 'User Management', path: '/user' },
-      { name: 'Code Management', path: '/code' }
+      { name: 'User Management', short: 'User', path: '/user' },
+      { name: 'Code Management', short: 'Code', path: '/code' }
     ]
   }
 ];
