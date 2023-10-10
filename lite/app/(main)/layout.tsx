@@ -40,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Hamburger button (PC) or Top bar (Mobile) */}
           {view === 'pc' ? (
             <button
-              className="w-6 h-6 text-xl text-charcol"
+              className="w-6 h-6 text-xl text-charcoal"
               onClick={() => setIsSideBarShown(!isSideBarShown)}
             >
               <i className="fa-solid fa-bars"></i>
