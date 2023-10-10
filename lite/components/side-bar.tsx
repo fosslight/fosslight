@@ -56,8 +56,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
         <div className="flex flex-col gap-y-4 py-8">
           <Link
             className={`px-4 ${
-              pathname === '/' ? 'bg-[rgb(104,114,126,0.2)]' : ''
-            } text-lg font-semibold leading-loose hover:bg-[rgb(104,114,126,0.5)]`}
+              pathname === '/' ? 'bg-semicharcol/20' : ''
+            } text-lg font-semibold leading-loose hover:bg-semicharcol/50`}
             href="/"
           >
             <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
@@ -68,8 +68,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                 <Link
                   key={menu.name}
                   className={`px-4 ${
-                    pathname.startsWith(menu.path) ? 'bg-[rgb(127,141,157,0.2)]' : ''
-                  } text-lg font-semibold leading-loose hover:bg-[rgb(104,114,126,0.5)]`}
+                    pathname.startsWith(menu.path) ? 'bg-semicharcol/20' : ''
+                  } text-lg font-semibold leading-loose hover:bg-semicharcol/50`}
                   href={menu.path}
                 >
                   <i className={menu.icon}></i>&ensp;{menu.name}
@@ -99,16 +99,14 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                 <div
                   className={`flex flex-col ${
                     !isMenuShown[menu.name] ? 'max-h-0' : 'max-h-40'
-                  } overflow-y-hidden transition-[max-height] duration-300`}
+                  } overflow-y-hidden transition-[max-height] duration-[500ms]`}
                 >
                   {menu.sub.map((subMenu) => (
                     <Link
                       key={subMenu.name}
                       className={`px-4 ${
-                        pathname.startsWith(menu.path + subMenu.path)
-                          ? 'bg-[rgb(127,141,157,0.2)]'
-                          : ''
-                      } leading-loose cursor-pointer hover:bg-[rgb(104,114,126,0.5)]`}
+                        pathname.startsWith(menu.path + subMenu.path) ? 'bg-semicharcol/20' : ''
+                      } leading-loose cursor-pointer hover:bg-semicharcol/50`}
                       href={menu.path + subMenu.path}
                     >
                       <i className="fa-solid fa-caret-right"></i>&emsp;{subMenu.name}
