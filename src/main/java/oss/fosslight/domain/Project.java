@@ -122,6 +122,12 @@ public class Project extends ComBean implements Serializable {
 	/** The allow download SPDX yaml yn. */
 	private String allowDownloadSPDXYamlYn;
 
+	/** The allow download CycloneDX json yn. */
+	private String allowDownloadCDXJsonYn;
+	
+	/** The allow download CycloneDX xml yn. */
+	private String allowDownloadCDXXmlYn;
+	
 	/** The identification status. */
 	private String identificationStatus;
 	
@@ -685,6 +691,11 @@ public class Project extends ComBean implements Serializable {
 	private String ossNameTemp;
 	
 	private String dependencies;
+	
+	/** The cyclonedx file id. */
+	private String cdxJsonFileId;
+	private String cdxXmlFileId;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -4310,5 +4321,37 @@ public class Project extends ComBean implements Serializable {
 
 	public void setDepCsvFileFlag(String depCsvFileFlag) {
 		this.depCsvFileFlag = depCsvFileFlag;
+	}
+
+	public String getAllowDownloadCDXJsonYn() {
+		return allowDownloadCDXJsonYn;
+	}
+
+	public void setAllowDownloadCDXJsonYn(String allowDownloadCDXJsonYn) {
+		this.allowDownloadCDXJsonYn = allowDownloadCDXJsonYn;
+	}
+
+	public String getAllowDownloadCDXXmlYn() {
+		return allowDownloadCDXXmlYn;
+	}
+
+	public void setAllowDownloadCDXXmlYn(String allowDownloadCDXXmlYn) {
+		this.allowDownloadCDXXmlYn = allowDownloadCDXXmlYn;
+	}
+
+	public String getCdxJsonFileId() {
+		return cdxJsonFileId;
+	}
+
+	public void setCdxJsonFileId(String cdxJsonFileId) {
+		this.cdxJsonFileId = cdxJsonFileId;
+	}
+
+	public String getCdxXmlFileId() {
+		return cdxXmlFileId;
+	}
+
+	public void setCdxXmlFileId(String cdxXmlFileId) {
+		this.cdxXmlFileId = cdxXmlFileId;
 	}
 }

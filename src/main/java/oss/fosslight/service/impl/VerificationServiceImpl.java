@@ -1500,6 +1500,91 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 		
+		// cycloneDX
+		String cdxJsonFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			if (isEmpty(cdxJsonFileId)) {
+				cdxJsonFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXJson", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+			}
+			
+			if (!isEmpty(cdxJsonFileId)) {
+				T2File jsonFileInfo = fileService.selectFileInfo(cdxJsonFileId);
+				String jsonFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!jsonFullPath.endsWith("/")) {
+					jsonFullPath += "/";
+				}
+				
+				jsonFullPath += jsonFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(jsonFileInfo.getLogiNm())+".json";
+				String resultFileName = FilenameUtils.getBaseName(jsonFileInfo.getOrigNm())+".json";
+				String tagFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxJsonFile = new File(tagFullPath);
+				
+				if (cdxJsonFile.exists() && cdxJsonFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.json.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxJsonFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
+				makeZipFile = true;
+			}
+		}
+		
+		String cdxXmlFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			if (isEmpty(cdxXmlFileId)) {
+				cdxXmlFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXXml", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+			}
+			
+			if (!isEmpty(cdxXmlFileId)) {
+				T2File xmlFileInfo = fileService.selectFileInfo(cdxXmlFileId);
+				String xmlFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!xmlFullPath.endsWith("/")) {
+					xmlFullPath += "/";
+				}
+				
+				xmlFullPath += xmlFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(xmlFileInfo.getLogiNm())+".xml";
+				String resultFileName = FilenameUtils.getBaseName(xmlFileInfo.getOrigNm())+".xml";
+				String tagFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxXmlFile = new File(tagFullPath);
+				
+				if (cdxXmlFile.exists() && cdxXmlFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.xml.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxXmlFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
+				makeZipFile = true;
+			}
+		}
+		
 		// zip파일 생성
 		if (makeZipFile) {
 			String noticeRootDir = NOTICE_PATH;
@@ -2627,6 +2712,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
 			bitFlag |= CoConstDef.FLAG_I;
+		}
+		
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_J;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			bitFlag |= CoConstDef.FLAG_K;
 		}
 		
 		return bitFlag;

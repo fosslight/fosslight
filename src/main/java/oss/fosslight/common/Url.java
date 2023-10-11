@@ -736,6 +736,13 @@ public final class Url {
 		
 	}
 	
+	public static final class CYCLONEDXDOWNLOAD {
+		public static final String PATH = "/cyclonedxdownload";
+		
+		public static final String CYCLONEDX_POST = PATH + "/getCycloneDXPost";
+		public static final String FILE = PATH + "/getFile";
+	}
+	
 	public static final class IMAGE_VIEW {
 		public static final String PATH = "/imageView";
 		

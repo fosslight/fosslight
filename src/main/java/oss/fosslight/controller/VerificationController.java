@@ -390,6 +390,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		log.info("URI: "+ "/project/verification/noticeAjax");
@@ -444,6 +446,8 @@ public class VerificationController extends CoTopComponent {
 				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
 				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
 				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
+				project.setAllowDownloadCDXJsonYn(allowDownloadCDXJsonYn);
+				project.setAllowDownloadCDXXmlYn(allowDownloadCDXXmlYn);
 				
 				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 				
@@ -627,6 +631,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/saveAjax");
 		
@@ -675,7 +681,9 @@ public class VerificationController extends CoTopComponent {
 		project.setAllowDownloadSPDXTagYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXTagYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXJsonYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXJsonYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXYamlYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXYamlYn 	 : CoConstDef.FLAG_NO);
-
+		project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXJsonYn 	 : CoConstDef.FLAG_NO);
+		project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXXmlYn 	 : CoConstDef.FLAG_NO);
+		
 		verificationService.updateProjectAllowDownloadBitFlag(project);
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
