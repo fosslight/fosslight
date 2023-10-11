@@ -200,19 +200,21 @@
 
 													/**
 													 * params["referenceDiv"] is id of identification type
-													 * 3RD, SRC, BIN, BIN-Android, BOM
+													 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
 													 * 10 (3RD) -> tab index: 0
-													 * 11 (SRC) -> tab index: 1
-													 * 15 (BIN) -> tab index: 2
-													 * 14 (ANDROID) -> tab index: 3
-													 * 13 (BOM) -> tab index: 4
+													 * 16 (DEP) -> tab index: 1
+													 * 11 (SRC) -> tab index: 2
+													 * 15 (BIN) -> tab index: 3
+													 * 14 (ANDROID) -> tab index: 4
+													 * 13 (BOM) -> tab index: 5
 													 */
 													switch(rowdata["referenceDiv"]) {
 													    case "10":    identificationTabOrder = "0";    break;
-													    case "11":    identificationTabOrder = "1";    break;
-													    case "15":    identificationTabOrder = "2";    break;
-													    case "14":    identificationTabOrder = "3";    break;
-													    case "13":    identificationTabOrder = "4";    break;
+													    case "16":    identificationTabOrder = "1";    break;
+													    case "11":    identificationTabOrder = "2";    break;
+													    case "15":    identificationTabOrder = "3";    break;
+													    case "14":    identificationTabOrder = "4";    break;
+													    case "13":    identificationTabOrder = "5";    break;
 													}
 
 													/**

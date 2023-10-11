@@ -207,6 +207,8 @@ public interface ProjectService extends HistoryConfig{
 	public Map<String, Object> checkSelectDownloadFile(Project project);
 
 	public List<OssComponents> getDependenciesDataList(Project project);
+
+	void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
 }
 
 

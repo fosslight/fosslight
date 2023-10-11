@@ -103,7 +103,13 @@ var bom_fn = {
  				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
  	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
  				}
- 			}
+ 			} else if(str[0] =="DEP") {
+                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+
+                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
+                }
+            }
  			
  			// obligationType 설정
  			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
@@ -575,7 +581,7 @@ var bom_fn = {
 		};
 
 		$.ajax({
-			url : '<c:url value="${suffixUrl}/project/binaryDBSave"/>',
+			url : '<c:url value="/project/binaryDBSave"/>',
 			type : 'POST',
 			data : JSON.stringify(param),
 			dataType : 'json',
@@ -976,7 +982,7 @@ var bom_data = {
 
 								break;
 							case "SRC" : //srcList
-								tabSeq = "1"
+								tabSeq = "2"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#srcList").jqGrid("setSelection", componentId);
@@ -984,7 +990,7 @@ var bom_data = {
 
 								break;
 							case "BIN" : //binList
-								tabSeq = "2"
+								tabSeq = "3"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#binList").jqGrid("setSelection", componentId);

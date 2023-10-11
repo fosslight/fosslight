@@ -184,7 +184,7 @@
 						display = "<div class=\"tcenter\">Drop</div>";
 					} else {
 						if("Y" == rowObject.androidFlag) {
-							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">Start</a></div>";
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Start</a></div>";
 						} else {
 							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Start</a></div>";
 						}
@@ -214,42 +214,50 @@
 							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
 						}
 						</c:if>
-					
+						
+						if("Y" == rowObject.identificationSubStatusDep) {
+                            display += "<a class='btnPG onDep' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>"; hasOss = true;
+                        } else if ("N" == rowObject.identificationSubStatusDep) {
+                            display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                        } else {
+                            display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                        }
+						
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusSrc =="Y" ) {
-							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
+							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusSrc == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
 						}
 
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusBin =="Y" ) {
-							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
+							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusBin == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
 						}
 
 						if(rowObject.identificationSubStatusBom == 0) {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
 						}
 					} else if("Y" == rowObject.androidFlag) {
 						if(rowObject.identificationSubStatusAndroid =="Y" ) {
-							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else if(rowObject.identificationSubStatusAndroid == "N") {
-							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else {
-							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						}
 					}
 					
 					if(rowObject.identificationSubStatusBat =="Y" ) {
-						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BAT</a>";
+						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",6,"+rowObject.permission+")\">BAT</a>";
 					}
 					
 					break;

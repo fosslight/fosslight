@@ -1981,6 +1981,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent,	List<List<ProjectIdentification>> ossComponentLicense, Project project) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+	}
+	
+	@Override
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent,
 			List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
@@ -2015,8 +2020,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(projectSubStatus);
 		}
 		
-		
-		ossComponent = convertOssNickName(ossComponent);
+		if (!CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			ossComponent = convertOssNickName(ossComponent);
+		}
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
 		
@@ -2028,7 +2034,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 파일 등록
-		if (!isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
+		if (!isEmpty(project.getDepCsvFileId()) || !isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
 			projectMapper.updateFileId(project);
 			
 			if (project.getCsvFileSeq() != null) {
@@ -2056,7 +2062,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Project prjFileCheck = projectMapper.getProjectBasicInfo(project);
 		boolean fileDeleteCheckFlag = false;
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+		if(CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			if(isEmpty(project.getDepCsvFileId()) && !isEmpty(prjFileCheck.getDepCsvFileId())) {
+				project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
 			if (project.getCsvFileSeq().size() == 0 && !isEmpty(prjFileCheck.getSrcCsvFileId())) {
 				project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
 				fileDeleteCheckFlag = true;
@@ -2133,7 +2144,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					projectStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
 				}
 				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+					if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+						projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+					} else {
+						projectStatus.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+					}
+				} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
 					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
 					if (!StringUtil.isEmpty(project.getIdentificationSubStatusSrc())){
 						projectStatus.setIdentificationSubStatusSrc(project.getIdentificationSubStatusSrc());
@@ -2169,11 +2186,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
 		
+		Map<String, OssMaster> ossInfo = null;
+		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			ossInfo = CoCodeManager.OSS_INFO_UPPER;
+		}
+		
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			// SRC STATUS 등록
 			
 			ProjectIdentification ossBean = ossComponent.get(i);
+			
+			if (ossInfo != null) {
+				String key = (ossBean.getOssName()+"_"+ossBean.getOssVersion()).toUpperCase();
+				OssMaster bean = ossInfo.get(key);
+				if (bean != null && (!bean.getOssName().equals(bean.getOssNameTemp()))) {
+					ossBean.setRefOssName(bean.getOssNameTemp());
+				}
+			}
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
@@ -5740,8 +5770,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String physicalFilePath = "";
 		T2File fileInfo = null;
 		
-		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN)
-				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_DEP) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) 
+				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
 			physicalFilePath = "Identification";
 		}
 		
@@ -5758,6 +5788,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (fileInfo != null) {
 			T2File fileInfo2 = fileService.selectFileInfoById(fileInfo.getFileId());
 			switch (project.getReferenceDiv()) {
+			case CoConstDef.CD_DTL_COMPONENT_ID_DEP: 
+				if (fileInfo2 == null && prjInfo.getDepCsvFileId().equals(fileInfo.getFileId())) {
+					project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+					fileDeleteCheckFlag = true;
+				}
+				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_SRC: 
 				if (fileInfo2 == null && prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
 					project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
