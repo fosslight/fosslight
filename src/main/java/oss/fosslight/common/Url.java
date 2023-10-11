@@ -147,6 +147,7 @@ public final class Url {
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		public static final String DEL_OSS_VERSION_MERGE_AJAX = PATH +  "/delOssWithVersionMeregeAjax";
 		public static final String URL_DUPLICATE_VALIDATION = PATH + "/urlDuplicateValidation";
 		public static final String VALIDATION = PATH + "/validation";
