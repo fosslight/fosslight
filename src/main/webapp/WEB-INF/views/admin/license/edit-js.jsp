@@ -15,6 +15,8 @@
 		$('.clear.example ').on('click', function() {
 			    $('.clear.example .ui.dropdown').dropdown('clear');
 		});
+		
+		showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
 	});
 	
 	var commentTemp = '';
