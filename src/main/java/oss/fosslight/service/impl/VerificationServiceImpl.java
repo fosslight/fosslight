@@ -2303,7 +2303,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
-			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
+			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
 			
 			noticeList.add(bean);
 		}
