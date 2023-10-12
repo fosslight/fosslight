@@ -33,7 +33,7 @@ export default function BottomBar() {
         href="/"
       >
         <i className={clsx('text-lg', rootMenu.icon)}></i>
-        <div className="text-sm">{rootMenu.short}</div>
+        <div className="text-sm">{rootMenu.name}</div>
       </Link>
       {menus.map((menu) => {
         if (!menu.sub) {
@@ -47,7 +47,7 @@ export default function BottomBar() {
               href={menu.path}
             >
               <i className={clsx('text-lg', menu.icon)}></i>
-              <div className="text-sm">{menu.short}</div>
+              <div className="text-sm">{menu.name}</div>
             </Link>
           );
         }
@@ -68,7 +68,7 @@ export default function BottomBar() {
             }}
           >
             <i className={clsx('text-lg', menu.icon)}></i>
-            <div className="text-sm">{menu.short}</div>
+            <div className="text-sm">{menu.name}</div>
             <div
               className={clsx(
                 'absolute right-0 bottom-16 left-0 flex flex-col bg-charcoal border-b border-darkgray rounded-t-md text-semiwhite overflow-y-hidden transition-[max-height,opacity] duration-[500ms] z-50',
@@ -84,7 +84,7 @@ export default function BottomBar() {
                   )}
                   href={menu.path + subMenu.path}
                 >
-                  {subMenu.short}
+                  {subMenu.name}
                 </Link>
               ))}
             </div>
