@@ -1504,7 +1504,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String cdxJsonFileId = null;
 		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
 			if (isEmpty(cdxJsonFileId)) {
-				cdxJsonFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXJson", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+				cdxJsonFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXJson", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
 			}
 			
 			if (!isEmpty(cdxJsonFileId)) {
@@ -1546,7 +1546,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String cdxXmlFileId = null;
 		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
 			if (isEmpty(cdxXmlFileId)) {
-				cdxXmlFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXXml", project.getPrjId(), EXPORT_TEMPLATE_PATH);
+				cdxXmlFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXXml", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
 			}
 			
 			if (!isEmpty(cdxXmlFileId)) {

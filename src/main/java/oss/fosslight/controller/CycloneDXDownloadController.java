@@ -75,7 +75,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 				if (!partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxJsonFileId()))) {
 					downloadId = prjBean.getCdxJsonFileId();
 				} else {
-					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, !isEmpty(dataStr) ? dataStr : prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
 					
 					T2File jsonFile = fileService.selectFileInfo(fileId);
 					String jsonFullPath = jsonFile.getLogiPath();
@@ -108,7 +108,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 				if (!partnerIdCheckFlag && (prjBean != null && !isEmpty(prjBean.getCdxXmlFileId()))) {
 					downloadId = prjBean.getCdxXmlFileId();
 				} else {
-					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+					String fileId = ExcelDownLoadUtil.getExcelDownloadId(type, prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX, !isEmpty(dataStr) ? "verify" : "bom");
 					
 					T2File xmlFile = fileService.selectFileInfo(fileId);
 					String xmlFullPath = xmlFile.getLogiPath();

@@ -2187,7 +2187,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				break;
 			case "cycloneDXJson" :
 			case "cycloneDXXml" :
-				downloadId = getCycloneDXFileId(type, dataStr);
+				downloadId = getCycloneDXFileId(type, dataStr, extParam.equals("verify") ? true : false);
 				
 				break;
 			default:
@@ -4797,27 +4797,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 	
-	@SuppressWarnings("serial")
-	private static String getCycloneDXFileId(String type, String dataStr) {
+	private static String getCycloneDXFileId(String type, String dataStr, boolean verifyFlag) {
 		// download file name
 		String downloadFileName = "CycloneDX-"; // Default
 		
-		String prjId = "";
-		OssNotice ossNotice = null;
-		
-		boolean verifyFlag = false;
-		
-		if (dataStr.contains("{")) {
-			verifyFlag = true;
-			Type ossNoticeType = new TypeToken<OssNotice>(){}.getType();
-			ossNotice = (OssNotice) fromJson(dataStr, ossNoticeType);
-			ossNotice.setFileType("text");
-			prjId = ossNotice.getPrjId();
-		} else {
-			prjId = dataStr;
-			ossNotice = new OssNotice();
-		}
-		
+		String prjId = dataStr;
 		boolean thirdPartyCheckFlag = false;
 		
 		if (prjId.startsWith("3rd_")) {
@@ -4826,6 +4810,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			prjId = prjIdSplit[1];
 		}
 		
+		OssNotice ossNotice = new OssNotice();
 		ossNotice.setPrjId(prjId);
 		ossNotice.setFileType("text");
 		
@@ -4922,7 +4907,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			noticeList.addAll(sourceList);
 		}
 
-		if (packageInfo.containsKey("notObligationList")) {
+		if (!verifyFlag && packageInfo.containsKey("notObligationList")) {
 			List<OssComponents> notObligationList = (List<OssComponents>) packageInfo.get("notObligationList");
 			if (notObligationList != null && !notObligationList.isEmpty()) {
 				noticeList.addAll(notObligationList);
