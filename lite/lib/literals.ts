@@ -21,15 +21,5 @@ export const menus = [
       { name: 'License', short: 'License', path: '/license' },
       { name: 'Vulnerability', short: 'Vunl', path: '/vulnerability' }
     ]
-  },
-  {
-    name: 'Etc',
-    short: 'Etc',
-    icon: 'fa-solid fa-gear',
-    path: '/etc',
-    sub: [
-      { name: 'User Management', short: 'User', path: '/user' },
-      { name: 'Code Management', short: 'Code', path: '/code' }
-    ]
   }
 ];
