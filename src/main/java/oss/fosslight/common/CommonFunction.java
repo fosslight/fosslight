@@ -1552,6 +1552,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		Map<String, List<String>> errorMap = new HashMap<>(); // error level
 		Map<String, List<String>> restrictionMap = new HashMap<>(); // restriction level
 		Map<String, List<String>> warningMap = new HashMap<>(); // warning level
+		Map<String, List<String>> warningVerMap = new HashMap<>(); // warning level (oss version)
 		Map<String, List<String>> infoBiMap = new HashMap<>(); // info level (new bianry)
 		Map<String, List<String>> infoModifyMap = new HashMap<>(); // info level (modified = new + tlsh > 120)
 		Map<String, List<String>> infoOnlyMap = new HashMap<>(); // info level
@@ -1591,11 +1592,37 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 
 		
-		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "This field is required" (Priority : 4)
 		if (validDiffMap != null && !validDiffMap.isEmpty()) {
 			for (String errKey : validDiffMap.keySet()) {
 				if (errKey.indexOf(".") > -1) {
+					String msg = validDiffMap.get(errKey);
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
+					
+					// oss version warning message "This field is required" (Priority : 4)
+					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
+						if (warningVerMap.containsKey(_key)) {
+							List<String> _list = warningVerMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningVerMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningVerMap.put(_key, _list);
+						}
+					} else {// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+						if (warningMap.containsKey(_key)) {
+							List<String> _list = warningMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningMap.put(_key, _list);
+						}
+					}
+					
+					
 					/*
 					if (hideObligation) {
 						if (hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
@@ -1605,15 +1632,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 					*/
 					
-					if (warningMap.containsKey(_key)) {
-						List<String> _list = warningMap.get(_key);
-						_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-						warningMap.replace(_key, _list);
-					} else {
-						List<String> _list = new ArrayList<>();
-						_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-						warningMap.put(_key, _list);
-					}
 				}
 			}
 		}
@@ -1714,6 +1732,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				} else if (checkMultiLicenseError(warningMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(warningMap, bean.getComponentLicenseList());
 					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3"), bean);
+				}
+				// 4 : warning level (oss version)
+				else if (warningVerMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
+					//sortList.add(bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4"), bean);
+				} else if (checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList()) != null) {
+					String _id = checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList());
+					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4"), bean);
 				}
 				// 5 : info level (new binary)
 				else if (infoBiMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {

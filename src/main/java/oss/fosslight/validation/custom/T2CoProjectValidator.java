@@ -979,6 +979,18 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 
+				{ // ADD OSS_VERSION REQUIRED MSG
+					if (!isEmpty(bean.getOssName()) 
+							&& !bean.getOssName().equals("-") 
+							&& isEmpty(bean.getOssVersion())) {
+						if (!errMap.containsKey("OSS_VERSION." + bean.getComponentId())) {
+							if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
+								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.REQUIRED");
+							}
+						}
+					}
+				}
+				
 				// 관리되지 않은 라이선스가 포함되어 있는 경우
 				if (bean.getOssComponentsLicenseList() != null) {
 					for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
@@ -2388,6 +2400,17 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 
+				{ // ADD OSS_VERSION REQUIRED MSG
+					if (!isEmpty(bean.getOssName()) 
+							&& !bean.getOssName().equals("-") 
+							&& isEmpty(bean.getOssVersion())) {
+						if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
+							if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
+								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
+							}
+						}
+					}
+				}
 			} // end of loop
 			
 			Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
