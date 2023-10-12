@@ -11,7 +11,7 @@ export const menus = [
   },
   {
     name: 'Database',
-    icon: 'fa-solid fa-database',
+    icon: 'fa-solid fa-server',
     path: '/database',
     sub: [
       { name: 'OSS', path: '/oss' },
