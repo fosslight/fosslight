@@ -5,9 +5,9 @@ export const rootMenu = {
 
 export const menus = [
   {
-    name: 'Project',
+    name: 'Self-Check',
     icon: 'fa-solid fa-list-check',
-    path: '/project'
+    path: '/self-check'
   },
   {
     name: 'Database',
