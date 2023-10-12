@@ -6,7 +6,7 @@ import { useRecoilValue } from 'recoil';
 
 export default function FullSearchBar() {
   const view = useRecoilValue(viewState);
-  const placeholder = 'Search by name of OSS, License, or Project';
+  const placeholder = 'Search by name of OSS, License, or Vuln';
 
   // Wait until detecting appropriate view
   if (view === 'none') return null;
