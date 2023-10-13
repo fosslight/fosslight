@@ -1,5 +1,3 @@
-'use client';
-
 import { menus, rootMenu } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
 import clsx from 'clsx';
@@ -28,7 +26,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
   return (
     <div
       className={clsx(
-        'sticky top-0 shrink-0 h-screen bg-charcoal shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10',
+        'sticky top-0 shrink-0 h-screen bg-charcoal shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-20',
         isShown ? 'w-56' : 'w-0'
       )}
     >

@@ -1,5 +1,3 @@
-'use client';
-
 import { viewState } from '@/lib/atoms';
 import { insertCommas } from '@/lib/commons';
 import clsx from 'clsx';
