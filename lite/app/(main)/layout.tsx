@@ -11,8 +11,8 @@ import { useMediaQuery } from 'react-responsive';
 import { useRecoilState } from 'recoil';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [isSideBarShown, setIsSideBarShown] = useState(true);
   const [view, setView] = useRecoilState(viewState);
+  const [isSideBarShown, setIsSideBarShown] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Areas fixed at the top of the page */}
         <div
           className={clsx(
-            'sticky top-0 bg-white',
+            'sticky top-0 bg-white z-10',
             view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-8'
           )}
         >

@@ -1,5 +1,3 @@
-'use client';
-
 import { menus, rootMenu } from '@/lib/literals';
 import clsx from 'clsx';
 import Link from 'next/link';
@@ -20,7 +18,6 @@ export default function BottomBar() {
     }
 
     document.addEventListener('mousedown', handleClickOutsideSubMenu);
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideSubMenu);
     };
