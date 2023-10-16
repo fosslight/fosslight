@@ -961,23 +961,20 @@
                     	<c:if test="${ct:isAdmin()}">
 							<input type="button" value="Save (Binary DB)" class="btnSave btnColor red idenSave" onclick="bom_fn.binaryDBSave('${project.prjId}')" style="width:120px;"/>
 						</c:if>
-						<c:if test="${project.identificationStatus ne 'CONF'}">
-							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
-						</c:if>
-						<c:if test="${project.identificationStatus eq 'CONF'}">
-							<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-								<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList(this);"/>
-								<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
-									<a onclick="bom_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
-									<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
-									<a onclick="bom_fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
-									<a onclick="bom_fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
-									<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
-									<a onclick="bom_fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
-									<a onclick="bom_fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
-								</div>
+						<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList(this);"/>
+							<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
+								<a onclick="bom_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
+								<a onclick="bom_fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
+								<a onclick="bom_fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
+								<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
+								<a onclick="bom_fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
+								<a onclick="bom_fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
+								<a onclick="bom_fn.selectDownloadFile('cdxJSON')" style="display: block;">CycloneDX (JSON)</a>
+								<a onclick="bom_fn.selectDownloadFile('cdxXML')" style="display: block;">CycloneDX (XML)</a>
 							</div>
-						</c:if>
+						</div>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
 	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>

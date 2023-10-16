@@ -638,6 +638,8 @@ var bom_fn = {
             else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
             else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
             else if (target === "YAML") com_fn.downloadYaml('BOM');
+            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
     	} else {
     		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
     	}

@@ -1563,6 +1563,46 @@ var com_fn = {
             }
         });
     },
+    downloadCycloneDXJson : function (target) {
+		$.ajax({
+			type: "POST",
+			url: '<c:url value="/cyclonedxdownload/getCycloneDXPost"/>',
+			data: JSON.stringify({"type":"cycloneDXJson", "prjId":'${project.prjId}'}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				} else {
+					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+	},
+	downloadCycloneDXXml : function (target) {
+		$.ajax({
+			type: "POST",
+			url: '<c:url value="/cyclonedxdownload/getCycloneDXPost"/>',
+			data: JSON.stringify({"type":"cycloneDXXml", "prjId":'${project.prjId}'}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				} else {
+					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+	},
 	deleteFiles : function(obj, type){
 		var FileSeq = [];
 		var tabGubn = $(".tabMenu").find("span").text();
