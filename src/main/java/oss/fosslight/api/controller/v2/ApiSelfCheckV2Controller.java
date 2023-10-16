@@ -64,16 +64,16 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 	
 	@ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+        @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_CREATE})
     public CommonResult createSelfCheck(
-    		@RequestHeader String _token,
+    		@RequestHeader String authorization,
     		@ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
     		@ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion){
 		
 		// 사용자 인증
-		T2Users userInfo = userService.checkApiUserAuth(_token);
+		T2Users userInfo = userService.checkApiUserAuth(authorization);
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		try {
@@ -108,16 +108,16 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "SelfCheck OSS Report", notes = "SelfCheck > oss report")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+        @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@PostMapping(value = {API.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public CommonResult ossReportSelfCheck(
-    		@RequestHeader String _token,
+    		@RequestHeader String authorization,
     		@ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
     		@ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
     		@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag){
 		
-		T2Users userInfo = userService.checkApiUserAuth(_token);
+		T2Users userInfo = userService.checkApiUserAuth(authorization);
 		Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 		
 		try {
@@ -230,15 +230,15 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 	
 	@ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+        @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@PostMapping(value = {API.FOSSLIGHT_API_EXPORT_SELFCHECK})
-    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String _token, @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId){
+    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String authorization, @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId){
 		String downloadId = "";
 		T2File fileInfo = new T2File();
 		
 		try {
-			T2Users userInfo = userService.checkApiUserAuth(_token);
+			T2Users userInfo = userService.checkApiUserAuth(authorization);
 			Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("userId", userInfo.getUserId());
 			paramMap.put("userRole", userRole(userInfo));
@@ -260,11 +260,11 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 	
 	@ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+        @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public CommonResult addPrjWatcher(
-    		@RequestHeader String _token,
+    		@RequestHeader String authorization,
     		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
     		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
 		
@@ -272,7 +272,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
 		
 		try {
-			T2Users userInfo = userService.checkApiUserAuth(_token);
+			T2Users userInfo = userService.checkApiUserAuth(authorization);
 			Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("userId", userInfo.getUserId());
 			paramMap.put("userRole", userRole(userInfo));
