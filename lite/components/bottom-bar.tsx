@@ -21,7 +21,7 @@ export default function BottomBar() {
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideSubMenu);
     };
-  });
+  }, []);
 
   return (
     <div className="fixed right-0 bottom-0 left-0 flex h-16 bg-charcoal text-semiwhite">
@@ -56,13 +56,9 @@ export default function BottomBar() {
               'menu relative flex-1 pt-2.5 text-center cursor-pointer no-tap-highlight',
               pathname.startsWith(menu.path) && 'bg-semicharcoal/20'
             )}
-            onClick={() => {
-              const newIsMenuShown = {
-                ...defaultIsMenuShown,
-                [menu.name]: !isMenuShown[menu.name]
-              };
-              setIsMenuShown(newIsMenuShown);
-            }}
+            onClick={() =>
+              setIsMenuShown({ ...defaultIsMenuShown, [menu.name]: !isMenuShown[menu.name] })
+            }
           >
             <i className={clsx('text-lg', menu.icon)}></i>
             <div className="text-sm">{menu.name}</div>
