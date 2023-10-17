@@ -1,9 +1,11 @@
+import { loadingState } from '@/lib/atoms';
 import { stringifyFilters } from '@/lib/filters';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
+import { useRecoilValue } from 'recoil';
 
 function renderFilters(filters: Filter[], form: UseFormReturn) {
   const labelClass = 'flex-shrink-0 w-20 lg:w-24';
@@ -156,12 +158,17 @@ export default function ListFilters({
 }) {
   const { default: defaultFilters, hidden: hiddenFilters } = filters;
 
+  const loading = useRecoilValue(loadingState);
   const [areHiddenFiltersShown, setAreHiddenFiltersShown] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
 
   function setFilters(filterParams: FieldValues) {
+    if (loading) {
+      return;
+    }
+
     const urlQueryParams = new URLSearchParams(queryParams);
 
     const f = stringifyFilters(filterParams);
@@ -216,7 +223,9 @@ export default function ListFilters({
 
       {/* Search button */}
       <div className="mt-2 text-right">
-        <button className="px-2 py-1 bg-crimson rounded text-semiwhite">Search</button>
+        <button className="px-2 py-1 bg-crimson rounded text-semiwhite" disabled={loading}>
+          Search
+        </button>
       </div>
     </form>
   );
