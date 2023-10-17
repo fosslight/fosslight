@@ -18,6 +18,7 @@
 	var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 	var divisionUseFlag = "${not empty ct:getCodeValues(ct:getConstDef('CD_USER_DIVISION'))}";
 	var projectPermission = '${projectPermission}';
+	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
 	
 	$(document).ready(function() {
 		'use strict';
@@ -200,13 +201,14 @@
 			$("#addEmail").click(function() {
 				/* AD ID 정보 */
 				var adId = $("#adId").val();
+				var domain = $("#emailTemp").val();
 
 				if(adId == "") {
 					$("#adId").focus();
 					return alertify.error('<spring:message code="enter.watcher.error" />', 0);
 				}
 				
-				var _email = adId + "@lge.com";
+				var _email = adId + "@" + domain;
 				var regEmail = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
 
 				if (!regEmail.test(_email)) {
@@ -237,6 +239,7 @@
 				});
 				
 				$("#adId").val('');
+				$("#emailTemp").val('');
 			});
 			
 			$('#addList').on('click', function(){
