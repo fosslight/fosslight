@@ -1290,6 +1290,26 @@
 					$(obj).hide();
 				}
 			});
+		},
+		showUnconfirmedLicense: function() {
+			var header    = '<p>';
+				header   += 	  '<b>' + '<spring:message code="msg.selfcheck.notice.error" />' + '</b>';
+				header   += '</p>';
+			var contents  = '<ul>';
+				contents +=	   unconfirmedLicenseList
+												.reduce((str, licenseName) => {
+													if(licenseName != '') {
+														str += fn.makeSquareStyle(licenseName);
+													}
+
+													return str;
+												}, '');
+				contents += '</ul>';
+
+			alertify.alert(header + '<br>' + contents);
+		},
+		makeSquareStyle: function(value){
+			return '<li style="list-style-type: square;">' + value + '</li>';
 		}
 	};
 
@@ -1488,6 +1508,8 @@
 	var srcValidMsgData;
 	var srcDiffMsgData;
 	var licenseData;
+	var unconfirmedLicenseList;
+	
 	// SRC 함수
 	var src_fn = {
 		// src 그리드 데이터
@@ -1511,6 +1533,8 @@
 						srcDiffMsgData = data.diffData;
 					}
 
+					unconfirmedLicenseList = data.unconfirmedLicenseList ? data.unconfirmedLicenseList : [];
+					
 					// 리로드 대신 그리드 삭제 후 다시 그리기
 					$("#srcList").jqGrid('GridUnload');
 					
@@ -2910,30 +2934,38 @@
 			$('#noticePreview').click(function(e){
 				e.preventDefault();
 				
-				fn.saveOrGetNotice('preview');
+				if (unconfirmedLicenseList.length > 0) {
+					fn.showUnconfirmedLicense();
+				} else {
+					fn.saveOrGetNotice('preview');
+				}
 			});
 
 			$('#packageDocDownload').click(function(e){
-				var type = $('#docType').val();
-				
-				if(type == 'noticeDownload') {
-					fn.downloadNotice();
-				} else if(type == 'noticeTextDownload') {
-					fn.downloadNoticeText();
-				} else if(type == 'noticeSimpleDownload') {
-					fn.downloadNoticeSimple();
-				} else if(type == 'noticeTextSimpleDownload') {
-					fn.downloadNoticeTextSimple();
-				} else if(type == 'spdxSpreadSheet') {
-					fn.downloadSpdxSpreadSheetExcel();
-				} else if(type == 'spdxRdf') {
-					fn.downloadSpdxRdf();
-				} else if(type == 'spdxTag') {
-					fn.downloadSpdxTag();
-				} else if(type == 'spdxJson') {
-					fn.downloadSpdxJson();
-				} else if(type == 'spdxYaml') {
-					fn.downloadSpdxYaml();
+				if (unconfirmedLicenseList.length > 0) {
+					fn.showUnconfirmedLicense();
+				} else { 
+					var type = $('#docType').val();
+					
+					if(type == 'noticeDownload') {
+						fn.downloadNotice();
+					} else if(type == 'noticeTextDownload') {
+						fn.downloadNoticeText();
+					} else if(type == 'noticeSimpleDownload') {
+						fn.downloadNoticeSimple();
+					} else if(type == 'noticeTextSimpleDownload') {
+						fn.downloadNoticeTextSimple();
+					} else if(type == 'spdxSpreadSheet') {
+						fn.downloadSpdxSpreadSheetExcel();
+					} else if(type == 'spdxRdf') {
+						fn.downloadSpdxRdf();
+					} else if(type == 'spdxTag') {
+						fn.downloadSpdxTag();
+					} else if(type == 'spdxJson') {
+						fn.downloadSpdxJson();
+					} else if(type == 'spdxYaml') {
+						fn.downloadSpdxYaml();
+					}
 				}
 			});
 
