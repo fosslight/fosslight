@@ -209,18 +209,13 @@
 													 * 13 (BOM) -> tab index: 5
 													 */
 													switch(rowdata["referenceDiv"]) {
-													    case "10":    identificationTabOrder = "0";    break;
-													    case "16":    identificationTabOrder = "1";    break;
-													    case "11":    identificationTabOrder = "2";    break;
-													    case "15":    identificationTabOrder = "3";    break;
-													    case "14":    identificationTabOrder = "4";    break;
-													    case "13":    identificationTabOrder = "5";    break;
+														case "10":    opener.party_evt.getPartGridData();			break;
+														case "16":    opener.dep_fn.getDepGridData();				break;
+												  		case "11":    opener.src_fn.getSrcGridData();   			break;
+												    	case "15":    opener.bin_fn.getBinGridData(); 	 			break;
+												    	case "14":    opener.binAndroid_fn.getBinAndroidGridData();	break;
+												    	case "13":    opener.bom_data.getJqGrid();    				break;
 													}
-
-													/**
-													 * reload identication tab you're working on
-													 */
-													opener.location.href = `/project/identification/\${rowdata["refPrjId"]}/\${identificationTabOrder}`;
 												}
 												
 												alertify.success(successMsg, 5); // 5sec동안 message 출력
