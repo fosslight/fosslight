@@ -2,6 +2,7 @@
 
 import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
+import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
@@ -9,8 +10,10 @@ import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSetRecoilState } from 'recoil';
 
 export default function OSSList() {
+  const setLoading = useSetRecoilState(loadingState);
   const queryParams = useSearchParams();
 
   // Filters
@@ -115,6 +118,8 @@ export default function OSSList() {
       countPerPage
     };
 
+    setLoading(true);
+
     setTimeout(() => {
       setTotalCount(24);
       setRows(
@@ -141,6 +146,8 @@ export default function OSSList() {
           cvssScore: '7.8'
         }))
       );
+
+      setLoading(false);
     }, 2000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);

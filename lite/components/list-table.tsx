@@ -1,4 +1,4 @@
-import { viewState } from '@/lib/atoms';
+import { loadingState, viewState } from '@/lib/atoms';
 import { insertCommas } from '@/lib/commons';
 import clsx from 'clsx';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -47,12 +47,13 @@ export default function ListTable({
   const lastPage = Math.max(Math.ceil(totalCount / countPerPage), 1);
 
   const view = useRecoilValue(viewState);
+  const loading = useRecoilValue(loadingState);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
 
   function setSort(sort: string) {
-    if (!sort) {
+    if (!sort || loading) {
       return;
     }
 
@@ -100,7 +101,7 @@ export default function ListTable({
   }
 
   function setPage(page: number) {
-    if (page === currentPage) {
+    if (page === currentPage || loading) {
       return;
     }
 
@@ -127,7 +128,7 @@ export default function ListTable({
                   <button
                     className="flex gap-x-2"
                     onClick={() => setSort(column.sort)}
-                    disabled={!column.sort}
+                    disabled={!column.sort || loading}
                   >
                     {column.name}
 
@@ -219,7 +220,7 @@ export default function ListTable({
                       : 'border-darkgray'
                   )}
                   onClick={() => setPage(page)}
-                  disabled={page === currentPage}
+                  disabled={page === currentPage || loading}
                 >
                   {page}
                 </button>

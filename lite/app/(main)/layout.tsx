@@ -2,16 +2,18 @@
 
 import BottomBar from '@/components/bottom-bar';
 import FullSearchBar from '@/components/full-search-bar';
+import Loading from '@/components/loading';
 import SideBar from '@/components/side-bar';
 import TopBar from '@/components/top-bar';
-import { viewState } from '@/lib/atoms';
+import { loadingState, viewState } from '@/lib/atoms';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [view, setView] = useRecoilState(viewState);
+  const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
 
@@ -56,11 +58,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Page content */}
         <div
           className={clsx(
-            'mx-4 overflow-x-auto no-scrollbar',
-            view === 'pc' ? 'pb-8' : 'pt-4 pb-24'
+            'mx-4 overflow-x-auto no-scrollbar transition-opacity duration-300',
+            view === 'pc' ? 'pb-8' : 'pt-4 pb-24',
+            loading && 'opacity-30'
           )}
         >
           {children}
+
+          {/* Loading */}
+          {loading && (
+            <div className="fixed top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4">
+              <Loading />
+            </div>
+          )}
         </div>
       </div>
 
