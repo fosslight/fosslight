@@ -274,6 +274,7 @@ public class VerificationController extends CoTopComponent {
 		Project projectMaster = new Project();
 		projectMaster.setPrjId(req.getParameter("prjId"));
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		//엑셀 분석
 		List<OssComponents> verificationList = ExcelUtil.getVerificationList(req, list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));

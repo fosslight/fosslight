@@ -2098,10 +2098,18 @@ public class ExcelUtil extends CoTopComponent {
 		if ((result != null && !result.isEmpty()) && (ossComponents != null && !ossComponents.isEmpty())) {
 			List<String> duplicateCheckList = new ArrayList<>();
 			for (OssComponents oc : ossComponents) {
-				String key = (oc.getOssName() + "|" + oc.getOssVersion() + "|" + oc.getLicenseName()).toUpperCase();
+				List<String> licenseNameList = Arrays.asList(oc.getLicenseName().split(","));
+				Collections.sort(licenseNameList);
+				String licenseName = String.join(",", licenseNameList);
+				
+				String key = (oc.getOssName() + "|" + oc.getOssVersion() + "|" + licenseName).toUpperCase();
 				if (!duplicateCheckList.contains(key)) {
 					for (ProjectIdentification pi : result) {
-						String key2 = (pi.getOssName() + "|" + pi.getOssVersion() + "|" + pi.getLicenseName()).toUpperCase();
+						List<String> lmList = Arrays.asList(pi.getLicenseName().split(","));
+						Collections.sort(lmList);
+						String lm = String.join(",", lmList);
+						
+						String key2 = (pi.getOssName() + "|" + pi.getOssVersion() + "|" + lm).toUpperCase();
 						if (key.equals(key2)) {
 							oc.setFilePath(pi.getFilePath());
 							duplicateCheckList.add(key);
