@@ -173,6 +173,7 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		// 중목제거용
