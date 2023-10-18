@@ -1289,7 +1289,7 @@
 					
 					// identification의 status tex를 더블클릭시 bom으로 이동
 					if(isAdmin && iCol == 5 || !isAdmin && iCol == 4) {
-						fn.mvIdentification(rowid, "4", rowData['permission']);
+						fn.mvIdentification(rowid, "5", rowData['permission']);
 					} else if(isAdmin && iCol == 6 || !isAdmin && iCol == 5) {
 						if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
 							
