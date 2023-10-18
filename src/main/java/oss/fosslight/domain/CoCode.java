@@ -356,6 +356,7 @@ public class CoCode {
         	
         	List<String> restrictionList = Arrays.asList(status.split(","));
         	
+        	int listIdx = 1;
         	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
@@ -365,7 +366,14 @@ public class CoCode {
               }
 	            
 	            stringbuffer.append("    <input name='restrictions' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((restrictionList.contains(codedtl.cdDtlNo))?"checked='checked'":""); 
-	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;"+(j==newLineIdx?"<br>"+("list".equals(callType)?"<label></label>":""):""));
+	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm);
+	            if ("list".equals(callType)){
+	            	stringbuffer.append("&nbsp;&nbsp;&nbsp;&nbsp;"+(listIdx%4==0?"<br>"+("list".equals(callType)?"<label></label>":""):""));
+	            } else if ("edit".equals(callType)){
+	            	stringbuffer.append("&nbsp;&nbsp;&nbsp;&nbsp;"+(j==newLineIdx?"<br>"+("list".equals(callType)?"<label></label>":""):""));
+	            }
+	            
+	            listIdx++;
 	        }
         } else if (CoConstDef.CD_NOTICE_INFO.equals(cd)) {
         	for (int k = codeDtls.size(); j < k; j++)
