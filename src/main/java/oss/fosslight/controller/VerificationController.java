@@ -271,9 +271,12 @@ public class VerificationController extends CoTopComponent {
 				MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
 	public @ResponseBody ResponseEntity<Object> uploadVerification(File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/uploadVerification");
+		Project projectMaster = new Project();
+		projectMaster.setPrjId(req.getParameter("prjId"));
+		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
 		
 		//엑셀 분석
-		List<ProjectIdentification> verificationList = ExcelUtil.getVerificationList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+		List<OssComponents> verificationList = ExcelUtil.getVerificationList(req, list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		
 		if (verificationList == null) {
 			return makeJsonResponseHeader(false, "");

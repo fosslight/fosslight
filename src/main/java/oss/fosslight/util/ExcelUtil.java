@@ -2018,7 +2018,7 @@ public class ExcelUtil extends CoTopComponent {
 	}
 
 
-	public static List<ProjectIdentification> getVerificationList(MultipartHttpServletRequest req, String localPath) {
+	public static List<OssComponents> getVerificationList(MultipartHttpServletRequest req, List<OssComponents> ossComponents, String localPath) {
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		Iterator<String> fileNames = req.getFileNames();
 		
@@ -2095,7 +2095,24 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 		
-		return result;
+		if ((result != null && !result.isEmpty()) && (ossComponents != null && !ossComponents.isEmpty())) {
+			List<String> duplicateCheckList = new ArrayList<>();
+			for (OssComponents oc : ossComponents) {
+				String key = (oc.getOssName() + "|" + oc.getOssVersion() + "|" + oc.getLicenseName()).toUpperCase();
+				if (!duplicateCheckList.contains(key)) {
+					for (ProjectIdentification pi : result) {
+						String key2 = (pi.getOssName() + "|" + pi.getOssVersion() + "|" + pi.getLicenseName()).toUpperCase();
+						if (key.equals(key2)) {
+							oc.setFilePath(pi.getFilePath());
+							duplicateCheckList.add(key);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return ossComponents;
 	}
 
 	/**

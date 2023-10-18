@@ -395,17 +395,9 @@
 					} else {
 						var result = data.resultData;
 						var target = $('#list');
-						var rowData = target.jqGrid("getRowData");
-						var rowid = "";
 						
-						for(var i = 0; i < result.length; i++){
-							for(var j = 0; j < rowData.length; j++){
-								if(result[i].ossName == rowData[j].ossName && result[i].ossVersion == rowData[j].ossVersion && result[i].licenseName == rowData[j].licenseName){
-									rowid = rowData[j].componentId;
-								}
-							}
-							
-							target.jqGrid("setCell", rowid, "filePath", result[i].filePath);
+						for (var i = 0; i < result.length; i++){
+							target.jqGrid("setCell", result[i].componentId, "filePath", result[i].filePath);
 						}
 						
 						target.jqGrid().trigger('reloadGrid');
