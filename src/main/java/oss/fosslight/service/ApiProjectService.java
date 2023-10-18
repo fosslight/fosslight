@@ -79,4 +79,6 @@ public interface ApiProjectService {
 	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList);
 
 	public void registDepOss(List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, Project project, String refDiv);
+
+	public void updateSubStatus(Map<String, Object> param);
 }
