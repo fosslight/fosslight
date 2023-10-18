@@ -317,6 +317,7 @@ public class ApiProjectController extends CoTopComponent {
     		@ApiParam(value = "OSS Notice (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeType,
     		@ApiParam(value = "Notice Platform (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
     		@ApiParam(value = "Priority (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String priority,
+    		@ApiParam(value = "Additional information", required = false) @RequestParam(required = false) String additionalInformation,
     		@ApiParam(value = "comment", required = false) @RequestParam(required = false) String comment){
 		
 		// 사용자 인증
@@ -425,6 +426,7 @@ public class ApiProjectController extends CoTopComponent {
 				paramMap.put("networkServerType", networkServerType);
 				paramMap.put("priority", priority);
 				paramMap.put("loginUserName", userInfo.getUserId());
+				paramMap.put("comment", avoidNull(additionalInformation, ""));
 				
 				result = apiProjectService.createProject(paramMap);
 				
