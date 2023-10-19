@@ -1739,14 +1739,14 @@ public class ApiProjectController extends CoTopComponent {
 			Map<String, Object> projectDetailMap = apiProjectService.selectProjectMaster(prjId);
 			String status = (String) projectDetailMap.get("status");
 			String identificationStatus = (String) projectDetailMap.get("identificationStatus");
-			String creator = (String) projectDetailMap.get("prjUserName");
-			String reviewer = (String) projectDetailMap.get("reviewerName");
+			String creator = (String) projectDetailMap.get("creator");
+			String reviewer = (String) projectDetailMap.get("reviewer");
 			boolean searchFlag = status.equals(CoConstDef.CD_DTL_PROJECT_STATUS_DROP) || status.equals(CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE) || identificationStatus.equals(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM) ? false : true;
 			
 			if (searchFlag) {
 				String email = userInfo.getEmail();
 				boolean authFlag = false;
-				if (creator.equals(userInfo.getUserName()) || reviewer.equals(userInfo.getUserName()) || userInfo.getAuthority().equals("ROLE_ADMIN") || apiProjectService.existsWatcherByEmail(prjId, email)) {
+				if (creator.equals(userInfo.getUserId()) || reviewer.equals(userInfo.getUserId()) || userInfo.getAuthority().equals("ROLE_ADMIN") || !apiProjectService.existsWatcherByEmail(prjId, email)) {
 					authFlag = true;
 				}
 				
