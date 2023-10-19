@@ -134,12 +134,12 @@ export default function OSSList() {
           downloadUrl: 'http://cairographics.org/releases',
           homepageUrl: 'https://www.cairographics.org',
           description: 'Some files in util and test folder are released under GPL-2.0',
+          cveId: 'CVE-2020-35492',
+          cvssScore: '7.8',
           creator: 'admin',
           created: '2023-10-05 23:54:08.0',
           modifier: 'admin',
-          modified: '2023-10-07 21:32:05.0',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8'
+          modified: '2023-10-07 21:32:05.0'
         }))
       );
 
