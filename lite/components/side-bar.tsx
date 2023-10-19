@@ -1,5 +1,3 @@
-'use client';
-
 import { menus, rootMenu } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
 import clsx from 'clsx';
@@ -18,9 +16,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
     const currentMenu = menus.filter((menu) => pathname.startsWith(menu.path))[0];
 
     if (currentMenu && currentMenu.sub && !isMenuShown[currentMenu.name]) {
-      const newIsMenuShown = { ...isMenuShown };
-      newIsMenuShown[currentMenu.name] = true;
-      setIsMenuShown(newIsMenuShown);
+      setIsMenuShown({ ...isMenuShown, [currentMenu.name]: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
@@ -28,7 +24,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
   return (
     <div
       className={clsx(
-        'sticky top-0 shrink-0 h-screen bg-charcoal shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-10',
+        'sticky top-0 shrink-0 h-screen bg-charcoal shadow-[0_0_6px_2px_rgba(0,0,0,0.5)] text-semiwhite transition-[width] duration-300 z-20',
         isShown ? 'w-56' : 'w-0'
       )}
     >
@@ -85,11 +81,9 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
               <div key={menu.name}>
                 <div
                   className="flex justify-between items-center px-4 cursor-pointer"
-                  onClick={() => {
-                    const newIsMenuShown = { ...isMenuShown };
-                    newIsMenuShown[menu.name] = !newIsMenuShown[menu.name];
-                    setIsMenuShown(newIsMenuShown);
-                  }}
+                  onClick={() =>
+                    setIsMenuShown({ ...isMenuShown, [menu.name]: !isMenuShown[menu.name] })
+                  }
                 >
                   <div className="text-lg font-semibold leading-loose">
                     <i className={menu.icon}></i>&ensp;{menu.name}

@@ -1,5 +1,3 @@
-'use client';
-
 import { viewState } from '@/lib/atoms';
 import clsx from 'clsx';
 import { useRecoilValue } from 'recoil';
