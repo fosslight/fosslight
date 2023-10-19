@@ -127,7 +127,6 @@ export default function OSSList() {
           ossId: String(24 - 10 * (params.page - 1) - idx),
           ossType: 'MD',
           ossName: 'cai qow jdqwodj oqwdqro',
-          ossNickname: 'Cairo Vector Graphics Library',
           ossVersion: '1.4.12',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           licenseType: 'Copyleft',
@@ -135,9 +134,6 @@ export default function OSSList() {
           downloadUrl: 'http://cairographics.org/releases',
           homepageUrl: 'https://www.cairographics.org',
           description: 'Some files in util and test folder are released under GPL-2.0',
-          copyright:
-            'Copyright (c) 2002 University of Southern California\nCopyright (c) 2005 Red Hat, Inc.\n',
-          attribution: '',
           creator: 'admin',
           created: '2023-10-05 23:54:08.0',
           modifier: 'admin',
