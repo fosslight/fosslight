@@ -133,6 +133,22 @@ function renderFilters(filters: Filter[], form: UseFormReturn) {
       );
     }
 
+    // Number
+    if (filter.type === 'number') {
+      return (
+        <div key={filter.name} className="flex items-start gap-x-4">
+          <div className={labelClass}>{filter.label}</div>
+          <div className="flex-1">
+            <input
+              className={clsx('w-full', inputClass)}
+              type="number"
+              {...form.register(filter.name)}
+            />
+          </div>
+        </div>
+      );
+    }
+
     // Multi-line text
     return (
       <div key={filter.name} className="flex items-start gap-x-4">
