@@ -455,9 +455,8 @@ public class ApiProjectController extends CoTopComponent {
 					
 					if (comment != null) {
 						CommentsHistory commentHisBean = new CommentsHistory();
-						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
 						commentHisBean.setReferenceId(resultPrjId);
-						commentHisBean.setExpansion1("SRC");
 						commentHisBean.setContents(comment);
 						commentHisBean.setLoginUserName(userInfo.getUserId());
 						commentService.registComment(commentHisBean, false);
