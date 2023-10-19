@@ -138,7 +138,7 @@ export default function ListTable({
   return (
     <>
       <div className="relative overflow-x-auto no-scrollbar">
-        <table className="w-full min-h-[200px] text-sm">
+        <table className={clsx('w-full text-sm', rows.length === 0 && 'min-h-[200px]')}>
           {/* Columns */}
           <thead>
             <tr className="border-b-2 border-charcoal/80 text-center whitespace-nowrap">

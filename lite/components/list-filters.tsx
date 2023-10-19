@@ -1,9 +1,9 @@
 import { loadingState } from '@/lib/atoms';
-import { stringifyFilters } from '@/lib/filters';
+import { parseFilters, stringifyFilters } from '@/lib/filters';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 
@@ -133,6 +133,22 @@ function renderFilters(filters: Filter[], form: UseFormReturn) {
       );
     }
 
+    // Number
+    if (filter.type === 'number') {
+      return (
+        <div key={filter.name} className="flex items-start gap-x-4">
+          <div className={labelClass}>{filter.label}</div>
+          <div className="flex-1">
+            <input
+              className={clsx('w-full', inputClass)}
+              type="number"
+              {...form.register(filter.name)}
+            />
+          </div>
+        </div>
+      );
+    }
+
     // Multi-line text
     return (
       <div key={filter.name} className="flex items-start gap-x-4">
@@ -163,7 +179,9 @@ export default function ListFilters({
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
+  const filtersQueryParam = queryParams.get('f') || '';
 
+  // Reflect states on URL query parameters (state -> URL)
   function setFilters(filterParams: FieldValues) {
     if (loading) {
       return;
@@ -181,6 +199,14 @@ export default function ListFilters({
 
     router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
   }
+
+  // Reflect URL query parameters on states (URL -> state)
+  useEffect(() => {
+    const f = stringifyFilters(form.watch());
+    if (f !== filtersQueryParam) {
+      form.reset(parseFilters(filtersQueryParam), { keepDefaultValues: true });
+    }
+  }, [filtersQueryParam, form]);
 
   return (
     <form

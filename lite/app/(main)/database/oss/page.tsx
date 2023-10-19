@@ -126,8 +126,7 @@ export default function OSSList() {
         Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
           ossId: String(24 - 10 * (params.page - 1) - idx),
           ossType: 'MD',
-          ossName: 'cai qow jdqwodj oqwdqro',
-          ossNickname: 'Cairo Vector Graphics Library',
+          ossName: 'cairo',
           ossVersion: '1.4.12',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           licenseType: 'Copyleft',
@@ -135,20 +134,17 @@ export default function OSSList() {
           downloadUrl: 'http://cairographics.org/releases',
           homepageUrl: 'https://www.cairographics.org',
           description: 'Some files in util and test folder are released under GPL-2.0',
-          copyright:
-            'Copyright (c) 2002 University of Southern California\nCopyright (c) 2005 Red Hat, Inc.\n',
-          attribution: '',
+          cveId: 'CVE-2020-35492',
+          cvssScore: '7.8',
           creator: 'admin',
           created: '2023-10-05 23:54:08.0',
           modifier: 'admin',
-          modified: '2023-10-07 21:32:05.0',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8'
+          modified: '2023-10-07 21:32:05.0'
         }))
       );
 
       setLoading(false);
-    }, 2000);
+    }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
@@ -218,21 +214,21 @@ export default function OSSList() {
             const source = row.obligations[1] === 'Y';
 
             return (
-              <>
-                {notice && <div className="whitespace-nowrap">Notice</div>}
-                {source && <div className="whitespace-nowrap">Source</div>}
-              </>
+              <div className="flex gap-x-2 whitespace-nowrap">
+                {notice && <i className="fa-solid fa-file-lines" title="Notice"></i>}
+                {source && <i className="fa-solid fa-code" title="Source"></i>}
+              </div>
             );
           }
 
           if (column === 'URL') {
             return (
               <div className="whitespace-nowrap">
-                <a href={row.downloadUrl} target="_blank">
+                <a className="text-blue-500 hover:underline" href={row.downloadUrl} target="_blank">
                   Download
                 </a>
                 <br />
-                <a href={row.homepageUrl} target="_blank">
+                <a className="text-blue-500 hover:underline" href={row.homepageUrl} target="_blank">
                   Homepage
                 </a>
               </div>
@@ -245,7 +241,11 @@ export default function OSSList() {
 
           if (column === 'Vuln') {
             return (
-              <a href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`} target="_blank">
+              <a
+                className="text-orange-500 hover:underline"
+                href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
+                target="_blank"
+              >
                 {row.cvssScore}
               </a>
             );
