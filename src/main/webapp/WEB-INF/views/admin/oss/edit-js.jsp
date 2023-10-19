@@ -1517,32 +1517,34 @@
 	};
 	
 	//V-Diff 체크
-	function checkVdiff() {
-		var flag = "";
-		if($('input[name=ossVersion]').val() == "") {
-			var rows = getOssGridRows('#_licenseChoice');
-			var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
-
-			$.ajax({
-				url : '<c:url value="/oss/checkVdiff"/>',
-				type : 'POST',
-				data : JSON.stringify(postData),
-				dataType : 'json',
-				cache : false,
-				async : false,
-				contentType : 'application/json',
-				success : function(json){
-					flag = json.vFlag;
-		        },
-	            error : function(){
-	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
-	            }
-			});
-		} else {
-			flag = "N";
+	function checkVdiff(func) {
+		var rtnData = {};
+		var rows = getOssGridRows('#_licenseChoice');
+		var ossVersion = $('input[name=ossVersion]').val();
+		var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
+		
+		if ("save" == func && "" != ossVersion) {
+			postData['ossVersion'] = ossVersion;
 		}
-
-		return flag;
+		
+		$.ajax({
+			url : '<c:url value="/oss/checkVdiff"/>',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(json){
+				rtnData = json.vFlag;
+	        },
+            error : function(){
+            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+		});
+		
+		rtnData['ossVersion'] = ossVersion;
+		return rtnData;
 	};
 	
 	// 그리드 체크 메세지( gridStr 그리드 문자열 )
@@ -1658,20 +1660,129 @@
 				ossGridValidMsg(json, "_licenseChoice");
 			}
 		} else if(json.isValid == 'true') {
-			var v_flag = checkVdiff();
-
+			var data = checkVdiff('save');
+			var v_flag = data.vFlag;
+			
 			if(v_flag == "Y"){
-				alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
-					if (e) {
-						onRegist();
+				if ("" != data.ossVersion) {
+					if (typeof data.resultData != "undefined") {
+						var checkList = data.resultData;
+						var height = 0;
+						let vDiffDiv = document.createElement('div');
+						vDiffDiv.id = 'vDiffDiv';
+						let h1 = document.createElement('h1');
+						h1.innerHTML = '<spring:message code="msg.oss.confirm.ossVersion" />';
+						vDiffDiv.appendChild(h1);
+						vDiffDiv.appendChild(document.createElement('br'));
+						height += 30;
+						
+						let table = document.createElement('table');
+						table.style.width = '100%';
+						$(table).css('border-collapse','collapse');
+						let thead = document.createElement('thead');
+						let tbody = document.createElement('tbody');
+						
+						let row_1 = document.createElement('tr');
+						$(row_1).css('background-color','#a39d9b');
+						row_1.style.height = "30";
+						height += 30;
+						
+						let heading_1 = document.createElement('th');
+						heading_1.style.border = '1px solid #444444';
+						$(heading_1).css('font-weight','bold');
+						$(heading_1).css('color','white');
+						heading_1.innerHTML = "OSS Name (version)";
+						
+						let heading_2 = document.createElement('th');
+						heading_2.style.border = '1px solid #444444';
+						$(heading_2).css('font-weight','bold');
+						$(heading_2).css('color','white');
+						heading_2.innerHTML = "Declared License";
+						
+						row_1.appendChild(heading_1);
+						row_1.appendChild(heading_2);
+						
+						thead.appendChild(row_1);
+						table.appendChild(thead);
+						
+						for (var j in checkList) {
+							var ossInfo = checkList[j].split("|")[0];
+							var declaredLicense = checkList[j].split("|")[1];
+							
+							let row_2 = document.createElement('tr');
+							row_2.style.height = "30";
+							height += 30;
+							
+							let row_2_data_1 = document.createElement('td');
+							row_2_data_1.style.border = '1px solid #444444';
+							row_2_data_1.innerHTML = '&nbsp;' + ossInfo;
+							
+							let row_2_data_2 = document.createElement('td');
+							row_2_data_2.style.border = '1px solid #444444';
+							row_2_data_2.innerHTML = '&nbsp;' + declaredLicense;
+							
+							row_2.appendChild(row_2_data_1);
+							row_2.appendChild(row_2_data_2);
+							tbody.appendChild(row_2);
+						}
+						
+						table.appendChild(tbody);
+						vDiffDiv.appendChild(table);
+						
+						height = (height + 160) < 750 ? (height + 160) : 750;
+						
+						if (!alertify.firstVDiffDialog) {
+							alertify.dialog('firstVDiffDialog', function() {
+								var settings;
+								
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+									settings: {
+										oncontinue: null
+									},
+									callback: function(closeEvent) {
+										alertify.confirm().callback.call(this, closeEvent);
+									}
+								};
+							}, false, 'confirm');
+							
+							alertify.firstVDiffDialog(vDiffDiv)
+							.set('onok', function(closeEvent){onRegist();})
+							.set('oncancel', function(closeEvent){return;});
+						} else {
+							alertify.firstVDiffDialog(vDiffDiv)
+							.set('onok', function(closeEvent){onRegist();})
+							.set('oncancel', function(closeEvent){return;})
+							.set('resizable', true).resizeTo('25%', height);
+						}
 					} else {
-						return false;
+						onRegist();
 					}
-				});
-			}else if(v_flag == ""){
+				} else {
+					alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
+						if (e) {
+							onRegist();
+						} else {
+							return false;
+						}
+					});
+				}
+			} else if(v_flag == ""){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				return;
-			}else{
+			} else {
 				onRegist();
 			}
 		}		
@@ -1723,7 +1834,7 @@
 			}
 
 		} else if(json.isValid == 'true') {
-			var v_flag = checkVdiff();
+			var v_flag = checkVdiff('delete');
 
 			if(v_flag == ""){
 				loading.hide();
