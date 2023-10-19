@@ -172,8 +172,21 @@
 						
 						break;
 					case 'ossType':
-						if(v.toUpperCase() == 'V'){
-							$("[name='"+k+"']").html(' / <span class="iconSet vdif">v-Diff</span>');
+						var colOssType = '';
+						if (v.toUpperCase().indexOf('M') > -1) {
+							colOssType += '<span class="iconSet multi">Multi</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('D') > -1) {
+							colOssType += '<span class="iconSet dual">Dual</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('V') > -1){
+							colOssType += '<span class="iconSet vdif">v-Diff</span>';
+						}
+						
+						if ('' != colOssType) {
+							$("[name='"+k+"']").html(colOssType);
 						}
 						
 						break;
@@ -2246,8 +2259,15 @@ var fn = {
             cache : false,
 	        success : function(json) {
 	        	if(json.externalData2){
-		        	$(target).parent().next("span.urltxt").empty();
-					$(target).parent().next("span.urltxt").html(json.externalData2.downloadLocation).show();
+	        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+		        		var downloadLocation = json.externalData2.downloadLocation;
+		        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
+		        			downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
+		        		}
+		        		
+		        		$(target).parent().next("span.urltxt").empty();
+		        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
+		        	}
 	        	}else{
 		        	$(target).parent().next("span.urltxt").empty();
 	        	}
@@ -2282,9 +2302,11 @@ var fn = {
 					    })[0];
 						
 						if(msg){
-							msg = msg.split("@@")[1];	
+							msg = msg.split("@@")[1];
+							var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
+							
 							$(cur).parent().next("span.urltxt").empty();
-							$(cur).parent().next("span.urltxt").html(msg).show();
+							$(cur).parent().next("span.urltxt").html(downloadLocation).show();
 						}						
 					});
 					
@@ -2314,8 +2336,15 @@ var fn = {
             cache : false,
 	        success : function(json) {
 	        	if(json.externalData2){
-					$(target).next("span.urltxt").empty();
-					$(target).next("span.urltxt").html(json.externalData2.homepage).show();
+	        		if (typeof json.externalData2.homepage !== 'undefined') {
+	        			var homepageHtml = json.externalData2.homepage;
+		        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+		        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
+		        		}
+		        		
+		        		$(target).next("span.urltxt").empty();
+						$(target).next("span.urltxt").html(homepageHtml).show();
+	        		}
 	        	}else{
 					$(target).next("span.urltxt").empty();
 	        	}
@@ -2429,6 +2458,54 @@ var fn = {
 					registSubmit();
 				} else {
 					return false;
+				}
+			});
+		}
+	},
+	showOssViewPage : function (obj) {
+		var ossName = $(obj).parent().next().find('input').val();
+		var ossVersion = $(obj).parent().parent().next().next().find('input').val();
+		fn.showDetailPopup(ossName, ossVersion);
+	},
+	loadUrl : function (target, url) {
+		var ossNameObj = url.split("?")[1];
+		var ossName = ossNameObj.split("=")[1];
+		var ossVersion = $("input[name=ossVersion]").val();
+		fn.showDetailPopup(ossName, ossVersion);
+	},
+	showDetailPopup : function (ossName, ossVersion) {
+		if ("" != ossName) {
+			var _popup = null;
+			
+			if ("N/A" == ossVersion) {
+				ossVersion = "";
+			}
+			
+			$.ajax({
+				url : '<c:url value="/oss/checkExistsOssByname"/>',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {ossName : ossName},
+				contentType : 'application/json',
+				success : function(data){
+					if(data.isValid == 'true') {
+						if(_popup == null || _popup.closed) {
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+								alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+							}
+						} else {
+							_popup.close();
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+						}
+					} else {
+						alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
 		}
