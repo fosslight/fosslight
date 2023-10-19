@@ -356,7 +356,7 @@ public class CoCode {
         	
         	List<String> restrictionList = Arrays.asList(status.split(","));
         	
-        	int multiplyRestIdx = 0;
+        	int multiplyRestIdx = 1;
         	for (int k = codeDtls.size(); j < k; j++)
 	        {
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
