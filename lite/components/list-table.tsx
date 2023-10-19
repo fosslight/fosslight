@@ -2,6 +2,7 @@ import { loadingState, viewState } from '@/lib/atoms';
 import { insertCommas } from '@/lib/commons';
 import clsx from 'clsx';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 function generatePagination(currPage: number, lastPage: number) {
@@ -48,6 +49,11 @@ export default function ListTable({
 
   const view = useRecoilValue(viewState);
   const loading = useRecoilValue(loadingState);
+  const [isColumnSelectorShown, setIsColumnSelectorShown] = useState(false);
+  const [isColumnShown, setIsColumnShown] = useState(
+    Object.fromEntries(columns.map((column) => [column.name, true]))
+  );
+
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
@@ -116,6 +122,19 @@ export default function ListTable({
     router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
   }
 
+  useEffect(() => {
+    function handleClickOutsideColumnSelector(e: MouseEvent) {
+      if (e.target && !(e.target as Element).closest('.column-selector')) {
+        setIsColumnSelectorShown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutsideColumnSelector);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideColumnSelector);
+    };
+  }, []);
+
   return (
     <>
       <div className="relative overflow-x-auto no-scrollbar">
@@ -123,49 +142,81 @@ export default function ListTable({
           {/* Columns */}
           <thead>
             <tr className="border-b-2 border-charcoal/80 text-center whitespace-nowrap">
-              {columns.map((column) => (
-                <th key={column.name} className="p-2 text-left">
-                  <button
-                    className="flex gap-x-2"
-                    onClick={() => setSort(column.sort)}
-                    disabled={!column.sort || loading}
-                  >
-                    {column.name}
+              {columns
+                .filter((column) => isColumnShown[column.name])
+                .map((column) => (
+                  <th key={column.name} className="p-2 text-left">
+                    <button
+                      className="flex gap-x-2"
+                      onClick={() => setSort(column.sort)}
+                      disabled={!column.sort || loading}
+                    >
+                      {column.name}
 
-                    {/* Sorting */}
-                    {column.sort && (
-                      <span className="relative inline-block w-2">
-                        {(() => {
-                          let [up, down] = [false, false];
-                          const d = currentSortObj[column.sort];
+                      {/* Sorting */}
+                      {column.sort && (
+                        <span className="relative inline-block w-2">
+                          {(() => {
+                            let [up, down] = [false, false];
+                            const d = currentSortObj[column.sort];
 
-                          if (d === 'asc') up = true;
-                          if (d === 'dsc') down = true;
+                            if (d === 'asc') up = true;
+                            if (d === 'dsc') down = true;
 
-                          return (
-                            <>
-                              <i
-                                className={clsx(
-                                  'absolute inset-0 pt-1 fa-solid fa-sort-up',
-                                  !up && 'text-semigray'
-                                )}
-                              ></i>
-                              <i
-                                className={clsx(
-                                  'absolute inset-0 pt-1 fa-solid fa-sort-down',
-                                  !down && 'text-semigray'
-                                )}
-                              ></i>
-                            </>
-                          );
-                        })()}
-                      </span>
-                    )}
-                  </button>
-                </th>
-              ))}
-              <th className="w-8 p-2">
-                <i className="fa-solid fa-eye"></i>
+                            return (
+                              <>
+                                <i
+                                  className={clsx(
+                                    'absolute inset-0 pt-1 fa-solid fa-sort-up',
+                                    !up && 'text-semigray'
+                                  )}
+                                ></i>
+                                <i
+                                  className={clsx(
+                                    'absolute inset-0 pt-1 fa-solid fa-sort-down',
+                                    !down && 'text-semigray'
+                                  )}
+                                ></i>
+                              </>
+                            );
+                          })()}
+                        </span>
+                      )}
+                    </button>
+                  </th>
+                ))}
+              <th className="column-selector relative w-8 p-2">
+                <button onClick={() => setIsColumnSelectorShown(!isColumnSelectorShown)}>
+                  <i className="fa-solid fa-eye"></i>
+                </button>
+                {isColumnSelectorShown && (
+                  <div className="absolute top-full right-0 flex flex-col gap-y-1.5 p-3 mt-0.5 bg-white border-x border-b border-darkgray rounded-b shadow-[-2px_2px_4px_0_rgba(0,0,0,0.3)]">
+                    {columns.map((column) => (
+                      <label key={column.name} className="flex justify-end items-center gap-x-2">
+                        {column.name}
+                        <input
+                          type="checkbox"
+                          checked={isColumnShown[column.name]}
+                          onChange={(e) => {
+                            const { checked } = e.target;
+                            const checkedCnt = Object.values(isColumnShown).filter((isShown) =>
+                              Boolean(isShown)
+                            ).length;
+
+                            if (!checked && checkedCnt <= 3) {
+                              return;
+                            }
+
+                            setIsColumnShown({
+                              ...isColumnShown,
+                              [column.name]: checked
+                            });
+                          }}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                )}
               </th>
             </tr>
           </thead>
@@ -174,11 +225,13 @@ export default function ListTable({
           <tbody>
             {rows.map((row, idx) => (
               <tr key={idx} className="border-b border-semigray">
-                {columns.map((column) => (
-                  <td key={column.name} className="px-2 py-1.5">
-                    {render(row, column.name)}
-                  </td>
-                ))}
+                {columns
+                  .filter((column) => isColumnShown[column.name])
+                  .map((column) => (
+                    <td key={column.name} className="px-2 py-1.5">
+                      {render(row, column.name)}
+                    </td>
+                  ))}
                 <td></td>
               </tr>
             ))}
