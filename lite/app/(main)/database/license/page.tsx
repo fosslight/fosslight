@@ -142,7 +142,7 @@ export default function LicenseList() {
       );
 
       setLoading(false);
-    }, 2000);
+    }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
