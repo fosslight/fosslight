@@ -2,6 +2,20 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { useState } from 'react';
 
+function highlight(text: string, keyword?: string) {
+  if (!keyword) {
+    return text;
+  }
+
+  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const highlightedText = text.replace(
+    new RegExp(escapedKeyword, 'gi'),
+    (match) => `<span class="bg-yellow-200 text-semiblack">${match}</span>`
+  );
+
+  return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
+}
+
 export default function ListSections({
   vulnerabilityList,
   ossList,
@@ -61,13 +75,13 @@ export default function ListSections({
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
                       <div className="line-clamp-1 font-semibold break-all">
-                        {vulnerability.ossName}
+                        {highlight(vulnerability.ossName, searchKeyword)}
                       </div>
                       <div className="flex-shrink-0 font-semibold">
                         ({vulnerability.ossVersion})
                       </div>
                       <div className="flex-shrink-0 px-1 py-0.5 bg-darkgray rounded text-xs text-semiwhite">
-                        {vulnerability.cveId}
+                        {highlight(vulnerability.cveId, searchKeyword)}
                       </div>
                     </div>
                     <div className="line-clamp-3 text-sm text-semiblack/80">
@@ -126,7 +140,9 @@ export default function ListSections({
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold break-all">{oss.ossName}</div>
+                      <div className="line-clamp-1 font-semibold break-all">
+                        {highlight(oss.ossName, searchKeyword)}
+                      </div>
                       <div className="flex-shrink-0 font-semibold">({oss.ossVersion})</div>
                       <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
                         {oss.obligations[0] === 'Y' && (
@@ -140,7 +156,9 @@ export default function ListSections({
                         <span className="text-orange-500">{oss.cvssScore}</span>
                       </div>
                     </div>
-                    <div className="line-clamp-3 text-sm text-semiblack/80">{oss.licenseName}</div>
+                    <div className="line-clamp-3 text-sm text-semiblack/80">
+                      {highlight(oss.licenseName, searchKeyword)}
+                    </div>
                     <div className="text-sm text-darkgray">
                       <i className="fa-solid fa-check"></i>&ensp;
                       {oss.created < oss.modified
@@ -195,10 +213,10 @@ export default function ListSections({
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
                       <div className="line-clamp-1 font-semibold break-all">
-                        {license.licenseName}
+                        {highlight(license.licenseName, searchKeyword)}
                       </div>
                       <div className="flex-shrink-0 font-semibold">
-                        ({license.licenseIdentifier})
+                        ({highlight(license.licenseIdentifier, searchKeyword)})
                       </div>
                       <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
                         {license.obligations[0] === 'Y' && (
