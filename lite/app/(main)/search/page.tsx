@@ -22,9 +22,9 @@ export default function FullSearch() {
     setTimeout(() => {
       setVulnerabilityList(
         Array.from(Array(3)).map(() => ({
-          cveId: 'CVE-2020-35492',
           ossName: 'cairo',
           ossVersion: '1.4.12',
+          cveId: 'CVE-2020-35492',
           cvssScore: '7.8',
           summary: 'A flaw was found in cairo image-compositor.c in all versions prior to 1.17.4.',
           published: '2021-03-18 23:54:08.0',
