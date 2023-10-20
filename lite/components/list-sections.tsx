@@ -5,11 +5,13 @@ import { useState } from 'react';
 export default function ListSections({
   vulnerabilityList,
   ossList,
-  licenseList
+  licenseList,
+  searchKeyword
 }: {
   vulnerabilityList: any[];
   ossList: any[];
   licenseList: any[];
+  searchKeyword?: string;
 }) {
   const [isVulnSectionShown, setIsVulnSectionShown] = useState(true);
   const [isOssSectionShown, setIsOssSectionShown] = useState(true);
@@ -22,9 +24,11 @@ export default function ListSections({
       <div className={clsx('col-span-2', sectionClass)}>
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">Vulnerability</div>
-          <Link className="text-charcoal" href="/database/vulnerability?s=mod-dsc">
-            show more here
-          </Link>
+          {searchKeyword === undefined && (
+            <Link className="text-charcoal" href="/database/vulnerability?s=mod-dsc">
+              show more here
+            </Link>
+          )}
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
@@ -79,7 +83,9 @@ export default function ListSections({
                 </div>
               ))
             ) : (
-              <div className="text-darkgray">No entries</div>
+              <div className="text-darkgray">
+                {searchKeyword === undefined ? 'No entries' : 'No results'}
+              </div>
             )}
           </div>
         </div>
@@ -87,9 +93,11 @@ export default function ListSections({
       <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
-          <Link className="text-charcoal" href="/database/oss?s=mod-dsc">
-            show more here
-          </Link>
+          {searchKeyword === undefined && (
+            <Link className="text-charcoal" href="/database/oss?s=mod-dsc">
+              show more here
+            </Link>
+          )}
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
@@ -143,7 +151,9 @@ export default function ListSections({
                 </div>
               ))
             ) : (
-              <div className="text-darkgray">No entries</div>
+              <div className="text-darkgray">
+                {searchKeyword === undefined ? 'No entries' : 'No results'}
+              </div>
             )}
           </div>
         </div>
@@ -151,9 +161,11 @@ export default function ListSections({
       <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
-          <Link className="text-charcoal" href="/database/license?s=mod-dsc">
-            show more here
-          </Link>
+          {searchKeyword === undefined && (
+            <Link className="text-charcoal" href="/database/license?s=mod-dsc">
+              show more here
+            </Link>
+          )}
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
@@ -210,7 +222,9 @@ export default function ListSections({
                 </div>
               ))
             ) : (
-              <div className="text-darkgray">No entries</div>
+              <div className="text-darkgray">
+                {searchKeyword === undefined ? 'No entries' : 'No results'}
+              </div>
             )}
           </div>
         </div>
