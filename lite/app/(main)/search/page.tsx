@@ -2,15 +2,18 @@
 
 import ListSections from '@/components/list-sections';
 import { loadingState } from '@/lib/atoms';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-export default function Dashboard() {
+export default function FullSearch() {
   const setLoading = useSetRecoilState(loadingState);
   const [vulnerabilityList, setVulnerabilityList] = useState<any[]>([]);
   const [ossList, setOssList] = useState<any[]>([]);
   const [licenseList, setLicenseList] = useState<any[]>([]);
-  const sectionHeaderClass = 'pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight';
+
+  const searchParams = useSearchParams();
+  const keyword = searchParams.get('keyword') || '';
 
   // Load recent rows for each section
   useEffect(() => {
@@ -55,30 +58,25 @@ export default function Dashboard() {
       setLoading(false);
     }, 500);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [keyword]);
 
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Dashboard</h2>
+      <h2 className="pb-2 text-xl font-black">Search Result</h2>
 
       {/* Description */}
       <h3 className="pb-8">
-        Insights on your projects, and recently registered vulnerabilities, oss, and licenses.
+        Search results of vulnerabilities, oss, and licenses. Each section shows up to 5 search
+        results.
       </h3>
 
-      {/* Projects */}
-      <h4 className={sectionHeaderClass}>Insights on Projects</h4>
-      <div className="w-[calc(100%-4px)] p-4 mb-8 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]">
-        ...
-      </div>
-
-      {/* Vulnerabilities, oss, licenses */}
-      <h4 className={sectionHeaderClass}>Recently Registered in Database</h4>
+      {/* Search results */}
       <ListSections
         vulnerabilityList={vulnerabilityList}
         ossList={ossList}
         licenseList={licenseList}
+        searchKeyword={keyword}
       />
     </>
   );
