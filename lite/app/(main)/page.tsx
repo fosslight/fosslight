@@ -10,6 +10,7 @@ export default function Dashboard() {
   const setLoading = useSetRecoilState(loadingState);
   const [vulnerabilityList, setVulnerabilityList] = useState<any[]>([]);
   const [ossList, setOssList] = useState<any[]>([]);
+  const [licenseList, setLicenseList] = useState<any[]>([]);
 
   const sectionHeaderClass = 'pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight';
   const sectionClass =
@@ -39,6 +40,17 @@ export default function Dashboard() {
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           obligations: 'YY',
           cvssScore: '7.8',
+          created: '2023-10-05 23:54:08.0',
+          modified: '2023-10-07 21:32:05.0'
+        }))
+      );
+
+      setLicenseList(
+        Array.from(Array(3)).map(() => ({
+          licenseName: 'Apache License 2.0',
+          licenseIdentifier: 'Apache-2.0',
+          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+          obligations: 'YY',
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
         }))
@@ -155,7 +167,52 @@ export default function Dashboard() {
             )}
           </div>
         </div>
-        <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>...</div>
+        <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
+          <div className="flex items-center gap-x-3 text-sm">
+            <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
+            <Link className="text-charcoal" href="/database/license?s=mod-dsc">
+              show more here
+            </Link>
+          </div>
+          <div className="flex flex-col gap-y-3 mt-4">
+            {licenseList.length > 0 ? (
+              licenseList.map((license, idx) => (
+                <div
+                  key={idx}
+                  className="flex gap-x-3 pb-3 border-b border-b-semigray last:pb-0 last:border-none"
+                >
+                  <div className="flex flex-col gap-y-1">
+                    <div className="flex gap-x-2 items-center">
+                      <div className="line-clamp-1 font-semibold">{license.licenseName}</div>
+                      <div className="flex-shrink-0 font-semibold">
+                        ({license.licenseIdentifier})
+                      </div>
+                      <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
+                        {license.obligations[0] === 'Y' && (
+                          <i className="fa-solid fa-file-lines" title="Notice"></i>
+                        )}
+                        {license.obligations[1] === 'Y' && (
+                          <i className="fa-solid fa-code" title="Source"></i>
+                        )}
+                      </div>
+                    </div>
+                    <div className="line-clamp-3 text-sm text-semiblack/80">
+                      {license.restrictions.join(', ')}
+                    </div>
+                    <div className="text-sm text-darkgray">
+                      <i className="fa-solid fa-check"></i>&ensp;
+                      {license.created < license.modified
+                        ? `${license.modified.substring(0, 10)} modified`
+                        : `${license.created.substring(0, 10)} created`}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-darkgray">No entries</div>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );
