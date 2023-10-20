@@ -38,7 +38,7 @@ export default function BottomBar() {
             <Link
               key={menu.name}
               className={clsx(
-                'flex-1 pt-2.5 text-center',
+                'flex-1 pt-2.5 text-center no-tap-highlight',
                 pathname.startsWith(menu.path) && 'bg-semicharcoal/20'
               )}
               href={menu.path}
