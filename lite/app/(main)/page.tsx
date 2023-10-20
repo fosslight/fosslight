@@ -67,13 +67,13 @@ export default function Dashboard() {
         Insights on your projects, and recently registered vulnerabilities, oss, and licenses.
       </h3>
 
-      {/* Recent Projects */}
+      {/* Projects */}
       <h4 className={sectionHeaderClass}>Insights on Projects</h4>
       <div className="w-[calc(100%-4px)] p-4 mb-8 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]">
         ...
       </div>
 
-      {/* Newly Registered in Database */}
+      {/* Vulnerabilities, oss, licenses */}
       <h4 className={sectionHeaderClass}>Recently Registered in Database</h4>
       <ListSections
         vulnerabilityList={vulnerabilityList}
