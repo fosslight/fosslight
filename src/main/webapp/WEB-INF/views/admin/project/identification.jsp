@@ -809,7 +809,7 @@
 										</div>
 									</div>
 								</dd>
-								<dd class="androidCase"><input type="button" value="Apply" class="btnColor black wauto" onclick="binAndroid_fn.showDialog('APPLY')"/></dd> <!-- sBtnArea -->
+								<dd class="androidCase"><input type="button" id="applyBtn" value="Apply" class="btnColor black wauto" onclick="binAndroid_fn.showDialog('APPLY')"/></dd> <!-- sBtnArea -->
 							</dl>
 						</form>
 						<form id="binAndroidProjectForm" class="binAndroidBtn">
