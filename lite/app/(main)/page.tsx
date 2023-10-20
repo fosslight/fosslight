@@ -68,7 +68,7 @@ export default function Dashboard() {
 
       {/* Description */}
       <h3 className="pb-8">
-        Insights on your projects, and recently registered OSSs, licenses, vulnerabilities.
+        Insights on your projects, and recently registered vulnerabilities, oss, and licenses.
       </h3>
 
       {/* Recent Projects */}
@@ -97,7 +97,9 @@ export default function Dashboard() {
                   </div>
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold">{vulnerability.ossName}</div>
+                      <div className="line-clamp-1 font-semibold break-all">
+                        {vulnerability.ossName}
+                      </div>
                       <div className="flex-shrink-0 font-semibold">
                         ({vulnerability.ossVersion})
                       </div>
@@ -138,7 +140,7 @@ export default function Dashboard() {
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold">{oss.ossName}</div>
+                      <div className="line-clamp-1 font-semibold break-all">{oss.ossName}</div>
                       <div className="flex-shrink-0 font-semibold">({oss.ossVersion})</div>
                       <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
                         {oss.obligations[0] === 'Y' && (
@@ -183,7 +185,9 @@ export default function Dashboard() {
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold">{license.licenseName}</div>
+                      <div className="line-clamp-1 font-semibold break-all">
+                        {license.licenseName}
+                      </div>
                       <div className="flex-shrink-0 font-semibold">
                         ({license.licenseIdentifier})
                       </div>
