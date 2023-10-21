@@ -5,12 +5,15 @@
 
 package oss.fosslight.api.controller.v2;
 
+import com.github.jsonldjava.utils.Obj;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
-import oss.fosslight.api.service.ResponseService;
+import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.APIV2;
@@ -19,7 +22,6 @@ import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +31,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/api/v2")
 public class ApiOssV2Controller extends CoTopComponent {
-    private final ResponseService responseService;
+    private final RestResponseService responseService;
 
     private final T2UserService userService;
 
@@ -43,7 +45,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_SEARCH})
-    public CommonResult getOssInfo(
+    public ResponseEntity<Map<String, Object>> getOssInfo(
             @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = true) @RequestParam(required = true) String ossName,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
@@ -65,10 +67,10 @@ public class ApiOssV2Controller extends CoTopComponent {
                 resultMap.put("content", content);
             }
 
-            return responseService.getSingleResult(resultMap);
+            return ResponseEntity.ok(resultMap);
         } catch (Exception e) {
-            return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
-                    , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
         }
     }
 
@@ -77,7 +79,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
-    public CommonResult getLicenseInfo(
+    public ResponseEntity<Map<String, Object>> getLicenseInfo(
             @RequestHeader String authorization,
             @ApiParam(value = "License Name", required = true) @RequestParam(required = true) String licenseName) {
 
@@ -87,16 +89,14 @@ public class ApiOssV2Controller extends CoTopComponent {
 
         try {
             List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
-
-
-            if (content.size() > 0) {
-                resultMap.put("content", content);
+            if (content.size() == 0) {
+                return ResponseEntity.notFound().build();
             }
-
-            return responseService.getSingleResult(resultMap);
+            resultMap.put("content", content);
+            return ResponseEntity.ok(resultMap);
         } catch (Exception e) {
-            return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
-                    , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
         }
     }
 
@@ -105,7 +105,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
-    public CommonResult registerOss(
+    public ResponseEntity<Map<String, Object>> registerOss(
             @RequestHeader String authorization,
             @ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
@@ -114,13 +114,13 @@ public class ApiOssV2Controller extends CoTopComponent {
             try {
                 resultMap = ossService.saveOss(ossMaster);
                 resultMap = ossService.sendMailForSaveOss(resultMap);
-                return responseService.getSingleResult(resultMap);
+                return ResponseEntity.ok(resultMap);
             } catch (Exception e) {
-                return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR
                         , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
             }
         }
-        return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-                , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+        return responseService.errorResponse(HttpStatus.FORBIDDEN,
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
     }
 }

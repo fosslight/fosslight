@@ -13,15 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
-import oss.fosslight.api.service.ResponseService;
-import oss.fosslight.common.CoCodeManager;
-import oss.fosslight.common.CoConstDef;
+import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.Url.API;
 import oss.fosslight.service.ApiCodeService;
 import oss.fosslight.service.T2UserService;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +28,7 @@ import java.util.Map;
 @RequestMapping(value = "/api/v2")
 public class ApiCodeV2Controller extends CoTopComponent {
 
-    private final ResponseService responseService;
+    private final RestResponseService responseService;
 
     private final T2UserService userService;
 
@@ -57,12 +53,12 @@ public class ApiCodeV2Controller extends CoTopComponent {
         try {
             List<Map<String, Object>> contents = apiCodeService.getCodeList(codeType, detailValue);
             if (contents.size() == 0) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.notFound().build();
             }
             result.put("content", contents);
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
