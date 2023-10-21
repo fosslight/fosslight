@@ -851,6 +851,9 @@ public final class Url {
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partners";
 
+			/** API 3rd Party Add Watcher */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
+
 		/** OSS */
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss";
