@@ -27,4 +27,8 @@
   .center {
     @apply top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4;
   }
+
+  .breadcrumb {
+    @apply pb-2 text-xl font-black;
+  }
 }

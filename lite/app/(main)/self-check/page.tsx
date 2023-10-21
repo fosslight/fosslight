@@ -86,7 +86,7 @@ export default function SelfCheckList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Self-Check List</h2>
+      <h2 className="breadcrumb">Self-Check List</h2>
 
       {/* Description */}
       <h3 className="pb-8">List of projects you&apos;ve created for self-check.</h3>

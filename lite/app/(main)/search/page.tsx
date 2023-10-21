@@ -63,7 +63,7 @@ export default function FullSearch() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Search Result</h2>
+      <h2 className="breadcrumb">Search Result</h2>
 
       {/* Description */}
       <h3 className="pb-8">
