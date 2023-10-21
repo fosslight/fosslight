@@ -739,7 +739,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
     public ResponseEntity<Map<String, Object>> ossReportBin(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,

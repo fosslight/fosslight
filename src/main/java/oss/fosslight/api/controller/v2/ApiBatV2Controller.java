@@ -17,7 +17,7 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.Url.API;
+import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.service.ApiBatService;
 import oss.fosslight.service.T2UserService;
 
@@ -42,7 +42,7 @@ public class ApiBatV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authentication", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {API.FOSSLIGHT_API_BINARY_SEARCH})
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})
     public ResponseEntity<Map<String, Object>> getBinaryInfo(
             @RequestHeader String authentication,
             @ApiParam(value = "Binary Name", required = false) @RequestParam(required = false) String fileName,

@@ -24,7 +24,7 @@ import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.Url.API;
+import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
@@ -72,7 +72,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {API.FOSSLIGHT_API_SELFCHECK_CREATE})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
     public ResponseEntity<Map<String, Object>> createSelfCheck(
             @RequestHeader String authorization,
             @ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
@@ -114,10 +114,10 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {API.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "name", required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
 
@@ -234,8 +234,11 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {API.FOSSLIGHT_API_EXPORT_SELFCHECK})
-    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String authorization, @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId) {
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_EXPORT_SELFCHECK})
+    public ResponseEntity<FileSystemResource> selfCheckExport(
+            @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
+    ) {
         String downloadId = "";
         T2File fileInfo = new T2File();
 
@@ -264,10 +267,10 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         Map<String, Object> resultMap = new HashMap<>();

@@ -5,17 +5,16 @@
 
 package oss.fosslight.api.controller.v2;
 
-import com.github.jsonldjava.utils.Obj;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.ApiOssService;
@@ -49,7 +48,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = true) @RequestParam(required = true) String ossName,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
-            @ApiParam(value = "Download Location", required = true) @RequestParam(required = true) String downloadLocation
+            @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation
     ) {
 
         // 사용자 인증
