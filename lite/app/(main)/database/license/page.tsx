@@ -149,7 +149,7 @@ export default function LicenseList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">
+      <h2 className="breadcrumb">
         Database
         <i className="mx-2 text-sm fa-solid fa-angle-right" />
         License List

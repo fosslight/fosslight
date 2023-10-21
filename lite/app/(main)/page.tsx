@@ -60,7 +60,7 @@ export default function Dashboard() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Dashboard</h2>
+      <h2 className="breadcrumb">Dashboard</h2>
 
       {/* Description */}
       <h3 className="pb-8">
