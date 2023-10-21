@@ -181,9 +181,7 @@ export default function OSSList() {
         rows={rows}
         columns={columns}
         currentSort={currentSort}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        countPerPage={countPerPage}
+        pagination={{ totalCount, currentPage, countPerPage }}
         render={(row: any, column: string) => {
           if (column === 'ID') {
             return row.ossId;
