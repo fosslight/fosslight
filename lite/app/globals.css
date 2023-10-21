@@ -39,4 +39,12 @@
   .shadow-box-header {
     @apply pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight;
   }
+
+  .default-btn {
+    @apply border border-darkgray rounded outline-none text-center;
+  }
+
+  .crimson-btn {
+    @apply bg-crimson border border-crimson rounded outline-none text-semiwhite text-center;
+  }
 }
