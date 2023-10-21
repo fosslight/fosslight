@@ -31,4 +31,12 @@
   .breadcrumb {
     @apply pb-2 text-xl font-black;
   }
+
+  .shadow-box {
+    @apply p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)];
+  }
+
+  .shadow-box-header {
+    @apply pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight;
+  }
 }

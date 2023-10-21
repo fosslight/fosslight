@@ -210,7 +210,7 @@ export default function ListFilters({
 
   return (
     <form
-      className="relative w-[calc(100%-4px)] p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]"
+      className="relative w-[calc(100%-4px)] shadow-box"
       onSubmit={form.handleSubmit(setFilters)}
     >
       {/* Default filters */}
