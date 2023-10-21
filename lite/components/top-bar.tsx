@@ -27,7 +27,7 @@ export default function TopBar() {
         <i
           className="text-lg cursor-pointer no-tap-highlight fa-solid fa-user"
           onClick={() => setIsProfileShown(true)}
-        ></i>
+        />
       </div>
       {isProfileShown && (
         <div
@@ -39,13 +39,13 @@ export default function TopBar() {
         >
           <div
             className={clsx(
-              'absolute top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4 p-4 rounded bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] transition-[transform]',
+              'absolute center p-4 rounded bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] transition-[transform]',
               isProfileActive ? 'scale-100' : 'scale-0'
             )}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center items-center gap-x-2 pb-2 mb-2 border-b border-b-semiblack font-semibold">
-              <i className="text-xl fa-solid fa-user"></i>
+              <i className="text-xl fa-solid fa-user" />
               Profile Information
             </div>
             <div className="flex flex-col gap-y-1 text-sm">

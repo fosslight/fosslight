@@ -30,12 +30,10 @@ export default function ListSections({
   const [isVulnSectionShown, setIsVulnSectionShown] = useState(true);
   const [isOssSectionShown, setIsOssSectionShown] = useState(true);
   const [isLicenseSectionShown, setIsLicenseSectionShown] = useState(true);
-  const sectionClass =
-    'p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]';
 
   return (
     <div className="grid grid-cols-2 gap-4 w-[calc(100%-4px)]">
-      <div className={clsx('col-span-2', sectionClass)}>
+      <div className="col-span-2 shadow-box">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">Vulnerability</div>
           {searchKeyword === undefined && (
@@ -49,9 +47,9 @@ export default function ListSections({
               onClick={() => setIsVulnSectionShown(!isVulnSectionShown)}
             >
               {isVulnSectionShown ? (
-                <i className="fa-solid fa-chevron-down"></i>
+                <i className="fa-solid fa-chevron-down" />
               ) : (
-                <i className="fa-solid fa-chevron-up"></i>
+                <i className="fa-solid fa-chevron-up" />
               )}
             </button>
           </div>
@@ -88,7 +86,8 @@ export default function ListSections({
                       {vulnerability.summary}
                     </div>
                     <div className="text-sm text-darkgray">
-                      <i className="fa-solid fa-check"></i>&ensp;
+                      <i className="fa-solid fa-check" />
+                      &ensp;
                       {vulnerability.published < vulnerability.modified
                         ? `${vulnerability.modified.substring(0, 10)} modified`
                         : `${vulnerability.published.substring(0, 10)} published`}
@@ -104,7 +103,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
+      <div className="col-span-2 shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
           {searchKeyword === undefined && (
@@ -118,9 +117,9 @@ export default function ListSections({
               onClick={() => setIsOssSectionShown(!isOssSectionShown)}
             >
               {isOssSectionShown ? (
-                <i className="fa-solid fa-chevron-down"></i>
+                <i className="fa-solid fa-chevron-down" />
               ) : (
-                <i className="fa-solid fa-chevron-up"></i>
+                <i className="fa-solid fa-chevron-up" />
               )}
             </button>
           </div>
@@ -144,23 +143,24 @@ export default function ListSections({
                         {highlight(oss.ossName, searchKeyword)}
                       </div>
                       <div className="flex-shrink-0 font-semibold">({oss.ossVersion})</div>
-                      <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
+                      <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                         {oss.obligations[0] === 'Y' && (
-                          <i className="fa-solid fa-file-lines" title="Notice"></i>
+                          <i className="fa-solid fa-file-lines" title="Notice" />
                         )}
                         {oss.obligations[1] === 'Y' && (
-                          <i className="fa-solid fa-code" title="Source"></i>
+                          <i className="fa-solid fa-code" title="Source" />
                         )}
                       </div>
-                      <div className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs">
-                        <span className="text-orange-500">{oss.cvssScore}</span>
+                      <div className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500">
+                        {oss.cvssScore}
                       </div>
                     </div>
                     <div className="line-clamp-3 text-sm text-semiblack/80">
                       {highlight(oss.licenseName, searchKeyword)}
                     </div>
                     <div className="text-sm text-darkgray">
-                      <i className="fa-solid fa-check"></i>&ensp;
+                      <i className="fa-solid fa-check" />
+                      &ensp;
                       {oss.created < oss.modified
                         ? `${oss.modified.substring(0, 10)} modified`
                         : `${oss.created.substring(0, 10)} created`}
@@ -176,7 +176,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
+      <div className="col-span-2 shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
           {searchKeyword === undefined && (
@@ -190,9 +190,9 @@ export default function ListSections({
               onClick={() => setIsLicenseSectionShown(!isLicenseSectionShown)}
             >
               {isLicenseSectionShown ? (
-                <i className="fa-solid fa-chevron-down"></i>
+                <i className="fa-solid fa-chevron-down" />
               ) : (
-                <i className="fa-solid fa-chevron-up"></i>
+                <i className="fa-solid fa-chevron-up" />
               )}
             </button>
           </div>
@@ -218,12 +218,12 @@ export default function ListSections({
                       <div className="flex-shrink-0 font-semibold">
                         ({highlight(license.licenseIdentifier, searchKeyword)})
                       </div>
-                      <div className="flex items-center gap-x-1 flex-shrink-0 px-1 py-1 border border-darkgray rounded text-xs">
+                      <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                         {license.obligations[0] === 'Y' && (
-                          <i className="fa-solid fa-file-lines" title="Notice"></i>
+                          <i className="fa-solid fa-file-lines" title="Notice" />
                         )}
                         {license.obligations[1] === 'Y' && (
-                          <i className="fa-solid fa-code" title="Source"></i>
+                          <i className="fa-solid fa-code" title="Source" />
                         )}
                       </div>
                     </div>
@@ -231,7 +231,8 @@ export default function ListSections({
                       {license.restrictions.join(', ')}
                     </div>
                     <div className="text-sm text-darkgray">
-                      <i className="fa-solid fa-check"></i>&ensp;
+                      <i className="fa-solid fa-check" />
+                      &ensp;
                       {license.created < license.modified
                         ? `${license.modified.substring(0, 10)} modified`
                         : `${license.created.substring(0, 10)} created`}

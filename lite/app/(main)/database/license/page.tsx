@@ -149,9 +149,9 @@ export default function LicenseList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">
+      <h2 className="breadcrumb">
         Database
-        <i className="mx-2 text-sm fa-solid fa-angle-right"></i>
+        <i className="mx-2 text-sm fa-solid fa-angle-right" />
         License List
       </h2>
 
@@ -163,7 +163,7 @@ export default function LicenseList() {
 
       {/* Button(s) */}
       <div className="flex justify-end gap-x-2 mt-8 mb-4">
-        <button className="flex items-center gap-x-1.5 px-2 py-0.5 border border-gray rounded">
+        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
           </div>
@@ -173,6 +173,7 @@ export default function LicenseList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
+        rowId="licenseId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -206,8 +207,8 @@ export default function LicenseList() {
 
             return (
               <div className="flex gap-x-2 whitespace-nowrap">
-                {notice && <i className="fa-solid fa-file-lines" title="Notice"></i>}
-                {source && <i className="fa-solid fa-code" title="Source"></i>}
+                {notice && <i className="fa-solid fa-file-lines" title="Notice" />}
+                {source && <i className="fa-solid fa-code" title="Source" />}
               </div>
             );
           }
@@ -218,6 +219,7 @@ export default function LicenseList() {
                 className="text-blue-500 whitespace-nowrap hover:underline"
                 href={row.homepageUrl}
                 target="_blank"
+                onClick={(e) => e.stopPropagation()}
               >
                 Homepage
               </a>

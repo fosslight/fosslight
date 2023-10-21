@@ -15,4 +15,36 @@
     -webkit-tap-highlight-color: transparent; /* Safari and other WebKit-based browsers */
     tap-highlight-color: transparent; /* Most other browsers */
   }
+
+  .center-x {
+    @apply right-2/4 translate-x-2/4;
+  }
+
+  .center-y {
+    @apply top-2/4 -translate-y-2/4;
+  }
+
+  .center {
+    @apply top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4;
+  }
+
+  .breadcrumb {
+    @apply pb-2 text-xl font-black;
+  }
+
+  .shadow-box {
+    @apply p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)];
+  }
+
+  .shadow-box-header {
+    @apply pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight;
+  }
+
+  .default-btn {
+    @apply border border-darkgray rounded outline-none text-center;
+  }
+
+  .crimson-btn {
+    @apply bg-crimson border border-crimson rounded outline-none text-semiwhite text-center;
+  }
 }

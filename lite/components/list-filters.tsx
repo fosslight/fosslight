@@ -210,7 +210,7 @@ export default function ListFilters({
 
   return (
     <form
-      className="relative w-[calc(100%-4px)] p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]"
+      className="relative w-[calc(100%-4px)] shadow-box"
       onSubmit={form.handleSubmit(setFilters)}
     >
       {/* Default filters */}
@@ -233,15 +233,15 @@ export default function ListFilters({
             </div>
           </div>
           <button
-            className="absolute top-full right-2/4 translate-x-2/4 px-2 py-0.5 border-x border-b border-darkgray rounded-b outline-none text-xs"
+            className="absolute top-full center-x px-2 py-0.5 border-x border-b border-darkgray rounded-b outline-none text-xs"
             type="button"
             onClick={() => setAreHiddenFiltersShown(!areHiddenFiltersShown)}
           >
             {areHiddenFiltersShown ? 'Hide' : 'Expand'}&nbsp;
             {areHiddenFiltersShown ? (
-              <i className="fa-solid fa-chevron-up"></i>
+              <i className="fa-solid fa-chevron-up" />
             ) : (
-              <i className="fa-solid fa-chevron-down"></i>
+              <i className="fa-solid fa-chevron-down" />
             )}
           </button>
         </>
@@ -249,7 +249,7 @@ export default function ListFilters({
 
       {/* Search button */}
       <div className="mt-2 text-right">
-        <button className="px-2 py-1 bg-crimson rounded text-semiwhite" disabled={loading}>
+        <button className="px-2 py-0.5 crimson-btn" disabled={loading}>
           Search
         </button>
       </div>

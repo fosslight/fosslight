@@ -37,7 +37,7 @@ export default function FullSearchBar() {
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
       />
-      <i className="text-2xl text-darkgray fa-solid fa-magnifying-glass"></i>
+      <i className="text-2xl text-darkgray fa-solid fa-magnifying-glass" />
     </form>
   );
 }

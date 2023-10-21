@@ -10,7 +10,6 @@ export default function Dashboard() {
   const [vulnerabilityList, setVulnerabilityList] = useState<any[]>([]);
   const [ossList, setOssList] = useState<any[]>([]);
   const [licenseList, setLicenseList] = useState<any[]>([]);
-  const sectionHeaderClass = 'pl-2 mb-4 border-l-4 border-l-semiblack font-bold leading-tight';
 
   // Load recent rows for each section
   useEffect(() => {
@@ -60,7 +59,7 @@ export default function Dashboard() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Dashboard</h2>
+      <h2 className="breadcrumb">Dashboard</h2>
 
       {/* Description */}
       <h3 className="pb-8">
@@ -68,13 +67,11 @@ export default function Dashboard() {
       </h3>
 
       {/* Projects */}
-      <h4 className={sectionHeaderClass}>Insights on Projects</h4>
-      <div className="w-[calc(100%-4px)] p-4 mb-8 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]">
-        ...
-      </div>
+      <h4 className="shadow-box-header">Insights on Projects</h4>
+      <div className="w-[calc(100%-4px)] mb-8 shadow-box">...</div>
 
       {/* Vulnerabilities, oss, licenses */}
-      <h4 className={sectionHeaderClass}>Recently Registered in Database</h4>
+      <h4 className="shadow-box-header">Recently Registered in Database</h4>
       <ListSections
         vulnerabilityList={vulnerabilityList}
         ossList={ossList}

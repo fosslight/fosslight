@@ -29,7 +29,7 @@ export default function BottomBar() {
         className={clsx('flex-1 pt-2.5 text-center', pathname === '/' && 'bg-semicharcoal/20')}
         href="/"
       >
-        <i className={clsx('text-lg', rootMenu.icon)}></i>
+        <i className={clsx('text-lg', rootMenu.icon)} />
         <div className="text-sm">{rootMenu.name}</div>
       </Link>
       {menus.map((menu) => {
@@ -43,7 +43,7 @@ export default function BottomBar() {
               )}
               href={menu.path}
             >
-              <i className={clsx('text-lg', menu.icon)}></i>
+              <i className={clsx('text-lg', menu.icon)} />
               <div className="text-sm">{menu.name}</div>
             </Link>
           );
@@ -60,11 +60,11 @@ export default function BottomBar() {
               setIsMenuShown({ ...defaultIsMenuShown, [menu.name]: !isMenuShown[menu.name] })
             }
           >
-            <i className={clsx('text-lg', menu.icon)}></i>
+            <i className={clsx('text-lg', menu.icon)} />
             <div className="text-sm">{menu.name}</div>
             <div
               className={clsx(
-                'absolute right-0 bottom-16 left-0 flex flex-col bg-charcoal border-b border-darkgray rounded-t-md text-semiwhite overflow-y-hidden transition-[max-height,opacity] duration-[500ms] z-50',
+                'absolute right-0 bottom-16 left-0 flex flex-col bg-charcoal rounded-t-md text-semiwhite overflow-y-hidden transition-[max-height,opacity] duration-[500ms] z-50',
                 !isMenuShown[menu.name] ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'
               )}
             >

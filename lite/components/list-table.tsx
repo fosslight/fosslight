@@ -28,6 +28,7 @@ function generatePagination(currPage: number, lastPage: number) {
 }
 
 export default function ListTable({
+  rowId,
   rows,
   columns,
   currentSort,
@@ -36,6 +37,7 @@ export default function ListTable({
   countPerPage,
   render
 }: {
+  rowId: string;
   rows: any[];
   columns: { name: string; sort: string }[];
   currentSort: string;
@@ -170,13 +172,13 @@ export default function ListTable({
                                     'absolute inset-0 pt-1 fa-solid fa-sort-up',
                                     !up && 'text-semigray'
                                   )}
-                                ></i>
+                                />
                                 <i
                                   className={clsx(
                                     'absolute inset-0 pt-1 fa-solid fa-sort-down',
                                     !down && 'text-semigray'
                                   )}
-                                ></i>
+                                />
                               </>
                             );
                           })()}
@@ -187,10 +189,10 @@ export default function ListTable({
                 ))}
               <th className="column-selector relative w-8 p-2">
                 <button onClick={() => setIsColumnSelectorShown(!isColumnSelectorShown)}>
-                  <i className="fa-solid fa-eye"></i>
+                  <i className="fa-solid fa-eye" />
                 </button>
                 {isColumnSelectorShown && (
-                  <div className="absolute top-full right-0 flex flex-col gap-y-1.5 p-3 mt-0.5 bg-white border-x border-b border-darkgray rounded-b shadow-[-2px_2px_4px_0_rgba(0,0,0,0.3)]">
+                  <div className="absolute top-full right-0 flex flex-col gap-y-1.5 p-3 mt-0.5 bg-white border-x border-b border-darkgray rounded-b shadow-[-2px_2px_4px_0_rgba(0,0,0,0.2)]">
                     {columns.map((column) => (
                       <label key={column.name} className="flex justify-end items-center gap-x-2">
                         {column.name}
@@ -224,7 +226,14 @@ export default function ListTable({
           {/* Rows */}
           <tbody>
             {rows.map((row, idx) => (
-              <tr key={idx} className="border-b border-semigray">
+              <tr
+                key={idx}
+                className={clsx(
+                  'border-b border-semigray',
+                  view === 'pc' && 'cursor-pointer hover:opacity-80'
+                )}
+                onClick={() => router.push(`${pathname}/${row[rowId]}`)}
+              >
                 {columns
                   .filter((column) => isColumnShown[column.name])
                   .map((column) => (
@@ -239,11 +248,7 @@ export default function ListTable({
         </table>
 
         {/* When there are no rows */}
-        {rows.length === 0 && (
-          <div className="absolute top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4 text-center">
-            There are no entries.
-          </div>
-        )}
+        {rows.length === 0 && <div className="absolute center">There are no entries.</div>}
       </div>
 
       {/* Pagination */}
@@ -260,7 +265,7 @@ export default function ListTable({
           <div className="flex items-center gap-x-2">
             {generatePagination(currentPage, lastPage).map((page) => {
               if (page === -1) {
-                return <i key={page} className="fa-solid fa-ellipsis"></i>;
+                return <i key={page} className="fa-solid fa-ellipsis" />;
               }
 
               return (

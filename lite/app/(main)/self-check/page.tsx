@@ -86,7 +86,7 @@ export default function SelfCheckList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="pb-2 text-xl font-black">Self-Check List</h2>
+      <h2 className="breadcrumb">Self-Check List</h2>
 
       {/* Description */}
       <h3 className="pb-8">List of projects you&apos;ve created for self-check.</h3>
@@ -96,7 +96,7 @@ export default function SelfCheckList() {
 
       {/* Button(s) */}
       <div className="flex justify-end gap-x-2 mt-8 mb-4">
-        <button className="flex items-center gap-x-1.5 px-2 py-0.5 border border-gray rounded">
+        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
           </div>
@@ -106,6 +106,7 @@ export default function SelfCheckList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
+        rowId="projectId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -128,7 +129,11 @@ export default function SelfCheckList() {
           if (column === 'Report') {
             return (
               row.report && (
-                <i className="cursor-pointer fa-regular fa-file-excel" title="FOSSLight Report"></i>
+                <i
+                  className="cursor-pointer fa-regular fa-file-excel"
+                  title="FOSSLight Report"
+                  onClick={(e) => e.stopPropagation()}
+                />
               )
             );
           }
@@ -142,7 +147,8 @@ export default function SelfCheckList() {
                       key={idx}
                       className="cursor-pointer fa-solid fa-cube"
                       title={`Package ${idx + 1}`}
-                    ></i>
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   ))}
                 </div>
               )
@@ -151,7 +157,13 @@ export default function SelfCheckList() {
 
           if (column === 'Notice') {
             return (
-              row.notice && <i className="cursor-pointer fa-solid fa-file-lines" title="Notice"></i>
+              row.notice && (
+                <i
+                  className="cursor-pointer fa-solid fa-file-lines"
+                  title="Notice"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )
             );
           }
 
@@ -161,6 +173,7 @@ export default function SelfCheckList() {
                 className="text-orange-500 hover:underline"
                 href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
                 target="_blank"
+                onClick={(e) => e.stopPropagation()}
               >
                 {row.cvssScore}
               </a>
