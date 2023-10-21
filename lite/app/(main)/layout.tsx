@@ -67,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Loading */}
           {loading && (
-            <div className="fixed top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4">
+            <div className="fixed center">
               <Loading />
             </div>
           )}

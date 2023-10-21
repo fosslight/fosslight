@@ -248,11 +248,7 @@ export default function ListTable({
         </table>
 
         {/* When there are no rows */}
-        {rows.length === 0 && (
-          <div className="absolute top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4 text-center">
-            There are no entries.
-          </div>
-        )}
+        {rows.length === 0 && <div className="absolute center">There are no entries.</div>}
       </div>
 
       {/* Pagination */}
