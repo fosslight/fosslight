@@ -7,19 +7,19 @@ export default function SignIn() {
   const router = useRouter();
 
   return (
-    <form className="flex flex-col gap-y-6 p-6 bg-semiwhite rounded">
+    <form className="flex flex-col gap-y-6 p-6 bg-white rounded">
       <div className="flex flex-col gap-y-1">
         <div className="font-semibold">ID</div>
-        <input className="w-full py-1 bg-transparent border-b border-semigray outline-none" />
+        <input className="w-full py-1 bg-transparent border-b border-b-semigray outline-none" />
       </div>
       <div className="flex flex-col gap-y-1">
         <div className="font-semibold">Password</div>
         <input
-          className="w-full py-1 bg-transparent border-b border-semigray outline-none"
+          className="w-full py-1 bg-transparent border-b border-b-semigray outline-none"
           type="password"
         />
       </div>
-      <label className="flex items-center cursor-pointer">
+      <label className="flex items-center">
         <input className="w-4 h-4" type="checkbox" />
         &ensp;
         <span className="font-semibold">Save ID</span>

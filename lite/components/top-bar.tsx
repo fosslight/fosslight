@@ -27,7 +27,7 @@ export default function TopBar() {
         <i
           className="text-lg cursor-pointer no-tap-highlight fa-solid fa-user"
           onClick={() => setIsProfileShown(true)}
-        ></i>
+        />
       </div>
       {isProfileShown && (
         <div
@@ -45,7 +45,7 @@ export default function TopBar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-center items-center gap-x-2 pb-2 mb-2 border-b border-b-semiblack font-semibold">
-              <i className="text-xl fa-solid fa-user"></i>
+              <i className="text-xl fa-solid fa-user" />
               Profile Information
             </div>
             <div className="flex flex-col gap-y-1 text-sm">
