@@ -1,11 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
-  const router = useRouter();
-
   return (
     <form className="flex flex-col gap-y-6 p-6 bg-white rounded">
       <div className="flex flex-col gap-y-1">
@@ -25,16 +22,10 @@ export default function SignIn() {
         <span className="font-semibold">Save ID</span>
       </label>
       <div className="flex flex-col gap-y-2">
-        <button className="w-full py-1 bg-crimson border border-crimson rounded text-lg text-semiwhite">
-          Sign In
-        </button>
-        <button
-          className="w-full py-1 bg-transparent border border-gray rounded text-lg"
-          type="button"
-          onClick={() => router.push('/sign-up')}
-        >
+        <button className="w-full py-1 text-lg crimson-btn">Sign In</button>
+        <Link className="w-full py-1 text-lg default-btn" href="/sign-up">
           Sign Up
-        </button>
+        </Link>
       </div>
       <Link className="mx-auto text-sm text-darkgray" href="/reset-password">
         Forgot password? Click here.

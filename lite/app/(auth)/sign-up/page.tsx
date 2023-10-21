@@ -42,9 +42,7 @@ export default function SignUp() {
           <option>N/A</option>
         </select>
       </div>
-      <button className="w-full py-1 bg-crimson border border-crimson rounded text-lg text-semiwhite">
-        Sign Up
-      </button>
+      <button className="w-full py-1 text-lg crimson-btn">Sign Up</button>
       <Link className="mx-auto text-sm text-darkgray" href="/sign-in">
         Already signed up? Sign in here.
       </Link>

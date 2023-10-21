@@ -249,7 +249,7 @@ export default function ListFilters({
 
       {/* Search button */}
       <div className="mt-2 text-right">
-        <button className="px-2 py-1 bg-crimson rounded text-semiwhite" disabled={loading}>
+        <button className="px-2 py-0.5 crimson-btn" disabled={loading}>
           Search
         </button>
       </div>

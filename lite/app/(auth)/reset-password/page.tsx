@@ -14,9 +14,7 @@ export default function ResetPassword() {
           type="email"
         />
       </div>
-      <button className="w-full py-1 bg-crimson border border-crimson rounded text-lg text-semiwhite">
-        Reset Password
-      </button>
+      <button className="w-full py-1 text-lg crimson-btn">Reset Password</button>
       <Link className="mx-auto text-sm text-darkgray" href="/sign-in">
         Return to sign in.
       </Link>
