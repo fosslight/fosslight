@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.service.RestResponseService;
-import oss.fosslight.common.Url.API;
+import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.service.ApiCodeService;
 import oss.fosslight.service.T2UserService;
 
@@ -40,7 +40,7 @@ public class ApiCodeV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {API.FOSSLIGHT_API_CODE_SEARCH})
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_CODE_SEARCH})
     public ResponseEntity<Map<String, Object>> getVulnerabilityData(
             @RequestHeader String authorization,
             @ApiParam(value = "code Type (DIV:Division, OS:Os Type, DSTT:Distribution Type, DSTS:Distribution Site, NOTI:NOTICE TYPE, NP:NOTICE PLATFORM, PRI:PRIORITY)", required = true, allowableValues = "DIV,OS,DSTT,DSTS,NOTI,NP,PRI") @RequestParam(required = true) String codeType,
