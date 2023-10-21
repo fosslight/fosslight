@@ -1,2 +1,0 @@
-[   INFO] ## Start to run Prechecker Lint
-[   INFO] |--- Path to analyze : .

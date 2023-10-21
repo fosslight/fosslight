@@ -41,6 +41,9 @@ public class RestResponseService {
             case INTERNAL_SERVER_ERROR:
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE);
                 break;
+            case FORBIDDEN:
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE);
+                break;
             default:
         }
 
