@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
+import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.API;
@@ -31,7 +32,7 @@ import java.util.Map;
 @Profile(value = {"stage", "prod"})
 public class ApiBatV2Controller extends CoTopComponent {
 
-    private final ResponseService responseService;
+    private final RestResponseService responseService;
 
     private final T2UserService userService;
 
@@ -73,10 +74,10 @@ public class ApiBatV2Controller extends CoTopComponent {
                 resultMap.put("content", contents);
             }
 
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            return ResponseEntity.ok(resultMap);
 
         } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
         }
     }
 }

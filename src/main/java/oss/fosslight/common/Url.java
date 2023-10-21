@@ -828,7 +828,7 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/oss_report_selfcheck";
-			
+
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
 			
@@ -880,24 +880,24 @@ public final class Url {
 		public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/projects/{id}/models";
 
 		/** API Update Project Model WITH FILE */
-		public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/model_update_upload_file";
+		public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/projects/{id}/models/upload";
 
 		/** API Project BOM Tab Export */
-		public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export";
+		public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/projects/{id}/bom/export";
 
 		/** API Project BOM Tab Export JSON*/
 		public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/projects/{id}/bom/json";
 
 		/** API BOM COMPARE */
-		public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/compareBom";
+		public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
 
 		/** API Project Add Watcher */
-		public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
+		public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/add-watcher";
 
 		/** API OSS Report upload */
 		public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 		public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
-		public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/reportAndroid";
+		public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
 
 		/** API Verification Packaging Upload */
 		public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/projects/{id}/packages";
@@ -905,10 +905,10 @@ public final class Url {
 
 		/** VULNABILITY */
 		/** vulnerability info search */
-		public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerability_data";
+		public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
 
 		/** vulnerability max score info search */
-		public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/vulnerability_max_data";
+		public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/max-vulnerabilities";
 
 
 		/** SELFCHECK */

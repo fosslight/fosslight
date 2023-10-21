@@ -154,7 +154,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
@@ -211,7 +211,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
+    @PutMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
@@ -449,7 +449,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT})
     public ResponseEntity<FileSystemResource> getPrjBomExport(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String mergeSaveFlag) {
 
         // 사용자 인증
@@ -524,8 +524,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
             @RequestHeader String authorization,
-            @ApiParam(value = "Before Project id", required = true) @RequestParam(required = true) String beforePrjId,
-            @ApiParam(value = "After Project id", required = true) @RequestParam(required = true) String afterPrjId) {
+            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
@@ -1386,7 +1386,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
