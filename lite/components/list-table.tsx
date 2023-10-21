@@ -28,6 +28,7 @@ function generatePagination(currPage: number, lastPage: number) {
 }
 
 export default function ListTable({
+  rowId,
   rows,
   columns,
   currentSort,
@@ -36,6 +37,7 @@ export default function ListTable({
   countPerPage,
   render
 }: {
+  rowId: string;
   rows: any[];
   columns: { name: string; sort: string }[];
   currentSort: string;
@@ -224,7 +226,14 @@ export default function ListTable({
           {/* Rows */}
           <tbody>
             {rows.map((row, idx) => (
-              <tr key={idx} className="border-b border-semigray">
+              <tr
+                key={idx}
+                className={clsx(
+                  'border-b border-semigray',
+                  view === 'pc' && 'cursor-pointer hover:opacity-80'
+                )}
+                onClick={() => router.push(`${pathname}/${row[rowId]}`)}
+              >
                 {columns
                   .filter((column) => isColumnShown[column.name])
                   .map((column) => (

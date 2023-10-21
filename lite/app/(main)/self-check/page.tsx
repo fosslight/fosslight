@@ -106,6 +106,7 @@ export default function SelfCheckList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
+        rowId="projectId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -128,7 +129,11 @@ export default function SelfCheckList() {
           if (column === 'Report') {
             return (
               row.report && (
-                <i className="cursor-pointer fa-regular fa-file-excel" title="FOSSLight Report"></i>
+                <i
+                  className="cursor-pointer fa-regular fa-file-excel"
+                  title="FOSSLight Report"
+                  onClick={(e) => e.stopPropagation()}
+                ></i>
               )
             );
           }
@@ -142,6 +147,7 @@ export default function SelfCheckList() {
                       key={idx}
                       className="cursor-pointer fa-solid fa-cube"
                       title={`Package ${idx + 1}`}
+                      onClick={(e) => e.stopPropagation()}
                     ></i>
                   ))}
                 </div>
@@ -151,7 +157,13 @@ export default function SelfCheckList() {
 
           if (column === 'Notice') {
             return (
-              row.notice && <i className="cursor-pointer fa-solid fa-file-lines" title="Notice"></i>
+              row.notice && (
+                <i
+                  className="cursor-pointer fa-solid fa-file-lines"
+                  title="Notice"
+                  onClick={(e) => e.stopPropagation()}
+                ></i>
+              )
             );
           }
 
@@ -161,6 +173,7 @@ export default function SelfCheckList() {
                 className="text-orange-500 hover:underline"
                 href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
                 target="_blank"
+                onClick={(e) => e.stopPropagation()}
               >
                 {row.cvssScore}
               </a>
