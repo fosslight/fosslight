@@ -1,6 +1,7 @@
 'use client';
 
 import SelfCheckNotice from '@/components/self-check-notice';
+import SelfCheckPackage from '@/components/self-check-package';
 import { selfCheckTabs } from '@/lib/literals';
 import clsx from 'clsx';
 import { Fragment, useState } from 'react';
@@ -89,6 +90,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions */}
+      {tab === 'Package' && <SelfCheckPackage />}
       {tab === 'Notice' && <SelfCheckNotice />}
     </>
   );
