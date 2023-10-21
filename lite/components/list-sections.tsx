@@ -30,12 +30,10 @@ export default function ListSections({
   const [isVulnSectionShown, setIsVulnSectionShown] = useState(true);
   const [isOssSectionShown, setIsOssSectionShown] = useState(true);
   const [isLicenseSectionShown, setIsLicenseSectionShown] = useState(true);
-  const sectionClass =
-    'p-4 border border-darkgray rounded-lg shadow-[2px_2px_4px_0_rgba(0,0,0,0.2)]';
 
   return (
     <div className="grid grid-cols-2 gap-4 w-[calc(100%-4px)]">
-      <div className={clsx('col-span-2', sectionClass)}>
+      <div className="col-span-2 shadow-box">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">Vulnerability</div>
           {searchKeyword === undefined && (
@@ -105,7 +103,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
+      <div className="col-span-2 shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
           {searchKeyword === undefined && (
@@ -178,7 +176,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className={clsx('col-span-2 lg:col-span-1', sectionClass)}>
+      <div className="col-span-2 shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
           {searchKeyword === undefined && (
