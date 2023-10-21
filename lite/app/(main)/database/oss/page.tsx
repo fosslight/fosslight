@@ -177,6 +177,7 @@ export default function OSSList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
+        rowId="ossId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -224,11 +225,21 @@ export default function OSSList() {
           if (column === 'URL') {
             return (
               <div className="whitespace-nowrap">
-                <a className="text-blue-500 hover:underline" href={row.downloadUrl} target="_blank">
+                <a
+                  className="text-blue-500 hover:underline"
+                  href={row.downloadUrl}
+                  target="_blank"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Download
                 </a>
                 <br />
-                <a className="text-blue-500 hover:underline" href={row.homepageUrl} target="_blank">
+                <a
+                  className="text-blue-500 hover:underline"
+                  href={row.homepageUrl}
+                  target="_blank"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Homepage
                 </a>
               </div>
@@ -245,6 +256,7 @@ export default function OSSList() {
                 className="text-orange-500 hover:underline"
                 href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
                 target="_blank"
+                onClick={(e) => e.stopPropagation()}
               >
                 {row.cvssScore}
               </a>

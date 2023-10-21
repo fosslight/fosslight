@@ -173,6 +173,7 @@ export default function LicenseList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
+        rowId="licenseId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -218,6 +219,7 @@ export default function LicenseList() {
                 className="text-blue-500 whitespace-nowrap hover:underline"
                 href={row.homepageUrl}
                 target="_blank"
+                onClick={(e) => e.stopPropagation()}
               >
                 Homepage
               </a>
