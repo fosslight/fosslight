@@ -233,7 +233,7 @@ export default function ListFilters({
             </div>
           </div>
           <button
-            className="absolute top-full right-2/4 translate-x-2/4 px-2 py-0.5 border-x border-b border-darkgray rounded-b outline-none text-xs"
+            className="absolute top-full center-x px-2 py-0.5 border-x border-b border-darkgray rounded-b outline-none text-xs"
             type="button"
             onClick={() => setAreHiddenFiltersShown(!areHiddenFiltersShown)}
           >

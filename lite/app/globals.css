@@ -15,4 +15,16 @@
     -webkit-tap-highlight-color: transparent; /* Safari and other WebKit-based browsers */
     tap-highlight-color: transparent; /* Most other browsers */
   }
+
+  .center-x {
+    @apply right-2/4 translate-x-2/4;
+  }
+
+  .center-y {
+    @apply top-2/4 -translate-y-2/4;
+  }
+
+  .center {
+    @apply top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4;
+  }
 }

@@ -39,7 +39,7 @@ export default function TopBar() {
         >
           <div
             className={clsx(
-              'absolute top-2/4 right-2/4 translate-x-2/4 -translate-y-2/4 p-4 rounded bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] transition-[transform]',
+              'absolute center p-4 rounded bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] transition-[transform]',
               isProfileActive ? 'scale-100' : 'scale-0'
             )}
             onClick={(e) => e.stopPropagation()}
