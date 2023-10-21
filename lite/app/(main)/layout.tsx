@@ -45,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               className="w-6 h-6 text-xl text-charcoal"
               onClick={() => setIsSideBarShown(!isSideBarShown)}
             >
-              <i className="fa-solid fa-bars"></i>
+              <i className="fa-solid fa-bars" />
             </button>
           ) : (
             <TopBar />
@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Page content */}
         <div
           className={clsx(
-            'mx-4 overflow-x-auto no-scrollbar transition-opacity duration-300',
+            'mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
             view === 'pc' ? 'pb-8' : 'pt-4 pb-24',
             loading && 'opacity-30'
           )}

@@ -239,9 +239,9 @@ export default function ListFilters({
           >
             {areHiddenFiltersShown ? 'Hide' : 'Expand'}&nbsp;
             {areHiddenFiltersShown ? (
-              <i className="fa-solid fa-chevron-up"></i>
+              <i className="fa-solid fa-chevron-up" />
             ) : (
-              <i className="fa-solid fa-chevron-down"></i>
+              <i className="fa-solid fa-chevron-down" />
             )}
           </button>
         </>

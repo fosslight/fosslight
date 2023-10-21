@@ -151,7 +151,7 @@ export default function LicenseList() {
       {/* Breadcrumb */}
       <h2 className="pb-2 text-xl font-black">
         Database
-        <i className="mx-2 text-sm fa-solid fa-angle-right"></i>
+        <i className="mx-2 text-sm fa-solid fa-angle-right" />
         License List
       </h2>
 
@@ -207,8 +207,8 @@ export default function LicenseList() {
 
             return (
               <div className="flex gap-x-2 whitespace-nowrap">
-                {notice && <i className="fa-solid fa-file-lines" title="Notice"></i>}
-                {source && <i className="fa-solid fa-code" title="Source"></i>}
+                {notice && <i className="fa-solid fa-file-lines" title="Notice" />}
+                {source && <i className="fa-solid fa-code" title="Source" />}
               </div>
             );
           }

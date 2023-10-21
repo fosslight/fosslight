@@ -43,7 +43,7 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
             </div>
           </Link>
           <div className="flex items-center gap-x-4 px-4 py-3 shadow-[0_0_6px_2px_rgba(0,0,0,0.5)]">
-            <i className="text-lg fa-solid fa-user"></i>
+            <i className="text-lg fa-solid fa-user" />
             <div className="flex-1 text-xs overflow-x-hidden">
               최덕경
               <br />
@@ -59,7 +59,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
             )}
             href="/"
           >
-            <i className={rootMenu.icon}></i>&ensp;{rootMenu.name}
+            <i className={rootMenu.icon} />
+            &ensp;{rootMenu.name}
           </Link>
           {menus.map((menu) => {
             if (!menu.sub) {
@@ -72,7 +73,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                   )}
                   href={menu.path}
                 >
-                  <i className={menu.icon}></i>&ensp;{menu.name}
+                  <i className={menu.icon} />
+                  &ensp;{menu.name}
                 </Link>
               );
             }
@@ -86,12 +88,13 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                   }
                 >
                   <div className="text-lg font-semibold leading-loose">
-                    <i className={menu.icon}></i>&ensp;{menu.name}
+                    <i className={menu.icon} />
+                    &ensp;{menu.name}
                   </div>
                   {isMenuShown[menu.name] ? (
-                    <i className="fa-solid fa-chevron-down"></i>
+                    <i className="fa-solid fa-chevron-down" />
                   ) : (
-                    <i className="fa-solid fa-chevron-up"></i>
+                    <i className="fa-solid fa-chevron-up" />
                   )}
                 </div>
                 <div
@@ -109,7 +112,8 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
                       )}
                       href={menu.path + subMenu.path}
                     >
-                      <i className="fa-solid fa-caret-right"></i>&emsp;{subMenu.name}
+                      <i className="fa-solid fa-caret-right" />
+                      &emsp;{subMenu.name}
                     </Link>
                   ))}
                 </div>

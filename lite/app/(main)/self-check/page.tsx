@@ -133,7 +133,7 @@ export default function SelfCheckList() {
                   className="cursor-pointer fa-regular fa-file-excel"
                   title="FOSSLight Report"
                   onClick={(e) => e.stopPropagation()}
-                ></i>
+                />
               )
             );
           }
@@ -148,7 +148,7 @@ export default function SelfCheckList() {
                       className="cursor-pointer fa-solid fa-cube"
                       title={`Package ${idx + 1}`}
                       onClick={(e) => e.stopPropagation()}
-                    ></i>
+                    />
                   ))}
                 </div>
               )
@@ -162,7 +162,7 @@ export default function SelfCheckList() {
                   className="cursor-pointer fa-solid fa-file-lines"
                   title="Notice"
                   onClick={(e) => e.stopPropagation()}
-                ></i>
+                />
               )
             );
           }
