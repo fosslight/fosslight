@@ -1357,7 +1357,7 @@ public class ProjectController extends CoTopComponent {
 				projectService.addPartnerData(project);
 				
 				// 4. merge and save 처리
-				projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>()); // 신규생성이기 때문에 default Data가 없음.
+				projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>()); // 신규생성이기 때문에 default Data가 없음.
 				
 				// 5. validation check로 project status를 정리함.
 				ProjectIdentification identification = new ProjectIdentification();
@@ -2800,12 +2800,15 @@ public class ProjectController extends CoTopComponent {
 		String prjId = (String) map.get("referenceId");
 		String merge = (String) map.get("merge");
 		String gridString = (String) map.get("gridData");
+		String checkGridString = (String) map.get("checkGridData");
 		
 		// bom에서 admin check선택한 data
 		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> projectIdentification = new ArrayList<>();
 		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
-		projectService.registBom(prjId, merge, projectIdentification);
+		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
+		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
+		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
 
 		Map<String, String> resMap = new HashMap<>();
 		

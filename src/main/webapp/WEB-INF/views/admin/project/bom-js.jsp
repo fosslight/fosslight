@@ -285,6 +285,29 @@ var bom_fn = {
 		
 		return display;
 	},
+	onCboxClickAll : function(allChk, target) {
+		if(event.stopPropagation) {
+	    	event.stopPropagation(); //MOZILLA
+    	} else {
+	    	event.cancelBubble = true; //IE
+    	}
+		
+		var dataArray = $("#"+target).jqGrid("getRowData");
+    	
+        if($(allChk).is(":checked")) {
+            $("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','Y');
+                $(this).prop('checked',true);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");        
+            });
+        } else {
+        	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','N');
+                $(this).prop('checked',false);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");        
+            });
+        }
+	},
 	unDisplayNotify : function(cellvalue, options, rowObject){
 		var display = $("#"+options.rowId+"_notify").val();
 		
@@ -800,7 +823,8 @@ var bom_data = {
 				, data : bomMainData
 				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
 		             ,'Download Location','Homepage','LicenseId','Copyright Text'
-		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn','admin<br>check']
+		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn'
+		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">']
 				, colModel : [
 					{name: 'group', width: 20, align: 'center', search : false, sorttype: 'int',
 					    cellattr: function(rowId, tv, rawObject, cm, rdata) {

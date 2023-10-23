@@ -55,7 +55,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification);
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList);
 	
 	public void checkProjectReviewer(Project project);
 	

@@ -2788,7 +2788,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
@@ -2810,8 +2810,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		identification.setOssVersionEmptyFlag(null);
 		
+		List<String> adminCheckComponentIds = new ArrayList<>();
+		List<String> removeAdminCheckComponentIds = new ArrayList<>();
+		for (ProjectIdentification bomGridData : checkGridBomList) {
+			for (String refComponentId : bomGridData.getRefComponentId().split(",")) {
+				removeAdminCheckComponentIds.add(refComponentId.trim());
+			}
+		}
+		
 		if (bomList != null && !bomList.isEmpty()) {
 			for (ProjectIdentification pi : bomList) {
+				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) adminCheckComponentIds.add(pi.getRefComponentId());
 				// convert max score
 				if (pi.getCvssScoreMax() != null) {
 					cvssScoreMaxList.add(pi.getCvssScoreMax());
@@ -2839,6 +2848,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
+		if (!removeAdminCheckComponentIds.isEmpty()) adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
 		List<OssComponents> componentId = projectMapper.selectComponentId(identification);
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
@@ -2861,7 +2871,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
-				bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
+					bean.setAdminCheckYn(CoConstDef.FLAG_YES);
+				} else {
+					bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				}
 				bean.setPreObligationType(bean.getObligationType());
 				
 				// 그리드 데이터 넣기
