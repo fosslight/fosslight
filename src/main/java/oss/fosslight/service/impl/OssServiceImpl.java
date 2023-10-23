@@ -3749,6 +3749,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else if (isNewVersion) {
 				mailBean.setParamOssInfo(ossMaster);
 			}
+			
+			if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(mailType)) {
+				setVdiffInfoForSentMail(ossMaster.getOssName(), mailBean);
+			}
+			
 			CoMailManager.getInstance().sendMail(mailBean);
 
 		} catch (Exception e) {
@@ -3783,6 +3790,31 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return resMap;
 	}
 
+	public void setVdiffInfoForSentMail(String ossName, CoMail mailBean) {
+		List<Map<String, Object>> resultData  = new ArrayList<>();
+		boolean vDiffFlag = ossMapper.checkOssVersionDiff(ossName) > 0 ? true : false;
+
+		if(vDiffFlag) {
+			OssMaster param = new OssMaster();
+			param.setOssNames(new String[] {ossName});
+			Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
+
+			for (String key : ossMap.keySet()) {
+				OssMaster om = ossMap.get(key);
+				Map<String, Object> contentMap = new HashMap<>();
+				contentMap.put("ossNameInfo", om.getOssName() + " (" + om.getOssVersion() + ")");
+				contentMap.put("licenseInfo", CommonFunction.makeLicenseExpression(om.getOssLicenses()));
+				resultData.add(contentMap);
+			}
+			
+			if (resultData != null && !resultData.isEmpty()) {
+				mailBean.setParamList(resultData);
+			} else {
+				mailBean.setParamList(new ArrayList<>());
+			}
+		}
+	}
+	
 	@Override
 	public List<String> getDeactivateOssList() {
 		return ossMapper.getDeactivateOssList();

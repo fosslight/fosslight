@@ -362,6 +362,13 @@ public class CoMailManager extends CoTopComponent {
     				convertModifiedData(convertDataMap, bean.getMsgType());
     			}
     			
+    			// when modifying/registering oss, if there is a version diff, license information by version is output
+				if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())) {
+					convertDataMap.put("versionDiffInfoList", bean.getParamList());
+				}
+    			
     			// 17.08.02 sw-yun 22번 메일은 더이상 사용하지 않고, 21번 메일에 포함
     			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
     				// license type이 변경된 경우 사용중인 프로젝트 리스트를 표시
