@@ -2810,12 +2810,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		identification.setOssVersionEmptyFlag(null);
 		
-		List<String> adminCheckRefComponentIdList = new ArrayList<>();
-		
 		if (bomList != null && !bomList.isEmpty()) {
 			for (ProjectIdentification pi : bomList) {
-				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) adminCheckRefComponentIdList.add(pi.getRefComponentId());
-				
 				// convert max score
 				if (pi.getCvssScoreMax() != null) {
 					cvssScoreMaxList.add(pi.getCvssScoreMax());
@@ -2865,11 +2861,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
-				if (adminCheckRefComponentIdList.contains(bean.getRefComponentId())) {
-					bean.setAdminCheckYn(CoConstDef.FLAG_YES);
-				} else {
-					bean.setAdminCheckYn(CoConstDef.FLAG_NO);
-				}
+				bean.setAdminCheckYn(CoConstDef.FLAG_NO);
 				bean.setPreObligationType(bean.getObligationType());
 				
 				// 그리드 데이터 넣기
