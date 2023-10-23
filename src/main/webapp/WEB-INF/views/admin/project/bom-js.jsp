@@ -80,6 +80,7 @@ var bom_fn = {
 		var str = "";
 		arr = bomList.jqGrid('getDataIDs');
 		var gridData = new Array();
+		var checkGridData = new Array();
 		
  		for(var i in arr){
  			// mergePreDiv 설정
@@ -126,15 +127,19 @@ var bom_fn = {
  				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
  				
 		 		gridData.push(bomList.getRowData(arr[i]));
+			} else {
+				checkGridData.push(bomList.getRowData(arr[i]));
 			}
  		}
  		
  		gridData.reverse();
+ 		checkGridData.reverse();
  		
 		var finalData = {
 			referenceId : '${project.prjId}',
 			merge : 'Y',
-			gridData : JSON.stringify(gridData)
+			gridData : JSON.stringify(gridData),
+			checkGridData : JSON.stringify(checkGridData)
 		};
 		
 		$.ajax({
