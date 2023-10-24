@@ -137,7 +137,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> getProjectList(Project project) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<Project> list = null;
-
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
+		
 		try {
 			// OSS NAME으로 검색하는 경우 NICK NAME을 포함하도록 추가
 			if (!isEmpty(project.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(project.getOssName().toUpperCase())) {
@@ -172,6 +173,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					// 코드변환처리
 					for (Project bean : list) {
+						bean.setStandardScore(Float.valueOf(standardScore));
 						// DISTRIBUTION Android Flag
 						String androidFlag = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull(bean.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
 						bean.setAndroidFlag(androidFlag);
@@ -253,17 +255,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private boolean checkIfVulnerabilityResolutionIsFixed(Project bean) {
-		List<OssComponents> securityDataList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
-		if (securityDataList != null && !securityDataList.isEmpty()) {
-			int fixedVulnResolutionDataListCnt = securityDataList.stream().filter(e -> avoidNull(e.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")).collect(Collectors.toList()).size();
-			if (securityDataList.size() == fixedVulnResolutionDataListCnt) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
+		return projectMapper.selectVulnerabilityResolutionSecurityListCnt(bean) > 0 ? false : true;
 	}
 
 	private boolean getSecurityDataCntByProject(Project project) {

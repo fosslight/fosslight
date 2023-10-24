@@ -357,6 +357,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String secCode;
 	
+	private Float standardScore;
+	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
 	}
@@ -4353,5 +4355,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setCdxXmlFileId(String cdxXmlFileId) {
 		this.cdxXmlFileId = cdxXmlFileId;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
 	}
 }

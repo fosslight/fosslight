@@ -5134,24 +5134,88 @@
 		ORDER BY LICENSE_NAME
 	</select>
 	
-	<select id="selectVulnerabilityResolutionSecurityList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
-		SELECT SEC.REFERENCE_ID
-				, SEC.OSS_NAME
-				, SEC.OSS_VERSION
-				, SEC.CVE_ID
-				, SEC.CVSS_SCORE
-				, SEC.VULNERABILITY_RESOLUTION
-		  FROM NVD_DATA_SECURITY SEC
-		 WHERE SEC.REFERENCE_ID = #{prjId}
-		   AND EXISTS (SELECT 1 FROM OSS_COMPONENTS
-		   						WHERE REFERENCE_ID = #{prjId}
-		   						AND REFERENCE_DIV = #{referenceDiv}
-		   						AND OSS_NAME != ''
-		   						AND OSS_NAME != '-'
-		   						AND OSS_NAME IS NOT NULL
-		   						AND IFNULL(EXCLUDE_YN, 'N') != 'Y'
-		   						AND OSS_NAME = SEC.OSS_NAME
-		   						AND OSS_VERSION = SEC.OSS_VERSION)
+	<select id="selectVulnerabilityResolutionSecurityListCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
+		SELECT COUNT(1) AS CNT
+		FROM
+		(
+			SELECT TBL.*, IFNULL(SEC.VULNERABILITY_RESOLUTION, 'Unresolved') AS VULNERABILITY_RESOLUTION
+			FROM
+			(
+				SELECT T1.*
+				FROM
+				(
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, NVD.CVSS_SCORE
+					FROM
+					(
+						SELECT OSS_NAME, OSS_VERSION
+						FROM OSS_COMPONENTS
+						WHERE REFERENCE_ID = #{prjId}
+						AND REFERENCE_DIV = #{referenceDiv}
+						AND OSS_NAME != ''
+						AND OSS_NAME != '-'
+						AND OSS_NAME IS NOT NULL
+						AND IFNULL(OSS_VERSION, '') != ''
+						AND IFNULL(EXCLUDE_YN, 'N') != 'Y'
+						GROUP BY OSS_NAME, OSS_VERSION
+					) OC
+					INNER JOIN
+					(
+						SELECT NVD.PRODUCT, NVD.VERSION, CVE.CVE_ID, CVE.CVSS_SCORE
+						FROM NVD_DATA_V3 NVD
+						INNER JOIN NVD_CVE_V3 CVE
+						ON NVD.CVE_ID = CVE.CVE_ID
+						WHERE NVD.VERSION != '-'
+						AND CVE.CVSS_SCORE >= #{standardScore}
+					) NVD
+					ON OC.OSS_NAME = NVD.PRODUCT
+					AND OC.OSS_VERSION = NVD.VERSION
+				) T1
+
+				UNION
+
+				SELECT T2.*
+				FROM
+				(
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, NVD.CVSS_SCORE
+					FROM
+					(
+						SELECT NICK.OSS_NICKNAME, OC.OSS_NAME, OC.OSS_VERSION
+						FROM OSS_COMPONENTS OC
+						INNER JOIN OSS_NICKNAME NICK
+						ON OC.OSS_NAME = NICK.OSS_NAME
+						WHERE OC.REFERENCE_ID = #{prjId}
+						AND OC.REFERENCE_DIV = #{referenceDiv}
+						AND OC.OSS_NAME != ''
+						AND OC.OSS_NAME != '-'
+						AND OC.OSS_NAME IS NOT NULL
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+						AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
+						GROUP BY NICK.OSS_NICKNAME, OC.OSS_NAME, OC.OSS_VERSION
+					) OC
+					INNER JOIN
+					(
+						SELECT NVD.PRODUCT, NVD.VERSION, CVE.CVE_ID, CVE.CVSS_SCORE
+						FROM NVD_DATA_V3 NVD
+						INNER JOIN NVD_CVE_V3 CVE
+						ON NVD.CVE_ID = CVE.CVE_ID
+						WHERE NVD.VERSION != '-'
+						AND CVE.CVSS_SCORE >= #{standardScore}
+					) NVD
+					ON OC.OSS_NICKNAME = NVD.PRODUCT
+					AND OC.OSS_VERSION = NVD.VERSION
+				) T2
+			) TBL
+			LEFT JOIN
+			(
+				SELECT OSS_NAME, OSS_VERSION, CVE_ID, CVSS_SCORE, VULNERABILITY_RESOLUTION
+				FROM NVD_DATA_SECURITY
+				WHERE REFERENCE_ID = #{prjId}
+			) SEC
+			ON TBL.OSS_NAME = SEC.OSS_NAME
+			AND TBL.OSS_VERSION = SEC.OSS_VERSION
+			AND TBL.CVE_ID = SEC.CVE_ID
+		) TBL
+		WHERE TBL.VULNERABILITY_RESOLUTION != 'Fixed'
 	</select>
 	
 	<select id="copySecurityDataForProjectCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
