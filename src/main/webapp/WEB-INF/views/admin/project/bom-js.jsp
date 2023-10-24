@@ -303,13 +303,15 @@ var bom_fn = {
             $("#"+target+" input[id*='_adminCheck']").each(function (idx){
                 $(this).attr('value','Y');
                 $(this).prop('checked',true);
-                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");        
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
             });
         } else {
         	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
                 $(this).attr('value','N');
                 $(this).prop('checked',false);
-                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");        
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
             });
         }
 	},
