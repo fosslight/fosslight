@@ -718,6 +718,9 @@ public class CoConstDef {
 	public static final String CD_DTL_FL_SCANNER_URL 							= "101";
 	public static final String CD_DTL_ADMIN_TOKEN								= "102";
 
+	/** Watcher Domain Setting */
+	public static final String CD_WATCHER_DOMAIN								= "710";
+	
 	// -------------- 서브메뉴 대표 코드
 	/** 대메뉴 */
 	public static final String CD_MENU_MAIN 									= "M001";
