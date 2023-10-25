@@ -59,6 +59,9 @@
 				$("[id^=selectTitle]").html(options);
 			},
 			selectTitle : function(seq){
+				var width = $(".detailView1").width()-40;
+            	$("#commentList"+seq).css("width", width);
+				
 				var gridId = $("#selectTitle"+seq).val();
 				var selectData = common_data.detailData.filter(function(cur){
 				    return cur.gridId == gridId;
