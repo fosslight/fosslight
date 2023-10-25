@@ -1807,6 +1807,12 @@ public class OssController extends CoTopComponent{
 		Type typeAnalysis = new TypeToken<List<OssAnalysis>>() {}.getType();
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+		for (OssAnalysis oa : analysisResultData) {
+			if (oa.getTitle().contains("최신 등록 정보")) {
+				oa.setOssId(ossService.getOssInfo(null, oa.getOssName(), false).getOssId());
+			}
+		}
+		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
 		
 		if (getSessionObject(sessionKey) != null) {

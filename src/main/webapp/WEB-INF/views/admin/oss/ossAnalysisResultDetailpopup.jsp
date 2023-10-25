@@ -74,6 +74,20 @@
 				$("#detailSummaryDescription"+seq).val(selectData.summaryDescription);
 				$("#detailcomment"+seq).val(selectData.comment);
 
+				if (typeof selectData.ossId !== 'undefined') {
+					if ('' == commentTemp){
+						$("input[name=latestOssId]").val(selectData.ossId);
+						Ctrl_fn.getCommentList(seq);
+					} else {
+						if ($('#commentListArea'+seq).find('dl').length == 0) {
+							$('#commentListArea'+seq).append(commentTemp);
+						}
+						$("#commentList"+seq).show();
+					}
+				} else {
+					$("#commentList"+seq).hide();
+				}
+				
 				$(".detailNickName"+seq+" > *").remove(); // nickName clear
 				$(".detailDownloadLocation"+seq+" > *").remove(); //downloadLocation clear
 				$(".detailDetectedLicense"+seq+" > *").remove(); //detectedLicense clear
@@ -760,6 +774,62 @@
 					},
     	            error : Ctrl_fn.onError
     			});
+            },
+            getCommentList : function (seq) {
+            	$.ajax({
+                	url : '<c:url value="/comment/getDivCommentList"/>',
+                    type : 'GET',
+                    dataType : 'json',
+                    cache : false,
+                    data : {
+                        referenceId : $('input[name=latestOssId]').val(),
+                        referenceDiv : '40'
+                    },
+                    success : function(data){
+                    	$('.tabContent'+seq).next().show();
+                    	$('#commentList'+seq).show();
+                    	$('#commentListArea'+seq).children().remove();
+        				
+        				if(data.length != 0) {
+        					for(var i = 0; i < data.length; i++) {
+        						var tempDl = document.createElement("dl");
+        						var commId = data[i].commId;
+        						var tempDt = document.createElement("dt");
+        						var leftSpan = document.createElement("span");
+        						leftSpan.setAttribute("class", "left");
+        						var nameArea = document.createElement("strong");
+        						var commentContentsArea = document.createElement("dd");
+        						
+        						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
+        							nameArea.append(data[i].creator);
+        						} else {
+        							nameArea.append(data[i].status).append("</br>"+data[i].creator);
+        						}
+        						
+        						if (typeof data[i].createdDate !== "undefined") {
+        							var dateArea = document.createElement("span");
+        							dateArea.append(data[i].createdDate);
+        							nameArea.append(" | ");
+        							nameArea.append(dateArea);
+        						}
+        						
+        						leftSpan.appendChild(nameArea);
+        						tempDt.appendChild(leftSpan);
+        						commentContentsArea.innerHTML = replaceWithLink(data[i].contents);
+        						tempDl.appendChild(tempDt).appendChild(commentContentsArea);
+        						$('#commentListArea'+seq).append(tempDl);
+        					}
+        					
+        					commentTemp = $('#commentListArea'+seq).html();
+        					$('#commentListArea'+seq).html(commentTemp);
+        				} else {
+        					$('#commentListArea'+seq).append('<p class="noneTxt">No comments were registered.</p>');
+        				}
+                    },
+                    error : function(xhr, ajaxOptions, thrownError){
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    }
+                });
             }
 		};
 
@@ -1742,6 +1812,7 @@
 		</div>
 		<div id="wrap" style="padding: 15px 0px;">
 			<div class="groupSet">
+				<input type="hidden" name="latestOssId"/>
 				<!--  -->
 				<div class="detailView1">
 					<div class="tbws1 w100P">
@@ -1882,6 +1953,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent1">
+            			<div id="commentList1" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea1"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -2025,6 +2102,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent2">
+            			<div id="commentList2" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea2"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -2168,6 +2251,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent3">
+            			<div id="commentList3" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea3"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 			</div>
