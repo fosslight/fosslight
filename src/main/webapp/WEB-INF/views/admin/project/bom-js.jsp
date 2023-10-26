@@ -813,7 +813,7 @@ var bom_fn = {
 
 var bom_data = {
 		getJqGrid : function(param){
-			var data = param ? param || {referenceId : '${project.prjId}', merge : 'N'};
+			var data = param ? param : {referenceId : '${project.prjId}', merge : 'N'};
 				
 			$.ajax({
 				url : '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/13"/>',
