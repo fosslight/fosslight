@@ -934,6 +934,10 @@ public final class Url {
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
 	}
 
+	public static final class API_LITE {
+			public static final String PATH = "/api/lite";
+	}
+
 
 	public static final class SEARCH {
 
