@@ -1556,6 +1556,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		Map<String, List<String>> infoBiMap = new HashMap<>(); // info level (new bianry)
 		Map<String, List<String>> infoModifyMap = new HashMap<>(); // info level (modified = new + tlsh > 120)
 		Map<String, List<String>> infoOnlyMap = new HashMap<>(); // info level
+		Map<String, List<String>> infoCopyrightMap = new HashMap<>(); // info level (copyright)
 		Map<String, String> hideObligationIdList = new HashMap<>();
 		
 		if (RestrictionFlag) {
@@ -1671,6 +1672,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
 							infoModifyMap.put(_key, _list);
 						}
+					} else if (errKey.startsWith("copyrightText.") && validInfoMap.get(errKey).toUpperCase().startsWith("NOT")) {
+						if (infoCopyrightMap.containsKey(_key)) {
+							List<String> _list = infoCopyrightMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoCopyrightMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoCopyrightMap.put(_key, _list);
+						}
 					} else {
 						
 						if (infoOnlyMap.containsKey(_key)) {
@@ -1763,6 +1774,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				} else if (checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList());
 					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "7"), bean);
+				}
+				// 10 : info level (copyright)
+				else if (infoCopyrightMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
+					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10"), bean);
 				}
 				else {
 					sortListOk.add(bean);

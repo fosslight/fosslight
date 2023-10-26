@@ -1094,7 +1094,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 			return false;
 		}
 
-		String[] splitCheckVal = val.split(",");
+		String[] splitCheckVal = null;
+		if (kind.equals("COPYRIGHT")) {
+			splitCheckVal = new String[] {val};
+		} else {
+			splitCheckVal = val.split(",");
+		}
 		
 		switch (kind) {
 		case "DOWNLOAD":
@@ -1122,11 +1127,43 @@ public class T2CoProjectValidator extends T2CoValidator {
 		boolean splitFlag = false;
 		
 		for (String checkVal : splitCheckVal) {
-			checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
-			splitFlag = checkVal.split("//").length == 2 ? true : false;
-			
-			if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
-				if (kind.equals("HOMEPAGE")) {
+			if (kind.equals("COPYRIGHT")) {
+				if (getData.equalsIgnoreCase(checkVal)) return true;
+			} else {
+				checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
+				splitFlag = checkVal.split("//").length == 2 ? true : false;
+				
+				if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
+					if (kind.equals("HOMEPAGE")) {
+						if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
+							checkVal = checkVal.split("//")[1];
+						}
+						
+						if (checkVal.startsWith("www.")) {
+							checkVal = checkVal.substring(5, checkVal.length());
+						}
+						
+						if (getData.contains(";")) {
+							getData = getData.split(";")[0];
+						}
+						
+						getData = linkPatternCompile(checkOssNameUrl, getData);
+						
+						if (getData.startsWith("http://") || getData.startsWith("https://")) {
+							getData = getData.split("//")[1];
+						}
+						
+						if (getData.startsWith("www.")) {
+							getData = getData.substring(5, getData.length());
+						}
+					}
+					
+					if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
+						return true;
+					}
+				}
+				
+				if (kind.equals("DOWNLOAD") && !isEmpty(getData2)){
 					if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
 						checkVal = checkVal.split("//")[1];
 					}
@@ -1135,8 +1172,35 @@ public class T2CoProjectValidator extends T2CoValidator {
 						checkVal = checkVal.substring(5, checkVal.length());
 					}
 					
-					if (getData.contains(";")) {
-						getData = getData.split(";")[0];
+					boolean chkFlag = false;
+					
+					for (String downloadLocation : getData2.split(",")){
+						downloadLocation = linkPatternCompile(checkOssNameUrl, downloadLocation);
+						
+						if (downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://")) {
+							downloadLocation = downloadLocation.split("//")[1];
+						}
+						
+						if (downloadLocation.startsWith("www.")) {
+							downloadLocation = downloadLocation.substring(5, downloadLocation.length());
+						}
+						
+						if (downloadLocation.toUpperCase().equals(checkVal.toUpperCase())) {
+							chkFlag = true;
+							break;
+						}
+					}
+					
+					if (!chkFlag) {
+						return true;
+					}
+				} else if (kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)){
+					if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
+						checkVal = checkVal.split("//")[1];
+					}
+					
+					if (checkVal.startsWith("www.")) {
+						checkVal = checkVal.substring(5, checkVal.length());
 					}
 					
 					getData = linkPatternCompile(checkOssNameUrl, getData);
@@ -1148,65 +1212,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 					if (getData.startsWith("www.")) {
 						getData = getData.substring(5, getData.length());
 					}
-				}
-				
-				if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
-					return true;
-				}
-			}
-			
-			if (kind.equals("DOWNLOAD") && !isEmpty(getData2)){
-				if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
-					checkVal = checkVal.split("//")[1];
-				}
-				
-				if (checkVal.startsWith("www.")) {
-					checkVal = checkVal.substring(5, checkVal.length());
-				}
-				
-				boolean chkFlag = false;
-				
-				for (String downloadLocation : getData2.split(",")){
-					downloadLocation = linkPatternCompile(checkOssNameUrl, downloadLocation);
 					
-					if (downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://")) {
-						downloadLocation = downloadLocation.split("//")[1];
+					if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
+						return true;
 					}
-					
-					if (downloadLocation.startsWith("www.")) {
-						downloadLocation = downloadLocation.substring(5, downloadLocation.length());
-					}
-					
-					if (downloadLocation.toUpperCase().equals(checkVal.toUpperCase())) {
-						chkFlag = true;
-						break;
-					}
-				}
-				
-				if (!chkFlag) {
-					return true;
-				}
-			}else if (kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)){
-				if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
-					checkVal = checkVal.split("//")[1];
-				}
-				
-				if (checkVal.startsWith("www.")) {
-					checkVal = checkVal.substring(5, checkVal.length());
-				}
-				
-				getData = linkPatternCompile(checkOssNameUrl, getData);
-				
-				if (getData.startsWith("http://") || getData.startsWith("https://")) {
-					getData = getData.split("//")[1];
-				}
-				
-				if (getData.startsWith("www.")) {
-					getData = getData.substring(5, getData.length());
-				}
-				
-				if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
-					return true;
 				}
 			}
 		}
@@ -2362,6 +2371,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 						String licenseText = CommonFunction.makeRecommendedLicenseString(ossmaster, bean);
 						if(!isEmpty(licenseText)) {
 							diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
+						}
+					}
+					
+					if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getGridId()) && !isEmpty(bean.getCopyrightText())) {
+						if (!checkOssData(ossInfo.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+							infoMap.put("COPYRIGHT_TEXT." + bean.getGridId(), "COPYRIGHT.DIFFERENT");
 						}
 					}
 				}

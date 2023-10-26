@@ -1238,10 +1238,11 @@ var com_fn = {
 						}
 					} else {
 						if(data.indexOf("<div class") > -1){
-							data = data.split("<")[0];
+							data = data.split("<div")[0];
 						}
 					}
 					
+					if (value != "copyrightText") data = data.replace(/<[^>]*>?/g, '');
 					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
 				}
 			});
