@@ -2,47 +2,46 @@
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script type="text/javascript">
 //==========================================================================================
-// PROJECT SRC
+// PROJECT DEP
 // REFERENCE_ID = PROJECT_ID
-// REFERENCE_DIV = 11 SRC
+// REFERENCE_DIV = 16 DEP
 //==========================================================================================
 var ossNames = [];
 var objs = [];
 var licenseNames = [];
-//2018-08-10 choye 추가
-var srcData;
+var depData;
 
 $(document).click(function(e){
-	if(!$("#srcExportContainer").has(e.target).length) {
-		$("#srcExportList").hide();
+	if(!$("#depExportContainer").has(e.target).length) {
+		$("#depExportList").hide();
 	}
 });
 
-// SRC 이벤트
-var src_evt = {
+// DEP 이벤트
+var dep_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
-		src_fn.getSrcGridData();
+		dep_fn.getDepGridData();
 		
-		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
+		$('#_depAddList').jqGrid(dep_fn.setParamProject3());
 		
-		var srcList = $("#srcList");
+		var depList = $("#depList");
 		//Not aplicable
-		var aplicable = $('#applicableSrc').is(':checked');
+		var aplicable = $('#applicableDep').is(':checked');
 		
 		if(aplicable){
-			$('.srcBtn').hide();
+			$('.depBtn').hide();
 		}
-		
+
 		// 그리드 리셋 버튼
-		$("#srcResetUp").click(function(e){
- 			e.preventDefault();
- 			
+		$("#depResetUp").click(function(e){
+			e.preventDefault();
+	 		
 			alertify.confirm('<spring:message code="msg.common.confirm.reset" />', function (e) {
 				if (e) {
-					$("#srcList").jqGrid('clearGridData');
-					$("#_srcAddList").jqGrid('clearGridData');
+					$("#depList").jqGrid('clearGridData');
+					$("#_depAddList").jqGrid('clearGridData');
 				} else {
 					return false;
 				}
@@ -50,19 +49,19 @@ var src_evt = {
 		});
 		
 		// 그리드 저장 버튼
-		$("#srcSaveUp").click(function(e){
+		$("#depSaveUp").click(function(e){
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				com_fn.exitCell(_mainLastsel, "srcList");
+				com_fn.exitCell(_mainLastsel, "depList");
 				
 				alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
 					if (e) {
-						com_fn.exitRow("srcList");
+						com_fn.exitRow("depList");						
 						// 메인, 서브 그리드 세이브 모드
-						fn_grid_com.totalGridSaveMode('srcList');
+						fn_grid_com.totalGridSaveMode('depList');
 						// 닉네임 체크
-						src_fn.saveMakeData();
+						dep_fn.saveMakeData();
 					} else {
 						return false;
 					}
@@ -73,14 +72,14 @@ var src_evt = {
 		});
 		
 		// 프로젝트 조회 버튼
-		$('#srcProjectSearchBtn').click(function(e){
+		$('#depProjectSearchBtn').click(function(e){
 			e.preventDefault();
 			
-			var postData = $('#srcProjectForm').serializeObject();
+			var postData = $('#depProjectForm').serializeObject();
 			
-			$('#_srcProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
-			$('.srcProject1').show();
-			$('.srcProject2').hide();
+			$('#_depProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+			$('.depProject1').show();
+			$('.depProject2').hide();
 		});
 		
 		var accept1 = '';
@@ -91,7 +90,7 @@ var src_evt = {
 		</c:forEach>
 		
 		//파일업로드
-		$('#srcCsvFile').uploadFile({
+		$('#depCsvFile').uploadFile({
 			url:'<c:url value="/project/csvFile"/>',
 			multiple:false,
 			dragDrop:true,
@@ -99,19 +98,24 @@ var src_evt = {
 			allowedTypes:accept1,
 			sequential:true,
 			sequentialCount:1,
-/*			dynamicFormData: function(){
-				var data ={ "registFileId" :$('#srcCsvFileId').val(), "tabNm" : "SRC"}
+			dynamicFormData: function(){
+				var data ={ "registFileId" :$('#depCsvFileId').val(), "tabNm" : "DEP"}
 				
 				return data;
-			},*/
-			formData:{"registFileId" : $('#srcCsvFileId').val(), "tabNm" : "SRC"},
+			},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
 				
 				if(result[1] == null) {
-					alertify.error('<spring:message code="msg.common.valid" />', 0);
-					$('.ajax-file-upload-statusbar').fadeOut('slow');
-					$('.ajax-file-upload-statusbar').remove();
+					if(result[0] == "TAB_GUBN_ERROR") {
+						alertify.error('<spring:message code="msg.common.upload.failed.separator" />', 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}else{
+						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					} 
 				} else {
 					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
 						alertify.alert(result[1], function(){
@@ -119,13 +123,13 @@ var src_evt = {
 							$('.ajax-file-upload-statusbar').remove();
 						});
 					} else if(result[2] == "CSV_FILE") {
-						src_fn.getCsvData(result[0][0].registSeq);
+						dep_fn.getCsvData(result[0][0].registSeq);
 
-						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 
-						src_fn.makeFileTag(result[0][0]);
+						dep_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "EXCEL_FILE") {
 						if(result[1].length != 0) {
 							$('.sheetSelectPop').show();
@@ -135,31 +139,31 @@ var src_evt = {
 								var num = i+1;
 								var checkedTxt = "";
 								
-								if(result[1][i].name.toUpperCase().trim().startsWith("SRC")){
+								var sheetName = result[1][i].name.toUpperCase().trim();
+								if(sheetName.startsWith("DEP") || sheetName.indexOf("DEPENDENCY") > -1){
 									checkedTxt = "checked";
 								}
 								
 								$('.sheetSelectPop .sheetNameArea').append('<li><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="sheetNum" '+checkedTxt+'>'
 										+'<label for="sheet'+result[1][i].no+'">'+result[1][i].name+'</label></li>');
-								$('.sheetSelectPop .sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
+								$('.sheetSelectPop .sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
 							}
 						}
 						
-						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						src_fn.makeFileTag(result[0][0]);	
+						dep_fn.makeFileTag(result[0][0]);	
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
-						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
-						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 
-						src_fn.makeFileTag(result[0][0]);
-					}
-					else {
+						dep_fn.makeFileTag(result[0][0]);
+					} else {
 						alertify.error('<spring:message code="msg.common.valid" />', 0);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
@@ -199,21 +203,20 @@ var src_evt = {
 	}
 };
 
-// src 그리드 데이터 전역 변수
-var srcMainData;
-var srcValidMsgData;
-var srcDiffMsgData;
-var srcInfoMsgData;
+// dep 그리드 데이터 전역 변수
+var depMainData;
+var depValidMsgData;
+var depDiffMsgData;
 
-// SRC 함수
-var src_fn = {
-	// src 그리드 데이터
-	getSrcGridData : function(param, type){
+// dep 함수
+var dep_fn = {
+	// dep 그리드 데이터
+	getDepGridData : function(param, type){
 		var url = "append".indexOf(type) > -1  
-				? '<c:url value="${suffixUrl}/project/identificationMergedGrid/${project.prjId}/11"/>' 
-				: '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/11"/>'
-		, type = "append".indexOf(type) > -1  ? 'POST' : 'GET'
-		, data = param || {referenceId : '${project.prjId}', typeFlag : 'N'};
+					? '<c:url value="/project/identificationMergedGrid/${project.prjId}/16"/>'
+					: '<c:url value="/project/identificationGrid/${project.prjId}/16"/>'
+		  , type = "append".indexOf(type) > -1  ? 'POST' : 'GET'
+		  , data = param || {referenceId : '${project.prjId}', typeFlag : 'N'};
 		
 		$.ajax({
 			url : url,
@@ -225,30 +228,26 @@ var src_fn = {
 			success : function(data){
 				$('.ajs-close').trigger("click");
 				
-				srcMainData = data.mainData;
-				srcValidMsgData = []; //초기화
-				srcDiffMsgData = []; //초기화
+				depMainData = data.mainData;
+				depValidMsgData = []; //초기화
+				depDiffMsgData = []; //초기화
 				
 				if(data.validData) {
-					srcValidMsgData = data.validData;
+					depValidMsgData = data.validData;
 				}
 				
 				if(data.diffData) {
-					srcDiffMsgData = data.diffData;
-				}
-				
-				if(data.infoData) {
-					srcInfoMsgData = data.infoData;
+					depDiffMsgData = data.diffData;
 				}
 				
 				// 리로드 대신 그리드 삭제 후 다시 그리기
-				$("#srcList").jqGrid('GridUnload');
-				src_grid.load();
+				$("#depList").jqGrid('GridUnload');
+				dep_grid.load();
 
 				// totla record 표시
-				$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+				$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
 				
-				fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
+				fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 			},
 			error : function(){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -257,27 +256,34 @@ var src_fn = {
 	},
 	// 저장 데이터 만들기
 	saveMakeData : function(){
-		cleanErrMsg("srcList");
-		var target = $("#srcList");
+		cleanErrMsg("depList");
+		var target = $("#depList");
 		var prjId = '${project.prjId}';
-		var csvFileId = $('#srcCsvFileId').val();
-		var fileData = src_evt.csvDelFileSeq;
-		var fileSeq = src_evt.csvFileSeq;
-		var identificationSubStatusSrc = $("#applicableSrc:checked").val();
-		
+		var csvFileId = $('#depCsvFileId').val();
+		var fileData = dep_evt.csvDelFileSeq;
+		var csvFiles = $(".depCsvFileArea").find("input[type=hidden]");
+		var fileSeq = [];
+		for(var i=0; i<csvFiles.length; i++){
+			var obj = {fileSeq : csvFiles.eq(i).val()};
+			fileSeq.push(obj);
+		}
+		if(fileSeq.length == 0) {
+			$("#depCsvFileId").val("");
+			csvFileId = "";
+		}
+		var identificationSubStatusDep = $("#applicableDep:checked").val();
 		var mainData = target.jqGrid('getGridParam','data');
-		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
+		var depAddListData = $("#_depAddList").jqGrid("getRowData");
 		// 최종 데이터
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
-				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};
-
-		// 닉네임 체크
-		src_fn.nickNameValid(mainData, finalData);
+				   , "identificationSubStatusDep" : identificationSubStatusDep, "mainData" : JSON.stringify(mainData), "depAddListData" : JSON.stringify(depAddListData)};
+		
+		dep_fn.exeSave(finalData);
 	},
 	// 저장
 	exeSave : function(finalData){
 		$.ajax({
-			url : '<c:url value="/project/saveSrc"/>',
+			url : '<c:url value="/project/saveDep"/>',
 			type : 'POST',
 			data : JSON.stringify(finalData),
 			dataType : 'json',
@@ -292,20 +298,20 @@ var src_fn = {
 						alertify.alert(data.validMsg, function(){});
 					}
 					
-					if(srcValidMsgData) {
-						gridValidMsgNew(srcValidMsgData, "srcList");
+					if(depValidMsgData) {
+						gridValidMsgNew(depValidMsgData, "depList");
 					}
 					
-					if(srcDiffMsgData) {
-						gridDiffMsg(srcDiffMsgData, "srcList");
+					if(depDiffMsgData) {
+						gridDiffMsg(depDiffMsgData, "depList");
 					}
 				} else {
 					if("10" == data.resCd) {
-						src_fn.getSrcGridData();
+						dep_fn.getDepGridData();
 						$("#mergeYn").val("N");
-						src_evt.csvDelFileSeq = [];
-						src_evt.csvFileSeq = [];
-						com_fn.saveFlagObject["SRC"] = true;
+						dep_evt.csvDelFileSeq = [];
+						dep_evt.csvFileSeq = [];
+						com_fn.saveFlagObject["DEP"] = true;
 						alertify.success('<spring:message code="msg.common.success" />');
 
 						curIdenStatus = data.resultData||"";
@@ -324,26 +330,26 @@ var src_fn = {
 	},
 	// 업로드 화면 컨트롤
 	changeSelectOption : function(){
-		var value = $('input[name=srcSelectOption]:checked').val();
+		var value = $('input[name=depSelectOption]:checked').val();
 		
 		if(value == 1){
-			$('#srcUploadSearch').show();
-			$('#srcProjectSearch').hide();
-			$('.srcProjectSearch').hide();
+			$('#depUploadSearch').show();
+			$('#depProjectSearch').hide();
+			$('.depProjectSearch').hide();
 		} else {
-			$('#srcUploadSearch').hide();
-			$('#srcProjectSearch').show();
-			$('.srcProjectSearch').show();
-			$('#_srcProjectList1').jqGrid(src_fn.setParamProject1());
-			$('#_srcProjectList2').jqGrid(src_fn.setParamProject2());
-			$('#_srcAddList').jqGrid(src_fn.setParamProject3());
-			$('#_srcProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			$('#depUploadSearch').hide();
+			$('#depProjectSearch').show();
+			$('.depProjectSearch').show();
+			$('#_depProjectList1').jqGrid(dep_fn.setParamProject1());
+			$('#_depProjectList2').jqGrid(dep_fn.setParamProject2());
+			$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+			$('#_depProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 		}
 	},
 	// 프로젝트 검색
 	setParamProject1 : function(){
 		return {
-			url: '<c:url value="/project/identificationProject/11"/>',
+			url: '<c:url value="/project/identificationProject/16"/>',
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -360,8 +366,8 @@ var src_fn = {
 				{name: 'comment', index: 'comment', width: 139, align: 'left', formatter: fn_grid_com.displayComment, unformat: fn_grid_com.unFormatter}
 			],
 			onSelectRow: function(id){
-				src_fn.identificationProjectSearch(id);
-				$('.srcProject2').show();
+				dep_fn.identificationProjectSearch(id);
+				$('.depProject2').show();
 			},
 			autoencode: true,
 			autowidth: true,
@@ -370,7 +376,7 @@ var src_fn = {
 			},
 			rowNum: 20,
 			rowList: [20, 40, 60],
-			pager: '#srcProjectPager1',
+			pager: '#depProjectPager1',
 			sortname: 'prjId',
 			viewrecords: true,
 			sortorder: 'asc',
@@ -414,7 +420,7 @@ var src_fn = {
 			loadComplete: function(data){},
 			gridComplete:function (){
 				//2018-08-10 choye 추가
-				var target = $("#_srcProjectList2");
+				var target = $("#_depProjectList2");
 				var data = target.jqGrid("getRowData");
 
 				for(var i=0; i<data.length; i++){
@@ -427,9 +433,9 @@ var src_fn = {
 	},
 	setParamProject3 : function(){
 		return {
-			url: '<c:url value="/project/getAddList"/>',
+ 			url: '<c:url value="/project/getAddList"/>',
 			datatype: 'json',
-			postData : {prjId : '${project.prjId}', referenceDiv : '11'},
+			postData : {prjId : '${project.prjId}', referenceDiv : '16'},
 			jsonReader:{
 				repeatitems: false,
 				id: 'prjId',
@@ -448,7 +454,7 @@ var src_fn = {
 				{name: 'prjVersion', index: 'prjVersion', width: 325, align: 'left'},
 				{name: 'componentCount', index: 'componentCount', width: 178, align: 'center'},
 				{name: 'referenceDiv', index: 'referenceDiv', width: 110, align: 'center', formatter: function(){
-					return '11';
+					return '16';
 				}, hidden:true}
 			],
 			onSelectRow: function(id){},
@@ -463,60 +469,30 @@ var src_fn = {
 			loadComplete: function(data){}
 		}
 	},	
-	// 닉네임 팝업 띄우기
-	makeNickNamePopup : function(obj, finalData) {
-		if(obj.validMsg && obj.validMsg.length != 0) {
-			alertify.alert(obj.validMsg, function (e) {
-				src_fn.exeSave(finalData);
-			});
-		} else {
-			src_fn.exeSave(finalData);
-		}
-	},
-	// 닉네임 체크
-	nickNameValid : function(mainData, finalData){
-		var prjId = '${project.prjId}';
-		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
-
-		$.ajax({
-			url : '<c:url value="/project/nickNameValid/11"/>',
-			type : 'POST',
-			data : JSON.stringify(postData),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function(data){
-				src_fn.makeNickNamePopup(data, finalData);
-			},
-			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
-			}
-		})
-	},
 	makeFileTag : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '<c:url value="/download/'+obj.registSeq+'/'+obj.fileName+'"/>';
-		$('.csvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, \'1\')"/></strong></span></li>');
+		$('.depCsvFileArea').append('<li><span><strong><a href="'+_url+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, \'1\')"/></strong></span></li>');
 	},
 	deleteCsv : function(obj, type){
 		var Seq = $(obj).prev().val();
 		var object = {fileSeq : Seq};
-		src_evt.csvDelFileSeq.push(object);
+		dep_evt.csvDelFileSeq.push(object);
 		$(obj).closest('li').remove();
 	},
 	loadToList : function(type){
 		// 로드 플래그
 		loadBln = true;
 		// 상단 프로젝트 서치 그리드 선택 로우
-		var selrow = $('#_srcProjectList1').jqGrid('getGridParam', "selrow" );
-		var listData = $('#_srcProjectList1').jqGrid('getRowData',selrow);
+		var selrow = $('#_depProjectList1').jqGrid('getGridParam', "selrow" );
+		var listData = $('#_depProjectList1').jqGrid('getRowData',selrow);
 		listData.referenceId = listData.prjId;
 		var param = {refPrjId : selrow, typeFlag : "Y"};
 		
 		switch(type){
 			case "append":
-				var mainData =  $("#srcList").jqGrid('getGridParam','data');
-				var addListData = $("#_srcAddList").jqGrid("getRowData");
+				var mainData =  $("#depList").jqGrid('getGridParam','data');
+				var addListData = $("#_depAddList").jqGrid("getRowData");
 				var duplicateFlag = addListData.filter(function(a){ 
 					return a.referenceId == listData.prjId;
 				}).length > 0;
@@ -527,31 +503,31 @@ var src_fn = {
 			    	return;
 			    }
 				
-				var cnt = $('#_srcProjectList2').jqGrid('getGridParam', "records" );
-				var ids = $('#_srcAddList').jqGrid('getDataIDs');
+				var cnt = $('#_depProjectList2').jqGrid('getGridParam', "records" );
+				var ids = $('#_depAddList').jqGrid('getDataIDs');
 				listData.componentCount = cnt;
-				$('#_srcAddList').jqGrid('addRowData',ids.length+1,listData);
+				$('#_depAddList').jqGrid('addRowData',ids.length+1,listData);
 				
 				param["mainData"] = JSON.stringify(mainData);				
 				param = JSON.stringify(param);
 				
 				break;
 			case "resetLoad":
-				$('#_srcAddList').jqGrid('clearGridData');
+				$('#_depAddList').jqGrid('clearGridData');
 				
-				var cnt = $('#_srcProjectList2').jqGrid('getGridParam', "records" );
-				var ids = $('#_srcAddList').jqGrid('getDataIDs');
+				var cnt = $('#_depProjectList2').jqGrid('getGridParam', "records" );
+				var ids = $('#_depAddList').jqGrid('getDataIDs');
 				listData.componentCount = cnt;
 				
-				$('#_srcAddList').jqGrid('addRowData',ids.length+1,listData);
+				$('#_depAddList').jqGrid('addRowData',ids.length+1,listData);
 				
 				break;
 			default:
 				break;
 		}
 		
-		src_fn.getSrcGridData(param, type);
-		$('.srcProject2').hide();
+		dep_fn.getDepGridData(param, type);
+		$('.depProject2').hide();
 	},
 	exportList : function(obj) {
     	var exportListId = '#' + $(obj).siblings("div").attr("id");
@@ -565,27 +541,27 @@ var src_fn = {
     selectDownloadFile : function(target) {
     	// download file
         if (target === "report_sub") {
-        	src_fn.downloadExcel();
+        	dep_fn.downloadExcel();
         } else {
         	var identificationStatus = '${project.identificationStatus}';
         	if ("CONF" != identificationStatus) {
         		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
     				if (e) {
-    					src_fn.selectDownloadFileValidation();
+    					dep_fn.selectDownloadFileValidation();
     				} else {
     					return false;
     				}
     			});
         	} else {
-        		src_fn.selectDownloadFileValidation();
+        		dep_fn.selectDownloadFileValidation();
         	}
         }
         // hide list
-        $("#srcExportList").hide();
+        $("#depExportList").hide();
     },
     selectDownloadFileValidation : function() {
-    	if (com_fn.checkSelectDownloadFile('SRC')) {
-    		com_fn.downloadYaml('SRC');
+    	if (com_fn.checkSelectDownloadFile('DEP')) {
+    		com_fn.downloadYaml('DEP');
     	} else {
     		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
     	}
@@ -595,7 +571,7 @@ var src_fn = {
 		$.ajax({
 			type: "POST",
 			url: '<c:url value="/exceldownload/getExcelPost"/>',
-			data: JSON.stringify({"type":"src", "parameter":'${project.prjId}'}),
+			data: JSON.stringify({"type":"dep", "parameter":'${project.prjId}'}),
 			dataType : 'json',
 			cache : false,
 			contentType : 'application/json',
@@ -612,7 +588,7 @@ var src_fn = {
 		});
 	},
 	closePop : function(){
-		src_fn.cancelFileDel();
+		dep_fn.cancelFileDel();
 		$('.sheetSelectPop').hide();
 	},
 	closeAndroidPop : function(){
@@ -620,17 +596,17 @@ var src_fn = {
 	},
 	getCsvData : function (seq){
 		loading.show();
-		fn_grid_com.totalGridSaveMode('srcList');
-		cleanErrMsg("srcList");
+		fn_grid_com.totalGridSaveMode('depList');
+		cleanErrMsg("depList");
 
-		var target = $("#srcList");
+		var target = $("#depList");
 		var mainData = target.jqGrid('getGridParam','data');
 		var sheetNum = ["0"];
-		var finalData = {"readType":"src","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+		var finalData = {"readType":"dep","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
 		var object = {fileSeq : seq};
 
-		src_evt.csvFileSeq.push(object);
-		src_fn.exeLoadReportData(finalData);
+		dep_evt.csvFileSeq.push(object);
+		dep_fn.exeLoadReportData(finalData);
 	},
 	getSheetData : function(seq){
 		var sheetNum = [];
@@ -647,32 +623,32 @@ var src_fn = {
 			return;
 		} else {
 			loading.show();
-			fn_grid_com.totalGridSaveMode('srcList');
-			cleanErrMsg("srcList");
+			fn_grid_com.totalGridSaveMode('depList');
+			cleanErrMsg("depList");
 			
-			var target = $("#srcList");
+			var target = $("#depList");
 			var mainData = target.jqGrid('getGridParam','data');
-			var finalData = {"readType":"src","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+			var finalData = {"readType":"dep","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
 			var object = {fileSeq : seq};
 
-			src_evt.csvFileSeq.push(object);
-			src_fn.exeLoadReportData(finalData);
+			dep_evt.csvFileSeq.push(object);
+			dep_fn.exeLoadReportData(finalData);
 		}
 	},
 	getSpdxSpreadsheetData : function(seq){
 		var sheetNum = ["1", "4"];
 
 		loading.show();
-		fn_grid_com.totalGridSaveMode('srcList');
-		cleanErrMsg("srcList");
+		fn_grid_com.totalGridSaveMode('depList');
+		cleanErrMsg("depList");
 
-		var target = $("#srcList");
+		var target = $("#depList");
 		var mainData = target.jqGrid('getGridParam','data');
-		var finalData = {"readType":"src","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+		var finalData = {"readType":"dep","prjId" : '${project.prjId}', "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
 		var object = {fileSeq : seq};
 
-		src_evt.csvFileSeq.push(object);
-		src_fn.exeLoadReportData(finalData);
+		dep_evt.csvFileSeq.push(object);
+		dep_fn.exeLoadReportData(finalData);
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
@@ -696,14 +672,14 @@ var src_fn = {
 					$('.sheetSelectPop').hide();
 
 					if(data.externalData) { // validData 표시
-						srcValidMsgData = data.externalData;
+						depValidMsgData = data.externalData;
 					}
 
 					if(data.externalData2) { // validData 표시
-						srcDiffMsgData = data.externalData2;
+						depDiffMsgData = data.externalData2;
 					}
 
-					src_fn.makeOssList(data.resultData);
+					dep_fn.makeOssList(data.resultData);
 
 					if(data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
@@ -722,14 +698,14 @@ var src_fn = {
 
 	makeOssList : function(data){
 
-		srcMainData = data.mainData;
+		depMainData = data.mainData;
 		
 		// 리로드 대신 그리드 삭제 후 다시 그리기
-		$("#srcList").jqGrid('GridUnload');
-		src_grid.load();
+		$("#depList").jqGrid('GridUnload');
+		dep_grid.load();
 
 		// totla record 표시
-		$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+		$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
 	},
 	
 	// upload Cancel시 DB삭제
@@ -740,8 +716,10 @@ var src_fn = {
 		
 		if(tabGubn == "SRC"){
 			seq = $('.csvFileArea > li:last').find("input[type=hidden]").val();
-		}else if(tabGubn == "BIN"){
+		} else if(tabGubn == "BIN"){
 			seq = $('.binFileArea > li:last').find("input[type=hidden]").val();
+		} else if (tabGubn == "DEP") {
+			seq = $('.depFileArea > li:last').find("input[type=hidden]").val();
 		}
 		
 		if(seq == ""){
@@ -753,7 +731,7 @@ var src_fn = {
 		var Data = {"csvDelFileIds" : JSON.stringify(FileSeq)};
 
 		$.ajax({
-			url : '<c:url value="/project/cancelFileDelSrc"/>',
+			url : '<c:url value="/project/cancelFileDelDep"/>',
 			type : 'POST',
 			data : JSON.stringify(Data),
 			dataType : 'json',
@@ -761,11 +739,7 @@ var src_fn = {
 			contentType : 'application/json',
 			success: function(data){
 				if("10"== data.resCd){
-					if(tabGubn == "SRC") {
-						$('.csvFileArea > li:last').remove();
-					} else if(tabGubn == "BIN") {
-						$('.binFileArea > li:last').remove();
-					}					
+					$('.depFileArea > li:last').remove();				
 				}else{
 					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
@@ -777,21 +751,21 @@ var src_fn = {
 	},
 	identificationProjectSearch : function(id){
 		//2018-07-25 choye 추가
-		$("#_srcProjectList2").jqGrid('clearGridData');
-		var postData = $("#_srcProjectList2").jqGrid('getGridParam', 'postData');
+		$("#_depProjectList2").jqGrid('clearGridData');
+		var postData = $("#_depProjectList2").jqGrid('getGridParam', 'postData');
 		postData.referenceId = id;
         $.ajax({
-        	url : '<c:url value="/project/identificationProjectSearch/11"/>',
+            url : '<c:url value="/project/identificationProjectSearch/16"/>',
             type : 'GET',
             dataType : 'json',
             data : postData,
             cache : false,
             success : function(data){
-				srcData = data.rows;
+				depData = data.rows;
 				
-				var target = $("#_srcProjectList2");
+				var target = $("#_depProjectList2");
 				
-				target.jqGrid('setGridParam', {data:srcData}).trigger('reloadGrid');
+				target.jqGrid('setGridParam', {data:depData}).trigger('reloadGrid');
             },
             error : function(xhr, ajaxOptions, thrownError){
                 alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -820,27 +794,55 @@ var src_fn = {
     			
 		//launch it.
 		var btnHtm = '<br/><b></b><br/>';
-		btnHtm += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="src_fn.loadToList(\'resetLoad\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm += '<input type="button" value="Load & Append" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="src_fn.loadToList(\'append\')"/>&nbsp;&nbsp;&nbsp;';
+		btnHtm += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="dep_fn.loadToList(\'resetLoad\')"/>&nbsp;&nbsp;&nbsp;';
+		btnHtm += '<input type="button" value="Load & Append" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="dep_fn.loadToList(\'append\')"/>&nbsp;&nbsp;&nbsp;';
 		btnHtm +='<input type="button" value="Cancel" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>&nbsp;&nbsp;&nbsp;';
 		
 		alertify.commentDialog(btnHtm);
+    },
+    displayVulnerability : function(cellvalue, options, rowObject){
+    	var display = "";
+		var _url = "";
+		var prjId = '${project.prjId}';
+		var ossName = rowObject.ossName;
+		
+		if (prjId) {
+			_url = '<c:url value="/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		} else {
+			_url = '<c:url value="/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		}
+		
+		if(parseInt(cellvalue) >= 9.0 ) {
+			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 7.0 ) {
+			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 4.0) {
+			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) > 0) {
+			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+			display="<span style=\"font-size:0;\"></span>";
+		} else {
+			display=cellvalue;
+		}
+		
+		return display;
     }
 }
 
-//SRC 그리드
-var src_grid = {
+// 그리드
+var dep_grid = {
 	load: function(){
 		var currentOssName = "";
 		var ondblClickRowBln = false;
-		var srcList = $("#srcList");
+		var depList = $("#depList");
 		
-		srcList.jqGrid({
+		depList.jqGrid({
 			datatype: 'local',
-			data : srcMainData,
-			colNames: ['gridId', 'ID_KEY', 'ID', 'Source Name or Path', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
+			data : depMainData,
+			colNames: ['gridId', 'ID_KEY', 'ID', 'Manifest file', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
 			           ,'Homepage','LicenseId','Copyright Text'
-			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'Comment'],
+			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'depList\');">Exclude','LicenseDiv', 'Comment', 'Dependencies', 'refOssName'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -851,7 +853,7 @@ var src_grid = {
 							function (e) { 
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 								});
 							}
 					}
@@ -877,19 +879,19 @@ var src_grid = {
 										if(e.value!=""){
 											var rowid = (e.id).split('_')[0];
 											
-											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'srcList');
-											fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'depList');
+											fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 										}
 									
 									}).dblclick(function(){
 										var rowid = (e.id).split('_')[0];
-										var licenseName = com_fn.getLicenseName(srcList.getRowData(rowid));
+										var licenseName = com_fn.getLicenseName(depList.getRowData(rowid));
 										
-										srcList.jqGrid("setCell", rowid, "licenseName", licenseName);
-										fn_grid_com.saveCellData(srcList.attr("id"), rowid, "licenseName", licenseName, null, null);
-										srcList.jqGrid('saveRow',rowid);
+										depList.jqGrid("setCell", rowid, "licenseName", licenseName);
+										fn_grid_com.saveCellData(depList.attr("id"), rowid, "licenseName", licenseName, null, null);
+										depList.jqGrid('saveRow',rowid);
 										
-										fn_grid_com.mvOssPage(srcList, rowid);
+										fn_grid_com.mvOssPage(depList, rowid);
 									});
 									
 									currentOssName = e.value;
@@ -900,11 +902,11 @@ var src_grid = {
 					editoptions: {
 						dataInit:
 							function (e) { 
-								fn_grid_com.griOssVersions(e, currentOssName, 'srcList');
+								fn_grid_com.griOssVersions(e, currentOssName, 'depList');
 								$(e).on( "autocompletechange", function() {
 									var rowid = (e.id).split('_')[0];
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 								});
 							}
 					}
@@ -912,18 +914,18 @@ var src_grid = {
  				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
  					editoptions: {
  						dataInit: function (e) {
- 								var licenseNameId = $(e).attr("id").split('_')[0];
+								var licenseNameId = $(e).attr("id").split('_')[0];
 								var licenseNameTd = $(e).parent();
 
 								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
 								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
 								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
 								displayLicenseNameCell += '</div>';
-						
+							
 								$(licenseNameTd).empty();
 								$(licenseNameTd).html(displayLicenseNameCell);
 								$('#'+licenseNameId+'_licenseNameDiv').append(e);
- 	 						
+ 	 							
 								// licenseName auto complete
 								$(e).autocomplete({
 									source: licenseNames
@@ -941,7 +943,7 @@ var src_grid = {
 									var rowid = (e.id).split('_')[0];
 									var mult = null;
 									var multText = null;
-									
+							
 									for(var i in licenseNames){
 										if("" != e.value && e.value == licenseNames[i].value){
 											var licenseIds = $('#'+rowid+'_licenseId').val();
@@ -951,12 +953,12 @@ var src_grid = {
 											break;
 										}
 									}
-									
+											
 									if(mult == null){
 										mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 										multText = e.value;
 									}
-									
+									 
 									var rowLicenseNames = [];
 									$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
 										rowLicenseNames.push($(this).text());
@@ -982,28 +984,28 @@ var src_grid = {
 									
 									$('#'+rowid+'_licenseName').val("");
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 								}).on("keypress", function(evt){
 									if(evt.keyCode == 13){
 										var rowid = (e.id).split('_')[0];
 										var mult = null;
 										var multText = null;
-										
+
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
-
+												
 												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 												multText = licenseNames[i].value;
 												break;
 											}
 										}
-										
-										if(mult == null && "" != e.value){
+
+										if(mult == null){
 											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 											multText = e.value;
 										}
-										
+
 										var rowLicenseNames = [];
 										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
 											rowLicenseNames.push($(this).text());
@@ -1026,10 +1028,10 @@ var src_grid = {
 												$('#'+rowid+'_licenseNameBtn').append(mult);
 											}
 										}
-										
+
 										$('#'+rowid+'_licenseName').val("");
 
-										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+										fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 									}
 								});
 							}
@@ -1048,7 +1050,7 @@ var src_grid = {
 									$("#"+rowid+"_downloadLocation").val(value);
 								}
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+								fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 							}).on("blur", function() {
 								var value = e.value;
 								
@@ -1075,7 +1077,7 @@ var src_grid = {
 										$("#"+rowid+"_homepage").val(value);
 									}
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 								}).on("blur", function() {
 									var value = e.value;
 									
@@ -1095,13 +1097,13 @@ var src_grid = {
 							$(e).on("change", function() {
 								var rowid = (e.id).split('_')[0];
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+								fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 							});
 						}
 					}
 				},
 				{name: 'cveId', index: 'cveId', hidden:true},
-				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', template: searchNumberOptions, formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float'},
+				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', template: searchNumberOptions, formatter:dep_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float'},
 				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', search: false, formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter,
  					editoptions: {
 						dataInit:
@@ -1109,7 +1111,7 @@ var src_grid = {
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
 
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+									fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 								});
 							}
 					}	
@@ -1121,18 +1123,20 @@ var src_grid = {
 							$(e).on("change", function() {
 								var rowid = (e.id).split('_')[0];
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
+								fn_grid_com.saveCellData("depList",rowid,e.name,e.value,depValidMsgData,depDiffMsgData);
 							});
 						}
 					}
-				}
+				},
+				{name: 'dependencies', index: 'dependencies', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"text"},
+				{name: 'refOssName', index: 'refOssName', width: 50, hidden:true}
 			],
 			autoencode: true,
 			editurl:'clientArray',
  			autowidth: true,
 			height: 'auto',
 			gridview: true,
-		   	pager: '#srcPager',
+		   	pager: '#depPager',
 			rowNum: 200,
 			rowList: [200, 500, 1000, 5000],
 			recordpos:'right',
@@ -1180,7 +1184,7 @@ var src_grid = {
 					}
 					
 					// 한번에 처리
-					$("#srcList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+					$("#depList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 					
 					tableRefresh();
 				}
@@ -1206,19 +1210,19 @@ var src_grid = {
 			       }
 			    }
 			 	// 경고 클래스 설정
-			    fn_grid_com.setWarningClass(srcList,rowid,["ossName","licenseName"]);
+			    fn_grid_com.setWarningClass(depList,rowid,["ossName","licenseName"]);
 			    return false;
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				if(iCol=="3") {
-					fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
+					fn_grid_com.showOssViewPage(depList, rowid, true, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				// 체크 박스 영역 제외
-				cleanErrMsg("srcList", rowid);
+				cleanErrMsg("depList", rowid);
 
-				fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
+				fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 
 				// 서브 그리드 제외
 				ondblClickRowBln = false;
@@ -1237,54 +1241,48 @@ var src_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
-
-                                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
-                                var nextRow = rowid
-                                $('#'+nextRow+"_"+nextCol).focus();
+				var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
+				var nextRow = rowid
+				$('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
-				cleanErrMsg("srcList");
+				cleanErrMsg("depList");
 				
-				fn_grid_com.totalGridSaveMode('srcList');
+				fn_grid_com.totalGridSaveMode('depList');
 			},
 			gridComplete : function() {
-				cleanErrMsg("srcList");
+				cleanErrMsg("depList");
 				
-				if(srcValidMsgData) {
-					gridValidMsgNew(srcValidMsgData, "srcList");
+				if(depValidMsgData) {
+					gridValidMsgNew(depValidMsgData, "depList");
 				}
 				
-				if(srcDiffMsgData) {
-					gridDiffMsg(srcDiffMsgData, "srcList");
-				}
-				
-				if(srcInfoMsgData) {
-					gridInfoMsg(srcInfoMsgData, "srcList");
+				if(depDiffMsgData) {
+					gridDiffMsg(depDiffMsgData, "depList");
 				}
 			},
 			removeHighLight : true
 		});
 		
-		srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+		depList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
 			afterSearch: function () {
-				// Identification > SRC 탭 > OSS Table에서 Filter 검색 후 Warning message 사라짐
-				if(srcValidMsgData.length > 0){ 
-					cleanErrMsg("srcList");
-					gridValidMsgNew(srcValidMsgData, "srcList");
+				if(depValidMsgData.length > 0){ 
+					cleanErrMsg("depList");
+					gridValidMsgNew(depValidMsgData, "depList");
 				}
 			}
 		});
 		
-		srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
+		depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
 												  , addfunc: function () { 
-													  com_fn.saveFlagObject["SRC"] = false;
-													  fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);
+													  com_fn.saveFlagObject["DEP"] = false;
+													  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
 												  }
-												  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
+												  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
 												  , cloneToTop:true
 		});
 		
-		$('#srcList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#depList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
 	}
 }
 </script>

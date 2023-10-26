@@ -200,25 +200,22 @@
 
 													/**
 													 * params["referenceDiv"] is id of identification type
-													 * 3RD, SRC, BIN, BIN-Android, BOM
+													 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
 													 * 10 (3RD) -> tab index: 0
-													 * 11 (SRC) -> tab index: 1
-													 * 15 (BIN) -> tab index: 2
-													 * 14 (ANDROID) -> tab index: 3
-													 * 13 (BOM) -> tab index: 4
+													 * 16 (DEP) -> tab index: 1
+													 * 11 (SRC) -> tab index: 2
+													 * 15 (BIN) -> tab index: 3
+													 * 14 (ANDROID) -> tab index: 4
+													 * 13 (BOM) -> tab index: 5
 													 */
 													switch(rowdata["referenceDiv"]) {
-													    case "10":    identificationTabOrder = "0";    break;
-													    case "11":    identificationTabOrder = "1";    break;
-													    case "15":    identificationTabOrder = "2";    break;
-													    case "14":    identificationTabOrder = "3";    break;
-													    case "13":    identificationTabOrder = "4";    break;
+														case "10":    opener.party_evt.getPartGridData();			break;
+														case "16":    opener.dep_fn.getDepGridData();				break;
+												  		case "11":    opener.src_fn.getSrcGridData();   			break;
+												    	case "15":    opener.bin_fn.getBinGridData(); 	 			break;
+												    	case "14":    opener.binAndroid_fn.getBinAndroidGridData();	break;
+												    	case "13":    opener.bom_data.getJqGrid();    				break;
 													}
-
-													/**
-													 * reload identication tab you're working on
-													 */
-													opener.location.href = `/project/identification/\${rowdata["refPrjId"]}/\${identificationTabOrder}`;
 												}
 												
 												alertify.success(successMsg, 5); // 5sec동안 message 출력

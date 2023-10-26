@@ -333,6 +333,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxYamlFileId)">
 				, SPDX_YAML_FILE_ID = #{spdxYamlFileId}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxJsonFileId)">
+				, CDX_JSON_FILE_ID = #{cdxJsonFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxXmlFileId)">
+				, CDX_XML_FILE_ID = #{cdxXmlFileId}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(zipFileId)">
 				, ZIP_FILE_ID = #{zipFileId}
 			</if>

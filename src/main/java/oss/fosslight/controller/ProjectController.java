@@ -498,6 +498,8 @@ public class ProjectController extends CoTopComponent {
 		
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PARTNER,
 				identification.getReferenceId()));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP,
+				identification.getReferenceId()));
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC,
 				identification.getReferenceId()));
 		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN,
@@ -588,7 +590,7 @@ public class ProjectController extends CoTopComponent {
 
 		T2CoProjectValidator pv = new T2CoProjectValidator();
 		
-		if ((CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(code) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(code)) && map != null) {
+		if ((CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(code) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(code) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(code)) && map != null) {
 			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 			
 			if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(code)) {
@@ -1355,7 +1357,7 @@ public class ProjectController extends CoTopComponent {
 				projectService.addPartnerData(project);
 				
 				// 4. merge and save 처리
-				projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>()); // 신규생성이기 때문에 default Data가 없음.
+				projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>()); // 신규생성이기 때문에 default Data가 없음.
 				
 				// 5. validation check로 project status를 정리함.
 				ProjectIdentification identification = new ProjectIdentification();
@@ -2147,7 +2149,177 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, null);
 		}
 	}
-	
+
+	/**
+	 * Save dep.
+	 *
+	 * @param map the map
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the response entity
+	 */
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.SAVE_DEP)
+	public @ResponseBody ResponseEntity<Object> saveDep(@RequestBody HashMap<String, Object> map,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		// default validation
+		boolean isValid = true;
+		// last response map
+		Map<String, String> resMap = new HashMap<>();
+		// default 00:java error check code, 10:success code
+		String resCd = "00";
+		String prjId = (String) map.get("prjId");
+		String csvFileId = (String) map.get("csvFileId");
+		String delFileString = (String) map.get("csvDelFileIds");
+		String FileSeqs = (String) map.get("csvFileSeqs");
+		String identificationSubStatusDep = (String) map.get("identificationSubStatusDep");
+		String mainDataString = (String) map.get("mainData");
+		String depAddListDataString = (String) map.get("depAddListData");
+
+		Type collectionType = new TypeToken<List<T2File>>() {}.getType();
+		List<T2File> delFile = new ArrayList<T2File>();
+		delFile = (List<T2File>) fromJson(delFileString, collectionType);
+		List<T2File> addFile = new ArrayList<T2File>();
+		addFile = (List<T2File>) fromJson(FileSeqs, collectionType);
+		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
+
+		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
+
+		Type collectionType4 = new TypeToken<List<Project>>() {}.getType();
+		List<Project> depAddList = new ArrayList<Project>();
+		depAddList = (List<Project>) fromJson(depAddListDataString, collectionType4);
+
+		if (CoConstDef.FLAG_NO.equals(identificationSubStatusDep)) {
+			Project project = new Project();
+			project.setIdentificationSubStatusDep(identificationSubStatusDep);
+			project.setPrjId(prjId);
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+			projectService.updateSubStatus(project);
+		} else {
+			/*
+			 * 중간저장 대응을 위해 save시에는 validation check 를 수행하지 않는다. 문제가 생길경우, 꼭 필요한
+			 * 체크를 별도의 type으로 추가해야함 // grid validation only customValidation
+			 * check!! // 모든 체크 파라미터를 customValidation에 코딩 해야한다.
+			 * T2CoProjectValidator pv = new T2CoProjectValidator();
+			 * pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE); // main grid
+			 * pv.setAppendix("mainList", ossComponents); // sub grid
+			 * pv.setAppendix("subList", ossComponentsLicense);
+			 *
+			 * // basic validator는 무시, validate를 호출하여 custom validator를 수행한다.
+			 * T2CoValidationResult vr = pv.validate(new HashMap<>());
+			 *
+			 * // return validator result if(!vr.isValid()) { return
+			 * makeJsonResponseHeader(vr.getValidMessageMap()); }
+			 */
+			// save 시 가장 기본적인 유효성 체크만 진행 (길이, 형식 체크)
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			//pv.setIgnore("LICENSE_NAME"); // 예외처리를 추가함.
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			pv.setAppendix("mainList", ossComponents); // sub grid
+			pv.setAppendix("subList", ossComponentsLicense);
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				if(CommonFunction.booleanOssNameFormatForValidMsg(vr.getValidMessageMap())) {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap(), ossComponents), vr.getValidMessageMap());
+				}else {
+					return makeJsonResponseHeader(false, CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+				}
+			}
+
+			Project project = new Project();
+			project.setPrjId(prjId);
+			project.setDepCsvFileId(csvFileId);
+			project.setCsvFile(delFile);
+			project.setCsvFileSeq(addFile);
+			project.setIdentificationSubStatusDep(identificationSubStatusDep);
+
+			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
+			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+
+			projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+
+			// 분석결과서 업로드시 라이선스명(닉네임)이 변경된 사항이 있으면 이력으로 등록한다.
+			if (addFile != null) {
+				for (T2File _file : addFile) {
+					if (!isEmpty(_file.getFileSeq())) {
+						try {
+							if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+									CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, _file.getFileSeq())) != null) {
+								String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(
+										loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE,
+										_file.getFileSeq()), true);
+
+								if (!isEmpty(changedLicenseName)) {
+									CommentsHistory commentHisBean = new CommentsHistory();
+									commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+									commentHisBean.setReferenceId(prjId);
+									commentHisBean.setExpansion1("DEP");
+									commentHisBean.setContents(changedLicenseName);
+									commentService.registComment(commentHisBean, false);
+								}
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+
+						try {
+							if(getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, _file.getFileSeq())) != null) {
+								String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, _file.getFileSeq()), true);
+
+								if(!isEmpty(chagedOssVersion)) {
+									CommentsHistory commentHisBean = new CommentsHistory();
+									commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+									commentHisBean.setReferenceId(prjId);
+									commentHisBean.setExpansion1("DEP");
+									commentHisBean.setContents(chagedOssVersion);
+									commentService.registComment(commentHisBean, false);
+								}
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+						}
+					}
+				}
+			}
+
+			try {
+				History h = new History();
+				h = projectService.work(project);
+				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				project = (Project) h.gethData();
+				h.sethEtc(project.etcStr());
+				historyService.storeData(h);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+		projectService.existsAddList(project);
+		projectService.insertAddList(depAddList);
+
+		// 정상처리된 경우 세션 삭제
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+		deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+
+		// success code set 10
+		resCd = "10";
+		resMap.put("isValid", String.valueOf(isValid));
+		resMap.put("resCd", resCd);
+		resMap.put("resultData", projectService.getProjectDetail(project).getIdentificationStatus());
+
+		return makeJsonResponseHeader(resMap);
+	}
+
 	/**
 	 * Save src.
 	 *
@@ -2628,12 +2800,15 @@ public class ProjectController extends CoTopComponent {
 		String prjId = (String) map.get("referenceId");
 		String merge = (String) map.get("merge");
 		String gridString = (String) map.get("gridData");
+		String checkGridString = (String) map.get("checkGridData");
 		
 		// bom에서 admin check선택한 data
 		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> projectIdentification = new ArrayList<>();
 		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
-		projectService.registBom(prjId, merge, projectIdentification);
+		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
+		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
+		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
 
 		Map<String, String> resMap = new HashMap<>();
 		
@@ -2748,12 +2923,12 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("project", projectMaster);
 		// android model이면서 bom화면을 표시하려고하는 경우, android bin tab index로 치환한다.
 		
-		if (!"3".equals(initDiv) && CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
-			initDiv = "3";
+		if (!"4".equals(initDiv) && CoConstDef.FLAG_YES.equals(projectMaster.getAndroidFlag())) {
+			initDiv = "4";
 		}
 		
 		if (!partnerFlag && "0".equals(initDiv)) {
-			initDiv = "1";
+			initDiv = "2";
 		}
 		
 		model.addAttribute("initDiv", initDiv);

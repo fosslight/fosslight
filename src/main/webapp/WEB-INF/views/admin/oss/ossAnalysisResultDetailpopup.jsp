@@ -59,6 +59,9 @@
 				$("[id^=selectTitle]").html(options);
 			},
 			selectTitle : function(seq){
+				var width = $(".detailView1").width()-40;
+            	$("#commentList"+seq).css("width", width);
+				
 				var gridId = $("#selectTitle"+seq).val();
 				var selectData = common_data.detailData.filter(function(cur){
 				    return cur.gridId == gridId;
@@ -74,6 +77,20 @@
 				$("#detailSummaryDescription"+seq).val(selectData.summaryDescription);
 				$("#detailcomment"+seq).val(selectData.comment);
 
+				if (typeof selectData.ossId !== 'undefined') {
+					if ('' == commentTemp){
+						$("input[name=latestOssId]").val(selectData.ossId);
+						Ctrl_fn.getCommentList(seq);
+					} else {
+						if ($('#commentListArea'+seq).find('dl').length == 0) {
+							$('#commentListArea'+seq).append(commentTemp);
+						}
+						$("#commentList"+seq).show();
+					}
+				} else {
+					$("#commentList"+seq).hide();
+				}
+				
 				$(".detailNickName"+seq+" > *").remove(); // nickName clear
 				$(".detailDownloadLocation"+seq+" > *").remove(); //downloadLocation clear
 				$(".detailDetectedLicense"+seq+" > *").remove(); //detectedLicense clear
@@ -134,6 +151,40 @@
 
 				common_data["list"+seq] = {rows:[]};
 				var licenseName = "";
+				
+				var vDiffFlag = false;
+				var multiFlag = false;
+				var dualFlag = false;
+				
+				if (typeof selectData.ossType !== "undefined") {
+					vDiffFlag = true;
+				}
+				
+				if ("M" == licenseDiv) {
+					if (replaceLicenseData.indexOf(' AND ') > -1 || replaceLicenseData.indexOf(' and ') > -1) {
+						multiFlag = true;
+					}
+					if (replaceLicenseData.indexOf(' OR ') > -1 || replaceLicenseData.indexOf(' or ') > -1) {
+						dualFlag = true;
+					}
+				}
+				
+				var colOssType = '';
+				if (multiFlag) {
+					colOssType += '<span class="iconSet multi">Multi</span>';
+				}
+				
+				if (dualFlag) {
+					colOssType += '<span class="iconSet dual">Dual</span>';
+				}
+				
+				if (vDiffFlag){
+					colOssType += '<span class="iconSet vdif">v-Diff</span>';
+				}
+				
+				if ('' != colOssType) {
+					$("[name='ossType"+seq+"']").html(colOssType);
+				}
 				
 				for(var i in licenseData){
 					var ossLicenseComb = "";
@@ -476,9 +527,10 @@
 							    })[0];
 								
 								if(msg){
-									msg = msg.split("@@")[1];	
+									msg = msg.split("@@")[1];
+									var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
 									$(cur).parent().next("span.urltxt").empty();
-									$(cur).parent().next("span.urltxt").html(msg).show();
+									$(cur).parent().next("span.urltxt").html(downloadLocation).show();
 								}						
 							});
 			        	} else {
@@ -525,7 +577,64 @@
 			    }).submit();
 			},
 			loadUrl : function (target, url) {
-				window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
+				var ossNameObj = url.split("?")[1];
+				var ossName = ossNameObj.split("=")[1];
+				
+				var ossVersionLength = $("input[name=ossVersion]").length;
+				var ossVersionArr = new Array(ossVersionLength);
+				for(var i=0; i<ossVersionLength; i++){                          
+					ossVersionArr[i] = $("input[name=ossVersion]").eq(i).val();
+			    }
+				
+				var ossVersion = "";
+				if (ossVersionLength > 0) {
+					ossVersion = ossVersionArr[0];
+				}
+				
+				Ctrl_fn.showDetailPopup(ossName, ossVersion);
+//				window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
+			},
+			showOssViewPage : function (obj) {
+				var ossName = $(obj).parent().next().find('input').val();
+				var ossVersion = $(obj).parent().parent().next().find('input').val();
+				Ctrl_fn.showDetailPopup(ossName, ossVersion);
+			},
+			showDetailPopup : function (ossName, ossVersion) {
+				var _popup = null;
+				
+				if ("N/A" == ossVersion) {
+					ossVersion = "";
+				}
+				
+				if("" != ossName) {
+					$.ajax({
+						url : '<c:url value="/oss/checkExistsOssByname"/>',
+						type : 'GET',
+						dataType : 'json',
+						cache : false,
+						data : {ossName : ossName},
+						contentType : 'application/json',
+						success : function(data){
+							if(data.isValid == 'true') {
+								if(_popup == null || _popup.closed) {
+									_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+									if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+										alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+									}
+								} else {
+									_popup.close();
+									_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+								}
+							} else {
+								alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+				}
 			},
 			onSuccess : function(){},
 			onError : function(data, status){
@@ -668,6 +777,62 @@
 					},
     	            error : Ctrl_fn.onError
     			});
+            },
+            getCommentList : function (seq) {
+            	$.ajax({
+                	url : '<c:url value="/comment/getDivCommentList"/>',
+                    type : 'GET',
+                    dataType : 'json',
+                    cache : false,
+                    data : {
+                        referenceId : $('input[name=latestOssId]').val(),
+                        referenceDiv : '40'
+                    },
+                    success : function(data){
+                    	$('.tabContent'+seq).next().show();
+                    	$('#commentList'+seq).show();
+                    	$('#commentListArea'+seq).children().remove();
+        				
+        				if(data.length != 0) {
+        					for(var i = 0; i < data.length; i++) {
+        						var tempDl = document.createElement("dl");
+        						var commId = data[i].commId;
+        						var tempDt = document.createElement("dt");
+        						var leftSpan = document.createElement("span");
+        						leftSpan.setAttribute("class", "left");
+        						var nameArea = document.createElement("strong");
+        						var commentContentsArea = document.createElement("dd");
+        						
+        						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
+        							nameArea.append(data[i].creator);
+        						} else {
+        							nameArea.append(data[i].status).append("</br>"+data[i].creator);
+        						}
+        						
+        						if (typeof data[i].createdDate !== "undefined") {
+        							var dateArea = document.createElement("span");
+        							dateArea.append(data[i].createdDate);
+        							nameArea.append(" | ");
+        							nameArea.append(dateArea);
+        						}
+        						
+        						leftSpan.appendChild(nameArea);
+        						tempDt.appendChild(leftSpan);
+        						commentContentsArea.innerHTML = replaceWithLink(data[i].contents);
+        						tempDl.appendChild(tempDt).appendChild(commentContentsArea);
+        						$('#commentListArea'+seq).append(tempDl);
+        					}
+        					
+        					commentTemp = $('#commentListArea'+seq).html();
+        					$('#commentListArea'+seq).html(commentTemp);
+        				} else {
+        					$('#commentListArea'+seq).append('<p class="noneTxt">No comments were registered.</p>');
+        				}
+                    },
+                    error : function(xhr, ajaxOptions, thrownError){
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    }
+                });
             }
 		};
 
@@ -1650,6 +1815,7 @@
 		</div>
 		<div id="wrap" style="padding: 15px 0px;">
 			<div class="groupSet">
+				<input type="hidden" name="latestOssId"/>
 				<!--  -->
 				<div class="detailView1">
 					<div class="tbws1 w100P">
@@ -1678,7 +1844,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName1" />
@@ -1706,6 +1872,10 @@
 											</div>
 											<input id="nickAdd1" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
+									</tr>
+									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType1"></span></td>
 									</tr>
 									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
@@ -1786,6 +1956,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent1">
+            			<div id="commentList1" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea1"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -1816,7 +1992,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName2" />
@@ -1845,6 +2021,10 @@
 											</div>
 											<input id="nickAdd2" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
+									</tr>
+									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType2"></span></td>
 									</tr>
 									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
@@ -1925,6 +2105,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent2">
+            			<div id="commentList2" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea2"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -1955,7 +2141,7 @@
 										</td>
 									</tr>
 									<tr>
-										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+										<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' onclick="Ctrl_fn.showOssViewPage(this);">Detail Info</a></th>
 										<td class="dCase">
 											<div class="required">
 												<input name="ossName" type="text" class="autoComOss w100P" id="detailOssName3" />
@@ -1984,6 +2170,10 @@
 											</div>
 											<input id="nickAdd3" type="button" value="+ Add" class="btnCLight gray"/>
 										</td>
+									</tr>
+									<tr>
+										<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+										<td class="dCase"><span name="ossType3"></span></td>
 									</tr>
 									<tr>
 										<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /></th>
@@ -2064,6 +2254,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent3">
+            			<div id="commentList3" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea3"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 			</div>

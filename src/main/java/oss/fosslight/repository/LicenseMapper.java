@@ -71,4 +71,6 @@ public interface LicenseMapper {
 	LicenseMaster getLicenseInfoWithName(String licenseName);
 	LicenseMaster getLicenseInfoWithId(String licenseId);
 
+	void updateLicenseMasterForRestriction(LicenseMaster licenseMaster);
+
 }

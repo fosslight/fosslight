@@ -140,4 +140,6 @@ public interface OssService extends HistoryConfig{
 	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
 
 	int checkOssVersionDiff(String ossName);
+
+	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
 }

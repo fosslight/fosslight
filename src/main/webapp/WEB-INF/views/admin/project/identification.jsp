@@ -30,6 +30,7 @@
 			<div class="subTab">
 			<div class="tabMenu">
 				<a rel="partyDiv">3rd party</a>
+				<a rel="depDiv">DEP</a>
 				<a rel="srcDiv">SRC</a>
 				<a rel="binDiv">BIN</a>
 				<a rel="binAndroidDiv">BIN (Android)</a>
@@ -218,6 +219,164 @@
 			</div>
 		</div>
 	</c:if>
+<!-- DEP ************************************************************************************************************ -->
+		<div id="depDiv" class="tabContent">
+			<div class="projectContents">
+				<div class="orangeBox">
+					<input type="button" value="btnToggle" class="btnToggle">
+					<fieldset class="editSearchUp">
+						<div class="sukind">
+							<span class="radioSet depBtn"><input type="radio" id="depR1" name="depSelectOption" onchange="dep_fn.changeSelectOption()" value="1" checked <c:if test="${isCommited}">disabled</c:if> /><label for="depR1">Upload Analysis Result</label></span>
+							<span class="radioSet depBtn"><input type="radio" id="depR2" name="depSelectOption" onchange="dep_fn.changeSelectOption()" value="2" <c:if test="${isCommited}">disabled</c:if> /><label for="depR2">Project Search</label></span>
+							<span class="checkSet"><input type="checkbox" id="applicableDep" value="N" onchange="com_fn.checkAplicable(this, 'depBtn')" /><label for="applicableDep">Not Applicable</label></span>
+						</div>
+						<form id="depUploadForm" class="depBtn">
+							<input type="hidden" id="depCsvFileId" value="${project.depCsvFileId }">
+							<dl class="uploadCase" id="depUploadSearch">
+								<dt>Upload Analysis Result</dt>
+								<dd>
+									<div class="basicCase">
+										<div class="uploadTit">
+											<span class="checkSet"><label for="2">FOSSLight Report</label></span>
+										</div>
+										<div class="uploadGroup">
+											<div class="uploadSet">
+												<span class="fileex_back" <c:if test="${isCommited}">style="display:none;"</c:if>>
+													<div id="depCsvFile">+ Add file</div>
+												</span>
+												<div class="uploadList">
+													<ul class="depCsvFileArea">
+														<c:forEach var="csvFile" items="${project.depCsvFile }" varStatus="vs">
+															<c:if test="${csvFile.delYn == 'N'}">
+																<li>
+															<span>
+																<strong>
+																	<a href="/download/${csvFile.fileSeq }/${csvFile.logiNm}">${csvFile.origNm }</a>
+																	<br>
+																	${csvFile.createdDate}
+																	<input type="hidden" value="${csvFile.fileSeq }"/>
+																	<input type="button" value="Delete" class="smallDelete" onclick="com_fn.deleteFiles(this, '1')" <c:if test="${isCommited}">style="display:none;"</c:if>/>
+																</strong>
+															</span>
+																</li>
+															</c:if>
+														</c:forEach>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</div>
+								</dd>
+							</dl>
+						</form>
+						<form id="depProjectForm" class="depBtn">
+							<input type="hidden" name="publicYn" value="Y">
+							<dl class="fideCase" id="depProjectSearch" style="display:none;">
+								<dt>Project Search Area</dt>
+								<dd>
+									<label>Project Name</label>
+									<input type="text" class="autoComProjectNmConf" name="prjName"/>
+								</dd>
+								<dd>
+									<label>Project Version</label>
+									<input type="text" name="prjVersion"/>
+								</dd>
+								<dd>
+									<label>Project Id</label>
+									<input type="text" class="autoComProjectIdConf" name="prjId"/>
+								</dd>
+								<dd class="sBtnArea"><input id="depProjectSearchBtn" type="button" value="Search" class="btnColor black wauto srcBtn" /></dd>
+							</dl>
+						</form>
+					</fieldset>
+					<div class="depProjectSearch editSearchUp depBtn">
+						<div class="depProject1" style="display:none;">
+							<div class="tRStit">
+								<h3>Search Results</h3>
+								<br/>
+							</div>
+							<div class="jqGridSet">
+								<table id="_depProjectList1"><tr><td></td></tr></table>
+								<div id="depProjectPager1"></div>
+							</div>
+						</div>
+						<!---->
+						<br/>
+						<div class="depProject2" style="display:none;">
+							<div class="tRStit">
+								<h3>Detail Preview</h3>
+								<span class="right"><input type="button" value="Load" class="btnCLight" onclick="dep_fn.showDialog()"/></span>
+							</div>
+							<div class="jqGridSet">
+								<table id="_depProjectList2"><tr><td></td></tr></table>
+							</div>
+						</div>
+					</div>
+					<br>
+					<div class="depBtn">
+						<div class="srcProject3">
+							<div class="tRStit">
+								<h3>Loaded List</h3>
+								<br/>
+							</div>
+							<div class="jqGridSet">
+								<table id="_depAddList"><tr><td></td></tr></table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="boxLine mt10" style="display:none;">
+					<div class="fileupload-progress">
+						<!-- The global progress bar -->
+						<div class="progress mt10" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+						<!-- The extended global progress state -->
+						<div class="progress-extended mt10">&nbsp;</div>
+					</div>
+				</div>
+				<div class="btnLayout">
+                    <span class="left">
+                    	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
+							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" class="btnColor red srcBtn" style="width: 115px;" />
+							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('DEP')" class="btnColor red srcBtn" style="width: 100px;" />
+							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('DEP')" class="btnColor btnColor red idenEdit" />
+						</c:if>
+                    </span>
+					<span class="right">
+                    	<div id="depExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="dep_fn.exportList(this)"/>
+							<div id="depExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0; text-align:left;">
+								<a onclick="dep_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a onclick="dep_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
+							</div>
+						</div>
+                        <c:if test="${project.dropYn ne 'Y'}">
+							<input id="depResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
+							<input id="depSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
+						</c:if>
+						<!-- Popup -->
+						<div class="pop savePop">
+							<div class="popdata">
+								<p>The following open source and license names will be changed to names registered on the system for efficient management.</p>
+								<dl class="openSourceArea">
+								</dl>
+								<dl class="licenseArea">
+								</dl>
+							</div>
+							<div class="pbtn">
+								<input type="button" value="Cancel" class="btnCancel btnColor" id="nicknameCancel"/>
+								<input type="button" value="OK" class="btnColor red" id="nicknameOk"/>
+							</div>
+						</div>
+						<!-- //Popup -->
+                    </span>
+				</div>
+				<!---->
+				<div class="jqGridSet depBtn">
+					<table id="depList"><tr><td></td></tr></table>
+					<div id="depPager"></div>
+				</div>
+			</div>
+		</div>
 <!-- SRC ************************************************************************************************************ -->
 		<div id="srcDiv" class="tabContent">
 			<div class="projectContents">
@@ -650,7 +809,7 @@
 										</div>
 									</div>
 								</dd>
-								<dd class="androidCase"><input type="button" value="Apply" class="btnColor black wauto" onclick="binAndroid_fn.showDialog('APPLY')"/></dd> <!-- sBtnArea -->
+								<dd class="androidCase"><input type="button" id="applyBtn" value="Apply" class="btnColor black wauto" onclick="binAndroid_fn.showDialog('APPLY')"/></dd> <!-- sBtnArea -->
 							</dl>
 						</form>
 						<form id="binAndroidProjectForm" class="binAndroidBtn">
@@ -802,23 +961,20 @@
                     	<c:if test="${ct:isAdmin()}">
 							<input type="button" value="Save (Binary DB)" class="btnSave btnColor red idenSave" onclick="bom_fn.binaryDBSave('${project.prjId}')" style="width:120px;"/>
 						</c:if>
-						<c:if test="${project.identificationStatus ne 'CONF'}">
-							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.downloadExcel()"/>
-						</c:if>
-						<c:if test="${project.identificationStatus eq 'CONF'}">
-							<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-								<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList(this);"/>
-								<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
-									<a onclick="bom_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
-									<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
-									<a onclick="bom_fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
-									<a onclick="bom_fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
-									<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
-									<a onclick="bom_fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
-									<a onclick="bom_fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
-								</div>
+						<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
+							<input type="button" value="Export" class="btnColor red btnExport" onclick="bom_fn.exportList(this);"/>
+							<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
+								<a onclick="bom_fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+								<a onclick="bom_fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
+								<a onclick="bom_fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
+								<a onclick="bom_fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
+								<a onclick="bom_fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
+								<a onclick="bom_fn.selectDownloadFile('JSON_sub')" style="display: block;">SPDX (JSON)</a>
+								<a onclick="bom_fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
+								<a onclick="bom_fn.selectDownloadFile('cdxJSON')" style="display: block;">CycloneDX (JSON)</a>
+								<a onclick="bom_fn.selectDownloadFile('cdxXML')" style="display: block;">CycloneDX (XML)</a>
 							</div>
-						</c:if>
+						</div>
                         <c:if test="${project.dropYn ne 'Y'}">
 	                        <input id="bomResetUp" type="button" value="Reset" class="btnColor btnReset idenReset" />
 	                        <input id="bomSaveUp" type="button" value="Merge And Save" class="btnColor red btnSave idenSave" style="width:120px;"/>

@@ -1669,6 +1669,7 @@ CREATE TABLE IF NOT EXISTS `PROCESS_GUIDE` (
 
 -- 테이블 데이터 fosslight.PROCESS_GUIDE:~0 rows (대략적) 내보내기
 DELETE FROM `PROCESS_GUIDE`;
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('License_Edit_Info', 'License_Edit', '<div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull;<strong> SPDX License인 경우 :</strong> SPDX 링크로 website를 추가<br />&bull;<strong> License 이름이 한글인 경우 :</strong> 1. License 이름 영문으로 변경하고, 2. 한글 License명은 License text 최상단에 포함<br />&bull;<strong> MIT/BSD-like인 경우 :</strong> MIT/BSD-like (OSS_Name) 으로 이름을 설정</div>', '', 'Y');
 /*!40000 ALTER TABLE `PROCESS_GUIDE` DISABLE KEYS */;
 /*!40000 ALTER TABLE `PROCESS_GUIDE` ENABLE KEYS */;
 
@@ -1769,6 +1770,8 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `SPDX_TAG_FILE_ID` int(11) DEFAULT NULL,
   `SPDX_JSON_FILE_ID` int(11) DEFAULT NULL,
   `SPDX_YAML_FILE_ID` int(11) DEFAULT NULL,
+  `CDX_JSON_FILE_ID` int(11) DEFAULT NULL,
+  `CDX_XML_FILE_ID` int(11) DEFAULT NULL,
   `ZIP_FILE_ID` int(11) DEFAULT NULL,
   `USE_CUSTOM_NOTICE_YN` char(1) DEFAULT 'N' COMMENT '사용자 편집 NOTICE 사용여부',
   `COMPLETE_YN` char(1) DEFAULT NULL COMMENT 'COMPLETE 여부',

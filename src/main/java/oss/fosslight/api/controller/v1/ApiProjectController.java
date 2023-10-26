@@ -317,6 +317,7 @@ public class ApiProjectController extends CoTopComponent {
     		@ApiParam(value = "OSS Notice (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeType,
     		@ApiParam(value = "Notice Platform (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
     		@ApiParam(value = "Priority (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String priority,
+    		@ApiParam(value = "Additional information", required = false) @RequestParam(required = false) String additionalInformation,
     		@ApiParam(value = "comment", required = false) @RequestParam(required = false) String comment){
 		
 		// 사용자 인증
@@ -425,6 +426,7 @@ public class ApiProjectController extends CoTopComponent {
 				paramMap.put("networkServerType", networkServerType);
 				paramMap.put("priority", priority);
 				paramMap.put("loginUserName", userInfo.getUserId());
+				paramMap.put("comment", avoidNull(additionalInformation, ""));
 				
 				result = apiProjectService.createProject(paramMap);
 				
@@ -453,9 +455,8 @@ public class ApiProjectController extends CoTopComponent {
 					
 					if (comment != null) {
 						CommentsHistory commentHisBean = new CommentsHistory();
-						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
 						commentHisBean.setReferenceId(resultPrjId);
-						commentHisBean.setExpansion1("SRC");
 						commentHisBean.setContents(comment);
 						commentHisBean.setLoginUserName(userInfo.getUserId());
 						commentService.registComment(commentHisBean, false);
@@ -1705,6 +1706,70 @@ public class ApiProjectController extends CoTopComponent {
 							&& !errorCode.equals(CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE)) {
 						return responseService.getSingleResult(resultMap);
 					}
+				} else {
+					errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+				}
+			} else {
+				errorCode = CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE;
+			}
+		} catch (Exception e) {
+			return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
+					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+		}
+		
+		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
+	}
+	
+	@ApiOperation(value = "Project Not Applicable", notes = "Project Not Applicable")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+	@GetMapping(value = {Url.API.FOSSLIGHT_API_PROJECT_NOT_APPLICABLE})
+    public CommonResult prjNotApplicable(
+    		@RequestHeader String _token,
+    		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
+    		@ApiParam(value = "Tab Flag (3rd, BIN, SRC)", required = true, allowableValues = "3rd,SRC,BIN") @RequestParam(required = true) String tabFlag){
+		
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<>();
+		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
+		
+		try {
+			Map<String, Object> projectDetailMap = apiProjectService.selectProjectMaster(prjId);
+			String status = (String) projectDetailMap.get("status");
+			String identificationStatus = (String) projectDetailMap.get("identificationStatus");
+			String creator = (String) projectDetailMap.get("creator");
+			String reviewer = (String) projectDetailMap.get("reviewer");
+			boolean searchFlag = status.equals(CoConstDef.CD_DTL_PROJECT_STATUS_DROP) || status.equals(CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE) || identificationStatus.equals(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM) ? false : true;
+			
+			if (searchFlag) {
+				String email = userInfo.getEmail();
+				boolean authFlag = false;
+				if (creator.equals(userInfo.getUserId()) || reviewer.equals(userInfo.getUserId()) || userInfo.getAuthority().equals("ROLE_ADMIN") || !apiProjectService.existsWatcherByEmail(prjId, email)) {
+					authFlag = true;
+				}
+				
+				if (authFlag) {
+					Map<String, Object> param = new HashMap<>();
+					param.put("prjId", prjId);
+					param.put("referenceId", prjId);
+					switch (tabFlag.toUpperCase()) {
+						case "3RD" : 
+							param.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+							param.put("identificationSubStatusPartner", CoConstDef.FLAG_NO);
+							break;
+						case "SRC" : 
+							param.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+							param.put("identificationSubStatusSrc", CoConstDef.FLAG_NO);
+							break;
+						case "BIN" : 
+							param.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+							param.put("identificationSubStatusBin", CoConstDef.FLAG_NO);
+							break;
+					}
+					
+					apiProjectService.updateSubStatus(param);
+					return responseService.getSingleResult(resultMap);
 				} else {
 					errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
 				}

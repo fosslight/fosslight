@@ -864,6 +864,11 @@
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
             AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
         </if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+			<![CDATA[
+			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
+			]]>
+		</if>
 		GROUP BY T1.OSS_ID
 		ORDER BY
 		T1.OSS_VERSION DESC

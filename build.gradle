@@ -131,5 +131,7 @@ dependencies {
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 	implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '2.3.8.RELEASE'
 	
+	implementation group: 'org.cyclonedx', name: 'cyclonedx-core-java', version: '7.3.2'
+	
 	implementation files('libs/tlsh-4.6.0.jar')
 }

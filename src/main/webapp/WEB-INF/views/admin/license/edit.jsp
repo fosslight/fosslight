@@ -17,7 +17,12 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr"><spring:message code="msg.common.field.licenseName" /></th>
+							<th class="dCase txStr">
+								<c:if test="${ct:isAdmin()}">
+									<a class="btnIcon licenseI" id="heplLink_licenseEditInfo"></a>
+								</c:if>
+								<spring:message code="msg.common.field.licenseName" />
+							</th>
 							<td class="dCase">
 								<div class="required">
 									<input name="licenseName" type="text" class="autoComLicenseLong w100P"/>

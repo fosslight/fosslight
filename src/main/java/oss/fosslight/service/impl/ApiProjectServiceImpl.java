@@ -3165,7 +3165,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return ossComponentLicenseList;
 	}
 	
-	private void deleteUploadFile(Project project, String refDiv) {
+	@Override
+	public void updateSubStatus(Map<String, Object> param) {
+		apiProjectMapper.updateProjectSubStatus(param);
+
+		List<String> componentIds = apiProjectMapper.selectComponentId(param);
 		
+		for (String componentId : componentIds) {
+			apiProjectMapper.deleteOssComponentsLicense(componentId);
+		}
+		
+		apiProjectMapper.deleteOssComponents(param);
 	}
 }

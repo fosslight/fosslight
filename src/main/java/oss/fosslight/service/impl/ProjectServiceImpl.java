@@ -137,7 +137,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> getProjectList(Project project) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		List<Project> list = null;
-
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
+		
 		try {
 			// OSS NAME으로 검색하는 경우 NICK NAME을 포함하도록 추가
 			if (!isEmpty(project.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(project.getOssName().toUpperCase())) {
@@ -172,6 +173,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					// 코드변환처리
 					for (Project bean : list) {
+						bean.setStandardScore(Float.valueOf(standardScore));
 						// DISTRIBUTION Android Flag
 						String androidFlag = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull(bean.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
 						bean.setAndroidFlag(androidFlag);
@@ -253,17 +255,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private boolean checkIfVulnerabilityResolutionIsFixed(Project bean) {
-		List<OssComponents> securityDataList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
-		if (securityDataList != null && !securityDataList.isEmpty()) {
-			int fixedVulnResolutionDataListCnt = securityDataList.stream().filter(e -> avoidNull(e.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")).collect(Collectors.toList()).size();
-			if (securityDataList.size() == fixedVulnResolutionDataListCnt) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
+		return projectMapper.selectVulnerabilityResolutionSecurityListCnt(bean) > 0 ? false : true;
 	}
 
 	private boolean getSecurityDataCntByProject(Project project) {
@@ -1675,7 +1667,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
-		if (project.getDeleteOsddFlag().equals(CoConstDef.FLAG_YES)) {
+		if (projectMapper.checkProjectDistributeHis(project) > 0) {
 			projectMapper.deleteProjectDistributeHis(project);
 		}
 		projectMapper.deleteProjectModel(project);
@@ -1981,6 +1973,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent,	List<List<ProjectIdentification>> ossComponentLicense, Project project) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+	}
+	
+	@Override
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent,
 			List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
@@ -2015,8 +2012,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(projectSubStatus);
 		}
 		
-		
-		ossComponent = convertOssNickName(ossComponent);
+		if (!CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			ossComponent = convertOssNickName(ossComponent);
+		}
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
 		
@@ -2028,7 +2026,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 파일 등록
-		if (!isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
+		if (!isEmpty(project.getDepCsvFileId()) || !isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
 			projectMapper.updateFileId(project);
 			
 			if (project.getCsvFileSeq() != null) {
@@ -2056,7 +2054,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Project prjFileCheck = projectMapper.getProjectBasicInfo(project);
 		boolean fileDeleteCheckFlag = false;
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+		if(CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			if(isEmpty(project.getDepCsvFileId()) && !isEmpty(prjFileCheck.getDepCsvFileId())) {
+				project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
 			if (project.getCsvFileSeq().size() == 0 && !isEmpty(prjFileCheck.getSrcCsvFileId())) {
 				project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
 				fileDeleteCheckFlag = true;
@@ -2133,7 +2136,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					projectStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
 				}
 				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+					if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+						projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+					} else {
+						projectStatus.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+					}
+				} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
 					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
 					if (!StringUtil.isEmpty(project.getIdentificationSubStatusSrc())){
 						projectStatus.setIdentificationSubStatusSrc(project.getIdentificationSubStatusSrc());
@@ -2169,11 +2178,24 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
 		
+		Map<String, OssMaster> ossInfo = null;
+		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			ossInfo = CoCodeManager.OSS_INFO_UPPER;
+		}
+		
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			// SRC STATUS 등록
 			
 			ProjectIdentification ossBean = ossComponent.get(i);
+			
+			if (ossInfo != null) {
+				String key = (ossBean.getOssName()+"_"+ossBean.getOssVersion()).toUpperCase();
+				OssMaster bean = ossInfo.get(key);
+				if (bean != null && (!bean.getOssName().equals(bean.getOssNameTemp()))) {
+					ossBean.setRefOssName(bean.getOssNameTemp());
+				}
+			}
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
@@ -2758,7 +2780,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
@@ -2780,8 +2802,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		identification.setOssVersionEmptyFlag(null);
 		
+		List<String> adminCheckComponentIds = new ArrayList<>();
+		List<String> removeAdminCheckComponentIds = new ArrayList<>();
+		for (ProjectIdentification bomGridData : checkGridBomList) {
+			for (String refComponentId : bomGridData.getRefComponentId().split(",")) {
+				removeAdminCheckComponentIds.add(refComponentId.trim());
+			}
+		}
+		
 		if (bomList != null && !bomList.isEmpty()) {
 			for (ProjectIdentification pi : bomList) {
+				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) adminCheckComponentIds.add(pi.getRefComponentId());
 				// convert max score
 				if (pi.getCvssScoreMax() != null) {
 					cvssScoreMaxList.add(pi.getCvssScoreMax());
@@ -2809,6 +2840,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
+		if (!removeAdminCheckComponentIds.isEmpty()) adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
 		List<OssComponents> componentId = projectMapper.selectComponentId(identification);
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
@@ -2831,7 +2863,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
-				bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
+					bean.setAdminCheckYn(CoConstDef.FLAG_YES);
+				} else {
+					bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				}
 				bean.setPreObligationType(bean.getObligationType());
 				
 				// 그리드 데이터 넣기
@@ -5740,8 +5776,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String physicalFilePath = "";
 		T2File fileInfo = null;
 		
-		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN)
-				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_DEP) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) 
+				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
 			physicalFilePath = "Identification";
 		}
 		
@@ -5758,6 +5794,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (fileInfo != null) {
 			T2File fileInfo2 = fileService.selectFileInfoById(fileInfo.getFileId());
 			switch (project.getReferenceDiv()) {
+			case CoConstDef.CD_DTL_COMPONENT_ID_DEP: 
+				if (fileInfo2 == null && prjInfo.getDepCsvFileId().equals(fileInfo.getFileId())) {
+					project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+					fileDeleteCheckFlag = true;
+				}
+				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_SRC: 
 				if (fileInfo2 == null && prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
 					project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);

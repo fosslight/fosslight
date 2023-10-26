@@ -351,7 +351,7 @@
 			, #{osType}
 			, #{osTypeEtc}
 			, #{distributionSite}
-			, ''
+			, #{comment}
 			, #{loginUserName}
 			, #{loginUserName}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
@@ -1216,4 +1216,21 @@
 	<insert id="insertWatcher" parameterType="hashMap">
 		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
 	</insert>
+	
+	<update id="updateProjectSubStatus" parameterType="hashMap">
+		UPDATE 
+			PROJECT_MASTER
+		SET 
+			<if test='identificationSubStatusPartner != null'>
+			IDENTIFICATION_SUB_STATUS_PARTNER = #{identificationSubStatusPartner}
+			</if>
+			<if test='identificationSubStatusSrc != null'>
+			IDENTIFICATION_SUB_STATUS_SRC = #{identificationSubStatusSrc}
+			</if>
+			<if test='identificationSubStatusBin != null'>
+			IDENTIFICATION_SUB_STATUS_BIN = #{identificationSubStatusBin}
+			</if>
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
 </mapper>

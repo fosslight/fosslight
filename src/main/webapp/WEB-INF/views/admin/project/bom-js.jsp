@@ -80,6 +80,7 @@ var bom_fn = {
 		var str = "";
 		arr = bomList.jqGrid('getDataIDs');
 		var gridData = new Array();
+		var checkGridData = new Array();
 		
  		for(var i in arr){
  			// mergePreDiv 설정
@@ -103,7 +104,13 @@ var bom_fn = {
  				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
  	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
  				}
- 			}
+ 			} else if(str[0] =="DEP") {
+                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+
+                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
+                }
+            }
  			
  			// obligationType 설정
  			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
@@ -120,15 +127,19 @@ var bom_fn = {
  				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
  				
 		 		gridData.push(bomList.getRowData(arr[i]));
+			} else {
+				checkGridData.push(bomList.getRowData(arr[i]));
 			}
  		}
  		
  		gridData.reverse();
+ 		checkGridData.reverse();
  		
 		var finalData = {
 			referenceId : '${project.prjId}',
 			merge : 'Y',
-			gridData : JSON.stringify(gridData)
+			gridData : JSON.stringify(gridData),
+			checkGridData : JSON.stringify(checkGridData)
 		};
 		
 		$.ajax({
@@ -279,6 +290,31 @@ var bom_fn = {
 		
 		return display;
 	},
+	onCboxClickAll : function(allChk, target) {
+		if(event.stopPropagation) {
+	    	event.stopPropagation(); //MOZILLA
+    	} else {
+	    	event.cancelBubble = true; //IE
+    	}
+		
+		var dataArray = $("#"+target).jqGrid("getRowData");
+    	
+        if($(allChk).is(":checked")) {
+            $("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','Y');
+                $(this).prop('checked',true);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        } else {
+        	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','N');
+                $(this).prop('checked',false);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        }
+	},
 	unDisplayNotify : function(cellvalue, options, rowObject){
 		var display = $("#"+options.rowId+"_notify").val();
 		
@@ -342,8 +378,40 @@ var bom_fn = {
 		$("#bomList").jqGrid('setCell', rowId, 'source', "10");
 
 		if(adminCheckYn) {
+			var checkList = ["downloadLocation", "homepage", "copyrightText"];
+			
+			try {
+				var rowData = $("#bomList").getRowData(id);
+				var componentId = rowData["componentId"];
+				Object.keys(rowData).forEach(function(value){
+					if(checkList.includes(value)) {
+						var data = rowData[value];
+						if(value == "downloadLocation" || value == "homepage"){
+							if(data.indexOf("Not the same as property") > -1){
+								data = data.split("Not the same as property")[0];
+							} else if(data.indexOf("The address should be") > -1){
+								data = data.split("The address should be")[0];
+							}
+						} else {
+							if(data.indexOf("<div class") > -1){
+								data = data.split("<div")[0];
+							}
+						}
+						
+						data = data.replace(/<[^>]*>?/g, '');
+						$("#bomList").jqGrid("setCell", id, value, data);
+					}
+				});
+			} finally {
+				$("#bomList").jqGrid('setColProp','homepage', {editable: true});
+				$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
+				$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
+				$("#bomList").jqGrid('editRow', id);
+			}
+			
 			$("#"+id+"_adminCheck").val("Y");
 		} else {
+			$("#bomList").jqGrid('saveRow', id);
 			$("#"+id+"_adminCheck").val("N");
 		}
 	},
@@ -575,7 +643,7 @@ var bom_fn = {
 		};
 
 		$.ajax({
-			url : '<c:url value="${suffixUrl}/project/binaryDBSave"/>',
+			url : '<c:url value="/project/binaryDBSave"/>',
 			type : 'POST',
 			data : JSON.stringify(param),
 			dataType : 'json',
@@ -632,6 +700,8 @@ var bom_fn = {
             else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
             else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
             else if (target === "YAML") com_fn.downloadYaml('BOM');
+            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
     	} else {
     		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
     	}
@@ -743,7 +813,7 @@ var bom_fn = {
 
 var bom_data = {
 		getJqGrid : function(param){
-			var data = param || {referenceId : '${project.prjId}', merge : 'N'};
+			var data = param ? param : {referenceId : '${project.prjId}', merge : 'N'};
 				
 			$.ajax({
 				url : '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/13"/>',
@@ -792,7 +862,8 @@ var bom_data = {
 				, data : bomMainData
 				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
 		             ,'Download Location','Homepage','LicenseId','Copyright Text'
-		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn','admin<br>check']
+		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn'
+		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">']
 				, colModel : [
 					{name: 'group', width: 20, align: 'center', search : false, sorttype: 'int',
 					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
@@ -976,7 +1047,7 @@ var bom_data = {
 
 								break;
 							case "SRC" : //srcList
-								tabSeq = "1"
+								tabSeq = "2"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#srcList").jqGrid("setSelection", componentId);
@@ -984,7 +1055,7 @@ var bom_data = {
 
 								break;
 							case "BIN" : //binList
-								tabSeq = "2"
+								tabSeq = "3"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#binList").jqGrid("setSelection", componentId);

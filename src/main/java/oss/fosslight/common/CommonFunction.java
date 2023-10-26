@@ -1552,9 +1552,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		Map<String, List<String>> errorMap = new HashMap<>(); // error level
 		Map<String, List<String>> restrictionMap = new HashMap<>(); // restriction level
 		Map<String, List<String>> warningMap = new HashMap<>(); // warning level
+		Map<String, List<String>> warningVerMap = new HashMap<>(); // warning level (oss version)
 		Map<String, List<String>> infoBiMap = new HashMap<>(); // info level (new bianry)
 		Map<String, List<String>> infoModifyMap = new HashMap<>(); // info level (modified = new + tlsh > 120)
 		Map<String, List<String>> infoOnlyMap = new HashMap<>(); // info level
+		Map<String, List<String>> infoCopyrightMap = new HashMap<>(); // info level (copyright)
 		Map<String, String> hideObligationIdList = new HashMap<>();
 		
 		if (RestrictionFlag) {
@@ -1591,11 +1593,37 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 
 		
-		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+		// warning message 가 포함되어 있는 경우 정렬 (우선순위 3) or oss version warning message "This field is required" (Priority : 4)
 		if (validDiffMap != null && !validDiffMap.isEmpty()) {
 			for (String errKey : validDiffMap.keySet()) {
 				if (errKey.indexOf(".") > -1) {
+					String msg = validDiffMap.get(errKey);
 					String _key = errKey.substring(errKey.indexOf(".") + 1, errKey.length());
+					
+					// oss version warning message "This field is required" (Priority : 4)
+					if (errKey.startsWith("ossVersion") && msg.equals("This field is required.")) {
+						if (warningVerMap.containsKey(_key)) {
+							List<String> _list = warningVerMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningVerMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningVerMap.put(_key, _list);
+						}
+					} else {// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+						if (warningMap.containsKey(_key)) {
+							List<String> _list = warningMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							warningMap.put(_key, _list);
+						}
+					}
+					
+					
 					/*
 					if (hideObligation) {
 						if (hideObligationColumns.contains(errKey.substring(0, errKey.indexOf(".")).toUpperCase())) {
@@ -1605,15 +1633,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 					*/
 					
-					if (warningMap.containsKey(_key)) {
-						List<String> _list = warningMap.get(_key);
-						_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-						warningMap.replace(_key, _list);
-					} else {
-						List<String> _list = new ArrayList<>();
-						_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
-						warningMap.put(_key, _list);
-					}
 				}
 			}
 		}
@@ -1652,6 +1671,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							List<String> _list = new ArrayList<>();
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
 							infoModifyMap.put(_key, _list);
+						}
+					} else if (errKey.startsWith("copyrightText.") && validInfoMap.get(errKey).toUpperCase().startsWith("NOT")) {
+						if (infoCopyrightMap.containsKey(_key)) {
+							List<String> _list = infoCopyrightMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoCopyrightMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoCopyrightMap.put(_key, _list);
 						}
 					} else {
 						
@@ -1715,6 +1744,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					String _id = checkMultiLicenseError(warningMap, bean.getComponentLicenseList());
 					sortMap.put(makeValidSortKey(warningMap.get(_id), _id, "3"), bean);
 				}
+				// 4 : warning level (oss version)
+				else if (warningVerMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
+					//sortList.add(bean);
+					sortMap.put(makeValidSortKey(warningVerMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "4"), bean);
+				} else if (checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList()) != null) {
+					String _id = checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList());
+					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4"), bean);
+				}
 				// 5 : info level (new binary)
 				else if (infoBiMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
@@ -1737,6 +1774,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				} else if (checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList());
 					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "7"), bean);
+				}
+				// 10 : info level (copyright)
+				else if (infoCopyrightMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
+					sortMap.put(makeValidSortKey(infoCopyrightMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "10"), bean);
 				}
 				else {
 					sortListOk.add(bean);
@@ -3750,6 +3791,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			userData.setTitle("사용자 작성 정보");
 			
+			String ossName = userData.getOssName();
+			String ossNameTemp = "";
+			boolean ossNicknameFlag = false;
+			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				int ossNameCnt = errorMsg.entrySet()
 						.stream()
@@ -3771,13 +3816,39 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				String duplicateNickname = bean.getOssNickname();
 				
+				String customOssName = "";
+				if (bean.getOssName().contains(";")) {
+					customOssName = bean.getOssName().split(";")[0];
+				} else {
+					customOssName = bean.getOssName();
+				}
+				
+				if (customOssName.endsWith(".git")) {
+					customOssName = customOssName.substring(0, customOssName.length()-4);
+				}
+				
 				if (ossNameCnt == 0 && ossVersionCnt > 0) { // ossVersion 대상
 					// 사용자 작성정보의 oss name이 취합정보의 nickname에 들어가는 case를 방지함.
 					if (!userData.getOssName().toUpperCase().equals(bean.getOssName().toUpperCase())) {
-						duplicateNickname = String.join(",", Arrays.asList(duplicateNickname.split(","))
-								.stream()
-								.filter(n -> !n.equals(userData.getOssName()))
-								.collect(Collectors.toList()));
+						List<String> duplicateNicknameList = Arrays.asList(duplicateNickname.split(","));
+						List<String> nicknameList = new ArrayList<>();
+						
+						for (String nick : duplicateNicknameList) {
+							String customNick = "";
+							if (nick.contains(";")) {
+								customNick = nick.split(";")[0];
+							} else {
+								customNick = nick;
+							}
+							
+							if (customNick.endsWith(".git")) {
+								customNick = customNick.substring(0, customNick.length()-4);
+							}
+							
+							if (!userData.getOssName().equalsIgnoreCase(customNick)) nicknameList.add(customNick);
+						}
+						
+						if (nicknameList != null && !nicknameList.isEmpty()) duplicateNickname = String.join(",", nicknameList);
 					}
 				}
 				
@@ -3811,13 +3882,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					downloadLocation = bean.getDownloadLocation();
 				}
 				
-				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, avoidNull(bean.getConcludedLicense(), null), copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "취합정보"); // 취합정보
-				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis askalono = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, askalonoLicense, null, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "License text파일 분석 결과"); // License text 정보
-				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), bean.getOssName(), bean.getOssVersion(), duplicateNickname
+				OssAnalysis scancode = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, scancodeLicense, copyright, downloadLocation
 						, bean.getHomepage(), null, comment, bean.getResult(), "Scancode 분석 결과"); // scancode 정보
 				
@@ -3885,10 +3956,20 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					OssAnalysis totalNewestOssInfo = null;
 					
 					try {
+						// check if oss name is nickname
+						if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(userData.getOssName().toUpperCase())) {
+							ossNameTemp = CoCodeManager.OSS_INFO_UPPER_NAMES.get(userData.getOssName().toUpperCase());
+						}
+						
+						if (!isEmpty(ossName) && !isEmpty(ossNameTemp) && !ossName.equals(ossNameTemp)) {
+							userData.setOssName(ossNameTemp);
+							ossNicknameFlag = true;
+						}
+						
 						newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						if (newestOssInfo != null) {
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(userData.getOssVersion());
+							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setComment(comment);
 						}
 						
@@ -3964,6 +4045,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						}
 					}
 					
+					if (ossNicknameFlag) {
+						userData.setOssName(ossName);
+					}
+					
 					changeAnalysisResultList.add(askalono);		 // seq 5 : askalono 정보
 					changeAnalysisResultList.add(scancode);		 // seq 6 : scancode 정보
 					changeAnalysisResultList.add(userData);		 // seq 7 : 사용자 입력 정보
@@ -3974,7 +4059,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					
 					if (totalNewestOssInfo != null) {
 						totalNewestOssInfo.setGridId(""+gridSeq++);
-						totalNewestOssInfo.setOssVersion(userData.getOssVersion());
+						totalNewestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 						totalNewestOssInfo.setComment(comment);
 						
 						String totalNewestMergeNickName = CommonFunction.mergeNickname(totalAnalysis, totalNewestOssInfo.getOssNickname()); // 사용자 작성 정보 & 최신등록정보 nickname Merge
@@ -4031,13 +4116,27 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				if (ossNameCnt == 0 && ossVersionCnt > 0){
 					try {
+						// check if oss name is nickname
+						if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(userData.getOssName().toUpperCase())) {
+							ossNameTemp = CoCodeManager.OSS_INFO_UPPER_NAMES.get(userData.getOssName().toUpperCase());
+						}
+						
+						if (!isEmpty(ossName) && !isEmpty(ossNameTemp) && !ossName.equals(ossNameTemp)) {
+							userData.setOssName(ossNameTemp);
+							ossNicknameFlag = true;
+						}
+						
 						OssAnalysis newestOssInfo = ossService.getNewestOssInfo(userData); // 사용자 정보의 ossName기준 최신 등록정보
 						
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
+							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
-							newestOssInfo.setOssVersion(userData.getOssVersion());
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
+						}
+						
+						if (ossNicknameFlag) {
+							userData.setOssName(ossName);
 						}
 					} catch (Exception newestException) {
 						log.error(newestException.getMessage());

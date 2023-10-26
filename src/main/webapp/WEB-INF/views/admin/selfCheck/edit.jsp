@@ -88,7 +88,23 @@
 						</div>
 						<div class="pb5">
 							<span><input type="text" id="adId" name="adId" style="width:200px" placeholder="Input AD ID" onKeypress="fn.CheckChar()" /></span>
-							<span class="pd5 watcherEmail w500">@lge.com, @lgepartner.com...</span>
+							<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
+							<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
+							<c:choose>
+								<c:when test="${not empty useDomainFlag}">
+									<span class="selectSet w220">
+										<strong for="domain" title="Watcher domain selected value">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</strong>
+										<select id="domain" name="domain">
+											${ct:genOption(ct:getConstDef("CD_REGIST_DOMAIN"))}
+										</select>
+									</span>
+									<input type="text" id="emailTemp" class="w220" <c:if test="${not empty useDomainFlag}">style="display:none;" value="${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}"</c:if> onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+								</c:when>
+								<c:otherwise>
+									<span class="pd5">@</span>
+									<input type="text" id="emailTemp" style="width:326px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+								</c:otherwise>
+							</c:choose>
 							<input id="addEmail" type="button" value="+ Add" class="btnCLight gray" />
 						</div>
 						<div class="pb5">

@@ -173,6 +173,7 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		// 중목제거용
@@ -271,9 +272,13 @@ public class VerificationController extends CoTopComponent {
 				MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
 	public @ResponseBody ResponseEntity<Object> uploadVerification(File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/uploadVerification");
+		Project projectMaster = new Project();
+		projectMaster.setPrjId(req.getParameter("prjId"));
+		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		//엑셀 분석
-		List<ProjectIdentification> verificationList = ExcelUtil.getVerificationList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+		List<OssComponents> verificationList = ExcelUtil.getVerificationList(req, list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		
 		if (verificationList == null) {
 			return makeJsonResponseHeader(false, "");
@@ -390,6 +395,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		log.info("URI: "+ "/project/verification/noticeAjax");
@@ -444,6 +451,8 @@ public class VerificationController extends CoTopComponent {
 				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
 				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
 				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
+				project.setAllowDownloadCDXJsonYn(allowDownloadCDXJsonYn);
+				project.setAllowDownloadCDXXmlYn(allowDownloadCDXXmlYn);
 				
 				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 				
@@ -555,25 +564,14 @@ public class VerificationController extends CoTopComponent {
 		log.info("URI: "+ "/project/verification/reportAjax");
 		log.debug("PARAM: "+ "prjId="+prjId);
 
-		OssNotice ossNotice = new OssNotice();
-		ossNotice.setDomain(CommonFunction.getDomain(req));
-		ossNotice.setPrjId(prjId);
-
 		String resultHtml = "";
 
 		try {
-			ossNotice.setDomain(CommonFunction.getDomain(req)); // domain Setting
-
-			Project prjMasterInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-			String noticeFileId = prjMasterInfo.getNoticeFileId();
-			log.debug("PARAM: "+ "noticeFileId="+noticeFileId);
-
 			// create review file
-			if (isEmpty(noticeFileId)) {
-				if (!verificationService.getReviewReportPdfFile(ossNotice)) {
-					return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
-				}
+			if (!verificationService.getReviewReportPdfFile(prjId)) {
+				return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
 			}
+
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -638,6 +636,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/saveAjax");
 		
@@ -686,7 +686,9 @@ public class VerificationController extends CoTopComponent {
 		project.setAllowDownloadSPDXTagYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXTagYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXJsonYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXJsonYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXYamlYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXYamlYn 	 : CoConstDef.FLAG_NO);
-
+		project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXJsonYn 	 : CoConstDef.FLAG_NO);
+		project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXXmlYn 	 : CoConstDef.FLAG_NO);
+		
 		verificationService.updateProjectAllowDownloadBitFlag(project);
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -950,7 +952,7 @@ public class VerificationController extends CoTopComponent {
 
 		ResponseEntity<FileSystemResource> result = null;
 		String prjId = req.getParameter("prjId");
-		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("notice.path", "/notice"));
+		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport"));
 
 		return result;
 	}

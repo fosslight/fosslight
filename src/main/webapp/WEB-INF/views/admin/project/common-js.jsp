@@ -56,7 +56,7 @@ var com_evt = {
 					// 머지 체크
 					if("Y"!= $("#mergeYn").val()){
 						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
-						com_fn.fnTabChange($(".tabMenu a:eq(4)"));	
+						com_fn.fnTabChange($(".tabMenu a:eq(5)"));	
 
 						return false;
 					}
@@ -157,7 +157,7 @@ var com_evt = {
 					alertify.alert('<spring:message code="msg.project.required.merge" />', function(){
 						// Identification 내 모든 탭 우측 상단에 request review 버튼 표시
 						// tab전환 하도록 함수를 새로만듦. (기존 tabMenuA.click callbac fucntion -> fnTabChange 으로 변경)
-						com_fn.fnTabChange($(".tabMenu a:eq(4)"));
+						com_fn.fnTabChange($(".tabMenu a:eq(5)"));
 					});
 					
 					return false;
@@ -168,7 +168,7 @@ var com_evt = {
 						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){
 							// Identification 내 모든 탭 우측 상단에 request review 버튼 표시
 							// tab전환 하도록 함수를 새로만듦. (기존 tabMenuA.click callbac fucntion -> fnTabChange 으로 변경)
-							com_fn.fnTabChange($(".tabMenu a:eq(4)"));
+							com_fn.fnTabChange($(".tabMenu a:eq(5)"));
 						});
 						
 						return false;
@@ -272,6 +272,7 @@ var com_evt = {
 			}
 		});
 		
+		com_fn.saveFlagObject["DEP"] = false;
 		com_fn.saveFlagObject["SRC"] = false;
 		com_fn.saveFlagObject["BIN"] = false;
 		com_fn.saveFlagObject["ANDROID"] = false;
@@ -313,24 +314,26 @@ var com_fn = {
 		
 		$(".tabMenu a span").remove();
 		tabMenuA.eq("0").text("3rd party");
-		tabMenuA.eq("1").text("SRC");
-		tabMenuA.eq("2").text("BIN");
-		tabMenuA.eq("3").text("BIN(${project.noticeTypeEtc})");
-		tabMenuA.eq("4").text("BOM");
-		tabMenuA.eq("5").text("BAT(Optional)");
+		tabMenuA.eq("1").text("DEP");
+		tabMenuA.eq("2").text("SRC");
+		tabMenuA.eq("3").text("BIN");
+		tabMenuA.eq("4").text("BIN(${project.noticeTypeEtc})");
+		tabMenuA.eq("5").text("BOM");
+		tabMenuA.eq("6").text("BAT(Optional)");
 		
 		<c:if test="${!partnerFlag}">
 			tabMenuA.eq("0").hide();
 		</c:if>
 		<c:if test="${project.androidFlag eq 'N'}">
-			tabMenuA.eq("3").hide();
+			tabMenuA.eq("4").hide();
 		</c:if>
 		// android model 의 경우 3rd/src/bin tab을 미표시
 		<c:if test="${project.androidFlag eq 'Y'}">
 			tabMenuA.eq("0").hide();
 			tabMenuA.eq("1").hide();
 			tabMenuA.eq("2").hide();
-			tabMenuA.eq("4").hide();				
+			tabMenuA.eq("3").hide();
+			tabMenuA.eq("5").hide();
 		</c:if>
 
 		var tag = "<span>"+$(target).text()+"</span>";
@@ -358,7 +361,9 @@ var com_fn = {
 		com_fn.btnControl(activeTab);
 					
 		// _mainLastsel 꼬이는것 방지
-		if(activeTab == "srcDiv") {
+		if (activeTab == "depDiv") {
+			_mainLastsel = $('#depList').jqGrid('getGridParam', "selrow");
+		} else if(activeTab == "srcDiv") {
 			_mainLastsel = $('#srcList').jqGrid('getGridParam', "selrow");
 		} else if(activeTab == "batDiv") {
 			_mainLastsel = $('#batList').jqGrid('getGridParam', "selrow");
@@ -466,6 +471,10 @@ var com_fn = {
 			$("#applicableParty").trigger('click');
 		}
 		
+		if('${project.identificationSubStatusDep}' == 'N'){
+            $("#applicableDep").trigger('click');
+        }
+		
 		if('${project.identificationSubStatusSrc}' == 'N'){
 			$("#applicableSrc").trigger('click');
 		}
@@ -484,6 +493,7 @@ var com_fn = {
 		
 		<c:if test="${project.verificationStatus eq 'CONF'}">
 			$("#applicableParty").attr("disabled", true);
+			$("#applicableDep").attr("disabled", true);
 			$("#applicableSrc").attr("disabled", true);
 			$("#applicableBat").attr("disabled", true);
 			$("#applicableBin").attr("disabled", true);
@@ -728,6 +738,19 @@ var com_fn = {
 		 		}
 			}
 			
+			if(rtnFlag && !($("#applicableDep").is(":checked")) ) {
+				target = $('#depList');
+				arr = target.jqGrid('getRowData');
+				
+		 		for(var i in arr){
+			 		if(arr[i].excludeYn != "Y") {
+			 			rtnFlag = false;
+			 			
+			 			return false;
+			 		}
+		 		}
+			}
+			
 			if(rtnFlag && !($("#applicableSrc").is(":checked")) ) {
 				target = $('#srcList');
 				arr = target.jqGrid('getRowData');
@@ -760,6 +783,7 @@ var com_fn = {
 	checkSave : function(data, status){
 		<c:if test="${project.androidFlag eq 'N'}">
 		cleanErrMsg("bomList");
+		cleanErrMsg("depList");
 		cleanErrMsg("srcList");
 		cleanErrMsg("binList");
 		</c:if>
@@ -807,6 +831,7 @@ var com_fn = {
 				partnerCheck = ($("#applicableParty").is(":checked") ? 'N' : 'Y');
 			</c:if>
 
+			var depMainGrid = $('#depList').jqGrid('getGridParam','data'); 
 			var srcMainGrid = $('#srcList').jqGrid('getGridParam','data');
 			var binMainGrid = $('#binList').jqGrid('getGridParam','data'); 
 	 		
@@ -814,6 +839,8 @@ var com_fn = {
 			var finalData = { 
 				referenceId : '${project.prjId}',
 				partyGrid : JSON.stringify(partyGrid),
+				depMainGrid : JSON.stringify(depMainGrid),
+				depSubGrid : "",
 				srcMainGrid : JSON.stringify(srcMainGrid),
 				srcSubGrid : "",
 				binMainGrid : JSON.stringify(binMainGrid),
@@ -837,6 +864,10 @@ var com_fn = {
 					if("false" == json.isValid) {
 						alertify.alert(json.validMsg == "" ? '<spring:message code="msg.project.required.merge2" />' : json.validMsg, function(){});
 
+						if (depValidMsgData) {
+							gridValidMsgNew(depValidMsgData, "depList");
+						}
+						
 						if(srcValidMsgData) {
 							gridValidMsgNew(srcValidMsgData, "srcList");
 						}
@@ -878,6 +909,7 @@ var com_fn = {
 		} else { // src, bin에 error level message 존재여부 확인
 			var arr = $("#bomList").jqGrid('getDataIDs');
 			var gridData = new Array();
+			var applicableDepChecked = $("#applicableDep").prop("checked");
 			var applicableSrcChecked = $("#applicableSrc").prop("checked");
 			var applicableBinChecked = $("#applicableBin").prop("checked");
 			
@@ -891,6 +923,36 @@ var com_fn = {
 				}
 	 		}
 	 		
+			if(!applicableDepChecked) {
+				if(depValidMsgData) {
+					$.each(depValidMsgData,function(key,value) {
+						if("isValid" != key && "validMsg" != key && "resultData" != key && "externalData" != key && "externalData2" != key) {
+							var seqSuffix = key.split(".");
+
+							if(seqSuffix.length  > 1) {
+								var result = bom_fn.adminCheck(gridData, seqSuffix, $("#depList"));
+	
+								if(!result){
+									rtnFlag = false;
+									$(".ajs-cancel").trigger("click");
+									
+									window.setTimeout(function(){
+										alertify.alert(com_fn.setMessage("There is an error in src."), function(){});
+										com_fn.fnTabChange($(".tabMenu a:eq(1)"));	
+									}, 100);
+									
+									return false;
+								}
+							}
+						}
+					});
+					
+					if(!rtnFlag) {
+						return false;
+					}
+				}
+			}
+			
 			if(!applicableSrcChecked) {
 				if(srcValidMsgData) {
 					$.each(srcValidMsgData,function(key,value) {
@@ -906,7 +968,7 @@ var com_fn = {
 									
 									window.setTimeout(function(){
 										alertify.alert(com_fn.setMessage("There is an error in src."), function(){});
-										com_fn.fnTabChange($(".tabMenu a:eq(1)"));	
+										com_fn.fnTabChange($(".tabMenu a:eq(2)"));	
 									}, 100);
 									
 									return false;
@@ -936,7 +998,7 @@ var com_fn = {
 									
 									window.setTimeout(function(){
 										alertify.alert(com_fn.setMessage("There is an error in bin."), function(){});
-										com_fn.fnTabChange($(".tabMenu a:eq(2)"));	
+										com_fn.fnTabChange($(".tabMenu a:eq(3)"));	
 									}, 100);
 									
 									return false;
@@ -993,6 +1055,10 @@ var com_fn = {
 						}
 						
 						// error message를 재표시
+						if(depValidMsgData) {
+							gridValidMsgNew(depValidMsgData, "depList");
+						}
+						
 						if(srcValidMsgData) {
 							gridValidMsgNew(srcValidMsgData, "srcList");
 						}
@@ -1006,6 +1072,10 @@ var com_fn = {
 						}
 						
 						// diff msg
+						if(depDiffMsgData) {
+							gridDiffMsg(depDiffMsgData, "depList");
+						}
+						
 						if(srcDiffMsgData) {
 							gridDiffMsg(srcDiffMsgData, "srcList");
 						}
@@ -1093,6 +1163,14 @@ var com_fn = {
 							gridDiffMsg(bomDiffMsgData, "bomList");
 						}
 						
+						if(depValidMsgData) {
+							gridValidMsgNew(depValidMsgData, "depList");
+						}
+						
+						if(depDiffMsgData) {
+							gridDiffMsg(depDiffMsgData, "depList");
+						}
+						
 						if(srcValidMsgData) {
 							gridValidMsgNew(srcValidMsgData, "srcList");
 						}
@@ -1117,6 +1195,7 @@ var com_fn = {
 							gridInfoMsg(binInfoMsgData, "binList");
 						}
 						
+						com_fn.saveFlagObject["DEP"] = false;
 						com_fn.saveFlagObject["SRC"] = false;
 						com_fn.saveFlagObject["BIN"] = false;
 					</c:if>
@@ -1159,10 +1238,11 @@ var com_fn = {
 						}
 					} else {
 						if(data.indexOf("<div class") > -1){
-							data = data.split("<")[0];
+							data = data.split("<div")[0];
 						}
 					}
 					
+					if (value != "copyrightText") data = data.replace(/<[^>]*>?/g, '');
 					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
 				}
 			});
@@ -1191,6 +1271,7 @@ var com_fn = {
 
 		switch(target.toUpperCase()){
 			case "SRC":		referenceDiv = "11";	break;
+			case "DEP":		referenceDiv = "16";	break;
 			case "ANDROID":	referenceDiv = "14";	break;
 			case "BIN":		referenceDiv = "15";	break;
 		}
@@ -1217,6 +1298,7 @@ var com_fn = {
 
 		switch(target.toUpperCase()){
 			case "SRC":		referenceDiv = "11";	break;
+			case "DEP":		referenceDiv = "16";	break;
 			case "ANDROID":	referenceDiv = "14";	break;
 			case "BIN":		referenceDiv = "15";	break;
 		}
@@ -1280,6 +1362,9 @@ var com_fn = {
         switch(tab){
             case 'SRC' : 
                 gridList = $("#srcList"); targetGird = "srcList";
+                break;
+            case 'DEP' : 
+                gridList = $("#depList"); targetGird = "depList";
                 break;
             case 'BIN' : 
                 gridList = $("#binList"); targetGird = "binList";
@@ -1406,7 +1491,12 @@ var com_fn = {
             if(flag == "main"){
             	$("#"+target).jqGrid('GridUnload');
 
-            	if(target == "srcList"){
+            	if(target == "depList"){
+            		depMainData = param;
+            		dep_grid.load();
+            		// total record 표시
+            		$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
+            	} else if(target == "srcList"){
                 	srcMainData = param;
                 	src_grid.load();
                 	// total record 표시
@@ -1448,10 +1538,11 @@ var com_fn = {
         var params = {'prjId':'${project.prjId}', 'prjName' : '${project.prjName}'};
 
         switch(target.toUpperCase()){
-            case "SRC":             referenceDiv = "11";    break;
-            case "BOM":             referenceDiv = "13";    break;
+            case "SRC":     referenceDiv = "11";    break;
+            case "BOM":     referenceDiv = "13";    break;
             case "ANDROID": referenceDiv = "14";    break;
-            case "BIN":             referenceDiv = "15";    break;
+            case "BIN":     referenceDiv = "15";    break;
+            case "DEP":		referenceDiv = "16";	break;
         }
 
         $.ajax({
@@ -1473,6 +1564,46 @@ var com_fn = {
             }
         });
     },
+    downloadCycloneDXJson : function (target) {
+		$.ajax({
+			type: "POST",
+			url: '<c:url value="/cyclonedxdownload/getCycloneDXPost"/>',
+			data: JSON.stringify({"type":"cycloneDXJson", "prjId":'${project.prjId}'}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				} else {
+					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+	},
+	downloadCycloneDXXml : function (target) {
+		$.ajax({
+			type: "POST",
+			url: '<c:url value="/cyclonedxdownload/getCycloneDXPost"/>',
+			data: JSON.stringify({"type":"cycloneDXXml", "prjId":'${project.prjId}'}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				} else {
+					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			}
+		});
+	},
 	deleteFiles : function(obj, type){
 		var FileSeq = [];
 		var tabGubn = $(".tabMenu").find("span").text();
@@ -1485,6 +1616,7 @@ var com_fn = {
 		
 		switch(tabGubn.toUpperCase()){
 			case "SRC":		referenceDiv = "11";	break;
+			case "DEP":		referenceDiv = "16";	break;
 			case "ANDROID":	referenceDiv = "14";	break;
 			case "BIN":		referenceDiv = "15";	break;
 		}
@@ -1522,6 +1654,7 @@ var com_fn = {
 			case "SRC":		referenceDiv = "11";	break;
 			case "BOM":		referenceDiv = "13";	break;
 			case "BIN":		referenceDiv = "15";	break;
+			case "DEP":		referenceDiv = "16";	break;
 		}
 		
 		$.ajax({
