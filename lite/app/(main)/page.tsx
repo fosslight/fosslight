@@ -44,8 +44,8 @@ export default function Dashboard() {
         Array.from(Array(3)).map(() => ({
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           obligations: 'YY',
+          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
         }))
@@ -63,14 +63,14 @@ export default function Dashboard() {
 
       {/* Description */}
       <h3 className="pb-8">
-        Insights on your projects, and recently registered vulnerabilities, oss, and licenses.
+        Insights on your projects, and recently registered vulnerabilities, OSS, and licenses.
       </h3>
 
       {/* Projects */}
       <h4 className="shadow-box-header">Insights on Projects</h4>
       <div className="w-[calc(100%-4px)] mb-8 shadow-box">...</div>
 
-      {/* Vulnerabilities, oss, licenses */}
+      {/* Vulnerabilities, OSS, licenses */}
       <h4 className="shadow-box-header">Recently Registered in Database</h4>
       <ListSections
         vulnerabilityList={vulnerabilityList}

@@ -10,7 +10,7 @@ export default function FullSearchBar() {
 
   const view = useRecoilValue(viewState);
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
-  const placeholder = 'Search vulnerabilities, oss, or licenses';
+  const placeholder = 'Search vulnerabilities, OSS, or licenses';
 
   // Wait until detecting appropriate view
   if (view === 'none') return null;
