@@ -378,8 +378,40 @@ var bom_fn = {
 		$("#bomList").jqGrid('setCell', rowId, 'source', "10");
 
 		if(adminCheckYn) {
+			var checkList = ["downloadLocation", "homepage", "copyrightText"];
+			
+			try {
+				var rowData = $("#bomList").getRowData(id);
+				var componentId = rowData["componentId"];
+				Object.keys(rowData).forEach(function(value){
+					if(checkList.includes(value)) {
+						var data = rowData[value];
+						if(value == "downloadLocation" || value == "homepage"){
+							if(data.indexOf("Not the same as property") > -1){
+								data = data.split("Not the same as property")[0];
+							} else if(data.indexOf("The address should be") > -1){
+								data = data.split("The address should be")[0];
+							}
+						} else {
+							if(data.indexOf("<div class") > -1){
+								data = data.split("<div")[0];
+							}
+						}
+						
+						data = data.replace(/<[^>]*>?/g, '');
+						$("#bomList").jqGrid("setCell", id, value, data);
+					}
+				});
+			} finally {
+				$("#bomList").jqGrid('setColProp','homepage', {editable: true});
+				$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
+				$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
+				$("#bomList").jqGrid('editRow', id);
+			}
+			
 			$("#"+id+"_adminCheck").val("Y");
 		} else {
+			$("#bomList").jqGrid('saveRow', id);
 			$("#"+id+"_adminCheck").val("N");
 		}
 	},
@@ -781,7 +813,7 @@ var bom_fn = {
 
 var bom_data = {
 		getJqGrid : function(param){
-			var data = param || {referenceId : '${project.prjId}', merge : 'N'};
+			var data = param ? param || {referenceId : '${project.prjId}', merge : 'N'};
 				
 			$.ajax({
 				url : '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/13"/>',
