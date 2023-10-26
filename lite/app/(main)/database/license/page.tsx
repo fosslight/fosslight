@@ -35,6 +35,15 @@ export default function LicenseList() {
       },
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
       {
+        label: 'Obligation(s)',
+        name: 'obligations',
+        type: 'checkbox',
+        options: [
+          { label: 'Notice', value: '0' },
+          { label: 'Source', value: '1' }
+        ]
+      },
+      {
         label: 'Restriction(s)',
         name: 'restrictions',
         type: 'checkbox',
@@ -47,15 +56,6 @@ export default function LicenseList() {
           { label: 'Specification Constraints', value: '5' },
           { label: 'Restricted Redistribution', value: '6' },
           { label: 'Commons Clause Restriction', value: '7' }
-        ]
-      },
-      {
-        label: 'Obligation(s)',
-        name: 'obligations',
-        type: 'checkbox',
-        options: [
-          { label: 'Notice', value: '0' },
-          { label: 'Source', value: '1' }
         ]
       },
       { label: 'Homepage URL', name: 'homepageUrl', type: 'char-exact' },
@@ -95,8 +95,8 @@ export default function LicenseList() {
     { name: 'Type', sort: 'type' },
     { name: 'Name', sort: 'name' },
     { name: 'Identifier', sort: 'idf' },
-    { name: 'Restriction(s)', sort: 'res' },
     { name: 'Obligation(s)', sort: 'obg' },
+    { name: 'Restriction(s)', sort: 'res' },
     { name: 'URL', sort: 'url' },
     { name: 'Description', sort: 'desc' },
     { name: 'Create', sort: 'create' },
@@ -130,8 +130,8 @@ export default function LicenseList() {
           licenseType: 'Permissive',
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           obligations: 'YY',
+          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           homepageUrl: 'https://spdx.org/licenses/blessing.html',
           description: 'There are some descriptions here.',
           creator: 'admin',
@@ -162,7 +162,7 @@ export default function LicenseList() {
       <ListFilters form={filtersForm} filters={filters} />
 
       {/* Button(s) */}
-      <div className="flex justify-end gap-x-2 mt-8 mb-4">
+      <div className="flex justify-end gap-x-1 mt-8 mb-4">
         <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
@@ -177,9 +177,7 @@ export default function LicenseList() {
         rows={rows}
         columns={columns}
         currentSort={currentSort}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        countPerPage={countPerPage}
+        pagination={{ totalCount, currentPage, countPerPage }}
         render={(row: any, column: string) => {
           if (column === 'ID') {
             return row.licenseId;
@@ -197,10 +195,6 @@ export default function LicenseList() {
             return row.licenseIdentifier;
           }
 
-          if (column === 'Restriction(s)') {
-            return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
-          }
-
           if (column === 'Obligation(s)') {
             const notice = row.obligations[0] === 'Y';
             const source = row.obligations[1] === 'Y';
@@ -211,6 +205,10 @@ export default function LicenseList() {
                 {source && <i className="fa-solid fa-code" title="Source" />}
               </div>
             );
+          }
+
+          if (column === 'Restriction(s)') {
+            return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
           }
 
           if (column === 'URL') {

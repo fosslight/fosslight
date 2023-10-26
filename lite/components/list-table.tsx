@@ -32,22 +32,19 @@ export default function ListTable({
   rows,
   columns,
   currentSort,
-  totalCount,
-  currentPage,
-  countPerPage,
+  pagination,
   render
 }: {
   rowId: string;
   rows: any[];
   columns: { name: string; sort: string }[];
-  currentSort: string;
-  totalCount: number;
-  currentPage: number;
-  countPerPage: number;
+  currentSort?: string;
+  pagination?: { totalCount: number; currentPage: number; countPerPage: number };
   render: (row: any, column: string) => React.ReactNode;
 }) {
-  const currentSortObj = Object.fromEntries(currentSort.split(',').map((str) => str.split('-')));
-  const lastPage = Math.max(Math.ceil(totalCount / countPerPage), 1);
+  const currentSortObj = Object.fromEntries(
+    (currentSort || '').split(',').map((str) => str.split('-'))
+  );
 
   const view = useRecoilValue(viewState);
   const loading = useRecoilValue(loadingState);
@@ -109,7 +106,7 @@ export default function ListTable({
   }
 
   function setPage(page: number) {
-    if (page === currentPage || loading) {
+    if (!pagination || page === pagination.currentPage || loading) {
       return;
     }
 
@@ -252,7 +249,7 @@ export default function ListTable({
       </div>
 
       {/* Pagination */}
-      {view !== 'none' && (
+      {view !== 'none' && pagination && (
         <div
           className={clsx(
             'flex mt-4 items-center',
@@ -260,10 +257,13 @@ export default function ListTable({
           )}
         >
           <div className="text-darkgray">
-            {rows.length} entries (total {insertCommas(totalCount)} entries)
+            {rows.length} entries (total {insertCommas(pagination.totalCount)} entries)
           </div>
           <div className="flex items-center gap-x-2">
-            {generatePagination(currentPage, lastPage).map((page) => {
+            {generatePagination(
+              pagination.currentPage,
+              Math.max(Math.ceil(pagination.totalCount / pagination.countPerPage), 1)
+            ).map((page) => {
               if (page === -1) {
                 return <i key={page} className="fa-solid fa-ellipsis" />;
               }
@@ -273,12 +273,12 @@ export default function ListTable({
                   key={page}
                   className={clsx(
                     'px-2 py-0.5 border',
-                    page === currentPage
+                    page === pagination.currentPage
                       ? 'bg-charcoal border-charcoal text-semiwhite'
                       : 'border-darkgray'
                   )}
                   onClick={() => setPage(page)}
-                  disabled={page === currentPage || loading}
+                  disabled={page === pagination.currentPage || loading}
                 >
                   {page}
                 </button>

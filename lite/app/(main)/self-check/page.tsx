@@ -95,7 +95,7 @@ export default function SelfCheckList() {
       <ListFilters form={filtersForm} filters={filters} />
 
       {/* Button(s) */}
-      <div className="flex justify-end gap-x-2 mt-8 mb-4">
+      <div className="flex justify-end gap-x-1 mt-8 mb-4">
         <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
@@ -110,9 +110,7 @@ export default function SelfCheckList() {
         rows={rows}
         columns={columns}
         currentSort={currentSort}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        countPerPage={countPerPage}
+        pagination={{ totalCount, currentPage, countPerPage }}
         render={(row: any, column: string) => {
           if (column === 'ID') {
             return row.projectId;

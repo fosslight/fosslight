@@ -135,7 +135,7 @@ export default function ListSections({
               ossList.map((oss, idx) => (
                 <div
                   key={idx}
-                  className="flex gap-x-3 pb-3 border-b border-b-semigray last:pb-0 last:border-none"
+                  className="flex pb-3 border-b border-b-semigray last:pb-0 last:border-none"
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
@@ -208,7 +208,7 @@ export default function ListSections({
               licenseList.map((license, idx) => (
                 <div
                   key={idx}
-                  className="flex gap-x-3 pb-3 border-b border-b-semigray last:pb-0 last:border-none"
+                  className="flex pb-3 border-b border-b-semigray last:pb-0 last:border-none"
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">

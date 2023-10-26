@@ -67,7 +67,7 @@ export default function FullSearch() {
 
       {/* Description */}
       <h3 className="pb-8">
-        Search results of vulnerabilities, oss, and licenses. Each section shows up to 5 search
+        Search results of vulnerabilities, OSS, and licenses. Each section shows up to 5 search
         results.
       </h3>
 
