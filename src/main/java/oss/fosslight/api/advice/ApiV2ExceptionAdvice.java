@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@ControllerAdvice(basePackages = "oss.fosslight.api.controller.v2")
+@ControllerAdvice(basePackages = {"oss.fosslight.api.controller.v2", "oss.fosslight.api.controller.lite"})
 @Order(ExceptionAdviceOrder.VERSION_SPECIFIC)
 @Slf4j
 public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
