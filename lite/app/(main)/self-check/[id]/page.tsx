@@ -1,6 +1,7 @@
 'use client';
 
 import SelfCheckNotice from '@/components/self-check-notice';
+import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
 import { selfCheckTabs } from '@/lib/literals';
 import clsx from 'clsx';
@@ -90,6 +91,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions */}
+      {tab === 'OSS' && <SelfCheckOSS />}
       {tab === 'Package' && <SelfCheckPackage />}
       {tab === 'Notice' && <SelfCheckNotice />}
     </>
