@@ -25,11 +25,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter {
-    private List<String> allowedOrigins = Arrays.asList(
-            "http://localhost:3000",
-            "http://127.0.0.1:3000"
-            // TODO: add confirmed url of lite hub
-    );
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -42,7 +37,7 @@ public class CorsFilter implements Filter {
         response.setHeader("Access-Control-Allow-Headers", "*");
 
         var origin = request.getHeader("Origin");
-        if (allowedOrigins.stream().anyMatch(allowedOrigin -> allowedOrigin.equals(origin))) {
+        if (Url.LITE_HUB_ORIGINS.stream().anyMatch(allowedOrigin -> allowedOrigin.equals(origin))) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
         }
