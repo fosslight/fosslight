@@ -5049,6 +5049,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		String ossName = identification.getOssName();
 		String refOssName = avoidNull(identification.getRefOssName(), identification.getOssName());
 		String ossVersion = avoidNull(identification.getOssVersion());
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
 		
 		OssMaster om = new OssMaster();
 		om.setPrjId(referenceId);
@@ -5117,7 +5118,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					om.setDashOssNameList(null);
 					om.setOssVersion(om.getOssVersion().isEmpty() ? "-" : om.getOssVersion());
 					
-					if (existsVendorProductBooleanFlag || cvssScore > 8.0) {
+					if (existsVendorProductBooleanFlag || cvssScore > Float.valueOf(standardScore)) {
 						List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
 						if (existsVendorProductBooleanFlag) {
 							String checkNvdData = cvssScoreMaxString[3] + "@" + cvssScoreMaxString[4];
