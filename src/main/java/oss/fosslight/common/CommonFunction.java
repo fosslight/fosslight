@@ -5075,7 +5075,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				String existenceOssName = (cvssScoreMaxString[2] + "-" + cvssScoreMaxString[0] + "_" + ossVersion).toUpperCase();
 				Float cvssScore = Float.valueOf(cvssScoreMaxString[3]);
 				
-				om.setOssName(isEmpty(refOssName) ? ossName : refOssName);
+				om.setOssName(avoidNull(refOssName, ossName));
 				om.setOssVersion(ossVersion);
 				String[] ossNicknames = null;
 				if (!isEmpty(refOssName)) {
@@ -5118,7 +5118,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					om.setOssVersion(om.getOssVersion().isEmpty() ? "-" : om.getOssVersion());
 					
 					if (existsVendorProductBooleanFlag || cvssScore > 8.0) {
-						om.setSchOssName(ossName);
 						List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
 						if (existsVendorProductBooleanFlag) {
 							String checkNvdData = cvssScoreMaxString[3] + "@" + cvssScoreMaxString[4];
