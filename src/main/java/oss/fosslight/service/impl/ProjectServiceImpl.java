@@ -3118,7 +3118,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					if (!isNetworkRestriction) {
-						if (_projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
+						if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
 							isNetworkRestriction = true;
 						}
 					}
