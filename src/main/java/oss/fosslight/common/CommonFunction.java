@@ -5118,7 +5118,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					om.setDashOssNameList(null);
 					om.setOssVersion(om.getOssVersion().isEmpty() ? "-" : om.getOssVersion());
 					
-					if (existsVendorProductBooleanFlag || cvssScore > Float.valueOf(standardScore)) {
+					if (existsVendorProductBooleanFlag || cvssScore >= Float.valueOf(standardScore)) {
 						List<String> cveDataList2 = ossService.selectVulnInfoForOss(om);
 						if (existsVendorProductBooleanFlag) {
 							String checkNvdData = cvssScoreMaxString[3] + "@" + cvssScoreMaxString[4];
