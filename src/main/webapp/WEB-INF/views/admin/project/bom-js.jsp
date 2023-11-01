@@ -817,7 +817,8 @@ var bom_fn = {
 		if (typeof rowObject.refOssName !== "undefined") {
 			ossName = rowObject.refOssName.replace(' ','_');
 		} else {
-			ossName = rowObject.ossName.replace(' ','_');
+			ossName = rowObject.ossName;
+			if ("" != ossName) ossName = ossName.replace(' ', '_');
 		}
 		
 		if (prjId) {
