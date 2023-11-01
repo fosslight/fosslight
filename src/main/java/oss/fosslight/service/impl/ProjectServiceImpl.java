@@ -264,6 +264,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public Project getProjectDetail(Project project) {
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
 		// master
 		project = projectMapper.selectProjectMaster(project);
 		
@@ -317,19 +318,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
+			project.setStandardScore(Float.valueOf(standardScore));
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 			if (getSecurityDataCntByProject(project)) {
 				project.setSecCode(CoConstDef.FLAG_YES);
 			}
 		} else {
 			if (!project.getIdentificationSubStatusBom().equals("0")) {
+				project.setStandardScore(Float.valueOf(standardScore));
 				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				if (getSecurityDataCntByProject(project)) {
 					project.setSecCode(CoConstDef.FLAG_YES);
 				}
 			}
 		}
-		
+		project.setStandardScore(null);
 		return project;
 	}
 	
