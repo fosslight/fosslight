@@ -214,7 +214,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(7), projectService.getIdentificationGridList(ossListParam), projectInfo);
+				Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
+				map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+				
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(7), map, projectInfo);
 			}
 			
 			// model
@@ -455,21 +458,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					String refSrcTab = "";
 					String thirdKey = "3rd";
-					switch (avoidNull(bean.getRefDiv())) {
-						case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-							refSrcTab = thirdKey;
-							break;
-						case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
-							refSrcTab = "DEP";
-							break;
-						case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
-							refSrcTab = "SRC";
-							break;
-						case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
-							refSrcTab = "BIN";
-							break;
-						default:
-							break;
+					
+					String[] refDivs = bean.getRefDiv().split("[,]");
+					for (String refDiv : refDivs) {
+						switch (avoidNull(refDiv)) {
+							case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+									refSrcTab += thirdKey;
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "DEP";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "SRC";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "BIN";
+								break;
+							default:
+								break;
+						}
 					}
 					if (refSrcTab.contains(thirdKey)) {
 						String[] thirdIds = avoidNull(bean.getRefPartnerId(), "").split(",");

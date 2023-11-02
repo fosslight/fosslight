@@ -2924,6 +2924,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
+				if(!isEmpty(bean.getCopyrightText())) {
+					String[] copyrights = bean.getCopyrightText().split("\\|");
+					String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+					bean.setCopyrightText(copyrightText);
+				}
+				
 				// 컴포넌트 마스터 인서트
 				projectMapper.registBomComponents(bean);
 				List<OssComponentsLicense> licenseList = CommonFunction.findOssLicenseIdAndName(bean.getOssId(), bean.getOssComponentsLicenseList());
@@ -4744,6 +4750,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			for (ProjectIdentification temp : tempData) {
 				if (rtnBean == null) {
 					rtnBean = temp;
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						List<String> rtnBeanCopyrights = Arrays.asList(rtnBean.getCopyrightText().split("\\n"));
+						String mergedCopyrightText = rtnBeanCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
+					}
 					continue;
 				}
 				
@@ -4770,6 +4781,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					if (!equalFlag) {
 						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
+					}
+				}
+				
+				if (!isEmpty(temp.getCopyrightText())) {
+					List<String> mergedCopyrights = new ArrayList<>();
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(rtnBean.getCopyrightText().split("\\n")));
+					}
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(temp.getCopyrightText().split("\\n")));
+					}
+					if (mergedCopyrights != null && !mergedCopyrights.isEmpty()) {
+						String mergedCopyrightText = mergedCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
 					}
 				}
 				

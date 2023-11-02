@@ -1962,6 +1962,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				}
 				bean = findOssIdAndName(bean);
 				
+				String copyrightText = (String) bean.get("copyrightText");
+				if(!isEmpty(copyrightText)) {
+					String[] copyrights = copyrightText.split("\\|");
+					String customCopyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+					bean.put("copyrightText", customCopyrightText);
+				}
+				
 				// 컴포넌트 마스터 인서트
 				apiProjectMapper.registBomComponents(bean);
 				
