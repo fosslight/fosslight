@@ -64,7 +64,7 @@ export default function BottomBar() {
             <div className="text-sm">{menu.name}</div>
             <div
               className={clsx(
-                'absolute right-0 bottom-16 left-0 flex flex-col bg-charcoal rounded-t-md text-semiwhite overflow-y-hidden transition-[max-height,opacity] duration-[500ms] z-50',
+                'absolute right-0 bottom-16 left-0 flex flex-col bg-charcoal rounded-t-md text-semiwhite overflow-y-hidden transition-[max-height,opacity] duration-[500ms] z-30',
                 !isMenuShown[menu.name] ? 'max-h-0 opacity-0' : 'max-h-40 opacity-100'
               )}
             >
