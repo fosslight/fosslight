@@ -44,6 +44,10 @@
     @apply border border-darkgray rounded outline-none text-center;
   }
 
+  .charcoal-btn {
+    @apply bg-charcoal rounded outline-none text-semiwhite text-center;
+  }
+
   .crimson-btn {
     @apply bg-crimson border border-crimson rounded outline-none text-semiwhite text-center;
   }
