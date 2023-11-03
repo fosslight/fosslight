@@ -1,5 +1,6 @@
 'use client';
 
+import Modal from '@/components/modal';
 import SelfCheckNotice from '@/components/self-check-notice';
 import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
@@ -8,6 +9,7 @@ import clsx from 'clsx';
 import { Fragment, useState } from 'react';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
+  const [isModalShown, setIsModalShown] = useState(false);
   const [tab, setTab] = useState<SelfCheckTab['name']>('OSS');
 
   return (
@@ -48,9 +50,47 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
         </div>
         <div className="flex justify-end gap-x-1 mt-2">
           <button className="px-2 py-0.5 crimson-btn">Delete</button>
-          <button className="px-2 py-0.5 default-btn">Edit</button>
+          <button className="px-2 py-0.5 default-btn" onClick={() => setIsModalShown(true)}>
+            Edit
+          </button>
         </div>
       </div>
+      <Modal show={isModalShown} onHide={() => setIsModalShown(false)} hideByBackdrop={false}>
+        <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
+          <i className="text-sm fa-solid fa-plus"></i>&ensp;Edit the project
+        </div>
+        <div className="flex flex-col gap-y-4 w-72">
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">
+              Project Name <span className="font-bold text-crimson">*</span>
+            </label>
+            <input
+              className="w-full px-2 py-1 border border-darkgray outline-none"
+              placeholder="EX) FOSSLight Hub Lite"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">Project Version</label>
+            <input
+              className="w-full px-2 py-1 border border-darkgray outline-none"
+              placeholder="EX) 1.0.0"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">Comment</label>
+            <textarea
+              className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
+              rows={3}
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex justify-end gap-x-1 mt-4">
+          <button className="px-2 py-0.5 crimson-btn">Edit</button>
+          <button className="px-2 py-0.5 default-btn" onClick={() => setIsModalShown(false)}>
+            Cancel
+          </button>
+        </div>
+      </Modal>
 
       {/* Tab selector */}
       <div className="flex justify-center items-center gap-x-2 mt-10 text-sm font-semibold">
