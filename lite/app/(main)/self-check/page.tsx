@@ -2,6 +2,7 @@
 
 import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
+import Modal from '@/components/modal';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
@@ -29,6 +30,9 @@ export default function SelfCheckList() {
     ],
     hidden: []
   };
+
+  // Modal
+  const [isModalShown, setIsModalShown] = useState(false);
 
   // Rows/Columns
   const [rows, setRows] = useState<any[]>([]);
@@ -102,10 +106,49 @@ export default function SelfCheckList() {
           </div>
           Export
         </button>
-        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
+        <button
+          className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
+          onClick={() => setIsModalShown(true)}
+        >
           <i className="text-sm fa-solid fa-plus"></i> Create Project
         </button>
       </div>
+      <Modal show={isModalShown} onHide={() => setIsModalShown(false)} hideByBackdrop={false}>
+        <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
+          <i className="text-sm fa-solid fa-plus"></i>&ensp;Create a project to check
+        </div>
+        <div className="flex flex-col gap-y-4 w-72">
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">
+              Project Name <span className="font-bold text-crimson">*</span>
+            </label>
+            <input
+              className="w-full px-2 py-1 border border-darkgray outline-none"
+              placeholder="EX) FOSSLight Hub Lite"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">Project Version</label>
+            <input
+              className="w-full px-2 py-1 border border-darkgray outline-none"
+              placeholder="EX) 1.0.0"
+            />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <label className="text-sm font-semibold">Comment</label>
+            <textarea
+              className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
+              rows={3}
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex justify-end gap-x-1 mt-4">
+          <button className="px-2 py-0.5 crimson-btn">Create</button>
+          <button className="px-2 py-0.5 default-btn" onClick={() => setIsModalShown(false)}>
+            Cancel
+          </button>
+        </div>
+      </Modal>
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
