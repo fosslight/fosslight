@@ -2335,7 +2335,7 @@
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
     		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
-								WHERE OSS_NAME = #{schOssName}
+								WHERE (OSS_NAME = #{schOssName}
 								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 								AND OSS_VERSION = #{ossVersion}
 								</if>
@@ -2343,7 +2343,7 @@
 								AND OSS_VERSION = ''
 								</if>
 								AND REFERENCE_ID = #{prjId}
-								AND VULNERABILITY_RESOLUTION = 'Fixed')
+								AND VULNERABILITY_RESOLUTION = 'Fixed'))
     		</if>
     	) NVD
 		INNER JOIN NVD_CVE_V3 CVE

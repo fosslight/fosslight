@@ -804,7 +804,12 @@ var dep_fn = {
     	var display = "";
 		var _url = "";
 		var prjId = '${project.prjId}';
-		var ossName = rowObject.ossName;
+		var ossName = "";
+		if (typeof rowObject.refOssName !== "undefined") {
+			ossName = rowObject.refOssName.replace(' ','_');
+		} else {
+			ossName = rowObject.ossName.replace(' ','_');
+		}
 		
 		if (prjId) {
 			_url = '<c:url value="/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';

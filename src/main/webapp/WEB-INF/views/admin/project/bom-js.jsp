@@ -808,6 +808,42 @@ var bom_fn = {
 	},
 	loadAnalysisUrl : function (target, url) {
 		createTabInFrame(target, url);
+	},
+	displayVulnerability : function(cellvalue, options, rowObject){
+		var display = "";
+		var _url = "";
+		var prjId = '${project.prjId}';
+		var ossName = "";
+		if (typeof rowObject.refOssName !== "undefined") {
+			ossName = rowObject.refOssName.replace(' ','_');
+		} else {
+			ossName = rowObject.ossName;
+			if (typeof ossName !== "undefined" && "" != ossName) {
+				ossName = ossName.replace(' ', '_');
+			}
+		}
+		
+		if (prjId) {
+			_url = '<c:url value="/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		} else {
+			_url = '<c:url value="/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		}
+		
+		if(parseInt(cellvalue) >= 9.0 ) {
+			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 7.0 ) {
+			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 4.0) {
+			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) > 0) {
+			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+			display="<span style=\"font-size:0;\"></span>";
+		} else {
+			display=cellvalue;
+		}
+		
+		return display;
 	}
 }
 
@@ -892,7 +928,7 @@ var bom_data = {
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true},
 					{name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', template: searchStringOptions},
 					{name: 'cveId', index: 'cveId', hidden:true},
-					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
+					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:bom_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
 					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 					{name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true},
 					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
