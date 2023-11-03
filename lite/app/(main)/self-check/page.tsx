@@ -110,7 +110,7 @@ export default function SelfCheckList() {
           className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
           onClick={() => setIsModalShown(true)}
         >
-          <i className="text-sm fa-solid fa-plus"></i> Create Project
+          <i className="text-sm fa-solid fa-plus" /> Create Project
         </button>
       </div>
       <Modal show={isModalShown} onHide={() => setIsModalShown(false)} hideByBackdrop={false}>
