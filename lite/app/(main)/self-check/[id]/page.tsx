@@ -1,5 +1,6 @@
 'use client';
 
+import SelfCheckModal from '@/components/self-check-modal';
 import SelfCheckNotice from '@/components/self-check-notice';
 import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
@@ -8,6 +9,7 @@ import clsx from 'clsx';
 import { Fragment, useState } from 'react';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
+  const [isModalShown, setIsModalShown] = useState(false);
   const [tab, setTab] = useState<SelfCheckTab['name']>('OSS');
 
   return (
@@ -15,7 +17,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       {/* Breadcrumb */}
       <h2 className="breadcrumb">
         Self-Check List
-        <i className="mx-2 text-sm fa-solid fa-angle-right"></i>
+        <i className="mx-2 text-sm fa-solid fa-angle-right" />
         Project {params.id}
       </h2>
 
@@ -48,9 +50,21 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
         </div>
         <div className="flex justify-end gap-x-1 mt-2">
           <button className="px-2 py-0.5 crimson-btn">Delete</button>
-          <button className="px-2 py-0.5 default-btn">Edit</button>
+          <button className="px-2 py-0.5 default-btn" onClick={() => setIsModalShown(true)}>
+            Edit
+          </button>
         </div>
       </div>
+      <SelfCheckModal
+        mode="edit"
+        data={{
+          name: 'FOSSLight Hub Lite',
+          version: '1.0.0',
+          comment: 'There are some comments here.'
+        }}
+        show={isModalShown}
+        onHide={() => setIsModalShown(false)}
+      />
 
       {/* Tab selector */}
       <div className="flex justify-center items-center gap-x-2 mt-10 text-sm font-semibold">
@@ -69,7 +83,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
               >
                 {idx + 1}. {selfCheckTab.name}
               </button>
-              {idx < 2 && <i className="fa-solid fa-right-long"></i>}
+              {idx < 2 && <i className="fa-solid fa-right-long" />}
             </Fragment>
           );
         })}

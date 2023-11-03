@@ -2,6 +2,7 @@
 
 import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
+import SelfCheckModal from '@/components/self-check-modal';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
@@ -29,6 +30,9 @@ export default function SelfCheckList() {
     ],
     hidden: []
   };
+
+  // Modal
+  const [isModalShown, setIsModalShown] = useState(false);
 
   // Rows/Columns
   const [rows, setRows] = useState<any[]>([]);
@@ -86,7 +90,7 @@ export default function SelfCheckList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="breadcrumb">Self-Check List</h2>
+      <h2 className="breadcrumb">Self-Check Project List</h2>
 
       {/* Description */}
       <h3 className="pb-8">List of projects you&apos;ve created for self-check.</h3>
@@ -94,7 +98,7 @@ export default function SelfCheckList() {
       {/* Filters */}
       <ListFilters form={filtersForm} filters={filters} />
 
-      {/* Button(s) */}
+      {/* Buttons */}
       <div className="flex justify-end gap-x-1 mt-8 mb-4">
         <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
@@ -102,7 +106,19 @@ export default function SelfCheckList() {
           </div>
           Export
         </button>
+        <button
+          className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
+          onClick={() => setIsModalShown(true)}
+        >
+          <i className="text-sm fa-solid fa-plus" /> Create Project
+        </button>
       </div>
+      <SelfCheckModal
+        mode="create"
+        data={{ name: '', version: '', comment: '' }}
+        show={isModalShown}
+        onHide={() => setIsModalShown(false)}
+      />
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable

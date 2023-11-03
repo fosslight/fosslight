@@ -1,18 +1,13 @@
 'use client';
 
 import Logo from '@/public/images/logo.png';
-import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Modal from './modal';
 
 export default function TopBar() {
   const [isProfileShown, setIsProfileShown] = useState(false);
-  const [isProfileActive, setIsProfileActive] = useState(false);
-
-  useEffect(() => {
-    setIsProfileActive(isProfileShown);
-  }, [isProfileShown]);
 
   return (
     <>
@@ -29,38 +24,22 @@ export default function TopBar() {
           onClick={() => setIsProfileShown(true)}
         />
       </div>
-      {isProfileShown && (
-        <div
-          className={clsx(
-            'fixed inset-0 bg-charcoal/50 transition-opacity',
-            isProfileActive ? 'opacity-100' : 'opacity-0'
-          )}
-          onClick={() => setIsProfileShown(false)}
-        >
-          <div
-            className={clsx(
-              'absolute center p-4 rounded bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] transition-[transform]',
-              isProfileActive ? 'scale-100' : 'scale-0'
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-center items-center gap-x-2 pb-2 mb-2 border-b border-b-semiblack font-semibold">
-              <i className="text-xl fa-solid fa-user" />
-              Profile Information
-            </div>
-            <div className="flex flex-col gap-y-1 text-sm">
-              <div className="flex gap-x-4 text-charcoal">
-                <div className="font-bold">Name</div>
-                <div className="opacity-80">최덕경</div>
-              </div>
-              <div className="flex gap-x-4 text-charcoal">
-                <div className="font-bold">Email</div>
-                <div className="opacity-80">hjcdg197@gmail.com</div>
-              </div>
-            </div>
+      <Modal show={isProfileShown} onHide={() => setIsProfileShown(false)}>
+        <div className="flex justify-center items-center gap-x-2 pb-2 mb-2 border-b border-b-semiblack font-semibold">
+          <i className="text-xl fa-solid fa-user" />
+          Profile Information
+        </div>
+        <div className="flex flex-col gap-y-1 text-sm">
+          <div className="flex gap-x-4 text-charcoal">
+            <div className="font-bold">Name</div>
+            <div className="opacity-80">최덕경</div>
+          </div>
+          <div className="flex gap-x-4 text-charcoal">
+            <div className="font-bold">Email</div>
+            <div className="opacity-80">hjcdg197@gmail.com</div>
           </div>
         </div>
-      )}
+      </Modal>
     </>
   );
 }
