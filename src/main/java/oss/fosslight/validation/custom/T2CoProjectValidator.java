@@ -2532,6 +2532,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 								infoMap.put(errKey, basicKey + ".MATCHED");
 							}
 						}
+						// 기 등록된 binary 정보가 없으면
+						else if (checkBinaryInfoMap.containsKey(binaryName)) {
+							infoMap.put(errKey, basicKey + ".NEW_BINARY_OSS");
+						}
 					}
 				}
 			}
