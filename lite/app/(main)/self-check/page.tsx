@@ -86,7 +86,7 @@ export default function SelfCheckList() {
   return (
     <>
       {/* Breadcrumb */}
-      <h2 className="breadcrumb">Self-Check List</h2>
+      <h2 className="breadcrumb">Self-Check Project List</h2>
 
       {/* Description */}
       <h3 className="pb-8">List of projects you&apos;ve created for self-check.</h3>
@@ -94,13 +94,16 @@ export default function SelfCheckList() {
       {/* Filters */}
       <ListFilters form={filtersForm} filters={filters} />
 
-      {/* Button */}
+      {/* Buttons */}
       <div className="flex justify-end gap-x-1 mt-8 mb-4">
         <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
           </div>
           Export
+        </button>
+        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
+          <i className="text-sm fa-solid fa-plus"></i> Create Project
         </button>
       </div>
 
