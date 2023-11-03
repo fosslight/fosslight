@@ -116,7 +116,7 @@ export default function SelfCheckOSS() {
         </div>
       </div>
 
-      {/* Cards (정렬/검색 UI 필요) */}
+      {/* Cards */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {rows.map((row, idx) => (
           <div key={idx} className="flex flex-col gap-y-1 p-4 border border-darkgray rounded">
