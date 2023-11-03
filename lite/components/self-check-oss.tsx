@@ -76,7 +76,7 @@ export default function SelfCheckOSS() {
               <div className="flex flex-col gap-y-1 mb-6">
                 {files.map((file, idx) => (
                   <div key={idx} className="flex justify-center items-center gap-x-1.5 text-sm">
-                    <i className="fa-solid fa-cube"></i>
+                    <i className="fa-solid fa-cube" />
                     <span className="italic text-semiblack/80">{file.name}</span>
                     <span className="text-semiblack/50">
                       ({dayjs(file.when).format('YY.MM.DD HH:mm')})
@@ -85,7 +85,8 @@ export default function SelfCheckOSS() {
                 ))}
               </div>
             )}
-            <i className="fa-solid fa-arrow-up-from-bracket"></i>&ensp;Upload a file here
+            <i className="fa-solid fa-arrow-up-from-bracket" />
+            &ensp;Upload a file here
             <div className="mt-1 text-sm text-darkgray">
               (The file must contain information of OSS to be listed.)
             </div>
@@ -103,7 +104,7 @@ export default function SelfCheckOSS() {
 
       {/* Buttons */}
       <div className="flex justify-between items-center mt-8 mb-2">
-        <i className="text-charcoal fa-solid fa-trash"></i>
+        <i className="text-charcoal fa-solid fa-trash" />
         <div className="flex justify-end gap-x-1">
           <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
             <div className="relative w-4 h-4">
@@ -138,17 +139,18 @@ export default function SelfCheckOSS() {
               </div>
             </div>
             <div className="text-sm text-semiblack/80">
-              <i className="fa-regular fa-folder-open"></i>&ensp;
+              <i className="fa-regular fa-folder-open" />
+              &ensp;
               {row.path}
             </div>
             <div className="line-clamp-3 text-sm text-semiblack/80">{row.licenses}</div>
             <div className="flex items-center gap-x-2 text-sm">
-              <i className="text-charcoal fa-solid fa-circle-info" title={row.description}></i>
-              <i className="text-charcoal fa-solid fa-copyright" title={row.copyright}></i>
+              <i className="text-charcoal fa-solid fa-circle-info" title={row.description} />
+              <i className="text-charcoal fa-solid fa-copyright" title={row.copyright} />
               <i
                 className="text-crimson fa-solid fa-registered"
                 title={row.restrictions.join('\n')}
-              ></i>
+              />
               <a
                 className="text-xs text-blue-500 hover:underline"
                 href={row.downloadUrl}
@@ -164,7 +166,7 @@ export default function SelfCheckOSS() {
                 Homepage
               </a>
               <div className="flex-1 text-right">
-                <i className="text-sm text-darkgray fa-solid fa-pen"></i>
+                <i className="text-sm text-darkgray fa-solid fa-pen" />
               </div>
             </div>
           </div>

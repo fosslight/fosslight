@@ -50,7 +50,7 @@ export default function SelfCheckPackage() {
           <div className="flex flex-col gap-y-1 mb-6">
             {files.map((file, idx) => (
               <div key={idx} className="flex justify-center items-center gap-x-1.5 text-sm">
-                <i className="fa-solid fa-cube"></i>
+                <i className="fa-solid fa-cube" />
                 <span className="italic text-semiblack/80">{file.name}</span>
                 <span className="text-semiblack/50">
                   ({dayjs(file.when).format('YY.MM.DD HH:mm')})
@@ -59,10 +59,11 @@ export default function SelfCheckPackage() {
             ))}
           </div>
         )}
-        <i className="fa-solid fa-arrow-up-from-bracket"></i>&ensp;Upload your package files here
+        <i className="fa-solid fa-arrow-up-from-bracket" />
+        &ensp;Upload your package files here
         <div className="mt-1 text-sm text-darkgray">
           (Below are the OSS that must disclose the source codes.&ensp;
-          <i className="fa-solid fa-turn-down"></i>)
+          <i className="fa-solid fa-turn-down" />)
         </div>
       </div>
 

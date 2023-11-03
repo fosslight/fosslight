@@ -17,7 +17,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       {/* Breadcrumb */}
       <h2 className="breadcrumb">
         Self-Check List
-        <i className="mx-2 text-sm fa-solid fa-angle-right"></i>
+        <i className="mx-2 text-sm fa-solid fa-angle-right" />
         Project {params.id}
       </h2>
 
@@ -109,7 +109,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
               >
                 {idx + 1}. {selfCheckTab.name}
               </button>
-              {idx < 2 && <i className="fa-solid fa-right-long"></i>}
+              {idx < 2 && <i className="fa-solid fa-right-long" />}
             </Fragment>
           );
         })}
