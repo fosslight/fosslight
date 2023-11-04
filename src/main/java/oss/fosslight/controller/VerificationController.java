@@ -460,8 +460,8 @@ public class VerificationController extends CoTopComponent {
 				{
 					prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
 					String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType()).getCdDtlExp();
-					if ("T".equalsIgnoreCase(distributionType)
-							|| (CoConstDef.FLAG_NO.equalsIgnoreCase(distributionType) && verificationService.checkNetworkServer(ossNotice.getPrjId()))
+					if ("T".equalsIgnoreCase(avoidNull(distributionType))
+							|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(ossNotice.getPrjId()))
 							|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) // 배포사이트 사용안함으로 설정한 경우
 							) {
 						project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
