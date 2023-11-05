@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import oss.fosslight.api.dto.ListOssDto;
+import oss.fosslight.api.dto.OssDto;
 
 @Mapper
 public interface ApiOssMapper {
@@ -28,8 +30,10 @@ public interface ApiOssMapper {
 	List<HashMap<String, Object>> getOssInfoAllWithNick();
 
 	List<HashMap<String, Object>> getOssAllNickNameList();
-	
+
 	List<String> getDownloadLocationListByOssName(String ossName);
 
 	List<String> getHomepageListByOssName(String ossName);
+
+    List<OssDto> selectOssList(ListOssDto.Request query);
 }

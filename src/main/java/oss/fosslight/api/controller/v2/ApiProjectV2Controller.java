@@ -1237,7 +1237,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
-    public ResponseEntity<Map<String, Object>> ossReportAndroid(
+    public ResponseEntity<Map<String, Object>> ossUploadPackage(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
