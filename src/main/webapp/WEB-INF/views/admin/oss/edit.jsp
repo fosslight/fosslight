@@ -109,6 +109,7 @@
 									<div class="required">
 										<span><input type="text" name="downloadLocations" class="w725"/><input type="button" value="Delete" class="smallDelete"/></span>
 										<span class="urltxt"></span>
+										<span class="retxt"></span>
 									</div>
 								</div>
 								<input id="downloadLocationAdd" type="button" value="+ Add" class="btnCLight gray"/>
@@ -120,6 +121,7 @@
 								<div class="required">
 									<input name="homepage" type="text" class="w100P" placeholder="http://" value="${homepage }"/>
 									<span class="urltxt"></span>
+									<span class="retxt"></span>
 								</div>
 							</td>
 						</tr>
