@@ -363,12 +363,27 @@
 				
 				$(ossForm + ' input[name=\'ossLicensesJson\']').val(JSON.stringify(newRows));
 				
+				var pattern = /\s/g;
 				$(ossForm + ' [name=\'downloadLocations\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("DownloadLocation remove spaces", 0);
+						
+						return false;
+					}
 				});
 				
 				$(ossForm + ' [name=\'homepage\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("Homepage remove spaces", 0);
+						
+						return false;
+					}
 				});
 
 				$(ossForm).ajaxForm({
