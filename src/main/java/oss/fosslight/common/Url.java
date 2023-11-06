@@ -299,7 +299,9 @@ public final class Url {
 		public static final String TRD_MAP = PATH + "/get3rdMap";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		public static final String SAVE_MODEL_AJAX = PATH + "/saveModelAjax";
 		
@@ -450,7 +452,9 @@ public final class Url {
 		public static final String AUTOCOMPLETE_CONF_SW_VER_AJAX = PATH + "/autoCompleteConfSwVerAjax";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String UPDATE_PUBLIC_YN = PATH + "/updatePublicYn";
