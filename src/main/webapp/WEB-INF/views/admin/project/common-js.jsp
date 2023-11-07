@@ -1103,9 +1103,9 @@ var com_fn = {
 					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
 							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/3"/>');
-							} else {
 								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+							} else {
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 							}
 						});
 					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
@@ -1115,9 +1115,9 @@ var com_fn = {
 					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
 						alertify.alert('<spring:message code="msg.common.success" />', function() {
 							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/3"/>');
-							} else {
 								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+							} else {
+								createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 							}
 						});
 					} else if(status == "CONF") { // Admin이 confirm한 경우

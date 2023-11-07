@@ -358,6 +358,9 @@ public class Project extends ComBean implements Serializable {
 	private String secCode;
 	
 	private Float standardScore;
+	private String copyWatcherLocation;
+	/** add watcher list. */
+	private ArrayList<Map<String, String>> changeWatcherList;
 	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -4363,5 +4366,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setStandardScore(Float standardScore) {
 		this.standardScore = standardScore;
+	}
+
+	public String getCopyWatcherLocation() {
+		return copyWatcherLocation;
+	}
+
+	public void setCopyWatcherLocation(String copyWatcherLocation) {
+		this.copyWatcherLocation = copyWatcherLocation;
+	}
+
+	public ArrayList<Map<String, String>> getChangeWatcherList() {
+		return changeWatcherList;
+	}
+
+	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
+		this.changeWatcherList = changeWatcherList;
 	}
 }

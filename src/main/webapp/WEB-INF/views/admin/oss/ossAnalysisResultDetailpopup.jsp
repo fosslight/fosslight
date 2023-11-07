@@ -363,12 +363,27 @@
 				
 				$(ossForm + ' input[name=\'ossLicensesJson\']').val(JSON.stringify(newRows));
 				
+				var pattern = /\s/g;
 				$(ossForm + ' [name=\'downloadLocations\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("DownloadLocation remove spaces", 0);
+						
+						return false;
+					}
 				});
 				
 				$(ossForm + ' [name=\'homepage\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("Homepage remove spaces", 0);
+						
+						return false;
+					}
 				});
 
 				$(ossForm).ajaxForm({
@@ -472,32 +487,46 @@
 					$(target).val(value);
 				}
 				
-		    	$("input[name=validationType]").val('DOWNLOADLOCATION');
-		    	$("[name='downloadLocation']").val(value);
-				$("#ossForm"+seq).ajaxForm({
-		            url :'/oss/urlDuplicateValidation',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2) {
-			        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
-			        			var downloadLocationHtml = json.externalData2.downloadLocation;
-				        		if (downloadLocationHtml.indexOf("createTabInFrame") > -1) {
-				        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				var pattern = /\s/g;
+				if (value.match(pattern)) {
+					$(target).parent().next("span.urltxt").empty();
+					$(target).parent().next("span.urltxt").css("display", "none");
+					$(target).parent().next().next("span.retxt").empty();
+					$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+				} else {
+					$(target).parent().next().next("span.retxt").empty();
+					$(target).parent().next().next("span.retxt").css("display", "none");
+					
+					$("input[name=validationType]").val('DOWNLOADLOCATION');
+			    	$("[name='downloadLocation']").val(value);
+					$("#ossForm"+seq).ajaxForm({
+			            url :'/oss/urlDuplicateValidation',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2) {
+				        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+				        			var downloadLocationHtml = json.externalData2.downloadLocation;
+					        		if (downloadLocationHtml.indexOf("createTabInFrame") > -1) {
+					        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+					        		}
+					        		
+					        		$(target).parent().next("span.urltxt").empty();
+									$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
 				        		}
-				        		
-				        		$(target).parent().next("span.urltxt").empty();
-								$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
-			        		}
-			        	} else {
-				        	$(target).parent().next("span.urltxt").empty();
-			        	}
-			        },
-			        error : Ctrl_fn.onError
-			    }).submit();
+				        	} else {
+					        	$(target).parent().next("span.urltxt").empty();
+				        	}
+				        },
+				        error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			urlDuplicationAll : function(target){
+				var pattern = /\s/g;
+				var patternCnt = 0;
+				
 				var seq = $(target).attr("id").replace(/[^\d]+/g, "");
 				$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
 					var value = $(cur).val();
@@ -506,41 +535,53 @@
 						value = value.slice(0, -1); // delete last string
 						$(cur).val(value);
 					}
+					
+					if (value.match(pattern)) {
+						patternCnt++;
+						$(cur).parent().next("span.urltxt").empty();
+						$(cur).parent().next("span.urltxt").css("display", "none");
+						$(cur).parent().next().next("span.retxt").empty();
+						$(cur).parent().next().next("span.retxt").html("Remove spaces");
+					}
 				});
 				
-				$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
-				
-				$("#ossForm"+seq).ajaxForm({
-					url :'<c:url value="/oss/urlDuplicateValidation"/>',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2){
-			        		var diffMsg = json.externalData2.downloadLocations.split("||");
-							
-							$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
-								var downloadLocation = $(cur).val();
+				if (patternCnt == 0) {
+					$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
+					
+					$("#ossForm"+seq).ajaxForm({
+						url :'<c:url value="/oss/urlDuplicateValidation"/>',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2){
+				        		var diffMsg = json.externalData2.downloadLocations.split("||");
 								
-								var msg = diffMsg.filter(function(a){
-							        return a.indexOf(downloadLocation) > -1;
-							    })[0];
-								
-								if(msg){
-									msg = msg.split("@@")[1];
-									var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
-									$(cur).parent().next("span.urltxt").empty();
-									$(cur).parent().next("span.urltxt").html(downloadLocation).show();
-								}						
-							});
-			        	} else {
-			        		$(".detailDownloadLocation"+seq+" > .required > span.urltxt").empty();
-			        	}
-			        	
-			        	Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
-			        },
-		            error : Ctrl_fn.onError
-			    }).submit();
+								$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
+									var downloadLocation = $(cur).val();
+									
+									var msg = diffMsg.filter(function(a){
+								        return a.indexOf(downloadLocation) > -1;
+								    })[0];
+									
+									if(msg){
+										msg = msg.split("@@")[1];
+										var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+										$(cur).parent().next().next("span.retxt").empty();
+										$(cur).parent().next().next("span.urltxt").css("display", "none");
+										$(cur).parent().next("span.urltxt").empty();
+										$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+									}						
+								});
+				        	} else {
+				        		$(".detailDownloadLocation"+seq+" > .required > span.urltxt").empty();
+				        	}
+				        	
+				        	Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
+				        },
+			            error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			homepageDuplication : function(target){
 				var value = $(target).val();
@@ -551,30 +592,41 @@
 					$(target).val(value);
 				}
 				
-				$("input[name=validationType]").val('HOMEPAGE');
-				
-				$("#ossForm"+seq).ajaxForm({
-					url :'<c:url value="/oss/urlDuplicateValidation"/>',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2) {
-			        		if (typeof json.externalData2.homepage !== 'undefined') {
-			        			var homepageHtml = json.externalData2.homepage;
-				        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
-				        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				var pattern = /\s/g;
+				if (value.match(pattern)) {
+					$(target).next("span.urltxt").empty();
+					$(target).next("span.urltxt").css("display", "none");
+					$(target).next().next("span.retxt").empty();
+					$(target).next().next("span.retxt").html("Remove spaces").show();
+				} else {
+					$(target).next().next("span.retxt").empty();
+					$(target).next().next("span.retxt").css("display", "none");
+					
+					$("input[name=validationType]").val('HOMEPAGE');
+					
+					$("#ossForm"+seq).ajaxForm({
+						url :'<c:url value="/oss/urlDuplicateValidation"/>',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2) {
+				        		if (typeof json.externalData2.homepage !== 'undefined') {
+				        			var homepageHtml = json.externalData2.homepage;
+					        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+					        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+					        		}
+					        		
+									$(target).next("span.urltxt").empty();
+									$(target).next("span.urltxt").html(homepageHtml).show();
 				        		}
-				        		
+				        	} else {
 								$(target).next("span.urltxt").empty();
-								$(target).next("span.urltxt").html(homepageHtml).show();
-			        		}
-			        	} else {
-							$(target).next("span.urltxt").empty();
-			        	}
-			        },
-		            error : Ctrl_fn.onError
-			    }).submit();
+				        	}
+				        },
+			            error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			loadUrl : function (target, url) {
 				var ossNameObj = url.split("?")[1];
@@ -1923,6 +1975,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations1" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd1" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -1934,6 +1987,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage1"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>
@@ -2072,6 +2126,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations2" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd2" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -2083,6 +2138,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage2"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>
@@ -2221,6 +2277,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations3" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd3" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -2232,6 +2289,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage3"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>

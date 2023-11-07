@@ -1403,12 +1403,27 @@
 		
 		$('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
 		
+		var pattern = /\s/g;
 		$("[name='downloadLocations']").each(function(idx, cur){
-			$(cur).val($(cur).val().trim());
+			var value = $(cur).val().trim();
+			$(cur).val(value);
+			
+			if (value.match(pattern)) {
+				alertify.error("DownloadLocation remove spaces", 0);
+				
+				return false;
+			}
 		});
 		
 		$("[name='homepage']").each(function(idx, cur){
-			$(cur).val($(cur).val().trim());
+			var value = $(cur).val().trim();
+			$(cur).val(value);
+			
+			if (value.match(pattern)) {
+				alertify.error("Homepage remove spaces", 0);
+				
+				return false;
+			}
 		});
 
 		var nicknameFormatErrorFlag = true;
@@ -2250,32 +2265,46 @@ var fn = {
 			$(target).val(value);
 		}
 		
-    	$("input[name=validationType]").val('DOWNLOADLOCATION');
-    	$("[name='downloadLocation']").val(value);
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-	        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
-		        		var downloadLocation = json.externalData2.downloadLocation;
-		        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
-		        			downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
-		        		}
-		        		
-		        		$(target).parent().next("span.urltxt").empty();
-		        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
+		var pattern = /\s/g;
+		if (value.match(pattern)) {
+			$(target).parent().next("span.urltxt").empty();
+			$(target).parent().next("span.urltxt").css("display", "none");
+			$(target).parent().next().next("span.retxt").empty();
+			$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+		} else {
+			$(target).parent().next().next("span.retxt").empty();
+			$(target).parent().next().next("span.retxt").css("display", "none");
+			
+			$("input[name=validationType]").val('DOWNLOADLOCATION');
+	    	$("[name='downloadLocation']").val(value);
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+			        		var downloadLocation = json.externalData2.downloadLocation;
+			        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
+			        			downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
+			        		}
+			        		
+			        		$(target).parent().next("span.urltxt").empty();
+			        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
+			        	}
+		        	}else{
+			        	$(target).parent().next("span.urltxt").empty();
 		        	}
-	        	}else{
-		        	$(target).parent().next("span.urltxt").empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	urlDuplicationAll : function(){
+		var pattern = /\s/g;
+		var patternCnt = 0;
+		
 		$("[name='downloadLocations']").each(function(idx, cur){
 			var value = $(cur).val();
 
@@ -2283,41 +2312,52 @@ var fn = {
 				value = value.slice(0, -1); // 마지막 문자열 제거
 				$(cur).val(value);
 			}
+			
+			if (value.match(pattern)) {
+				patternCnt++;
+				$(cur).parent().next("span.urltxt").empty();
+				$(cur).parent().next("span.urltxt").css("display", "none");
+				$(cur).parent().next().next("span.retxt").empty();
+				$(cur).parent().next().next("span.retxt").html("Remove spaces");
+			}
 		});
 		
-		$("input[name=validationType]").val('DOWNLOADLOCATIONS');
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-	        		var diffMsg = json.externalData2.downloadLocations.split("||");
-					
-					$("[name='downloadLocations']").each(function(idx, cur){
-						var downloadLocation = $(cur).val();
-						var msg = diffMsg.filter(function(a){
-					        return a.indexOf(downloadLocation) > -1;
-					    })[0];
+		if (patternCnt == 0) {
+			$("input[name=validationType]").val('DOWNLOADLOCATIONS');
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		var diffMsg = json.externalData2.downloadLocations.split("||");
 						
-						if(msg){
-							msg = msg.split("@@")[1];
-							var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
+						$("[name='downloadLocations']").each(function(idx, cur){
+							var downloadLocation = $(cur).val();
+							var msg = diffMsg.filter(function(a){
+						        return a.indexOf(downloadLocation) > -1;
+						    })[0];
 							
-							$(cur).parent().next("span.urltxt").empty();
-							$(cur).parent().next("span.urltxt").html(downloadLocation).show();
-						}						
-					});
-					
-	        	}else{
-	        		$(".multiDownloadLocationSet > .required > span.urltxt").empty();
-	        	}
-	        	
-	        	fn.homepageDuplication($('input[name=homepage]'));
-	        },
-            error : onError
-	    }).submit();
+							if(msg){
+								msg = msg.split("@@")[1];
+								var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
+								$(cur).parent().next().next("span.retxt").empty();
+								$(cur).parent().next().next("span.urltxt").css("display", "none");
+								$(cur).parent().next("span.urltxt").empty();
+								$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+							}						
+						});
+						
+		        	}else{
+		        		$(".multiDownloadLocationSet > .required > span.urltxt").empty();
+		        	}
+		        	
+		        	fn.homepageDuplication($('input[name=homepage]'));
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	homepageDuplication : function(target){
 		var value = $(target).val();
@@ -2327,30 +2367,41 @@ var fn = {
 			$(target).val(value);
 		}
 		
-		$("input[name=validationType]").val('HOMEPAGE');
-		
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-	        		if (typeof json.externalData2.homepage !== 'undefined') {
-	        			var homepageHtml = json.externalData2.homepage;
-		        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
-		        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
+		var pattern = /\s/g;
+		if (value.match(pattern)) {
+			$(target).next("span.urltxt").empty();
+			$(target).next("span.urltxt").css("display", "none");
+			$(target).next().next("span.retxt").empty();
+			$(target).next().next("span.retxt").html("Remove spaces").show();
+		} else {
+			$(target).next().next("span.retxt").empty();
+			$(target).next().next("span.retxt").css("display", "none");
+			
+			$("input[name=validationType]").val('HOMEPAGE');
+			
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		if (typeof json.externalData2.homepage !== 'undefined') {
+		        			var homepageHtml = json.externalData2.homepage;
+			        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+			        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
+			        		}
+			        		
+			        		$(target).next("span.urltxt").empty();
+							$(target).next("span.urltxt").html(homepageHtml).show();
 		        		}
-		        		
-		        		$(target).next("span.urltxt").empty();
-						$(target).next("span.urltxt").html(homepageHtml).show();
-	        		}
-	        	}else{
-					$(target).next("span.urltxt").empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
+		        	}else{
+						$(target).next("span.urltxt").empty();
+		        	}
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	checkValid : function(){
 		var result = gLicenseData.filter(function(a){

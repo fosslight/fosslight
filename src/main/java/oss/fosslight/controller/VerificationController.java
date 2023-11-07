@@ -459,11 +459,9 @@ public class VerificationController extends CoTopComponent {
 				// 프로젝트 기본정보의 distribution type이 verify까지만인 경우, distribute status를 N/A 처리한다.
 				{
 					prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-					
-					if ("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase())
-							|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase()) 
-									&& verificationService.checkNetworkServer(ossNotice.getPrjId())
-							)
+					String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType()).getCdDtlExp();
+					if ("T".equalsIgnoreCase(avoidNull(distributionType))
+							|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(ossNotice.getPrjId()))
 							|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) // 배포사이트 사용안함으로 설정한 경우
 							) {
 						project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);

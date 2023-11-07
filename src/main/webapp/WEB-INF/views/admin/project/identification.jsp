@@ -335,8 +335,10 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-                    	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
+						<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin())}">
 							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" class="btnColor red srcBtn" style="width: 115px;" />
+						</c:if>
+                    	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('DEP')" class="btnColor red srcBtn" style="width: 100px;" />
 							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('DEP')" class="btnColor btnColor red idenEdit" />
 						</c:if>

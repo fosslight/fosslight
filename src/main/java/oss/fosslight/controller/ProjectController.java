@@ -3341,6 +3341,60 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	/**
+	 * Adds the watchers.
+	 *
+	 * @param project the project
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the response entity
+	 */
+	@PostMapping(value = PROJECT.ADD_WATCHERS)
+	public @ResponseBody ResponseEntity<Object> addWatchers(@RequestBody Project project,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		try {
+			String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+			Project param = new Project();
+			
+			for (Map<String, String> changeWatcher : project.getChangeWatcherList()) {
+				String prjEmail = changeWatcher.get("prjEmail");
+				
+				if (CoConstDef.FLAG_YES.equals(ldapFlag) && !isEmpty(prjEmail)) {
+					Map<String, String> userInfo = new HashMap<>();
+					userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
+					userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
+					
+					boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", prjEmail);
+					
+					if (!isAuthenticated) {
+						throw new Exception("add Watcher Failure");
+					}
+				}
+				
+				param.setPrjUserId(changeWatcher.get("prjUserId"));
+				param.setPrjDivision(changeWatcher.get("prjDivision"));
+				param.setPrjEmail(prjEmail);
+				
+				for (String prjId : project.getPrjIds()) {
+					if (!isEmpty(param.getPrjUserId()) || !isEmpty(param.getPrjEmail())) {
+						param.setPrjId(prjId);
+						projectService.addWatcher(param);
+					}
+				}
+			}
+			
+			resultMap.put("isValid", "true");
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, null);
+		}
+		
+		return makeJsonResponseHeader(resultMap);
+	}
+	
+	/**
 	 * Removes the watcher.
 	 *
 	 * @param project the project
@@ -3357,6 +3411,43 @@ public class ProjectController extends CoTopComponent {
 				projectService.removeWatcher(project);
 			} else {
 				return makeJsonResponseHeader(false, null);
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, null);
+		}
+		
+		return makeJsonResponseHeader();
+	}
+	
+	/**
+	 * Removes the watcher.
+	 *
+	 * @param project the project
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the response entity
+	 */
+	@PostMapping(value = PROJECT.REMOVE_WATCHERS)
+	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody Project project,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		try {
+			Project param = new Project();
+			
+			for (Map<String, String> changeWatcher : project.getChangeWatcherList()) {
+				String prjUserId = changeWatcher.get("prjUserId");
+				String prjEmail = changeWatcher.get("prjEmail");
+				
+				if (!isEmpty(prjUserId) || !isEmpty(prjEmail)) {
+					param.setPrjUserId(prjUserId);
+					param.setPrjDivision(changeWatcher.get("prjDivision"));
+					param.setPrjEmail(prjEmail);
+					
+					for (String prjId : project.getPrjIds()) {
+						param.setPrjId(prjId);
+						projectService.removeWatcher(param);
+					}
+				}
 			}
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, null);
@@ -3390,7 +3481,7 @@ public class ProjectController extends CoTopComponent {
 						}
 					}
 					
-					if (!isEmpty(project.getPrjId())) {
+					if (isEmpty(project.getCopyWatcherLocation()) && !isEmpty(project.getPrjId())) {
 						boolean existProjectWatcher = projectService.existsWatcher(project);
 						
 						for (Project pm : result) {
