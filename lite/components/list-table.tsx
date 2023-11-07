@@ -28,19 +28,19 @@ function generatePagination(currPage: number, lastPage: number) {
 }
 
 export default function ListTable({
-  rowId,
   rows,
   columns,
   currentSort,
   pagination,
-  render
+  render,
+  onClickRow
 }: {
-  rowId: string;
   rows: any[];
   columns: { name: string; sort: string }[];
   currentSort?: string;
   pagination?: { totalCount: number; currentPage: number; countPerPage: number };
   render: (row: any, column: string) => React.ReactNode;
+  onClickRow: (row: any) => void;
 }) {
   const currentSortObj = Object.fromEntries(
     (currentSort || '').split(',').map((str) => str.split('-'))
@@ -229,7 +229,7 @@ export default function ListTable({
                   'border-b border-semigray',
                   view === 'pc' && 'cursor-pointer hover:opacity-80'
                 )}
-                onClick={() => router.push(`${pathname}/${row[rowId]}`)}
+                onClick={() => onClickRow(row)}
               >
                 {columns
                   .filter((column) => isColumnShown[column.name])
