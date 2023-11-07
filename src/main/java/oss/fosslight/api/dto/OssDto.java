@@ -2,12 +2,15 @@ package oss.fosslight.api.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class OssDto {
     String ossId;
     String ossType;
     String ossName;
     String ossVersion;
+    List<LicenseDto> ossLicenses;
     String licenseName;
     String licenseType;
     String downloadUrl;
