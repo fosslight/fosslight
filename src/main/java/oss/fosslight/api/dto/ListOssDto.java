@@ -18,15 +18,19 @@ public class ListOssDto {
         }
     }
 
-    @Data
+    @Setter
+    @Getter
     @Builder(toBuilder = true)
     public static class Request extends Paging {
         private String ossName;
         private String ossId;
+        @Builder.Default
         private Boolean ossNameExact = false;
         private String licenseName;
+        @Builder.Default
         private Boolean licenseNameExact = false;
         private String homepageUrl;
+        @Builder.Default
         private Boolean homepageUrlExact = false;
         private String description;
         private String copyright;
@@ -41,6 +45,7 @@ public class ListOssDto {
         private String modifiedAtTo;
 
 
+        @Builder.Default
         @Setter(AccessLevel.NONE)
         private Boolean searchFlag = true;
         @Setter(AccessLevel.NONE)
@@ -77,14 +82,13 @@ public class ListOssDto {
             var ossMaster = new OssMaster();
             ossMaster.setOssName(ossName);
             ossMaster.setOssId(ossId);
-            ossMaster.setOssNameAllSearchFlag(ossNameExact ? "Y" : "N");
+            ossMaster.setOssNameAllSearchFlag((ossNameExact != null && ossNameExact) ? "Y" : "N");
             ossMaster.setLicenseName(licenseName);
-            ossMaster.setLicenseNameAllSearchFlag(licenseNameExact ? "Y" : "N");
+            ossMaster.setLicenseNameAllSearchFlag((licenseNameExact != null && licenseNameExact) ? "Y" : "N");
             ossMaster.setHomepage(homepageUrl);
-            // homepageUrlExact = null??
-//            ossMaster.setHomepageAllSearchFlag(homepageUrlExact ? "Y" : "N");
+            ossMaster.setHomepageAllSearchFlag((homepageUrlExact != null && homepageUrlExact) ? "Y" : "N");
             ossMaster.setSummaryDescription(description);
-            ossMaster.setDeactivateFlag(deactivate ? "Y" : "N");
+            ossMaster.setDeactivateFlag((deactivate != null && deactivate) ? "Y" : "N");
             ossMaster.setOssType(ossType);
             ossMaster.setcStartDate(createdAtFrom);
             ossMaster.setcEndDate(createdAtTo);
