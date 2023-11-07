@@ -91,9 +91,9 @@ export default function OSSList() {
   const [rows, setRows] = useState<any[]>([]);
   const columns = [
     { name: 'ID', sort: 'id' },
-    { name: 'Type', sort: 'type' },
     { name: 'Name', sort: 'name' },
     { name: 'Ver', sort: 'ver' },
+    { name: 'Type', sort: 'type' },
     { name: 'License(s)', sort: '' },
     { name: 'Obligation(s)', sort: 'obg' },
     { name: 'URL', sort: '' },
@@ -127,9 +127,9 @@ export default function OSSList() {
       setRows(
         Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
           ossId: String(24 - 10 * (params.page - 1) - idx),
-          ossType: 'MD',
           ossName: 'cairo',
           ossVersion: '1.4.12',
+          ossType: 'MD',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           licenseType: 'Copyleft',
           obligations: 'YY',
@@ -188,16 +188,16 @@ export default function OSSList() {
             return row.ossId;
           }
 
-          if (column === 'Type') {
-            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
-          }
-
           if (column === 'Name') {
             return row.ossName;
           }
 
           if (column === 'Ver') {
             return row.ossVersion;
+          }
+
+          if (column === 'Type') {
+            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
           }
 
           if (column === 'License(s)') {

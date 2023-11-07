@@ -12,10 +12,10 @@ export default function DetailModalLicense({ data }: { data: any }) {
 
 /*
 License ID
-License Type
 License Name
 License Nickname
 License Identifier
+License Type
 Obligation(s)
 Restriction(s)
 Homepage URL

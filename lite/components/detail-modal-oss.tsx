@@ -12,26 +12,24 @@ export default function DetailModalOSS({ data }: { data: any }) {
 
 /*
 OSS ID
-OSS Type
 OSS Name
 OSS Nickname
 OSS Version
-Download URL
-Homepage URL
-Description
-Copyright
-Attribution
-Creator
-Created
-Modifier
-Modified
-Deactivate
-
+OSS Type
 License Name(s)
 License Type
 Declared License(s)
 Detected License(s)
 Obligation(s)
-
+Download URL
+Homepage URL
+Description
+Copyright
+Attribution
 Vulnerability(s)
+Deactivate
+Creator
+Created
+Modifier
+Modified
 */
