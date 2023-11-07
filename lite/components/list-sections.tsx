@@ -177,7 +177,17 @@ export default function ListSections({
                           <i className="fa-solid fa-code" title="Source" />
                         )}
                       </div>
-                      <div className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500">
+                      <div
+                        className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500 cursor-pointer"
+                        onClick={() => {
+                          const urlQueryParams = new URLSearchParams(queryParams);
+                          urlQueryParams.set('modal-type', 'vuln');
+                          urlQueryParams.set('modal-id', oss.cveId);
+                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                            scroll: false
+                          });
+                        }}
+                      >
                         {oss.cvssScore}
                       </div>
                     </div>

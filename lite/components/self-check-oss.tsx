@@ -39,6 +39,7 @@ export default function SelfCheckOSS() {
           description: 'Some files in util and test folder are released under GPL-2.0',
           copyright:
             'Copyright (c) 2002 University of Southern California Copyright (c) 2005 Red Hat, Inc.',
+          cveId: 'CVE-2020-35492',
           cvssScore: '7.8',
           exclude: false
         }))
@@ -151,7 +152,17 @@ export default function SelfCheckOSS() {
                 )}
                 {row.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
               </div>
-              <div className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500">
+              <div
+                className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500 cursor-pointer"
+                onClick={() => {
+                  const urlQueryParams = new URLSearchParams(queryParams);
+                  urlQueryParams.set('modal-type', 'vuln');
+                  urlQueryParams.set('modal-id', row.cveId);
+                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                    scroll: false
+                  });
+                }}
+              >
                 {row.cvssScore}
               </div>
             </div>

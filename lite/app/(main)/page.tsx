@@ -35,6 +35,7 @@ export default function Dashboard() {
           ossVersion: '1.4.12',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           obligations: 'YY',
+          cveId: 'CVE-2020-35492',
           cvssScore: '7.8',
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
