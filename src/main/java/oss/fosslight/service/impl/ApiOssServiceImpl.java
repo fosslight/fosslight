@@ -7,10 +7,12 @@ package oss.fosslight.service.impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CoConstDef;
@@ -76,79 +78,42 @@ public class ApiOssServiceImpl implements ApiOssService {
     public ListOssDto.Result listOss(ListOssDto.Request request) {
         var ossMaster = new OssMaster();
 
-        HashMap<String, Object> map = new HashMap<>();
-
-        ArrayList<OssDto> newList = new ArrayList<>();
-
         ListOssDto.Result result = new ListOssDto.Result();
+        request.setVersionCheck(true);
         var list = apiOssMapper.selectOssList(request);
         result.list = list;
 
-        String orgOssName = request.getOssName();
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
 
-        // TODO:
-//        for (OssMaster oss : list) {
-//            if (multiOssList.contains(oss.getOssName().toUpperCase())) {
-//                var query = request.toBuilder()
-//                        .ossName(oss.getOssName())
-//                        .ossId(oss.getOssId())
-//                        .build();
-//                List<OssMaster> subList = apiOssMapper.selectOssSubList(ossMaster);
-//
-//                newList.addAll(subList);
-//            } else {
-//                newList.add(oss);
-//            }
-//        }
-//
-//        ossMaster.setOssName(orgOssName);
-//
-//        // license name 처리
-//        if (newList != null && !newList.isEmpty()) {
-//            OssMaster param = new OssMaster();
-//
-//            for (OssMaster bean : newList) {
-//                param.addOssIdList(bean.getOssId());
-//            }
-//
-//            List<OssLicense> licenseList = apiOssMapper.selectOssLicenseList(param);
-//
-//            for (OssLicense licenseBean : licenseList) {
-//                for (OssMaster bean : newList) {
-//                    if (licenseBean.getOssId().equals(bean.getOssId())) {
-//                        bean.addOssLicense(licenseBean);
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            for (OssMaster bean : newList) {
-//                if (bean.getOssLicenses() != null && !bean.getOssLicenses().isEmpty()) {
-//                    bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
-//                }
-//
-//                // group by key 설정 grid 상에서 대소문자 구분되어 대문자로 모두 치화하여 그룹핑
-//                bean.setGroupKey(bean.getOssName().toUpperCase());
-//
-//                // NICK NAME ICON 표시
-//                if (CoConstDef.FLAG_YES.equals(ossMaster.getSearchFlag())) {
-//                    bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
-//
-//                    if (!isEmpty(bean.getOssNickname())) {
-//                        bean.setOssName("<span class='iconSet nick'>Nick</span>&nbsp;" + bean.getOssName());
-//                    } else {
-//                        bean.setOssName("<span class='iconSet nick dummy'></span>&nbsp;" + bean.getOssName());
-//                    }
-//                }
-//            }
-//        }
-//
-//        map.put("page", ossMaster.getCurPage());
-//        map.put("total", ossMaster.getTotBlockSize());
-//        map.put("records", records);
-//        map.put("rows", newList);
+        var rows = list.stream().flatMap(oss -> {
+            if (!multiOssList.contains(oss.getOssName().toUpperCase())) {
+                return Stream.of(oss);
+            }
+            var query = request.toBuilder()
+                    .ossName(oss.getOssName())
+                    .ossId(oss.getOssId())
+                    .build()
+                    .toOssMaster();
+            var sublist = apiOssMapper.selectOssSubList(query);
+            return sublist.stream();
+        }).collect(Collectors.toList());
+
+        // license name 처리
+        if (!rows.isEmpty()) {
+            var ossIdList = rows.stream().map(OssDto::getOssId).collect(Collectors.toList());
+
+            List<LicenseDto> licenseList = apiOssMapper.selectOssLicenseList(ossIdList);
+
+            rows.forEach(oss -> {
+                var licensesForOss = licenseList.stream().filter(license ->
+                        license.getOssId().equals(oss.getOssId())
+                ).sorted().collect(Collectors.toList());
+                oss.setOssLicenses(licensesForOss);
+            });
+        }
+
+        result.list = rows;
 
         return result;
     }

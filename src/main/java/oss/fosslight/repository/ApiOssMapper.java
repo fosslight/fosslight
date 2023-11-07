@@ -5,13 +5,16 @@
 
 package oss.fosslight.repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.domain.OssMaster;
 
 @Mapper
 public interface ApiOssMapper {
@@ -32,4 +35,8 @@ public interface ApiOssMapper {
 	List<HashMap<String, Object>> getOssAllNickNameList();
 
     List<OssDto> selectOssList(ListOssDto.Request query);
+
+	List<OssDto> selectOssSubList(OssMaster query);
+
+	List<LicenseDto> selectOssLicenseList(List<String> ossIdList);
 }

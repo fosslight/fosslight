@@ -1,7 +1,7 @@
 package oss.fosslight.api.dto;
 
 import lombok.*;
-import oss.fosslight.util.DateUtil;
+import oss.fosslight.domain.OssMaster;
 
 import java.util.List;
 
@@ -45,8 +45,7 @@ public class ListOssDto {
         private Boolean searchFlag = true;
         @Setter(AccessLevel.NONE)
         private String cvssScore;
-        @Setter(AccessLevel.NONE)
-        private String versionCheck;
+        private Boolean versionCheck;
 
         public void setHomepageUrl(String url) {
             homepageUrl = url
@@ -73,10 +72,33 @@ public class ListOssDto {
         public String getLicenseNameQuery() {
             return "%" + licenseName.replaceAll("_", "\\_") + "%";
         }
-    }
 
-//    public static class Query extends Request {
-//    }
+        public OssMaster toOssMaster() {
+            var ossMaster = new OssMaster();
+            ossMaster.setOssName(ossName);
+            ossMaster.setOssId(ossId);
+            ossMaster.setOssNameAllSearchFlag(ossNameExact ? "Y" : "N");
+            ossMaster.setLicenseName(licenseName);
+            ossMaster.setLicenseNameAllSearchFlag(licenseNameExact ? "Y" : "N");
+            ossMaster.setHomepage(homepageUrl);
+            // homepageUrlExact = null??
+//            ossMaster.setHomepageAllSearchFlag(homepageUrlExact ? "Y" : "N");
+            ossMaster.setSummaryDescription(description);
+            ossMaster.setDeactivateFlag(deactivate ? "Y" : "N");
+            ossMaster.setOssType(ossType);
+            ossMaster.setcStartDate(createdAtFrom);
+            ossMaster.setcEndDate(createdAtTo);
+            ossMaster.setmStartDate(modifiedAtFrom);
+            ossMaster.setmEndDate(modifiedAtTo);
+            ossMaster.setCreator(creator);
+            ossMaster.setModifier(modifier);
+
+//            private String copyright;
+//            private String licenseType;
+
+            return ossMaster;
+        }
+    }
 
     public static class Result {
         public List<OssDto> list;
