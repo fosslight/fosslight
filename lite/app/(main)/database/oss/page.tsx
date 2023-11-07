@@ -282,7 +282,12 @@ export default function OSSList() {
 
           return null;
         }}
-        onClickRow={(row: any) => router.push(`${pathname}/${row.ossId}`)}
+        onClickRow={(row: any) => {
+          const urlQueryParams = new URLSearchParams(queryParams);
+          urlQueryParams.set('modal-type', 'oss');
+          urlQueryParams.set('modal-id', row.ossId);
+          router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
+        }}
       />
     </>
   );
