@@ -14,7 +14,7 @@ export default function SelfCheckModal({
   onHide: () => void;
 }) {
   return (
-    <Modal show={show} onHide={onHide} hideByBackdrop={false}>
+    <Modal show={show} onHide={onHide} size="sm" hideByBackdrop={false}>
       <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
         {mode === 'create' ? (
           <i className="text-sm fa-solid fa-plus" />
@@ -24,7 +24,7 @@ export default function SelfCheckModal({
         &ensp;
         {mode === 'create' ? 'Create a project to check' : 'Edit the project'}
       </div>
-      <div className="flex flex-col gap-y-4 w-72">
+      <div className="flex flex-col gap-y-4">
         <div className="flex flex-col gap-y-2">
           <label className="text-sm font-semibold">
             Project Name <span className="font-bold text-crimson">*</span>
