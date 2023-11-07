@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import Link from 'next/link';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 function highlight(text: string, keyword?: string) {
@@ -30,6 +31,9 @@ export default function ListSections({
   const [isVulnSectionShown, setIsVulnSectionShown] = useState(true);
   const [isOssSectionShown, setIsOssSectionShown] = useState(true);
   const [isLicenseSectionShown, setIsLicenseSectionShown] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryParams = useSearchParams();
 
   return (
     <div className="grid grid-cols-2 gap-4 w-[calc(100%-4px)]">
@@ -72,7 +76,17 @@ export default function ListSections({
                   </div>
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="flex gap-x-1 font-semibold">
+                      <div
+                        className="flex gap-x-1 font-semibold cursor-pointer"
+                        onClick={() => {
+                          const urlQueryParams = new URLSearchParams(queryParams);
+                          urlQueryParams.set('modal-type', 'vuln');
+                          urlQueryParams.set('modal-id', vulnerability.cveId);
+                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                            scroll: false
+                          });
+                        }}
+                      >
                         <div className="line-clamp-1 break-all">
                           {highlight(vulnerability.ossName, searchKeyword)}
                         </div>
@@ -139,7 +153,17 @@ export default function ListSections({
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="flex gap-x-1 font-semibold">
+                      <div
+                        className="flex gap-x-1 font-semibold cursor-pointer"
+                        onClick={() => {
+                          const urlQueryParams = new URLSearchParams(queryParams);
+                          urlQueryParams.set('modal-type', 'oss');
+                          urlQueryParams.set('modal-id', oss.ossId);
+                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                            scroll: false
+                          });
+                        }}
+                      >
                         <div className="line-clamp-1 break-all">
                           {highlight(oss.ossName, searchKeyword)}
                         </div>
@@ -214,7 +238,17 @@ export default function ListSections({
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="flex gap-x-1 font-semibold">
+                      <div
+                        className="flex gap-x-1 font-semibold cursor-pointer"
+                        onClick={() => {
+                          const urlQueryParams = new URLSearchParams(queryParams);
+                          urlQueryParams.set('modal-type', 'license');
+                          urlQueryParams.set('modal-id', license.licenseId);
+                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                            scroll: false
+                          });
+                        }}
+                      >
                         <div className="line-clamp-1 break-all">
                           {highlight(license.licenseName, searchKeyword)}
                         </div>
