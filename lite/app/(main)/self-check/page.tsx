@@ -8,13 +8,15 @@ import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
 
 export default function SelfCheckList() {
   const setLoading = useSetRecoilState(loadingState);
+  const router = useRouter();
+  const pathname = usePathname();
   const queryParams = useSearchParams();
 
   // Filters
@@ -122,7 +124,6 @@ export default function SelfCheckList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
-        rowId="projectId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -200,6 +201,7 @@ export default function SelfCheckList() {
 
           return null;
         }}
+        onClickRow={(row: any) => router.push(`${pathname}/${row.projectId}`)}
       />
     </>
   );
