@@ -2,10 +2,14 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import DetailModalLicense from './detail-modal-license';
+import DetailModalOSS from './detail-modal-oss';
+import DetailModalVuln from './detail-modal-vuln';
 import Loading from './loading';
 import Modal from './modal';
 
 export default function DetailModal() {
+  const [dataType, setDataType] = useState<string>('');
   const [data, setData] = useState<any>(null);
   const router = useRouter();
   const queryParams = useSearchParams();
@@ -18,6 +22,7 @@ export default function DetailModal() {
       return;
     }
 
+    setDataType(modalType);
     setData(null);
 
     setTimeout(() => {
@@ -32,7 +37,12 @@ export default function DetailModal() {
           <Loading />
         </div>
       ) : (
-        JSON.stringify(data)
+        (() => {
+          if (dataType === 'oss') return <DetailModalOSS data={data} />;
+          if (dataType === 'license') return <DetailModalLicense data={data} />;
+          if (dataType === 'vuln') return <DetailModalVuln data={data} />;
+          return null;
+        })()
       )}
     </Modal>
   );
