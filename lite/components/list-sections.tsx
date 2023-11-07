@@ -72,11 +72,11 @@ export default function ListSections({
                   </div>
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold break-all">
-                        {highlight(vulnerability.ossName, searchKeyword)}
-                      </div>
-                      <div className="flex-shrink-0 font-semibold">
-                        ({vulnerability.ossVersion})
+                      <div className="flex gap-x-1 font-semibold">
+                        <div className="line-clamp-1 break-all">
+                          {highlight(vulnerability.ossName, searchKeyword)}
+                        </div>
+                        <div className="flex-shrink-0">({vulnerability.ossVersion})</div>
                       </div>
                       <div className="flex-shrink-0 px-1 py-0.5 bg-darkgray rounded text-xs text-semiwhite">
                         {highlight(vulnerability.cveId, searchKeyword)}
@@ -139,10 +139,12 @@ export default function ListSections({
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold break-all">
-                        {highlight(oss.ossName, searchKeyword)}
+                      <div className="flex gap-x-1 font-semibold">
+                        <div className="line-clamp-1 break-all">
+                          {highlight(oss.ossName, searchKeyword)}
+                        </div>
+                        <div className="flex-shrink-0">({oss.ossVersion})</div>
                       </div>
-                      <div className="flex-shrink-0 font-semibold">({oss.ossVersion})</div>
                       <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                         {oss.obligations[0] === 'Y' && (
                           <i className="fa-solid fa-file-lines" title="Notice" />
@@ -212,11 +214,13 @@ export default function ListSections({
                 >
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div className="line-clamp-1 font-semibold break-all">
-                        {highlight(license.licenseName, searchKeyword)}
-                      </div>
-                      <div className="flex-shrink-0 font-semibold">
-                        ({highlight(license.licenseIdentifier, searchKeyword)})
+                      <div className="flex gap-x-1 font-semibold">
+                        <div className="line-clamp-1 break-all">
+                          {highlight(license.licenseName, searchKeyword)}
+                        </div>
+                        <div className="flex-shrink-0">
+                          ({highlight(license.licenseIdentifier, searchKeyword)})
+                        </div>
                       </div>
                       <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                         {license.obligations[0] === 'Y' && (
