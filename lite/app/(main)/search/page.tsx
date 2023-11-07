@@ -33,7 +33,8 @@ export default function FullSearch() {
       );
 
       setOssList(
-        Array.from(Array(3)).map(() => ({
+        Array.from(Array(3)).map((_, idx) => ({
+          ossId: String(3 - idx),
           ossName: 'cairo',
           ossVersion: '1.4.12',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
@@ -45,7 +46,8 @@ export default function FullSearch() {
       );
 
       setLicenseList(
-        Array.from(Array(3)).map(() => ({
+        Array.from(Array(3)).map((_, idx) => ({
+          licenseId: String(3 - idx),
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
           restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
