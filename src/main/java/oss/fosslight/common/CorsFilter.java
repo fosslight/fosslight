@@ -40,6 +40,7 @@ public class CorsFilter implements Filter {
         if (Url.LITE_HUB_ORIGINS.stream().anyMatch(allowedOrigin -> allowedOrigin.equals(origin))) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
         }
 
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
