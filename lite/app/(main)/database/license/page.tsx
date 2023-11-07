@@ -249,7 +249,12 @@ export default function LicenseList() {
 
           return null;
         }}
-        onClickRow={(row: any) => router.push(`${pathname}/${row.licenseId}`)}
+        onClickRow={(row: any) => {
+          const urlQueryParams = new URLSearchParams(queryParams);
+          urlQueryParams.set('modal-type', 'license');
+          urlQueryParams.set('modal-id', row.licenseId);
+          router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
+        }}
       />
     </>
   );
