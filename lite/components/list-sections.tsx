@@ -71,22 +71,22 @@ export default function ListSections({
                   key={idx}
                   className="flex gap-x-3 pb-3 border-b border-b-semigray last:pb-0 last:border-none"
                 >
-                  <div className="flex justify-center items-center flex-shrink-0 w-8 h-8 border border-crimson rounded-full text-crimson">
+                  <div
+                    className="flex justify-center items-center flex-shrink-0 w-8 h-8 border border-crimson rounded-full text-crimson cursor-pointer"
+                    onClick={() => {
+                      const urlQueryParams = new URLSearchParams(queryParams);
+                      urlQueryParams.set('modal-type', 'vuln');
+                      urlQueryParams.set('modal-id', vulnerability.cveId);
+                      router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                        scroll: false
+                      });
+                    }}
+                  >
                     {vulnerability.cvssScore}
                   </div>
                   <div className="flex flex-col gap-y-1">
                     <div className="flex gap-x-2 items-center">
-                      <div
-                        className="flex gap-x-1 font-semibold cursor-pointer"
-                        onClick={() => {
-                          const urlQueryParams = new URLSearchParams(queryParams);
-                          urlQueryParams.set('modal-type', 'vuln');
-                          urlQueryParams.set('modal-id', vulnerability.cveId);
-                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                            scroll: false
-                          });
-                        }}
-                      >
+                      <div className="flex gap-x-1 font-semibold">
                         <div className="line-clamp-1 break-all">
                           {highlight(vulnerability.ossName, searchKeyword)}
                         </div>
