@@ -117,7 +117,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className="col-span-2 shadow-box lg:col-span-1">
+      <div className="col-span-2 self-start shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
           {searchKeyword === undefined && (
@@ -212,7 +212,7 @@ export default function ListSections({
           </div>
         </div>
       </div>
-      <div className="col-span-2 shadow-box lg:col-span-1">
+      <div className="col-span-2 self-start shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
           {searchKeyword === undefined && (
