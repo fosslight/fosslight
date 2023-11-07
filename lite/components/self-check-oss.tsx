@@ -126,8 +126,10 @@ export default function SelfCheckOSS() {
               <span className="text-sm text-darkgray">exclude {row.exclude ? 'O' : 'X'}</span>
             </div>
             <div className="flex gap-x-2 items-center">
-              <div className="line-clamp-1 font-semibold break-all">{row.ossName}</div>
-              <div className="flex-shrink-0 font-semibold">({row.ossVersion})</div>
+              <div className="flex gap-x-1 font-semibold">
+                <div className="line-clamp-1 break-all">{row.ossName}</div>
+                <div className="flex-shrink-0">({row.ossVersion})</div>
+              </div>
               <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                 {row.obligations[0] === 'Y' && (
                   <i className="fa-solid fa-file-lines" title="Notice" />
