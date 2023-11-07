@@ -2,6 +2,7 @@ import { loadingState } from '@/lib/atoms';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
@@ -10,6 +11,9 @@ export default function SelfCheckOSS() {
   const [method, setMethod] = useState<'file' | 'url'>('file');
   const [files, setFiles] = useState<any[]>([]);
   const [rows, setRows] = useState<any[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryParams = useSearchParams();
 
   useEffect(() => {
     setLoading(true);
@@ -22,8 +26,9 @@ export default function SelfCheckOSS() {
         }))
       );
       setRows(
-        Array.from(Array(5)).map(() => ({
+        Array.from(Array(5)).map((_, idx) => ({
           path: 'aaa/bbb',
+          ossId: String(5 - idx),
           ossName: 'cairo',
           ossVersion: '1.4.12',
           licenses: 'MPL-1.1, GPL-2.0',
@@ -126,7 +131,17 @@ export default function SelfCheckOSS() {
               <span className="text-sm text-darkgray">exclude {row.exclude ? 'O' : 'X'}</span>
             </div>
             <div className="flex gap-x-2 items-center">
-              <div className="flex gap-x-1 font-semibold">
+              <div
+                className="flex gap-x-1 font-semibold cursor-pointer"
+                onClick={() => {
+                  const urlQueryParams = new URLSearchParams(queryParams);
+                  urlQueryParams.set('modal-type', 'oss');
+                  urlQueryParams.set('modal-id', row.ossId);
+                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                    scroll: false
+                  });
+                }}
+              >
                 <div className="line-clamp-1 break-all">{row.ossName}</div>
                 <div className="flex-shrink-0">({row.ossVersion})</div>
               </div>
