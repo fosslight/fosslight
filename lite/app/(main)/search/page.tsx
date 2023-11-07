@@ -12,8 +12,8 @@ export default function FullSearch() {
   const [ossList, setOssList] = useState<any[]>([]);
   const [licenseList, setLicenseList] = useState<any[]>([]);
 
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get('keyword') || '';
+  const queryParams = useSearchParams();
+  const keyword = queryParams.get('keyword') || '';
 
   // Load recent rows for each section
   useEffect(() => {

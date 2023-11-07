@@ -6,10 +6,10 @@ import { useRecoilValue } from 'recoil';
 
 export default function FullSearchBar() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const queryParams = useSearchParams();
 
   const view = useRecoilValue(viewState);
-  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
+  const [keyword, setKeyword] = useState(queryParams.get('keyword') || '');
   const placeholder = 'Search vulnerabilities, OSS, or licenses';
 
   // Wait until detecting appropriate view
