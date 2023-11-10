@@ -1,5 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import dayjs from 'dayjs';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import ListTable from './list-table';
@@ -15,6 +16,10 @@ export default function SelfCheckPackage() {
     { name: 'License(s)', sort: '' },
     { name: 'URL', sort: '' }
   ];
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryParams = useSearchParams();
 
   useEffect(() => {
     setLoading(true);
@@ -69,7 +74,6 @@ export default function SelfCheckPackage() {
 
       {/* Table */}
       <ListTable
-        rowId="ossId"
         rows={rows}
         columns={columns}
         render={(row: any, column: string) => {
@@ -114,6 +118,12 @@ export default function SelfCheckPackage() {
           }
 
           return null;
+        }}
+        onClickRow={(row: any) => {
+          const urlQueryParams = new URLSearchParams(queryParams);
+          urlQueryParams.set('modal-type', 'oss');
+          urlQueryParams.set('modal-id', row.ossId);
+          router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
         }}
       />
     </>
