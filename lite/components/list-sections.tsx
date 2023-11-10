@@ -178,7 +178,7 @@ export default function ListSections({
                         )}
                       </div>
                       <div
-                        className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500 cursor-pointer"
+                        className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
                         onClick={() => {
                           const urlQueryParams = new URLSearchParams(queryParams);
                           urlQueryParams.set('modal-type', 'vuln');

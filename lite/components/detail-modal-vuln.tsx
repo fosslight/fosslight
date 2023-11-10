@@ -27,7 +27,7 @@ export default function DetailModalVuln({ data }: { data: any }) {
         />
         <DetailModalRow
           label="CVSS Score"
-          value={<div className="text-orange-500">{data.cvssScore}</div>}
+          value={<div className="text-crimson">{data.cvssScore}</div>}
           bottomBorder
         />
         <DetailModalRow
