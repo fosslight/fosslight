@@ -52,3 +52,8 @@
     @apply bg-crimson border border-crimson rounded outline-none text-semiwhite text-center;
   }
 }
+
+/* Override react-toggle */
+.react-toggle--checked .react-toggle-track {
+  background-color: #b02a42 !important;
+}
