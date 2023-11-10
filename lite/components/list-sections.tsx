@@ -41,7 +41,7 @@ export default function ListSections({
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">Vulnerability</div>
           {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/vulnerability?s=mod-dsc">
+            <Link className="text-charcoal" href="/database/vulnerability?s=modify-dsc">
               show more here
             </Link>
           )}
@@ -121,7 +121,7 @@ export default function ListSections({
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
           {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/oss?s=mod-dsc">
+            <Link className="text-charcoal" href="/database/oss?s=modify-dsc">
               show more here
             </Link>
           )}
@@ -216,7 +216,7 @@ export default function ListSections({
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
           {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/license?s=mod-dsc">
+            <Link className="text-charcoal" href="/database/license?s=modify-dsc">
               show more here
             </Link>
           )}
