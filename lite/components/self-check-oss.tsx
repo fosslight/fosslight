@@ -2,6 +2,7 @@ import { loadingState } from '@/lib/atoms';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
@@ -10,6 +11,9 @@ export default function SelfCheckOSS() {
   const [method, setMethod] = useState<'file' | 'url'>('file');
   const [files, setFiles] = useState<any[]>([]);
   const [rows, setRows] = useState<any[]>([]);
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryParams = useSearchParams();
 
   useEffect(() => {
     setLoading(true);
@@ -22,8 +26,9 @@ export default function SelfCheckOSS() {
         }))
       );
       setRows(
-        Array.from(Array(5)).map(() => ({
+        Array.from(Array(5)).map((_, idx) => ({
           path: 'aaa/bbb',
+          ossId: String(5 - idx),
           ossName: 'cairo',
           ossVersion: '1.4.12',
           licenses: 'MPL-1.1, GPL-2.0',
@@ -34,6 +39,7 @@ export default function SelfCheckOSS() {
           description: 'Some files in util and test folder are released under GPL-2.0',
           copyright:
             'Copyright (c) 2002 University of Southern California Copyright (c) 2005 Red Hat, Inc.',
+          cveId: 'CVE-2020-35492',
           cvssScore: '7.8',
           exclude: false
         }))
@@ -126,15 +132,37 @@ export default function SelfCheckOSS() {
               <span className="text-sm text-darkgray">exclude {row.exclude ? 'O' : 'X'}</span>
             </div>
             <div className="flex gap-x-2 items-center">
-              <div className="line-clamp-1 font-semibold break-all">{row.ossName}</div>
-              <div className="flex-shrink-0 font-semibold">({row.ossVersion})</div>
+              <div
+                className="flex gap-x-1 font-semibold cursor-pointer"
+                onClick={() => {
+                  const urlQueryParams = new URLSearchParams(queryParams);
+                  urlQueryParams.set('modal-type', 'oss');
+                  urlQueryParams.set('modal-id', row.ossId);
+                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                    scroll: false
+                  });
+                }}
+              >
+                <div className="line-clamp-1 break-all">{row.ossName}</div>
+                <div className="flex-shrink-0">({row.ossVersion})</div>
+              </div>
               <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
                 {row.obligations[0] === 'Y' && (
                   <i className="fa-solid fa-file-lines" title="Notice" />
                 )}
                 {row.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
               </div>
-              <div className="flex-shrink-0 px-1 py-0.5 border border-orange-500 rounded text-xs text-orange-500">
+              <div
+                className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
+                onClick={() => {
+                  const urlQueryParams = new URLSearchParams(queryParams);
+                  urlQueryParams.set('modal-type', 'vuln');
+                  urlQueryParams.set('modal-id', row.cveId);
+                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                    scroll: false
+                  });
+                }}
+              >
                 {row.cvssScore}
               </div>
             </div>

@@ -28,19 +28,19 @@ function generatePagination(currPage: number, lastPage: number) {
 }
 
 export default function ListTable({
-  rowId,
   rows,
   columns,
   currentSort,
   pagination,
-  render
+  render,
+  onClickRow
 }: {
-  rowId: string;
   rows: any[];
   columns: { name: string; sort: string }[];
   currentSort?: string;
   pagination?: { totalCount: number; currentPage: number; countPerPage: number };
   render: (row: any, column: string) => React.ReactNode;
+  onClickRow: (row: any) => void;
 }) {
   const currentSortObj = Object.fromEntries(
     (currentSort || '').split(',').map((str) => str.split('-'))
@@ -140,11 +140,11 @@ export default function ListTable({
         <table className={clsx('w-full text-sm', rows.length === 0 && 'min-h-[200px]')}>
           {/* Columns */}
           <thead>
-            <tr className="border-b-2 border-charcoal/80 text-center whitespace-nowrap">
+            <tr className="border-b-2 border-charcoal/80 text-left whitespace-nowrap">
               {columns
                 .filter((column) => isColumnShown[column.name])
                 .map((column) => (
-                  <th key={column.name} className="p-2 text-left">
+                  <th key={column.name} className="p-2">
                     <button
                       className="flex gap-x-2"
                       onClick={() => setSort(column.sort)}
@@ -225,11 +225,8 @@ export default function ListTable({
             {rows.map((row, idx) => (
               <tr
                 key={idx}
-                className={clsx(
-                  'border-b border-semigray',
-                  view === 'pc' && 'cursor-pointer hover:opacity-80'
-                )}
-                onClick={() => router.push(`${pathname}/${row[rowId]}`)}
+                className="border-b border-semigray cursor-pointer hover:opacity-80"
+                onClick={() => onClickRow(row)}
               >
                 {columns
                   .filter((column) => isColumnShown[column.name])

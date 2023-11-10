@@ -24,8 +24,8 @@ export default function TopBar() {
           onClick={() => setIsProfileShown(true)}
         />
       </div>
-      <Modal show={isProfileShown} onHide={() => setIsProfileShown(false)}>
-        <div className="flex justify-center items-center gap-x-2 pb-2 mb-2 border-b border-b-semiblack font-semibold">
+      <Modal show={isProfileShown} onHide={() => setIsProfileShown(false)} size="sm">
+        <div className="flex justify-center items-center gap-x-2 pb-3 mb-3 border-b border-b-semiblack font-semibold">
           <i className="text-xl fa-solid fa-user" />
           Profile Information
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import BottomBar from '@/components/bottom-bar';
+import DetailModal from '@/components/detail-modal';
 import FullSearchBar from '@/components/full-search-bar';
 import Loading from '@/components/loading';
 import SideBar from '@/components/side-bar';
@@ -76,6 +77,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Bottom navigation bar (Mobile) */}
       {view === 'mobile' && <BottomBar />}
+
+      {/* Modal for detail view */}
+      <DetailModal />
     </main>
   );
 }

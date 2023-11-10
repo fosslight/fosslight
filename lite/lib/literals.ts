@@ -40,3 +40,18 @@ export const selfCheckTabs: SelfCheckTab[] = [
       'Generate a notice document explaining the OSS in your project, as a format that you want.'
   }
 ];
+
+export const ossTypes: Record<string, { name: string; desc: string }> = {
+  M: {
+    name: 'Multi License',
+    desc: 'It contains source codes under multiple licenses. (EX. lib is LGPL-2.1 and src is GPL-2.0)'
+  },
+  D: {
+    name: 'Dual License',
+    desc: 'You can select one of the registered licenses. (EX. GPL-2.0 or MIT)'
+  },
+  V: {
+    name: 'Version Different License',
+    desc: 'It is distributed under different licenses according to its versions. (EX. 1.0 is GPL-2.0, but 2.0 is BSD-3-Clause)'
+  }
+};

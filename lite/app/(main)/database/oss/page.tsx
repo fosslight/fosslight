@@ -7,13 +7,15 @@ import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
 
 export default function OSSList() {
   const setLoading = useSetRecoilState(loadingState);
+  const router = useRouter();
+  const pathname = usePathname();
   const queryParams = useSearchParams();
 
   // Filters
@@ -89,9 +91,9 @@ export default function OSSList() {
   const [rows, setRows] = useState<any[]>([]);
   const columns = [
     { name: 'ID', sort: 'id' },
-    { name: 'Type', sort: 'type' },
     { name: 'Name', sort: 'name' },
     { name: 'Ver', sort: 'ver' },
+    { name: 'Type', sort: 'type' },
     { name: 'License(s)', sort: '' },
     { name: 'Obligation(s)', sort: 'obg' },
     { name: 'URL', sort: '' },
@@ -125,9 +127,9 @@ export default function OSSList() {
       setRows(
         Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
           ossId: String(24 - 10 * (params.page - 1) - idx),
-          ossType: 'MD',
           ossName: 'cairo',
           ossVersion: '1.4.12',
+          ossType: 'MD',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           licenseType: 'Copyleft',
           obligations: 'YY',
@@ -177,7 +179,6 @@ export default function OSSList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
-        rowId="ossId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -187,16 +188,16 @@ export default function OSSList() {
             return row.ossId;
           }
 
-          if (column === 'Type') {
-            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
-          }
-
           if (column === 'Name') {
             return row.ossName;
           }
 
           if (column === 'Ver') {
             return row.ossVersion;
+          }
+
+          if (column === 'Type') {
+            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
           }
 
           if (column === 'License(s)') {
@@ -251,7 +252,7 @@ export default function OSSList() {
           if (column === 'Vuln') {
             return (
               <a
-                className="text-orange-500 hover:underline"
+                className="text-crimson hover:underline"
                 href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}
@@ -280,6 +281,12 @@ export default function OSSList() {
           }
 
           return null;
+        }}
+        onClickRow={(row: any) => {
+          const urlQueryParams = new URLSearchParams(queryParams);
+          urlQueryParams.set('modal-type', 'oss');
+          urlQueryParams.set('modal-id', row.ossId);
+          router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
         }}
       />
     </>

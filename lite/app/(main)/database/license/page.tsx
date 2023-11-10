@@ -7,13 +7,15 @@ import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
 
 export default function LicenseList() {
   const setLoading = useSetRecoilState(loadingState);
+  const router = useRouter();
+  const pathname = usePathname();
   const queryParams = useSearchParams();
 
   // Filters
@@ -21,6 +23,7 @@ export default function LicenseList() {
   const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
   const filters: { default: Filter[]; hidden: Filter[] } = {
     default: [
+      { label: 'License Name', name: 'licenseName', type: 'char-exact' },
       {
         label: 'License Type',
         name: 'licenseType',
@@ -33,7 +36,6 @@ export default function LicenseList() {
           { label: 'Proprietary Free', value: '4' }
         ]
       },
-      { label: 'License Name', name: 'licenseName', type: 'char-exact' },
       {
         label: 'Obligation(s)',
         name: 'obligations',
@@ -92,9 +94,9 @@ export default function LicenseList() {
   const [rows, setRows] = useState<any[]>([]);
   const columns = [
     { name: 'ID', sort: 'id' },
-    { name: 'Type', sort: 'type' },
     { name: 'Name', sort: 'name' },
     { name: 'Identifier', sort: 'idf' },
+    { name: 'Type', sort: 'type' },
     { name: 'Obligation(s)', sort: 'obg' },
     { name: 'Restriction(s)', sort: 'res' },
     { name: 'URL', sort: 'url' },
@@ -127,9 +129,9 @@ export default function LicenseList() {
       setRows(
         Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
           licenseId: String(24 - 10 * (params.page - 1) - idx),
-          licenseType: 'Permissive',
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
+          licenseType: 'Permissive',
           obligations: 'YY',
           restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           homepageUrl: 'https://spdx.org/licenses/blessing.html',
@@ -173,7 +175,6 @@ export default function LicenseList() {
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
-        rowId="licenseId"
         rows={rows}
         columns={columns}
         currentSort={currentSort}
@@ -183,16 +184,16 @@ export default function LicenseList() {
             return row.licenseId;
           }
 
-          if (column === 'Type') {
-            return row.licenseType;
-          }
-
           if (column === 'Name') {
             return row.licenseName;
           }
 
           if (column === 'Identifier') {
             return row.licenseIdentifier;
+          }
+
+          if (column === 'Type') {
+            return row.licenseType;
           }
 
           if (column === 'Obligation(s)') {
@@ -247,6 +248,12 @@ export default function LicenseList() {
           }
 
           return null;
+        }}
+        onClickRow={(row: any) => {
+          const urlQueryParams = new URLSearchParams(queryParams);
+          urlQueryParams.set('modal-type', 'license');
+          urlQueryParams.set('modal-id', row.licenseId);
+          router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
         }}
       />
     </>

@@ -12,8 +12,8 @@ export default function FullSearch() {
   const [ossList, setOssList] = useState<any[]>([]);
   const [licenseList, setLicenseList] = useState<any[]>([]);
 
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get('keyword') || '';
+  const queryParams = useSearchParams();
+  const keyword = queryParams.get('keyword') || '';
 
   // Load recent rows for each section
   useEffect(() => {
@@ -33,11 +33,13 @@ export default function FullSearch() {
       );
 
       setOssList(
-        Array.from(Array(3)).map(() => ({
+        Array.from(Array(3)).map((_, idx) => ({
+          ossId: String(3 - idx),
           ossName: 'cairo',
           ossVersion: '1.4.12',
           licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
           obligations: 'YY',
+          cveId: 'CVE-2020-35492',
           cvssScore: '7.8',
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
@@ -45,7 +47,8 @@ export default function FullSearch() {
       );
 
       setLicenseList(
-        Array.from(Array(3)).map(() => ({
+        Array.from(Array(3)).map((_, idx) => ({
+          licenseId: String(3 - idx),
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
           restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
