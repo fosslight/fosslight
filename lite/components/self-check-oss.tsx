@@ -28,25 +28,27 @@ export default function SelfCheckOSS() {
           when: '2023-09-28 16:17:30'
         }))
       );
-      setOssList(
-        Array.from(Array(5)).map((_, idx) => ({
-          path: 'aaa/bbb',
-          ossId: String(5 - idx),
-          ossName: 'cairo',
-          ossVersion: '1.4.12',
-          licenses: 'MPL-1.1, GPL-2.0',
-          obligations: 'YY',
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
-          downloadUrl: 'http://cairographics.org/releases',
-          homepageUrl: 'https://www.cairographics.org',
-          description: 'Some files in util and test folder are released under GPL-2.0',
-          copyright:
-            'Copyright (c) 2002 University of Southern California Copyright (c) 2005 Red Hat, Inc.',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8',
-          exclude: false
-        }))
-      );
+
+      const data = Array.from(Array(5)).map((_, idx) => ({
+        path: 'aaa/bbb',
+        ossId: String(5 - idx),
+        ossName: 'cairo',
+        ossVersion: '1.4.12',
+        licenses: 'MPL-1.1, GPL-2.0',
+        obligations: 'YY',
+        restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+        downloadUrl: 'http://cairographics.org/releases',
+        homepageUrl: 'https://www.cairographics.org',
+        description: 'Some files in util and test folder are released under GPL-2.0',
+        copyright:
+          'Copyright (c) 2002 University of Southern California Copyright (c) 2005 Red Hat, Inc.',
+        cveId: 'CVE-2020-35492',
+        cvssScore: '7.8',
+        exclude: false
+      }));
+
+      setOssList(data);
+      setExcludeList(data.filter((oss) => oss.exclude).map((oss) => oss.ossId));
 
       setLoading(false);
     }, 500);
@@ -129,10 +131,36 @@ export default function SelfCheckOSS() {
       {/* Cards */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {ossList.map((oss, idx) => (
-          <div key={idx} className="flex flex-col gap-y-1 p-4 border border-darkgray rounded">
+          <div
+            key={idx}
+            className={clsx(
+              'flex flex-col gap-y-1 p-4 border border-darkgray rounded',
+              excludeList.includes(oss.ossId) && 'bg-semigray/50'
+            )}
+          >
             <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
               <input className="w-4 h-4" type="checkbox" />
-              <span className="text-sm text-darkgray">exclude {oss.exclude ? 'O' : 'X'}</span>
+              <label className="flex items-center gap-x-2">
+                <span
+                  className={clsx(
+                    'text-sm',
+                    excludeList.includes(oss.ossId) ? 'text-crimson' : 'text-darkgray'
+                  )}
+                >
+                  exclude
+                </span>
+                <Toogle
+                  icons={false}
+                  checked={excludeList.includes(oss.ossId)}
+                  onChange={() => {
+                    if (excludeList.includes(oss.ossId)) {
+                      setExcludeList(excludeList.filter((ossId) => ossId !== oss.ossId));
+                    } else {
+                      setExcludeList([...excludeList, oss.ossId]);
+                    }
+                  }}
+                />
+              </label>
             </div>
             <div className="flex items-center gap-x-2">
               <div
