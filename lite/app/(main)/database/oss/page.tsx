@@ -252,7 +252,7 @@ export default function OSSList() {
           if (column === 'Vuln') {
             return (
               <a
-                className="text-orange-500 hover:underline"
+                className="text-crimson hover:underline"
                 href={`https://nvd.nist.gov/vuln/detail/${row.cveId}`}
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}

@@ -214,7 +214,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
                       <td className="p-1">{vulnerability.id}</td>
                       <td className="p-1">
                         <a
-                          className="text-orange-500 hover:underline"
+                          className="text-crimson hover:underline"
                           href={`https://nvd.nist.gov/vuln/detail/${vulnerability.id}`}
                           target="_blank"
                           onClick={(e) => e.stopPropagation()}
