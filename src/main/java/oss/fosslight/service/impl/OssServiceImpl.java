@@ -3028,8 +3028,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				ossNewistData.setDownloadLocation(url);
 			}
+			
+			ProjectIdentification prjOssMaster = new ProjectIdentification();
+			prjOssMaster.setOssId(ossNewistData.getOssId());
+			List<ProjectIdentification> Licenselist = projectMapper.getLicenses(prjOssMaster);
+			if (Licenselist.size() != 0){
+				Licenselist = CommonFunction.makeLicenseExcludeYn(Licenselist);
+				ossNewistData.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(Licenselist, ","));
+			}
 		}
 		
+		ossNewistData.setOssId(null);
 		return ossNewistData;
 	}
 	
