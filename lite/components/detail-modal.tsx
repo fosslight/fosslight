@@ -26,7 +26,66 @@ export default function DetailModal() {
     setData(null);
 
     setTimeout(() => {
-      setData({ modalType, modalId });
+      if (modalType === 'oss') {
+        setData({
+          ossName: 'cairo',
+          ossNicknames: ['Cairo Vector Graphics', 'Cairo Vector Graphics Library'],
+          ossVersion: '1.4.12',
+          ossType: 'MD',
+          licenses: [
+            {
+              id: '123',
+              name: 'Mozilla Public License 1.1',
+              identifier: 'MPL-1.1',
+              comb: ''
+            },
+            {
+              id: '124',
+              name: 'GNU General Public License v2.0 only',
+              identifier: 'GPL-2.0',
+              comb: 'AND'
+            },
+            {
+              id: '125',
+              name: 'GNU Lesser General Public License v2.1 only',
+              identifier: 'LGPL-2.1',
+              comb: 'OR'
+            },
+            {
+              id: '124',
+              name: 'GNU General Public License v2.0 only',
+              identifier: 'GPL-2.0',
+              comb: 'AND'
+            }
+          ],
+          licenseType: 'Copyleft',
+          obligations: 'YY',
+          downloadUrl: 'http://cairographics.org/releases',
+          homepageUrl: 'https://www.cairographics.org',
+          description: 'Some files in util and test folder are released under GPL-2.0',
+          copyright: 'Copyright (c) 2013 the PM2 project\nCopyright (c) 2013-present, Keymetrics',
+          attribution: 'There some content about attribution here.',
+          vulnerabilities: [
+            {
+              id: 'CVE-2020-35492',
+              score: '7.8',
+              summary: 'A flaw was found in cairo image-compositor.c.'
+            },
+            {
+              id: 'CVE-2020-35492',
+              score: '7.8',
+              summary: 'A flaw was found in cairo image-compositor.c.'
+            }
+          ],
+          deactivate: false,
+          creator: 'admin',
+          created: '2023-10-05 23:54:08.0',
+          modifier: 'admin',
+          modified: '2023-10-07 21:32:05.0'
+        });
+      } else {
+        setData({ modalType, modalId });
+      }
     }, 500);
   }, [modalType, modalId]);
 

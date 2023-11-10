@@ -11,6 +11,19 @@ declare global {
     title: string;
     description: string;
   }
+
+  interface OSSLicense {
+    id: string;
+    name: string;
+    identifier: string;
+    comb: '' | 'AND' | 'OR';
+  }
+
+  interface OSSVuln {
+    id: string;
+    score: string;
+    summary: string;
+  }
 }
 
 export {};
