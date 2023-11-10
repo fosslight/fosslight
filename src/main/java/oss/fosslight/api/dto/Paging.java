@@ -7,7 +7,13 @@ import lombok.Setter;
 @Setter
 public class Paging {
     public enum SortDirection {
-        ASC, DESC
+        ASC("asc"), DESC("desc");
+
+        SortDirection(String value) {
+            this.value = value;
+        }
+
+        public final String value;
     }
 
     protected int page;
