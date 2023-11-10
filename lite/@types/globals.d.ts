@@ -24,6 +24,13 @@ declare global {
     score: string;
     summary: string;
   }
+
+  interface VulnOSS {
+    id: string;
+    name: string;
+    nickname: string;
+    ver: string;
+  }
 }
 
 export {};
