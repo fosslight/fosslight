@@ -13,7 +13,7 @@ export default function DetailModalLicense({ data }: { data: any }) {
           value={
             <div className="flex flex-col gap-y-3">
               {data.licenseName}
-              <div className="flex gap-x-1.5 items-center text-sm">
+              <div className="flex items-center gap-x-1.5 text-sm">
                 <span className="px-1 bg-semiblack rounded text-xs text-semiwhite">
                   SPDX Identifier
                 </span>
@@ -25,7 +25,7 @@ export default function DetailModalLicense({ data }: { data: any }) {
                 </summary>
                 <div className="mt-1">
                   {(data.licenseNicknames as string[]).map((licenseNickname, idx) => (
-                    <div key={idx} className="flex gap-x-1.5 items-center">
+                    <div key={idx} className="flex items-center gap-x-1.5">
                       <span className="px-1 bg-semiblack rounded text-xs text-semiwhite">N</span>
                       {licenseNickname}
                     </div>
@@ -50,7 +50,7 @@ export default function DetailModalLicense({ data }: { data: any }) {
             return (
               <div className="flex flex-col gap-y-3">
                 {notice && (
-                  <div className="flex gap-x-2 items-center">
+                  <div className="flex items-center gap-x-2">
                     <i className="text-sm fa-solid fa-file-lines" title="Notice" />
                     <span className="font-semibold text-crimson">
                       You must notify(generate notice).
@@ -58,7 +58,7 @@ export default function DetailModalLicense({ data }: { data: any }) {
                   </div>
                 )}
                 {source && (
-                  <div className="flex gap-x-2 items-center">
+                  <div className="flex items-center gap-x-2">
                     <i className="text-sm fa-solid fa-code" title="Source" />
                     <span className="font-semibold text-crimson">
                       You must disclose the source code.

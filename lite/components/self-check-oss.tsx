@@ -1,16 +1,19 @@
 import { loadingState } from '@/lib/atoms';
 import ExcelIcon from '@/public/images/excel.png';
+import clsx from 'clsx';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+import Toogle from './toggle';
 
 export default function SelfCheckOSS() {
   const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'file' | 'url'>('file');
   const [files, setFiles] = useState<any[]>([]);
-  const [rows, setRows] = useState<any[]>([]);
+  const [ossList, setOssList] = useState<any[]>([]);
+  const [excludeList, setExcludeList] = useState<string[]>([]);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
@@ -25,7 +28,7 @@ export default function SelfCheckOSS() {
           when: '2023-09-28 16:17:30'
         }))
       );
-      setRows(
+      setOssList(
         Array.from(Array(5)).map((_, idx) => ({
           path: 'aaa/bbb',
           ossId: String(5 - idx),
@@ -125,70 +128,70 @@ export default function SelfCheckOSS() {
 
       {/* Cards */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {rows.map((row, idx) => (
+        {ossList.map((oss, idx) => (
           <div key={idx} className="flex flex-col gap-y-1 p-4 border border-darkgray rounded">
             <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
               <input className="w-4 h-4" type="checkbox" />
-              <span className="text-sm text-darkgray">exclude {row.exclude ? 'O' : 'X'}</span>
+              <span className="text-sm text-darkgray">exclude {oss.exclude ? 'O' : 'X'}</span>
             </div>
-            <div className="flex gap-x-2 items-center">
+            <div className="flex items-center gap-x-2">
               <div
                 className="flex gap-x-1 font-semibold cursor-pointer"
                 onClick={() => {
                   const urlQueryParams = new URLSearchParams(queryParams);
                   urlQueryParams.set('modal-type', 'oss');
-                  urlQueryParams.set('modal-id', row.ossId);
+                  urlQueryParams.set('modal-id', oss.ossId);
                   router.push(`${pathname}?${urlQueryParams.toString()}`, {
                     scroll: false
                   });
                 }}
               >
-                <div className="line-clamp-1 break-all">{row.ossName}</div>
-                <div className="flex-shrink-0">({row.ossVersion})</div>
+                <div className="line-clamp-1 break-all">{oss.ossName}</div>
+                <div className="flex-shrink-0">({oss.ossVersion})</div>
               </div>
               <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
-                {row.obligations[0] === 'Y' && (
+                {oss.obligations[0] === 'Y' && (
                   <i className="fa-solid fa-file-lines" title="Notice" />
                 )}
-                {row.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
+                {oss.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
               </div>
               <div
                 className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
                 onClick={() => {
                   const urlQueryParams = new URLSearchParams(queryParams);
                   urlQueryParams.set('modal-type', 'vuln');
-                  urlQueryParams.set('modal-id', row.cveId);
+                  urlQueryParams.set('modal-id', oss.cveId);
                   router.push(`${pathname}?${urlQueryParams.toString()}`, {
                     scroll: false
                   });
                 }}
               >
-                {row.cvssScore}
+                {oss.cvssScore}
               </div>
             </div>
             <div className="text-sm text-semiblack/80">
               <i className="fa-regular fa-folder-open" />
               &ensp;
-              {row.path}
+              {oss.path}
             </div>
-            <div className="line-clamp-3 text-sm text-semiblack/80">{row.licenses}</div>
+            <div className="line-clamp-3 text-sm text-semiblack/80">{oss.licenses}</div>
             <div className="flex items-center gap-x-2 text-sm">
-              <i className="text-charcoal fa-solid fa-circle-info" title={row.description} />
-              <i className="text-charcoal fa-solid fa-copyright" title={row.copyright} />
+              <i className="text-charcoal fa-solid fa-circle-info" title={oss.description} />
+              <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
               <i
                 className="text-crimson fa-solid fa-registered"
-                title={row.restrictions.join('\n')}
+                title={oss.restrictions.join('\n')}
               />
               <a
                 className="text-xs text-blue-500 hover:underline"
-                href={row.downloadUrl}
+                href={oss.downloadUrl}
                 target="_blank"
               >
                 Download
               </a>
               <a
                 className="text-xs text-blue-500 hover:underline"
-                href={row.homepageUrl}
+                href={oss.homepageUrl}
                 target="_blank"
               >
                 Homepage

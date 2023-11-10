@@ -85,7 +85,7 @@ export default function ListSections({
                     {vulnerability.cvssScore}
                   </div>
                   <div className="flex flex-col gap-y-1">
-                    <div className="flex gap-x-2 items-center">
+                    <div className="flex items-center gap-x-2">
                       <div className="flex gap-x-1 font-semibold">
                         <div className="line-clamp-1 break-all">
                           {highlight(vulnerability.ossName, searchKeyword)}
@@ -152,7 +152,7 @@ export default function ListSections({
                   className="flex pb-3 border-b border-b-semigray last:pb-0 last:border-none"
                 >
                   <div className="flex flex-col gap-y-1">
-                    <div className="flex gap-x-2 items-center">
+                    <div className="flex items-center gap-x-2">
                       <div
                         className="flex gap-x-1 font-semibold cursor-pointer"
                         onClick={() => {
@@ -247,7 +247,7 @@ export default function ListSections({
                   className="flex pb-3 border-b border-b-semigray last:pb-0 last:border-none"
                 >
                   <div className="flex flex-col gap-y-1">
-                    <div className="flex gap-x-2 items-center">
+                    <div className="flex items-center gap-x-2">
                       <div
                         className="flex gap-x-1 font-semibold cursor-pointer"
                         onClick={() => {
