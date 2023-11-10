@@ -144,6 +144,7 @@ input.cal:focus {background:#fff8ea url("../images/bg_cal.png") no-repeat right 
 .w500 {width:500px !important;}
 .w600 {width:600px !important;}
 .w725 {width:725px !important;}
+.w900 {width:900px !important;}
 .w1025 {width:1025px !important;}
 .w100P {width:100% !important;box-sizing:border-box;}
 .w90P {width:95% !important;box-sizing:border-box;}
@@ -544,6 +545,12 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .uploadSet .uploadList_3 span {position:relative;clear:left;display:inline-block;}
 .uploadSet .uploadList_3 span strong {display:inline-block;padding-right:20px;font-weight:normal;font-family:Tahoma;max-width:500px;}
 .uploadSet .uploadList_3 span .smallDelete {position:absolute;right:4px;top:4px;}
+
+.uploadSet .uploadList_4 {float:left;display:inline-block;padding:0 0 0 21px;}
+.uploadSet .uploadList_4 li {padding:3px 0;}
+.uploadSet .uploadList_4 span {position:relative;clear:left;display:inline-block;}
+.uploadSet .uploadList_4 span strong {display:inline-block;padding-right:20px;font-weight:normal;font-family:Tahoma;max-width:500px;}
+.uploadSet .uploadList_4 span .smallDelete {position:absolute;right:4px;top:4px;}
 /* Verification File-Upload */
 
 .uploadCase .basicCase {position:relative;clear:left;display:inline-block;width:100%;}
