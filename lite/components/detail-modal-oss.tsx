@@ -25,7 +25,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
                 </summary>
                 <div className="mt-1">
                   {(data.ossNicknames as string[]).map((ossNickname, idx) => (
-                    <div key={idx} className="flex gap-x-1.5 items-center">
+                    <div key={idx} className="flex items-center gap-x-1.5">
                       <span className="px-1 bg-semiblack rounded text-xs text-semiwhite">N</span>
                       {ossNickname}
                     </div>
@@ -74,7 +74,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
 
             function renderOption(option: OSSLicense[]) {
               return option.map((license, licenseIdx) => (
-                <div key={licenseIdx} className="flex gap-x-1 items-center">
+                <div key={licenseIdx} className="flex items-center gap-x-1">
                   <div className="line-clamp-1 break-all">◦ {license.name}</div>
                   <div className="flex-shrink-0">({license.identifier})</div>
                   <i
@@ -137,7 +137,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
             return (
               <div className="flex flex-col gap-y-3">
                 {notice && (
-                  <div className="flex gap-x-2 items-center">
+                  <div className="flex items-center gap-x-2">
                     <i className="text-sm fa-solid fa-file-lines" title="Notice" />
                     <span className="font-semibold text-crimson">
                       You must notify(generate notice).
@@ -145,7 +145,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
                   </div>
                 )}
                 {source && (
-                  <div className="flex gap-x-2 items-center">
+                  <div className="flex items-center gap-x-2">
                     <i className="text-sm fa-solid fa-code" title="Source" />
                     <span className="font-semibold text-crimson">
                       You must disclose the source code.

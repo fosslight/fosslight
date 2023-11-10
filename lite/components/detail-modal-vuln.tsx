@@ -16,7 +16,7 @@ export default function DetailModalVuln({ data }: { data: any }) {
         <DetailModalRow
           label="CVE ID"
           value={
-            <div className="flex gap-x-1.5 items-center">
+            <div className="flex items-center gap-x-1.5">
               {data.cveId}
               <a href={`https://nvd.nist.gov/vuln/detail/${data.cveId}`} target="_blank">
                 <i className="text-crimson fa-solid fa-square-up-right" />

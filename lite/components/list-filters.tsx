@@ -158,7 +158,7 @@ function renderFilters(filters: Filter[], form: UseFormReturn) {
             className={clsx('block w-full resize-none', inputClass)}
             rows={3}
             {...form.register(filter.name)}
-          ></textarea>
+          />
         </div>
       </div>
     );
