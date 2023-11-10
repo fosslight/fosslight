@@ -29,7 +29,19 @@ ALTER TABLE `PROJECT_MASTER` ADD `CDX_JSON_FILE_ID` int(11) NULL DEFAULT NULL;
 ALTER TABLE `PROJECT_MASTER` ADD `CDX_XML_FILE_ID` int(11) NULL DEFAULT NULL;
 
 ALTER TABLE `PROJECT_MASTER` ADD `PACKAGE_VUL_DOC_FILE_ID` int(11) NULL DEFAULT NULL;
-
+INSERT INTO
+    `T2_CODE_DTL` (
+    `CD_NO`,
+    `CD_DTL_NO`,
+    `CD_DTL_NM`,
+    `CD_SUB_NO`,
+    `CD_DTL_EXP`,
+    `CD_ORDER`,
+    `USE_YN`
+)
+VALUES
+    ('120', '40', '프로젝트 PACKAGINE VUL DOC FILE', '', 'pdf,xlsm,zip,tar.gz,gz,tar.xz', 40, 'Y');
+    
 -- //@UNDO
 -- SQL to undo the change goes here.
 
