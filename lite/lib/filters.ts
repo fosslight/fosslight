@@ -14,7 +14,7 @@ export function stringifyFilters(obj: FieldValues) {
   return JSON.stringify(cleanedObj);
 }
 
-export function parseFilters(str: string) {
+export function parseFilters(str: string): FieldValues | undefined {
   if (!str) {
     return undefined;
   }

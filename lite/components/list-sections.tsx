@@ -23,9 +23,9 @@ export default function ListSections({
   licenseList,
   searchKeyword
 }: {
-  vulnerabilityList: any[];
-  ossList: any[];
-  licenseList: any[];
+  vulnerabilityList: ListSection.Vuln[];
+  ossList: ListSection.OSS[];
+  licenseList: ListSection.License[];
   searchKeyword?: string;
 }) {
   const [isVulnSectionShown, setIsVulnSectionShown] = useState(true);
@@ -96,9 +96,11 @@ export default function ListSections({
                         {highlight(vulnerability.cveId, searchKeyword)}
                       </div>
                     </div>
-                    <div className="line-clamp-3 text-sm text-semiblack/80">
-                      {vulnerability.summary}
-                    </div>
+                    {vulnerability.summary && (
+                      <div className="line-clamp-3 text-sm text-semiblack/80">
+                        {vulnerability.summary}
+                      </div>
+                    )}
                     <div className="text-sm text-darkgray">
                       <i className="fa-solid fa-check" />
                       &ensp;
@@ -167,33 +169,39 @@ export default function ListSections({
                         <div className="line-clamp-1 break-all">
                           {highlight(oss.ossName, searchKeyword)}
                         </div>
-                        <div className="flex-shrink-0">({oss.ossVersion})</div>
+                        {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
                       </div>
-                      <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
-                        {oss.obligations[0] === 'Y' && (
-                          <i className="fa-solid fa-file-lines" title="Notice" />
-                        )}
-                        {oss.obligations[1] === 'Y' && (
-                          <i className="fa-solid fa-code" title="Source" />
-                        )}
-                      </div>
-                      <div
-                        className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
-                        onClick={() => {
-                          const urlQueryParams = new URLSearchParams(queryParams);
-                          urlQueryParams.set('modal-type', 'vuln');
-                          urlQueryParams.set('modal-id', oss.cveId);
-                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                            scroll: false
-                          });
-                        }}
-                      >
-                        {oss.cvssScore}
-                      </div>
+                      {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
+                        <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
+                          {oss.obligations[0] === 'Y' && (
+                            <i className="fa-solid fa-file-lines" title="Notice" />
+                          )}
+                          {oss.obligations[1] === 'Y' && (
+                            <i className="fa-solid fa-code" title="Source" />
+                          )}
+                        </div>
+                      )}
+                      {oss.cveId && oss.cvssScore && (
+                        <div
+                          className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
+                          onClick={() => {
+                            const urlQueryParams = new URLSearchParams(queryParams);
+                            urlQueryParams.set('modal-type', 'vuln');
+                            urlQueryParams.set('modal-id', oss.cveId);
+                            router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                              scroll: false
+                            });
+                          }}
+                        >
+                          {oss.cvssScore}
+                        </div>
+                      )}
                     </div>
-                    <div className="line-clamp-3 text-sm text-semiblack/80">
-                      {highlight(oss.licenseName, searchKeyword)}
-                    </div>
+                    {oss.licenseName && (
+                      <div className="line-clamp-3 text-sm text-semiblack/80">
+                        {highlight(oss.licenseName, searchKeyword)}
+                      </div>
+                    )}
                     <div className="text-sm text-darkgray">
                       <i className="fa-solid fa-check" />
                       &ensp;
@@ -266,18 +274,22 @@ export default function ListSections({
                           ({highlight(license.licenseIdentifier, searchKeyword)})
                         </div>
                       </div>
-                      <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
-                        {license.obligations[0] === 'Y' && (
-                          <i className="fa-solid fa-file-lines" title="Notice" />
-                        )}
-                        {license.obligations[1] === 'Y' && (
-                          <i className="fa-solid fa-code" title="Source" />
-                        )}
+                      {(license.obligations[0] === 'Y' || license.obligations[1] === 'Y') && (
+                        <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
+                          {license.obligations[0] === 'Y' && (
+                            <i className="fa-solid fa-file-lines" title="Notice" />
+                          )}
+                          {license.obligations[1] === 'Y' && (
+                            <i className="fa-solid fa-code" title="Source" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {license.restrictions.length > 0 && (
+                      <div className="line-clamp-3 text-sm text-semiblack/80">
+                        {license.restrictions.join(', ')}
                       </div>
-                    </div>
-                    <div className="line-clamp-3 text-sm text-semiblack/80">
-                      {license.restrictions.join(', ')}
-                    </div>
+                    )}
                     <div className="text-sm text-darkgray">
                       <i className="fa-solid fa-check" />
                       &ensp;

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { FieldValues, UseFormReturn } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 
-function renderFilters(filters: Filter[], form: UseFormReturn) {
+function renderFilters(filters: List.Filter[], form: UseFormReturn) {
   const labelClass = 'flex-shrink-0 w-20 lg:w-24';
   const inputClass = 'px-2 py-1 border border-darkgray outline-none';
 
@@ -170,7 +170,7 @@ export default function ListFilters({
   filters
 }: {
   form: UseFormReturn;
-  filters: { default: Filter[]; hidden: Filter[] };
+  filters: { default: List.Filter[]; hidden: List.Filter[] };
 }) {
   const { default: defaultFilters, hidden: hiddenFilters } = filters;
 
@@ -218,7 +218,7 @@ export default function ListFilters({
         {renderFilters(defaultFilters, form)}
       </div>
 
-      {/* Hidden Filters (If exists) */}
+      {/* Hidden filters (If exists) */}
       {hiddenFilters.length > 0 && (
         <>
           <div

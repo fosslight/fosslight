@@ -7,13 +7,13 @@ import ListTable from './list-table';
 
 export default function SelfCheckPackage() {
   const setLoading = useSetRecoilState(loadingState);
-  const [files, setFiles] = useState<any[]>([]);
-  const [rows, setRows] = useState<any[]>([]);
+  const [files, setFiles] = useState<SelfCheck.PackageFile[]>([]);
+  const [rows, setRows] = useState<SelfCheck.PackageOSS[]>([]);
   const columns = [
     { name: 'ID', sort: '' },
     { name: 'Name', sort: '' },
     { name: 'Ver', sort: '' },
-    { name: 'License(s)', sort: '' },
+    { name: 'Licenses', sort: '' },
     { name: 'URL', sort: '' }
   ];
 
@@ -76,7 +76,7 @@ export default function SelfCheckPackage() {
       <ListTable
         rows={rows}
         columns={columns}
-        render={(row: any, column: string) => {
+        render={(row: SelfCheck.PackageOSS, column: string) => {
           if (column === 'ID') {
             return row.ossId;
           }
@@ -89,37 +89,40 @@ export default function SelfCheckPackage() {
             return row.ossVersion;
           }
 
-          if (column === 'License(s)') {
+          if (column === 'Licenses') {
             return row.licenseName;
           }
 
           if (column === 'URL') {
             return (
               <div className="whitespace-nowrap">
-                <a
-                  className="text-blue-500 hover:underline"
-                  href={row.downloadUrl}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Download
-                </a>
-                <br />
-                <a
-                  className="text-blue-500 hover:underline"
-                  href={row.homepageUrl}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Homepage
-                </a>
+                {row.downloadUrl && (
+                  <a
+                    className="block text-blue-500 hover:underline"
+                    href={row.downloadUrl}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Download
+                  </a>
+                )}
+                {row.homepageUrl && (
+                  <a
+                    className="block text-blue-500 hover:underline"
+                    href={row.homepageUrl}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Homepage
+                  </a>
+                )}
               </div>
             );
           }
 
           return null;
         }}
-        onClickRow={(row: any) => {
+        onClickRow={(row: SelfCheck.PackageOSS) => {
           const urlQueryParams = new URLSearchParams(queryParams);
           urlQueryParams.set('modal-type', 'oss');
           urlQueryParams.set('modal-id', row.ossId);

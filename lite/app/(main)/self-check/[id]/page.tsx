@@ -10,7 +10,7 @@ import { Fragment, useState } from 'react';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
   const [isModalShown, setIsModalShown] = useState(false);
-  const [tab, setTab] = useState<SelfCheckTab['name']>('OSS');
+  const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
 
   return (
     <>
@@ -58,8 +58,8 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       <SelfCheckModal
         mode="edit"
         data={{
-          name: 'FOSSLight Hub Lite',
-          version: '1.0.0',
+          projectName: 'FOSSLight Hub Lite',
+          projectVersion: '1.0.0',
           comment: 'There are some comments here.'
         }}
         show={isModalShown}

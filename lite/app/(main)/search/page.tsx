@@ -8,9 +8,9 @@ import { useSetRecoilState } from 'recoil';
 
 export default function FullSearch() {
   const setLoading = useSetRecoilState(loadingState);
-  const [vulnerabilityList, setVulnerabilityList] = useState<any[]>([]);
-  const [ossList, setOssList] = useState<any[]>([]);
-  const [licenseList, setLicenseList] = useState<any[]>([]);
+  const [vulnerabilityList, setVulnerabilityList] = useState<ListSection.Vuln[]>([]);
+  const [ossList, setOssList] = useState<ListSection.OSS[]>([]);
+  const [licenseList, setLicenseList] = useState<ListSection.License[]>([]);
 
   const queryParams = useSearchParams();
   const keyword = queryParams.get('keyword') || '';
@@ -51,8 +51,8 @@ export default function FullSearch() {
           licenseId: String(3 - idx),
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           obligations: 'YY',
+          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
         }))

@@ -1,10 +1,44 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
+import Loading from './loading';
 
-export default function DetailModalVuln({ data }: { data: any }) {
+export default function DetailModalVuln({ modalId }: { modalId: string }) {
+  const [data, setData] = useState<Detail.Vuln | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
+
+  // Load data based on query parameter information
+  useEffect(() => {
+    if (!modalId) {
+      return;
+    }
+
+    setData(null);
+
+    setTimeout(() => {
+      setData({
+        cveId: 'CVE-2020-35492',
+        cvssScore: '7.8',
+        summary: 'A flaw was found in cairo image-compositor.c in all versions prior to 1.17.4.',
+        published: '2021-03-18 23:54:08.0',
+        modified: '2023-05-03 21:32:05.0',
+        oss: [
+          { ossId: '123', ossName: 'cairo', ossVersion: '1.4.12' },
+          { ossId: '124', ossName: 'cairo', ossVersion: '1.4.12' }
+        ]
+      });
+    }, 500);
+  }, [modalId]);
+
+  if (!data) {
+    return (
+      <div className="flex justify-center py-6">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -50,20 +84,20 @@ export default function DetailModalVuln({ data }: { data: any }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(data.oss as VulnOSS[]).map((oss) => (
+                  {data.oss.map((oss) => (
                     <tr
-                      key={oss.id}
+                      key={oss.ossId}
                       className="border-b border-semigray cursor-pointer"
                       onClick={() => {
                         const urlQueryParams = new URLSearchParams(queryParams);
                         urlQueryParams.set('modal-type', 'oss');
-                        urlQueryParams.set('modal-id', oss.id);
+                        urlQueryParams.set('modal-id', oss.ossId);
                         router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
                       }}
                     >
-                      <td className="p-1">{oss.id}</td>
-                      <td className="p-1">{oss.name}</td>
-                      <td className="p-1">{oss.ver}</td>
+                      <td className="p-1">{oss.ossId}</td>
+                      <td className="p-1">{oss.ossName}</td>
+                      <td className="p-1">{oss.ossVersion}</td>
                     </tr>
                   ))}
                 </tbody>
