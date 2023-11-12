@@ -54,6 +54,21 @@ export default function Modal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
+  // Hide the modal by ESC
+  useEffect(() => {
+    function handleEsc(e: KeyboardEvent) {
+      if (visible && hideByBackdrop && e.code === 'Escape') {
+        onHide();
+      }
+    }
+
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
   return (
     <div
       className={clsx(
