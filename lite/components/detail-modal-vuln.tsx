@@ -45,7 +45,7 @@ export default function DetailModalVuln({ data }: { data: any }) {
                 <thead>
                   <tr className="bg-semiblack text-semiwhite text-left whitespace-nowrap overflow-hidden">
                     <th className="px-1.5 py-1 rounded-tl font-semibold">ID</th>
-                    <th className="px-1.5 py-1 font-semibold">Name (Nickname)</th>
+                    <th className="px-1.5 py-1 font-semibold">Name</th>
                     <th className="px-1.5 py-1 rounded-tr font-semibold">Ver</th>
                   </tr>
                 </thead>
@@ -62,9 +62,7 @@ export default function DetailModalVuln({ data }: { data: any }) {
                       }}
                     >
                       <td className="p-1">{oss.id}</td>
-                      <td className="p-1">
-                        {oss.name} ({oss.nickname})
-                      </td>
+                      <td className="p-1">{oss.name}</td>
                       <td className="p-1">{oss.ver}</td>
                     </tr>
                   ))}

@@ -28,7 +28,6 @@ declare global {
   interface VulnOSS {
     id: string;
     name: string;
-    nickname: string;
     ver: string;
   }
 }
