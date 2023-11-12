@@ -36,7 +36,7 @@ export default function ListTable({
   onClickRow
 }: {
   rows: any[];
-  columns: { name: string; sort: string }[];
+  columns: List.Column[];
   currentSort?: string;
   pagination?: { totalCount: number; currentPage: number; countPerPage: number };
   render: (row: any, column: string) => React.ReactNode;

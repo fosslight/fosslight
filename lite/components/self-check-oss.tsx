@@ -11,8 +11,8 @@ import Toogle from './toggle';
 export default function SelfCheckOSS() {
   const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'file' | 'url'>('file');
-  const [files, setFiles] = useState<any[]>([]);
-  const [ossList, setOssList] = useState<any[]>([]);
+  const [files, setFiles] = useState<SelfCheck.OSSFile[]>([]);
+  const [ossList, setOssList] = useState<SelfCheck.OSS[]>([]);
   const [excludeList, setExcludeList] = useState<string[]>([]);
   const router = useRouter();
   const pathname = usePathname();
@@ -34,7 +34,10 @@ export default function SelfCheckOSS() {
         ossId: String(5 - idx),
         ossName: 'cairo',
         ossVersion: '1.4.12',
-        licenses: 'MPL-1.1, GPL-2.0',
+        licenses: [
+          { licenseId: '1', licenseIdentifier: 'MPL-1.1' },
+          { licenseId: '2', licenseIdentifier: 'GPL-2.0' }
+        ],
         obligations: 'YY',
         restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
         downloadUrl: 'http://cairographics.org/releases',
@@ -175,34 +178,42 @@ export default function SelfCheckOSS() {
                 }}
               >
                 <div className="line-clamp-1 break-all">{oss.ossName}</div>
-                <div className="flex-shrink-0">({oss.ossVersion})</div>
+                {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
               </div>
-              <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
-                {oss.obligations[0] === 'Y' && (
-                  <i className="fa-solid fa-file-lines" title="Notice" />
-                )}
-                {oss.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
-              </div>
-              <div
-                className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
-                onClick={() => {
-                  const urlQueryParams = new URLSearchParams(queryParams);
-                  urlQueryParams.set('modal-type', 'vuln');
-                  urlQueryParams.set('modal-id', oss.cveId);
-                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                    scroll: false
-                  });
-                }}
-              >
-                {oss.cvssScore}
-              </div>
+              {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
+                <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
+                  {oss.obligations[0] === 'Y' && (
+                    <i className="fa-solid fa-file-lines" title="Notice" />
+                  )}
+                  {oss.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
+                </div>
+              )}
+              {oss.cveId && oss.cvssScore && (
+                <div
+                  className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
+                  onClick={() => {
+                    const urlQueryParams = new URLSearchParams(queryParams);
+                    urlQueryParams.set('modal-type', 'vuln');
+                    urlQueryParams.set('modal-id', oss.cveId);
+                    router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                      scroll: false
+                    });
+                  }}
+                >
+                  {oss.cvssScore}
+                </div>
+              )}
             </div>
             <div className="text-sm text-semiblack/80">
               <i className="fa-regular fa-folder-open" />
               &ensp;
               {oss.path}
             </div>
-            <div className="line-clamp-3 text-sm text-semiblack/80">{oss.licenses}</div>
+            {oss.licenses.length > 0 && (
+              <div className="line-clamp-3 text-sm text-semiblack/80">
+                {oss.licenses.map((license) => license.licenseIdentifier).join(', ')}
+              </div>
+            )}
             <div className="flex items-center gap-x-2 text-sm">
               <i className="text-charcoal fa-solid fa-circle-info" title={oss.description} />
               <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
@@ -210,20 +221,24 @@ export default function SelfCheckOSS() {
                 className="text-crimson fa-solid fa-registered"
                 title={oss.restrictions.join('\n')}
               />
-              <a
-                className="text-xs text-blue-500 hover:underline"
-                href={oss.downloadUrl}
-                target="_blank"
-              >
-                Download
-              </a>
-              <a
-                className="text-xs text-blue-500 hover:underline"
-                href={oss.homepageUrl}
-                target="_blank"
-              >
-                Homepage
-              </a>
+              {oss.downloadUrl && (
+                <a
+                  className="text-xs text-blue-500 hover:underline"
+                  href={oss.downloadUrl}
+                  target="_blank"
+                >
+                  Download
+                </a>
+              )}
+              {oss.homepageUrl && (
+                <a
+                  className="text-xs text-blue-500 hover:underline"
+                  href={oss.homepageUrl}
+                  target="_blank"
+                >
+                  Homepage
+                </a>
+              )}
               <div className="flex-1 text-right">
                 <i className="text-sm text-darkgray fa-solid fa-pen" />
               </div>

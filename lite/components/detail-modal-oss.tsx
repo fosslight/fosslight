@@ -1,11 +1,90 @@
 import { ossTypes } from '@/lib/literals';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
+import Loading from './loading';
 
-export default function DetailModalOSS({ data }: { data: any }) {
+export default function DetailModalOSS({ modalId }: { modalId: string }) {
+  const [data, setData] = useState<Detail.OSS | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
+
+  // Load data based on query parameter information
+  useEffect(() => {
+    if (!modalId) {
+      return;
+    }
+
+    setData(null);
+
+    setTimeout(() => {
+      setData({
+        ossName: 'cairo',
+        ossNicknames: ['Cairo Vector Graphics', 'Cairo Vector Graphics Library'],
+        ossVersion: '1.4.12',
+        ossType: 'MD',
+        licenses: [
+          {
+            licenseId: '123',
+            licenseName: 'Mozilla Public License 1.1',
+            licenseIdentifier: 'MPL-1.1',
+            comb: ''
+          },
+          {
+            licenseId: '124',
+            licenseName: 'GNU General Public License v2.0 only',
+            licenseIdentifier: 'GPL-2.0',
+            comb: 'AND'
+          },
+          {
+            licenseId: '125',
+            licenseName: 'GNU Lesser General Public License v2.1 only',
+            licenseIdentifier: 'LGPL-2.1',
+            comb: 'OR'
+          },
+          {
+            licenseId: '124',
+            licenseName: 'GNU General Public License v2.0 only',
+            licenseIdentifier: 'GPL-2.0',
+            comb: 'AND'
+          }
+        ],
+        licenseType: 'Copyleft',
+        obligations: 'YY',
+        downloadUrl: 'http://cairographics.org/releases',
+        homepageUrl: 'https://www.cairographics.org',
+        description: 'Some files in util and test folder are released under GPL-2.0',
+        copyright: 'Copyright (c) 2013 the PM2 project\nCopyright (c) 2013-present, Keymetrics',
+        attribution: 'There some content about attribution here.',
+        vulnerabilities: [
+          {
+            cveId: 'CVE-2020-35492',
+            cvssScore: '7.8',
+            summary: 'A flaw was found in cairo image-compositor.c.'
+          },
+          {
+            cveId: 'CVE-2020-35493',
+            cvssScore: '7.8',
+            summary: 'A flaw was found in cairo image-compositor.c.'
+          }
+        ],
+        deactivate: false,
+        creator: 'admin',
+        created: '2023-10-05 23:54:08.0',
+        modifier: 'admin',
+        modified: '2023-10-07 21:32:05.0'
+      });
+    }, 500);
+  }, [modalId]);
+
+  if (!data) {
+    return (
+      <div className="flex justify-center py-6">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -18,20 +97,22 @@ export default function DetailModalOSS({ data }: { data: any }) {
           label="Name & Version"
           value={
             <div className="flex flex-col gap-y-3">
-              {data.ossName} ({data.ossVersion})
-              <details className="px-2.5 py-1.5 border border-semigray rounded text-sm">
-                <summary className="outline-none cursor-pointer no-tap-highlight">
-                  Nicknames
-                </summary>
-                <div className="mt-1">
-                  {(data.ossNicknames as string[]).map((ossNickname, idx) => (
-                    <div key={idx} className="flex items-center gap-x-1.5">
-                      <span className="px-1 bg-semiblack rounded text-xs text-semiwhite">N</span>
-                      {ossNickname}
-                    </div>
-                  ))}
-                </div>
-              </details>
+              {`${data.ossName}${data.ossVersion ? ` (${data.ossVersion})` : ''}`}
+              {data.ossNicknames && (
+                <details className="px-2.5 py-1.5 border border-semigray rounded text-sm">
+                  <summary className="outline-none cursor-pointer no-tap-highlight">
+                    Nicknames
+                  </summary>
+                  <div className="mt-1">
+                    {data.ossNicknames.map((ossNickname, idx) => (
+                      <div key={idx} className="flex items-center gap-x-1.5">
+                        <span className="px-1 bg-semiblack rounded text-xs text-semiwhite">N</span>
+                        {ossNickname}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
               {data.deactivate && (
                 <div className="text-sm text-crimson">* This is deactivated OSS.</div>
               )}
@@ -43,7 +124,7 @@ export default function DetailModalOSS({ data }: { data: any }) {
           label="Type"
           value={
             <div className="flex flex-col gap-y-3">
-              {(data.ossType as string).split('').map((x) => (
+              {data.ossType.split('').map((x) => (
                 <details key={x} open>
                   <summary className="outline-none font-semibold cursor-pointer no-tap-highlight">
                     {ossTypes[x].name}
@@ -58,31 +139,31 @@ export default function DetailModalOSS({ data }: { data: any }) {
         <DetailModalRow
           label="Licenses"
           value={(() => {
-            const licenseType = (
+            const licenseType = data.licenseType ? (
               <div className="self-start px-1.5 py-0.5 border border-semiblack/80 rounded text-sm text-semiblack/80">
                 {data.licenseType}
               </div>
-            );
+            ) : null;
 
-            const options: OSSLicense[][] = [[]];
-            (data.licenses as OSSLicense[]).forEach((license) => {
+            const options: Detail.OSSLicense[][] = [[]];
+            data.licenses.forEach((license) => {
               if (license.comb === 'OR') {
                 options.push([]);
               }
               options[options.length - 1].push(license);
             });
 
-            function renderOption(option: OSSLicense[]) {
+            function renderOption(option: Detail.OSSLicense[]) {
               return option.map((license, licenseIdx) => (
                 <div key={licenseIdx} className="flex items-center gap-x-1">
-                  <div className="line-clamp-1 break-all">◦ {license.name}</div>
-                  <div className="flex-shrink-0">({license.identifier})</div>
+                  <div className="line-clamp-1 break-all">◦ {license.licenseName}</div>
+                  <div className="flex-shrink-0">({license.licenseIdentifier})</div>
                   <i
                     className="flex-shrink-0 cursor-pointer fa-solid fa-square-up-right"
                     onClick={() => {
                       const urlQueryParams = new URLSearchParams(queryParams);
                       urlQueryParams.set('modal-type', 'license');
-                      urlQueryParams.set('modal-id', license.id);
+                      urlQueryParams.set('modal-id', license.licenseId);
                       router.push(`${pathname}?${urlQueryParams.toString()}`, {
                         scroll: false
                       });
@@ -160,17 +241,21 @@ export default function DetailModalOSS({ data }: { data: any }) {
         <DetailModalRow
           label="Download URL"
           value={
-            <a className="text-blue-500 hover:underline" href={data.downloadUrl} target="_blank">
-              {data.downloadUrl}
-            </a>
+            data.downloadUrl && (
+              <a className="text-blue-500 hover:underline" href={data.downloadUrl} target="_blank">
+                {data.downloadUrl}
+              </a>
+            )
           }
         />
         <DetailModalRow
           label="Homepage URL"
           value={
-            <a className="text-blue-500 hover:underline" href={data.homepageUrl} target="_blank">
-              {data.homepageUrl}
-            </a>
+            data.homepageUrl && (
+              <a className="text-blue-500 hover:underline" href={data.homepageUrl} target="_blank">
+                {data.homepageUrl}
+              </a>
+            )
           }
           bottomBorder
         />
@@ -200,26 +285,26 @@ export default function DetailModalOSS({ data }: { data: any }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(data.vulnerabilities as OSSVuln[]).map((vulnerability) => (
+                  {data.vulnerabilities.map((vulnerability) => (
                     <tr
-                      key={vulnerability.id}
+                      key={vulnerability.cveId}
                       className="border-b border-semigray cursor-pointer"
                       onClick={() => {
                         const urlQueryParams = new URLSearchParams(queryParams);
                         urlQueryParams.set('modal-type', 'vuln');
-                        urlQueryParams.set('modal-id', vulnerability.id);
+                        urlQueryParams.set('modal-id', vulnerability.cveId);
                         router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
                       }}
                     >
-                      <td className="p-1">{vulnerability.id}</td>
+                      <td className="p-1">{vulnerability.cveId}</td>
                       <td className="p-1">
                         <a
                           className="text-crimson hover:underline"
-                          href={`https://nvd.nist.gov/vuln/detail/${vulnerability.id}`}
+                          href={`https://nvd.nist.gov/vuln/detail/${vulnerability.cveId}`}
                           target="_blank"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {vulnerability.score}
+                          {vulnerability.cvssScore}
                         </a>
                       </td>
                       <td className="p-1">
