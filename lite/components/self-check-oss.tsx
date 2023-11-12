@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+import SelfCheckOSSModal from './self-check-oss-modal';
 import Toogle from './toggle';
 
 export default function SelfCheckOSS() {
@@ -17,6 +18,10 @@ export default function SelfCheckOSS() {
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
+
+  // Modal
+  const [modalData, setModalData] = useState<SelfCheck.SetOSS>();
+  const [isModalShown, setIsModalShown] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -118,7 +123,16 @@ export default function SelfCheckOSS() {
 
       {/* Buttons */}
       <div className="flex justify-between items-center mt-8 mb-2">
-        <i className="text-charcoal fa-solid fa-trash" />
+        <div className="flex gap-x-3 text-charcoal">
+          <i className="cursor-pointer fa-solid fa-trash" />
+          <i
+            className="cursor-pointer fa-solid fa-plus"
+            onClick={() => {
+              setModalData(undefined);
+              setIsModalShown(true);
+            }}
+          />
+        </div>
         <div className="flex justify-end gap-x-1">
           <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
             <div className="relative w-4 h-4">
@@ -240,15 +254,32 @@ export default function SelfCheckOSS() {
                 </a>
               )}
               <div className="flex-1 text-right">
-                <i className="text-sm text-darkgray fa-solid fa-pen" />
+                <i
+                  className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
+                  onClick={() => {
+                    setModalData({
+                      path: oss.path,
+                      ossName: oss.ossName,
+                      ossVersion: oss.ossVersion,
+                      licenses: oss.licenses,
+                      downloadUrl: oss.downloadUrl,
+                      homepageUrl: oss.homepageUrl,
+                      copyright: oss.copyright
+                    });
+                    setIsModalShown(true);
+                  }}
+                />
               </div>
             </div>
           </div>
         ))}
-        <div className="flex justify-center items-center p-4 border border-dashed border-darkgray rounded text-semiblack/80">
-          + Add another OSS
-        </div>
       </div>
+      <SelfCheckOSSModal
+        mode={!modalData ? 'add' : 'edit'}
+        data={modalData}
+        show={isModalShown}
+        onHide={() => setIsModalShown(false)}
+      />
     </>
   );
 }
