@@ -63,12 +63,12 @@
 						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
 					</when>
 				</choose>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sort)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirection)">
 					<choose>
-						<when test="@oss.fosslight.util.StringUtil@equals('asc', sort)">
+						<when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirection)">
 							ASC
 						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals('desc', sort)">
+						<when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirection)">
 							DESC
 						</when>
 					</choose>
