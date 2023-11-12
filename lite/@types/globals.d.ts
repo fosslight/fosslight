@@ -105,12 +105,17 @@ declare global {
       when: string;
     }
 
+    interface OSSLicense {
+      licenseId: string;
+      licenseIdentifier: string;
+    }
+
     interface OSS {
       path: string;
       ossId: string;
       ossName: string;
       ossVersion: string;
-      licenses: { licenseId: string; licenseIdentifier: string }[];
+      licenses: OSSLicense[];
       obligations: string;
       restrictions: string[];
       downloadUrl: string;
@@ -120,6 +125,16 @@ declare global {
       cveId: string;
       cvssScore: string;
       exclude: boolean;
+    }
+
+    interface SetOSS {
+      path: string;
+      ossName: string;
+      ossVersion: string;
+      licenses: OSSLicense[];
+      downloadUrl: string;
+      homepageUrl: string;
+      copyright: string;
     }
 
     interface PackageFile {
