@@ -108,8 +108,8 @@ export default function DetailModal() {
           published: '2021-03-18 23:54:08.0',
           modified: '2023-05-03 21:32:05.0',
           oss: [
-            { id: '123', name: 'cairo', nickname: 'cairo', ver: '1.4.12' },
-            { id: '124', name: 'cairo', nickname: 'cairo', ver: '1.4.12' }
+            { id: '123', name: 'cairo', ver: '1.4.12' },
+            { id: '124', name: 'cairo', ver: '1.4.12' }
           ]
         });
       }
