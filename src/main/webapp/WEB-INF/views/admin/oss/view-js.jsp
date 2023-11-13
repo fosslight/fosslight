@@ -171,11 +171,7 @@
 				/*Oss info*/
 				$('#ossName').text(data.detail.ossName);
 				var ossVersion = data.detail.ossVersion;
-
-				if(data.detail.ossType.toUpperCase() == "V"){
-					ossVersion += ' / <span class="iconSet vdif">v-Diff</span>'; 
-				}
-
+				var ossType = data.detail.ossType;
 				$('#ossVersion').html(ossVersion);
 				$('#downloadLocation a').text(data.detail.downloadLocation);
 
@@ -223,6 +219,21 @@
 					}					
 				});
 				
+				if (typeof ossType != "undefined" && "" != ossType) {
+					var colOssType = '';
+					if (ossType.toUpperCase().indexOf('M') > -1) {
+						colOssType += '<span class="iconSet multi">Multi</span>';
+					}
+					
+					if (ossType.toUpperCase().indexOf('D') > -1) {
+						colOssType += '<span class="iconSet dual">Dual</span>';
+					}
+					
+					if (ossType.toUpperCase().indexOf('V') > -1){
+						colOssType += '<span class="iconSet vdif">v-Diff</span>';
+					}
+					$("[name=ossType]").html(colOssType);
+				}
 			}
 		}
 	}
@@ -728,5 +739,46 @@
     	} else {
     		$("#disp_licenseText").html("");
     	}
+    }
+    
+    function showOssViewPage(obj) {
+    	var ossName = $(obj).parent().next().find('input').val();
+		var ossVersion = $(obj).parent().parent().next().next().find('input').val();
+
+		if ("" != ossName) {
+			var _popup = null;
+			
+			if ("N/A" == ossVersion) {
+				ossVersion = "";
+			}
+			
+			$.ajax({
+				url : '<c:url value="/oss/checkExistsOssByname"/>',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {ossName : ossName},
+				contentType : 'application/json',
+				success : function(data){
+					if(data.isValid == 'true') {
+						if(_popup == null || _popup.closed) {
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+								alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+							}
+						} else {
+							_popup.close();
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+						}
+					} else {
+						alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		}
     }
 </script>
