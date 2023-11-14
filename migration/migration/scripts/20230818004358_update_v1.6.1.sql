@@ -41,7 +41,9 @@ INSERT INTO
 )
 VALUES
     ('120', '40', '프로젝트 PACKAGINE VUL DOC FILE', '', 'pdf,xlsm,zip,tar.gz,gz,tar.xz', 40, 'Y');
-    
+
+ALTER TABLE `OSS_COMPONENTS` MODIFY `DEPENDENCIES` varchar(5000) DEFAULT NULL;
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
