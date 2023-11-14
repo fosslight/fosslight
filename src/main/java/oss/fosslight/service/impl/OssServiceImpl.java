@@ -3038,9 +3038,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossNewistData.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(Licenselist, ","));
 				}
 			}
+			
+			ossNewistData.setOssId(null);
 		}
 		
-		ossNewistData.setOssId(null);
 		return ossNewistData;
 	}
 	
