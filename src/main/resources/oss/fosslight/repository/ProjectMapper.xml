@@ -3098,12 +3098,17 @@
 					, OSS_VERSION	
 					, DOWNLOAD_LOCATION	
 					, HOMEPAGE	
-					<if test="@oss.fosslight.util.StringUtil@equals('N', androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
-					, '' AS FILE_PATH
-					</if>
-					<if test="!@oss.fosslight.util.StringUtil@equals('N', androidFlag) or !@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
-					, FILE_PATH
-					</if>
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals('N', androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
+							, '' AS FILE_PATH
+						</when>
+						<when test="@oss.fosslight.util.StringUtil@isEmpty(androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
+							, CONCAT(OSS_NAME, IF(IFNULL(OSS_VERSION, '') != '', CONCAT('-', OSS_VERSION), ''), '/') AS FILE_PATH
+						</when>
+						<otherwise>
+							, FILE_PATH
+						</otherwise>
+					</choose>
 					, #{excludeYn}
 					, COPYRIGHT
 					, OBLIGATION_TYPE
