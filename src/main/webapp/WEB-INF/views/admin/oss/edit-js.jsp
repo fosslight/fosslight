@@ -1404,28 +1404,35 @@
 		$('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
 		
 		var pattern = /\s/g;
+		var patternFlag = false;
+		var patternCheckFlag = false;
 		$("[name='downloadLocations']").each(function(idx, cur){
-			var value = $(cur).val().trim();
-			$(cur).val(value);
-			
+			var value = $(cur).val();
 			if (value.match(pattern)) {
-				alertify.error("DownloadLocation remove spaces", 0);
-				
-				return false;
+				$(cur).parent().next("span.urltxt").empty();
+				$(cur).parent().next("span.urltxt").css("display", "none");
+				$(cur).parent().next().next("span.retxt").empty();
+				$(cur).parent().next().next("span.retxt").html("Remove spaces").show();
+				patternFlag = true;
+				patternCheckFlag = true;
 			}
 		});
-		
+		if (patternFlag) alertify.error("DownloadLocation remove spaces", 0);
+		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
-			var value = $(cur).val().trim();
-			$(cur).val(value);
-			
+			var value = $(cur).val();
 			if (value.match(pattern)) {
-				alertify.error("Homepage remove spaces", 0);
-				
-				return false;
+				$(cur).next("span.urltxt").empty();
+				$(cur).next("span.urltxt").css("display", "none");
+				$(cur).next().next("span.retxt").empty();
+				$(cur).next().next("span.retxt").html("Remove spaces").show();
+				patternFlag = true;
+				patternCheckFlag = true;
 			}
 		});
-
+		if (patternFlag) alertify.error("Homepage remove spaces", 0);
+		if (patternCheckFlag) return false;
+		
 		var nicknameFormatErrorFlag = true;
 		$("[name='ossNicknames']").each(function(idx, cur){
 			var nickname = $(cur).val();
