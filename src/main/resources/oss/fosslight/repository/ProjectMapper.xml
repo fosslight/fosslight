@@ -3105,14 +3105,11 @@
 					, DOWNLOAD_LOCATION	
 					, HOMEPAGE	
 					<choose>
-						<when test="@oss.fosslight.util.StringUtil@equals('N', androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
-							, '' AS FILE_PATH
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@isEmpty(androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
-							, CONCAT(OSS_NAME, IF(IFNULL(OSS_VERSION, '') != '', CONCAT('-', OSS_VERSION), ''), '/') AS FILE_PATH
+						<when test="@oss.fosslight.util.StringUtil@equals('Y', androidFlag) and @oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
+							, FILE_PATH
 						</when>
 						<otherwise>
-							, FILE_PATH
+							, CONCAT(OSS_NAME, IF(IFNULL(OSS_VERSION, '') != '', CONCAT('-', OSS_VERSION), ''), '/') AS FILE_PATH
 						</otherwise>
 					</choose>
 					, #{excludeYn}
