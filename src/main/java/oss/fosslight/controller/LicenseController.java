@@ -66,8 +66,9 @@ public class LicenseController extends CoTopComponent{
 		}
 		
 		model.addAttribute("searchBean", searchBean);
+		model.addAttribute("gRowCnt", CoCodeManager.getCodeExpString(CommonFunction.getCoConstDefVal("CD_EXCEL_DOWNLOAD"), CommonFunction.getCoConstDefVal("CD_MAX_ROW_COUNT")));
 		
-		return LICENSE.LIST_JSP;
+		return "license/list :: content";
 	}
 	
 	@GetMapping(value=LICENSE.LIST_AJAX)
@@ -137,13 +138,14 @@ public class LicenseController extends CoTopComponent{
 			model.addAttribute("licenseInfo", licenseMaster);
 		}
 		
-		model.addAttribute("detail", toJson(licenseMaster));
+		model.addAttribute("detail", licenseMaster);
 		
-		if ("ROLE_ADMIN".equals(loginUserRole())) {
-			return LICENSE.EDIT_JSP;
-		} else {
-			return LICENSE.LICENSE_VIEW_JSP;
-		}
+		return "license/edit :: content";
+//		if ("ROLE_ADMIN".equals(loginUserRole())) {
+//			return LICENSE.EDIT_JSP;
+//		} else {
+//			return LICENSE.LICENSE_VIEW_JSP;
+//		}
 	}
 	
 	@PostMapping(value=LICENSE.VALIDATION)

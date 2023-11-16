@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+      
+<th:block th:fragment="content">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="license/list-script :: script"></th:block>
+<div class="contents" style="overflow-y : scroll;">
+	<div id="wrapIframe">
+	<!---->
+	<div>
+		<!---->
+		<fieldset class="listSearch">
+			<form id="licenseSearch" name="licenseSearch">
+				<dl class="basicSearch col2">
+					<dt>Basic Search Area</dt>
+					<dd>
+						<label>License Name</label>
+						<input type="text" name="licenseName" class="autoComLicense" th:value="${searchBean.licenseName}" style="width:230px"/>
+						<input type="checkbox" id="licenseNameAllSearchFlag" value="Y" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
+					</dd>
+					<dd class="textArea">
+						<label>License Text</label>
+						<textarea name="licenseText" th:utext="${searchBean.licenseText}"></textarea>
+					</dd>
+					<dd>
+						<label>License Type</label>
+						<span class="selectSet">
+							<strong for="licenseType" title="selected value"></strong>
+							<select id="licenseType" name="licenseType">	
+								<option th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></option>
+							</select>
+						</span>
+					</dd>
+					<dd th:if="${not #strings.isEmpty(@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION')))}" style="width:100%;">
+						<label>Restriction</label>
+						<span class='checkSet' th:utext="${@CoCodeManager.genCheckbox(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'), searchBean.restrictions, 'list')}"></span>
+					</dd>
+					<dd>
+						<label>User Guide</label>
+						<textarea name="description" th:utext="${searchBean.description}"></textarea>
+					</dd>
+					<dd>
+						<label>Website</label>
+						<input name="webpage" type="text" th:value="${searchBean.webpage}"/>
+					</dd>
+					<dd>
+						<label>Obligation Type</label>
+						<span class="selectSet">
+							<strong for="obligationType" title="selected value"></strong>
+							<select id="obligationType" name="obligationType">	
+								<option th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></option>
+								<option value="NONE">None</option>
+							</select>
+						</span>
+					</dd>
+				</dl>
+				<input th:if="${@CommonFunction.isAdmin()}"  type="button" value="Admin Expand apply" class="btnExpand" />
+				<dl th:if="${@CommonFunction.isAdmin()}" class="adminSearch" style="display:none; height: 70px;">
+					<dd>
+						<label>Creator</label>
+						<span class="selectSet">
+							<strong for="creator" title="Creator selected value"></strong>
+							<select id="creator" name="creator">
+								<option th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></option>
+							</select>
+						</span>
+					</dd>
+					<dd>
+						<label>Created Date</label>
+						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" th:value="${searchBean.cStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" th:value="${searchBean.cEndDate}" maxlength="8" autocomplete="off"/> 
+					</dd>
+					<dd>
+						<label>Modifier</label>
+						<span class="selectSet">
+							<strong for="modifier" title="Modifier selected value"></strong>
+							<select id="modifier" name="modifier">
+								<option th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></option>
+								<option value="NONE">None</option>
+							</select>
+						</span>
+					</dd>
+					<dd>
+						<label>Modified Date</label>
+						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" th:value="${searchBean.mStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" th:value="${searchBean.mEndDate}" maxlength="8" autocomplete="off"/> 
+					</dd>
+				</dl>
+				<input name="act" type="hidden" value="search"/>
+				<input id="search" type="submit" value="Search" class="btnColor search" />
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+			</form>
+		</fieldset>
+		<!---->
+		<div class="btnLayout">
+			<span class="right">
+				<input th:if="${@CommonFunction.isAdmin()}" type="button" value="Bulk registration" onclick="createTabInFrame('BulkReg_License', '#/license/licenseBulkReg')" class="btnColor red" style="width: 125px;" />
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
+				<input th:if="${@CommonFunction.isAdmin()}" type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_License', '/license/edit')" />
+			</span>
+		</div>
+		<!---->
+		<div class="jqGridSet">
+			<table id="list"><tr><td></td></tr></table>
+			<div id="pager"></div>
+		</div>
+	</div>
+	<!---->
+	</div>
+	<!-- //wrap -->
+</div>
+</th:block>

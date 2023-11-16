@@ -113,7 +113,7 @@ import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoOssValidator;
 
-@Component
+@Component("CommonFunction")
 @Slf4j
 public class CommonFunction extends CoTopComponent {
 	

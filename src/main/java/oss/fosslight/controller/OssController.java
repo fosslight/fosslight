@@ -115,7 +115,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list :: content";
 	}
 	
 	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
@@ -294,8 +294,8 @@ public class OssController extends CoTopComponent{
 		} else {
 			model.addAttribute("detectedLicenseIdByName", null);
 		}
-		model.addAttribute("list", toJson(map));
-		model.addAttribute("detail", toJson(ossMaster));
+		model.addAttribute("list", map);
+		model.addAttribute("detail", ossMaster);
 		model.addAttribute("ossId", ossMaster.getOssId());
 		
 		// 참조 프로젝트 목록 조회
@@ -314,8 +314,8 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			model.addAttribute("components", toJson(components));
-			model.addAttribute("componentsPartner", toJson(componentsPartner));
+			model.addAttribute("components", components);
+			model.addAttribute("componentsPartner", componentsPartner);
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);
@@ -326,16 +326,16 @@ public class OssController extends CoTopComponent{
 			if (vulnInfoList.size() == 5) {
 				model.addAttribute("vulnListMore", "vulnListMore");
 			}
-			model.addAttribute("vulnInfoList", toJson(vulnInfoList));
+			model.addAttribute("vulnInfoList", vulnInfoList);
 		}
 		
 		List<String> nickList = new ArrayList<>();
-		model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
 		List<String> downloadLocationList = new ArrayList<>();
-		model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
-		
-		return CommonFunction.isAdmin() ? OSS.EDIT_JSP : OSS.VIEW_JSP;
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
+		return "oss/edit :: content";
+//		return CommonFunction.isAdmin() ? "oss/edit :: content" : "oss/view :: content";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")

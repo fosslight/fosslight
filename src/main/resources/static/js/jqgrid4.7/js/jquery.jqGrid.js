@@ -1093,7 +1093,7 @@ $.fn.jqGrid = function( pin ) {
 		$(gv).attr("id","gview_"+this.id).appendTo(eg);
 		$("<div class='ui-widget-overlay jqgrid-overlay' id='lui_"+this.id+"'></div>").insertBefore(gv);
 		//$("<div class='loading ui-state-default ui-state-active' id='load_"+this.id+"'>"+this.p.loadtext+"</div>").insertBefore(gv);
-		$("<div class='loading' id='load_"+this.id+"'>"+"<img src='"+CTX_PATH+"/images/loading.gif' alt='loading' />"+"</div>").insertBefore(gv);
+		$("<div class='loading' id='load_"+this.id+"'>"+"<img src='/images/loading.gif' alt='loading' />"+"</div>").insertBefore(gv);
 		$(this).attr({cellspacing:"0",cellpadding:"0",border:"0","role":"presentation","aria-multiselectable":!!this.p.multiselect,"aria-labelledby":"gbox_"+this.id});
 		var sortkeys = ["shiftKey","altKey","ctrlKey"],
 		intNum = function(val,defval) {

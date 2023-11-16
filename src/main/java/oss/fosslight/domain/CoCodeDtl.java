@@ -10,6 +10,22 @@ public class CoCodeDtl {
 	/** The cd dtl no. */
 	String cdDtlNo;
 	
+	public String getCdDtlNo() {
+		return cdDtlNo;
+	}
+
+	public void setCdDtlNo(String cdDtlNo) {
+		this.cdDtlNo = cdDtlNo;
+	}
+
+	public String getCdDtlNm() {
+		return cdDtlNm;
+	}
+
+	public void setCdDtlNm(String cdDtlNm) {
+		this.cdDtlNm = cdDtlNm;
+	}
+
 	/** The cd sub no. */
     String cdSubNo;
     

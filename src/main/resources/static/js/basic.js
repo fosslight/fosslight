@@ -539,11 +539,11 @@ var createTab = function(tabNm, tabLk){
 		frameSrc = tabLk.replace('#','');
 	}
 	
-	var appendIFrame = "<iframe src='" + frameSrc + "' style='width:100%; height:100%;' scrolling='yes' marginwidth='0' marginheight='0' frameborder='0' vspace='0' hspace='0'></iframe>";
-	
-	$(".contents").append("<div id=" + tabAnchor.replace(/\//g, '-') + " class='contentsBack'>" + appendIFrame + "</div>");
-	$("<li><span><a class=" + tabAnchor.replace(/\//g, '-') + " href=" + tabLink.replace(/\//g, '-') + ">" + tabName + "</a></span><input type='button' value='x' class='ui-icon ui-icon-close' /></li>")
-	.appendTo(".nav-tab-menu");
+//	var appendIFrame = "<iframe src='" + frameSrc + "' style='width:100%; height:100%;' scrolling='yes' marginwidth='0' marginheight='0' frameborder='0' vspace='0' hspace='0'></iframe>";
+//	
+//	$(".contents").append("<div id=" + tabAnchor.replace(/\//g, '-') + " class='contentsBack'>" + appendIFrame + "</div>");
+//	$("<li><span><a class=" + tabAnchor.replace(/\//g, '-') + " href=" + tabLink.replace(/\//g, '-') + ">" + tabName + "</a></span><input type='button' value='x' class='ui-icon ui-icon-close' /></li>")
+//	.appendTo(".nav-tab-menu");
 	
 	$("#nav-tabs").tabs("refresh");
 	
@@ -1004,7 +1004,7 @@ var commonAjax = {
 };
 
 function fnBasicAjaxData(data, url) {
-	return $.ajax({	type: 'GET',url:CTX_PATH+url,data:data,headers: {'Content-Type': 'application/json'}});
+	return $.ajax({	type: 'GET',url:url,data:data,headers: {'Content-Type': 'application/json'}});
 }
 
 function xssPreventerUnescape(data){
@@ -1978,7 +1978,7 @@ function showHelpLink(id, target){
 	if(_showItem && _showItem.length > 0) {
 		$.ajax({
 			type: 'GET',
-			url: CTX_PATH+"/system/processGuide/getProcessGuide",
+			url: "/system/processGuide/getProcessGuide",
 			data: {"id":id},
 			async:false,
 			success : function(data){

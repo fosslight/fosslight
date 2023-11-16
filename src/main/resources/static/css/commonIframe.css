@@ -19,7 +19,7 @@
 hr {display:none;}
 dl,ul,ol,menu,li {list-style:none;}
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,label,fieldset,legend,textarea,p,blockquote,th,td,input,select,textarea,button {margin:0;padding:0;}
-body, * {font-family:Myriad Pro,Tahoma,Sans-serif,Dotum;font-size:12px;color:#6a6a6a;}
+/* body, * {font-family:Myriad Pro,Tahoma,Sans-serif,Dotum;font-size:12px;color:#6a6a6a;} */
 html, body {height:100%;}
 blockquote, q {quotes:none;}
 blockquote:before, blockquote:after, q:before, q:after {content:"";content:none;}
@@ -378,6 +378,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 html {_overflow-y:scroll;_overflow-x:auto}
 body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;}
 #wrapIframe {padding:25px;background:#fff;}
+#wrapIframe tspan {font-family:Myriad Pro,Tahoma,Sans-serif,Dotum;font-size:12px;color:#6a6a6a;}
 /**/
 .guide {margin:15px 0;padding:10px;border:1px solid #ddd;}
 .guide dt {padding:5px;border-bottom:1px solid #ddd;}

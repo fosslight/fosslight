@@ -78,15 +78,15 @@ dependencies {
 	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 	implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-jasper', version: '9.0.63'
 	implementation group: 'org.apache.taglibs', name: 'taglibs-standard-impl', version: '1.2.5'
-	implementation group: 'org.apache.tiles', name: 'tiles-jsp', version: '3.0.8'
-	implementation group: 'org.apache.tiles', name: 'tiles-core', version: '3.0.8'
+//	implementation group: 'org.apache.tiles', name: 'tiles-jsp', version: '3.0.8'
+//	implementation group: 'org.apache.tiles', name: 'tiles-core', version: '3.0.8'
 	implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 	implementation group: 'org.apache.poi', name: 'poi', version: '4.1.2'
 	implementation group: 'org.apache.poi', name: 'poi-excelant', version: '4.1.2'
 	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
 	implementation group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '4.1.2'
 	implementation group: 'org.apache.poi', name: 'poi-scratchpad', version: '4.1.2'
-	implementation group: 'javax.servlet', name: 'jstl', version: '1.2'
+//	implementation group: 'javax.servlet', name: 'jstl', version: '1.2'
 	
 	implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
 	implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
@@ -134,4 +134,7 @@ dependencies {
 	implementation group: 'org.cyclonedx', name: 'cyclonedx-core-java', version: '7.3.2'
 	
 	implementation files('libs/tlsh-4.6.0.jar')
+	
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
 }

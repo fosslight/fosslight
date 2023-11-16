@@ -37,7 +37,7 @@ public class MainController{
 		model.addAttribute("complianceStatusFlag", CommonFunction.propertyFlagCheck("menu.compliancestatus.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("externalLinkFlag", CommonFunction.propertyFlagCheck("menu.externallink.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
-		return MAIN.INDEX_JSP;
+		return "main/main";
 	}
 	
 	@RequestMapping(value= { CoConstDef.HEALTH_CHECK_URL }, produces=MediaType.TEXT_HTML_VALUE)

@@ -183,7 +183,7 @@ public class ProjectController extends CoTopComponent {
 		
 		CommonFunction.setProjectService(projectService);
 		
-		return PROJECT.LIST_JSP;
+		return "project/list :: content";
 	}
 	
 	/**

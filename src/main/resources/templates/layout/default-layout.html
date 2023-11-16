@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="fragments/header :: headFragment"></th:block>
+<th:block th:replace="fragments/script :: scriptFragment"></th:block>
+<body>
+    <!-- skip-navigation -->
+	<div class="skip-navigation">
+		<p><a href="#container" tabindex="0">본문 바로가기</a></p>
+	</div>
+    <!-- Content Wrapper. Contains page content -->
+    <!-- wrap -->
+	<div id="wrap">
+		<div id="wrapBack">
+			<input type="button" value="<" class="headerHandle" />
+			<th:block th:replace="fragments/nav :: navFragment"></th:block>
+			<hr/>
+       		<div id="blind_wrap"></div>
+			<!-- container -->
+			<div id="section">
+				<div class="sectionBack">
+					<div id="nav-tabs" class="container">
+						<!---->
+						<div class="contentsFix">
+							<div class="contentsFixBack">
+								<div class="tabMenu">
+									<ul class="nav-tab-menu">
+										<li style="display:none;">
+											<span></span>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<!---->
+						<div id="content"></div>
+						<!---->
+					</div>
+				</div>
+			</div>
+			<!-- //container -->
+		</div>
+	</div>
+	<!-- //wrap -->
+</body>
+</html>

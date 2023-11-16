@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+      
+<th:block th:fragment="content">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="oss/list-script :: contentScript"></th:block>
+<div class="contents" style="overflow-y : scroll;">
+	<div id="wrapIframe">
+	<!---->
+	<div>
+		<!---->
+		<fieldset class="listSearch">
+			<form id="ossSearch" name="ossSearch" th:object="${searchBean}">
+				<input type="hidden" name="type" value="oss">
+				<input type="hidden" name="parameter">
+				<dl class="basicSearch col2">
+					<dt>Basic Search Area</dt>
+					<dd>
+						<label>OSS Name</label>
+						<input name="ossName" type="text" class="autoComOss" th:value="${searchBean.ossName}" style="width:230px"/>
+						<input type="checkbox"id="ossNameAllSearchFlag" th:checked="${#strings.equals(searchBean.ossNameAllSearchFlag, 'Y')}" /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="ossNameAllSearchFlag" th:value="${searchBean.ossNameAllSearchFlag}"/>
+					</dd>
+					<dd class="textArea">
+						<label>Copyright Text</label>
+						<textarea name="copyrights" th:utext="${searchBean.copyright}"></textarea>
+					</dd>
+					<dd>
+						<label>License Name</label>
+						<input name="licenseName" type="text" class="autoComLicense" th:value="${searchBean.licenseName}" style="width:230px"/>
+						<input type="checkbox" id="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}"/>
+					</dd>
+					<dd>
+						<label>Description</label>
+						<textarea name="summaryDescription" th:utext="${searchBean.summaryDescription}"></textarea>
+					</dd>
+					<dd>
+						<label>Website</label>
+						<input name="homepage" type="text" th:value="${searchBean.homepage}" style="width:230px"/>
+						<input type="checkbox"id="homepageAllSearchFlag" th:checked="${#strings.equals(searchBean.homepageAllSearchFlag, 'Y')}" /><span>&nbsp;Exact Match</span>
+						<input type="hidden" name="homepageAllSearchFlag" th:value="${searchBean.homepageAllSearchFlag}"/>
+					</dd>
+					<dd>
+						<label>Vulnerability (>=)</label>
+						<input name="cvssScore" type="text" th:value="${searchBean.cvssScore}" style="width:230px"/>
+
+					</dd>
+					<dd>
+						<label>Deactivate</label>
+						<input type="checkbox" id="deactivateFlag" th:checked="${#strings.equals(searchBean.deactivateFlag, 'Y')}" style="margin:0 5px;"/>
+						<input type="hidden" name="deactivateFlag" th:value="${searchBean.deactivateFlag}"/>
+					</dd>
+				</dl>
+				<input th:if="${@CommonFunction.isAdmin()}" type="button" th:value="Admin Expand apply" class="btnExpand" />
+				<dl th:if="${@CommonFunction.isAdmin()}" class="adminSearch" style="display:none; height: 105px;">
+					<dd>
+						<label>Creator</label>
+						<span class="selectSet">
+							<strong for="creator" title="Creator selected value"></strong>
+							<select id="creator" name="creator">
+								<option th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></option>
+							</select>
+						</span>
+					</dd>
+					<dd>
+						<label>Created Date</label>
+						<input name="cStartDate" id="cStartDate" type="text" class="cal" title="Search Start Date" th:value="${searchBean.cStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="cEndDate" id="cEndDate" type="text" class="cal" title="Search End Date" th:value="${searchBean.cEndDate}" maxlength="8" autocomplete="off"/> 
+					</dd>
+					<dd>
+						<label>Modifier</label>
+						<span class="selectSet">
+							<strong for="modifier" title="Modifier selected value"></strong>
+							<select id="modifier" name="modifier">
+								<option th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></option>
+							</select>
+						</span>
+					</dd>
+					<dd>
+						<label>Modified Date</label>
+						<input name="mStartDate" id="mStartDate" type="text" class="cal" title="Search Start Date" th:value="${searchBean.mStartDate}" maxlength="8" autocomplete="off"/> ~ 
+						<input name="mEndDate" id="mEndDate" type="text" class="cal" title="Search End Date" th:value="${searchBean.mEndDate}" maxlength="8" autocomplete="off"/> 
+					</dd>
+					<dd>
+						<label>License Type</label>
+						<span class="selectSet">
+							<strong for="licenseType" title="selected value"></strong>
+							<select id="licenseType" name="licenseType">
+								<option th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></option>
+							</select>
+						</span>
+					</dd>
+					<dd>
+						<label>OSS Type</label>
+						<span class="iconSet none" title="None">None</span><input type="checkbox" id="noneLicenseFlag" name="ossTypeSearch" th:value = "N"/>
+						<span class="iconSet multi" title="Multi">Multi</span><input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" th:value = "M"/>
+						<span class="iconSet dual" title="Dual">Dual</span><input type="checkbox" id="dualLicenseFlag" name="ossTypeSearch" th:value = "D"/>
+						<span class="iconSet vdif" title="Version Difference">v-Diff</span><input type="checkbox" id="versionDiffFlag" name="ossTypeSearch" th:value = "V"/>
+					</dd>
+				</dl>
+				<input name="act" type="hidden" th:value="search"/> 
+				<input id="search" type="submit" th:value="Search" class="btnColor search" />
+				<a class="right" id="helpLink" style="position:absolute; cursor: pointer; top:10px; right:-60px; display:none;"><img alt="" src="/images/user-guide.png" /></a>
+			</form>
+		</fieldset>
+		<!---->
+		<div class="btnLayout">
+			<input th:if="${@CommonFunction.isAdmin()}" id="delete" type="button" value="Delete" class="btnOssSelect btnColor left" onclick="fn.deleteOss();"/>
+			<span class="right">
+				<input th:if="${@CommonFunction.isAdmin()}" type="button" value="Bulk registration" onclick="createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')" class="btnColor red" style="width: 125px;" />
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Export</span></a>
+				<input th:if="${@CommonFunction.isAdmin()}" type="button" value="Add" class="btnColor" onclick="createTabInFrame('New_Opensource', '/oss/edit')" />
+			</span>
+		</div>
+		<!---->
+		<div class="jqGridSet">
+			<table id="list"><tr><td></td></tr></table>
+			<div id="pager"></div>
+		</div>
+	</div>
+	<!---->
+	</div>
+	<!-- //wrap -->
+</div>
+</th:block>

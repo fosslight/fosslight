@@ -5,6 +5,10 @@
 
 package oss.fosslight.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,9 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.STATISTICS;
@@ -29,12 +35,13 @@ public class StatisticsController extends CoTopComponent{
 	/** The statistics service. */
 	@Autowired StatisticsService statisticsService;
 	
-	@GetMapping(value=STATISTICS.VIEW)
+	@GetMapping("/statistics/view")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
-		
-		return STATISTICS.VIEW_JSP;
+		model.addAttribute("divisionList", CoCodeManager.getCodeNames(CommonFunction.getCoConstDefVal("CD_USER_DIVISION")));
+				
+		return "statistics/view :: content";
 	}
 	
 	@GetMapping(value=STATISTICS.DIVISIONAL_PROJECT_CHART)
