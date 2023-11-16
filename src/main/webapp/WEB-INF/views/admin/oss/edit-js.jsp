@@ -2371,7 +2371,8 @@ var fn = {
 		}
 	},
 	homepageDuplication : function(target){
-		var value = $(target).val();
+		var value = $(target).val().trim();
+		$(target).val(value);
 
 		if(value.charAt(value.length-1) == "/"){
 			value = value.slice(0, -1); // 마지막 문자열 제거
