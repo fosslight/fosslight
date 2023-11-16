@@ -1407,7 +1407,8 @@
 		var patternFlag = false;
 		var patternCheckFlag = false;
 		$("[name='downloadLocations']").each(function(idx, cur){
-			var value = $(cur).val();
+			var value = $(cur).val().trim();
+			$(cur).val(value);
 			if (value.match(pattern)) {
 				$(cur).parent().next("span.urltxt").empty();
 				$(cur).parent().next("span.urltxt").css("display", "none");
@@ -1420,7 +1421,8 @@
 		if (patternFlag) alertify.error("DownloadLocation remove spaces", 0);
 		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
-			var value = $(cur).val();
+			var value = $(cur).val().trim();
+			$(cur).val(value);
 			if (value.match(pattern)) {
 				$(cur).next("span.urltxt").empty();
 				$(cur).next("span.urltxt").css("display", "none");
