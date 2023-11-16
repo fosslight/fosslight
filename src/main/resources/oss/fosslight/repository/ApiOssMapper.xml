@@ -269,6 +269,7 @@
 	<resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
 		<result property="downloadUrl" column="download_location" />
 		<result property="homepageUrl" column="homepage" />
+		<result property="obligations" column="obligation_type" />
 <!--		<result property="creator" column="" />-->
 	</resultMap>
 	<select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
@@ -298,11 +299,6 @@
 		, T1.MODIFIED_DATE
 		, T3.LICENSE_NAME
 		, T1.OBLIGATION_TYPE
-		, CONCAT(
-		IF(		T3.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N')
-		, IF(	T3.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'Y',	'N')
-		, IF(	T3.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
-		) AS OBLIGATION_CHECKS
 		, SUB1.OSS_TYPE AS OSS_TYPE
 		, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
@@ -461,7 +457,7 @@
 		<include refid="limitPage"/>
 	</select>
 
-	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.api.dto.OssDto">
+	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultMap="OssDtoMap">
 		SELECT
 		#{ossId} AS REF_OSS_ID
 		, T1.OSS_ID
@@ -488,16 +484,7 @@
 		, T1.CREATED_DATE
 		, T1.MODIFIED_DATE
 		, T3.LICENSE_NAME
-		, IFNULL(
-		(SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE CD_NO = '217' AND CD_DTL_NO = T1.OBLIGATION_TYPE)
-		, CASE WHEN T1.OBLIGATION_TYPE='10' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>' WHEN T1.OBLIGATION_TYPE='11' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>]]>' ELSE '' END
-		) AS OBLIGATION
 		, T1.OBLIGATION_TYPE
-		, CONCAT(
-		IF(		T3.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N')
-		, IF(	T3.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'Y',	'N')
-		, IF(	T3.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
-		) AS OBLIGATION_CHECKS
 		, SUB1.OSS_TYPE AS OSS_TYPE
 		, T4.CD_DTL_NM AS LICENSE_TYPE
 		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
