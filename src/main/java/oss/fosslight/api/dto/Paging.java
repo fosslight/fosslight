@@ -8,10 +8,14 @@ import lombok.Setter;
 @Setter
 public class Paging {
     public enum SortDirection {
-        ASC("asc"), DSC("desc");
+        ASC("asc"), DESC("desc");
 
         SortDirection(String value) {
             this.value = value;
+        }
+
+        public String getValue() {
+            return value;
         }
 
         public final String value;
@@ -34,6 +38,10 @@ public class Paging {
         if (sort == null || sort.isEmpty() || !sort.contains("-")) return;
         var sortSplit = sort.toUpperCase().split("-");
         this.sortColumn = sortSplit[0].toUpperCase();
-        this.sortDirection = SortDirection.valueOf(sortSplit[1]);
+        if (sortSplit[1] == "ASC") {
+            this.sortDirection = SortDirection.ASC;
+        } else {
+            this.sortDirection = SortDirection.DESC;
+        }
     }
 }
