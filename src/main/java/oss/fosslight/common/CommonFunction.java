@@ -4146,6 +4146,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		
+		changeAnalysisResultList = changeAnalysisResultList.stream().filter(distinctByKey(e -> (e.getTitle() + "|" + e.getOssName() + "|" + e.getOssVersion()).toUpperCase())).collect(Collectors.toList());
+		
 		getAnalysisValidation(map, changeAnalysisResultList);
 		map.replace("rows", changeAnalysisResultList);
 		map.remove("analysisList"); // 분석결과 Data에서는 필요없는 data이므로 제거.
