@@ -4250,6 +4250,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			if (!isEmpty(bean.getOssNickname())) { // nickname이 빈값이 있을 경우 담지 않음.
 				nicknameList.addAll(Arrays.asList(bean.getOssNickname().split(",")));
+				nicknameList = nicknameList.stream().filter(e -> !e.equalsIgnoreCase(bean.getOssName())).collect(Collectors.toList());
 			}
 			
 			nicknameList.addAll(Arrays.asList(newestNickName.split(",")));
