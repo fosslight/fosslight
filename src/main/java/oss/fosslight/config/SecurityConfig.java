@@ -59,11 +59,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-//		http
-//		// replay 어택을 막기 위한 csrf 토큰의 생성을 비활성화(disabled) 처리
-//		.csrf().disable()
-//		// 'X-Frame-Options' to 'DENY' 대응
-//		.headers().frameOptions().disable().and()
+		http
+		// replay 어택을 막기 위한 csrf 토큰의 생성을 비활성화(disabled) 처리
+		.csrf().disable()
+		// 'X-Frame-Options' to 'DENY' 대응
+		.headers().frameOptions().disable().and();
 //		.authorizeRequests().antMatchers(Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
 //		.authorizeRequests().antMatchers(Url.USER.RESET_PASSWORD).permitAll().and() // 비밀번호 초기화 요청처리 예외
 //		.authorizeRequests().antMatchers("/*" + Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외

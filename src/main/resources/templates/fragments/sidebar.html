@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="sidebarFragment">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="./index.html" class="brand-link">
+      <img th:src="@{/images/logo_s.png}" alt="FOSSLight hub Logo" class="brand-image img-circle elevation-3"
+           style="opacity: .8">
+      <span class="brand-text font-weight-light">FOSSLight Hub</span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <!-- <div class="image">
+          <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+        </div> -->
+        <div class="info">
+          <a href="#" class="d-block">Alexander Pierce</a>
+        </div>
+      </div>
+
+      <!-- SidebarSearch Form -->
+      <div class="form-inline">
+        <div class="input-group" data-widget="sidebar-search">
+          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-sidebar">
+              <i class="fas fa-search fa-fw"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/license/list" class="nav-link" id="license-list">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                License List
+              </p>
+              <i class="fas fa-angle-left right"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/oss/list" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                OSS List
+              </p>
+              <i class="fas fa-angle-left right"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/project/list" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Project List
+              </p>
+              <i class="fas fa-angle-left right"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="./view/partner/partner-list.html" class="nav-link">
+              <i class="nav-icon fas fa-edit"></i>
+              <p>
+                3rd Party List
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="./view/partner/partner-add.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>3rd Party Add</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Binary DB
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="./view/vulnerability/vulnerabliity.html" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Vulnerability
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="./view/selfCheck/selfCheck-list.html" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Self-Check List
+              </p>
+              <i class="fas fa-angle-left right"></i>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="./view/selfCheck/selfCheck-add.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Self-Check Add</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Compliance Status
+              </p>
+              <i class="fas fa-angle-left right"></i>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="./view/compliance/oscSt-list.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>MODEL(S/W) OSC Status</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="./view/compliance/partySt-list.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>3rd Party Status</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="./view/configuration/configuration.html" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+              <p>
+                Configuration
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-envelope"></i>
+              <p>
+                System
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Statistics</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="./view/system/code-mgt.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Code management</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/mailbox/compose.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>User management</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/mailbox/read-mail.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>History List</p>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+          <li class="nav-item ml-3 mb-3 fixed copyright">
+            <div class="text-white">
+              <strong>Version 3.2.0</strong><br />
+              Copyright &copy; 2021 LG Electronics.<br />
+              All rights reserved.
+            </div>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+  <script type="text/javascript">
+    // iframe 강제 렌더링 ->  WebSecurityConfigurerAdapter > configure에서 'X-Frame-Options' to 'DENY' 대응이 불가할 경우 사용
+    // $(document).ready(function () {
+    //   $(".nav-link").on("click", function (e) {
+    //     e.preventDefault();
+    //
+    //     if (!this || !$(this).attr('id')) {
+    //       console.error("Invalid 'this' or 'id' attribute.");
+    //       return;
+    //     }
+    //
+    //     const elementId = $(this).attr('id');
+    //     const targetElementId = "panel-" + elementId;
+    //     const elementIds = elementId.split("-");
+    //
+    //     if (elementIds.length === 2) {
+    //       let url = "/" + elementIds.join("/");
+    //
+    //
+    //       ajaxRequest(url, "GET", "html", function (data) {
+    //         $("#" + targetElementId).html(data);
+    //       }, function (error) {
+    //         console.error("Error loading content: " + error);
+    //       });
+    //     } else {
+    //       console.error("Unexpected elementId format:", elementId);
+    //     }
+    //   });
+    // });
+  </script>
+</th:block>
+</html>

@@ -2,112 +2,58 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/script :: scriptFragment"></th:block>
 <th:block th:fragment="navFragment">
-   <!-- header -->
-<div id="header">
-	<div class="back">
-		<div class="logo">
-			<img src="/images/img_logo.png" alt="FOSSLight Hub"/>
-		</div>
-		<div class="version">
-			<strong><a style="color: #AC1E35;" th:href="@{https://github.com/fosslight/fosslight/blob/develop/RELEASE_NOTES.md}" target='_blank' th:with="projectVersion=${@CommonFunction.getProperty('project.version')}">v[[${projectVersion}]]</a></strong>
-		</div>
-		<div class="userLang">
-			<select id="selectLang">
-				<option th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_LOCALE'))}" th:value="${code[3]}" th:utext="${code[1]}"></option>
-			</select>
-		</div>
-		<div class="userLogout">
-			<input type="hidden" id="defaultTabAnchorArr" value="${sessUserInfo.defaultTabAnchor}" />
-			<span class="configurationSpan"><a th:href="@{/configuration/edit}" class="add-tab" title="User Settings"><span><img src="/images/settings.png" alt="FOSSLight Hub" width="14" height="14" /></span>&nbsp;&nbsp;</a></span>
-			<span class="userLogoutSpan"><a th:href="@{/session/logout-proc}" class="userLogoutA">Logout</a></span>
-			<p style="margin-top: 20px;"><marquee behavior="scroll" direction="left" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_MARQUEE'), @CommonFunction.getCoConstDefVal('CD_DTL_CONTENTS'))}"></marquee></p>
-		</div>
-		<div class="gnb">
-			<div class="scrl">
-				<ul>
-					<li th:if="${dashboardFlag}"><a th:href="@{/dashboard/list}" class="add-tab">Dashboard</a></li>
-				    <li th:if="${statisticsFlag}"><a style="cursor:pointer;" onclick="loadContent('statistics', '/statistics/view');">Statistics</a></li>
-					<li><a style="cursor:pointer;" onclick="loadContent('license', '/license/list');">License List</a></li>
-					<li><a style="cursor:pointer;" onclick="loadContent('oss', '/oss/list');">OSS List</a></li>
-					<li th:if="${projectFlag}"><a style="cursor:pointer;" onclick="loadContent('project', '/project/list');">Project List</a></li>
-					<li th:if="${partnerFlag}"><a href="/partner/list" class="add-tab">3rd Party List</a></li>
-					<li th:if="${batFlag}"><a href="/bat/list" class="add-tab">BAT List</a></li>
-					<li th:if="${binarydbFlag}"><a href="/binary" class="add-tab">Binary DB</a></li>
-					<li><a href="/vulnerability/list" class="add-tab">Vulnerability</a></li>
-					<li><a href="/selfCheck/list" class="add-tab">Self-Check List</a></li>
-					<li th:if="${complianceStatusFlag and (projectFlag or partnerFlag)}" class="gnbOpen">
-						<strong>Compliance Status</strong>
-						<ol>
-							<li th:if="${projectFlag}"><a href="/compliance/modelStatus" class="add-tab">Model(S/W) OSC Status</a></li>
-							<li th:if="${partnerFlag}"><a href="/compliance/3rdList" class="add-tab">3rd Party Status</a></li>
-						</ol>
-					</li>
-					<li th:if="${externalLinkFlag and not strings.isEmpty(@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_LINK')))}" class="gnbOpen">
-						<a href="/external/external" class="add-tab">External Link</a>
-						<ol>
-							<li th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_LINK'))}">
-								<a href="${#strings.setSplit(@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_LINK'),code[0]),'|')[1]}" target="_blank" th:utext="${code[1]}"></a>
-							</li>
-						</ol>
-					</li>
-					<li th:if="${@CommonFunction.isAdmin()}"><a href="/system/configuration" class="add-tab">Configuration</a></li>
-					<li th:if="${@CommonFunction.isAdmin()}" class="gnbOpen">
-						<strong>System</strong>
-						<ol>
-							<li><a href="/system/code" class="add-tab">Code management</a></li>
-							<li><a href="/system/user" class="add-tab">User management</a></li>
-							<li><a href="/system/history" class="add-tab">History List</a></li>
-							<li><a href="/system/notice" class="add-tab">Notification</a></li>
-							<li><a href="/system/sentMail" class="add-tab">Sent Mail List</a></li>
-							<li th:if="${binarydbFlag}"><a href="/system/processGuide" class="add-tab">Help & Guide</a></li>
-							<li><a href="/system/vulnerabilityHistory}" class="add-tab">Vulnerability Log</a></li>
-							<li th:if="${binarydbFlag}"><a href="/system/binaryDataHistory" class="add-tab">BinaryDB Log</a></li>
-						</ol>
-					</li>
-				</ul>	
-			</div>
-		</div>
-		<div class="footer"><p>Copyright © 2021 LG Electronics. <br/>All Rights Reserved. <span>PRIVACY LEGAL</span></p></div>
-	</div>
-</div>
-<!-- //header -->
-<script type="text/javascript">
-	function loadContent(_step, _url) {
-		$.ajax({
-	        url: _url,
-	        type: "GET",
-	        dataType : "html"
-	    })
-	    .done(function (fragment) {
-	        $("#content").html(fragment);
-	        
-	        switch (_step) {
-	        	case "statistics" :
-	        		common_fn.init();
-	        		break;
-	        	case "license" :
-	        		data.init();
-	        		evt.init();
-	        		showHelpLink("License_List_Main");
-	        		break;
-	        	case "oss" :
-	        		evt.init();
-	        		data.init();
-	        		showHelpLink("OSS_List_Main");
-	        		break;
-	        	case "project" :
-	        		evt.init();
-	        		fn.getUserIdList("Y", "REVIEWER"); // 근무자
-	        		fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
-	        		$('.btnReject').hide();
-	        		showHelpLink("Project_List_Main");
-	        		break;
-	        	default :
-	        		readyFunction();
-        		break;
-	        }
-	    });
-	}
-</script>
+	<!-- header -->
+	<!-- Navbar -->
+	<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+		<!-- Left navbar links -->
+		<ul class="navbar-nav">
+			<li class="nav-item">
+				<a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+			</li>
+		</ul>
+
+		<!-- Right navbar links -->
+		<ul class="navbar-nav ml-auto">
+			<!-- Navbar Search -->
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-book"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-bullhorn"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-question"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-widget="fullscreen" href="#" role="button">
+					<i class="fas fa-expand-arrows-alt"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+					<i class="fas fa-th-large"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="flag-icon flag-icon-us"></i>
+				</a>
+				<div class="dropdown-menu dropdown-menu-right p-0">
+					<a href="#" class="dropdown-item active">
+						<i class="flag-icon flag-icon-us mr-2"></i> English
+					</a>
+					<a href="#" class="dropdown-item">
+						<i class="flag-icon flag-icon-kr mr-2"></i> Korean
+					</a>
+				</div>
+			</li>
+		</ul>
+	</nav>
 </th:block>
 </html>
