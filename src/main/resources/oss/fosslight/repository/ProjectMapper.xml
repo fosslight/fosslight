@@ -3688,7 +3688,10 @@
 	</select>
 	
 	<select id="existsWatcherByUser" resultType="int" parameterType="oss.fosslight.domain.Project">
-		SELECT COUNT(1) FROM PROJECT_WATCHER WHERE PRJ_ID = #{prjId} AND DIVISION = #{prjDivision} AND (USER_ID = 'ALL' OR USER_ID = #{prjUserId})
+		SELECT COUNT(1) 
+		FROM PROJECT_WATCHER 
+		WHERE (PRJ_ID = #{prjId} AND DIVISION = #{prjDivision} AND (USER_ID = 'ALL' OR USER_ID = #{prjUserId}))
+		OR (PRJ_ID = #{prjId} AND EMAIL = (SELECT EMAIL FROM T2_USERS WHERE USER_ID = #{prjUserId} AND DIVISION = #{prjDivision} LIMIT 1))
 	</select>
 	
 	<select id="existsWatcherByUserDivistion" resultType="int" parameterType="oss.fosslight.domain.Project">

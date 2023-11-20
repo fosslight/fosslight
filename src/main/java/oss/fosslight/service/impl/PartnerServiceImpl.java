@@ -634,8 +634,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		} else {
 			// 이미 추가된 watcher 체크
 			if (partnerMapper.existsWatcherByUser(project) == 0) {
-				// watcher 추가
-				partnerMapper.insertWatcher(project);
+				if (partnerMapper.existsWatcherByUserDivistion(project) > 0) {
+					partnerMapper.updateWatcherDivision(project);
+				} else {
+					// watcher 추가
+					partnerMapper.insertWatcher(project);
+				}
 			}
 		}
 	}
