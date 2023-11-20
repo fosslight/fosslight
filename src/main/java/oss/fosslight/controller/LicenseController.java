@@ -118,7 +118,7 @@ public class LicenseController extends CoTopComponent{
 	
 	@GetMapping(value=LICENSE.EDIT)
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
-		return LICENSE.EDIT_JSP;
+		return "license/edit :: content";
 	}
 	
 	@GetMapping(value=LICENSE.EDIT_ID)
