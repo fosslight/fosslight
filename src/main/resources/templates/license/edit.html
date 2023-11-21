@@ -1,15 +1,334 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
       
 <th:block th:fragment="content">
-<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
-<th:block th:replace="license/edit-script :: contentScript"></th:block>
-<div class="contents" style="overflow-y : scroll;">
-	<div id="wrapIframe">
-	<!---->
-	welcome
-	<!---->
+	<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+	<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+	<th:block th:replace="license/edit-script :: contentScript"></th:block>
+	<div class="contents" style="overflow-y : scroll;">
+		<div class="wrapper">
+			<div class="content-wrapper custom-layout" style="height:auto">
+				<!-- Content Header (Page header) -->
+				<section class="content-header">
+					<div class="container-fluid">
+					</div><!-- /.container-fluid -->
+				</section>
+				<form name="licenseForm" id="licenseForm" action="" method="post">
+				<section class="content">
+					<div class="row">
+						<div class="col-md-9">
+							<div class="card card-secondary submit-form">
+								<div class="card-header">
+									<h3 class="card-title text-white">Form</h3>
+
+									<div class="card-tools">
+										<button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse">
+											<i class="fas fa-minus"></i>
+										</button>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="form-group">
+										<label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label>
+										<input type="text" name="licenseName" id="licenseNameInput" class="form-control">
+									</div>
+									<div class="form-group">
+										<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label>
+										<select class="select2" name="licenseType" id="licenseTypeSelect" style="width: 100%;">
+											<option value=""></option>
+											<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
+										</select>
+									</div>
+									<div class="form-group">
+										<label th:text="#{msg.common.field.restriction}"></label>
+										<select class="select2" name="restriction" id="restrictionSelect" multiple="multiple" style="width: 100%;">
+											<option value=""></option>
+											<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
+										</select>
+									</div>
+									<div class="form-group clearfix">
+										<div class="row">
+											<div class="col-2">
+												<label th:text="#{msg.common.field.obligation}"></label>
+											</div>
+											<div class="col-10">
+												<div class="icheck-primary d-inline mx-3">
+													<input type="checkbox" name="obligationNotificationYn" id="noticeChk">
+													<label class="text-lg-gray" for="noticeChk">
+														Notice
+													</label>
+												</div>
+												<div class="icheck-primary d-inline  mx-3">
+													<input type="checkbox" name="obligationDisclosingSrcYn" id="sourceChk">
+													<label class="text-lg-gray" for="sourceChk">
+														Source Code
+													</label>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="form-group tag-form">
+										<label for="word_nickname" th:text="#{msg.common.field.nickname}"></label>
+										<div class="input-group">
+											<input type="text" class="form-control" id="word_nickname">
+											<div class="input-group-append">
+												<button type="button" class="btn btn-default" name="addTagButton" id="nickname">Add</button>
+											</div>
+											<!-- /btn-group -->
+										</div>
+									</div>
+									<div class="form-group d-flex" id="appendTagArea_nickname"></div>
+									<div class="form-group tag-form" name="append-stag-form">
+										<label for="word_website" th:text="#{msg.common.field.licenseWebsite}"></label>
+										<div class="input-group">
+											<input type="text" class="form-control" id="word_website">
+											<div class="input-group-append">
+												<button type="button" class="btn btn-default" name="addTagButton" id="website">Add</button>
+											</div>
+											<!-- /btn-group -->
+										</div>
+									</div>
+									<div class="form-group d-flex" id="appendTagArea_website">
+									</div>
+									<div class="form-group">
+										<label for="inputName" th:text="#{msg.common.field.userGuide}"></label>
+										<textarea class="form-control" name="description" rows="3"></textarea>
+									</div>
+									<div class="form-group">
+										<label for="inputName" th:text="#{msg.common.field.licenseText}"></label>
+										<textarea class="form-control" name="licenseText"  rows="5"></textarea>
+									</div>
+									<div class="form-group">
+										<label for="inputName" th:text="#{msg.common.field.attribution}"></label>
+										<textarea class="form-control" rows="3" name="attribution"></textarea>
+									</div>
+									<div class="form-group">
+										<label for="inputName">Comment</label>
+										<textarea class="form-control" name='commentInput' style="height: 800px" rows="3">
+											<ul>
+											  <li>List item one</li>
+											  <li>List item two</li>
+											  <li>List item three</li>
+											  <li>List item four</li>
+											</ul>
+										  </textarea>
+									</div>
+								</div>
+								<div class="card-footer clearfix">
+									<a href="javascript:void(0)" class="btn btn-secondary float-left" id="delete">Delete</a>
+									<a href="javascript:void(0)" class="btn btn-teal-01 float-right" id="save">Save</a>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="card card-lg-red">
+								<div class="card-header">
+									<h3 class="card-title">Comment</h3>
+
+									<div class="card-tools">
+										<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+											<i class="fas fa-minus"></i>
+										</button>
+									</div>
+								</div>
+								<div class="card-body">
+									<div clas="row">
+										<div clas="col-md-12">
+											<table class="table">
+												<!-- <thead>
+                                                  <tr>
+                                                    <th>File Name</th>
+                                                    <th>File Size</th>
+                                                    <th></th>
+                                                  </tr>
+                                                </thead> -->
+												<tbody>-
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn btn-default" data-toggle="modal"
+															   data-target="#modal-comment"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn btn-default" data-toggle="modal"
+															   data-target="#modal-comment"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn btn-default" data-toggle="modal"
+															   data-target="#modal-comment"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn btn-default" data-toggle="modal"
+															   data-target="#modal-comment"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn-default" data-toggle="modal"
+															   data-target="#modal-comment"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												<tr>
+													<td>
+														<div class="post">
+															<div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+																<span class="description ml-0">Shared publicly - 7:45 PM today</span>
+															</div>
+															<p>
+																Lorem ipsum represents a long-held tradition for designers,
+																typographers and the like. Some people hate it and argue for
+																its demise, but others ignore.
+															</p>
+														</div>
+													</td>
+													<td class="text-right py-0 align-middle">
+														<div class="btn-group btn-group-sm">
+															<a href="#" class="btn btn-default"><i class="fas fa-pencil-alt"></i></a>
+															<a href="#" class="btn btn-lg-red"><i class="fas fa-trash"></i></a>
+														</div>
+													</td>
+												</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<!-- modal -->
+				<div class="modal fade" id="modal-comment">
+					<!-- modal dialog -->
+					<div class="modal-dialog modal-lg">
+						<!-- modal-content -->
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title">Comment</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+                    <textarea class="form-control" name="commentInput" style="height: 800px" rows="3">
+                        <ul>
+                            <li>List item one</li>
+                            <li>List item two</li>
+                            <li>List item three</li>
+                            <li>List item four</li>
+                        </ul>
+                    </textarea>
+							</div>
+							<div class="modal-footer justify-content-between">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+								<button type="button" class="btn btn-primary">Save changes</button>
+							</div>
+						</div>
+						<!-- /.modal-content -->
+					</div>
+					<!-- /.modal-dialog -->
+				</div>
+				<!--/. modal -->
+				</form>
+			</div>
+		</div>
 	</div>
-	<!-- //wrap -->
-</div>
 </th:block>

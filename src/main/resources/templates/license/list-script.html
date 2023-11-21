@@ -5,23 +5,23 @@
         /*<![CDATA[*/
         var initParam = {};
         var totalRow = 0;
-        const G_ROW_CNT = "*{gRowCnt}";
+        //const G_ROW_CNT = "*{gRowCnt}";
 
         $(window).load(function () {
-            licenseData.init();
+            license_list_data.init();
         });
 
-        const licenseData = {
+        const license_list_data = {
             typeCodes: [],
             tooltipCont: "<div class=\"tooltipData\"><dl><dt><span class=\"iconSet ops\">Notice Obligation</span>Notice Obligation</dt><dd></dd></dl><dl><dt><span class=\"iconSet man\">Source Code Obligation</span>Source Code Obligation</dt><dd></dd></dl></div>",
             existTooltip: false,
             init: function () {
-                license_evt.init();
+                license_list_evt.init();
                 $('[data-toggle="tooltip"]').tooltip();
             }
         }
 
-        const license_evt = {
+        const license_list_evt = {
             init: function () {
                 // Initialize Select2 Elements
                 $('#restrictionSelect').select2({
@@ -39,6 +39,10 @@
                     allowClear: true,
                 });
 
+                $("#licenseNameAllSearchFlag").on("change", function(e){
+                    $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+
                 // Auto complete
                 const licenseNameList = ["Artistic License 1.0 (Perl)", "Artistic License 1.0", "Artistic License 2.0", "Australian Public Licence B 1.0", "GNU General Public License v2.0 w/Linux Syscall Note", "CeCILL-B Free Software License Agreement"];
                 const autocompleteLicenseName = $('#autocomplete-license-name');
@@ -48,25 +52,23 @@
                 // autocompleteLicenseName.typeahead({ source: licenseNameList });
 
                 $('#search').on('click', function (e) {
-                    console.log("클릭")
+                    console.log("111");
                     e.preventDefault();
-                    var postData = license_fn.setGridParam();
+
+                    var postData = license_list_fn.setGridParam();
                     postData.ignoreSearchFlag = "N";
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                     resizingOuterJqGidSet();
                 });
 
-                license_list.load();
+                license_list_grid.load();
 
             },
         }
 
-        const license_fn = {
+        const license_list_fn = {
             setGridParam: function () {
-
-
                 var paramData = $('#licenseSearch').serializeObject();
-                console.log(paramData);
 
                 if (paramData.restrictions != null) {
                     paramData.restrictions = JSON.stringify(paramData.restrictions);
@@ -89,7 +91,7 @@
 
         }
 
-        const license_list = {
+        const license_list_grid = {
             load: function () {
                 $("#list").jqGrid({
                     url: "/license/listAjax",
@@ -119,7 +121,7 @@
                             index: 'licenseName',
                             width: 200,
                             align: 'left',
-                            formatter: license_fn.licenseNameFormatter
+                            formatter: license_list_fn.licenseNameFormatter
                         }
                         , {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left'}
                         , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}

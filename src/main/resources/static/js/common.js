@@ -41,21 +41,6 @@ function resizingOuterJqGidSet() {
     }
 }
 
-// $(window)
-//   .bind("resize", function () {
-//     if ($(".jqGridSet table").length > 0) {
-//       // 그리드의 width 초기화
-//       $(".jqGridSet table").jqGrid("setGridWidth", 0, true);
-//       // 그리드의 width를 div 에 맞춰서 적용
-//       $(".jqGridSet table").jqGrid(
-//         "setGridWidth",
-//         $(".jqGridSet").width(),
-//         true
-//       );
-//     }
-//   })
-//   .trigger("resize");
-
 var searchStringOptions = {
     searchoptions: { sopt: ["cn", "eq", "ne", "bw", "bn", "ew", "en", "nc"] },
 };
@@ -155,4 +140,49 @@ function escapeHtml(str) {
     return str.replace(/[&<>"']/g, function (m) {
         return map[m];
     });
+}
+
+function appendMultiTag(e, elId_01, elId_02, tgId) {
+    e.preventDefault();
+
+    const fword = $("#" + elId_01).val();
+    const lword = $("#" + elId_02).val();
+    const word = fword + " / " + lword;
+
+    if (!fword || !lword || fword.length === 0 || lword.length === 0) {
+        return;
+    }
+
+    const el = $("<div/>", {
+        class: "external-event",
+        text: word,
+    }).append(
+        '<i class="fas fa-times float-right mt-1" name="deleteTagButton"></i>'
+    );
+
+    $("#" + tgId).prepend(el);
+    $("#" + elId_01 + ", #" + elId_02)
+        .val(null)
+        .trigger("change");
+}
+
+function appendSingleTag(e, elId, tgId) {
+    e.preventDefault();
+    const word = $("#" + elId).val();
+
+    if (!word || word.length === 0) {
+        return;
+    }
+
+    const el = $("<div/>", {
+        class: "external-event",
+        text: word,
+    }).append(
+        '<i class="fas fa-times float-right mt-1" name="deleteTagButton"></i>'
+    );
+
+    $("#" + tgId).prepend(el);
+    $("#" + elId)
+        .val(null)
+        .trigger("change");
 }
