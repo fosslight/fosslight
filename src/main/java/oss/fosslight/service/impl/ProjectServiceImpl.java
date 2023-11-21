@@ -54,6 +54,7 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
@@ -84,6 +85,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired ProjectMapper projectMapper;
 	@Autowired T2UserMapper userMapper;
 	@Autowired PartnerMapper partnerMapper;
+	@Autowired CodeMapper codeMapper;
 	
 	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
@@ -1612,7 +1614,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else if ("CONF".equals(result.getVerificationStatus()) 
 					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(result.getDestributionStatus())
 					&& !CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget())) {
-				projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, result.getDistributionType()).getCdDtlExp();
+				if ("T".equalsIgnoreCase(avoidNull(distributionType))
+						|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(result.getPrjId()))) {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), CoConstDef.CD_DTL_DISTRIBUTE_NA);
+				} else {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				}
 			}
 			
 			if (isNew) {
