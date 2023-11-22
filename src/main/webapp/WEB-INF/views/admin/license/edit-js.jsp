@@ -16,6 +16,7 @@
 		});
 		
 		showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
+;
 	});
 	
 	var commentTemp = '';

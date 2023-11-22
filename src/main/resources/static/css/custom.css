@@ -146,8 +146,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* submit form */
 .custom-layout .submit-form .tag-form { margin-bottom: .5rem !important; }
-.custom-layout .submit-form .external-event {margin-right: .5rem;color: #6b6b6b !important;cursor: pointer;font-weight: 550;background-color: #f5f4f3;}
-.custom-layout .submit-form .external-event i:hover {color: #333;}
+.custom-layout .submit-form .external-event {margin-right: .5rem;color: #0082f7 !important;cursor: pointer;font-weight: 550;background-color: #FFFFFF;border: 1px solid #cdd8e8; }
+.custom-layout .submit-form .external-event i:hover {color: #0082f7;}
 .custom-layout .submit-form .external-events { display: flex; }
 .custom-layout .submit-form .external-event { width: 20%; }
 .custom-layout .submit-form #actions span { font-size: .8rem; }
@@ -274,6 +274,7 @@ tr.ui-row-ltr,
 .ui-jqgrid tr.ui-row-ltr td,
 .ui-jqgrid tr.ui-row-ltr th {
     padding: 10px;
+    font-size: .8rem;
 }
 
 .ui-jqgrid thead {
@@ -288,7 +289,7 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-jqgrid-htable th div {
     overflow: hidden;
     position: relative;
-    height: 40px;
+    height: 50px;
     padding: 10px 0;
 }
 
@@ -403,13 +404,17 @@ html .ui-button.ui-state-disabled:active {
     background-color: #f8f9fa !important;
     font-weight: bold !important;
     color: #000;
-    font-size: 1rem;
+    font-size: .8rem;
 }
 
 .ui-jqgrid .ui-jqgrid-htable #main_jqGrid_01_cb { width: 30px !important;}
 .ui-jqgrid .ui-jqgrid-htable .cbox { padding: 0;}
 .ui-jqgrid .ui-jqgrid-htable #jqgh_main_jqGrid_01_cb input { position: relative;}
-
+.ui-th-column, .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable {
+    height: auto;
+}
+.ui-jqgrid .ui-icon-asc { margin-top: 4px !important; }
+.ui-jqgrid .ui-icon-desc { margin-top: 10px; }
 #innerJqTable { width: 100%; border-collapse: collapse; }
 #innerJqTable th { background-color: #f2f2f2; border: 1px solid #ccc; padding: 10px; text-align: center; }
 #innerJqTable td { border: 1px solid #ccc; text-align: center; }

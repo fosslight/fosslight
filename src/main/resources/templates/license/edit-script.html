@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-        /*<![CDATA[*/
+
         var initParam = {};
         var totalRow = 0;
         //const G_ROW_CNT = "*{gRowCnt}";
@@ -27,7 +27,7 @@
 
                 $("[name='addTagButton']").click(function (e) {
                     const elId = this.id;
-                    appendSingleTag(e, "word_" + elId, "appendTagArea_" + elId);
+                    appendSingleTag(e, elId);
 
                     $("[name='deleteTagButton']").on("click", function () {
                         $(this).closest(".external-event").remove();
@@ -36,7 +36,7 @@
 
                 //save license
                 $("#save").on('click',function(){
-                    alertify.confirm('<spring:message code="msg.common.confirm.save" />', function (e) {
+                    alertify.confirm(String(/*[[#{msg.common.confirm.save}]]*/), function (e) {
                         if (e) {
                             license_edit_fn.registSubmit();
                         } else {
@@ -50,11 +50,11 @@
                     var editorVal = CKEDITOR.instances.editor.getData();
 
                     if(editorVal == "") {
-                        alertify.alert('<spring:message code="msg.license.confirm.delete.required.comment" />', function(){});
+                        alertify.alert(String(/*[[#{msg.license.confirm.delete.required.comment}]]*/), function(){});
                         return false;
                     }
 
-                    alertify.confirm('<spring:message code="msg.license.confirm.delete" />', function (e) {
+                    alertify.confirm(String(/*[[#{msg.license.confirm.delete}]]*/), function (e) {
                         if (e) {
                             $('input[name=comment]').val(editorVal);
                             deleteSubmit();
@@ -63,7 +63,6 @@
                         }
                     });
                 });
-
             }
         }
 
@@ -81,8 +80,7 @@
             onValidSuccess: function (json, status) {
                 if (json.isValid == 'false') {
                     license_edit_fn.createValidMsgComplex(json);
-
-                    alertify.error('<spring:message code="msg.common.valid" />', 0);
+                    alertify.error(String(/*[[#{msg.common.valid}]]*/), 0);
                 } else if (json.isValid == 'true') {
                     loading.show();
 
@@ -99,7 +97,7 @@
                     }
 
                     $("#licenseForm").ajaxForm({
-                        url: '<c:url value="/license/saveAjax"/>',
+                        url: "/license/saveAjax",
                         type: 'POST',
                         dataType: "json",
                         cache: false,
@@ -109,7 +107,7 @@
                 }
             },
             onError: function(data, status){
-                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
             },
             createValidMsgComplex: function(msgData){
                 license_edit_fn.hideErrMsg();
@@ -132,8 +130,6 @@
                                 $('select[id='+targetId+']').focus().after(makeErrMsg(value)).show();
                             }
                         } else {
-                            console.log(key);
-
                             if(key == 'licenseNicknames'){
                                 $('input[name=licenseNicknames]').focus().parent().next("span.retxt").html(value).show();
                             }
@@ -163,7 +159,5 @@
 
         }
 
-
-        /*]]>*/
     </script>
 </th:block>

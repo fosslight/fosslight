@@ -50,7 +50,7 @@ $(document).ready(function (){
 
 // create tab in frame
 function createTabInFrame(id, tabTitle, panelSrc) {
-    const existingPanel = findExistingPanelByPanelId(id);
+    const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + id + '"]') || null;
 
     if (existingPanel) {
         activateTab(id);
@@ -92,14 +92,14 @@ function createTabInFrame(id, tabTitle, panelSrc) {
         'aria-labelledby': 'tab--' + id,
         append: [
             $('<iframe>', {
-                src: panelSrc,
-                style: 'height: 1066px',
+                src: panelSrc
             }),
         ],
     });
 
     const tabContent = $('.tab-content');
     tabContent.append(newTabPanel);
+    triggerWindowResize();
 
     activateTab(id);
 }
@@ -113,7 +113,6 @@ function activateTab(id) {
     const activePanel = document.getElementById('panel--' + id);
     activePanel.classList.add('active', 'show');
 
-
     const tabs = document.querySelectorAll('.iframe-mode .navbar .navbar-nav .nav-item .nav-link');
     tabs.forEach(tab => {
         tab.classList.remove('active');
@@ -121,12 +120,12 @@ function activateTab(id) {
 
     const activeTab = document.getElementById('tab--' + id);
     activeTab.classList.add('active');
+
 }
 
-function findExistingPanelByPanelId(id) {
-    return document.querySelector('.tab-pane[aria-labelledby="tab--' + id + '"]') || null;
+function triggerWindowResize() {
+    $(window).trigger('resize');
 }
-
 // call create tab in frame
 function callCreateTabInFrame(id, tabTitle, panelSrc) {
     var tabData = [];
@@ -140,6 +139,19 @@ function callCreateTabInFrame(id, tabTitle, panelSrc) {
     };
 
     parent.postMessage(JSON.stringify(data),"*");
+}
+
+const loading = {
+    show: function(){
+        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
+            $('#loading_wrap').show();
+        }
+    },
+    hide: function(){
+        if("Y" != doNotUseAutoLoadingHideFlag) {
+            $('#loading_wrap').hide();
+        }
+    }
 }
 
 if ('addEventListener' in window){
@@ -284,8 +296,6 @@ const autoComplete = {
                                 restriction : obj.restriction
                             }
                             autoComplete.licenseTags.push(tag);
-
-                            console.log(tag);
                         }
                     });
                 }

@@ -68,55 +68,6 @@ var stringCommonOptions = {
     edittype: "text",
 };
 
-// nav link 따라 main grids / bom grids 를 전환
-// nav link 가 3rd party, src, bin 이면 main grids 를 표시하고, bom 이면 bom grids 표시
-function toggleMainGridsOnNavLink() {
-    $(".nav-link").on("click", function (event) {
-        const elementId = $(this).attr("id");
-
-        $("[name='mainGrids-area']").hide();
-
-        if (elementId === "tab-menu-tParty") $("#mainGrids-tParty").show();
-        else if (elementId === "tab-menu-dep") $("#mainGrids-dep").show();
-        else if (elementId === "tab-menu-src") $("#mainGrids-src").show();
-        else if (elementId === "tab-menu-bin") $("#mainGrids-bin").show();
-        else if (elementId === "tab-menu-bom") $("#mainGrids-bom").show();
-        else if (elementId === "tab-menu-yocto") $("#mainGrids-yocto").show();
-        else if (elementId === "tab-menu-bat") $("#mainGrids-bat").show();
-    });
-}
-
-// radio check 에 대응하는 content 를 표시
-function showRadioCheckedContent() {
-    $('input[type="radio"]').each(function () {
-        if (this.checked) {
-            console.log(this.id);
-            const elementId = this.id.split("_")[1];
-            const categoryId = elementId.split("-")[0];
-
-            $('[name^="content_' + categoryId + '"]').hide();
-
-            console.log(elementId);
-            $("#content_" + elementId).show();
-        }
-    });
-}
-
-// radio check 여부에 따라 content를 전환
-function toggleRadioContentEvent() {
-    $('input[type="radio"]').on("change", function () {
-        const elementId = this.id.split("_")[1];
-        const categoryId = elementId.split("-")[0];
-
-        $('[name^="content_' + categoryId + '"]').hide();
-        createSubGrids(categoryId);
-
-        if (this.checked) {
-            $("#content_" + elementId).show();
-        }
-    });
-}
-
 function displayUrl(cellvalue) {
     var icon1 =
         '<a href="https://opensource.org/licenses/BSD-2-Clause" class="urlLink" target="_blank">https://opensource.org/licenses/BSD-2-Clause</a>';
@@ -166,9 +117,9 @@ function appendMultiTag(e, elId_01, elId_02, tgId) {
         .trigger("change");
 }
 
-function appendSingleTag(e, elId, tgId) {
+function appendSingleTag(e, id) {
     e.preventDefault();
-    const word = $("#" + elId).val();
+    const word = $("#input_" + id).val();
 
     if (!word || word.length === 0) {
         return;
@@ -176,13 +127,16 @@ function appendSingleTag(e, elId, tgId) {
 
     const el = $("<div/>", {
         class: "external-event",
-        text: word,
+        name: id,
+        text: word
     }).append(
-        '<i class="fas fa-times float-right mt-1" name="deleteTagButton"></i>'
+        '<i class="fas fa-times text-blue-gray float-right mt-1" name="deleteTagButton"></i>'
     );
 
-    $("#" + tgId).prepend(el);
-    $("#" + elId)
+    $("#appendArea_" + id).prepend(el);
+    $("#input_" + id)
         .val(null)
         .trigger("change");
 }
+
+
