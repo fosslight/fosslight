@@ -742,8 +742,8 @@
     }
     
     function showOssViewPage(obj) {
-    	var ossName = $(obj).parent().next().find('input').val();
-		var ossVersion = $(obj).parent().parent().next().next().find('input').val();
+    	var ossName = $(obj).parent().next().find('#ossName').text();
+		var ossVersion = $(obj).parent().parent().next().next().find('#ossVersion').text();
 
 		if ("" != ossName) {
 			var _popup = null;
