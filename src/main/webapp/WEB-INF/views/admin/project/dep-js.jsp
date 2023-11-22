@@ -807,7 +807,7 @@ var dep_fn = {
 		var ossName = "";
 		if (typeof rowObject.refOssName !== "undefined") {
 			ossName = rowObject.refOssName.replace(' ','_');
-		} else {
+		} else if (typeof rowObject.ossName !== "undefined"){
 			ossName = rowObject.ossName.replace(' ','_');
 		}
 		
