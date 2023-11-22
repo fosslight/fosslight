@@ -5,124 +5,126 @@
     <th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
     <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
     <th:block th:replace="license/list-script :: script"></th:block>
-    <div class="contents" style="overflow-y : scroll;">
-        <div id="wrapIframe">
-            <div class="wrapper">
-                <div class="content-wrapper custom-layout">
+
+    <body class="hold-transition sidebar-mini" style="height: 100%;">
+        <div class="wrapper">
+            <div class="content-wrapper custom-layout">
+                <form id="licenseSearch" name="licenseSearch">
                     <section class="content-header"></section>
                     <section class="content">
                         <div class="container-fluid">
-                            <form id="licenseSearch" name="licenseSearch">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card card-dark card-outline collapsed-card search-form mb-3">
-                                            <div class="card-header" style="border-bottom: none;">
-                                                <div class="row">
-                                                    <div class="col-md-1 d-flex align-items-center">
-                                                        <div class="custom-control custom-checkbox">
-                                                            <input type="checkbox" class="custom-control-input"
-                                                                   id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag eq 'Y'}" value="Y">
-                                                            <label class="custom-control-label text-blue-gray"
-                                                                   for="licenseNameAllSearchFlag"
-                                                                   style="font-weight: normal;">Exact Match</label>
-                                                            <input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
-                                                        </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                        <div class="card-header" style="border-bottom: none;">
+                                            <div class="row">
+                                                <div class="col-md-1 d-flex align-items-center">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" id="licenseNameAllSearchFlag"
+                                                               th:checked="${searchBean.licenseNameAllSearchFlag eq 'Y'}"
+                                                               type="checkbox"
+                                                               value="Y">
+                                                        <label class="custom-control-label text-blue-gray"
+                                                               for="licenseNameAllSearchFlag"
+                                                               style="font-weight: normal;">Exact Match</label>
+                                                        <input name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}"
+                                                               type="hidden"/>
                                                     </div>
-                                                    <div class="col-md-7">
-                                                        <div class="row">
-                                                            <div class="input-group">
-                                                                <input class="form-control"
-                                                                       id="autocomplete-license-name"
-                                                                       name="licenseName"
-                                                                       placeholder="Licence Name"
-                                                                       th:value="${searchBean.licenseName}"
-                                                                       type="search">
-                                                                <div class="input-group-append">
-                                                                    <button class="btn btn-default" id="search"
-                                                                            type="submit">
-                                                                        <i class="fa fa-search"></i>
-                                                                    </button>
-                                                                </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="row">
+                                                        <div class="input-group">
+                                                            <input class="form-control autoComLicense"
+                                                                   name="licenseName"
+                                                                   placeholder="Licence Name"
+                                                                   th:value="${searchBean.licenseName}"
+                                                                   type="search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default" id="search"
+                                                                        type="submit">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-2 d-flex justify-content-start mx-2">
-                                                        <div class="input-group-appen d-flex align-items-center">
-                                                            <a class="text-blue-gray" data-card-widget="collapse"
-                                                               id="advancedSearchBnt" style="font-size: 1rem;">
-                                                                <!-- <i class="fas fa-cart-plus fa-lg mr-2"></i> -->
-                                                                + advanced Search
-                                                            </a>
-                                                        </div>
+                                                </div>
+                                                <div class="col-md-2 d-flex justify-content-start mx-2">
+                                                    <div class="input-group-appen d-flex align-items-center">
+                                                        <a class="text-blue-gray" data-card-widget="collapse"
+                                                           id="advancedSearchBnt" style="font-size: 1rem;">
+                                                            <!-- <i class="fas fa-cart-plus fa-lg mr-2"></i> -->
+                                                            + advanced Search
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="card-body py-1">
-                                                <div class="row">
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <select class="select2" data-placeholder="Restriction"
-                                                                    id="restrictionSelect" multiple="multiple"
-                                                                    name="restrictions" style="width: 100%;">
-                                                                <option value=""></option>
-                                                                <th:block
-                                                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <select class="select2" id="licenseTypeSelect"
-                                                                    name="licenseType"
-                                                                    style="width: 100%; color: gray;">
-                                                                <option value=""></option>
-                                                                <th:block
-                                                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
-                                                                <option value="NONE">None</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <!-- <label>Order By:</label> -->
-                                                            <select class="select2" id="obligationTypeSelect"
-                                                                    name="obligationType"
-                                                                    style="width: 100%;">
-                                                                <option value=""></option>
-                                                                <th:block
-                                                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
-                                                                <option value="NONE">None</option>
-                                                            </select>
-                                                        </div>
+                                        </div>
+                                        <div class="card-body py-1">
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    <div class="form-group">
+                                                        <select class="select2" data-placeholder="Restriction"
+                                                                id="restrictionSelect" multiple="multiple"
+                                                                name="restrictions" style="width: 100%;">
+                                                            <option value=""></option>
+                                                            <th:block
+                                                                    th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
+                                                        </select>
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                        <textarea class="form-control" name="licenseText"
-                                                                  placeholder="License Text" rows="3"
-                                                                  th:value="${searchBean.licenseText}"></textarea>
-                                                        </div>
+                                                <div class="col-4">
+                                                    <div class="form-group">
+                                                        <select class="select2" id="licenseTypeSelect"
+                                                                name="licenseType"
+                                                                style="width: 100%; color: gray;">
+                                                            <option value=""></option>
+                                                            <th:block
+                                                                    th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
+                                                            <option value="NONE">None</option>
+                                                        </select>
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                        <textarea class="form-control" name="description"
-                                                                  placeholder="User Guide" rows="3"
-                                                                  th:value="${searchBean.description}"></textarea>
-                                                        </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="form-group">
+                                                        <!-- <label>Order By:</label> -->
+                                                        <select class="select2" id="obligationTypeSelect"
+                                                                name="obligationType"
+                                                                style="width: 100%;">
+                                                            <option value=""></option>
+                                                            <th:block
+                                                                    th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
+                                                            <option value="NONE">None</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                            <textarea class="form-control" name="licenseText"
+                                                                      placeholder="License Text" rows="3"
+                                                                      th:value="${searchBean.licenseText}"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                            <textarea class="form-control" name="description"
+                                                                      placeholder="User Guide" rows="3"
+                                                                      th:value="${searchBean.description}"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                             <div class="row px-1">
                                 <div class="col-md-6">
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right nav-item">
-                                        <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button">Bulk
+                                        <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button">
+                                            Bulk
                                             Registration
                                         </button>
                                         <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3"
@@ -130,7 +132,9 @@
                                         </button>
                                         <!--                    <th:block th:if="${@CommonFunction.isAdmin()}">-->
                                         <button class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3 btn-transition-page"
-                                              id="transitionButton" onclick="callCreateTabInFrame('license-edit', 'License Edit', '/license/edit')" type="button">Add
+                                                id="transitionButton"
+                                                onclick="callCreateTabInFrame('license-edit', 'New_License', '/license/edit')"
+                                                type="button">Add
                                         </button>
                                         <!--                    </th:block>-->
                                     </div>
@@ -139,7 +143,7 @@
 
                             <div class="row">
                                 <div class="col-12 mt-3" style="overflow-x: scroll;">
-                                    <div class="outerJqGridSet">
+                                    <div class="jqGridSet">
                                         <table id="list">
                                             <tr>
                                                 <td></td>
@@ -150,4 +154,11 @@
                                 </div>
                             </div>
                         </div>
+                    </section>
+                </form>
+            </div>
+        </div>
+    </body>
+
+
 </th:block>

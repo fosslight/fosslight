@@ -77,7 +77,6 @@ ul { list-style-type: none; }
 .custom-layout .bg-purple { background-color: #702f9f; }
 .custom-layout .bg-pink { background-color: #f70ce4; }
 
-
 a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:hover { background-color: #7e101b!important; }
 
 .content-wrapper.custom-layout { font-size: 1rem;}
@@ -96,9 +95,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .btn-outline-lg-red { color: #a50034; border-color: #a50034; }
 .btn-outline-lg-red:hover {background-color: #a50034; color: #fff; }
 
-
 /* card */
-
 .card-lg-red:not(.card-outline)>.card-header { background-color: #a50034;color: #fff; }
 .card-lg-light-gray:not(.card-outline)>.card-header { background-color: #d9dadb;color: #343a40; }
 .card-dark:not(.card-outline)>.card-header { background-color: #343a40; }
@@ -135,6 +132,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 }
 
 .custom-layout .card.search-form a { cursor: pointer; }
+.custom-layout .card.search-form a:hover { color: #007bff }
 .custom-layout .search-form .card-header {padding: .5rem 1.25rem;}
 .custom-layout .search-form .checkable-label label{ margin-top: .3rem; }
 .custom-layout .collapsed-card .card-header .card-title { color:#999; }
@@ -148,13 +146,15 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* submit form */
 .custom-layout .submit-form .tag-form { margin-bottom: .5rem !important; }
-.custom-layout .submit-form .external-event { margin-right: .5rem; color: #999 !important; cursor: pointer; }
+.custom-layout .submit-form .external-event {margin-right: .5rem;color: #6b6b6b !important;cursor: pointer;font-weight: 550;background-color: #f5f4f3;}
+.custom-layout .submit-form .external-event i:hover {color: #333;}
 .custom-layout .submit-form .external-events { display: flex; }
 .custom-layout .submit-form .external-event { width: 20%; }
 .custom-layout .submit-form #actions span { font-size: .8rem; }
 .custom-layout .submit-form .form-group { margin-bottom: 2rem;}
 .custom-layout .submit-form #previews span, .custom-layout #previews p { font-size: .7rem;}
 .custom-layout section .info-box { min-height: 20px; }
+.custom-layout .jqGridSet { width: 100%; }
 .custom-layout .jqGridSet div { max-width: 100%; max-height: 100%; }
 .custom-layout .user-block .username { margin-left: 0; }
 /* select2 size custom */
@@ -538,3 +538,25 @@ div.jqcloud span.w1 { color: #feb24c; }
     cursor: pointer;
 }
 
+/* Auto Complete */
+ul.ui-autocomplete {
+    margin: 0px;
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: rgb(33, 37, 41);
+    text-align: left;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem  !important;
+    box-shadow: inset 0 0 0 transparent  !important;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
+}
+ul.ui-autocomplete {z-index:1001;max-height:240px;overflow-y: auto;overflow-x: hidden;}
+ul.ui-autocomplete .ui-menu-item { border: none; padding: 6px 12px; }
+ul.ui-autocomplete .ui-menu-item:hover {
+    background-color: #0074f0;
+    color: white;
+    border: none;
+}

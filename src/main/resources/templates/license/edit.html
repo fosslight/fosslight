@@ -5,7 +5,7 @@
 	<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
 	<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
 	<th:block th:replace="license/edit-script :: contentScript"></th:block>
-	<div class="contents" style="overflow-y : scroll;">
+	<body class="hold-transition sidebar-mini">
 		<div class="wrapper">
 			<div class="content-wrapper custom-layout" style="height:auto">
 				<!-- Content Header (Page header) -->
@@ -30,7 +30,7 @@
 								<div class="card-body">
 									<div class="form-group">
 										<label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label>
-										<input type="text" name="licenseName" id="licenseNameInput" class="form-control">
+										<input type="text" name="licenseName" id="licenseNameInput" class="form-control autoComLicenseLong">
 									</div>
 									<div class="form-group">
 										<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label>
@@ -330,5 +330,5 @@
 				</form>
 			</div>
 		</div>
-	</div>
+	</body>
 </th:block>

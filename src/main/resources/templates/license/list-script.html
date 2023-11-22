@@ -44,21 +44,20 @@
                 });
 
                 // Auto complete
-                const licenseNameList = ["Artistic License 1.0 (Perl)", "Artistic License 1.0", "Artistic License 2.0", "Australian Public Licence B 1.0", "GNU General Public License v2.0 w/Linux Syscall Note", "CeCILL-B Free Software License Agreement"];
-                const autocompleteLicenseName = $('#autocomplete-license-name');
-                autocompleteLicenseName.on('focus', function () {
-                    autocompleteLicenseName.typeahead('open');
-                });
+                // const licenseNameList = ["Artistic License 1.0 (Perl)", "Artistic License 1.0", "Artistic License 2.0", "Australian Public Licence B 1.0", "GNU General Public License v2.0 w/Linux Syscall Note", "CeCILL-B Free Software License Agreement"];
+                // const autocompleteLicenseName = $('#autocomplete-license-name');
+                // autocompleteLicenseName.on('focus', function () {
+                //     autocompleteLicenseName.typeahead('open');
+                // });
                 // autocompleteLicenseName.typeahead({ source: licenseNameList });
 
                 $('#search').on('click', function (e) {
-                    console.log("111");
                     e.preventDefault();
 
                     var postData = license_list_fn.setGridParam();
                     postData.ignoreSearchFlag = "N";
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
-                    resizingOuterJqGidSet();
+                    resizingJqGidSet();
                 });
 
                 license_list_grid.load();
@@ -168,7 +167,7 @@
                         }
                     },
                     gridComplete: function () {
-                        resizingOuterJqGidSet();
+                        resizingJqGidSet();
                     }
                 });
             }
