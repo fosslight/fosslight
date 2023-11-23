@@ -1225,13 +1225,14 @@
 			
 			btn_div.show();
 			if(role=="ROLE_ADMIN"){ // 관리자 권한 일 경우
+				$("#approve").attr("disabled", false);
+				
 				switch(status){
 					case "":
 						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "PROG":
@@ -1239,7 +1240,6 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "REQ":
@@ -1247,9 +1247,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "REV":
@@ -1257,9 +1255,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "CONF":
@@ -1273,7 +1269,6 @@
 						$('#noticeEditor').prop('disabled', true);
 						$('#noticeEditor').css('opacity', 0.5);
 						
-						$("#approve").attr("disabled",true);
 						break;
 						
 				}

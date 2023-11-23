@@ -357,6 +357,9 @@ public class Project extends ComBean implements Serializable {
 	
 	private String secCode;
 	
+	private String vulDocInst;
+	private String vulDocInfo;
+	
 	private Float standardScore;
 	private String copyWatcherLocation;
 	/** add watcher list. */
@@ -419,6 +422,7 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId; // 오픈소스 파일ID
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
+	private String packageVulDocFileId;
 	
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
@@ -462,6 +466,7 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo; // 오픈소스 파일객체
 	private T2File packageFileInfo2; // 오픈소스 파일객체
 	private T2File packageFileInfo3; // 오픈소스 파일객체
+	private T2File packageVulDocFileInfo;
 	
 	/** The notice text file id. */
 	private String noticeTextFileId;
@@ -4358,6 +4363,38 @@ public class Project extends ComBean implements Serializable {
 
 	public void setCdxXmlFileId(String cdxXmlFileId) {
 		this.cdxXmlFileId = cdxXmlFileId;
+	}
+
+	public String getVulDocInst() {
+		return vulDocInst;
+	}
+
+	public void setVulDocInst(String vulDocInst) {
+		this.vulDocInst = vulDocInst;
+	}
+
+	public String getPackageVulDocFileId() {
+		return packageVulDocFileId;
+	}
+
+	public void setPackageVulDocFileId(String packageVulDocFileId) {
+		this.packageVulDocFileId = packageVulDocFileId;
+	}
+
+	public String getVulDocInfo() {
+		return vulDocInfo;
+	}
+
+	public void setVulDocInfo(String vulDocInfo) {
+		this.vulDocInfo = vulDocInfo;
+	}
+
+	public T2File getPackageVulDocFileInfo() {
+		return packageVulDocFileInfo;
+	}
+
+	public void setPackageVulDocFileInfo(T2File packageVulDocFileInfo) {
+		this.packageVulDocFileInfo = packageVulDocFileInfo;
 	}
 
 	public Float getStandardScore() {

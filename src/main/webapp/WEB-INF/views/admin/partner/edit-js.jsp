@@ -2262,6 +2262,7 @@ var saveFlag = false;
 			if('${detail.partnerId}' != "") {
 				fn.getPartyGridData();
 			} else {
+				grid.init();
 				partyMainData = [];
 				partySubData = [];
 			}

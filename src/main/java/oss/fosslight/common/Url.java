@@ -396,6 +396,7 @@ public final class Url {
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
+		public static final String DELETE_FILE = PATH + "/deleteFile";
 	}
 	
 //	public static final class DISTRIBUTION {

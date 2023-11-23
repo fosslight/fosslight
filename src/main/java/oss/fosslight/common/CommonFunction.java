@@ -57,6 +57,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.BeanMap;
@@ -1297,7 +1298,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					result.setLicenseName(result.getLicenseName() + "," + bean.getLicenseName());
 					
 					mainGridList.set(mainGridList.size()-1, result);
-				}else {
+				} else {
 					bean.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(bean.getComponentLicenseList(), ","));
 					
 					mainGridList.add(bean);
@@ -4145,6 +4146,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		
+		changeAnalysisResultList = changeAnalysisResultList.stream().filter(distinctByKey(e -> (e.getTitle() + "|" + e.getOssName() + "|" + e.getOssVersion()).toUpperCase())).collect(Collectors.toList());
+		
 		getAnalysisValidation(map, changeAnalysisResultList);
 		map.replace("rows", changeAnalysisResultList);
 		map.remove("analysisList"); // 분석결과 Data에서는 필요없는 data이므로 제거.
@@ -4249,6 +4252,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			if (!isEmpty(bean.getOssNickname())) { // nickname이 빈값이 있을 경우 담지 않음.
 				nicknameList.addAll(Arrays.asList(bean.getOssNickname().split(",")));
+				nicknameList = nicknameList.stream().filter(e -> !e.equalsIgnoreCase(bean.getOssName())).collect(Collectors.toList());
 			}
 			
 			nicknameList.addAll(Arrays.asList(newestNickName.split(",")));
@@ -5243,5 +5247,35 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		} else {
 			return null;
 		}
+	}
+
+	public static String getMessageForVulDOC(HttpServletRequest request, String gubn) {
+		String vulDocMsg = null;
+		if (gubn.equals("inst")) {
+			String installLink = "<a target='_blank' href='http://collab.lge.com/main/x/jhbZeg' style='color:blue;'>VulDOC Privacy and Credential Analyzer - Install</a>";
+			String webLink = "<a target='_blank' href='http://collab.lge.com/main/x/Sb2ig' style='color:blue;'>VulDOC Privacy and Credential Analyzer - Web</a>";
+			String isInfo = "<a target='_blank' href='http://collab.lge.com/main/x/NyM_cg' style='color:blue;'>";
+			
+			String lang = "";
+			Cookie[] cookies = request.getCookies();
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("lang")) {
+					lang = cookie.getValue();
+					break;
+				}
+			}
+			if (lang.equals("en-US")) {
+				isInfo += "sensitive or credential information<a>";
+				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo});
+			} else {
+				isInfo += "중요 민감 정보</a>";
+				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo});
+			}
+		} else {
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			vulDocMsg = getMessage("msg.project.packaging.vuldoc.info" , new String[]{vulDocInfoLink});
+		}
+		
+		return vulDocMsg;
 	}
 }

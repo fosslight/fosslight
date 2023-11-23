@@ -1019,6 +1019,10 @@ var bom_data = {
 						gridDiffMsg(bomDiffMsgData, "bomList");
 					}
 
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
 					// totla record 표시
 					$("#bomList_toppager_right, #bomPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+bomMainData.length+'</div>');
 					

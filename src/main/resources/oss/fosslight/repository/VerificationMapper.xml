@@ -249,6 +249,14 @@
 		   AND T1.DEL_YN = 'N'
 	</select>
 	
+	<select id="selectVerificationVulDocFile" resultType="oss.fosslight.domain.File" parameterType="String">
+		SELECT T1.*
+			 , DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		  FROM T2_FILE T1
+		 WHERE T1.FILE_SEQ = #{packageVulDocFileId}
+		   AND T1.DEL_YN = 'N'
+	</select>
+	
 	<select id="selectPackageFileName" resultType="oss.fosslight.domain.T2File" parameterType="String">
 	SELECT
 		T2.*
@@ -364,6 +372,17 @@
 	     <if test="!@oss.fosslight.util.StringUtil@isEmpty(statusVerifyYn)">
 	     , STATUS_VERIFY_YN = #{statusVerifyYn} 
 	     </if>
+	 WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<update id="updatePackageVulDocFile" parameterType="oss.fosslight.domain.Project">
+	UPDATE PROJECT_MASTER 
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageVulDocFileId)">
+		SET PACKAGE_VUL_DOC_FILE_ID = #{packageVulDocFileId}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(packageVulDocFileId)">
+		SET PACKAGE_VUL_DOC_FILE_ID = null
+		</if>
 	 WHERE PRJ_ID = #{prjId}
 	</update>
 	

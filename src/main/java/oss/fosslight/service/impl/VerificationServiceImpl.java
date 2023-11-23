@@ -134,7 +134,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if (result > 0){
 			return false;
-		}else{
+		} else{
 			return true;
 		}
 	}
@@ -1271,7 +1271,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
 			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
-		}else {
+		} else {
 			updateProjectStatus(project);
 		}
 		
@@ -2617,54 +2617,59 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		  
 		Project project = projectMapper.selectProjectMaster(prjParam);
 		
-		if (fileSeq.equals("1")) {
-			prjParam.setPackageFileId(registFileId);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else if (fileSeq.equals("2")) {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(registFileId);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(registFileId);
-		}
-				
-		List<String> fileSeqs = new ArrayList<String>(); 
-		if (prjParam.getPackageFileId() != null) {
-			fileSeqs.add(prjParam.getPackageFileId()); 
-		}  
-		if (prjParam.getPackageFileId2() != null) {
-			fileSeqs.add(prjParam.getPackageFileId2()); 
-		} 
-		if (prjParam.getPackageFileId3() != null) {
-			fileSeqs.add(prjParam.getPackageFileId3()); 
-		}
+		if (fileSeq.equals("4")) {
+			prjParam.setPackageVulDocFileId(registFileId);
+			verificationMapper.updatePackageVulDocFile(prjParam);
+		} else {
+			if (fileSeq.equals("1")) {
+				prjParam.setPackageFileId(registFileId);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+			}else if (fileSeq.equals("2")) {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(registFileId);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+			}else {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(registFileId);
+			}
 					
-		Map<Object, Object> map = new HashMap<Object, Object>();
-		map.put("prjId", prjId);
-		map.put("fileSeqs", fileSeqs);
-		
-		String packagingComment = "";
-		
-		try {
-			packagingComment = fileService.setClearFiles(map);
-		}catch(Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		prjParam.setStatusVerifyYn("N");
-		// project_master packageFileId update
-		verificationMapper.updatePackageFile(prjParam);
-		
-		// commentHistory regist
-		if (!packagingComment.equals("")) {
-			CommentsHistory commHisBean = new CommentsHistory();
-			commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-			commHisBean.setReferenceId(prjId); 
-			commHisBean.setContents(packagingComment);
+			List<String> fileSeqs = new ArrayList<String>(); 
+			if (prjParam.getPackageFileId() != null) {
+				fileSeqs.add(prjParam.getPackageFileId()); 
+			}  
+			if (prjParam.getPackageFileId2() != null) {
+				fileSeqs.add(prjParam.getPackageFileId2()); 
+			} 
+			if (prjParam.getPackageFileId3() != null) {
+				fileSeqs.add(prjParam.getPackageFileId3()); 
+			}
+						
+			Map<Object, Object> map = new HashMap<Object, Object>();
+			map.put("prjId", prjId);
+			map.put("fileSeqs", fileSeqs);
 			
-			commentService.registComment(commHisBean, false);
+			String packagingComment = "";
+			
+			try {
+				packagingComment = fileService.setClearFiles(map);
+			}catch(Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			prjParam.setStatusVerifyYn("N");
+			// project_master packageFileId update
+			verificationMapper.updatePackageFile(prjParam);
+			
+			// commentHistory regist
+			if (!packagingComment.equals("")) {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+				commHisBean.setReferenceId(prjId); 
+				commHisBean.setContents(packagingComment);
+				
+				commentService.registComment(commHisBean, false);
+			}
 		}
 	}
 	
@@ -2743,5 +2748,22 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public void deleteFile(Map<Object, Object> map) {
+		String delFileSeq = (String) map.get("delFileSeq");
+		String prjId = (String) map.get("prjId");
+		T2File file = fileService.selectFileInfo(delFileSeq);
+		
+		// delete logical file
+		fileMapper.updateFileDelYn(new String[] {delFileSeq});
+		// delete physical file
+		fileService.deletePhysicalFile(file, "VERIFY");
+		// update file id
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setPackageVulDocFileId(null);
+		verificationMapper.updatePackageVulDocFile(project);
 	}
 }

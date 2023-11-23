@@ -84,6 +84,8 @@ public class VerificationController extends CoTopComponent {
 		project.setPrjId(prjId);
 		
 		Project projectMaster = projectService.getProjectDetail(project);
+		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
+		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst").replace("<br />", " "));
 		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
@@ -134,6 +136,10 @@ public class VerificationController extends CoTopComponent {
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
 		
+		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
+			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
+			model.addAttribute("vulDocFile", file);
+		}
 		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
 		model.addAttribute("ossList", toJson(list));
 		model.addAttribute("files", files);
@@ -152,6 +158,8 @@ public class VerificationController extends CoTopComponent {
 		project.setPrjId(prjId);
 		
 		Project projectMaster = projectService.getProjectDetail(project);
+		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
+		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst"));
 		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
@@ -202,7 +210,10 @@ public class VerificationController extends CoTopComponent {
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
-		
+		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
+			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
+			model.addAttribute("vulDocFile", file);
+		}
 		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
 		model.addAttribute("ossList", toJson(list));
 		model.addAttribute("files", files);
@@ -229,13 +240,14 @@ public class VerificationController extends CoTopComponent {
 
 		Map<String, MultipartFile> fileMap = req.getFileMap();
 		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
-
+		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
+		
 		//파일 등록
 		if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
 			file.setCreator(loginUserName());
 
 			//파일 확장자 체크
-			String codeExp = codeMapper.getCodeDetail("120", "16").getCdDtlExp();
+			String codeExp = !fileSeq.equals("4") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
 			String[] exts = codeExp.split(",");
 			boolean fileExtCheck = false;
 			for (String s : exts) {
@@ -258,9 +270,7 @@ public class VerificationController extends CoTopComponent {
 		resultList.add(list);
 		
 		// 20210625_fileUpload 시 projectMaster table save_START
-		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
 		String registFileId = list.get(0).getRegistSeq();
-		
 		verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
 		// 20210625_fileUpload 시 projectMaster table save_END
 		
@@ -988,5 +998,19 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
+	}
+	
+	@PostMapping(value=VERIFICATION.DELETE_FILE)
+	public @ResponseBody ResponseEntity<Object> deleteFile (@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
+		log.info("URI: "+ "/project/verification/deleteFile");
+		
+		try {
+			verificationService.deleteFile(map);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader();
 	}
 }

@@ -231,6 +231,8 @@
 		T2_FILE
 	WHERE
 		FilE_ID = #{fileId}
+	AND
+		DEL_YN = 'N'
 	ORDER BY FILE_SEQ DESC
 	LIMIT 1
 	</select>
@@ -265,6 +267,14 @@
 		    ON T1.FILE_SEQ = T2.PACKAGE_FILE_ID
 		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID2
 		    OR T1.FILE_SEQ = T2.PACKAGE_FILE_ID3
+		 WHERE T2.PRJ_ID = #{prjId}
+	</select>
+	
+	<select id="selectPackagingVulDOCFileInfo" parameterType="java.lang.String" resultType="oss.fosslight.domain.T2File">
+		SELECT T1.* 
+		  FROM T2_FILE T1
+		 INNER JOIN PROJECT_MASTER T2
+		    ON T1.FILE_SEQ = T2.PACKAGE_VUL_DOC_FILE_ID
 		 WHERE T2.PRJ_ID = #{prjId}
 	</select>
 	
