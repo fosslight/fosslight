@@ -225,6 +225,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnColor.blue, .btnCLight.blue, .btnCLight2.blue {border-color:#4d6080;background:#7a8fae;}
 .btnColor.purple, .btnCLight.purple, .btnCLight2.purple {border-color:#5f4b7c;background:#8d79ae;}
 .btnColor.gray, .btnCLight.gray, .btnCLight2.gray, .btnCLightAnalysis.gray {color:#666 !important;border-color:#c6c6c6;background:#f1f1f1;}
+.btnColor.gray.disabled {color: #bbbbbb !important; text-decoration: line-through}
 .btnColor.darkgray, .btnCLight.darkgray, .btnCLight2.darkgray {border-color:#656565;background:#939393;}
 .btnColor.brown, .btnCLight.brown, .btnCLight2.brown {border-color:#766554;background:#a59381;}
 .btnColor.pink, .btnCLight.pink, .btnCLight2.pink {border-color:#cf6a91;background:#d47f9a; vertical-align:middle !important;}
