@@ -335,9 +335,6 @@
 				</div>
 				<div class="btnLayout">
                     <span class="left">
-<%--						<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin())}">--%>
-<%--							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" class="btnColor red srcBtn" style="width: 115px;" />--%>
-<%--						</c:if>--%>
 						<c:set var="isAdmin" value="${ct:isAdmin()}"/>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
 							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" style="width: 115px;" <c:choose> <c:when test="${isAdmin == 'true'}">class="btnColor red srcBtn"</c:when> <c:otherwise>class="btnColor gray disabled srcBtn" disabled</c:otherwise> </c:choose> />
