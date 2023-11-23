@@ -1,7 +1,88 @@
 # Changelog
 
-## v1.6.0 (28/07/2023)
+## v1.6.2 (01/01/1970)
+## Changes
+* No changes
 
+---
+
+## v1.6.1 (23/11/2023)
+## 🚀 Features
+-  Added "Change" Button in Project List, 3rd party list @FOSSLight-dev (#1013)
+-  In BOM tab, append all copyright when oss name and oss version is same. @FOSSLight-dev (#1011)
+- CycloneDX is now supported by FOSSLight Hub. You can select the form to be issued at the packaging stage and export the SBOM in project(identification). @FOSSLight-dev (#1009)
+- In OSS detail view, added OSS type row and info icon in OSS name row. When info icon is clicked, OSS information popup by version is displayed. @FOSSLight-dev (#1009)
+- In License detail view, added info icon in License name row. When info icon is clicked, help message is displayed. @FOSSLight-dev (#1009)
+- It is possible to delete several OSS at the same time for only admin. @FOSSLight-dev (#1009)
+- Added new api /api/v1/prj_not_applicable which is possible to check “N/A” in 3rd, src, bin tab. @FOSSLight-dev (#1009)
+- Add “Not the same as property” warning message in copyright column @FOSSLight-dev (#1009)
+- Project > Identification > The “DEP” tab has been added to upload the results of FOSSLight Dependency Scanner. @FOSSLight-dev (#987)
+- When selecting "admin check", it is possible to modify download location, homepage and copyright information. @FOSSLight-dev (#987)
+- The OSS report form has been updated to version 3.2. Please note that the "DEP" sheet has been added for the dependency analysis results, and the automatic selection form for the Operating System field and Category field within the Model Info sheet has also been updated with the latest information. @FOSSLight-dev (#987)
+- Add vulnerability search to OSS List @jiwon83 (#983)
+- Fix to show multiple notifications @parkmuhyeun (#937)
+- Combine comment into one when packaging confirm @MyunghyunNero (#984)
+- Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add) @FOSSLight-dev (#986)
+- All OSS are included in the BOM when exported, regardless of the notification obligation. @FOSSLight-dev (#986)
+- A button to download the FOSSLight Report in yaml format has been added to “export” button. @FOSSLight-dev (#986)
+- The parameter whether to reset or not when uploading report in Project/Self-check is newly added. (/api/v1/oss_report_src, /api/v1/oss_report_bin, /api/v1/oss_report_selfcheck) @FOSSLight-dev (#986)
+- Add new popup to ask enter version of oss which has N/A version to ensure accurate vulnerability when clicking “request”. @FOSSLight-dev (#986)
+- When an open source with a different license for each version is saved to the system for the first time, a pop-up displays the detected license information for each saved version. @FOSSLight-dev (#986)
+- Sending email when reviewer is changed as other person. @FOSSLight-dev (#986)
+- Modify to do not have to press the search button @dener8 (#933)
+- Add stackoverflow pattern for check oss name @dener8 (#974)
+- OSS > add > new icon for newly added nicknames @Lightieey (#931)
+- Added watcher search box in Project List, 3rd Party List @Youngseo-Jeon0313 (#934)
+- Block unsupported file extensions in the packaging tab @MyunghyunNero (#917)
+- Add Attach Pdf to Email @MyunghyunNero (#760)
+
+## 🐛 Hotfixes
+- Bug fix in Identification (CheckOSSName Button in DEP tab, first tab) @hyeinlee00 (#1010)
+- In self-check, OSS Notice cannot be generated when unconfirmed license is included in oss table. @FOSSLight-dev (#1009)
+- Bug fix where verify logic in packaging tab.@FOSSLight-dev (#1009)
+- Bug fix when using “admin check”, save checked oss list regardless of active page. @FOSSLight-dev (#1009)
+- Bug fix where displaying “fixed” in security column of project list even if remaining not fixed CVE ID. @FOSSLight-dev (#1009)
+- Modify pdf with error @MyunghyunNero (#1003)
+- Fix bugs related to Vulnerability when searching OSS List @Youngseo-Jeon0313 (#999)
+- Bug fix where displaying same SPDXElementID in spdx document.  @FOSSLight-dev (#987)
+- Fix the logic to find user information by using email. @FOSSLight-dev (#986)
+- Change the condition of displaying the list in “check license”. @FOSSLight-dev (#986)
+-  Do not send email when watcher is added in self check. @FOSSLight-dev (#986)
+- In Bin tab, If two or more same binary names are created and any one of them has an excluded item, it is excluded from the warning message ("The following binaries are written to the OSS report as excluded, but they are in the binary.txt. Make sure it is not included in the final firmware." ). @FOSSLight-dev (#986)
+- Display “delete” button of model information even if the project status is complete. @FOSSLight-dev (#986)
+- Bug fix where the license disappeared after executing “bulk edit”. @FOSSLight-dev (#986)
+- Bug fix were sending recalculated, discovered vulnerability email. @FOSSLight-dev (#986)
+- When uploading FOSSLight report, the copyright value is entered as value entered by user. @FOSSLight-dev (#986)
+- Before saving download location, homepage of oss table, remove html tag. @FOSSLight-dev (#986)
+- When clicking “Check OSS Name”, ignore values after the “?” in the link. @FOSSLight-dev (#986)
+- When project is copied, the comment of oss table is also copied. @FOSSLight-dev (#986)
+- Bug fix when changing the settings of User Setting > Default Search Conditions, the setting is applied well. @FOSSLight-dev (#986)
+- Bug fix when registering the comment via api, set user information properly. @FOSSLight-dev (#986)
+- Bug fix where user’s token is not working. @FOSSLight-dev (#986)
+- Even when the compressed file name is included in the path, the number of files can be counted. @FOSSLight-dev (#986)
+- Bug fix when saving self-check, division information is changed as null. @FOSSLight-dev (#986)
+- Bug fix where register license by using “Bulk registration” in License list. @FOSSLight-dev (#986)
+- Bug fix when download the spdx document, the license is printed as spdx format. @FOSSLight-dev (#986)
+- Fix to support searching by either CVE-ID or OSS Name in /api/v1/vuln… @KyuheonKim (#866)
+
+## 🔧 Maintenance
+- Use early return pattern to avoid nested conditions @parkcoldroad (#920)
+- Seperate Build and Deploy-demo from publish workflow @hseungho (#963)
+- Fix the RUN script format of Dockerfile @hseungho (#971)
+- “There is no data to load” error message is added in report upload api when there is no row to load in FOSSLight report. @FOSSLight-dev (#986)
+- “[tab name] sheet name cannot be found” error message is added in report upload api when there is no sheet to load in FOSSLight report. @FOSSLight-dev (#986)
+- Display “Notice” screen before login screen. @FOSSLight-dev (#986)
+- Add “comment” field in Bulk Edit of Self-check. @FOSSLight-dev (#986)
+- Fetch base-check-commit-message.yml from .github @Gseungmin (#969)
+- Remove unused Slack notification step @che-so (#930)
+- Fix a typo of CoMail's getSndSeq comment @hseungho (#898)
+- Fix a typo at Url @brorica (#905)
+- Remove Unused Parameter 'binaryName' in Function @brorica (#921)
+- Change string concatenation method @jaehee329 (#859)
+
+---
+
+## v1.6.0 (28/07/2023)
 ## 🚀 Features
 
 - If project is loaded through "Load" feature in the SRC/BIN tab, the loaded project ID will be displayed in the comment field. @FOSSLight-dev 
@@ -74,9 +155,9 @@
 - Remove all files and folder related to compressed notice file. @Min-Kyungsun (#800)
 - Add space after if and for, while statements @jongwooo (#794)
 - Print partner name in excel BOM @soimkim (#787, #786)
+---
 
 ## v1.5.0 (23/12/2022)
-
 ## 🚀 Features
 
 - OSS Bulk Registration > Fix type of some fields to textarea @FRESH-TUNA (#771)
@@ -607,23 +688,3 @@
 - Fix the bug where the License List is not filtered by restriction @FOSSLight-dev (#410)
 - Separate the handling of npm's group name from Check OSS Name @FOSSLight-dev (#408)
 - Modify the written offer in notice template. @dd-jy (#407)
-
----
-
-## v1.2.29 (11/02/2022)
-## 🚀 Features
-
-- Add personal list search condition to setting @FOSSLight-dev (#405)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the license was not displayed on the OSS details page @FOSSLight-dev (#398)
-- Fix bug where OSS Rename popup appears for new OSS @FOSSLight-dev (#397)
-
-## 🔧 Maintenance
-
-- Make the Favicon background transparent @soimkim (#406)
-- Match OSS not deactivated in Check License @soimkim (#402)
-- Change the format of OSS mail @soimkim (#401)
-- Add a message stating that a Notice file is required @FOSSLight-dev (#400)
-- Update FOSSLight icon @soimkim (#399)
