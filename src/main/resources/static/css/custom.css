@@ -32,6 +32,11 @@ ul { list-style-type: none; }
 .custom-layout .text-gray { color: #999 ; }
 .custom-layout .text-smaller { font-size: smaller;}
 
+.custom-layout .icon-orange { color: #ff5a00; }
+.custom-layout .icon-orange:hover { color: #c95200; }
+.custom-layout .icon-yellow { color: #ffc003;}
+.custom-layout .icon-yellow:hover { color: #c95200; }
+
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
 .custom-layout .btn-lg-gray {background-color: #6b6b6b; font-weight: 500; color: #fff}
@@ -195,6 +200,33 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .level-4 { background-color: #3399ff; /* 진한 파란색 */}
 .custom-layout .level-5 { background-color: #0052cc; /* 매우 진한 파란색 */}
 
+/* tooltip */
+.tooltip {
+    top: 50px !important;
+    font-size: .7rem;
+    position: absolute;
+}
+.tooltip.show { opacity: 1; }
+.tooltip .arrow { display: none; }
+.tooltip .tooltip-inner {
+    max-width: 800px;
+    padding: .25rem .5rem;
+    color: #fff;
+    text-align: left;
+    background-color: #333;
+    border-radius: .25rem;
+    border: 1px solid #ced4da !important;
+    box-shadow: inset 0 0 0 transparent  !important;
+    opacity: 1;
+}
+.tooltip .tooltip-inner i { margin-right: 10px; }
+
+/*.tooltip {*/
+/*    float: left !important;*/
+/*    font-size: 8px;*/
+/*}*/
+
+
 /* jqGrid Table */
 .ui-widget input,
 .ui-widget select,
@@ -203,7 +235,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .ui-jqgrid {
     margin: 0px;
     font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 1rem;
+    font-size: .8rem;
     font-weight: 400;
     line-height: 1.5;
     color: rgb(33, 37, 41);
@@ -336,16 +368,17 @@ tr.ui-search-toolbar input  {
     border-radius: 4px;
 }
 
-.ui-pg-table .ui-separator {
-    display: none;
-}
-
-.ui-pg-table .ui-paging-info {
-    display: none;
-}
-
 .ui-jqgrid .ui-pg-table td {
     width: 23px;
+}
+
+.ui-jqgrid .ui-pg-table #pager_right div[dir="ltr"]{
+    margin: 0px 10px 3px 12px;
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: .8rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #3c3c3c;
 }
 
 .ui-jqgrid tr.ui-search-toolbar th {
@@ -363,7 +396,7 @@ tr.ui-search-toolbar input  {
     padding: 0;
     position: relative;
     height: 48px;
-    font-size: 11px;
+    font-size: .8rem !important;
     display: flex;
     align-items: center;
 }
@@ -374,13 +407,16 @@ tr.ui-search-toolbar input  {
     padding: 0;
 }
 
+.ui-jqgrid .ui-pg-table td[dir="ltr"] { font-size: 0.8rem;  margin: 0 5px; }
+
 .ui-jqgrid .ui-pg-input {
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 4px;
     text-align: center;
-    font-size: 1rem;
+    font-size: .8rem;
     height: auto;
+    margin: 0 5px;
 }
 
 .ui-jqgrid .ui-pg-selbox {
@@ -388,7 +424,7 @@ tr.ui-search-toolbar input  {
     border-radius: 4px;
     padding: 5px 10px;
     text-align: center;
-    font-size: 1rem;
+    font-size: .8rem;
     height: auto;
     margin-left: .7rem;
 }
@@ -413,8 +449,7 @@ html .ui-button.ui-state-disabled:active {
 .ui-th-column, .ui-jqgrid .ui-jqgrid-htable th.ui-th-column .ui-jqgrid-sortable {
     height: auto;
 }
-.ui-jqgrid .ui-icon-asc { margin-top: 4px !important; }
-.ui-jqgrid .ui-icon-desc { margin-top: 10px; }
+
 #innerJqTable { width: 100%; border-collapse: collapse; }
 #innerJqTable th { background-color: #f2f2f2; border: 1px solid #ccc; padding: 10px; text-align: center; }
 #innerJqTable td { border: 1px solid #ccc; text-align: center; }
@@ -509,6 +544,8 @@ div.jqcloud span.w1 { color: #feb24c; }
     display: inline-block;
     text-align: center;
 }
+
+.ui-jqgrid .ui-separator { margin: 0 5px; }
 
 .ui-pg-input {
     border: 1px solid #ccc;

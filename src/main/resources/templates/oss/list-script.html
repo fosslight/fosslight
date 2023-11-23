@@ -4,8 +4,12 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     var initParam = {};
+    var groupBuffer='';
     var totalRow = 0;
     //const G_ROW_CNT = "*{gRowCnt}";
+    linkFlag = String(/*[[ ${searchBean.linkFlag}]]*/);
+
+    console.log(linkFlag);
 
     $(window).load(function () {
         oss_list_evt.init();
@@ -20,59 +24,88 @@
                 $(this).bootstrapSwitch('state', $(this).prop('checked'));
             })
 
+            $('#search').on('click',function(e){
+                e.preventDefault();
+
+                const searchOSSName = $("input[type=text][name=ossName]").val();
+                $("input[type=text][name=ossName]").val(searchOSSName.trim());
+
+                const searchLicenseName = $("input[type=text][name=licenseName]").val();
+                $("input[type=text][name=licenseName]").val(searchLicenseName.trim());
+
+                const searchHomepage = $("input[type=text][name=homepage]").val();
+                $("input[type=text][name=homepage]").val(searchHomepage.trim());
+
+                const postData = oss_list_fn.serializeObjectHelper();
+                postData.ignoreSearchFlag = "N";
+                $("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+            });
+
+            $(".cal").on("keyup", function(e){
+                calValidation(this, e);
+            });
+
+            $("#ossNameAllSearchFlag").on("change", function(e){
+                $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+            });
+
+            $("#licenseNameAllSearchFlag").on("change", function(e){
+                $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+            });
+
+            $("#homepageAllSearchFlag").on("change", function(e){
+                $("[name='homepageAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+            });
+
+            $("#deactivateFlag").on("change", function(){
+                $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
+            });
+
             oss_list_gridData.init();
         }
     }
 
     const oss_list_gridData = {
         typeCodes: [],
-        tooltipCont: "<div class=\"tooltipData\"><dl><dt><span class=\"iconSet ops\">Notice Obligation</span>Notice Obligation</dt><dd></dd></dl><dl><dt><span class=\"iconSet man\">Source Code Obligation</span>Source Code Obligation</dt><dd></dd></dl></div>",
-        tooltipCont2: "<div class=\"tooltipData350\"><dl><dt><span class=\"iconSet multi\">Multi License</span>Multi License</dt><dd>The OSS contains source codes under multiple licenses.</dd><dd>본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.</dd><dd>(e.g. \lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> \src is GPL-2.0)</dd></dl><dl><dt><span class=\"iconSet dual\">Dual License</span>Dual License</dt><dd>You can select one of registered licenses.</dd><dd>본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.</dd><dd>(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</dd></dl><dl><dt><span class=\"iconSet vdif\">Version Different License</span>Version Different License</dt><dd>The OSS is distributed under <span style=\"text-decoration : underline;\">different licenses</span> according to its <span style=\"text-decoration : underline;\">versions</span>.</dd><dd>본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.</dd><dd>(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</dd></dl></div>",
-        existTooltip: true,
+        licenseTypeInformation: "<div style=\"float:left\">" +
+                                    "<span class=\"badge badge-primary mr-1\">M</span>" +
+                                    "<strong>Multi License</strong>" +
+                                    "<br>he OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. \lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> \src is GPL-2.0)</p>" +
+                                "</div>" +
+                                "<div>" +
+                                    "<span class=\"badge badge-info mr-1\">D</span>" +
+                                    "<strong>Dual License</strong>" +
+                                    "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
+                                "</div>" +
+                                "<div>" +
+                                    "<span class=\"badge badge-success mr-1\">V</span>" +
+                                    "<strong>different licenses</strong>" +
+                                    "<br>according to its <span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
+                                "</div>",
+        obligationInformation:  "<div>" +
+                                    "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                                "</div>" +
+                                "<div>" +
+                                    "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                                "</div>",
+        existTooltip: false,
         init: function () {
             oss_list_grid.load();
         }
     }
 
     const oss_list_fn = {
-        displayOssType: function (cellvalue, options, rowObject) {
-            var display = "";
+        serializeObjectHelper: function () {
+            var postData = $('#ossSearch').serializeObject();
 
-            if (cellvalue.includes("M")) {
-                display += "<span class=\"badge badge-primary mr-1\">M</span>";
-            }
-            if (cellvalue.includes("D")) {
-                display += "<span class=\"badge badge-info mr-1\">D</span>";
-            }
-            if (cellvalue.includes("V")) {
-                display += "<span class=\"badge badge-success mr-1\">V</span>";
-            }
-
-            return display;
-        },
-        ossNameLinkFormat : function(cellvalue, options, rowObject){
-            var display = "";
-
-            if("N" == linkFlag){
-                var _frameId = rowObject['ossId'] + "_Opensource";
-                var _frameTarget = "#/oss/edit/" + rowObject['ossId'];
-                display = "<a class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellvalue + "</a>";
+            if(postData.ossTypeSearch != null) {
+                postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
             } else {
-                var url = '';
-                if("${ct:isAdmin()}"){
-                    url = '<c:url value="/oss/edit/'+rowObject['ossId']+'"/>';
-                } else {
-                    url = '<c:url value="/oss/view/'+rowObject['ossId']+'"/>';
-                }
-                display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
+                postData.ossTypeSearch = "";
             }
 
-            return display;
-        },
-
-        iconFormatter:  function(cellvalue, options, rowObject) {
-            // 아이콘의 HTML 및 속성 설정
-            return '<i class="fas fa-info-circle text-danger ml-2" data-toggle="tooltip" data-placement="left" title="" data-original-title="Tooltip on left"></i>';
+            return postData;
         }
     }
 
@@ -115,12 +148,12 @@
                             return ' style="display:none;"';
                         }
                     }
-                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', formatter: oss_list_format.ossTypeFormat }
-                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: oss_list_format.ossNameLinkFormat }
+                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: oss_grid_format.ossTypeFormat }
+                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: oss_grid_format.ossNameLinkFormat }
                     , { name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left' }
                     , { name: 'licenseName', index: 'licenseName', width: 200, align: 'left' }
-                    , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center' }
-                    , { name: 'obligation', index: 'obligation', width: 70, align: 'left' }
+                    , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
+                    , { name: 'obligationobligation', index: 'obligation', width: 70, align: 'left', sortable: false }
                     , { name: 'downloadLocation', index: 'downloadLocation', width: 150, align: 'left', formatter: 'link', formatoptions: { target: '_blank' } }
                     , { name: 'homepage', index: 'homepage', width: 65, align: 'left', formatter: 'link2', formatoptions: { target: '_blank' } }
                     , { name: 'summaryDescription', index: 'summaryDescription', width: 150, height: 50, align: 'left' }
@@ -156,7 +189,7 @@
                         }
                     }
                 ],
-                rowNum: 100,
+                rowNum: 20,
                 // rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
                 // rowList: [${ct:getConstDef("DISP_PAGENATION_LIST_STR")}],
                 autowidth: true,
@@ -190,7 +223,7 @@
 
                         if ((diffNum > 0 && cEndDate > 0)
                             || (diffNum2 > 0 && mEndDate > 0)) {
-                            alertify.alert('<spring:message code="msg.common.search.check.date" />', function () { });
+                            alertify.alert(String(/*[[#{msg.common.search.check.date}]]*/), function () { });
                         }
                     }
 
@@ -247,102 +280,43 @@
                     $('.listghead_0').hide(); // hide basic groupHeader
 
                     // add button in header
-                    if (!data.existTooltip) {
-                        $('<i class="fas fa-info-circle text-danger ml-2" data-toggle="tooltip" data-placement="left"></i>').appendTo($("#jqgh_list_obligation"))
-                            .attr("title", gridData.tooltipCont).tooltip({
-                            content: function () {
-                                return $(this).prop('title');
-                            }
-                        });
-                        $('<i class="fas fa-info-circle text-danger ml-2"data-toggle="tooltip" data-placement="left"></i>').appendTo($("#jqgh_list_ossType"))
-                            .attr("title", gridData.tooltipCont2).tooltip({
-                            content: function () {
-                                return $(this).prop('title');
-                            }
-                        });
+                    if (!oss_list_gridData.existTooltip) {
 
-                        $('[data-toggle="tooltip"]').tooltip();
+                        $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
+                            .appendTo($("#jqgh_list_obligation"))
+                            .attr("title", oss_list_gridData.obligationInformation)
+                            .tooltip({
+                                content: function () {
+                                    return $(this).prop('title');
+                                }
+                            });
 
-                        // 		$.ajax({
-                        // 			type: 'GET',
-                        // 			url: '<c:url value="/system/processGuide/getProcessGuide"/>',
-                        // 			data: {"id":"OSS_LIST_License_Type"},
-                        // 			success : function(data){
-                        // 				if(data.processGuide){
-                        // 					var contents = data.processGuide.contents;
+                        $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2"data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                            .attr("title", oss_list_gridData.licenseTypeInformation)
+                            .tooltip({
+                                content: function () {
+                                    return $(this).prop('title');
+                                }
+                            });
 
-                        // 					if(contents && contents.trim()) {
-                        // 						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_licenseType"))
-                        // 							.attr("title", contents).tooltip({
-                        // 								content: function () {
-                        // 									return $(this).prop('title');
-                        // 								}
-                        // 						});
-                        // 					}
-                        // 				}
-                        // 			}
-                        // 		});
+                        $('[data-toggle="tooltip"]').tooltip({html: true});
+                        oss_list_gridData.existTooltip = true;
+                    }
+                },
+                ondblClickRow: function(rowid,iRow,iCol,e) {
+                    if(iCol!=0){
+                        var rowData = $("#list").jqGrid('getRowData',rowid);
 
-                        // 		$.ajax({
-                        // 			type: 'GET',
-                        // 			url: '<c:url value="/system/processGuide/getProcessGuide"/>',
-                        // 			data: {"id":"OSS_List_Vulnerability"},
-                        // 			success : function(data){
-                        // 				if(data.processGuide){
-                        // 					var contents = data.processGuide.contents;
-
-                        // 					if(contents && contents.trim()) {
-                        // 						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_cvssScore"))
-                        // 							.attr("title", contents).tooltip({
-                        // 								content: function () {
-                        // 									return $(this).prop('title');
-                        // 								}
-                        // 						});
-                        // 					}
-                        // 				}
-                        // 			}
-                        // 		});
-
-                        // 		data.existTooltip = true;
-                        // 	}
-
-                        // 	var datas = result.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
-
-                        // 	for(var _idx=0;_idx<rowsCount;_idx++) {
-                        // 		row = rows[_idx];
-                        // 		className = row.className;
-
-                        // 		if (className.indexOf('jqgrow') !== -1) {
-                        // 			rowid = row.id;
-                        // 			rowData = result.rows[rowIdx++];
-                        // 			var dataObject = datas.filter(function(a){
-                        // 				return a.ossId==rowid}
-                        // 			)[0];
-
-                        // 			if(dataObject.deactivateFlag == "Y" && className.indexOf('excludeRow') === -1) {
-                        // 				className= className + ' excludeRow';
-                        // 			}
-
-                        // 			row.className = className;
-                        // 		} else if(className.indexOf('ui-subgrid') !== -1){
-                        // 			rowIdx++;
-                        // 		}
-                        // 	}
-                        // },
-                        // ondblClickRow: function(rowid,iRow,iCol,e) {
-                        // 	if(iCol!=0){
-                        // 		var rowData = $("#list").jqGrid('getRowData',rowid);
-
-                        // 		if("Y" != linkFlag) {
-                        // 			createTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
-                        // 		} else {
-                        // 			var openNewWindow = window.open("about:blank");
-                        // 			if("${ct:isAdmin()}"){
-                        // 				openNewWindow.location.href	= '<c:url value="/oss/edit/'+rowData['ossId']+'"/>';
-                        // 			} else {
-                        // 				openNewWindow.location.href	= '<c:url value="/oss/view/'+rowData['ossId']+'"/>';
-                        // 			}
-                        // 		}
+                        if("Y" != linkFlag) {
+                            callCreateTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
+                        } else {
+                            var openNewWindow = window.open("about:blank");
+                            // if("${ct:isAdmin()}"){
+                            //     openNewWindow.location.href	= "/oss/edit/" + rowData['ossId'];
+                            // } else {
+                            //     openNewWindow.location.href	= "/oss/view/" + rowData['ossId'];
+                            // }
+                        }
                     }
                 },
                 // postData: initParam

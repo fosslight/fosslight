@@ -31,7 +31,6 @@ $(document).ready(function (){
             } else {
                 if(isArrObject) {
                     node = [element.value];
-
                     result[element.name] = node;
                 } else {
                     result[element.name] = element.value;
@@ -48,90 +47,71 @@ $(document).ready(function (){
     autoComplete.init();
 });
 
-// create tab in frame
-function createTabInFrame(id, tabTitle, panelSrc) {
-    const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + id + '"]') || null;
+const SELECTOR_CONTENT_WRAPPER = '.content-wrapper'
+const SELECTOR_TAB_CONTENT = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .tab-content`
+const SELECTOR_TAB_LOADING = `${SELECTOR_TAB_CONTENT} .tab-loading`
+const SELECTOR_TAB_NAVBAR_NAV = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .navbar-nav`
+const SELECTOR_TAB_NAVBAR_NAV_LINK = `${SELECTOR_TAB_NAVBAR_NAV} .nav-link`
+const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
+
+function createTabInFrame(title, link,  uniqueName, autoOpen) {
+    const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab-' + uniqueName + '"]') || null;
+    let tabId = `panel-${uniqueName}`
+    let navId = `tab-${uniqueName}`
 
     if (existingPanel) {
-        activateTab(id);
+        activateTab(tabId, navId);
         return;
     }
 
-    $('.tab-empty').hide();
+    const newTabListItem = `<li class="nav-item" role="presentation"><a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a><a class="nav-link" data-toggle="row" id="${navId}" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">${title}</a></li>`
+    $(SELECTOR_TAB_NAVBAR_NAV).append(unescape(escape(newTabListItem)))
 
-    const newTabListItem = $('<li>', {
-        class: 'nav-item',
-        role: 'presentation',
-        append: [
-            $('<a>', {
-                href: '#',
-                class: 'btn-iframe-close',
-                'data-widget': 'iframe-close',
-                'data-type': 'only-this',
-                html: '<i class="fas fa-times"></i>',
-            }),
-            $('<a>', {
-                href: '#panel--'+id,
-                class: 'nav-link active',
-                'data-toggle': 'row',
-                id: 'tab--' + id,
-                role: 'tab',
-                'aria-controls': 'panel--' + id,
-                text: tabTitle,
-            })
-        ],
-    });
-
-    const tabList = $('.iframe-mode .navbar .navbar-nav');
-    tabList.append(newTabListItem);
-
-    const newTabPanel = $('<div>', {
-        class: 'tab-pane fade active show',
-        id: 'panel--' + id,
-        role: 'tabpanel',
-        'aria-labelledby': 'tab--' + id,
-        append: [
-            $('<iframe>', {
-                src: panelSrc
-            }),
-        ],
-    });
-
-    const tabContent = $('.tab-content');
-    tabContent.append(newTabPanel);
+    const newTabItem = `<div class="tab-pane fade" id="${tabId}" role="tabpanel" aria-labelledby="${navId}"><iframe src="${link}"></iframe></div>`
+    $(SELECTOR_TAB_CONTENT).append(unescape(escape(newTabItem)))
     triggerWindowResize();
 
-    activateTab(id);
+    if (autoOpen) {
+        const $loadingScreen = $(SELECTOR_TAB_LOADING)
+        $loadingScreen.fadeIn()
+        $(`${tabId} iframe`).ready(() => {
+            activateTab(tabId, navId);
+            setTimeout(() => {
+                $loadingScreen.fadeOut()
+            })
+        })
+    }
 }
 
-function activateTab(id) {
-    const panels = document.querySelectorAll('.tab-pane');
-    panels.forEach(panel => {
-        panel.classList.remove('active', 'show');
-    });
-
-    const activePanel = document.getElementById('panel--' + id);
-    activePanel.classList.add('active', 'show');
-
-    const tabs = document.querySelectorAll('.iframe-mode .navbar .navbar-nav .nav-item .nav-link');
+function activateTab(tabId, navId) {
+    const tabs = document.querySelectorAll(SELECTOR_TAB_PANE);
     tabs.forEach(tab => {
-        tab.classList.remove('active');
+        tab.classList.remove('active', 'show');
     });
 
-    const activeTab = document.getElementById('tab--' + id);
-    activeTab.classList.add('active');
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add('active', 'show');
 
+    const navs = document.querySelectorAll(SELECTOR_TAB_NAVBAR_NAV_LINK);
+    navs.forEach(nav => {
+        nav.classList.remove('active');
+    });
+
+    const activeNav = document.getElementById(navId);
+    activeNav.classList.add('active');
 }
 
 function triggerWindowResize() {
     $(window).trigger('resize');
 }
+
 // call create tab in frame
-function callCreateTabInFrame(id, tabTitle, panelSrc) {
+function callCreateTabInFrame(title, link,  uniqueName, autoOpen) {
     var tabData = [];
-    tabData[0] = id;
-    tabData[1] = tabTitle;
-    tabData[2] = panelSrc;
+    tabData[0] = title;
+    tabData[1] = link;
+    tabData[2] = uniqueName;
+    tabData[3] = autoOpen;
 
     var data = {
         tabData: tabData,
@@ -139,19 +119,6 @@ function callCreateTabInFrame(id, tabTitle, panelSrc) {
     };
 
     parent.postMessage(JSON.stringify(data),"*");
-}
-
-const loading = {
-    show: function(){
-        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
-            $('#loading_wrap').show();
-        }
-    },
-    hide: function(){
-        if("Y" != doNotUseAutoLoadingHideFlag) {
-            $('#loading_wrap').hide();
-        }
-    }
 }
 
 if ('addEventListener' in window){
@@ -165,9 +132,22 @@ function receiveMessage(event) {
 
     switch(data.action){
         case 'create':
-            createTabInFrame(data.tabData[0], data.tabData[1], data.tabData[2]);
+            createTabInFrame(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
 
             break;
+    }
+}
+
+const loading = {
+    show: function(){
+        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
+            $('#loading_wrap').show();
+        }
+    },
+    hide: function(){
+        if("Y" != doNotUseAutoLoadingHideFlag) {
+            $('#loading_wrap').hide();
+        }
     }
 }
 
@@ -698,7 +678,7 @@ const autoComplete = {
         })
             .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}})
             .autocomplete( "instance" )._renderItem = function( ul, item ) {
-            if(item.division) {
+            if(item.division) {v1
                 return $( "<li>" ).append( "<div>" + item.division + ' > ' + item.label + "("+item.id+")"+"</div>" ).appendTo( ul );
             } else {
                 return $( "<li>" ).append( "<div>" + item.label + "("+item.id+")"+"</div>" ).appendTo( ul );

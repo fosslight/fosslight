@@ -61,7 +61,6 @@
                 });
 
                 license_list_grid.load();
-
             },
         }
 
@@ -129,14 +128,14 @@
                             index: 'restriction',
                             width: 70,
                             align: 'center',
-                            formatter: fn_grid_com.displayLicenseRestriction,
-                            unformat: fn_grid_com.unformatter,
+                            formatter: license_grid_format.displayLicenseRestriction,
+                            unformat: license_grid_format.unformatter,
                             sortable: false,
                             search: false
                         }
                         , {name: 'obligation', index: 'obligation', width: 60, align: 'left'}
                         , {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link2'}
-                        , {name: 'description', index: 'description', width: 150, align: 'left'}
+                        , {name: 'description', index: 'description', width: 150, align: 'left', formatter: common_grid_format.truncateText, maxlength: 20 }
                     ],
                     rowNum: 20,
                     rowList: ['20', '40', '60'],
@@ -162,7 +161,7 @@
 
                             if ((diffNum > 0 && cEndDate > 0)
                                 || (diffNum2 > 0 && mEndDate > 0)) {
-                                alertify.alert('<spring:message code="msg.common.search.check.date" />', function () { });
+                                alertify.alert(String(/*[[#{msg.common.search.check.date}]]*/), function () { });
                             }
                         }
                     },

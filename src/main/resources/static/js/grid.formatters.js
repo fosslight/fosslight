@@ -1,4 +1,29 @@
-const oss_list_format = {
+// license grid formatter
+const license_grid_format = {
+    displayLicenseRestriction: function (cellvalue, options, rowObject) {
+        var display = "";
+
+        if (cellvalue != "" && cellvalue != undefined) {
+            display =
+                '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="top" title="' +
+                cellvalue +
+                '" onclick="src_fn_com.showLicenseRestrictionViewPage(\'' +
+                options.gid +
+                "','" +
+                options.rowId +
+                "')\">R</span>";
+        }
+
+        return display;
+    },
+    unformatter: function (cellvalue, options, rowObject) {
+        return cellvalue;
+    },
+}
+
+let linkFlag;
+// oss grid formatter
+const oss_grid_format = {
     ossTypeFormat: function (cellvalue, options, rowObject) {
         var display = "";
 
@@ -32,6 +57,37 @@ const oss_list_format = {
         }
 
         return display;
-    }
+    },
+    obligationTypeFormat : function (cellvalue, options, rowObject) {
+        var display = "";
+        switch(cellvalue) {
+            case "10" :
+                display = "<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i>";
 
+                break;
+            case "11" :
+                display = "<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i><i class=\"far fa-file-code fa-lg ml-1\" title=\"Source Code\"></i>";
+
+                break;
+            default:
+                display = '';
+
+                break;
+        }
+        return display;
+    }
+}
+
+const common_grid_format = {
+    truncateText: function (cellValue, options, rowObject) {
+        var maxLength = options.colModel.maxlength;
+        var firstLine = cellValue.split('\n')[0];
+
+        if (firstLine.length > maxLength) {
+            return cellValue.substring(0, maxLength) + "...";
+        } else {
+            cellValue = firstLine;
+        }
+        return cellValue;
+    }
 }

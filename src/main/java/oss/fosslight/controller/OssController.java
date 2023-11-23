@@ -174,11 +174,11 @@ public class OssController extends CoTopComponent{
 		// download location check
 		List<String> values = Arrays.asList("https://", "http://", "www.");
 		String homepage =req.getParameter("homepage");
-		if (!values.contains(homepage)){
-			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
-			homepage = homepage.replaceFirst("/$", "");
-			ossMaster.setHomepage(homepage);
-		}
+//		if (!values.contains(homepage)){
+//			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+//			homepage = homepage.replaceFirst("/$", "");
+//			ossMaster.setHomepage(homepage);
+//		}
 
 		if ("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
@@ -271,7 +271,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
 		}
 		
-		return OSS.EDIT_JSP;
+		return "/oss/edit :: content";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
