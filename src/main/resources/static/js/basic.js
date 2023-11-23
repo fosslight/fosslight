@@ -1459,6 +1459,10 @@ var autoComplete = {
 	    	}
 	    	
 	    };
+	    
+	    if ($("#accordionBtn").length) {
+			$("#accordionBtn").on("click", function() { $(this).toggleClass("active"); });
+		}
 	}
 }
 
@@ -2250,4 +2254,37 @@ function findAndReplace(match) {
 		url += "/partner/view/" + id;
 	}
 	return "<a href=" + url +" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" +  match + "</a>";
+}
+
+function popUpHelpGuide(id, _step) {
+	$.ajax({
+		type: 'GET',
+		url: CTX_PATH+"/system/processGuide/getProcessGuide",
+		data: {"id":id},
+		async:false,
+		success : function(data){
+			if(data.processGuide) {
+				var height = 680;
+				if ("D" == _step) height = 515;
+				var contents = data.processGuide.contents;
+				alertify.alert().destroy();
+				alertify.alert(contents).set('resizable',true).resizeTo(1150,height);
+			}
+		}
+	})
+}
+
+function openHelpGuideLink(id) {
+	$.ajax({
+		type: 'GET',
+		url: CTX_PATH+"/system/processGuide/getProcessGuide",
+		data: {"id":id},
+		async:false,
+		success : function(data){
+			if(data.processGuide) {
+				var url = data.processGuide.url;
+				window.open(url, '_blank');
+			}
+		}
+	})
 }

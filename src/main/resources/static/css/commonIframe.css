@@ -820,3 +820,16 @@ div .retxtg {padding-top:2px;font-size:11px;color:gray !important;}
 .btnLayoutSyncPopupBtn {float:right; padding-right:10px;}
 
 .useCustomNotice {display:inline-block; padding-left:190px; color:#FF0000;}
+
+/* dropdown 버튼 */
+.accordion-btn-area {position: absolute; top:12px; left:1040px;}
+.accordion-btn { background-color: #2E75B6;cursor: pointer;padding: 6.5px;padding-left: 20px;width: 80px;border: none;text-align: left;outline: none;font-size: 12px;font-weight: bold;transition: 0.4s; }
+.accordion-btn .accordian-btn-name, .accordion-btn .icon { color: #fff !important; }
+.accordion-btn:hover, .accordion-btn.active { background-color: #174276; }
+.accordion-btn .icon::before { content: '▼'; }
+.accordion-btn.active .icon::before { content: '▲'; }
+.accodian-content {position:fixed;font-size: 11px;display: none;border: 1px solid #ccc;background-color: #ffffff;width: 230px;padding: 10px;z-index:1002;}
+.accordion-btn.active+.accodian-content { display: block; }
+.accodian-content button {background-color: inherit;color: black;padding: 10px 10px;width: 100%;outline: none;text-align: left;cursor: pointer;border: .3px solid #d3e3fd;margin: 5px 0;border-radius: 5px;box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);}
+.accodian-content button:hover { background-color: #91c1e7; }
+.accodian-content button.active, .accodian-content button:hover { background-color: #91c1e7; }
