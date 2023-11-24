@@ -110,8 +110,8 @@ export default function LicenseList() {
 
   // Pagination
   const [totalCount, setTotalCount] = useState(0);
-  const currentPage = Number(queryParams.get('p') || '1');
   const countPerPage = 10;
+  const currentPage = Number(queryParams.get('p') || '1');
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
