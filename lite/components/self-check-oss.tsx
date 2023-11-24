@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import SelfCheckOSSModal from './self-check-oss-modal';
+import SelfCheckOSSPagination from './self-check-oss-pagination';
 import Toogle from './toggle';
 
 export default function SelfCheckOSS() {
@@ -22,6 +23,11 @@ export default function SelfCheckOSS() {
   // Modal
   const [modalData, setModalData] = useState<SelfCheck.SetOSS>();
   const [isModalShown, setIsModalShown] = useState(false);
+
+  // Pagination
+  const countPerPage = 3;
+  const [currentPage, setCurrentPage] = useState(1);
+  const lastPage = Math.max(Math.ceil(ossList.length / countPerPage), 1);
 
   useEffect(() => {
     setLoading(true);
@@ -146,134 +152,149 @@ export default function SelfCheckOSS() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {ossList.map((oss) => (
-          <div
-            key={oss.ossId}
-            className={clsx(
-              'flex flex-col gap-y-1 p-4 border border-darkgray rounded',
-              excludeList.includes(oss.ossId) && 'bg-semigray/50'
-            )}
-          >
-            <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
-              <input className="w-4 h-4" type="checkbox" />
-              <label className="flex items-center gap-x-2">
-                <span
-                  className={clsx(
-                    'text-sm',
-                    excludeList.includes(oss.ossId) ? 'text-crimson' : 'text-darkgray'
-                  )}
-                >
-                  exclude
-                </span>
-                <Toogle
-                  icons={false}
-                  checked={excludeList.includes(oss.ossId)}
-                  onChange={() => {
-                    if (excludeList.includes(oss.ossId)) {
-                      setExcludeList(excludeList.filter((ossId) => ossId !== oss.ossId));
-                    } else {
-                      setExcludeList([...excludeList, oss.ossId]);
-                    }
-                  }}
-                />
-              </label>
-            </div>
-            <div className="flex items-center gap-x-2">
+      <div className="border border-charcoal rounded overflow-hidden">
+        <div className="py-2 bg-charcoal font-semibold text-semiwhite text-center">
+          <i className="fa-solid fa-list" />
+          &ensp; OSS List ({ossList.length})
+        </div>
+        <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {ossList
+            .slice((currentPage - 1) * countPerPage, currentPage * countPerPage)
+            .map((oss) => (
               <div
-                className="flex gap-x-1 font-semibold cursor-pointer"
-                onClick={() => {
-                  const urlQueryParams = new URLSearchParams(queryParams);
-                  urlQueryParams.set('modal-type', 'oss');
-                  urlQueryParams.set('modal-id', oss.ossId);
-                  router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                    scroll: false
-                  });
-                }}
+                key={oss.ossId}
+                className={clsx(
+                  'flex flex-col gap-y-1 p-4 border border-gray rounded',
+                  excludeList.includes(oss.ossId) && 'bg-semigray/50'
+                )}
               >
-                <div className="line-clamp-1 break-all">{oss.ossName}</div>
-                {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
-              </div>
-              {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
-                <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
-                  {oss.obligations[0] === 'Y' && (
-                    <i className="fa-solid fa-file-lines" title="Notice" />
+                <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
+                  <input className="w-4 h-4" type="checkbox" />
+                  <label className="flex items-center gap-x-2">
+                    <span
+                      className={clsx(
+                        'text-sm',
+                        excludeList.includes(oss.ossId) ? 'text-crimson' : 'text-darkgray'
+                      )}
+                    >
+                      exclude
+                    </span>
+                    <Toogle
+                      icons={false}
+                      checked={excludeList.includes(oss.ossId)}
+                      onChange={() => {
+                        if (excludeList.includes(oss.ossId)) {
+                          setExcludeList(excludeList.filter((ossId) => ossId !== oss.ossId));
+                        } else {
+                          setExcludeList([...excludeList, oss.ossId]);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="flex items-center gap-x-2">
+                  <div
+                    className="flex gap-x-1 font-semibold cursor-pointer"
+                    onClick={() => {
+                      const urlQueryParams = new URLSearchParams(queryParams);
+                      urlQueryParams.set('modal-type', 'oss');
+                      urlQueryParams.set('modal-id', oss.ossId);
+                      router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                        scroll: false
+                      });
+                    }}
+                  >
+                    <div className="line-clamp-1 break-all">{oss.ossName}</div>
+                    {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
+                  </div>
+                  {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
+                    <div className="flex items-center gap-x-1 flex-shrink-0 p-1 border border-darkgray rounded text-xs">
+                      {oss.obligations[0] === 'Y' && (
+                        <i className="fa-solid fa-file-lines" title="Notice" />
+                      )}
+                      {oss.obligations[1] === 'Y' && (
+                        <i className="fa-solid fa-code" title="Source" />
+                      )}
+                    </div>
                   )}
-                  {oss.obligations[1] === 'Y' && <i className="fa-solid fa-code" title="Source" />}
+                  {oss.cveId && oss.cvssScore && (
+                    <div
+                      className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
+                      onClick={() => {
+                        const urlQueryParams = new URLSearchParams(queryParams);
+                        urlQueryParams.set('modal-type', 'vuln');
+                        urlQueryParams.set('modal-id', oss.cveId);
+                        router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                          scroll: false
+                        });
+                      }}
+                    >
+                      {oss.cvssScore}
+                    </div>
+                  )}
                 </div>
-              )}
-              {oss.cveId && oss.cvssScore && (
-                <div
-                  className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
-                  onClick={() => {
-                    const urlQueryParams = new URLSearchParams(queryParams);
-                    urlQueryParams.set('modal-type', 'vuln');
-                    urlQueryParams.set('modal-id', oss.cveId);
-                    router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                      scroll: false
-                    });
-                  }}
-                >
-                  {oss.cvssScore}
+                <div className="text-sm text-semiblack/80">
+                  <i className="fa-regular fa-folder-open" />
+                  &ensp;
+                  {oss.path}
                 </div>
-              )}
-            </div>
-            <div className="text-sm text-semiblack/80">
-              <i className="fa-regular fa-folder-open" />
-              &ensp;
-              {oss.path}
-            </div>
-            {oss.licenses.length > 0 && (
-              <div className="line-clamp-3 text-sm text-semiblack/80">
-                {oss.licenses.map((license) => license.licenseIdentifier).join(', ')}
+                {oss.licenses.length > 0 && (
+                  <div className="line-clamp-3 text-sm text-semiblack/80">
+                    {oss.licenses.map((license) => license.licenseIdentifier).join(', ')}
+                  </div>
+                )}
+                <div className="flex items-center gap-x-2 text-sm">
+                  <i className="text-charcoal fa-solid fa-circle-info" title={oss.description} />
+                  <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
+                  <i
+                    className="text-crimson fa-solid fa-registered"
+                    title={oss.restrictions.join('\n')}
+                  />
+                  {oss.downloadUrl && (
+                    <a
+                      className="text-xs text-blue-500 hover:underline"
+                      href={oss.downloadUrl}
+                      target="_blank"
+                    >
+                      Download
+                    </a>
+                  )}
+                  {oss.homepageUrl && (
+                    <a
+                      className="text-xs text-blue-500 hover:underline"
+                      href={oss.homepageUrl}
+                      target="_blank"
+                    >
+                      Homepage
+                    </a>
+                  )}
+                  <div className="flex-1 text-right">
+                    <i
+                      className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
+                      onClick={() => {
+                        setModalData({
+                          path: oss.path,
+                          ossName: oss.ossName,
+                          ossVersion: oss.ossVersion,
+                          licenses: oss.licenses,
+                          downloadUrl: oss.downloadUrl,
+                          homepageUrl: oss.homepageUrl,
+                          copyright: oss.copyright
+                        });
+                        setIsModalShown(true);
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-            )}
-            <div className="flex items-center gap-x-2 text-sm">
-              <i className="text-charcoal fa-solid fa-circle-info" title={oss.description} />
-              <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
-              <i
-                className="text-crimson fa-solid fa-registered"
-                title={oss.restrictions.join('\n')}
-              />
-              {oss.downloadUrl && (
-                <a
-                  className="text-xs text-blue-500 hover:underline"
-                  href={oss.downloadUrl}
-                  target="_blank"
-                >
-                  Download
-                </a>
-              )}
-              {oss.homepageUrl && (
-                <a
-                  className="text-xs text-blue-500 hover:underline"
-                  href={oss.homepageUrl}
-                  target="_blank"
-                >
-                  Homepage
-                </a>
-              )}
-              <div className="flex-1 text-right">
-                <i
-                  className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
-                  onClick={() => {
-                    setModalData({
-                      path: oss.path,
-                      ossName: oss.ossName,
-                      ossVersion: oss.ossVersion,
-                      licenses: oss.licenses,
-                      downloadUrl: oss.downloadUrl,
-                      homepageUrl: oss.homepageUrl,
-                      copyright: oss.copyright
-                    });
-                    setIsModalShown(true);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+            ))}
+        </div>
       </div>
+      <SelfCheckOSSPagination
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        lastPage={lastPage}
+      />
 
       {/* Modal */}
       <SelfCheckOSSModal
