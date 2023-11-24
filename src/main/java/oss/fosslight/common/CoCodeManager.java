@@ -826,4 +826,5 @@ public class CoCodeManager extends CoTopComponent {
     	CoCode code = getCodeInstance(s);
     	return code.getCodeDtls();
     }
+
 }

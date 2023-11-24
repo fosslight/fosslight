@@ -1,245 +1,344 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-      
+
 <th:block th:fragment="content">
-<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
-<th:block th:replace="oss/edit-script :: contentScript"></th:block>
-<div class="contents" style="overflow-y : scroll;">
-	<div id="wrapIframe">
-	<div>
-		<div class="tbws1 w1025">
-			<form name="ossForm" id="ossForm">
-				<input type="hidden" name="ossLicensesJson"/>
-				<input type="hidden" name="ossId"/>
-				<input type="hidden" name="licenseType" id="licenseType" />
-				<input type="hidden" name="obligationType" id="obligationType" />
-				<input type="hidden" name="comment"/>
-				<input type="hidden" name="ossType" th:value="${ossType}"/>
-				<input type="hidden" name="validationType"/>
-				<input type="hidden" name="downloadLocation"/>
-				<input type="hidden" name="licenseId"/>
-				<input type="hidden" name="deactivateFlag" th:value="N"/>
-				<input type="hidden" name="renameFlag" th:value="N"/>
-				<input type="hidden" name="ossCopyFlag" th:value="N"/>
-				<!-- Main Table [S] -->
-				<table class="dCase">
-					<colgroup>
-						<col width="188"/>
-						<col/>
-					</colgroup>
-					<tbody>
-						<tr>
-							<th class="dCase txStr" th:text="#{msg.common.field.OSS.name}"><a class='btnIcon ossI' style="margin-left:5px;" onclick="fn.showOssViewPage(this);"></a></th>
-							<td class="dCase">
-								<div class="required">
-									<input name="ossName" type="text" class="autoComOss w350" th:value="${ossName}"/>
-										<input th:if="${ossId != null and not #strings.isEmpty(ossId)}" type="checkbox" id="deactivateFlag" value="N" style="margin:0 5px;"/>Deactivate
-										<span th:if="${ossId != null and not #strings.isEmpty(ossId)}" style="display:inline-block; width:5px;"></span><input id="rename" type="button" value="Rename" class="btnColor blue" />
-									<span class="retxt"></span>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.nickname}"></th>
-							<td class="dCase">
-								<div class="multiTxtSet">
-									<div class="required">
-										<span><input type="text" name="ossNicknames" class="w350" onblur="fn.checkNickName(this)"/><input type="button" value="Delete" class="smallDelete"/><img id="newIcon"></span>
-										<span class="retxt"></span>
-									</div>
-								</div>
-								<input id="nickAdd" type="button" value="+ Add" class="btnCLight gray"/>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.OSS.version}"></th>
-							<td class="dCase">
-								<div class="required">	
-									<input name="ossVersion" type="text" class="w350" th:value="${ossVersion}"/>
-									<span class="retxt"></span>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.OSS.type}"></th>
-							<td class="dCase"><span name="ossType"></span></td>
-						</tr>
-						<tr>
-							<th class="dCase txStr" th:text="#{msg.common.field.declaredLicense}"><br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
-							<td class="dCase">
-								<div class="required">
-									<input type="hidden" name="licenseDiv"/>
-									<div class="licenseMulti">
-										<div class="mark"></div>
-										<div class="mt5"><table id="_licenseChoice"><tr><td></td></tr></table></div>
-										<div id="_licenseChoicePager"></div>
-									</div>
-								</div>
-								<div id="disp_licenseText" style="display: none;"></div>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.detectedLicense}"></th>
-							<td class="dCase">
-								<div class="multiItemSet multiDetectedLicenseSet">
-									<div class="required">
-										<span><input type="text" name="detectedLicenses" class="autoComOssLicense w725"/><input type="button" value="Delete" class="smallDelete"/></span>
-										<span class="retxt"></span>
-									</div>
-								</div>
-								<input id="detectedLicenseAdd" type="button" value="+ Add" class="btnCLight gray"/>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.Copyright}"></th>
-							<td class="dCase">
-								<textarea name="copyright" class="w100P h150" th:utext="${copyright}"></textarea>
-							</td>
-						</tr>
-						<tr id="lt">
-							<th class="dCase" th:text="#{msg.common.field.licenseType}"></th>
-							<td class="dCase"></td>
-						</tr>
-						<tr id="ob">
-							<th class="dCase" th:text="#{msg.common.field.obligation}"></th>
-							<td class="dCase"></td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
-							<td class="dCase">
-								<div class="multiItemSet multiDownloadLocationSet">
-									<div class="required">
-										<span><input type="text" name="downloadLocations" class="w725"/><input type="button" value="Delete" class="smallDelete"/></span>
-										<span class="urltxt"></span>
-									</div>
-								</div>
-								<input id="downloadLocationAdd" type="button" value="+ Add" class="btnCLight gray"/>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.homepage}"></th>
-							<td class="dCase">
-								<div class="required">
-									<input name="homepage" type="text" class="w100P" placeholder="http://" th:value="${homepage}"/>
-									<span class="urltxt"></span>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.summaryDescription}"></th>
-							<td class="dCase"><textarea name="summaryDescription" class="w100P h150" th:utext="${summaryDescription}"></textarea></td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.attribution}"></th>
-							<td class="dCase"><textarea name="attribution" class="w100P h150" th:utext="${attribution}"></textarea></td>
-						</tr>
-						<tr th:if="${ossId != null and not #strings.isEmpty(ossId)} and 'true' == projectListFlag">
-							<th class="dCase" th:text="Project"><br/><input id="listMore" type="button" value="List more" class="btnCLight gray" /></th>
-							<td class="dCase">
-								<table id="_projectList"><tr><td></td></tr></table>
-							</td>
-						</tr>
-						<tr th:if="${ossId != null and not #strings.isEmpty(ossId) and 'true' == projectListFlag}">
-							<th class="dCase" th:text="3rd Party"><br/><input id="listMore3rd" type="button" value="List more" class="btnCLight gray" /></th>
-							<td class="dCase">
-								<table id="_partnerList"><tr><td></td></tr></table>
-							</td>
-						</tr>
-						<tr th:if="${ossId != null and not #strings.isEmpty(ossId) and not #lists.isEmpty(vulnInfoList)}">
-							<th class="dCase" th:text="#{msg.common.field.vulnerability}"></th>
-							<td class="dCase">
-								<table id="_vulnInfoList"><tr><td></td></tr></table>
-							</td>
-						</tr>
-						<tr>
-							<th class="dCase" th:text="#{msg.common.field.comment}"></th>
-							<td class="dCase">
-								<div class="grid-container">
-									<div class="grid-width-100">
-										<div id="editor"></div>
-									</div>
-								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<!-- Main Table [E] -->
-			</form>
-		</div>
-		<!-- Button Set[S] -->
-		<div class="btnLayout w1025">
-			<input th:if="${ossId != null and not #strings.isEmpty(ossId)}" id="delete" type="button" value="Delete" class="btnOssSelect btnColor left" />
-			<span class="right">
-				<input th:if="${ossId != null and not #strings.isEmpty(ossId)}" id="sync" type="button" value="Sync" class="btnColor" />
-				<input th:if="${ossId != null and not #strings.isEmpty(ossId)}" id="copy" type="button" value="Copy" class="btnColor" />
-				<input id="save" type="button" value="Save" class="btnColor red" />
-			</span>
-		</div>
-        <div th:if="${ossId != null and not #strings.isEmpty(ossId)}" class="tabContent">
-            <div class="commentList" style="width:986px">
-                <strong class="tit">Comments</strong>
-                <div class="commentBack" id="commentListArea"></div>
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <th:block th:replace="oss/edit-script :: contentScript"></th:block>
+    <body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout">
+            <input type="hidden" name="ossLicensesJson"/>
+            <input type="hidden" name="ossId"/>
+            <input type="hidden" name="licenseType" id="licenseType" />
+            <input type="hidden" name="obligationType" id="obligationType" />
+            <input type="hidden" name="comment"/>
+            <input type="hidden" name="ossType" value="${ossType}"/>
+            <input type="hidden" name="validationType"/>
+            <input type="hidden" name="downloadLocation"/>
+            <input type="hidden" name="licenseId" value=""/>
+            <input type="hidden" name="deactivateFlag" value="N"/>
+            <input type="hidden" name="renameFlag" value="N"/>
+            <input type="hidden" name="ossCopyFlag" value="N"/>
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+
+                </div><!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <form name="ossForm" id="ossForm">
+                    <div class="row">
+                    <div class="col-md-9">
+                        <div class="card card-secondary submit-form">
+                            <div class="card-header">
+                                <h3 class="card-title text-white">Form</h3>
+
+                                <div class="card-tools">
+                                    <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"
+                                            type="button">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="licenseName" th:text="#{msg.common.field.OSS.name}"><span class="text-orange">*</span></label>
+                                    <input type="text" class="form-control autoComLicenseLong" name="ossName" id="licenseName" th:value="${ossName}"/>
+                                </div>
+                                <div class="form-group tag-form" name="append-stag-form">
+                                    <label th:text="#{msg.common.field.nickname}"></label>
+                                    <div class="input-group">
+                                        <input class="form-control" id="input_licenseNicknames" type="text" onblur="oss_edit_fn.checkNickName(this)">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button">
+                                                Add
+                                            </button>
+                                        </div>
+                                        <!-- /btn-group -->
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex" id="appendArea_licenseNicknames"></div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.OSS.type}"></label>
+                                    <span name="ossType"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.declaredLicense}"><span class="text-orange">*</span></label>
+                                    <input type="hidden" name="licenseDiv"/>
+                                    <div class="jqGridSet">
+                                        <table id="_licenseChoice"><tr><td></td></tr></table>
+                                        <div id="_licenseChoicePager"></div>
+                                    </div>
+                                <div id="disp_licenseText" style="display: none;"></div>
+                                </div>
+                                <div class="form-group tag-form" name="append-stag-form">
+                                    <label th:text="#{msg.common.field.detectedLicense}"></label>
+                                    <div class="input-group">
+                                        <input class="form-control" id="input_detectedLicense" type="text">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default" id="detectedLicense" name="addTagButton"  type="button">
+                                                Add
+                                            </button>
+                                        </div>
+                                        <!-- /btn-group -->
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex" id="appendArea_detectedLicense"></div>
+                                <div class="form-group row">
+                                    <div class="col-3">
+                                        <label th:text="#{msg.common.field.obligation}"></label>
+                                    </div>
+                                    <div class="col-9">
+                                        <div class="form-group mb-0">
+                                            <div class="custom-control custom-switch">
+                                                <input class="custom-control-input" id="customSwitch1" type="checkbox">
+                                                <label class="custom-control-label" for="customSwitch1">Yes</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.downloadLocation}"></label>
+                                    <input class="form-control" name="downloadLocations" id="inputName" type="text">
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.homepage}">홈페이지</label>
+                                    <input class="form-control" name="downloadLocations" th:value="${homepage}">
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.summaryDescription}">요약 설명</label>
+                                    <textarea class="form-control" rows="5" th:text="${summaryDescription}"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.attribution}">Attribution 고지</label>
+                                    <textarea class="form-control" rows="5" th:text="${attribution}"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputName">Comment</label>
+                                    <textarea class="form-control" id="compose-textarea" rows="3" style="height: 800px"></textarea>
+                                </div>
+                            </div>
+                            <div class="card-footer clearfix">
+                                <a class="btn btn-secondary float-left" href="javascript:void(0)">Delete</a>
+                                <a class="btn btn-teal-01 float-right" href="javascript:void(0)">Save</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card card-lg-red">
+                            <div class="card-header">
+                                <h3 class="card-title">Comment</h3>
+                                <div class="card-tools">
+                                    <button class="btn btn-tool" data-card-widget="collapse" title="Collapse"
+                                            type="button">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            <!-- <thead>
+                                              <tr>
+                                                <th>File Name</th>
+                                                <th>File Size</th>
+                                                <th></th>
+                                              </tr>
+                                            </thead> -->
+                                            <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
+                                                           href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
+                                                           href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
+                                                           href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
+                                                           href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn-default" data-target="#modal-comment" data-toggle="modal"
+                                                           href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                <span class="username">
+                                  <a href="#">Jonathan Burke Jr.</a>
+                                </span>
+                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for designers,
+                                                            typographers and the like. Some people hate it and argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                                <td class="text-right py-0 align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn-default" href="#"><i
+                                                                class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </section>
+            <!-- modal -->
+            <div class="modal fade" id="modal-comment">
+                <!-- modal dialog -->
+                <div class="modal-dialog modal-lg">
+                    <!-- modal-content -->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Comment</h4>
+                            <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+             	 <textarea class="form-control" id="commpose-textarea-02" rows="3" style="height: 800px">
+                        <ul>
+                            <li>List item one</li>
+                            <li>List item two</li>
+                            <li>List item three</li>
+                            <li>List item four</li>
+                        </ul>
+                    </textarea>
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+                            <button class="btn btn-primary" type="button">Save changes</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-		<!-- Button Set[E] -->
-		<!-- Popup -->
-	    <div class="pop ossSelectPop" style="position: absolute;">
-	        <h1>Select OSS</h1>
-	            <div class="red"><strong class="red">This OSS is already in use and can not be just deleted.</strong></div>
-	            <div>Please select another OSS to replace this OSS.<br>The name of this OSS will be a nickname of selected OSS.</div>
-	        <div class="popdata">
-	            <!-- 검색 박스 -->
-	            <fieldset class="listSearch2">
-	                <form id="listSearch" name="listSearch">
-	                    <dl class="basicSearch">
-	                        <dt>Basic Search Area</dt>
-	                        <dd>
-	                            <label>OSS Name</label>
-	                            <input name="schOssName" type="text" class="autoCom ui-autocomplete-input" style="width:340px"/>
-	                            <input type="checkbox" id="ossNameAllSearchFlag"/><span>&nbsp;Exact Match</span>
-	                            <input type="hidden" name="ossNameAllSearchFlag"/>
-	                        </dd>
-	                    </dl>
-	                    <input type="button" value="Search" class="btnColor search">
-	                </form>
-	            </fieldset>
-	            <!-- //검색 박스 -->
-	            <!-- 검색 리스트 -->
-	            <div class="mt20">
-	                <table id="_ossSelectList"><tr><td></td></tr></table>
-	                <div id="ossSelectListPager"></div>
-	            </div>
-	            <!-- //검색 리스트 -->
-	        </div>
-	        <div class="pbtn">
-	            <input type="button" value="Cancel" class="btnCancel btnColor" />
-	            <input type="button" value="OK" class="btnColor red" />
-	        </div>
-	    </div>
-	    <!-- //Popup -->
-	    
-		<!-- Popup -->
-	    <div class="pop mergeOssCheckPop" style="position: absolute;">
-	        <h1>Preview OSS Version Merge</h1>
-	        <div class="red"><strong class="red">This OSS has multiple versions. </strong></div>
-	        <div>All versions are deleted or merged. Please Check Again.</div>
-	        <div style="font-size: 25px;" id="div_mergeOssCheckPop_change"></div>
-	        <div class="popdata">
-	            <!-- 검색 리스트 -->
-	            <div class="mt20">
-	                <table id="_ossMergeCheckList"><tr><td></td></tr></table>
-	            </div>
-	            <!-- //검색 리스트 -->
-	        </div>
-	        <div class="pbtn">
-	            <input type="button" value="Cancel" class="btnCancel btnColor" />
-	            <input type="button" value="OK" class="btnColor red" />
-	        </div>
-	    </div>
-	    <!-- //Popup -->
-	</div>
-	<!---->
-	</div>
-	<!-- //wrap -->
-</div>
+    </div>
+    </body>
 </th:block>

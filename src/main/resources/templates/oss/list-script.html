@@ -9,8 +9,6 @@
     //const G_ROW_CNT = "*{gRowCnt}";
     linkFlag = String(/*[[ ${searchBean.linkFlag}]]*/);
 
-    console.log(linkFlag);
-
     $(window).load(function () {
         oss_list_evt.init();
     });
@@ -153,7 +151,7 @@
                     , { name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left' }
                     , { name: 'licenseName', index: 'licenseName', width: 200, align: 'left' }
                     , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                    , { name: 'obligationobligation', index: 'obligation', width: 70, align: 'left', sortable: false }
+                    , { name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false }
                     , { name: 'downloadLocation', index: 'downloadLocation', width: 150, align: 'left', formatter: 'link', formatoptions: { target: '_blank' } }
                     , { name: 'homepage', index: 'homepage', width: 65, align: 'left', formatter: 'link2', formatoptions: { target: '_blank' } }
                     , { name: 'summaryDescription', index: 'summaryDescription', width: 150, height: 50, align: 'left' }
@@ -308,7 +306,7 @@
                         var rowData = $("#list").jqGrid('getRowData',rowid);
 
                         if("Y" != linkFlag) {
-                            callCreateTabInFrame(rowData['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+rowData['ossId']+'"/>');
+                            callCreateTabInFrame(rowData['ossId']+'_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
                         } else {
                             var openNewWindow = window.open("about:blank");
                             // if("${ct:isAdmin()}"){

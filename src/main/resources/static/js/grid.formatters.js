@@ -1,5 +1,24 @@
 // license grid formatter
 const license_grid_format = {
+    setGridParam: function () {
+        var paramData = $('#licenseSearch').serializeObject();
+
+        if (paramData.restrictions != null) {
+            paramData.restrictions = JSON.stringify(paramData.restrictions);
+            paramData.restrictions = paramData.restrictions.replace(/\"|\[|\]/gi, "");
+        } else {
+            paramData.restrictions = "";
+        }
+
+        return paramData;
+    },
+
+    licenseNameFormatter: function (cellvalue, options, rowObject) {
+        var display = "";
+        display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
+
+        return display;
+    },
     displayLicenseRestriction: function (cellvalue, options, rowObject) {
         var display = "";
 

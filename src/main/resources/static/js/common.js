@@ -117,26 +117,37 @@ function appendMultiTag(e, elId_01, elId_02, tgId) {
         .trigger("change");
 }
 
-function appendSingleTag(e, id) {
-    e.preventDefault();
-    const word = $("#input_" + id).val();
 
-    if (!word || word.length === 0) {
+function appendSingleTag(event, id) {
+    event.preventDefault();
+
+    const inputElement = $("#input_" + id);
+    const word = inputElement.val().trim();
+
+    if (!word) {
         return;
     }
 
-    const el = $("<div/>", {
+    const tagContainer = $("<div/>", {
         class: "external-event",
         name: id,
         text: word
-    }).append(
-        '<i class="fas fa-times text-blue-gray float-right mt-1" name="deleteTagButton"></i>'
-    );
+    });
 
-    $("#appendArea_" + id).prepend(el);
-    $("#input_" + id)
-        .val(null)
-        .trigger("change");
+    const hiddenInput = $('<input>', {
+        type: 'hidden',
+        name: id,
+        value: word
+    });
+
+    const deleteIcon = $('<i>', {
+        class: 'fas fa-times text-blue-gray float-right mt-1',
+        name: 'deleteTagButton'
+    });
+
+    tagContainer.append(hiddenInput, deleteIcon);
+
+    $("#appendArea_" + id).prepend(tagContainer);
+
+    inputElement.val(null).trigger("change");
 }
-
-

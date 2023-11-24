@@ -1,3 +1,4 @@
+const LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 
 $( document ).ajaxSend(function( event, jqxhr, settings ) {
     jqxhr.setRequestHeader("AJAX", true);
@@ -9,6 +10,173 @@ $( document ).ajaxError(function( event, jqxhr, settings, thrownError  ) {
         location.href = "/";
     }
 });
+
+if ('addEventListener' in window){
+    window.addEventListener('message', receiveMessage, false);
+} else if ('attachEvent' in window){ //IE
+    window.attachEvent('onmessage', receiveMessage);
+}
+
+function receiveMessage(event) {
+    var data = JSON.parse(event.data);
+
+    switch(data.action){
+        case 'create':
+            createTab(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
+
+            break;
+        case 'delete':
+            deleteTab(data.tabData[0]);
+
+            break;
+        case 'reload':
+            reloadTab(data.tabData[0], data.tabData[1], data.action);
+
+            break;
+    }
+}
+
+// call create tab in frame
+function callCreateTabInFrame(title, link, uniqueName, autoOpen) {
+    var tabData = [];
+    tabData[0] = title;
+    tabData[1] = link;
+    tabData[2] = uniqueName;
+    tabData[3] = autoOpen;
+
+    var data = {
+        tabData: tabData,
+        action:'create'
+    };
+
+    parent.postMessage(JSON.stringify(data),"*");
+}
+
+var callReloadTabInframe = function(link, uniqueName){
+    var tabData = [];
+    tabData[0] = link;
+    tabData[1] = uniqueName;
+
+    var data = {
+        tabData:tabData,
+        action:'reload'
+    };
+
+    parent.postMessage(JSON.stringify(data),"*");
+}
+
+var callDeleteTabInFrame = function(uniqueName){
+    var tabData = [];
+    tabData[0] = uniqueName;
+
+    var data = {
+        tabData:tabData,
+        action:'delete'
+    };
+
+    parent.postMessage(JSON.stringify(data),"*");
+}
+
+const SELECTOR_CONTENT_WRAPPER = '.content-wrapper'
+const SELECTOR_TAB_CONTENT = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .tab-content`
+const SELECTOR_TAB_LOADING = `${SELECTOR_TAB_CONTENT} .tab-loading`
+const SELECTOR_TAB_NAVBAR_NAV = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .navbar-nav`
+const SELECTOR_TAB_NAVBAR_NAV_LINK = `${SELECTOR_TAB_NAVBAR_NAV} .nav-link`
+const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
+
+
+
+function createTab(title, link,  uniqueName, autoOpen) {
+    const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + uniqueName + '"]') || null;
+    if (existingPanel) {
+        activateTab(uniqueName);
+        return;
+    }
+
+    let tabId = `panel--${uniqueName}`
+    let navId = `tab--${uniqueName}`
+
+    const newTabListItem = `<li class="nav-item" role="presentation"><a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a><a class="nav-link" data-toggle="row" id="${navId}" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">${title}</a></li>`
+    $(SELECTOR_TAB_NAVBAR_NAV).append(unescape(escape(newTabListItem)))
+
+    const newTabItem = `<div class="tab-pane fade" id="${tabId}" role="tabpanel" aria-labelledby="${navId}"><iframe src="${link}"></iframe></div>`
+    $(SELECTOR_TAB_CONTENT).append(unescape(escape(newTabItem)))
+    triggerWindowResize();
+
+    if (autoOpen) {
+        const $loadingScreen = $(SELECTOR_TAB_LOADING)
+        $loadingScreen.fadeIn()
+        $(`${tabId} iframe`).ready(() => {
+            activateTab(uniqueName);
+            setTimeout(() => {
+                $loadingScreen.fadeOut()
+            })
+        })
+    }
+}
+
+function deleteTab (uniqueName) {
+    $("#tab--" + uniqueName).parent().find('.btn-iframe-close').trigger("click");
+}
+
+function reloadTab(link, uniqueName, act) {
+    $('iframe').each(function(){
+        var url = $(this).attr('src');
+
+        if(url.indexOf("?") != -1){
+            var tmp = url.split('?');
+            url = tmp[0];
+        }
+
+        if(url == link){
+            if(act === "create" || act === "reload"){
+                $(this).attr('src', url);
+            }
+        }
+        activateTab(uniqueName);
+    });
+}
+
+function activateTab(uniqueName) {
+    let tabId = `panel--${uniqueName}`
+    let navId = `tab--${uniqueName}`
+
+    const tabs = document.querySelectorAll(SELECTOR_TAB_PANE);
+    tabs.forEach(tab => {
+        tab.classList.remove('active', 'show');
+    });
+
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add('active', 'show');
+
+
+    const navs = document.querySelectorAll(SELECTOR_TAB_NAVBAR_NAV_LINK);
+    navs.forEach(nav => {
+        nav.classList.remove('active');
+    });
+
+    const activeNav = document.getElementById(navId);
+    activeNav.classList.add('active');
+}
+
+function triggerWindowResize() {
+    $(window).trigger('resize');
+}
+
+const loading = {
+    show: function(){
+        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
+            $('#loading_wrap').show();
+        }
+    },
+    hide: function(){
+        if("Y" != doNotUseAutoLoadingHideFlag) {
+            $('#loading_wrap').hide();
+        }
+    }
+}
+
+var doNotUseAutoLoadingHideFlag = 'N';
 
 $(document).ready(function (){
     //form data -> json data
@@ -46,111 +214,6 @@ $(document).ready(function (){
     autoComplete.load();
     autoComplete.init();
 });
-
-const SELECTOR_CONTENT_WRAPPER = '.content-wrapper'
-const SELECTOR_TAB_CONTENT = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .tab-content`
-const SELECTOR_TAB_LOADING = `${SELECTOR_TAB_CONTENT} .tab-loading`
-const SELECTOR_TAB_NAVBAR_NAV = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .navbar-nav`
-const SELECTOR_TAB_NAVBAR_NAV_LINK = `${SELECTOR_TAB_NAVBAR_NAV} .nav-link`
-const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
-
-function createTabInFrame(title, link,  uniqueName, autoOpen) {
-    const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab-' + uniqueName + '"]') || null;
-    let tabId = `panel-${uniqueName}`
-    let navId = `tab-${uniqueName}`
-
-    if (existingPanel) {
-        activateTab(tabId, navId);
-        return;
-    }
-
-    const newTabListItem = `<li class="nav-item" role="presentation"><a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a><a class="nav-link" data-toggle="row" id="${navId}" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">${title}</a></li>`
-    $(SELECTOR_TAB_NAVBAR_NAV).append(unescape(escape(newTabListItem)))
-
-    const newTabItem = `<div class="tab-pane fade" id="${tabId}" role="tabpanel" aria-labelledby="${navId}"><iframe src="${link}"></iframe></div>`
-    $(SELECTOR_TAB_CONTENT).append(unescape(escape(newTabItem)))
-    triggerWindowResize();
-
-    if (autoOpen) {
-        const $loadingScreen = $(SELECTOR_TAB_LOADING)
-        $loadingScreen.fadeIn()
-        $(`${tabId} iframe`).ready(() => {
-            activateTab(tabId, navId);
-            setTimeout(() => {
-                $loadingScreen.fadeOut()
-            })
-        })
-    }
-}
-
-function activateTab(tabId, navId) {
-    const tabs = document.querySelectorAll(SELECTOR_TAB_PANE);
-    tabs.forEach(tab => {
-        tab.classList.remove('active', 'show');
-    });
-
-    const activeTab = document.getElementById(tabId);
-    activeTab.classList.add('active', 'show');
-
-    const navs = document.querySelectorAll(SELECTOR_TAB_NAVBAR_NAV_LINK);
-    navs.forEach(nav => {
-        nav.classList.remove('active');
-    });
-
-    const activeNav = document.getElementById(navId);
-    activeNav.classList.add('active');
-}
-
-function triggerWindowResize() {
-    $(window).trigger('resize');
-}
-
-// call create tab in frame
-function callCreateTabInFrame(title, link,  uniqueName, autoOpen) {
-    var tabData = [];
-    tabData[0] = title;
-    tabData[1] = link;
-    tabData[2] = uniqueName;
-    tabData[3] = autoOpen;
-
-    var data = {
-        tabData: tabData,
-        action:'create'
-    };
-
-    parent.postMessage(JSON.stringify(data),"*");
-}
-
-if ('addEventListener' in window){
-    window.addEventListener('message', receiveMessage, false);
-} else if ('attachEvent' in window){ //IE
-    window.attachEvent('onmessage', receiveMessage);
-}
-
-function receiveMessage(event) {
-    var data = JSON.parse(event.data);
-
-    switch(data.action){
-        case 'create':
-            createTabInFrame(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
-
-            break;
-    }
-}
-
-const loading = {
-    show: function(){
-        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
-            $('#loading_wrap').show();
-        }
-    },
-    hide: function(){
-        if("Y" != doNotUseAutoLoadingHideFlag) {
-            $('#loading_wrap').hide();
-        }
-    }
-}
-
 // Auto complete
 const commonAjax = {
     getLicenseTags : function(data){
@@ -688,3 +751,22 @@ const autoComplete = {
     }
 }
 
+function replaceWithLink(text){
+    return text.replace(LINKREGEXP, findAndReplace);
+}
+
+function findAndReplace(match) {
+    var prj = /PRJ/i;
+    var third = /3rd/i;
+    var arrLink = match.split('-');
+    var id = arrLink[1];
+    var protocol = window.location.protocol;
+    var host =  window.location.host;
+    var url = protocol + "//" + host;
+    if(prj.test(match)) {
+        url += "/project/view/" + id;
+    } else if(third.test(match)) {
+        url += "/partner/view/" + id;
+    }
+    return "<a href=" + url +" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" +  match + "</a>";
+}

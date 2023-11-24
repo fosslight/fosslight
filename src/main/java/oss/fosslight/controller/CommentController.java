@@ -43,7 +43,7 @@ public class CommentController extends CoTopComponent {
 		model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
 		model.addAttribute("moreYn", false);
 		
-		return COMMENT.COMMENT_LIST_JSP;
+		return "fragments/comment-fragments :: commentAreaFragment";
 	}
 	
 	@GetMapping(value=COMMENT.MORE_COMMENT_LIST, produces = "text/html; charset=utf-8")

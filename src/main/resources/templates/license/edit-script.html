@@ -2,16 +2,19 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-
-        var initParam = {};
         var totalRow = 0;
         //const G_ROW_CNT = "*{gRowCnt}";
 
         $(window).load(function () {
             license_edit_data.init();
+
+            if($('input[name=licenseId]').val()) {
+                license_edit_commemt.getCommentList();
+            }
         });
 
         const license_edit_data = {
+            detail : /*[[${detail}]]*/ null,
             init: function () {
                 $('#licenseTypeSelect').select2({
                     placeholder: "License Type",
@@ -84,7 +87,8 @@
                 } else if (json.isValid == 'true') {
                     loading.show();
 
-                    var editorVal = CKEDITOR.instances.editor.getData();
+                    var editorVal = $('#commentInput').summernote('code');
+                    console.log(editorVal);
                     $('input[name=comment]').val(replaceWithLink(editorVal));
 
                     var pData = $('#licenseForm').serializeObject();
@@ -92,6 +96,7 @@
                     if (pData.restrictions != null) {
                         pData.restrictions = JSON.stringify(pData.restrictions);
                         $('input[name=restriction]').val(pData.restrictions.replace(/\"|\[|\]/gi, ""));
+                        console.log("restric ::" + pData.restrictions);
                     } else {
                         $('input[name=restriction]').val('');
                     }
@@ -101,9 +106,21 @@
                         type: 'POST',
                         dataType: "json",
                         cache: false,
-                        success: onRegistSuccess,
-                        error: onError
+                        success: license_edit_fn.onRegistSuccess,
+                        error: license_edit_fn.onError
                     }).submit();
+                }
+            },
+            onRegistSuccess: function(json, status){
+                loading.hide();
+
+                if(json.resCd == '10') {
+                    alertify.alert(String(/*[[#{msg.common.success}]]*/), function(){
+                        callDeleteTabInFrame("license-edit_" + json.licenseId);
+                        callReloadTabInframe("/license/list", "license-list");
+                    });
+                } else {
+                    alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
                 }
             },
             onError: function(data, status){
@@ -155,8 +172,101 @@
             }
         };
 
-        const license_edit_grid = {
+        const license_edit_commemt = {
+            getCommentList : function(){
+                $.ajax({
+                    url : "/comment/getCommentList",
+                    type : 'GET',
+                    dataType : 'html',
+                    cache : false,
+                    data : {
+                        referenceId : license_edit_data.detail.licenseId,
+                        referenceDiv : 'license'
+                    },
+                    success : function(res){
+                        $('#commentAreaFragment').replaceWith(res);
+                    },
+                    error : function(xhr, ajaxOptions, thrownError){
+                        alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                    }
+                });
+            },
+            deleteComment : function(_commId){
+                if(!confirm("Are you sure you want to delete this comment?")) {
+                    return;
+                }
 
+                $.ajax({
+                    url : "/comment/deleteComment",
+                    type : 'POST',
+                    dataType : 'json',
+                    cache : false,
+                    data : {'commId' : _commId},
+                    success : function(data){
+                        alertify.error(String(/*[[#{msg.common.success}]]*/));
+                        license_edit_commemt.getCommentList();
+                    },
+                    error : function(){
+                        alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                    }
+                });
+            },
+            editComment : function(_commId){
+                if(CKEDITOR.instances['comm_editor_'+_commId]) {
+                    var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+                    _editor.destroy();
+                }
+
+                _editor = CKEDITOR.replace('comm_editor_'+_commId);
+
+                $("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
+                $("#spanBtnArea_"+_commId+" > .btnEditMode").show();
+                $("#spanBtnArea_"+_commId+" > .closeModComment").off("click").on("click", function(e){
+                    e.preventDefault();
+                    fn_commemt.createNonToolbarEditor(_commId);
+                    $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
+                    $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
+                });
+
+                $("#spanBtnArea_"+_commId+" > .modifyComment").off("click").on("click", function(e){
+                    e.preventDefault();
+                    var _referenceId = $('input[name=licenseId]').val();
+                    var param = {commId : _commId, contents : replaceWithLink(_editor.getData()), referenceDiv: '30', referenceId: _referenceId};
+
+                    $.ajax({
+                        url : '<c:url value="/comment/updateComment"/>',
+                        type : 'POST',
+                        dataType : 'json',
+                        cache : false,
+                        data : param,
+                        success : function(json){
+                            fn_commemt.createNonToolbarEditor(_commId);
+                            $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
+                            $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
+                            alertify.success(String(/*[[#{msg.common.success}]]*/), 0);
+                        },
+                        error : function(){
+                            alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                        },
+                        complete : function(){
+                            fn_commemt.getCommentList();
+                        }
+                    });
+
+                    return false;
+                });
+            },
+            createNonToolbarEditor : function(_commId) {
+                var _editor = CKEDITOR.instances['comm_editor_'+_commId];
+
+                if(_editor) {
+                    _editor.destroy();
+                }
+
+                if($('#comm_editor_'+_commId).html().length > 0) {
+                    CKEDITOR.replace('comm_editor_'+_commId, {customConfig:'<c:url value="/js/customEditorConf_Comment.js"/>'});
+                }
+            }
         }
 
     </script>

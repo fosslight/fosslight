@@ -54,7 +54,7 @@
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
-                    var postData = license_list_fn.setGridParam();
+                    var postData = license_grid_format.setGridParam();
                     postData.ignoreSearchFlag = "N";
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                     resizingJqGidSet();
@@ -64,30 +64,6 @@
             },
         }
 
-        const license_list_fn = {
-            setGridParam: function () {
-                var paramData = $('#licenseSearch').serializeObject();
-
-                if (paramData.restrictions != null) {
-                    paramData.restrictions = JSON.stringify(paramData.restrictions);
-                    paramData.restrictions = paramData.restrictions.replace(/\"|\[|\]/gi, "");
-                } else {
-                    paramData.restrictions = "";
-                }
-
-                return paramData;
-            },
-
-            licenseNameFormatter: function (cellvalue, options, rowObject) {
-                var display = "";
-
-                var _frameId = options.rowId + "_License";
-                var _frameTarget = "#${suffixUrl}/license/edit/" + options.rowId;
-                display = "<a class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('" + _frameId + "','" + _frameTarget + "')\" >" + cellvalue + "</a>";
-                return display;
-            },
-
-        }
 
         const license_list_grid = {
             load: function () {
@@ -119,7 +95,7 @@
                             index: 'licenseName',
                             width: 200,
                             align: 'left',
-                            formatter: license_list_fn.licenseNameFormatter
+                            formatter: license_grid_format.licenseNameFormatter
                         }
                         , {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left'}
                         , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
@@ -164,6 +140,13 @@
                                 alertify.alert(String(/*[[#{msg.common.search.check.date}]]*/), function () { });
                             }
                         }
+                    },
+                    onSelectRow: function(id){
+                        $('#'+id+'description').width(130).height(140);
+                    },
+                    ondblClickRow: function(rowid,iRow,iCol,e) {
+                        var rowData = $("#list").jqGrid('getRowData',rowid);
+                        callCreateTabInFrame(rowData['licenseId']+'_License', "/license/edit/"+ rowData['licenseId'], 'license-edit_' + rowData['licenseId'], true);
                     },
                     gridComplete: function () {
                         resizingJqGidSet();

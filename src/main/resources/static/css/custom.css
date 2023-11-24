@@ -151,7 +151,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* submit form */
 .custom-layout .submit-form .tag-form { margin-bottom: .5rem !important; }
-.custom-layout .submit-form .external-event {margin-right: .5rem;color: #0082f7 !important;cursor: pointer;font-weight: 550;background-color: #FFFFFF;border: 1px solid #cdd8e8; }
+.custom-layout .submit-form .external-event {margin-right: .5rem;color: #0082f7 !important;cursor: pointer;font-weight: 550;background-color: #FFFFFF;border: 1px solid #cdd8e8;font-size: .8rem }
 .custom-layout .submit-form .external-event i:hover {color: #0082f7;}
 .custom-layout .submit-form .external-events { display: flex; }
 .custom-layout .submit-form .external-event { width: 20%; }
@@ -349,7 +349,7 @@ tr.ui-row-ltr,
     margin: 0 auto;
 }
 
-.ui-pg-table #pager_center tbody tr {
+.ui-pg-table td:nth-child(2) tbody tr {
     white-space: pre;
     width: 225px;
 }
@@ -372,7 +372,7 @@ tr.ui-search-toolbar input  {
     width: 23px;
 }
 
-.ui-jqgrid .ui-pg-table #pager_right div[dir="ltr"]{
+.ui-jqgrid .ui-pg-table td:nth-child(3) div[dir="ltr"]{
     margin: 0px 10px 3px 12px;
     font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: .8rem;
