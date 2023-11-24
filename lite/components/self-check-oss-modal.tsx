@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Modal from './modal';
 
 export default function SelfCheckOSSModal({
@@ -13,6 +14,15 @@ export default function SelfCheckOSSModal({
   show: boolean;
   onHide: () => void;
 }) {
+  const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
+
+  useEffect(() => {
+    if (show) {
+      setLicenses(data ? data.licenses : []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]);
+
   return (
     <Modal show={show} onHide={onHide} size="lg" hideByBackdrop={false}>
       <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
@@ -52,15 +62,20 @@ export default function SelfCheckOSSModal({
         <div className="col-span-2 flex flex-col gap-y-2">
           <label className="text-sm font-semibold">Licenses</label>
           <input className="w-full px-2 py-1 border border-darkgray outline-none" defaultValue="" />
-          {data && data.licenses.length > 0 && (
+          {licenses.length > 0 && (
             <div className="flex gap-x-1">
-              {data.licenses.map((license) => (
+              {licenses.map((license) => (
                 <div
                   key={license.licenseId}
                   className="px-1.5 py-0.5 border border-semiblack/80 rounded text-sm text-semiblack/80"
                 >
                   {license.licenseIdentifier}
-                  <i className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x" />
+                  <i
+                    className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
+                    onClick={() =>
+                      setLicenses(licenses.filter((l) => l.licenseId !== license.licenseId))
+                    }
+                  />
                 </div>
               ))}
             </div>
