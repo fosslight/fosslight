@@ -50,7 +50,7 @@ export default function SelfCheckPackage() {
   return (
     <>
       {/* Uploading files */}
-      <div className="p-4 mb-8 border border-dashed border-semigray rounded text-center">
+      <div className="p-4 mb-12 border border-dashed border-semigray rounded text-center">
         {files.length > 0 && (
           <div className="flex flex-col gap-y-1 mb-6">
             {files.map((file, idx) => (

@@ -122,7 +122,7 @@ export default function SelfCheckOSS() {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-between items-center mt-8 mb-2">
+      <div className="flex justify-between items-center mt-12 mb-2">
         <div className="flex gap-x-3 text-charcoal">
           <i className="cursor-pointer fa-solid fa-trash" />
           <i
@@ -140,16 +140,16 @@ export default function SelfCheckOSS() {
             </div>
             Export
           </button>
-          <button className="px-2 py-0.5 default-btn">Bulk Edit</button>
-          <button className="px-2 py-0.5 crimson-btn">Check</button>
+          <button className="px-2 py-0.5 default-btn">Check</button>
+          <button className="px-2 py-0.5 crimson-btn">Save</button>
         </div>
       </div>
 
       {/* Cards */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {ossList.map((oss, idx) => (
+        {ossList.map((oss) => (
           <div
-            key={idx}
+            key={oss.ossId}
             className={clsx(
               'flex flex-col gap-y-1 p-4 border border-darkgray rounded',
               excludeList.includes(oss.ossId) && 'bg-semigray/50'
@@ -274,6 +274,8 @@ export default function SelfCheckOSS() {
           </div>
         ))}
       </div>
+
+      {/* Modal */}
       <SelfCheckOSSModal
         mode={!modalData ? 'add' : 'edit'}
         data={modalData}
