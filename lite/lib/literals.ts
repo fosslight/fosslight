@@ -1,9 +1,9 @@
-export const rootMenu = {
+export const rootMenu: Nav.RootMenu = {
   name: 'Dashboard',
   icon: 'fa-solid fa-chart-line'
 };
 
-export const menus = [
+export const menus: Nav.Menu[] = [
   {
     name: 'Self-Check',
     icon: 'fa-solid fa-list-check',
@@ -21,7 +21,7 @@ export const menus = [
   }
 ];
 
-export const selfCheckTabs: SelfCheckTab[] = [
+export const selfCheckTabs: SelfCheck.Tab[] = [
   {
     name: 'OSS',
     title: 'Listing up your OSS',
@@ -41,7 +41,7 @@ export const selfCheckTabs: SelfCheckTab[] = [
   }
 ];
 
-export const ossTypes: Record<string, { name: string; desc: string }> = {
+export const ossTypes: Detail.OSSTypes = {
   M: {
     name: 'Multi License',
     desc: 'It contains source codes under multiple licenses. (EX. lib is LGPL-2.1 and src is GPL-2.0)'

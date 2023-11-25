@@ -10,7 +10,7 @@ import { Fragment, useState } from 'react';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
   const [isModalShown, setIsModalShown] = useState(false);
-  const [tab, setTab] = useState<SelfCheckTab['name']>('OSS');
+  const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
 
   return (
     <>
@@ -58,8 +58,8 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       <SelfCheckModal
         mode="edit"
         data={{
-          name: 'FOSSLight Hub Lite',
-          version: '1.0.0',
+          projectName: 'FOSSLight Hub Lite',
+          projectVersion: '1.0.0',
           comment: 'There are some comments here.'
         }}
         show={isModalShown}
@@ -67,7 +67,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       />
 
       {/* Tab selector */}
-      <div className="flex justify-center items-center gap-x-2 mt-10 text-sm font-semibold">
+      <div className="flex justify-center items-center gap-x-2 mt-12 text-sm font-semibold">
         {selfCheckTabs.map((selfCheckTab, idx) => {
           return (
             <Fragment key={selfCheckTab.name}>
@@ -90,7 +90,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Tab description */}
-      <div className="text-center mt-6 mb-8">
+      <div className="text-center mt-6 mb-12">
         {selfCheckTabs.map(
           (selfCheckTab) =>
             tab === selfCheckTab.name && (

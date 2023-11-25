@@ -21,7 +21,7 @@ export default function OSSList() {
   // Filters
   const filtersQueryParam = queryParams.get('f') || '';
   const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
-  const filters: { default: Filter[]; hidden: Filter[] } = {
+  const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'OSS Name', name: 'ossName', type: 'char-exact' },
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
@@ -88,14 +88,14 @@ export default function OSSList() {
   };
 
   // Rows/Columns
-  const [rows, setRows] = useState<any[]>([]);
-  const columns = [
+  const [rows, setRows] = useState<List.OSS[]>([]);
+  const columns: List.Column[] = [
     { name: 'ID', sort: 'id' },
     { name: 'Name', sort: 'name' },
     { name: 'Ver', sort: 'ver' },
     { name: 'Type', sort: 'type' },
-    { name: 'License(s)', sort: '' },
-    { name: 'Obligation(s)', sort: 'obg' },
+    { name: 'Licenses', sort: '' },
+    { name: 'Obligations', sort: 'obg' },
     { name: 'URL', sort: '' },
     { name: 'Description', sort: 'desc' },
     { name: 'Vuln', sort: 'vuln' },
@@ -108,8 +108,8 @@ export default function OSSList() {
 
   // Pagination
   const [totalCount, setTotalCount] = useState(0);
-  const currentPage = Number(queryParams.get('p') || '1');
   const countPerPage = 10;
+  const currentPage = Number(queryParams.get('p') || '1');
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
@@ -183,7 +183,7 @@ export default function OSSList() {
         columns={columns}
         currentSort={currentSort}
         pagination={{ totalCount, currentPage, countPerPage }}
-        render={(row: any, column: string) => {
+        render={(row: List.OSS, column: string) => {
           if (column === 'ID') {
             return row.ossId;
           }
@@ -200,18 +200,17 @@ export default function OSSList() {
             return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
           }
 
-          if (column === 'License(s)') {
-            return (
-              <>
-                [{row.licenseType}]<br />
-                {row.licenseName}
-              </>
-            );
+          if (column === 'Licenses') {
+            return `${row.licenseType ? `[${row.licenseType}] ` : ''}${row.licenseName}`;
           }
 
-          if (column === 'Obligation(s)') {
+          if (column === 'Obligations') {
             const notice = row.obligations[0] === 'Y';
             const source = row.obligations[1] === 'Y';
+
+            if (!notice && !source) {
+              return null;
+            }
 
             return (
               <div className="flex gap-x-2 whitespace-nowrap">
@@ -224,23 +223,26 @@ export default function OSSList() {
           if (column === 'URL') {
             return (
               <div className="whitespace-nowrap">
-                <a
-                  className="text-blue-500 hover:underline"
-                  href={row.downloadUrl}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Download
-                </a>
-                <br />
-                <a
-                  className="text-blue-500 hover:underline"
-                  href={row.homepageUrl}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Homepage
-                </a>
+                {row.downloadUrl && (
+                  <a
+                    className="block text-blue-500 hover:underline"
+                    href={row.downloadUrl}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Download
+                  </a>
+                )}
+                {row.homepageUrl && (
+                  <a
+                    className="block text-blue-500 hover:underline"
+                    href={row.homepageUrl}
+                    target="_blank"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Homepage
+                  </a>
+                )}
               </div>
             );
           }
@@ -250,6 +252,10 @@ export default function OSSList() {
           }
 
           if (column === 'Vuln') {
+            if (!row.cveId || !row.cvssScore) {
+              return null;
+            }
+
             return (
               <a
                 className="text-crimson hover:underline"
@@ -282,7 +288,7 @@ export default function OSSList() {
 
           return null;
         }}
-        onClickRow={(row: any) => {
+        onClickRow={(row: List.OSS) => {
           const urlQueryParams = new URLSearchParams(queryParams);
           urlQueryParams.set('modal-type', 'oss');
           urlQueryParams.set('modal-id', row.ossId);

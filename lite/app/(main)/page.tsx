@@ -7,9 +7,9 @@ import { useSetRecoilState } from 'recoil';
 
 export default function Dashboard() {
   const setLoading = useSetRecoilState(loadingState);
-  const [vulnerabilityList, setVulnerabilityList] = useState<any[]>([]);
-  const [ossList, setOssList] = useState<any[]>([]);
-  const [licenseList, setLicenseList] = useState<any[]>([]);
+  const [vulnerabilityList, setVulnerabilityList] = useState<ListSection.Vuln[]>([]);
+  const [ossList, setOssList] = useState<ListSection.OSS[]>([]);
+  const [licenseList, setLicenseList] = useState<ListSection.License[]>([]);
 
   // Load recent rows for each section
   useEffect(() => {

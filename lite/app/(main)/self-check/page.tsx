@@ -22,7 +22,7 @@ export default function SelfCheckList() {
   // Filters
   const filtersQueryParam = queryParams.get('f') || '';
   const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
-  const filters: { default: Filter[]; hidden: Filter[] } = {
+  const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'Project ID', name: 'projectId', type: 'number' },
       { label: 'Project Name', name: 'projectName', type: 'char-exact' },
@@ -37,13 +37,13 @@ export default function SelfCheckList() {
   const [isModalShown, setIsModalShown] = useState(false);
 
   // Rows/Columns
-  const [rows, setRows] = useState<any[]>([]);
-  const columns = [
+  const [rows, setRows] = useState<List.SelfCheck[]>([]);
+  const columns: List.Column[] = [
     { name: 'ID', sort: 'id' },
     { name: 'Name', sort: 'name' },
     { name: 'Ver', sort: 'ver' },
     { name: 'Report', sort: '' },
-    { name: 'Package(s)', sort: '' },
+    { name: 'Packages', sort: '' },
     { name: 'Notice', sort: '' },
     { name: 'Vuln', sort: 'vuln' },
     { name: 'Create', sort: 'create' }
@@ -54,8 +54,8 @@ export default function SelfCheckList() {
 
   // Pagination
   const [totalCount, setTotalCount] = useState(0);
-  const currentPage = Number(queryParams.get('p') || '1');
   const countPerPage = 10;
+  const currentPage = Number(queryParams.get('p') || '1');
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
@@ -115,12 +115,7 @@ export default function SelfCheckList() {
           <i className="text-sm fa-solid fa-plus" /> Create Project
         </button>
       </div>
-      <SelfCheckModal
-        mode="create"
-        data={{ name: '', version: '', comment: '' }}
-        show={isModalShown}
-        onHide={() => setIsModalShown(false)}
-      />
+      <SelfCheckModal mode="create" show={isModalShown} onHide={() => setIsModalShown(false)} />
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable
@@ -128,7 +123,7 @@ export default function SelfCheckList() {
         columns={columns}
         currentSort={currentSort}
         pagination={{ totalCount, currentPage, countPerPage }}
-        render={(row: any, column: string) => {
+        render={(row: List.SelfCheck, column: string) => {
           if (column === 'ID') {
             return row.projectId;
           }
@@ -153,11 +148,11 @@ export default function SelfCheckList() {
             );
           }
 
-          if (column === 'Package(s)') {
+          if (column === 'Packages') {
             return (
               row.packages.length > 0 && (
                 <div className="flex gap-x-2 whitespace-nowrap">
-                  {(row.packages as any[]).map((_, idx) => (
+                  {row.packages.map((_, idx) => (
                     <i
                       key={idx}
                       className="cursor-pointer fa-solid fa-cube"
@@ -183,6 +178,10 @@ export default function SelfCheckList() {
           }
 
           if (column === 'Vuln') {
+            if (!row.cveId || !row.cvssScore) {
+              return null;
+            }
+
             return (
               <a
                 className="text-crimson hover:underline"
@@ -201,7 +200,7 @@ export default function SelfCheckList() {
 
           return null;
         }}
-        onClickRow={(row: any) => router.push(`${pathname}/${row.projectId}`)}
+        onClickRow={(row: List.SelfCheck) => router.push(`${pathname}/${row.projectId}`)}
       />
     </>
   );

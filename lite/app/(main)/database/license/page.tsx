@@ -21,7 +21,7 @@ export default function LicenseList() {
   // Filters
   const filtersQueryParam = queryParams.get('f') || '';
   const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
-  const filters: { default: Filter[]; hidden: Filter[] } = {
+  const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
       {
@@ -37,7 +37,7 @@ export default function LicenseList() {
         ]
       },
       {
-        label: 'Obligation(s)',
+        label: 'Obligations',
         name: 'obligations',
         type: 'checkbox',
         options: [
@@ -46,7 +46,7 @@ export default function LicenseList() {
         ]
       },
       {
-        label: 'Restriction(s)',
+        label: 'Restrictions',
         name: 'restrictions',
         type: 'checkbox',
         options: [
@@ -91,14 +91,14 @@ export default function LicenseList() {
   };
 
   // Rows/Columns
-  const [rows, setRows] = useState<any[]>([]);
-  const columns = [
+  const [rows, setRows] = useState<List.License[]>([]);
+  const columns: List.Column[] = [
     { name: 'ID', sort: 'id' },
     { name: 'Name', sort: 'name' },
     { name: 'Identifier', sort: 'idf' },
     { name: 'Type', sort: 'type' },
-    { name: 'Obligation(s)', sort: 'obg' },
-    { name: 'Restriction(s)', sort: 'res' },
+    { name: 'Obligations', sort: 'obg' },
+    { name: 'Restrictions', sort: 'res' },
     { name: 'URL', sort: 'url' },
     { name: 'Description', sort: 'desc' },
     { name: 'Create', sort: 'create' },
@@ -110,8 +110,8 @@ export default function LicenseList() {
 
   // Pagination
   const [totalCount, setTotalCount] = useState(0);
-  const currentPage = Number(queryParams.get('p') || '1');
   const countPerPage = 10;
+  const currentPage = Number(queryParams.get('p') || '1');
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
@@ -179,7 +179,7 @@ export default function LicenseList() {
         columns={columns}
         currentSort={currentSort}
         pagination={{ totalCount, currentPage, countPerPage }}
-        render={(row: any, column: string) => {
+        render={(row: List.License, column: string) => {
           if (column === 'ID') {
             return row.licenseId;
           }
@@ -196,9 +196,13 @@ export default function LicenseList() {
             return row.licenseType;
           }
 
-          if (column === 'Obligation(s)') {
+          if (column === 'Obligations') {
             const notice = row.obligations[0] === 'Y';
             const source = row.obligations[1] === 'Y';
+
+            if (!notice && !source) {
+              return null;
+            }
 
             return (
               <div className="flex gap-x-2 whitespace-nowrap">
@@ -208,11 +212,15 @@ export default function LicenseList() {
             );
           }
 
-          if (column === 'Restriction(s)') {
+          if (column === 'Restrictions') {
             return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
           }
 
           if (column === 'URL') {
+            if (!row.homepageUrl) {
+              return null;
+            }
+
             return (
               <a
                 className="text-blue-500 whitespace-nowrap hover:underline"
@@ -249,7 +257,7 @@ export default function LicenseList() {
 
           return null;
         }}
-        onClickRow={(row: any) => {
+        onClickRow={(row: List.License) => {
           const urlQueryParams = new URLSearchParams(queryParams);
           urlQueryParams.set('modal-type', 'license');
           urlQueryParams.set('modal-id', row.licenseId);

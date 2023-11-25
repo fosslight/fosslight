@@ -9,7 +9,7 @@ export default function SelfCheckModal({
   onHide
 }: {
   mode: 'create' | 'edit';
-  data: { name: string; version: string; comment: string };
+  data?: SelfCheck.Set;
   show: boolean;
   onHide: () => void;
 }) {
@@ -32,7 +32,7 @@ export default function SelfCheckModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) FOSSLight Hub Lite"
-            value={data.name}
+            defaultValue={data ? data.projectName : ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -40,7 +40,7 @@ export default function SelfCheckModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) 1.0.0"
-            value={data.version}
+            defaultValue={data ? data.projectVersion : ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -48,9 +48,8 @@ export default function SelfCheckModal({
           <textarea
             className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
             rows={3}
-          >
-            {data.comment}
-          </textarea>
+            defaultValue={data ? data.comment : ''}
+          />
         </div>
       </div>
       <div className="flex justify-end gap-x-1 mt-4">
