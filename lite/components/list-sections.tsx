@@ -1,21 +1,8 @@
+import { highlight } from '@/lib/commons';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-
-function highlight(text: string, keyword?: string) {
-  if (!keyword) {
-    return text;
-  }
-
-  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const highlightedText = text.replace(
-    new RegExp(escapedKeyword, 'gi'),
-    (match) => `<span class="bg-yellow-200 text-semiblack">${match}</span>`
-  );
-
-  return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
-}
 
 export default function ListSections({
   vulnerabilityList,
@@ -88,12 +75,20 @@ export default function ListSections({
                     <div className="flex items-center gap-x-2">
                       <div className="flex gap-x-1 font-semibold">
                         <div className="line-clamp-1 break-all">
-                          {highlight(vulnerability.ossName, searchKeyword)}
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: highlight(vulnerability.ossName, searchKeyword)
+                            }}
+                          />
                         </div>
                         <div className="flex-shrink-0">({vulnerability.ossVersion})</div>
                       </div>
                       <div className="flex-shrink-0 px-1 py-0.5 bg-darkgray rounded text-xs text-semiwhite">
-                        {highlight(vulnerability.cveId, searchKeyword)}
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(vulnerability.cveId, searchKeyword)
+                          }}
+                        />
                       </div>
                     </div>
                     {vulnerability.summary && (
@@ -167,7 +162,11 @@ export default function ListSections({
                         }}
                       >
                         <div className="line-clamp-1 break-all">
-                          {highlight(oss.ossName, searchKeyword)}
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: highlight(oss.ossName, searchKeyword)
+                            }}
+                          />
                         </div>
                         {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
                       </div>
@@ -199,7 +198,11 @@ export default function ListSections({
                     </div>
                     {oss.licenseName && (
                       <div className="line-clamp-3 text-sm text-semiblack/80">
-                        {highlight(oss.licenseName, searchKeyword)}
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(oss.licenseName, searchKeyword)
+                          }}
+                        />
                       </div>
                     )}
                     <div className="text-sm text-darkgray">
@@ -268,10 +271,18 @@ export default function ListSections({
                         }}
                       >
                         <div className="line-clamp-1 break-all">
-                          {highlight(license.licenseName, searchKeyword)}
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: highlight(license.licenseName, searchKeyword)
+                            }}
+                          />
                         </div>
                         <div className="flex-shrink-0">
-                          ({highlight(license.licenseIdentifier, searchKeyword)})
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: highlight(license.licenseIdentifier, searchKeyword)
+                            }}
+                          />
                         </div>
                       </div>
                       {(license.obligations[0] === 'Y' || license.obligations[1] === 'Y') && (

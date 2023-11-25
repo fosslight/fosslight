@@ -1,11 +1,14 @@
 import { loadingState } from '@/lib/atoms';
+import { highlight } from '@/lib/commons';
 import ExcelIcon from '@/public/images/excel.png';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { FieldValues, useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
+import SelfCheckOSSFilters from './self-check-oss-filters';
 import SelfCheckOSSModal from './self-check-oss-modal';
 import SelfCheckOSSPagination from './self-check-oss-pagination';
 import Toogle from './toggle';
@@ -24,10 +27,56 @@ export default function SelfCheckOSS() {
   const [modalData, setModalData] = useState<SelfCheck.SetOSS>();
   const [isModalShown, setIsModalShown] = useState(false);
 
+  // Filters
+  const filtersForm = useForm();
+  const [filters, setFilters] = useState({ path: '', keyword: '', url: '', copyright: '' });
+  const filteredOssList = ossList.filter((oss) => {
+    let { path, keyword, url, copyright } = filters;
+
+    if (!path && !keyword && !url && !copyright) {
+      return true;
+    }
+
+    path = path.toLowerCase();
+    keyword = keyword.toLowerCase();
+    url = url.toLowerCase();
+    copyright = copyright.toLowerCase();
+
+    let result = false;
+
+    if (path) {
+      result = result || oss.path.toLowerCase().includes(path);
+    }
+
+    if (keyword) {
+      result =
+        result ||
+        oss.ossName.toLowerCase().includes(keyword) ||
+        oss.licenses.some((license) => license.licenseIdentifier.toLowerCase().includes(keyword));
+    }
+
+    if (url) {
+      result =
+        result ||
+        oss.downloadUrl.toLowerCase().includes(url) ||
+        oss.homepageUrl.toLowerCase().includes(url);
+    }
+
+    if (copyright) {
+      result = result || oss.copyright.toLowerCase().includes(copyright);
+    }
+
+    return result;
+  });
+
   // Pagination
   const countPerPage = 3;
   const [currentPage, setCurrentPage] = useState(1);
-  const lastPage = Math.max(Math.ceil(ossList.length / countPerPage), 1);
+  const lastPage = Math.max(Math.ceil(filteredOssList.length / countPerPage), 1);
+  const paginatedOssList = filteredOssList.slice(
+    (currentPage - 1) * countPerPage,
+    currentPage * countPerPage
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -155,12 +204,18 @@ export default function SelfCheckOSS() {
       <div className="border border-charcoal rounded overflow-hidden">
         <div className="py-2 bg-charcoal font-semibold text-semiwhite text-center">
           <i className="fa-solid fa-list" />
-          &ensp; OSS List ({ossList.length})
+          &ensp; OSS List ({filteredOssList.length})
         </div>
-        <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {ossList
-            .slice((currentPage - 1) * countPerPage, currentPage * countPerPage)
-            .map((oss) => (
+        <SelfCheckOSSFilters
+          form={filtersForm}
+          onSubmit={(filterParams: FieldValues) => {
+            setFilters(filterParams as any);
+            setCurrentPage(1);
+          }}
+        />
+        {paginatedOssList.length > 0 ? (
+          <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedOssList.map((oss) => (
               <div
                 key={oss.ossId}
                 className={clsx(
@@ -204,7 +259,13 @@ export default function SelfCheckOSS() {
                       });
                     }}
                   >
-                    <div className="line-clamp-1 break-all">{oss.ossName}</div>
+                    <div className="line-clamp-1 break-all">
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: highlight(oss.ossName, filters.keyword)
+                        }}
+                      />
+                    </div>
                     {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
                   </div>
                   {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
@@ -236,11 +297,21 @@ export default function SelfCheckOSS() {
                 <div className="text-sm text-semiblack/80">
                   <i className="fa-regular fa-folder-open" />
                   &ensp;
-                  {oss.path}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: highlight(oss.path, filters.path)
+                    }}
+                  />
                 </div>
                 {oss.licenses.length > 0 && (
                   <div className="line-clamp-3 text-sm text-semiblack/80">
-                    {oss.licenses.map((license) => license.licenseIdentifier).join(', ')}
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: oss.licenses
+                          .map((license) => highlight(license.licenseIdentifier, filters.keyword))
+                          .join(', ')
+                      }}
+                    />
                   </div>
                 )}
                 <div className="flex items-center gap-x-2 text-sm">
@@ -288,7 +359,10 @@ export default function SelfCheckOSS() {
                 </div>
               </div>
             ))}
-        </div>
+          </div>
+        ) : (
+          <div className="p-4 mb-4 text-darkgray text-center">No entries</div>
+        )}
       </div>
       <SelfCheckOSSPagination
         currentPage={currentPage}
