@@ -69,6 +69,34 @@ export default function SelfCheckOSS() {
     return result;
   });
 
+  // Sorting
+  const [sort, setSort] = useState<{ key: string; asc: boolean }[]>([]);
+  sort.reverse().forEach(({ key, asc }) => {
+    filteredOssList.sort((a, b) => {
+      const x = asc ? a : b;
+      const y = asc ? b : a;
+
+      if (key === 'path') {
+        return x.path.localeCompare(y.path);
+      }
+      if (key === 'oss') {
+        return x.ossName.localeCompare(y.ossName);
+      }
+      if (key === 'license') {
+        const xLicenses = a.licenses.map((license) => license.licenseIdentifier).join(', ');
+        const yLicenses = b.licenses.map((license) => license.licenseIdentifier).join(', ');
+        return xLicenses.localeCompare(yLicenses);
+      }
+      if (key === 'download') {
+        return x.downloadUrl.localeCompare(y.downloadUrl);
+      }
+      if (key === 'homepage') {
+        return x.homepageUrl.localeCompare(y.homepageUrl);
+      }
+      return 0;
+    });
+  });
+
   // Pagination
   const countPerPage = 3;
   const [currentPage, setCurrentPage] = useState(1);
@@ -209,8 +237,14 @@ export default function SelfCheckOSS() {
         <SelfCheckOSSFilters
           form={filtersForm}
           onSubmit={(filterParams: FieldValues) => {
-            setFilters(filterParams as any);
+            const { path, keyword, url, copyright } = filterParams;
+
+            // Filters
+            setFilters({ path, keyword, url, copyright });
             setCurrentPage(1);
+
+            // Sorting
+            setSort(filterParams.sort);
           }}
         />
         {paginatedOssList.length > 0 ? (
