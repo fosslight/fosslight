@@ -9,7 +9,8 @@
 		LIMIT #{offset}, #{countPerPage}
 	</sql>
 	<sql id="orderby">
-		ORDER BY T1.DEACTIVATE_FLAG ASC,
+		ORDER BY
+<!--		T1.DEACTIVATE_FLAG ASC,-->
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
 		</if>
@@ -53,13 +54,13 @@
 					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
 						CREATOR
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sortColumn)">
+					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_AT', sortColumn)">
 						DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sortColumn)">
 						MODIFIER
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sortColumn)">
+					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_AT', sortColumn)">
 						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
 					</when>
 				</choose>
@@ -270,6 +271,8 @@
 		<result property="downloadUrl" column="download_location" />
 		<result property="homepageUrl" column="homepage" />
 		<result property="obligations" column="obligation_type" />
+		<result property="created" column="created_date" />
+		<result property="modified" column="modified_date" />
 <!--		<result property="creator" column="" />-->
 	</resultMap>
 	<select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">

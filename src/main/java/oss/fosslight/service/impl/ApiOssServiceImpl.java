@@ -1,30 +1,26 @@
 /*
  * Copyright (c) 2021 LG Electronics Inc.
- * SPDX-License-Identifier: AGPL-3.0-only 
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 package oss.fosslight.service.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
-import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.OssMaster;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.ApiOssService;
-import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 
-import static oss.fosslight.CoTopComponent.isEmpty;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ApiOssServiceImpl implements ApiOssService {
@@ -76,15 +72,14 @@ public class ApiOssServiceImpl implements ApiOssService {
 
     @Override
     public ListOssDto.Result listOss(ListOssDto.Request request) {
-        var ossMaster = new OssMaster();
+        var ossMaster = request.toOssMaster();
 
-        ListOssDto.Result result = new ListOssDto.Result();
         request.setVersionCheck(true);
         var list = apiOssMapper.selectOssList(request);
-        result.list = list;
 
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
+        int totalRows = ossMapper.selectOssMasterTotalCount(ossMaster);
 
         var rows = list.stream().flatMap(oss -> {
             if (!multiOssList.contains(oss.getOssName().toUpperCase())) {
@@ -113,8 +108,9 @@ public class ApiOssServiceImpl implements ApiOssService {
             });
         }
 
-        result.list = rows;
-
-        return result;
+        return ListOssDto.Result.builder()
+                .list(rows)
+                .totalRows(totalRows)
+                .build();
     }
 }
