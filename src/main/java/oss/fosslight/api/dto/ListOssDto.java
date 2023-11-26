@@ -104,7 +104,9 @@ public class ListOssDto {
         }
     }
 
+    @Builder
     public static class Result {
         public List<OssDto> list;
+        public int totalRows;
     }
 }

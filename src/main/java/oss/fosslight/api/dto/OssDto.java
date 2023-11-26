@@ -20,9 +20,9 @@ public class OssDto {
     String cveId;
     String cvssScore;
     String creator;
-    String createdDate;
+    String created;
     String modifier;
-    String modifiedDate;
+    String modified;
     List<Character> obligations;
 
     public void setObligations(String obligationType) {
