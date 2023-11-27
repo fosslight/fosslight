@@ -134,6 +134,9 @@ public class LicenseMaster extends ComBean implements Serializable {
 	
 	/** The restrictionList. */
 	private String restrictionList;
+
+	/** The restriction cdNo. */
+	private List<String> restrictionCdNoList;
 	
 	private String licenseNameAllSearchFlag;
 	
@@ -802,6 +805,10 @@ public class LicenseMaster extends ComBean implements Serializable {
 	public void setRestrictionList(String restrictionList) {
 		this.restrictionList = restrictionList;
 	}
+
+	public List<String> getRestrictionCdNoList() { return restrictionCdNoList; }
+
+	public void setRestrictionCdNoList(List<String> restrictionCdNoList) { this.restrictionCdNoList = restrictionCdNoList; }
 
 	public String getRestrictionStr() {
 		return restrictionStr;

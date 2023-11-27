@@ -163,15 +163,18 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 					log.error(e.getMessage());
 				}
 				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+				List<String> restrictionCdNoList = new ArrayList<>();
 				String restrictionStr = "";
 				
 				for (T2CodeDtl item: t2CodeDtlList){
 					if (restrictionList.contains(item.getCdDtlNo())) {
 						restrictionStr += (!isEmpty(restrictionStr) ? ", " : "") + item.getCdDtlNm();
+						restrictionCdNoList.add(item.getCdDtlNo());
 					}
 				}
 				
 				licenseMaster.setRestriction(restrictionStr);
+				licenseMaster.setRestrictionCdNoList(restrictionCdNoList);
 			}
 		}
 		

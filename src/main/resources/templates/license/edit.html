@@ -58,16 +58,12 @@
                                         <select class="select2" id="restrictionSelect" multiple="multiple"
                                                 name="restriction" style="width: 100%;">
                                             <option value=""></option>
-                                            <th:block th:if="${detail?.restriction}">
-                                                <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
-                                                        th:selected="${#lists.contains(#strings.arraySplit(detail?.restriction, ','), code.cdDtlNm)}"
-                                                        th:text="${code.cdDtlNm}"
-                                                        th:value="${code.cdDtlNo}"></option>
-                                            </th:block>
-                                            <th:block th:unless="${detail?.restriction}">
-                                                <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
-                                                        th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
-                                            </th:block>
+                                            <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+                                                    th:text="${code.cdDtlNm}"
+                                                    th:value="${code.cdDtlNo}"
+                                                    th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}">
+                                            </option>
+
                                         </select>
                                     </div>
                                     <div class="form-group clearfix">
@@ -188,7 +184,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row" id="commentAreaFragment">
-                                        <div class="col-md-12">
+                                        <div class="col-md-12" >
                                             <strong class="text-lg-gray">No comments were registered.</strong>
                                         </div>
                                     </div>
@@ -200,28 +196,7 @@
             </section>
             <!-- modal -->
             <div class="modal fade" id="modal-comment">
-                <!-- modal dialog -->
-                <div class="modal-dialog modal-lg">
-                    <!-- modal-content -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Comment</h4>
-                            <button aria-label="Close" class="close" data-dismiss="modal" type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" id="commentListArea">
-								<textarea class="form-control" name="commentInput" rows="3" style="height: 800px">
-								</textarea>
-                        </div>
-                        <div class="modal-footer justify-content-between">
-                            <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
-                            <button class="btn btn-primary" type="button">Save changes</button>
-                        </div>
-                    </div>
-                    <!-- /.modal-content -->
-                </div>
-                <!-- /.modal-dialog -->
+                <th:block th:replace="fragments/comment-fragments :: commentPopupFragment"></th:block>
             </div>
             <!--/. modal -->
         </div>

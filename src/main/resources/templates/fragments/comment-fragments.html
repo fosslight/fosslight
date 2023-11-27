@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="commentAreaFragment">
-        <div class="row">
-            <div class="col-md-12" style="overflow: scroll;">
-                <table class="table">
-                    <tbody>
-                    <th:block th:each="code : ${commentList}">
-                        <tr>
-                            <td>
-                                <div class="post">
-                                    <div class="user-block">
+    <div class="row" id="commentAreaFragment">
+        <div class="col-md-12" style="overflow-x: scroll;">
+            <table class="table">
+                <tbody>
+                <th:block th:each="comment : ${commentList}">
+                    <tr>
+                        <td>
+                            <div class="post">
+                                <div class="user-block">
 									<span class="username">
-									  <a href="#">[[ ${code.loginUserName} ]]</a>
+									  <a href="#">[[ ${comment.loginUserName} ]]</a>
 									</span>
-                                        <span class="description ml-0" th:text="${code.createdDate}"></span>
-                                    </div>
-                                    <p th:utext="${code.contents }">
-                                    </p>
+                                    <span class="description ml-0" th:text="${comment.createdDate}"></span>
                                 </div>
-                            </td>
-                            <td class="text-right py-0 align-middle">
-                                <div class="btn-group btn-group-sm">
-                                    <a class="btn btn btn-default" data-target="#modal-comment"
-                                       data-toggle="modal"
-                                       href="#"><i
-                                            class="fas fa-pencil-alt"></i></a>
-                                    <a class="btn btn-lg-red" href="#"><i
-                                            class="fas fa-trash"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                    </th:block>
-                    </tbody>
-                </table>
-            </div>
+                                <p th:utext="${comment.contents }">
+                                </p>
+                            </div>
+                        </td>
+                        <td class="text-right py-0 align-middle">
+                        <td class="text-right py-0 align-middle">
+                            <div class="btn-group btn-group-sm">
+                                <a class="btn btn btn-default" data-target="#modal-comment"
+                                   data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}"
+                                   onclick="license_edit_commemt.handleModalOpen(this)">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <a class="btn btn-lg-red" href="#" th:data-commId="${comment.commId}"
+                                   onclick="license_edit_commemt.deleteComment(this)"><i
+                                        class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
         </div>
+    </div>
 </th:block>
 <th:block th:fragment="commentPopupFragment">
-
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Comment</h4>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="commentListArea">
+                <input type="hidden" id="updateCommId">
+                <textarea class="form-control" name="commentInput" id="updateContents" rows="3" style="height: 800px"></textarea>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+                <button class="btn btn-primary" data-dismiss="modal" type="button" onclick="license_edit_commemt.editComment()">Save changes</button>
+            </div>
+        </div>
+    </div>
 </th:block>
 </html>
