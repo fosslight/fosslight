@@ -2,41 +2,48 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="commentAreaFragment">
     <div class="row" id="commentAreaFragment">
-        <div class="col-md-12" style="overflow-x: scroll;">
-            <table class="table">
-                <tbody>
-                <th:block th:each="comment : ${commentList}">
-                    <tr>
-                        <td>
-                            <div class="post">
-                                <div class="user-block">
+        <th:block th:if="${!#lists.isEmpty(commentList)}">
+            <div class="col-md-12" style="overflow-x: scroll;">
+                <table class="table">
+                    <tbody>
+                    <th:block th:each="comment : ${commentList}">
+                        <tr>
+                            <td>
+                                <div class="post">
+                                    <div class="user-block">
 									<span class="username">
 									  <a href="#">[[ ${comment.loginUserName} ]]</a>
 									</span>
-                                    <span class="description ml-0" th:text="${comment.createdDate}"></span>
+                                        <span class="description ml-0" th:text="${comment.createdDate}"></span>
+                                    </div>
+                                    <p th:utext="${comment.contents }">
+                                    </p>
                                 </div>
-                                <p th:utext="${comment.contents }">
-                                </p>
-                            </div>
-                        </td>
-                        <td class="text-right py-0 align-middle">
-                        <td class="text-right py-0 align-middle">
-                            <div class="btn-group btn-group-sm">
-                                <a class="btn btn btn-default" data-target="#modal-comment"
-                                   data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}"
-                                   onclick="license_edit_commemt.handleModalOpen(this)">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                <a class="btn btn-lg-red" href="#" th:data-commId="${comment.commId}"
-                                   onclick="license_edit_commemt.deleteComment(this)"><i
-                                        class="fas fa-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                </th:block>
-                </tbody>
-            </table>
-        </div>
+                            </td>
+                            <td class="text-right py-0 align-middle">
+                            <td class="text-right py-0 align-middle">
+                                <div class="btn-group btn-group-sm">
+                                    <a class="btn btn btn-default" data-target="#modal-comment"
+                                       data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}"
+                                       onclick="license_edit_commemt.handleModalOpen(this)">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <a class="btn btn-lg-red" href="#" th:data-commId="${comment.commId}"
+                                       onclick="license_edit_commemt.deleteComment(this)"><i
+                                            class="fas fa-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+        <th:block th:if="${#lists.isEmpty(commentList)}">
+            <div class="col-md-12" >
+                <strong class="text-lg-gray">No comments were registered.</strong>
+            </div>
+        </th:block>
     </div>
 </th:block>
 <th:block th:fragment="commentPopupFragment">

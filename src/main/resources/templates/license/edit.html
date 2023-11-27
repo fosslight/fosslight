@@ -110,13 +110,15 @@
                                             <!-- /btn-group -->
                                         </div>
                                     </div>
-                                    <div class="form-group d-flex" id="appendArea_licenseNicknames">
-                                        <th:block th:each="licenseNickname : ${detail?.licenseNicknames}">
-                                            <div class="external-event" name="appendArea_licenseNicknames">
-                                                <input name="licenseNicknames" th:value="${licenseNickname}"
-                                                       type="hidden"/>
-                                                <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                   name="deleteTagButton"></i>[[${licenseNickname}]]
+                                    <div class="form-group row" id="appendArea_licenseNicknames">
+                                        <th:block th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
+                                            <div class="col-4 tag-container mb-1 pr-0">
+                                                <div class="external-event" name="appendArea_licenseNicknames">
+                                                    <input name="licenseNicknames" th:value="${licenseNickname}"
+                                                           type="hidden"/>
+                                                    <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                       onclick="deleteTag(this)"></i>[[${licenseNickname}]]
+                                                </div>
                                             </div>
                                         </th:block>
                                     </div>
@@ -132,18 +134,19 @@
                                         </div>
                                         <!-- /btn-group -->
                                     </div>
-                                    <div class="form-group d-flex" id="appendArea_webpages">
-                                        <th:block th:each="webpage : ${detail?.webpages}">
-                                            <div class="external-event" name="webpages">
-                                                <input name="webpages" th:value="${webpage}" type="hidden"/>
-                                                <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                   name="deleteTagButton"></i>[[${webpage}]]
+                                    <div class="form-group row" id="appendArea_webpages">
+                                        <th:block th:each="webpage : ${detail?.webpages}" th:if="${!#strings.isEmpty(webpage)}">
+                                            <div class="col-4 tag-container  mb-1 pr-0">
+                                                <div class="external-event" name="webpages">
+                                                    <input name="webpages" th:value="${webpage}" type="hidden"/>
+                                                    <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                       onclick="deleteTag(this)"></i>[[${webpage}]]
+                                                </div>
                                             </div>
                                         </th:block>
                                     </div>
                                     <div class="fom-group">
                                         <label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
-
                                         <textarea class="form-control" id="licenseUserGuide" name="description" rows="3"
                                                   th:text="${detail?.description}"></textarea>
                                     </div>

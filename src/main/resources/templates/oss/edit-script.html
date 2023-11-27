@@ -2,8 +2,28 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-        var totalRow = 0;
-        //const G_ROW_CNT = "*{gRowCnt}";
+        let lastsel;
+        let temp={ obligation: ''};
+        let list = [];
+        let licenseTags=[];
+        let gLicenseData = new Array();
+        let detectedLicenseValid = true;
+        let deactivateFlag = "N";
+        let renameFlag = "N";
+        let nickNameClone;
+
+        const oss_edit_data = {
+            detail :  /*[[${detail}]*/ null,
+            list : /*[[${list}]]*/ {row:[]},
+            components : /*[[${components}]]*/ [],
+            componentsPartner : /*[[${componentsPartner}]]*/ [],
+            vulnInfoList :  /*[[${vulnInfoList}]]*/ [],
+            clone : '',
+            typeCodes : [],
+            copyData : /*[[ ${copyData}]]*/ null,
+            init : function(){
+            }
+        }
 
         $(window).load(function () {
             license_edit_data.init();
@@ -11,6 +31,41 @@
             if ($('input[name=licenseId]').val()) {
                 license_edit_commemt.getCommentList();
             }
+            //자동완성 데이터 리스트 가져오기
+            commonAjax.getLicenseTags().success(function(data, status, headers, config){
+                if(data != null){
+                    data.forEach(function(obj){
+                        var tag ={
+                            value : obj.licenseName,
+                            licenseId : obj.licenseId,
+                            label : obj.shortIdentifier.length > 0 ? obj.licenseName+' ('+obj.shortIdentifier+')' : obj.licenseName,
+                            licenseName : obj.licenseName,
+                            shortIdentifier : obj.shortIdentifier,
+                            licenseType : obj.licenseType,
+                            obligation : obj.obligation,
+                            obligationChecks : obj.obligationChecks
+                            ,obligationCode : obj.obligationCode
+                            ,licenseTypeVal : obj.licenseTypeVal
+                            ,restriction : obj.restriction
+                        }
+
+                        licenseTags.push(tag);
+                    });
+                }
+            });
+
+            setCustomAutoComplete('single');
+
+            if(oss_edit_data.copyData){
+                list = oss_edit_data.copyData.ossLicenses;
+                // $('#copy').hide();
+                // $('#delete').hide();
+                // $('input[name=ossCopyFlag]').val("Y");
+            }else{
+                list = oss_edit_data.list.rows;
+            }
+
+            oss_edit_grid.load();
         });
 
         const license_edit_data = {
@@ -31,21 +86,11 @@
                 $("[name='addTagButton']").click(function (e) {
                     const elId = this.id;
                     appendSingleTag(e, elId);
-
-                    $("[name='deleteTagButton']").on("click", function () {
-                        $(this).closest(".external-event").remove();
-                    });
                 });
 
-                //save license
-                $("#save").on('click', function () {
-                    alertify.confirm(String(/*[[#{msg.common.confirm.save}]]*/), function (e) {
-                        if (e) {
-                            license_edit_fn.registSubmit();
-                        } else {
-                            return false;
-                        }
-                    });
+                //라이센스 save
+                $("#save").on('click',function(){
+                    oss_edit_fn.save();
                 });
 
                 //delete license
@@ -69,108 +114,6 @@
                 });
             }
         }
-
-        const license_edit_fn = {
-            registSubmit: function () {
-                $("#licenseForm").ajaxForm({
-                    url: "/license/validation",
-                    type: 'POST',
-                    dataType: "json",
-                    cache: false,
-                    success: license_edit_fn.onValidSuccess,
-                    error: license_edit_fn.onError
-                }).submit();
-            },
-            onValidSuccess: function (json, status) {
-                if (json.isValid == 'false') {
-                    license_edit_fn.createValidMsgComplex(json);
-                    alertify.error(String(/*[[#{msg.common.valid}]]*/), 0);
-                } else if (json.isValid == 'true') {
-                    loading.show();
-
-                    const editorVal = $('#commentInput').summernote('code');
-                    $('input[name=comment]').val(replaceWithLink(editorVal));
-
-                    var pData = $('#licenseForm').serializeObject();
-
-                    if (pData.restrictions != null) {
-                        pData.restrictions = JSON.stringify(pData.restrictions);
-                        $('input[name=restriction]').val(pData.restrictions.replace(/\"|\[|\]/gi, ""));
-                        console.log("restric ::" + pData.restrictions);
-                    } else {
-                        $('input[name=restriction]').val('');
-                    }
-
-                    $("#licenseForm").ajaxForm({
-                        url: "/license/saveAjax",
-                        type: 'POST',
-                        dataType: "json",
-                        cache: false,
-                        success: license_edit_fn.onRegistSuccess,
-                        error: license_edit_fn.onError
-                    }).submit();
-                }
-            },
-            onRegistSuccess: function (json, status) {
-                loading.hide();
-
-                if (json.resCd == '10') {
-                    alertify.alert(String(/*[[#{msg.common.success}]]*/), function () {
-                        callDeleteTabInFrame("license-edit_" + json.licenseId);
-                        callReloadTabInframe("/license/list", "license-list");
-                    });
-                } else {
-                    alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
-                }
-            },
-            onError: function (data, status) {
-                alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
-            },
-            createValidMsgComplex: function (msgData) {
-                license_edit_fn.hideErrMsg();
-
-                $.each(msgData, function (key, value) {
-                    if ("isValid" != key && "validMsg" != key) {
-                        if (key.indexOf(".") > -1) {
-                            var seqSuffix = key.split(".");
-                            var targetId = seqSuffix[1] + "_" + seqSuffix[0];
-
-                            if (seqSuffix[0] == 'licenseNicknames') {
-                                $('input[name=licenseNicknames]:eq(' + (Number(seqSuffix[1]) - 1) + ')').focus().parent().next("span.retxt").html(value).show();
-                            }
-
-                            if ($('input[id=' + targetId + ']').length > 0) {
-                                $('input[id=' + targetId + ']').focus().after(makeErrMsg(value)).show();
-                            } else if ($('textarea[id=' + targetId + ']').length > 0) {
-                                $('textarea[id=' + targetId + ']').focus().after(makeErrMsg(value)).show();
-                            } else if ($('select[id=' + targetId + ']').length > 0) {
-                                $('select[id=' + targetId + ']').focus().after(makeErrMsg(value)).show();
-                            }
-                        } else {
-                            if (key == 'licenseNicknames') {
-                                $('input[name=licenseNicknames]').focus().parent().next("span.retxt").html(value).show();
-                            }
-
-                            if (key == 'validMsgModelList') {
-                                $('#validMsgModelList').html(value).show();
-                            }
-
-                            if ($('input[name=' + key + ']').length > 0) {
-                                $('input[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
-                            } else if ($('textarea[name=' + key + ']').length > 0) {
-                                $('textarea[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
-                            } else if ($('select[name=' + key + ']').length > 0) {
-                                $('select[name=' + key + ']').focus().parent().siblings("span.retxt,div.retxt").html(value).show();
-                            }
-                        }
-                    }
-                });
-            },
-            hideErrMsg: function () {
-                $("div.retxt").hide();
-                $("span.retxt").hide();
-            }
-        };
 
         const license_edit_commemt = {
             getCommentList: function () {
@@ -246,10 +189,1363 @@
                         license_edit_commemt.getCommentList();
                     }
                 });
+                return false;
+            }
+        }
+
+        const oss_edit_grid_fn = {
+            displayButtons: function (cellvalue, options, rowObject){
+                var deleted = "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"exeDelete("+options.rowId+")\" />";
+                return deleted;
+            },
+            setFristComb: function (){
+                $('#_licenseChoice').find("tr").eq(1).find("td").eq(3).text("");
+            },
+            createMultiLicenseText(){           // 라이센스 묶음 처리
+                var rows = $('#_licenseChoice').jqGrid('getRowData');
+                var markTxt = '';
+
+                rows.forEach(function(row, index, ref){
+                    // row로 들어오는 데이터가 텍스트인지 element인지 확인.
+                    var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
+                    var ossLicenseComb, licenseName;
+                    var url = '#<c:url value="/license/edit/'+row.licenseId+'"/>';
+
+                    ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + $(olc).attr("id")).val() : olc;
+                    licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + $(lnm).attr("id")).val() : lnm;
+
+                    // mark 텍스트 그리기
+                    if(index!=0){
+                        markTxt += ' <span> '+ossLicenseComb+' </span> ';
+                    }
+
+                    markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
+                });
+
+                var andTxts = markTxt.split('<span> OR </span>');
+
+                markTxt = '';
+
+                andTxts.forEach(function(andTxt, index, ref){
+                    var isAnd = andTxt.split('AND').length > 1;
+                    if(isAnd){
+                        markTxt += '('+andTxt+')';
+                    }else{
+                        markTxt += andTxt;
+                    }
+                    if(index != ref.length-1){
+                        markTxt += '<span> OR </span>';
+                    }
+                });
+
+                if(markTxt.split('OR').length == 1 && markTxt[0] =='(' && markTxt[markTxt.length-1] == ')'){
+                    markTxt = markTxt.substring(1,markTxt.length-1);
+                }
+
+                if(markTxt.indexOf('undefined') == -1){
+                    $('.licenseMulti .mark').html(markTxt);
+                }
+            },
+            makeBackGroundColor: function (){      // 색 설정
+
+            var colors = [];
+            var list = [];
+            if(oss_edit_data.copyData){
+                list = oss_edit_data.copyData.ossLicenses;
+            }else{
+                list = oss_edit_data.list.rows;
+            }
+            // <c:forEach var="colors" items='${ct:getCodeNames(ct:getConstDef("CD_LICENSE_BACKGROUND"))}' varStatus="vs">
+            //     colors.push("${colors}");
+            // </c:forEach>
+            var lastColor = colors[0];
+            for(var i=0; i<list.length; i++){
+                var comb = list[i].ossLicenseComb;
+                if(comb == 'AND'){
+                    $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                }else if(comb == 'OR'){
+                    var flag = false;
+                    for(var j = 0; j<colors.length;j++){
+                        if(lastColor == colors[j]){
+                            lastColor = colors[j+1];
+                            $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                            flag = true;
+                        }else if(lastColor == colors[colors.length-1]){
+                            lastColor = colors[0];
+                            $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                            flag = true;
+                        }
+                        if(flag) break;
+                    }
+                }
+            }
+        }
+        }
+
+        const oss_edit_grid = {
+            load : function () {
+                var _licenseChoice = $('#_licenseChoice');
+                _licenseChoice.jqGrid({
+                    datatype: 'local',
+                    data: list,
+                    colNames:['','','','License', 'Copyright', '','','','','license Type', 'obligationChecks'],
+                    colModel:[
+                        {name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
+                        {name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
+                        {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
+                        {name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
+                                dataInit: function (elem) {
+                                    $(elem).focus(function () { setCustomAutoComplete('multi'); })
+                                }
+                            }},
+                        {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
+                        {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
+                        {name:'licenseName',index:'licenseName', width:50, hidden:true},
+                        {name:'licenseId',index:'licenseId', width:50, hidden:true},
+                        {name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true},
+                        {name:'licenseType',index:'licenseType', width:50,hidden:true},
+                        {name:'obligationChecks',index:'obligationChecks', width:50,hidden:true}
+                    ],
+                    autoencode: true,
+                    editurl:'clientArray',
+                    pager: '#_licenseChoicePager',
+                    autowidth: true,
+                    height: 'auto',
+                    gridview: true,
+                    rownumbers: true,
+                    viewrecords: true,
+                    loadonce:true,
+                    onSelectRow: function(rowid){
+                    },
+                    afterInsertRow:function(rowid, rowdata, rowelem){
+                    },
+                    loadComplete:function(data){
+                    }
+                });
+                _licenseChoice.jqGrid('navGrid',"#_licenseChoicePager",{edit:false,add:true,del:false,search:false,refresh:false
+                    , addfunc: function (rowid) {
+                        var ids = $("#_licenseChoice").jqGrid("getDataIDs");
+                        var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
+                        var row = {no	:newId, ossLicenseIdx	:newId};
+                        oss_edit_data.list.rows.push(row);
+                        $("#_licenseChoice").jqGrid("addRowData", newId , row, "last");
+                        $("#_licenseChoice").jqGrid("setSelection", newId);
+
+                        // 첫 로우 ossLicenseComb 설정
+                        setFristComb();
+                    }
+                });
+            }
+
+        }
+
+        function getOssGridRows(elementId){
+            var grid = $(elementId);
+            var dataToSend = [];
+            var rows = grid.jqGrid('getDataIDs');
+            for(idx=0; idx < rows.length; idx++) {
+                grid.jqGrid('saveRow', rows[idx]);
+                var rowData = grid.jqGrid('getRowData', rows[idx]);
+                dataToSend.push(rowData);
+            }
+            return dataToSend;
+        }
+
+        //커스터마이징 자동완성 셀렉트
+        function setCustomAutoComplete(div){
+            var selected = false;
+            if(div == 'single'){
+                $( '.autoComOssLicense' ).autocomplete({
+                    source: licenseTags,
+                    select: function( event, ui ) {
+                        var target = $(this).attr("id");
+
+                        if(target == "licenseName"){
+                            $("#licenseName").parent().find("span.retxt:first").hide();
+                            var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
+                            $('#licenseName').val(licenseName);
+                            showLicenseText(licenseName);
+
+                            return false;
+                        }
+                    },
+                    minLength: 0,
+                    open: function() {
+                        $(this).attr('state', 'open');
+                        selected = false;
+
+                    },
+                    close: function () {
+                        $(this).attr('state', 'closed');
+                        var _item = checkLicenseSelected($(this).val());
+                        var target = $(this).attr("id");
+
+                        // detected License
+                        $(this).parent().next("span.retxt:first").empty();
+                        detectedLicenseValid = true; // reset
+
+                        if(_item != null){
+                            var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+                            $(this).val(licenseName);
+                            selected = true;
+                        } else {
+                            var value = $(this).val();
+
+                            if(value != ""){
+                                $(this).parent().next("span.retxt:first").html('<spring:message code="msg.oss.unknown.license" />').show();
+                                detectedLicenseValid = false;
+                            }
+                        }
+                    }
+                })
+                    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}})
+                    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+                    return $( "<li>" )
+                        .append( "<div>" + item.label + "<strong> (" + item.licenseType + ") </strong>" + item.obligation + item.restriction + "</div>" )
+                        .appendTo( ul );
+                };
+            }else if(div == 'multi'){
+                $('#'+lastsel+'_licenseNameEx').autocomplete({
+                    source: licenseTags,
+                    select: function( event, ui ) {
+                        var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
+                        $('#'+lastsel+'_licenseNameEx').val(licenseName);
+                        $('#'+lastsel+' > td:eq(9)').text(licenseName); // licenseNameEx
+                        $('#'+lastsel+' > td:eq(7)').text(licenseName); // licenseName
+                        $('#'+lastsel+' > td:eq(10)').text(ui.item.licenseType); // licenseType
+                        $('#'+lastsel+' > td:eq(11)').text(ui.item.obligationChecks); // obligationChecks
+                        $('#'+lastsel+' > td:eq(8)').text(ui.item.licenseId); // licenseId
+                        showLicenseText(licenseName);
+                        gLicenseData[lastsel] = "Y";
+                        return false;
+                    },
+                    minLength: 0,
+                    open: function() {
+                        $(this).attr('state', 'open');
+                        selected = false;
+                    },
+                    change: function(){
+                        gLicenseData[lastsel] = "N";
+                    },
+                    close: function () {
+                        $(this).attr('state', 'closed');
+                        var _item = checkLicenseSelected($(this).val());
+                        var gridStr = "_licenseChoice";
+                        $("div.retxt._licenseChoice_"+lastsel).remove();
+                        if(_item == null) {
+                            $("#"+lastsel+"_licenseNameEx").after('<div class=\"'+gridStr+"_"+lastsel+' retxt\">'+ '<spring:message code="msg.oss.unknown.license" />' +'</div>');
+                            $("div.retxt._licenseChoice_"+lastsel).show();
+                        } else {
+                            var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
+                            $('#'+lastsel+'_licenseNameEx').val(licenseName);
+                            // 리스트 설정
+                            $('#_licenseChoice').jqGrid('saveRow',lastsel);
+                            var list = [];
+                            oss_edit_data.copyData ? list = oss_edit_data.copyData.ossLicenses : list = oss_edit_data.list.rows;
+                            var rowData = $('#_licenseChoice').jqGrid('getRowData', lastsel);
+                            rowData['licenseId'] = _item.licenseId;
+                            rowData['licenseName'] = _item.licenseName;
+                            rowData['licenseNameEx'] = licenseName;
+                            rowData['licenseType'] = _item.licenseType;
+                            rowData['obligation'] = _item.obligation;
+                            rowData['obligationChecks'] = _item.obligationChecks;
+                            rowData['ossLicenseIdx'] = lastsel;
+                            rowData['no'] = lastsel;
+
+                            list.forEach(function(row,index){
+                                if(row.ossLicenseIdx == lastsel ){
+                                    list.splice(index,1,rowData);
+                                };
+                            });
+
+                            $('#_licenseChoice').jqGrid('editRow',lastsel);
+                            // 첫 로우 ossLicenseComb 설정
+                            changeLicenseType();
+                            setFristComb();
+                            selected = true;
+                        }
+                    }
+                })
+                    .focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}})
+                    .autocomplete( "instance" )._renderItem = function( ul, item ) {
+                    return $( "<li>" )
+                        .append( "<div>" + item.label + "<strong> (" + item.licenseType + ") </strong>" + item.obligation  + item.restriction + "</div>" )
+                        .appendTo( ul );
+                };
+            }
+        }
+
+        //라이센스 우선순위 자동 계산
+        function autoLicense(data){
+            var licenseCount = 0;
+            data.forEach(function(data){
+                if(data.licenseName){
+                    licenseCount += 1;
+                }
+            })
+
+            var result = '';
+            if(licenseCount != 0){
+                //1. 그룹별 분류하기
+                var groups = distributeGroups(data);
+                var numbers = getLicenseGroup(groups);
+
+                //2. 각 그룹끼리 비교하기(OR 비교)
+                if(numbers.length != 1){
+                    var min = getMin(numbers);
+                    switch(min){
+                        case 1:
+                            result = 'Permissive';
+                            $('#licenseType').val("PMS");
+                            break;
+                        case 2:
+                            result = 'Weak Copyleft';
+                            $('#licenseType').val("WCP");
+                            break;
+                        case 3:
+                            result = 'Copyleft';
+                            $('#licenseType').val("CP");
+                            break;
+                        case 4:
+                            result = 'Proprietary Free';
+                            $('#licenseType').val("PF");
+                            break;
+                        case 5:
+                            result = 'Proprietary';
+                            $('#licenseType').val("NA");
+                            break;
+                    }
+                } else {
+                    var min = numbers[0];
+                    switch(min){
+                        case 1:
+                            result = 'Permissive';
+                            $('#licenseType').val("PMS");
+                            break;
+                        case 2:
+                            result = 'Weak Copyleft';
+                            $('#licenseType').val("WCP");
+                            break;
+                        case 3:
+                            result = 'Copyleft';
+                            $('#licenseType').val("CP");
+                            break;
+                        case 4:
+                            result = 'Proprietary Free';
+                            $('#licenseType').val("PF");
+                            break;
+                        case 5:
+                            result = 'Proprietary';
+                            $('#licenseType').val("NA");
+                            break;
+                    }
+                }
+            }
+            return result;
+        }
+
+        //Obligation 우선순위 자동계산
+        function autoObligation(data){
+            var licenseCount = 0;
+            data.forEach(function(data){
+                if(data.licenseName){
+                    licenseCount += 1;
+                }
+            })
+            var result = '';
+            if(licenseCount != 0){
+                //1. 그룹별 분류하기
+                var groups = distributeGroups(data);
+                var numbers = getLicenseGroup(groups);
+
+                //2. 각 그룹끼리 비교하기(OR 비교)
+                if(numbers.length != 1) {
+                    var min = getMin(numbers);
+                    var number = compareObligationGroupMax(groups[numbers.indexOf(min)]);
+                    switch(number){
+                        case 1:
+                            result = '<span></span>';
+                            break;
+                        case 2:
+                            result = '<span class=\"iconSet ops\" title=\"Notice\"></span>';
+                            $('input[name=obligationType]').val("10");
+                            break;
+                        case 3:
+                            result = '<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>';
+                            $('input[name=obligationType]').val("11");
+                            break;
+                    }
+                } else {
+                    var min = numbers[0];
+                    var number = compareObligationGroupMax(groups[0]);
+
+                    switch(number){
+                        case 1:
+                            result = '<span></span>';
+                            break;
+                        case 2:
+                            result = '<span class=\"iconSet ops\" title=\"Notice\"></span>';
+                            $('input[name=obligationType]').val("10");
+                            break;
+                        case 3:
+                            result = '<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>';
+                            $('input[name=obligationType]').val("11");
+                            break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        //AND그룹으로 묶어서 분류하기
+        function distributeGroups(data){
+            var type='A';
+            var groups =[];
+            var groupA =[];
+            var groupB =[];
+
+            data.forEach(function(item,index,ref){
+                if(item.ossLicenseComb == 'AND' || item.ossLicenseComb =="") {
+                    if(groupA.length > 0) {	//AND - AND 배열 결속
+
+                    }
+
+                    if(groupB.length > 0) {	//OR - AND 배열 결속
+                        groupA.push(groupB[0]);
+                        groupB = [];
+                    }
+
+                    groupA.push(item);
+                } else if(item.ossLicenseComb == 'OR') {
+                    if(groupA.length > 0){	//AND - OR 배열 변경 (이전까지 등록된 배열을 그룹에 등록후 배열 초기화)
+                        groups.push(groupA);
+                        groupA = [];
+                    }
+
+                    if(groupB.length > 0){  //OR - OR 배열 변경 (바로 전 등록된 배열을 그룹에 등록후 배열 초기화)
+                        groups.push(groupB);
+                        groupB = [];
+                    }
+
+                    groupB.push(item);
+                }
+
+                if(index == ref.length-1){	//마지막 순서일 때 최종 등록
+                    if(groupA.length > 0){
+                        groups.push(groupA);
+                    }
+
+                    if(groupB.length > 0){
+                        groups.push(groupB);
+                    }
+                }
+            });
+
+            return groups;
+        }
+        /*
+            AND그룹 내 라이센스 우선순위 비교
+            (AND - Copyleft > Weak Copyleft > Permissive)
+        */
+        function compareLicenseGroupMax(group){
+            var max = 0;
+            var constant = {
+                'Permissive' 		: 1,
+                'Weak Copyleft' 	: 2,
+                'Copyleft'  		: 3,
+                'Proprietary Free' 	: 4,
+                'Proprietary' 		: 5
+            };
+            group.forEach(function(item,index,ref){
+                if(max < constant[item.licenseType]){
+                    max = constant[item.licenseType];
+                }
+            });
+            return max;
+        }
+        /*
+            AND그룹 내 Obligation 우선순위 비교
+            (AND - Copyleft > Weak Copyleft > Permissive)
+        */
+        function compareObligationGroupMax(group){
+            var max = 0;
+            var constant = {
+                'NNY' : 1,
+                'NNN' : 1,
+                'YNY' : 2,
+                'YNN' : 2,
+                'YYY' : 3,
+                'YYN' : 3
+            };
+            group.forEach(function(item,index,ref){
+                if(max < constant[item.obligationChecks]){
+                    max = constant[item.obligationChecks];
+                }
+            });
+            return max;
+        }
+
+        //숫자배열 중 최소값 찾기(AND조건의 역순)
+        function getMin(numbers){
+            var min = 9;
+            numbers.forEach(function(number){
+                if(min > number ){
+                    min = number;
+                }
+            });
+            return min;
+        }
+
+        //숫자배열 중 최대값 찾기(AND조건의 역순)
+        function getMax(numbers){
+            var max = 0;
+            numbers.forEach(function(number){
+                if(max < number ){
+                    max = number;
+                }
+            });
+            return max;
+        }
+
+        //save동작 처리
+        function saveRow(){
+            $('#_licenseChoice').jqGrid('saveRow', lastsel);
+            $('#_licenseChoice').jqGrid('resetSelection');	// 셀렉트 해제
+        }
+
+        function changeLicenseType() {
+
+            $('#_licenseChoice').jqGrid('saveRow',lastsel);
+            //var list = data.list.rows;
+            var list = $('#_licenseChoice').jqGrid('getRowData');
+            var type = autoLicense(list);
+            var obligationHtml = autoObligation(list);
+
+            if(list.length==0){
+                type='';
+                obligationHtml='';
+            }
+
+            $('#lt td').html(type);
+            $('#ob td').html('');
+            $(obligationHtml).appendTo('#ob td');
+            $('#_licenseChoice').jqGrid('editRow',lastsel);
+        }
+
+        //라이센스 묶음 처리
+        function createMultiLicenseText(){
+            var rows = $('#_licenseChoice').jqGrid('getRowData');
+            var markTxt = '';
+
+            rows.forEach(function(row, index, ref){
+                // row로 들어오는 데이터가 텍스트인지 element인지 확인.
+                var olc = row.ossLicenseComb, lnm = row.licenseNameEx;
+                var ossLicenseComb, licenseName;
+                var url = '#<c:url value="/license/edit/'+row.licenseId+'"/>';
+
+                ossLicenseComb = /<[a-z][\s\S]*>/i.test(olc) ? $("#" + $(olc).attr("id")).val() : olc;
+                licenseName = /<[a-z][\s\S]*>/i.test(lnm) ? $("#" + $(lnm).attr("id")).val() : lnm;
+
+                // mark 텍스트 그리기
+                if(index!=0){
+                    markTxt += ' <span> '+ossLicenseComb+' </span> ';
+                }
+
+                markTxt+='<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","'+url+'")>'+licenseName+'</a>';
+            });
+
+            var andTxts = markTxt.split('<span> OR </span>');
+
+            markTxt = '';
+
+            andTxts.forEach(function(andTxt, index, ref){
+                var isAnd = andTxt.split('AND').length > 1;
+                if(isAnd){
+                    markTxt += '('+andTxt+')';
+                }else{
+                    markTxt += andTxt;
+                }
+                if(index != ref.length-1){
+                    markTxt += '<span> OR </span>';
+                }
+            });
+
+            if(markTxt.split('OR').length == 1 && markTxt[0] =='(' && markTxt[markTxt.length-1] == ')'){
+                markTxt = markTxt.substring(1,markTxt.length-1);
+            }
+
+            if(markTxt.indexOf('undefined') == -1){
+                $('.licenseMulti .mark').html(markTxt);
+            }
+        }
+
+        function getOssGridRows(elementId){
+            var grid = $(elementId);
+            var dataToSend = [];
+            var rows = grid.jqGrid('getDataIDs');
+            for(idx=0; idx < rows.length; idx++) {
+                grid.jqGrid('saveRow', rows[idx]);
+                var rowData = grid.jqGrid('getRowData', rows[idx]);
+                dataToSend.push(rowData);
+            }
+            return dataToSend;
+        }
+
+        function validationDataSet(){
+            var licenseDiv = "";
+            var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+            switch (licenseChoiceLength) {
+                case 0:
+                    alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
+                    return false;
+                    break;
+                case 1:
+                    licenseDiv = "S";
+                    break;
+                default:
+                    licenseDiv = "M";
+                    break;
+            }
+
+            var rows = getOssGridRows('#_licenseChoice');
+
+            $('input[name=licenseDiv]').val(licenseDiv);
+
+            var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
+            var newRows = [];
+            var checkLicenses = [];
+            dataIds.forEach(function(dataId){
+                var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+                var licenseName = rowData.licenseName;
+                if( licenseName.indexOf('<div') > -1){
+                    rowData['licenseName'] = '';
+                }
+                checkLicenses.push(rowData.licenseNameEx);
+                newRows.push(rowData);
+            });
+
+            $('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
+
+            $("[name='downloadLocations']").each(function(idx, cur){
+                $(cur).val($(cur).val().trim());
+            });
+
+            $("[name='homepage']").each(function(idx, cur){
+                $(cur).val($(cur).val().trim());
+            });
+
+            var nicknameFormatErrorFlag = true;
+            $("[name='ossNicknames']").each(function(idx, cur){
+                var nickname = $(cur).val();
+
+                if(nickname.indexOf(",") > -1){
+                    fn.checkNickName(cur);
+                    nicknameFormatErrorFlag = false;
+                }
+            });
+
+            if(!nicknameFormatErrorFlag){
+                alertify.alert("Formatting error", function(){});
 
                 return false;
-
             }
+
+            var duplicatedLicenseFlag = true;
+            if (checkLicenses.length > 0) {
+                $.each(checkLicenses, function(index, element){
+                    $("[name='detectedLicenses']").each(function(idx, cur){
+                        var detectedLicense = $(cur).val();
+                        if (detectedLicense && element == detectedLicense) {
+                            $('input[name=detectedLicenses]:eq('+idx+')').parent().next("span.retxt").html("License included in Declared").show();
+                            duplicatedLicenseFlag = false;
+                            return true;
+                        }
+                    });
+                });
+            }
+
+            if (!duplicatedLicenseFlag) {
+                alertify.error("License included in Declared", 0);
+                return false;
+            }
+
+            return true;
+        }
+
+        //OSS등록로직
+        function registSubmit(){
+            if(validationDataSet()){
+                $("#ossForm").ajaxForm({
+                    url :'<c:url value="/oss/validation"/>',
+                    type : 'POST',
+                    dataType:"json",
+                    cache : false,
+                    success : onValidSuccess,
+                    error : onError
+                }).submit();
+            }
+        }
+
+        // OSS 삭제 체크 (기존에 CONF 상태로 등록된 OSS가 있는지 여부 검사)
+        function checkExistOssConf(){
+            var ossId = $('input[name=ossId]').val();
+
+            $.ajax({
+                url : '<c:url value="/oss/checkExistOssConf"/>',
+                type : 'GET',
+                dataType : 'json',
+                cache : false,
+                data : {'ossId' : ossId},
+                success : function(data){
+                    if(parseInt(data) > 0){
+                        loading.hide();
+
+                        $('.ossSelectPop').show();
+                        $('#blind_wrap').show();
+                    }else if(parseInt(data) == 0){
+                        deleteOssByOne();
+                    }else{
+                        loading.hide();
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    }
+                },
+                error : function(){
+                    loading.hide();
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+        };
+
+        // OSS 삭제
+        function deleteOssByOne(){
+            var ossId = $('input[name=ossId]').val();
+            var ossName = $('input[name=ossName]').val();
+            var editorVal = CKEDITOR.instances['editor'].getData();
+            var sendData = {
+                ossId:ossId,
+                ossName:ossName,
+                newOssId:"N", // 단건일때 "N" 로 보냄
+                comment:editorVal
+            };
+
+            $.ajax({
+                url :'<c:url value="/oss/delAjax"/>',
+                type : 'POST',
+                data : sendData,
+                dataType:"json",
+                cache : false,
+                success : function(json){
+                    loading.hide();
+                    if(json.resCd == '10'){
+                        alertify.alert('<spring:message code="msg.common.success" />',function(){
+                            deleteTabInFrame('#<c:url value="/oss/edit/'+ossId+'"/>');
+                            reloadTabInframe('<c:url value="/oss/list"/>');
+                        });
+                    }else{
+                        alertify.error('<spring:message code="msg.common.valid" />', 0);
+                    }
+                },
+                error : function(){
+                    loading.hide();
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+        };
+
+        //V-Diff 체크
+        function checkVdiff(func) {
+            var rtnData = {};
+            var rows = getOssGridRows('#_licenseChoice');
+            var ossVersion = $('input[name=ossVersion]').val();
+            var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
+
+            if ("save" == func && "" != ossVersion) {
+                postData['ossVersion'] = ossVersion;
+            }
+
+            $.ajax({
+                url : '<c:url value="/oss/checkVdiff"/>',
+                type : 'POST',
+                data : JSON.stringify(postData),
+                dataType : 'json',
+                cache : false,
+                async : false,
+                contentType : 'application/json',
+                success : function(json){
+                    rtnData = json.vFlag;
+                },
+                error : function(){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+
+            rtnData['ossVersion'] = ossVersion;
+            return rtnData;
+        };
+
+        // 그리드 체크 메세지( gridStr 그리드 문자열 )
+        function ossGridValidMsg(msgData,gridStr) {
+            $.each(msgData,function(key,value) {
+                if("isValid" != key) {
+                    if(key.indexOf(".") > -1){
+                        if(key.indexOf("ossNicknames") > -1){
+                            var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;
+                            $('input[name=ossNicknames]:eq('+_nickIndex+')').parent().next("span.retxt").html(value).show();
+                        } else {
+                            var seqSuffix = key.split(".");
+                            var rowId = seqSuffix[1];
+                            // licenseId 일 경우 에러 메세지 타겟을 licenseNameEx 로 변경
+                            if(seqSuffix[0] === "licenseId"){
+                                seqSuffix[0] = "licenseNameEx";
+                            }
+                            var colName = $("#"+gridStr+" #"+rowId).parents("table").attr("id")+"_"+seqSuffix[0];
+                            // 그리드 메세지 그리기
+                            $("#"+gridStr+" #"+rowId+" td[aria-describedby=\""+colName+"\"]")
+                                .append('<div class=\"'+gridStr+"_"+rowId+' retxt"\">'+ value +'</div>');
+                        }
+                        $("div.retxt").show();
+                    } else {
+                        if(key == 'ossNicknames'){
+                            $('input[name=ossNicknames]').parent().next("span.retxt").html(value).show();
+                        }
+                        if($('input[name='+key+']').length > 0) {
+                            $('input[name='+key+']').next("span.retxt").html(value).show();
+                        } else if($('textarea[name='+key+']').length > 0) {
+                            $('textarea[name='+key+']').next("span.retxt").html(value).show();
+                        } else if($('select[name='+k+']').length > 0) {
+                            $('select[name='+key+']').parent().siblings("span.retxt").html(value).show();
+                        }
+                    }
+                    // 라셀 초기화
+                    lastsel = -1;
+                }
+            });
+        };
+
+        //유효성 체크 콜백함수
+        function onValidSuccess(json, status){
+            loading.hide();
+
+            if(json.isValid == 'false') {
+                if(json.validMsg == "hasDelNick") {
+                    // oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
+
+                    // nick name 필드 초기화
+                    if($("div.multiTxtSet > div").length > 1) {
+                        $("div.multiTxtSet > div:not(:nth-child(1))").remove();
+                    }
+
+                    for(var k in json.resultData.addNickArr) {
+                        $(nickNameClone).appendTo('.multiTxtSet');
+                        $('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
+                    }
+
+                    $('.smallDelete').on('click', function(){
+                        $(this).parent().remove();
+                    });
+
+                    var _alertMsg = '<spring:message code="msg.oss.nickname.exists"/>';
+                    if(json.resultData.delNickArr) {
+                        _alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
+                        for(var k in json.resultData.delNickArr) {
+                            _alertMsg += '<br/>' + json.resultData.delNickArr[k];
+                        }
+                        _alertMsg += '</span>';
+                    }
+
+                    alertify.alert(_alertMsg, function(){});
+                } else if(json.validMsg == "rename"){
+                    if(typeof json.resultData !== 'undefined'){
+                        var data = json.resultData;
+                        var _alertMsg  = '<spring:message code="msg.oss.check.rename"/>';
+                        for(var i in data){
+                            _alertMsg += '<br> - ' + data[i];
+                        }
+                        alertify.alert(_alertMsg, function(){});
+                    }else{
+                        alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
+                    }
+
+                    renameFlag = 'N';
+                    $('input[name=renameFlag]').val(renameFlag);
+                } else if(json.validMsg == "notChange"){
+                    alertify.alert('<spring:message code="msg.oss.name.nickname.sametime.notchange"/>', function(){});
+                } else if(json.resultData) {
+                    var _alertMsg  = '<spring:message code="msg.oss.nickname.exists"/>';
+                    _alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
+                    alertify.alert(_alertMsg, function(){});
+
+                    for(var k in json.resultData) {
+                        $(nickNameClone).appendTo('.multiTxtSet');
+                        $('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
+                    }
+
+                    $('.smallDelete').on('click', function(){
+                        $(this).parent().remove();
+                    });
+                } else if(json.validMsg == "deactivate"){
+                    alertify.error('<spring:message code="msg.oss.deactivated"/>', 0);
+                } else if(json.ossName == "Formatting error"){
+                    alertify.error('<spring:message code="msg.common.valid"/>', 0);
+                    // 커스텀 에러 메세지
+                    ossGridValidMsg(json, "_licenseChoice");
+                }else {
+                    //alertify.error('<spring:message code="msg.common.valid"/>', 0);
+                    alertify.error('<spring:message code="msg.oss.duplicated"/>', 0);
+                    // 커스텀 에러 메세지
+                    ossGridValidMsg(json, "_licenseChoice");
+                }
+            } else if(json.isValid == 'true') {
+                var data = checkVdiff('save');
+                var v_flag = data.vFlag;
+
+                if(v_flag == "Y"){
+                    if ("" != data.ossVersion) {
+                        if (typeof data.resultData != "undefined") {
+                            var checkList = data.resultData;
+                            var height = 0;
+                            let vDiffDiv = document.createElement('div');
+                            vDiffDiv.id = 'vDiffDiv';
+                            let h1 = document.createElement('h1');
+                            h1.innerHTML = '<spring:message code="msg.oss.confirm.ossVersion" />';
+                            vDiffDiv.appendChild(h1);
+                            vDiffDiv.appendChild(document.createElement('br'));
+                            height += 30;
+
+                            let table = document.createElement('table');
+                            table.style.width = '100%';
+                            $(table).css('border-collapse','collapse');
+                            let thead = document.createElement('thead');
+                            let tbody = document.createElement('tbody');
+
+                            let row_1 = document.createElement('tr');
+                            $(row_1).css('background-color','#a39d9b');
+                            row_1.style.height = "30";
+                            height += 30;
+
+                            let heading_1 = document.createElement('th');
+                            heading_1.style.border = '1px solid #444444';
+                            $(heading_1).css('font-weight','bold');
+                            $(heading_1).css('color','white');
+                            heading_1.innerHTML = "OSS Name (version)";
+
+                            let heading_2 = document.createElement('th');
+                            heading_2.style.border = '1px solid #444444';
+                            $(heading_2).css('font-weight','bold');
+                            $(heading_2).css('color','white');
+                            heading_2.innerHTML = "Declared License";
+
+                            row_1.appendChild(heading_1);
+                            row_1.appendChild(heading_2);
+
+                            thead.appendChild(row_1);
+                            table.appendChild(thead);
+
+                            for (var j in checkList) {
+                                var ossInfo = checkList[j].split("|")[0];
+                                var declaredLicense = checkList[j].split("|")[1];
+
+                                let row_2 = document.createElement('tr');
+                                row_2.style.height = "30";
+                                height += 30;
+
+                                let row_2_data_1 = document.createElement('td');
+                                row_2_data_1.style.border = '1px solid #444444';
+                                row_2_data_1.innerHTML = '&nbsp;' + ossInfo;
+
+                                let row_2_data_2 = document.createElement('td');
+                                row_2_data_2.style.border = '1px solid #444444';
+                                row_2_data_2.innerHTML = '&nbsp;' + declaredLicense;
+
+                                row_2.appendChild(row_2_data_1);
+                                row_2.appendChild(row_2_data_2);
+                                tbody.appendChild(row_2);
+                            }
+
+                            table.appendChild(tbody);
+                            vDiffDiv.appendChild(table);
+
+                            height = (height + 160) < 750 ? (height + 160) : 750;
+
+                            if (!alertify.firstVDiffDialog) {
+                                alertify.dialog('firstVDiffDialog', function() {
+                                    var settings;
+
+                                    return {
+                                        setup: function() {
+                                            var settings = alertify.confirm().settings;
+
+                                            for (var prop in settings) {
+                                                this.settings[prop] = settings[prop];
+                                            }
+
+                                            var setup = alertify.confirm().setup();
+
+                                            setup.focus.element = 1;
+
+                                            return setup;
+                                        },
+                                        settings: {
+                                            oncontinue: null
+                                        },
+                                        callback: function(closeEvent) {
+                                            alertify.confirm().callback.call(this, closeEvent);
+                                        }
+                                    };
+                                }, false, 'confirm');
+
+                                alertify.firstVDiffDialog(vDiffDiv)
+                                    .set('onok', function(closeEvent){onRegist();})
+                                    .set('oncancel', function(closeEvent){return;});
+                            } else {
+                                alertify.firstVDiffDialog(vDiffDiv)
+                                    .set('onok', function(closeEvent){onRegist();})
+                                    .set('oncancel', function(closeEvent){return;})
+                                    .set('resizable', true).resizeTo('25%', height);
+                            }
+                        } else {
+                            onRegist();
+                        }
+                    } else {
+                        alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
+                            if (e) {
+                                onRegist();
+                            } else {
+                                return false;
+                            }
+                        });
+                    }
+                } else if(v_flag == ""){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    return;
+                } else {
+                    onRegist();
+                }
+            }
+        };
+
+        //유효성 체크 콜백함수
+        function onDeleteValidSuccess(json, status){
+            if(json.isValid == 'false') {
+                loading.hide();
+
+                if(json.validMsg == "hasDelNick") {
+                    // oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
+
+                    // nick name 필드 초기화
+                    if($("div.multiTxtSet > div").length > 1) {
+                        $("div.multiTxtSet > div:not(:nth-child(1))").remove();
+                    }
+
+                    for(var k in json.resultData.addNickArr) {
+                        $(nickNameClone).appendTo('.multiTxtSet');
+                        $('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
+                    }
+                    $('.smallDelete').on('click', function(){
+                        $(this).parent().remove();
+                    });
+                    var _alertMsg = '<spring:message code="msg.oss.nickname.exists"/>';
+                    if(json.resultData.delNickArr) {
+                        _alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
+                        for(var k in json.resultData.delNickArr) {
+                            _alertMsg += '<br/>' + json.resultData.delNickArr[k];
+                        }
+                        _alertMsg += '</span>';
+                    }
+                    alertify.alert(_alertMsg, function(){});
+                } else if(json.resultData) {
+                    alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function(){});
+                    for(var k in json.resultData) {
+                        $(nickNameClone).appendTo('.multiTxtSet');
+                        $('.multiTxtSet input[type=text]:last').val(json.resultData[k]);
+                    }
+                    $('.smallDelete').on('click', function(){
+                        $(this).parent().remove();
+                    });
+
+                } else {
+                    alertify.error('<spring:message code="msg.common.valid"/>', 0);
+                    // 커스텀 에러 메세지
+                    ossGridValidMsg(json, "_licenseChoice");
+                }
+
+            } else if(json.isValid == 'true') {
+                var v_flag = checkVdiff('delete');
+
+                if(v_flag == ""){
+                    loading.hide();
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    return;
+
+                }else{
+                    checkExistOssConf();
+                }
+            }
+        };
+
+        //저장함수
+        function onRegist(){
+            loading.show();
+            saveRow();
+            var editorVal = CKEDITOR.instances.editor.getData();
+            $('input[name=comment]').val(replaceWithLink(editorVal));
+            $("#ossForm").ajaxForm({
+                url :'<c:url value="/oss/saveAjax"/>',
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success : onRegistSuccess,
+                error : onError
+            }).submit();
+        };
+
+        //등록성공콜백함수
+        function onRegistSuccess(json, status){
+            loading.hide();
+            if(json.resCd == '10'){
+                alertify.alert('<spring:message code="msg.common.success" />', function(){
+                    if(opener){
+                        // 현재 창이 팝업인 경우
+                        self.opener = null;self.close();
+                    } else {
+                        deleteTabInFrame('#<c:url value="/oss/edit/'+json.ossId+'"/>');
+                        reloadTabInframe('<c:url value="/oss/list"/>');
+                    }
+                });
+            }else{
+                alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                renameFlag = 'N';
+                $('input[name=renameFlag]').val(renameFlag);
+            }
+        };
+        // 색 설정
+        function makeBackGroundColor(){
+
+            var colors = [];
+            var list = [];
+            if(data.copyData){
+                list = data.copyData.ossLicenses;
+            }else{
+                list = data.list.rows;
+            }
+            // <c:forEach var="colors" items='${ct:getCodeNames(ct:getConstDef("CD_LICENSE_BACKGROUND"))}' varStatus="vs">
+            //     colors.push("${colors}");
+            // </c:forEach>
+            var lastColor = colors[0];
+            for(var i=0; i<list.length; i++){
+                var comb = list[i].ossLicenseComb;
+                if(comb == 'AND'){
+                    $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                }else if(comb == 'OR'){
+                    var flag = false;
+                    for(var j = 0; j<colors.length;j++){
+                        if(lastColor == colors[j]){
+                            lastColor = colors[j+1];
+                            $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                            flag = true;
+                        }else if(lastColor == colors[colors.length-1]){
+                            lastColor = colors[0];
+                            $("#_licenseChoice").jqGrid("setRowData", list[i].ossLicenseIdx, false, {'background-color' : lastColor});
+                            flag = true;
+                        }
+                        if(flag) break;
+                    }
+                }
+            }
+        }
+
+        function onPopupListSuccess(json, status){
+            $('#_ossSelectList').jqGrid('clearGridData');
+            $('#_ossSelectList').jqGrid('setGridParam',{data:json}).trigger('reloadGrid');
+
+        }
+
+        //에러엘럿
+        function onError(data, status){
+            alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            renameFlag = 'N';
+            $('input[name=renameFlag]').val(renameFlag);
+        };
+
+        function deleteComment(obj){
+            if(!confirm('<spring:message code="msg.oss.confirm.delete.comment" />')) return;
+            var commId = $(obj).next().val();
+            $.ajax({
+                url : '<c:url value="/oss/deleteComment"/>',
+                type : 'POST',
+                dataType : 'json',
+                cache : false,
+                data : {'commId' : commId},
+                success : function(){
+                    fn_commemt.getCommentList();
+                },
+                error : function(){
+                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                }
+            });
+        }
+
+        function modifyComment(obj){
+            $('.commModifyPop').show();
+            $('#blind_wrap').show();
+            var commId = $(obj).next().next().val();
+            modifyCommentId = commId;
+            var contents = $(obj).parent().parent().next().html();
+            CKEDITOR.instances.editor3.setData(contents);
+
+            //코멘트 수정
+            $('.closeModComment').off("click").on("click", function(){
+                $('.commModifyPop').hide();
+                $('#blind_wrap').hide();
+            });
+
+            $('.modifyComment').off("click").on("click", function(){
+                var editorVal = CKEDITOR.instances.editor3.getData();
+                var register = '${sessUserInfo.userId}';
+                var param = {commId : modifyCommentId, referenceId : data.detail.ossId, referenceDiv :'40', contents : replaceWithLink(editorVal)};
+                $.ajax({
+                    url : '<c:url value="/oss/saveComment"/>',
+                    type : 'POST',
+                    dataType : 'json',
+                    cache : false,
+                    data : param,
+                    success : function(json){
+                        alertify.success('<spring:message code="msg.common.success" />');
+                        if(json.isValid) {
+                            if(json.isValid == 'false') {
+                                createValidMsgComplex(json);
+                                alertify.error('<spring:message code="msg.common.valid" />', 0);
+
+                            } else if(json.isValid == 'true') {
+                                alertify.alert('<spring:message code="msg.common.success" />', function(){});
+                            }
+                        } else {
+                            alertify.alert('<spring:message code="msg.common.success" />', function(){});
+                        }
+                        $('.commModifyPop').hide();
+                        $('#blind_wrap').hide();
+
+                        fn_commemt.getCommentList();
+                    },
+                    error : function(){}
+                });
+            });
+        }
+
+        function showLicenseText(_licenseName) {
+            if(!_licenseName) {
+                var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+                switch (licenseChoiceLength) {
+                    case 0:
+                        alertify.alert('<spring:message code="msg.oss.required.license" />', function(){});
+                        return false;
+                        break;
+                    case 1:
+                        $("input[name=licenseDiv]").val("S");
+                        break;
+                    default:
+                        $("input[name=licenseDiv]").val("M");
+                        break;
+                }
+
+                var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" );
+                if(_selectedRow) {
+                    var licenseNameEx = $('#_licenseChoice').jqGrid('getRowData',_selectedRow,'licenseNameOrg');
+                    licenseName = licenseNameEx['licenseNameEx'];
+                } else {
+                    if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
+                        _selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
+                        licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+                    }
+                }
+            } else {
+                licenseName = _licenseName;
+            }
+
+            if(licenseName && licenseName != "") {
+                $.ajax({
+                    url : '<c:url value="/license/getLicenseText"/>',
+                    type : 'GET',
+                    dataType : 'json',
+                    cache : false,
+                    data : {licenseName : licenseName},
+                    success : function(data){
+                        if("false" != data.isValid) {
+                            $("#disp_licenseText").html(data.validMsg);
+                            licenseName = "";
+                        } else {
+                            $("#disp_licenseText").html("");
+                        }
+                    },
+                    error : function(){
+                        $("#disp_licenseText").html("");
+                    }
+                });
+            } else {
+                $("#disp_licenseText").html("");
+            }
+        }
+
+        // 다른 OSS로 이관하는 경우
+        function mergeOssForDelete(newOssId) {
+
+            $('.ossSelectPop').hide();
+            $("#_ossMergeCheckList").jqGrid('GridUnload');
+            $('.mergeOssCheckPop').show();
+            //$("#div_mergeOssCheckPop_change").text(${ossId} + " => ");
+
+            $('#_ossMergeCheckList').jqGrid({
+                url:'<c:url value="/oss/ossMergeCheckList/${ossId}/'+newOssId+'"/>',
+                datatype: 'json',
+                jsonReader:{
+                    repeatitems: false,
+                    id:'ossId',
+                    root:function(obj){return obj.rows;}
+                },
+                colNames:['ID', 'Merge', 'Version', 'License', 'License Type', 'Obligation', 'Copyright', 'Download Location', 'HomePage', 'delOssId'],
+                colModel:[
+                    {name:'ossId', index: 'ossId', width:70, align:"center"},
+                    {name:'mergeStr', index: 'mergeStr', width:70, align:"center"},
+                    {name:'ossVersion',index:'ossVersion', width:80, align:"left"},
+                    {name:'licenseName',index:'licenseName', width:150, align:"left"},
+                    {name:'licenseType',index:'licenseType', width:80, align:"left"},
+                    {name:'obligation',index:'obligation', width:80, align:"left"},
+                    {name:'copyright',index:'copyright', width:150, align:"left"},
+                    {name:'downloadLocation',index:'downloadLocation', width:100, align:"left"},
+                    {name:'homepage',index:'homepage', width:100, align:"left"},
+                    {name:'delOssId',index:'delOssId', hidden:true}
+                ],
+                autoencode: true,
+                rowNum: 9999,
+                autowidth: true,
+                gridview: true,
+                sortname: 'ossVersion',
+                viewrecords: true,
+                sortorder: 'desc',
+                loadonce:true,
+                height: 'auto',
+                loadComplete: function(id){
+                    $('#_ossMergeCheckList').jqGrid("setRowData",'${ossId}', false, {'background-color' : '#ada9a9'});
+                },
+                onSelectRow: function(id){
+                },
+                ondblClickRow: function(rowid,iRow,iCol,e) {
+                    // 체크 박스 영역 제외
+                    var row = $('#_ossMergeCheckList').jqGrid('getRowData', rowid);
+
+                    // 자기자신이 아닌 경우만
+                    if('Duplicated' == row['mergeStr'] && row['delOssId'] && row['delOssId'] != '${ossId}') {
+                        createTabInFrame(row['delOssId']+'_Opensource', '#<c:url value="/oss/edit/'+row['delOssId']+'"/>');
+                    }
+                    else if(row['ossId'] != '${ossId}') {
+                        createTabInFrame(row['ossId']+'_Opensource', '#<c:url value="/oss/edit/'+row['ossId']+'"/>');
+                    }
+
+                }
+            });
         }
 
     </script>

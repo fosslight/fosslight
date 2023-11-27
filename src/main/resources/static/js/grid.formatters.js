@@ -64,7 +64,7 @@ const oss_grid_format = {
         if("N" == linkFlag){
             var _frameId = rowObject['ossId'] + "_Opensource";
             var _frameTarget = "#/oss/edit/" + rowObject['ossId'];
-            display = "<a class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellvalue + "</a>";
+            display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
         } else {
             var url = '';
             if("${ct:isAdmin()}"){

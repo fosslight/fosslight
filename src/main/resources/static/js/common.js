@@ -128,6 +128,10 @@ function appendSingleTag(event, id) {
         return;
     }
 
+    const gridDiv = $("<div/>", {
+        class: "col-4 tag-container mb-1 pr-0"
+    });
+
     const tagContainer = $("<div/>", {
         class: "external-event",
         name: id,
@@ -142,12 +146,19 @@ function appendSingleTag(event, id) {
 
     const deleteIcon = $('<i>', {
         class: 'fas fa-times text-blue-gray float-right mt-1',
-        name: 'deleteTagButton'
+    }).click(function() {
+        deleteTag(this);
     });
 
     tagContainer.append(hiddenInput, deleteIcon);
+    gridDiv.append(tagContainer);
 
-    $("#appendArea_" + id).prepend(tagContainer);
+    $("#appendArea_" + id).prepend(gridDiv);
 
     inputElement.val(null).trigger("change");
+}
+
+function deleteTag (el) {
+    console.log(el);
+    $(el).closest(".tag-container").remove();
 }

@@ -23,6 +23,7 @@ ul { list-style-type: none; }
 .custom-layout .text-d-orange { color: #c95200; }
 .custom-layout .text-yellow { color: #ffc003; }
 .custom-layout .text-lg-gray { color: #6b6b6b; }
+.custom-layout .text-light-gray { color: #9E9E9E; }
 .custom-layout .text-blue-gray { color: #596d82; }
 .custom-layout .text-dark-blue { color: #1F2D3D; }
 .custom-layout .text-cerebral-gray { color: #ecebe9; }
@@ -151,10 +152,11 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* submit form */
 .custom-layout .submit-form .tag-form { margin-bottom: .5rem !important; }
-.custom-layout .submit-form .external-event {margin-right: .5rem;color: #0082f7 !important;cursor: pointer;font-weight: 550;background-color: #FFFFFF;border: 1px solid #cdd8e8;font-size: .8rem }
-.custom-layout .submit-form .external-event i:hover {color: #0082f7;}
+.custom-layout .submit-form .external-event { color: #12b886;cursor: pointer;font-weight: 450;background-color: #F7F8F9FF; font-size: 1rem; box-shadow: none; }
+.custom-layout .submit-form .external-event:hover { background-color: rgb(128 126 126 / 16%); }
+.custom-layout .submit-form .external-event i { color: rgb(128 126 126 / 16%); }
+.custom-layout .submit-form .external-event i:hover { color: #999 }
 .custom-layout .submit-form .external-events { display: flex; }
-.custom-layout .submit-form .external-event { width: 20%; }
 .custom-layout .submit-form #actions span { font-size: .8rem; }
 .custom-layout .submit-form .form-group { margin-bottom: 2rem;}
 .custom-layout .submit-form #previews span, .custom-layout #previews p { font-size: .7rem;}

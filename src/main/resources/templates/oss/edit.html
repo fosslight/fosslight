@@ -7,7 +7,7 @@
     <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
-        <div class="content-wrapper custom-layout">
+        <div class="content-wrapper custom-layout" style="height: auto">
             <input type="hidden" name="ossLicensesJson"/>
             <input type="hidden" name="ossId"/>
             <input type="hidden" name="licenseType" id="licenseType" />
@@ -46,24 +46,45 @@
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="licenseName" th:text="#{msg.common.field.OSS.name}"><span class="text-orange">*</span></label>
-                                    <input type="text" class="form-control autoComLicenseLong" name="ossName" id="licenseName" th:value="${ossName}"/>
+                                    <input type="text" class="form-control autoComLicenseLong" name="ossName" id="licenseName" th:value="${detail?.ossName}"/>
                                 </div>
                                 <div class="form-group tag-form" name="append-stag-form">
                                     <label th:text="#{msg.common.field.nickname}"></label>
                                     <div class="input-group">
-                                        <input class="form-control" id="input_licenseNicknames" type="text" onblur="oss_edit_fn.checkNickName(this)">
+                                        <input class="form-control" id="input_ossNicknames" type="text" onblur="oss_edit_fn.checkNickName(this)">
                                         <div class="input-group-append">
-                                            <button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button">
+                                            <button class="btn btn-default" id="ossNicknames" name="addTagButton" type="button">
                                                 Add
                                             </button>
                                         </div>
                                         <!-- /btn-group -->
                                     </div>
                                 </div>
-                                <div class="form-group d-flex" id="appendArea_licenseNicknames"></div>
+                                <div class="form-group row" id="appendArea_ossNicknames">
+                                    <th:block th:each="ossNickname : ${detail?.ossNicknames}" th:if="${!#strings.isEmpty(ossNickname)}">
+                                        <div class="col-4 tag-container mb-1 pr-0">
+                                            <div class="external-event" name="appendArea_ossNicknames">
+                                                <input name="ossNicknames" th:value="${ossNickname}"
+                                                       type="hidden"/>
+                                                <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                   onclick="deleteTagButton(this)"></i>[[${ossNickname}]]
+                                            </div>
+                                        </div>
+                                    </th:block>
+                                </div>
+                                <div class="form-group row" th:if="${detail?.ossType}">
+                                    <div class="col-2">
+                                        <label th:text="#{msg.common.field.OSS.type}"></label>
+                                    </div>
+                                    <div class="col-9">
+                                        <span class="badge badge-primary mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'M')}">M</span>
+                                        <span class="badge badge-info mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
+                                        <span class="badge badge-success mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'D')}">D</span>
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label th:text="#{msg.common.field.OSS.type}"></label>
-                                    <span name="ossType"></span>
+                                    <label for="ossVersion" th:text="#{msg.common.field.OSS.version}"><span class="text-orange">*</span></label>
+                                    <input type="text" class="form-control autoComLicenseLong" name="ossVersion" id="ossVersion" th:value="${detail?.ossVersion}"/>
                                 </div>
                                 <div class="form-group">
                                     <label th:text="#{msg.common.field.declaredLicense}"><span class="text-orange">*</span></label>
@@ -86,23 +107,53 @@
                                         <!-- /btn-group -->
                                     </div>
                                 </div>
-                                <div class="form-group d-flex" id="appendArea_detectedLicense"></div>
-                                <div class="form-group row">
-                                    <div class="col-3">
-                                        <label th:text="#{msg.common.field.obligation}"></label>
-                                    </div>
-                                    <div class="col-9">
-                                        <div class="form-group mb-0">
-                                            <div class="custom-control custom-switch">
-                                                <input class="custom-control-input" id="customSwitch1" type="checkbox">
-                                                <label class="custom-control-label" for="customSwitch1">Yes</label>
+                                <div class="form-group row" id="appendArea_detectedLicense">
+                                    <th:block th:each="detectedLicense : ${detail?.detectedLicenses}" th:if="${!#strings.isEmpty(detectedLicense)}">
+                                        <div class="col-4 tag-container mb-1 pr-0">
+                                            <div class="external-event" name="appendArea_detectedLicense">
+                                                <input name="detectedLicenses" th:value="${detectedLicense}"
+                                                       type="hidden"/>
+                                                <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                   onclick="deleteTag(this)"></i>[[${detectedLicense}]]
                                             </div>
                                         </div>
+                                    </th:block>
+                                </div>
+                                <div class="form-group">
+                                    <label th:text="#{msg.common.field.Copyright}">Attribution 고지</label>
+                                    <textarea class="form-control" rows="5" th:text="${detail?.copyright}"></textarea>
+                                </div>
+                                <div class="form-group" th:if="${detail?.licenseType}">
+                                        <label class="text-light-gray" th:text="#{msg.common.field.licenseType}"></label>
+                                        <select class="select2" id="licenseTypeSelect" name="licenseType"
+
+
+                                                style="width: 100%;" disabled>
+                                            <option value=""></option>
+                                            <th:block
+                                                    th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}"
+                                                        th:value="${code.cdDtlNo}"></option>
+                                            </th:block>
+                                        </select>
+                                </div>
+                                <div class="form-group row" th:if="${detail?.obligationType}">
+                                    <div class="col-2">
+                                        <label class="text-light-gray" th:text="#{msg.common.field.obligation}"></label>
+                                    </div>
+                                    <div class="col-9">
+                                        <span th:if="${#strings.equals('10', detail.obligationType)}">
+                                            <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
+                                        </span>
+                                        <span th:if="${#strings.equals('11', detail.obligationType)}">
+                                            <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
+                                            <i class="far fa-file-alt fa-lg mx-1" title="Source Code"></i>
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label th:text="#{msg.common.field.downloadLocation}"></label>
-                                    <input class="form-control" name="downloadLocations" id="inputName" type="text">
+                                    <input class="form-control" name="downloadLocations" id="inputName" type="text" th:value="${detail.downloadLocation}">
                                 </div>
                                 <div class="form-group">
                                     <label th:text="#{msg.common.field.homepage}">홈페이지</label>
@@ -118,225 +169,44 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="inputName">Comment</label>
-                                    <textarea class="form-control" id="compose-textarea" rows="3" style="height: 800px"></textarea>
+                                    <textarea class="form-control" id="commentInput" name='commentInput'
+                                              rows="3" style="height: 800px"></textarea>
                                 </div>
                             </div>
                             <div class="card-footer clearfix">
-                                <a class="btn btn-secondary float-left" href="javascript:void(0)">Delete</a>
-                                <a class="btn btn-teal-01 float-right" href="javascript:void(0)">Save</a>
+                                <a class="btn btn-secondary float-left" href="javascript:void(0)"
+                                   id="delete">Delete</a>
+                                <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save">Save</a>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card card-lg-red">
-                            <div class="card-header">
-                                <h3 class="card-title">Comment</h3>
-                                <div class="card-tools">
-                                    <button class="btn btn-tool" data-card-widget="collapse" title="Collapse"
-                                            type="button">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
+                            <div class="card card-lg-red">
+                                <div class="card-header">
+                                    <h3 class="card-title">Comment</h3>
+                                    <div class="card-tools">
+                                        <button class="btn btn-tool text-white" data-card-widget="collapse"
+                                                title="Collapse"
+                                                type="button">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <table class="table">
-                                            <!-- <thead>
-                                              <tr>
-                                                <th>File Name</th>
-                                                <th>File Size</th>
-                                                <th></th>
-                                              </tr>
-                                            </thead> -->
-                                            <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
-                                                           href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
-                                                           href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
-                                                           href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn btn-default" data-target="#modal-comment" data-toggle="modal"
-                                                           href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn-default" data-target="#modal-comment" data-toggle="modal"
-                                                           href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="post">
-                                                        <div class="user-block">
-                                <span class="username">
-                                  <a href="#">Jonathan Burke Jr.</a>
-                                </span>
-                                                            <span class="description ml-0">Shared publicly - 7:45 PM today</span>
-                                                        </div>
-                                                        <p>
-                                                            Lorem ipsum represents a long-held tradition for designers,
-                                                            typographers and the like. Some people hate it and argue for
-                                                            its demise, but others ignore.
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td class="text-right py-0 align-middle">
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a class="btn btn-default" href="#"><i
-                                                                class="fas fa-pencil-alt"></i></a>
-                                                        <a class="btn btn-lg-red" href="#"><i class="fas fa-trash"></i></a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                <div class="card-body">
+                                    <div class="row" id="commentAreaFragment">
+                                        <div class="col-md-12" >
+                                            <strong class="text-lg-gray">No comments were registered.</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </div>
                 </form>
             </section>
             <!-- modal -->
             <div class="modal fade" id="modal-comment">
-                <!-- modal dialog -->
-                <div class="modal-dialog modal-lg">
-                    <!-- modal-content -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Comment</h4>
-                            <button aria-label="Close" class="close" data-dismiss="modal" type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-             	 <textarea class="form-control" id="commpose-textarea-02" rows="3" style="height: 800px">
-                        <ul>
-                            <li>List item one</li>
-                            <li>List item two</li>
-                            <li>List item three</li>
-                            <li>List item four</li>
-                        </ul>
-                    </textarea>
-                        </div>
-                        <div class="modal-footer justify-content-between">
-                            <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
-                            <button class="btn btn-primary" type="button">Save changes</button>
-                        </div>
-                    </div>
-                </div>
+                <th:block th:replace="fragments/comment-fragments :: commentPopupFragment"></th:block>
             </div>
         </div>
     </div>

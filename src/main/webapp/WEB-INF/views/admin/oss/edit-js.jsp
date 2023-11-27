@@ -214,7 +214,7 @@
 		init : function(){ 
 			$('.btnCancel').click(function(){
 				$('.pop').hide();
-				$('#blind_wrap').hide();
+				$('#blind_wrap').hide();oss_edit_fn
 			}); // 팝업 닫기
 			
 			//닉네임 인풋 추가

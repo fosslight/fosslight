@@ -32,9 +32,9 @@
                     const elId = this.id;
                     appendSingleTag(e, elId);
 
-                    $("[name='deleteTagButton']").on("click", function () {
-                        $(this).closest(".external-event").remove();
-                    });
+                    // $("[name='deleteTagButton']").on("click", function () {
+                    //     $(this).closest(".tag-container").remove();
+                    // });
                 });
 
                 //save license
@@ -88,7 +88,6 @@
                     loading.show();
 
                     var editorVal = $('#commentInput').summernote('code');
-                    console.log(editorVal);
                     $('input[name=comment]').val(replaceWithLink(editorVal));
 
                     var pData = $('#licenseForm').serializeObject();
