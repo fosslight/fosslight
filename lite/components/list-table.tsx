@@ -32,6 +32,7 @@ export default function ListTable({
   columns,
   currentSort,
   pagination,
+  hideColumnSelector = false,
   render,
   onClickRow
 }: {
@@ -39,8 +40,9 @@ export default function ListTable({
   columns: List.Column[];
   currentSort?: string;
   pagination?: { totalCount: number; currentPage: number; countPerPage: number };
+  hideColumnSelector?: boolean;
   render: (row: any, column: string) => React.ReactNode;
-  onClickRow: (row: any) => void;
+  onClickRow?: (row: any) => void;
 }) {
   const currentSortObj = Object.fromEntries(
     (currentSort || '').split(',').map((str) => str.split('-'))
@@ -184,39 +186,41 @@ export default function ListTable({
                     </button>
                   </th>
                 ))}
-              <th className="column-selector relative w-8 p-2">
-                <button onClick={() => setIsColumnSelectorShown(!isColumnSelectorShown)}>
-                  <i className="fa-solid fa-eye" />
-                </button>
-                {isColumnSelectorShown && (
-                  <div className="absolute top-full right-0 flex flex-col gap-y-1.5 p-3 mt-0.5 bg-white border-x border-b border-darkgray rounded-b shadow-[-2px_2px_4px_0_rgba(0,0,0,0.2)]">
-                    {columns.map((column) => (
-                      <label key={column.name} className="flex justify-end items-center gap-x-2">
-                        {column.name}
-                        <input
-                          type="checkbox"
-                          checked={isColumnShown[column.name]}
-                          onChange={(e) => {
-                            const { checked } = e.target;
-                            const checkedCnt = Object.values(isColumnShown).filter((isShown) =>
-                              Boolean(isShown)
-                            ).length;
+              {!hideColumnSelector && (
+                <th className="column-selector relative w-8 p-2">
+                  <button onClick={() => setIsColumnSelectorShown(!isColumnSelectorShown)}>
+                    <i className="fa-solid fa-eye" />
+                  </button>
+                  {isColumnSelectorShown && (
+                    <div className="absolute top-full right-0 flex flex-col gap-y-1.5 p-3 mt-0.5 bg-white border-x border-b border-darkgray rounded-b shadow-[-2px_2px_4px_0_rgba(0,0,0,0.2)]">
+                      {columns.map((column) => (
+                        <label key={column.name} className="flex justify-end items-center gap-x-2">
+                          {column.name}
+                          <input
+                            type="checkbox"
+                            checked={isColumnShown[column.name]}
+                            onChange={(e) => {
+                              const { checked } = e.target;
+                              const checkedCnt = Object.values(isColumnShown).filter((isShown) =>
+                                Boolean(isShown)
+                              ).length;
 
-                            if (!checked && checkedCnt <= 3) {
-                              return;
-                            }
+                              if (!checked && checkedCnt <= 3) {
+                                return;
+                              }
 
-                            setIsColumnShown({
-                              ...isColumnShown,
-                              [column.name]: checked
-                            });
-                          }}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </th>
+                              setIsColumnShown({
+                                ...isColumnShown,
+                                [column.name]: checked
+                              });
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -225,8 +229,11 @@ export default function ListTable({
             {rows.map((row, idx) => (
               <tr
                 key={idx}
-                className="border-b border-semigray cursor-pointer hover:opacity-80"
-                onClick={() => onClickRow(row)}
+                className={clsx(
+                  'border-b border-semigray',
+                  onClickRow && 'cursor-pointer hover:opacity-80'
+                )}
+                onClick={() => onClickRow && onClickRow(row)}
               >
                 {columns
                   .filter((column) => isColumnShown[column.name])
@@ -235,7 +242,7 @@ export default function ListTable({
                       {render(row, column.name)}
                     </td>
                   ))}
-                <td></td>
+                {!hideColumnSelector && <td></td>}
               </tr>
             ))}
           </tbody>
