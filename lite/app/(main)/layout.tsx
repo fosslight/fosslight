@@ -17,6 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+  const isSubwindow = Boolean(window.opener);
 
   useEffect(() => {
     if (isMobile) setView('mobile');
@@ -29,37 +30,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <main className={clsx('min-h-screen', view === 'pc' && 'flex')}>
       {/* Left navigation bar (PC) */}
-      {view === 'pc' && <SideBar isShown={isSideBarShown} />}
+      {view === 'pc' && !isSubwindow && <SideBar isShown={isSideBarShown} />}
 
       {/* Page body */}
       <div className={view === 'pc' ? 'flex-1 min-w-0' : ''}>
         {/* Areas fixed at the top of the page */}
-        <div
-          className={clsx(
-            'sticky top-0 bg-white z-10',
-            view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-8'
-          )}
-        >
-          {/* Hamburger button (PC) or Top bar (Mobile) */}
-          {view === 'pc' ? (
-            <button
-              className="w-6 h-6 text-xl text-charcoal"
-              onClick={() => setIsSideBarShown(!isSideBarShown)}
-            >
-              <i className="fa-solid fa-bars" />
-            </button>
-          ) : (
-            <TopBar />
-          )}
+        {!isSubwindow && (
+          <div
+            className={clsx(
+              'sticky top-0 bg-white z-10',
+              view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-4'
+            )}
+          >
+            {/* Hamburger button (PC) or Top bar (Mobile) */}
+            {view === 'pc' ? (
+              <button
+                className="w-6 h-6 text-xl text-charcoal"
+                onClick={() => setIsSideBarShown(!isSideBarShown)}
+              >
+                <i className="fa-solid fa-bars" />
+              </button>
+            ) : (
+              <TopBar />
+            )}
 
-          {/* Full search bar */}
-          <FullSearchBar />
-        </div>
+            {/* Full search bar */}
+            <FullSearchBar />
+          </div>
+        )}
 
         {/* Page content */}
         <div
           className={clsx(
-            'mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
+            'pt-4 mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
             view === 'pc' ? 'pb-8' : 'pt-4 pb-24',
             loading && 'opacity-30'
           )}
@@ -76,7 +79,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Bottom navigation bar (Mobile) */}
-      {view === 'mobile' && <BottomBar />}
+      {view === 'mobile' && !isSubwindow && <BottomBar />}
 
       {/* Modal for detail view */}
       <DetailModal />
