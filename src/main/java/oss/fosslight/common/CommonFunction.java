@@ -3796,6 +3796,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			String ossNameTemp = "";
 			boolean ossNicknameFlag = false;
 			
+			String comment  = bean.getComment();
+			if (!isEmpty(comment)) userData.setComment(comment);
+			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				int ossNameCnt = errorMsg.entrySet()
 						.stream()
@@ -3810,7 +3813,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						.size();
 				
 				String copyright = bean.getOssCopyright();
-				String comment  = bean.getComment();
 				
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
@@ -4132,6 +4134,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setComment(comment);
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
 						}
