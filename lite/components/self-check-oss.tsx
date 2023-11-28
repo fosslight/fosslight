@@ -106,6 +106,18 @@ export default function SelfCheckOSS() {
     currentPage * countPerPage
   );
 
+  function openSubwindowForCheck() {
+    const [width, height] = [900, 600];
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+
+    window.open(
+      `${pathname}/check?`,
+      'selfCheckDetailCheck',
+      `width=${width}, height=${height}, left=${left}, top=${top}`
+    );
+  }
+
   useEffect(() => {
     setLoading(true);
 
@@ -223,7 +235,9 @@ export default function SelfCheckOSS() {
             </div>
             Export
           </button>
-          <button className="px-2 py-0.5 default-btn">Check</button>
+          <button className="px-2 py-0.5 default-btn" onClick={openSubwindowForCheck}>
+            Check
+          </button>
           <button className="px-2 py-0.5 crimson-btn">Save</button>
         </div>
       </div>
