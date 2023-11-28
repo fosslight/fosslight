@@ -137,6 +137,20 @@ declare global {
       copyright: string;
     }
 
+    interface OSSCheck {
+      downloadUrl: string;
+      ossName: string;
+      newOssName: string;
+    }
+
+    interface LicenseCheck {
+      ossName: string;
+      ossVersion: string;
+      downloadUrl: string;
+      licenses: string[];
+      newLicenses: string[];
+    }
+
     interface PackageFile {
       name: string;
       when: string;
