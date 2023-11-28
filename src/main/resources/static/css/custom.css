@@ -202,6 +202,9 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .level-4 { background-color: #3399ff; /* 진한 파란색 */}
 .custom-layout .level-5 { background-color: #0052cc; /* 매우 진한 파란색 */}
 
+/* licenseText  */
+.custom-layout #disp_licenseText {background-color: aliceblue;font-size: .8rem;padding: 1rem;margin-top: 1rem;color: #06063b;height: 200px; overflow: scroll;}
+
 /* tooltip */
 .tooltip {
     top: 50px !important;

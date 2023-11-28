@@ -108,7 +108,7 @@ function appendMultiTag(e, elId_01, elId_02, tgId) {
         class: "external-event",
         text: word,
     }).append(
-        '<i class="fas fa-times float-right mt-1" name="deleteTagButton"></i>'
+        '<i class="fas fa-times float-right mt-1" onclick="deleteTag()"></i>'
     );
 
     $("#" + tgId).prepend(el);
@@ -134,8 +134,7 @@ function appendSingleTag(event, id) {
 
     const tagContainer = $("<div/>", {
         class: "external-event",
-        name: id,
-        text: word
+        name: id
     });
 
     const hiddenInput = $('<input>', {
@@ -150,11 +149,11 @@ function appendSingleTag(event, id) {
         deleteTag(this);
     });
 
-    tagContainer.append(hiddenInput, deleteIcon);
+    const content = $("<span/>", { text: word });
+
+    tagContainer.append(hiddenInput, deleteIcon, content);
     gridDiv.append(tagContainer);
-
     $("#appendArea_" + id).prepend(gridDiv);
-
     inputElement.val(null).trigger("change");
 }
 

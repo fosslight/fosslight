@@ -8,20 +8,20 @@
         //const G_ROW_CNT = "*{gRowCnt}";
 
         $(window).load(function () {
-            license_list_data.init();
+            lic_lst_data.init();
         });
 
-        const license_list_data = {
+        const lic_lst_data = {
             typeCodes: [],
             tooltipCont: "<div class=\"tooltipData\"><dl><dt><span class=\"iconSet ops\">Notice Obligation</span>Notice Obligation</dt><dd></dd></dl><dl><dt><span class=\"iconSet man\">Source Code Obligation</span>Source Code Obligation</dt><dd></dd></dl></div>",
             existTooltip: false,
             init: function () {
-                license_list_evt.init();
+                lic_lst_evt.init();
                 $('[data-toggle="tooltip"]').tooltip();
             }
         }
 
-        const license_list_evt = {
+        const lic_lst_evt = {
             init: function () {
                 // Initialize Select2 Elements
                 $('#restrictionSelect').select2({
@@ -54,18 +54,18 @@
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
-                    var postData = license_grid_format.setGridParam();
+                    var postData = lic_lst_fmt.setGridParam();
                     postData.ignoreSearchFlag = "N";
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                     resizingJqGidSet();
                 });
 
-                license_list_grid.load();
+                lic_lst_grid.load();
             },
         }
 
 
-        const license_list_grid = {
+        const lic_lst_grid = {
             load: function () {
                 $("#list").jqGrid({
                     url: "/license/listAjax",
@@ -95,7 +95,7 @@
                             index: 'licenseName',
                             width: 200,
                             align: 'left',
-                            formatter: license_grid_format.licenseNameFormatter
+                            formatter: lic_lst_fmt.licenseNameFormatter
                         }
                         , {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left'}
                         , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
@@ -104,14 +104,14 @@
                             index: 'restriction',
                             width: 70,
                             align: 'center',
-                            formatter: license_grid_format.displayLicenseRestriction,
-                            unformat: license_grid_format.unformatter,
+                            formatter: lic_lst_fmt.displayLicenseRestriction,
+                            unformat: lic_lst_fmt.unformatter,
                             sortable: false,
                             search: false
                         }
                         , {name: 'obligation', index: 'obligation', width: 60, align: 'left'}
                         , {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link2'}
-                        , {name: 'description', index: 'description', width: 150, align: 'left', formatter: common_grid_format.truncateText, maxlength: 20 }
+                        , {name: 'description', index: 'description', width: 150, align: 'left', formatter: common_fmt.truncateText, maxlength: 20 }
                     ],
                     rowNum: 20,
                     rowList: ['20', '40', '60'],
@@ -137,7 +137,7 @@
 
                             if ((diffNum > 0 && cEndDate > 0)
                                 || (diffNum2 > 0 && mEndDate > 0)) {
-                                alertify.alert(String(/*[[#{msg.common.search.check.date}]]*/), function () { });
+                                alertify.alert(String([[#{msg.common.search.check.date}]]), function () { });
                             }
                         }
                     },

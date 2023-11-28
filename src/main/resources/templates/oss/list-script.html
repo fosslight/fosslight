@@ -7,13 +7,13 @@
     var groupBuffer='';
     var totalRow = 0;
     //const G_ROW_CNT = "*{gRowCnt}";
-    linkFlag = String(/*[[ ${searchBean.linkFlag}]]*/);
+    linkFlag = String([[ ${searchBean.linkFlag}]]);
 
     $(window).load(function () {
-        oss_list_evt.init();
+        oss_lst_evt.init();
     });
 
-    const oss_list_evt = {
+    const oss_lst_evt = {
         init: function () {
             //Initialize Select2 Elements
             $('.select2').select2();
@@ -34,7 +34,7 @@
                 const searchHomepage = $("input[type=text][name=homepage]").val();
                 $("input[type=text][name=homepage]").val(searchHomepage.trim());
 
-                const postData = oss_list_fn.serializeObjectHelper();
+                const postData = oss_lst_fn.serializeObjectHelper();
                 postData.ignoreSearchFlag = "N";
                 $("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
             });
@@ -59,11 +59,11 @@
                 $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
             });
 
-            oss_list_gridData.init();
+            oss_lst_data.init();
         }
     }
 
-    const oss_list_gridData = {
+    const oss_lst_data = {
         typeCodes: [],
         licenseTypeInformation: "<div style=\"float:left\">" +
                                     "<span class=\"badge badge-primary mr-1\">M</span>" +
@@ -88,11 +88,11 @@
                                 "</div>",
         existTooltip: false,
         init: function () {
-            oss_list_grid.load();
+            oss_lst_grid.load();
         }
     }
 
-    const oss_list_fn = {
+    const oss_lst_fn = {
         serializeObjectHelper: function () {
             var postData = $('#ossSearch').serializeObject();
 
@@ -107,7 +107,7 @@
         }
     }
 
-    const oss_list_grid = {
+    const oss_lst_grid = {
         oldRowNum: 20,
         load: function () {
             $("#list").jqGrid({
@@ -146,8 +146,8 @@
                             return ' style="display:none;"';
                         }
                     }
-                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: oss_grid_format.ossTypeFormat }
-                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: oss_grid_format.ossNameLinkFormat }
+                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: oss_lst_fmt.ossTypeFormat }
+                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: oss_lst_fmt.ossNameLinkFormat }
                     , { name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left' }
                     , { name: 'licenseName', index: 'licenseName', width: 200, align: 'left' }
                     , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
@@ -221,7 +221,7 @@
 
                         if ((diffNum > 0 && cEndDate > 0)
                             || (diffNum2 > 0 && mEndDate > 0)) {
-                            alertify.alert(String(/*[[#{msg.common.search.check.date}]]*/), function () { });
+                            alertify.alert(String([[#{msg.common.search.check.date}]]), function () { });
                         }
                     }
 
@@ -278,11 +278,11 @@
                     $('.listghead_0').hide(); // hide basic groupHeader
 
                     // add button in header
-                    if (!oss_list_gridData.existTooltip) {
+                    if (!oss_lst_data.existTooltip) {
 
                         $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
                             .appendTo($("#jqgh_list_obligation"))
-                            .attr("title", oss_list_gridData.obligationInformation)
+                            .attr("title", oss_lst_data.obligationInformation)
                             .tooltip({
                                 content: function () {
                                     return $(this).prop('title');
@@ -290,7 +290,7 @@
                             });
 
                         $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2"data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
-                            .attr("title", oss_list_gridData.licenseTypeInformation)
+                            .attr("title", oss_lst_data.licenseTypeInformation)
                             .tooltip({
                                 content: function () {
                                     return $(this).prop('title');
@@ -298,7 +298,7 @@
                             });
 
                         $('[data-toggle="tooltip"]').tooltip({html: true});
-                        oss_list_gridData.existTooltip = true;
+                        oss_lst_data.existTooltip = true;
                     }
                 },
                 ondblClickRow: function(rowid,iRow,iCol,e) {

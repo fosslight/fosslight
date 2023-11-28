@@ -8,179 +8,198 @@
     <!-- Site wrapper -->
     <div class="wrapper">
         <div class="content-wrapper custom-layout" style="height: auto">
-            <input type="hidden" name="ossLicensesJson"/>
-            <input type="hidden" name="ossId"/>
-            <input type="hidden" name="licenseType" id="licenseType" />
-            <input type="hidden" name="obligationType" id="obligationType" />
-            <input type="hidden" name="comment"/>
-            <input type="hidden" name="ossType" value="${ossType}"/>
-            <input type="hidden" name="validationType"/>
-            <input type="hidden" name="downloadLocation"/>
-            <input type="hidden" name="licenseId" value=""/>
-            <input type="hidden" name="deactivateFlag" value="N"/>
-            <input type="hidden" name="renameFlag" value="N"/>
-            <input type="hidden" name="ossCopyFlag" value="N"/>
-            <!-- Content Header (Page header) -->
             <section class="content-header">
-                <div class="container-fluid">
-
-                </div><!-- /.container-fluid -->
+                <div class="container-fluid"></div><!-- /.container-fluid -->
             </section>
-
             <!-- Main content -->
             <section class="content">
-                <form name="ossForm" id="ossForm">
+                <form id="ossForm" name="ossForm">
+                    <input type="hidden" name="ossLicensesJson"/>
+                    <input type="hidden" name="ossId" th:value="${ossId}"/>
+                    <input type="hidden" name="licenseType" id="licenseType" th:value="${detail?.licenseType}"/>
+                    <input type="hidden" name="obligationType" id="obligationType" th:value="${detail?.obligationType}"/>
+                    <input type="hidden" name="comment" th:value="${detail?.comment}"/>
+                    <input type="hidden" name="ossType" th:value="${detail?.ossType}"/>
+                    <input type="hidden" name="validationType" th:value="${detail?.validationType}"/>
+                    <input type="hidden" name="downloadLocation" th:value="${downloadLocation}"/>
+                    <input type="hidden" name="licenseId" th:value="${detail?.licenseId}"/>
+                    <input type="hidden" name="deactivateFlag" value="N"/>
+                    <input type="hidden" name="renameFlag" value="N"/>
+                    <input type="hidden" name="ossCopyFlag" th:value="${copyData != null ? 'Y' : 'N'}" />
                     <div class="row">
-                    <div class="col-md-9">
-                        <div class="card card-secondary submit-form">
-                            <div class="card-header">
-                                <h3 class="card-title text-white">Form</h3>
+                        <div class="col-md-9">
+                            <div class="card card-secondary submit-form">
+                                <div class="card-header">
+                                    <h3 class="card-title text-white">Form</h3>
 
-                                <div class="card-tools">
-                                    <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"
-                                            type="button">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label for="licenseName" th:text="#{msg.common.field.OSS.name}"><span class="text-orange">*</span></label>
-                                    <input type="text" class="form-control autoComLicenseLong" name="ossName" id="licenseName" th:value="${detail?.ossName}"/>
-                                </div>
-                                <div class="form-group tag-form" name="append-stag-form">
-                                    <label th:text="#{msg.common.field.nickname}"></label>
-                                    <div class="input-group">
-                                        <input class="form-control" id="input_ossNicknames" type="text" onblur="oss_edit_fn.checkNickName(this)">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-default" id="ossNicknames" name="addTagButton" type="button">
-                                                Add
-                                            </button>
-                                        </div>
-                                        <!-- /btn-group -->
+                                    <div class="card-tools">
+                                        <button class="btn btn-tool text-white" data-card-widget="collapse"
+                                                title="Collapse"
+                                                type="button">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="form-group row" id="appendArea_ossNicknames">
-                                    <th:block th:each="ossNickname : ${detail?.ossNicknames}" th:if="${!#strings.isEmpty(ossNickname)}">
-                                        <div class="col-4 tag-container mb-1 pr-0">
-                                            <div class="external-event" name="appendArea_ossNicknames">
-                                                <input name="ossNicknames" th:value="${ossNickname}"
-                                                       type="hidden"/>
-                                                <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                   onclick="deleteTagButton(this)"></i>[[${ossNickname}]]
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="ossName" th:text="#{msg.common.field.OSS.name}"><span
+                                                class="text-orange">*</span></label>
+                                        <input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}"
+                                               type="text"/>
+                                    </div>
+                                    <div class="form-group tag-form" name="append-stag-form">
+                                        <label th:text="#{msg.common.field.nickname}"></label>
+                                        <div class="input-group">
+                                            <input class="form-control" id="input_ossNicknames" onblur="oss_edit_fn.checkNickName(this)"
+                                                   type="text">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default" id="ossNicknames" name="addTagButton"
+                                                        type="button">
+                                                    Add
+                                                </button>
                                             </div>
+                                            <!-- /btn-group -->
                                         </div>
-                                    </th:block>
-                                </div>
-                                <div class="form-group row" th:if="${detail?.ossType}">
-                                    <div class="col-2">
-                                        <label th:text="#{msg.common.field.OSS.type}"></label>
                                     </div>
-                                    <div class="col-9">
-                                        <span class="badge badge-primary mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'M')}">M</span>
-                                        <span class="badge badge-info mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
-                                        <span class="badge badge-success mr-1 text-sm" th:if="${#strings.contains(detail?.ossType, 'D')}">D</span>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="ossVersion" th:text="#{msg.common.field.OSS.version}"><span class="text-orange">*</span></label>
-                                    <input type="text" class="form-control autoComLicenseLong" name="ossVersion" id="ossVersion" th:value="${detail?.ossVersion}"/>
-                                </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.declaredLicense}"><span class="text-orange">*</span></label>
-                                    <input type="hidden" name="licenseDiv"/>
-                                    <div class="jqGridSet">
-                                        <table id="_licenseChoice"><tr><td></td></tr></table>
-                                        <div id="_licenseChoicePager"></div>
-                                    </div>
-                                <div id="disp_licenseText" style="display: none;"></div>
-                                </div>
-                                <div class="form-group tag-form" name="append-stag-form">
-                                    <label th:text="#{msg.common.field.detectedLicense}"></label>
-                                    <div class="input-group">
-                                        <input class="form-control" id="input_detectedLicense" type="text">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-default" id="detectedLicense" name="addTagButton"  type="button">
-                                                Add
-                                            </button>
-                                        </div>
-                                        <!-- /btn-group -->
-                                    </div>
-                                </div>
-                                <div class="form-group row" id="appendArea_detectedLicense">
-                                    <th:block th:each="detectedLicense : ${detail?.detectedLicenses}" th:if="${!#strings.isEmpty(detectedLicense)}">
-                                        <div class="col-4 tag-container mb-1 pr-0">
-                                            <div class="external-event" name="appendArea_detectedLicense">
-                                                <input name="detectedLicenses" th:value="${detectedLicense}"
-                                                       type="hidden"/>
-                                                <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                   onclick="deleteTag(this)"></i>[[${detectedLicense}]]
+                                    <div class="form-group row" id="appendArea_ossNicknames">
+                                        <th:block th:each="ossNickname : ${detail?.ossNicknames}"
+                                                  th:if="${!#strings.isEmpty(ossNickname)}">
+                                            <div class="col-4 tag-container mb-1 pr-0">
+                                                <div class="external-event" name="appendArea_ossNicknames">
+                                                    <input name="ossNicknames" th:value="${ossNickname}"
+                                                           type="hidden"/>
+                                                    <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                       onclick="deleteTag(this)"></i>[[${ossNickname}]]
+                                                </div>
                                             </div>
+                                        </th:block>
+                                    </div>
+                                    <div class="form-group row" th:if="${detail?.ossType}">
+                                        <div class="col-2">
+                                            <label th:text="#{msg.common.field.OSS.type}"></label>
                                         </div>
-                                    </th:block>
-                                </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.Copyright}">Attribution 고지</label>
-                                    <textarea class="form-control" rows="5" th:text="${detail?.copyright}"></textarea>
-                                </div>
-                                <div class="form-group" th:if="${detail?.licenseType}">
-                                        <label class="text-light-gray" th:text="#{msg.common.field.licenseType}"></label>
-                                        <select class="select2" id="licenseTypeSelect" name="licenseType"
-
-
-                                                style="width: 100%;" disabled>
+                                        <div class="col-9">
+                                            <span class="badge badge-primary mr-1 text-sm"
+                                                  th:if="${#strings.contains(detail?.ossType, 'M')}">M</span>
+                                            <span class="badge badge-info mr-1 text-sm"
+                                                  th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
+                                            <span class="badge badge-success mr-1 text-sm"
+                                                  th:if="${#strings.contains(detail?.ossType, 'D')}">D</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ossVersion" th:text="#{msg.common.field.OSS.version}"><span
+                                                class="text-orange">*</span></label>
+                                        <input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}"
+                                               type="text"/>
+                                        <span class="retxt"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.declaredLicense}"><span class="text-orange">*</span></label>
+                                        <input type="button" class="btn btn-yellow-04 btn-xs mx-3 mb-1 px-3 py-0" onclick="showLicenseTextvalue(this)" value="Show license text">
+                                        <input name="licenseDiv" type="hidden"/>
+                                        <div class="jqGridSet mt-1">
+                                            <table id="_licenseChoice">
+                                                <tr>
+                                                    <td></td>
+                                                </tr>
+                                            </table>
+                                            <div id="_licenseChoicePager"></div>
+                                        </div>
+                                        <div id="disp_licenseText" style="display: none;"></div>
+                                    </div>
+                                    <div class="form-group tag-form" name="append-stag-form">
+                                        <label th:text="#{msg.common.field.detectedLicense}"></label>
+                                        <div class="input-group">
+                                            <input class="form-control autoComOssLicense" id="input_detectedLicense" type="text">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default" id="detectedLicense" name="addTagButton"
+                                                        type="button">
+                                                    Add
+                                                </button>
+                                            </div>
+                                            <!-- /btn-group -->
+                                        </div>
+                                    </div>
+                                    <div class="form-group row" id="appendArea_detectedLicense">
+                                        <th:block th:each="detectedLicense : ${detail?.detectedLicenses}"
+                                                  th:if="${!#strings.isEmpty(detectedLicense)}">
+                                            <div class="col-4 tag-container mb-1 pr-0">
+                                                <div class="external-event" name="appendArea_detectedLicense">
+                                                    <input name="detectedLicenses" th:value="${detectedLicense}"
+                                                           type="hidden"/>
+                                                    <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                       onclick="deleteTag(this)"></i>[[${detectedLicense}]]
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.Copyright}">Attribution 고지</label>
+                                        <textarea class="form-control" rows="5"
+                                                  th:text="${detail?.copyright}"></textarea>
+                                    </div>
+                                    <div class="form-group" th:if="${detail?.licenseType}">
+                                        <label class="text-light-gray"
+                                               th:text="#{msg.common.field.licenseType}"></label>
+                                        <select class="select2" disabled id="licenseTypeSelect"
+                                                name="licenseType" style="width: 100%;">
                                             <option value=""></option>
                                             <th:block
                                                     th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}"
+                                                <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}"
+                                                        th:text="${code.cdDtlNm}"
                                                         th:value="${code.cdDtlNo}"></option>
                                             </th:block>
                                         </select>
-                                </div>
-                                <div class="form-group row" th:if="${detail?.obligationType}">
-                                    <div class="col-2">
-                                        <label class="text-light-gray" th:text="#{msg.common.field.obligation}"></label>
                                     </div>
-                                    <div class="col-9">
-                                        <span th:if="${#strings.equals('10', detail.obligationType)}">
+                                    <div class="form-group row" th:if="${detail?.obligationType}">
+                                        <div class="col-2">
+                                            <label class="text-light-gray"
+                                                   th:text="#{msg.common.field.obligation}"></label>
+                                        </div>
+                                        <div class="col-9">
+                                        <span th:if="${#strings.equals('10', detail?.obligationType)}">
                                             <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
                                         </span>
-                                        <span th:if="${#strings.equals('11', detail.obligationType)}">
+                                            <span th:if="${#strings.equals('11', detail?.obligationType)}">
                                             <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
                                             <i class="far fa-file-alt fa-lg mx-1" title="Source Code"></i>
                                         </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.downloadLocation}"></label>
+                                        <input class="form-control" id="inputName" name="downloadLocations" th:value="${detail?.downloadLocation}"
+                                               type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.homepage}">홈페이지</label>
+                                        <input class="form-control" name="downloadLocations" th:value="${homepage}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.summaryDescription}">요약 설명</label>
+                                        <textarea class="form-control" rows="5"
+                                                  th:text="${summaryDescription}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label th:text="#{msg.common.field.attribution}">Attribution 고지</label>
+                                        <textarea class="form-control" rows="5" th:text="${attribution}"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputName">Comment</label>
+                                        <textarea class="form-control" id="commentContcommentCont" name='commentInput'
+                                                  rows="3" style="height: 800px"></textarea>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.downloadLocation}"></label>
-                                    <input class="form-control" name="downloadLocations" id="inputName" type="text" th:value="${detail.downloadLocation}">
+                                <div class="card-footer clearfix">
+                                    <a th:if="${copyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
+                                    <a th:if="${copyData == null}" class="btn btn-teal-01 float-right mx-2" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="save">Save</a>
+                                    <a class="btn btn-lg-red float-right" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="copy">copy</a>
                                 </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.homepage}">홈페이지</label>
-                                    <input class="form-control" name="downloadLocations" th:value="${homepage}">
-                                </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.summaryDescription}">요약 설명</label>
-                                    <textarea class="form-control" rows="5" th:text="${summaryDescription}"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label th:text="#{msg.common.field.attribution}">Attribution 고지</label>
-                                    <textarea class="form-control" rows="5" th:text="${attribution}"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputName">Comment</label>
-                                    <textarea class="form-control" id="commentInput" name='commentInput'
-                                              rows="3" style="height: 800px"></textarea>
-                                </div>
-                            </div>
-                            <div class="card-footer clearfix">
-                                <a class="btn btn-secondary float-left" href="javascript:void(0)"
-                                   id="delete">Delete</a>
-                                <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save">Save</a>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-3">
+                        <div class="col-md-3">
                             <div class="card card-lg-red">
                                 <div class="card-header">
                                     <h3 class="card-title">Comment</h3>
@@ -201,7 +220,7 @@
                                 </div>
                             </div>
                         </div>
-                </div>
+                    </div>
                 </form>
             </section>
             <!-- modal -->

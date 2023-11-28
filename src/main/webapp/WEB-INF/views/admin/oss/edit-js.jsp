@@ -214,7 +214,7 @@
 		init : function(){ 
 			$('.btnCancel').click(function(){
 				$('.pop').hide();
-				$('#blind_wrap').hide();oss_edit_fn
+				$('#blind_wrap').hide();
 			}); // 팝업 닫기
 			
 			//닉네임 인풋 추가
@@ -731,10 +731,13 @@
 				{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
 				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
 				{name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
-                        dataInit: function (elem) { 
-	                               $(elem).focus(function () { setCustomAutoComplete('multi'); }) 
-	                         }
-	                    }},
+                        dataInit: function (elem) {
+                            $(elem).focus(function () {
+                                setCustomAutoComplete('multi');
+                            })
+                        }
+                    }
+                },
 				{name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
 				{name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
 				{name:'licenseName',index:'licenseName', width:50, hidden:true},

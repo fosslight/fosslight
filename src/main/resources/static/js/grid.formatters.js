@@ -1,5 +1,5 @@
-// license grid formatter
-const license_grid_format = {
+// license list page grid formatter
+const lic_lst_fmt = {
     setGridParam: function () {
         var paramData = $('#licenseSearch').serializeObject();
 
@@ -41,8 +41,8 @@ const license_grid_format = {
 }
 
 let linkFlag;
-// oss grid formatter
-const oss_grid_format = {
+// oss list page grid formatter
+const oss_lst_fmt = {
     ossTypeFormat: function (cellvalue, options, rowObject) {
         var display = "";
 
@@ -97,7 +97,15 @@ const oss_grid_format = {
     }
 }
 
-const common_grid_format = {
+// oss edit page grid formatter
+const oss_edit_fmt = {
+    displayButtons : function (cellvalue, options, rowObject) {
+        return "<input type=\"button\" value=\"delete\" class=\"btn btn-default\" onclick=\"exeDelete(" + options.rowId + ")\" />";
+    },
+}
+
+// common used grid formatter
+const common_fmt = {
     truncateText: function (cellValue, options, rowObject) {
         var maxLength = options.colModel.maxlength;
         var firstLine = cellValue.split('\n')[0];

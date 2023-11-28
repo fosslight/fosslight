@@ -6,15 +6,15 @@
         //const G_ROW_CNT = "*{gRowCnt}";
 
         $(window).load(function () {
-            license_edit_data.init();
+            lic_edit_data.init();
 
             if($('input[name=licenseId]').val()) {
-                license_edit_commemt.getCommentList();
+                lic_edit_cmt.getCommentList();
             }
         });
 
-        const license_edit_data = {
-            detail : /*[[${detail}]]*/ null,
+        const lic_edit_data = {
+            detail : [[${ detail }]],
             init: function () {
                 $('#licenseTypeSelect').select2({
                     placeholder: "License Type",
@@ -39,9 +39,9 @@
 
                 //save license
                 $("#save").on('click',function(){
-                    alertify.confirm(String(/*[[#{msg.common.confirm.save}]]*/), function (e) {
+                    alertify.confirm(String([[ #{msg.common.confirm.save} ]]), function (e) {
                         if (e) {
-                            license_edit_fn.registSubmit();
+                            lic_edit_fn.registSubmit();
                         } else {
                             return false;
                         }
@@ -53,11 +53,11 @@
                     var editorVal = CKEDITOR.instances.editor.getData();
 
                     if(editorVal == "") {
-                        alertify.alert(String(/*[[#{msg.license.confirm.delete.required.comment}]]*/), function(){});
+                        alertify.alert(String([[ #{msg.license.confirm.delete.required.comment} ]]), function(){});
                         return false;
                     }
 
-                    alertify.confirm(String(/*[[#{msg.license.confirm.delete}]]*/), function (e) {
+                    alertify.confirm(String([[ #{msg.license.confirm.delete} ]]), function (e) {
                         if (e) {
                             $('input[name=comment]').val(editorVal);
                             deleteSubmit();
@@ -69,21 +69,21 @@
             }
         }
 
-        const license_edit_fn = {
+        const lic_edit_fn = {
             registSubmit: function () {
                 $("#licenseForm").ajaxForm({
                     url :"/license/validation",
                     type : 'POST',
                     dataType:"json",
                     cache : false,
-                    success: license_edit_fn.onValidSuccess,
-                    error : license_edit_fn.onError
+                    success: lic_edit_fn.onValidSuccess,
+                    error : lic_edit_fn.onError
                 }).submit();
             },
             onValidSuccess: function (json, status) {
                 if (json.isValid == 'false') {
-                    license_edit_fn.createValidMsgComplex(json);
-                    alertify.error(String(/*[[#{msg.common.valid}]]*/), 0);
+                    lic_edit_fn.createValidMsgComplex(json);
+                    alertify.error(String([[ #{msg.common.valid} ]]), 0);
                 } else if (json.isValid == 'true') {
                     loading.show();
 
@@ -105,8 +105,8 @@
                         type: 'POST',
                         dataType: "json",
                         cache: false,
-                        success: license_edit_fn.onRegistSuccess,
-                        error: license_edit_fn.onError
+                        success: lic_edit_fn.onRegistSuccess,
+                        error: lic_edit_fn.onError
                     }).submit();
                 }
             },
@@ -114,19 +114,19 @@
                 loading.hide();
 
                 if(json.resCd == '10') {
-                    alertify.alert(String(/*[[#{msg.common.success}]]*/), function(){
+                    alertify.alert(String([[ #{msg.common.success} ]]), function(){
                         callDeleteTabInFrame("license-edit_" + json.licenseId);
                         callReloadTabInframe("/license/list", "license-list");
                     });
                 } else {
-                    alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 }
             },
             onError: function(data, status){
-                alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                alertify.error(String([[ #{msg.common.valid2} ]]), 0);
             },
             createValidMsgComplex: function(msgData){
-                license_edit_fn.hideErrMsg();
+                lic_edit_fn.hideErrMsg();
 
                 $.each(msgData,function(key,value) {
                     if("isValid" != key && "validMsg" != key) {
@@ -171,27 +171,32 @@
             }
         };
 
-        const license_edit_commemt = {
+        const lic_edit_cmt = {
             getCommentList: function () {
-                $.ajax({
-                    url: "/comment/getCommentList",
-                    type: 'GET',
-                    dataType: 'html',
-                    cache: false,
-                    data: {
-                        referenceId: license_edit_data.detail.licenseId,
-                        referenceDiv: 'license'
-                    },
-                    success: function (res) {
+                const data = {
+                    referenceId: lic_edit_data.detail.licenseId,
+                    referenceDiv: 'license'
+                };
+
+                getAjaxData(data, "/comment/getCommentList", 'html',
+                    function (res) {
                         $('#commentAreaFragment').replaceWith(res);
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
-                    }
+                        $("[name ='commentModifyBtn']").on("click", function (e){
+                            e.preventDefault();
+                            lic_edit_cmt.handleModalOpen($(this))
+                        })
+                        $("[name ='commentDeleteBtn']").on("click", function (e){
+                            e.preventDefault();
+                            lic_edit_cmt.deleteComment($(this))
+                        })
+                },
+                    function (xhr, ajaxOptions, thrownError) {
+                        alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 });
             },
-            deleteComment: function (event) {
-                const commId = event.getAttribute('data-commId');
+            deleteComment: function (el) {
+                console.log(el)
+                const commId = el.attr('data-commId');
                 if (!confirm("Are you sure you want to delete this comment?")) {
                     return;
                 }
@@ -203,25 +208,29 @@
                     cache: false,
                     data: {'commId': commId},
                     success: function (data) {
-                        alertify.error(String(/*[[#{msg.common.success}]]*/));
-                        license_edit_commemt.getCommentList();
+                        alertify.error(String([[#{msg.common.success}]]));
+                        lic_edit_cmt.getCommentList();
                     },
                     error: function () {
-                        alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                        alertify.error(String([[#{msg.common.valid2}]]), 0);
                     }
                 });
             },
-            handleModalOpen: function (event) {
-                const commId = event.getAttribute('data-commId');
-                const contents = event.getAttribute('data-contents');
+            handleModalOpen: function (el) {
+                const commId = el.attr('data-commId');
+                const contents = el.attr('data-contents');
 
-                $("#updateCommId").val(commId);
-                $('#updateContents').summernote('code', contents);
+                $("#modifiedCommentId").val(commId);
+                $('#modifiedCommentCont').summernote('code', contents);
+                $("#modifiedCommentSaveBtn").on("click", function (e) {
+                    e.preventDefault();
+                    lic_edit_cmt.editComment();
+                })
             },
             editComment: function () {
-                const commId = $("#updateCommId").val();
+                const commId = $("#modifiedCommentId").val();
                 const referenceId = $('input[name=licenseId]').val();
-                const contents = $('#updateContents').summernote('code');
+                const contents = $('#modifiedCommentCont').summernote('code');
                 const param = {
                     'commId': commId,
                     'contents': contents,
@@ -236,29 +245,16 @@
                     cache: false,
                     data: param,
                     success: function (json) {
-                        alertify.success(String(/*[[#{msg.common.success}]]*/), 0);
+                        alertify.success(String([[ #{msg.common.success} ]]), 0);
                     },
                     error: function () {
-                        alertify.error(String(/*[[#{msg.common.valid2}]]*/), 0);
+                        alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                     },
                     complete: function () {
-                        license_edit_commemt.getCommentList();
+                        lic_edit_cmt.getCommentList();
                     }
                 });
-
                 return false;
-
-            },
-            createNonToolbarEditor: function (_commId) {
-                var _editor = CKEDITOR.instances['comm_editor_' + _commId];
-
-                if (_editor) {
-                    _editor.destroy();
-                }
-
-                if ($('#comm_editor_' + _commId).html().length > 0) {
-                    CKEDITOR.replace('comm_editor_' + _commId, {customConfig: '<c:url value="/js/customEditorConf_Comment.js"/>'});
-                }
             }
         }
 

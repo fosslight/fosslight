@@ -23,14 +23,12 @@
                             <td class="text-right py-0 align-middle">
                             <td class="text-right py-0 align-middle">
                                 <div class="btn-group btn-group-sm">
-                                    <a class="btn btn btn-default" data-target="#modal-comment"
-                                       data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}"
-                                       onclick="license_edit_commemt.handleModalOpen(this)">
+                                    <button class="btn btn btn-default" name="commentModifyBtn" data-target="#modal-comment"
+                                       data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}">
                                         <i class="fas fa-pencil-alt"></i>
-                                    </a>
-                                    <a class="btn btn-lg-red" href="#" th:data-commId="${comment.commId}"
-                                       onclick="license_edit_commemt.deleteComment(this)"><i
-                                            class="fas fa-trash"></i></a>
+                                    </button>
+                                    <button class="btn btn-lg-red" name="commentDeleteBtn" th:data-commId="${comment.commId}"><i
+                                            class="fas fa-trash"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -56,12 +54,12 @@
                 </button>
             </div>
             <div class="modal-body" id="commentListArea">
-                <input type="hidden" id="updateCommId">
-                <textarea class="form-control" name="commentInput" id="updateContents" rows="3" style="height: 800px"></textarea>
+                <input type="hidden" id="modifiedCommentId">
+                <textarea class="form-control" id="modifiedCommentCont" name="commentInput" rows="3" style="height: 800px"></textarea>
             </div>
             <div class="modal-footer justify-content-between">
                 <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
-                <button class="btn btn-primary" data-dismiss="modal" type="button" onclick="license_edit_commemt.editComment()">Save changes</button>
+                <button class="btn btn-primary" id="modifiedCommentSaveBtn" data-dismiss="modal" type="button">Save changes</button>
             </div>
         </div>
     </div>

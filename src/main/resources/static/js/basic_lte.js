@@ -304,7 +304,72 @@ const commonAjax = {
 };
 
 function fnBasicAjaxData(data, url) {
-    return $.ajax({	type: 'GET',url:url,data:data,headers: {'Content-Type': 'application/json'}});
+    return $.ajax({	type: 'GET', url:url, data:data, headers: {'Content-Type': 'application/json'}});
+}
+
+function getAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+    return $.ajax({
+        type: 'GET',
+        url: url,
+        data: data,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        dataType: dataType || 'html',
+        success: function (data, status, xhr) {
+            if (successCallback && typeof successCallback === 'function') {
+                successCallback(data, status, xhr);
+            }
+        },
+        error: function (xhr, status, error) {
+            if (errorCallback && typeof errorCallback === 'function') {
+                errorCallback(xhr, status, error);
+            }
+        },
+        complete: function (xhr, status, error) {
+            if (completeCallback && typeof completeCallback === 'function') {
+                completeCallback(xhr, status, error);
+            }
+        }
+    });
+}
+
+function postAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+    return $.ajax({
+        type: 'POST',
+        url: url,
+        data: data,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        dataType: dataType || 'html',
+        success: function (data, status, xhr) {
+            if (successCallback && typeof successCallback === 'function') {
+                successCallback(data, status, xhr);
+            }
+        },
+        error: function (xhr, status, error) {
+            if (errorCallback && typeof errorCallback === 'function') {
+                errorCallback(xhr, status, error);
+            }
+        },
+        complete: function (xhr, status, error) {
+            if (completeCallback && typeof completeCallback === 'function') {
+                completeCallback(xhr, status, error);
+            }
+        }
+    });
+}
+
+function formAjaxData(formId, url, successCallback, errorCallback) {
+    $(formId).ajaxForm({
+        url: url,
+        type: 'POST',
+        dataType: "json",
+        cache: false,
+        success: successCallback,
+        error: errorCallback
+    }).submit();
 }
 
 const autoComplete = {

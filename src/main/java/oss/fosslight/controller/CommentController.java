@@ -99,9 +99,10 @@ public class CommentController extends CoTopComponent {
 	}
 	
 	@GetMapping(value=COMMENT.DIV_COMMENT_LIST)
-	public @ResponseBody ResponseEntity<Object> getDivCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
+	public String getDivCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
 		List<CommentsHistory> result = commentService.getCommentList(commentsHistory);
+		model.addAttribute("commentList", result);
 		
-		return makeJsonResponseHeader(result);
+		return "fragments/comment-fragments :: commentAreaFragment";
 	}
 }
