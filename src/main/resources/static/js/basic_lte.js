@@ -1,4 +1,5 @@
 const LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
+let onAjaxLoadingHide = false;
 
 $( document ).ajaxSend(function( event, jqxhr, settings ) {
     jqxhr.setRequestHeader("AJAX", true);

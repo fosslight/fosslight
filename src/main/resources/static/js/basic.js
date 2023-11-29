@@ -865,8 +865,6 @@ function createValidMsgComplex(msgData){
 	});
 }
 
-// grid 관련
-// grid pager 미표시
 function hidePageNav(pagerId) {
 	if($("#"+pagerId+"_center")) {
 		$("#"+pagerId+"_center").hide();

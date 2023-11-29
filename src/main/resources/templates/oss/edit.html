@@ -76,14 +76,14 @@
                                     </div>
                                     <div class="form-group row" th:if="${detail?.ossType}">
                                         <div class="col-2">
-                                            <label th:text="#{msg.common.field.OSS.type}"></label>
+                                            <label class="text-gray" th:text="#{msg.common.field.OSS.type}"></label>
                                         </div>
                                         <div class="col-9">
                                             <span class="badge badge-primary mr-1 text-sm"
                                                   th:if="${#strings.contains(detail?.ossType, 'M')}">M</span>
-                                            <span class="badge badge-info mr-1 text-sm"
-                                                  th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
                                             <span class="badge badge-success mr-1 text-sm"
+                                                  th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
+                                            <span class="badge badge-info mr-1 text-sm"
                                                   th:if="${#strings.contains(detail?.ossType, 'D')}">D</span>
                                         </div>
                                     </div>
@@ -98,6 +98,7 @@
                                         <label th:text="#{msg.common.field.declaredLicense}"><span class="text-orange">*</span></label>
                                         <input type="button" class="btn btn-yellow-04 btn-xs mx-3 mb-1 px-3 py-0" onclick="showLicenseTextvalue(this)" value="Show license text">
                                         <input name="licenseDiv" type="hidden"/>
+                                        <div class="mark" id="licenseMarkText"></div>
                                         <div class="jqGridSet mt-1">
                                             <table id="_licenseChoice">
                                                 <tr>
@@ -160,11 +161,11 @@
                                         </div>
                                         <div class="col-9">
                                         <span th:if="${#strings.equals('10', detail?.obligationType)}">
-                                            <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
+                                            <i class="far fa-file-code text-secondary fa-lg mx-1" title="Notice"></i>
                                         </span>
                                             <span th:if="${#strings.equals('11', detail?.obligationType)}">
-                                            <i class="far fa-file-code fa-lg mx-1" title="Notice"></i>
-                                            <i class="far fa-file-alt fa-lg mx-1" title="Source Code"></i>
+                                            <i class="far fa-file-code text-secondary fa-lg mx-1" title="Notice"></i>
+                                            <i class="far fa-file-alt text-secondary fa-lg mx-1" title="Source Code"></i>
                                         </span>
                                         </div>
                                     </div>
@@ -188,7 +189,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="inputName">Comment</label>
-                                        <textarea class="form-control" id="commentContcommentCont" name='commentInput'
+                                        <textarea class="form-control" id="commentCont" name='commentInput'
                                                   rows="3" style="height: 800px"></textarea>
                                     </div>
                                 </div>
@@ -227,6 +228,10 @@
             <div class="modal fade" id="modal-comment">
                 <th:block th:replace="fragments/comment-fragments :: commentPopupFragment"></th:block>
             </div>
+            <!--/. modal -->
+            <!-- loading bar -->
+            <th:block th:replace="fragments/popup-fragments :: loadingWrapFragment"></th:block>
+            <!-- /. loading bar -->
         </div>
     </div>
     </body>

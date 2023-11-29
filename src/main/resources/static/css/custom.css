@@ -33,11 +33,13 @@ ul { list-style-type: none; }
 .custom-layout .text-gray { color: #999 ; }
 .custom-layout .text-smaller { font-size: smaller;}
 
+/* icon color option */
 .custom-layout .icon-orange { color: #ff5a00; }
 .custom-layout .icon-orange:hover { color: #c95200; }
 .custom-layout .icon-yellow { color: #ffc003;}
 .custom-layout .icon-yellow:hover { color: #c95200; }
 
+/* btn color option */
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
 .custom-layout .btn-lg-gray {background-color: #6b6b6b; font-weight: 500; color: #fff}
@@ -68,6 +70,7 @@ ul { list-style-type: none; }
 .custom-layout .btn-dark-04 { background-color: #595959; font-weight: 500; color: #fff }
 .custom-layout .btn-dark-04:hover { background-color: #001429; }
 
+/* bg color option */
 .custom-layout .bg-lg-red { background-color: #a50034; }
 .custom-layout .bg-lg-gray { background-color: #6b6b6b; }
 .custom-layout .bg-lg-gainsboro { background-color: #d6d9e1; }
@@ -100,6 +103,15 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .nav-pills .nav-link.active, .nav-pills .show>.nav-link { color: #fff;background-color: #a50034; }
 .btn-outline-lg-red { color: #a50034; border-color: #a50034; }
 .btn-outline-lg-red:hover {background-color: #a50034; color: #fff; }
+.custom-layout .mark {background-color: transparent; font-size: .8rem}
+
+/* loading bar */
+.custom-layout #loading_wrap {position:fixed; z-index:1001; width:100%; height:100%;}
+.custom-layout #loading_wrap .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+    opacity: .5;}
+.custom-layout #loading_wrap img {position:fixed; top:0; left:0; right:0; bottom:0; z-index:1000; margin:auto; width:48px; height:48px;}
 
 /* card */
 .card-lg-red:not(.card-outline)>.card-header { background-color: #a50034;color: #fff; }
