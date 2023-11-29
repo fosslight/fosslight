@@ -347,7 +347,7 @@ var loading = {
 
 /* iFrame에서 호출 (보안문제로 broadcast하여 호출) */
 function receiveMessage(event) {
-if (typeof event.data === 'string') {
+if ('undefined' !== typeof event.data && 'string' === typeof event.data) {
 	var data = JSON.parse(event.data);
 	
 	switch(data.action){
