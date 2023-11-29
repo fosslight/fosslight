@@ -194,9 +194,9 @@
                                     </div>
                                 </div>
                                 <div class="card-footer clearfix">
-                                    <a th:if="${copyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
-                                    <a th:if="${copyData == null}" class="btn btn-teal-01 float-right mx-2" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="save">Save</a>
-                                    <a class="btn btn-lg-red float-right" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="copy">copy</a>
+                                    <a th:if="${isCopyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
+                                    <a class="btn btn-teal-01 float-right mx-2" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="save">Save</a>
+                                    <a th:if="${isCopyData == null}" class="btn btn-lg-red float-right" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
                                 </div>
                             </div>
                         </div>

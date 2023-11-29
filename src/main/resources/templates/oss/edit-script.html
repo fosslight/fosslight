@@ -47,17 +47,14 @@
             vulnInfoList: [[ ${vulnInfoList}]],
             clone: '',
             typeCodes: [],
-            copyData: [[ ${copyData}]],
             ossId: [[ ${ossId}]],
+            isCopyData: [[ ${isCopyData} ]],
             init: function () {
-                if (this.copyData) {
-                    list = this.copyData.ossLicenses;
-                    $('input[name=ossCopyFlag]').val("Y");
-                } else {
-                    list = this.list.rows;
-                }
+                list = this.isCopyData ? this.detail.ossLicenses : this.list.rows;
 
-                if (this.ossId) {
+                if (this.isCopyData) {
+                    $('input[name=ossCopyFlag]').val("Y");
+                } else if (this.ossId) {
                     oss_edit_cmt.getCommentList();
                 }
 
@@ -353,6 +350,15 @@
                 } else {
                     $(target).parent().next("span.retxt").hide();
                 }
+            },
+            copyOssPage : function () {
+                const ossId = oss_edit_data.ossId;
+                console.log(ossId);
+                // if(opener == null) {
+                    //callCreateTabInFrame(`copy_${ossId}_Opensource`, `/oss/copy/${ossId}`, `oss-edit_${ossId}`, true);
+                // } else {
+                    window.location.href = "/oss/copy/" + ossId;
+                // }
             }
         }
 
