@@ -39,6 +39,12 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
+				if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
+					alertify.alert('<spring:message code="msg.project.validation.error" />');
+					
+					return false;
+				}
+				
 				if(com_fn.isAndroidOnly()) {
 					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 					
