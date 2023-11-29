@@ -1,6 +1,63 @@
 const LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 let onAjaxLoadingHide = false;
 
+$(document).ready(function (){
+    //alertify Default 설정
+
+    if(typeof alertify !== 'undefined') {
+        alertify.defaults = {
+            // dialogs defaults
+            autoReset:true,
+            basic:false,
+            closable:true,
+            closableByDimmer:false,
+            frameless:false,
+            maintainFocus:false, // <== global default not per instance, applies to all dialogs
+            maximizable:true,
+            modal:true,
+            movable:true,
+            moveBounded:false,
+            overflow:true,
+            padding: true,
+            pinnable:true,
+            pinned:true,
+            preventBodyShift:false, // <== global default not per instance, applies to all dialogs
+            resizable:true,
+            startMaximized:false,
+            transition:'fade',
+
+            // notifier defaults
+            notifier:{
+                // auto-dismiss wait time (in seconds)
+                delay:3,
+                // default position
+                position:'bottom-right'
+            },
+
+            // language resources
+            glossary:{
+                // dialogs default title
+                title:'FOSSLight Hub',
+                // ok button text
+                ok: 'OK',
+                // cancel button text
+                cancel: 'Cancel'
+            },
+
+            // theme settings
+            theme:{
+                // class name attached to prompt dialog input textbox.
+                input:'ajs-input',
+                // class name attached to ok button
+                ok:'ajs-ok',
+                // class name attached to cancel button
+                cancel:'ajs-cancel'
+            }
+        };
+    }
+
+});
+
 $( document ).ajaxSend(function( event, jqxhr, settings ) {
     jqxhr.setRequestHeader("AJAX", true);
 });
@@ -308,7 +365,7 @@ function fnBasicAjaxData(data, url) {
     return $.ajax({	type: 'GET', url:url, data:data, headers: {'Content-Type': 'application/json'}});
 }
 
-function getAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+function getAjaxJsonData(data, url, dataType, successCallback, errorCallback, completeCallback) {
     return $.ajax({
         type: 'GET',
         url: url,
@@ -335,15 +392,39 @@ function getAjaxData(data, url, dataType, successCallback, errorCallback, comple
     });
 }
 
-function postAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+function postAjaxJsonData(data, url, dataType, successCallback, errorCallback, completeCallback) {
     return $.ajax({
         type: 'POST',
         url: url,
         data: data,
+        cache : false,
         headers: {
             'Content-Type': 'application/json'
         },
         dataType: dataType || 'html',
+        success: function (data, status, xhr) {
+            if (successCallback && typeof successCallback === 'function') {
+                successCallback(data, status, xhr);
+            }
+        },
+        error: function (xhr, status, error) {
+            if (errorCallback && typeof errorCallback === 'function') {
+                errorCallback(xhr, status, error);
+            }
+        },
+        complete: function (xhr, status, error) {
+            if (completeCallback && typeof completeCallback === 'function') {
+                completeCallback(xhr, status, error);
+            }
+        }
+    });
+}
+function postAjaxData(data, url,successCallback, errorCallback, completeCallback) {
+    return $.ajax({
+        type: 'POST',
+        url: url,
+        data: data,
+        cache : false,
         success: function (data, status, xhr) {
             if (successCallback && typeof successCallback === 'function') {
                 successCallback(data, status, xhr);

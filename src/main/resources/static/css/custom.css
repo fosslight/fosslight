@@ -86,6 +86,8 @@ ul { list-style-type: none; }
 .custom-layout .bg-purple { background-color: #702f9f; }
 .custom-layout .bg-pink { background-color: #f70ce4; }
 
+/*popup*/
+.custom-layout #promptPopup {width:470px; height:560px;}
 a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:hover { background-color: #7e101b!important; }
 
 .content-wrapper.custom-layout { font-size: 1rem;}

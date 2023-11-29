@@ -26,7 +26,16 @@
                     allowClear: true,
                 });
 
-                $("[name='commentInput']").summernote();
+                $("[name='commentInput']").summernote({
+                    callbacks: {
+                        onInit: function() {
+                            var content = $(this).summernote('code');
+                            if (content === '<p><br></p>') {
+                                $(this).summernote('code', '');
+                            }
+                        }
+                    }
+                });
 
                 $("[name='addTagButton']").click(function (e) {
                     const elId = this.id;
@@ -178,12 +187,12 @@
                     referenceDiv: 'license'
                 };
 
-                getAjaxData(data, "/comment/getCommentList", 'html',
+                getAjaxJsonData(data, "/comment/getCommentList", 'html',
                     function (res) {
                         $('#commentAreaFragment').replaceWith(res);
                         $("[name ='commentModifyBtn']").on("click", function (e){
                             e.preventDefault();
-                            lic_edit_cmt.handleModalOpen($(this))
+                            lic_edit_cmt.handlePromptPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
                         })
                         $("[name ='commentDeleteBtn']").on("click", function (e){
                             e.preventDefault();
@@ -195,42 +204,48 @@
                 });
             },
             deleteComment: function (el) {
-                console.log(el)
                 const commId = el.attr('data-commId');
                 if (!confirm("Are you sure you want to delete this comment?")) {
                     return;
                 }
 
-                $.ajax({
-                    url: "/comment/deleteComment",
-                    type: 'POST',
-                    dataType: 'json',
-                    cache: false,
-                    data: {'commId': commId},
-                    success: function (data) {
-                        alertify.error(String([[#{msg.common.success}]]));
-                        lic_edit_cmt.getCommentList();
-                    },
-                    error: function () {
-                        alertify.error(String([[#{msg.common.valid2}]]), 0);
-                    }
+                postAjaxData({'commId': commId}, "/comment/deleteComment", function (data) {
+                    alertify.error(String([[ #{msg.common.success}]]));
+                    lic_edit_cmt.getCommentList();
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
                 });
             },
-            handleModalOpen: function (el) {
-                const commId = el.attr('data-commId');
-                const contents = el.attr('data-contents');
-
-                $("#modifiedCommentId").val(commId);
-                $('#modifiedCommentCont').summernote('code', contents);
-                $("#modifiedCommentSaveBtn").on("click", function (e) {
-                    e.preventDefault();
-                    lic_edit_cmt.editComment();
-                })
+            handlePromptPopupOpen: function (id, contents) {
+                const param = {
+                    data : {commId : id},
+                    templateName: "comment-fragments",
+                    fragmentName: "commentPopupFragment"
+                }
+                postAjaxJsonData(JSON.stringify(param), "/temp/popup", "html", function (res) {
+                    alertify.confirm(res, function (e) {
+                        if(e) {
+                            lic_edit_cmt.editComment();
+                        } else {
+                            return false;
+                        }
+                    }).set('resizable', true)
+                        .resizeTo('650px', '450px');
+                }, null, function () {
+                    $("#modifiedCommentEditor").summernote({
+                        height: 200,
+                        callbacks: {
+                            onInit: function() {
+                                $(this).summernote('code', contents);
+                            }
+                        }
+                    });
+                });
             },
             editComment: function () {
                 const commId = $("#modifiedCommentId").val();
                 const referenceId = $('input[name=licenseId]').val();
-                const contents = $('#modifiedCommentCont').summernote('code');
+                const contents = $('#modifiedCommentEditor').summernote('code');
                 const param = {
                     'commId': commId,
                     'contents': contents,
@@ -238,22 +253,14 @@
                     'referenceId': referenceId
                 };
 
-                $.ajax({
-                    url: "/comment/updateComment",
-                    type: 'POST',
-                    dataType: 'json',
-                    cache: false,
-                    data: param,
-                    success: function (json) {
-                        alertify.success(String([[ #{msg.common.success} ]]), 0);
-                    },
-                    error: function () {
-                        alertify.error(String([[ #{msg.common.valid2} ]]), 0);
-                    },
-                    complete: function () {
-                        lic_edit_cmt.getCommentList();
-                    }
+                postAjaxData(param,"/comment/updateComment", function (json) {
+                    alertify.success(String([[ #{msg.common.success} ]]), 0);
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
+                }, function () {
+                    lic_edit_cmt.getCommentList();
                 });
+
                 return false;
             }
         }

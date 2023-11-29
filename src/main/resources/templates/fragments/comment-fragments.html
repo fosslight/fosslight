@@ -23,8 +23,7 @@
                             <td class="text-right py-0 align-middle">
                             <td class="text-right py-0 align-middle">
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn btn-default" name="commentModifyBtn" data-target="#modal-comment"
-                                       data-toggle="modal" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}">
+                                    <button class="btn btn btn-default" name="commentModifyBtn" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}">
                                         <i class="fas fa-pencil-alt"></i>
                                     </button>
                                     <button class="btn btn-lg-red" name="commentDeleteBtn" th:data-commId="${comment.commId}"><i
@@ -45,23 +44,13 @@
     </div>
 </th:block>
 <th:block th:fragment="commentPopupFragment">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Comment</h4>
-                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="commentListArea">
-                <input type="hidden" id="modifiedCommentId">
-                <textarea class="form-control" id="modifiedCommentCont" name="commentInput" rows="3" style="height: 800px"></textarea>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
-                <button class="btn btn-primary" id="modifiedCommentSaveBtn" data-dismiss="modal" type="button">Save changes</button>
-            </div>
-        </div>
+   <div class="comment-popup">
+       <div class="row mt-2">
+           <div class="col-12">
+               <input type="hidden" id="modifiedCommentId" th:value="${data.commId}">
+               <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
+           </div>
+       </div>
     </div>
 </th:block>
 </html>

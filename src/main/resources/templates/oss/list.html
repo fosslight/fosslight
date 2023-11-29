@@ -139,7 +139,7 @@
                     <div class="row px-1">
                         <div class="col-md-6">
                             <div class="row">
-                                <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" type="button">Delete
+                                <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" type="button" onclick="oss_lst_fn.deleteOss()">Delete
                                 </button>
                             </div>
                         </div>
@@ -173,6 +173,10 @@
 
                         </div>
                     </div>
+                </div>
+                <!-- loading bar -->
+                <th:block th:replace="fragments/popup-fragments :: loadingWrapFragment"></th:block>
+                <!-- /. loading bar -->
             </section>
         </div>
     </div>

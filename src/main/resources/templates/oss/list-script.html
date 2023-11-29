@@ -104,6 +104,80 @@
             }
 
             return postData;
+        },
+        deleteOss : function () {
+            var deleteIds = [];
+
+            $("#list input[type=checkbox]").each(function() {
+                if ($(this).is(":checked")) {
+                    var obj = {};
+
+                    var name = $(this).attr('name');
+                    var ossId = name.split("_")[2];
+                    deleteIds.push(ossId);
+                }
+            });
+
+            if (deleteIds.length > 0) {
+                const param = {
+                    templateName: "popup-fragments",
+                    fragmentName: "promptPopupFragment",
+                    data: { context : "Do you want to delete the oss ?"}
+                };
+                postAjaxJsonData(JSON.stringify(param), "/temp/popup", "html", function (res) {
+                    alertify.confirm(res, function (e) {
+                        const comment = $("#editor").summernote('code');
+                        if (e) {
+                            if("" == comment){
+                                alertify.alert(String([[ #{msg.oss.required.deletion} ]]), function(){});
+                                return false;
+                            } else {
+                                oss_lst_fn.multiDelAjax(deleteIds, comment);
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+                    //initCKEditorToolbar("editor");
+                }, null, function () {
+                    $("#editor").summernote({
+                        height: 150,
+                        callbacks: {
+                            onInit: function() {
+                                var content = $(this).summernote('code');
+                                if (content === '<p><br></p>') {
+                                    $(this).summernote('code', '');
+                                }
+                            }
+                        }
+                    });
+                })
+            } else {
+                alertify.alert(String([[ #{msg.oss.select.ossTable} ]]), function(){});
+            }
+        },
+        multiDelAjax : function (deleteIds, comment) {
+            loading.show();
+
+            postAjaxData({"ossIds" : deleteIds, "comment" : comment}, "/oss/multiDelAjax", function (res) {
+                loading.hide();
+                var msg = String( [[ #{msg.common.success} ]] );
+
+                if (typeof res.notDelOssList !== "undefined") {
+                    var notDelOss = res.notDelOssList;
+                    msg = String( [[ #{msg.oss.cannot.delete} ]] );
+                    msg += '<br/>';
+                    for (var i in notDelOss) {
+                        msg += '<br/>';
+                        msg += '&emsp;&#8259; ' + notDelOss[i];
+                    }
+                }
+                alertify.alert(msg, function(){
+                    callReloadTabInframe("/oss/list", "oss-list");
+                });
+            }, function () {
+                alertify.error(String([[ #{msg.common.valid2} ]]), 0);
+            })
         }
     }
 

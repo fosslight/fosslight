@@ -6,4 +6,14 @@
     <img src="/images/loading.gif" alt="loading" />
   </div>
 </th:block>
+<th:block th:fragment="promptPopupFragment">
+  <div id="promptPopup">
+    [[ ${data.context} ]]
+    <div class="row mt-3">
+      <div class="col-12">
+        <textarea class="form-control" id="editor" rows="5"></textarea>
+      </div>
+    </div>
+  </div>
+</th:block>
 </html>

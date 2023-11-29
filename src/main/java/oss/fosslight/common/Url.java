@@ -112,6 +112,9 @@ public final class Url {
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
 		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
+
+		/* Popup */
+		public static final String TEMP_POPUP = "/temp/popup";
 	}
 	
 	public static final class PROCESSGUIDE {
