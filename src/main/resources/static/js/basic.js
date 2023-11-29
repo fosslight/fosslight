@@ -347,6 +347,7 @@ var loading = {
 
 /* iFrame에서 호출 (보안문제로 broadcast하여 호출) */
 function receiveMessage(event) {
+if (typeof event.data === 'string') {
 	var data = JSON.parse(event.data);
 	
 	switch(data.action){
@@ -379,6 +380,7 @@ function receiveMessage(event) {
 			
 			break;
 	}
+}
 }
 
 if ('addEventListener' in window){
