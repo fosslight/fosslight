@@ -20,7 +20,7 @@ public class LiteLicenseController {
     @Autowired
     ApiLicenseService apiLicenseService;
 
-    @GetMapping("/license")
+    @GetMapping("/licenses")
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getPage(
             @ModelAttribute ListLicenseDto.Request licenseRequest
     ) {

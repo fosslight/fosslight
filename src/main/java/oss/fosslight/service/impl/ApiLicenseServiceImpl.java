@@ -20,12 +20,12 @@ public class ApiLicenseServiceImpl implements ApiLicenseService {
 
     @Override
     public ListLicenseDto.Result listLicenses(ListLicenseDto.Request request) {
-        var list = new ArrayList<LicenseDto>();
-
-        // TODO:
+        var totalCount = apiLicenseMapper.selectLicenseMasterTotalCount(request);
+        var list = apiLicenseMapper.selectLicenseList(request);
 
         return ListLicenseDto.Result.builder()
                 .list(list)
+                .totalCount(totalCount)
                 .build();
     }
 }
