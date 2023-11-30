@@ -66,7 +66,7 @@ declare global {
       licenseIdentifier: string;
       licenseType: string;
       obligations: string;
-      restrictions: string[];
+      restriction: string;
       homepageUrl: string;
       description: string;
       creator: string;
