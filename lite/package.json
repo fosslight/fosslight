@@ -13,6 +13,7 @@
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
     "next": "13.5.4",
+    "qs": "^6.11.2",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.47.0",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/node": "^20",
+    "@types/qs": "^6.9.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-toggle": "^4.0.5",

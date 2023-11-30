@@ -5,9 +5,11 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
+import axios from 'axios';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import qs from 'qs';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
@@ -90,17 +92,17 @@ export default function OSSList() {
   // Rows/Columns
   const [rows, setRows] = useState<List.OSS[]>([]);
   const columns: List.Column[] = [
-    { name: 'ID', sort: 'id' },
-    { name: 'Name', sort: 'name' },
-    { name: 'Ver', sort: 'ver' },
-    { name: 'Type', sort: 'type' },
+    { name: 'ID', sort: 'OSS_ID' },
+    { name: 'Name', sort: 'OSS_NAME' },
+    { name: 'Ver', sort: 'OSS_VERSION' },
+    { name: 'Type', sort: '' },
     { name: 'Licenses', sort: '' },
-    { name: 'Obligations', sort: 'obg' },
+    { name: 'Obligations', sort: 'OBG' },
     { name: 'URL', sort: '' },
-    { name: 'Description', sort: 'desc' },
-    { name: 'Vuln', sort: 'vuln' },
-    { name: 'Create', sort: 'create' },
-    { name: 'Modify', sort: 'modify' }
+    { name: 'Description', sort: 'DESC' },
+    { name: 'Vuln', sort: 'VULN' },
+    { name: 'Create', sort: 'CREATED_AT' },
+    { name: 'Modify', sort: 'MODIFIED_AT' }
   ];
 
   // Sorting
@@ -120,33 +122,34 @@ export default function OSSList() {
       countPerPage
     };
 
+    const requestRows = async () => {
+      const signInRequest = async () => {
+        axios.defaults.withCredentials = true;
+        const response = await axios.post(
+          'http://localhost:8180/session/login-proc',
+          qs.stringify({
+            un: 'admin',
+            up: 'admin'
+          })
+        );
+      };
+      await signInRequest();
+
+      return await axios.get('http://localhost:8180/api/lite/oss', {
+        params,
+        withCredentials: true,
+        paramsSerializer: (params) => {
+          return qs.stringify(params, { arrayFormat: 'repeat' });
+        }
+      });
+    };
     setLoading(true);
-
-    setTimeout(() => {
-      setTotalCount(24);
-      setRows(
-        Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
-          ossId: String(24 - 10 * (params.page - 1) - idx),
-          ossName: 'cairo',
-          ossVersion: '1.4.12',
-          ossType: 'MD',
-          licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
-          licenseType: 'Copyleft',
-          obligations: 'YY',
-          downloadUrl: 'http://cairographics.org/releases',
-          homepageUrl: 'https://www.cairographics.org',
-          description: 'Some files in util and test folder are released under GPL-2.0',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8',
-          creator: 'admin',
-          created: '2023-10-05 23:54:08.0',
-          modifier: 'admin',
-          modified: '2023-10-07 21:32:05.0'
-        }))
-      );
-
+    requestRows().then((res) => {
+      console.log(res);
+      setRows(res.data.list);
+      setTotalCount(res.data.totalRows);
       setLoading(false);
-    }, 500);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
