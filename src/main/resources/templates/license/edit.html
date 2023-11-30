@@ -3,7 +3,6 @@
 
 <th:block th:fragment="content">
     <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-    <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
     <th:block th:replace="license/edit-script :: contentScript"></th:block>
     <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -198,7 +197,7 @@
                 </form>
             </section>
             <!-- loading bar -->
-            <th:block th:replace="fragments/popup-fragments :: loadingWrapFragment"></th:block>
+            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             <!-- /. loading bar -->
         </div>
     </div>

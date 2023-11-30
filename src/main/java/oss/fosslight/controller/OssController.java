@@ -2070,7 +2070,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_SYNC_POPUP_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncPopupFragment";
 	}
 	
 	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
@@ -2121,7 +2121,7 @@ public class OssController extends CoTopComponent{
 		}
 		model.addAttribute("syncCheckList" , syncCheckList);
 		
-		return OSS.OSS_SYNC_DETAILS_VIEW_AJAX_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncDetailViewFragment";
 	}
 
 	@PostMapping(value=OSS.OSS_SYNC_UPDATE)

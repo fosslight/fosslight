@@ -160,7 +160,7 @@
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">
-										<div id="editor">${project.comment }</div>
+										<div id="ossCommentEditor">${project.comment }</div>
 									</div>
 								</div>
 							</td>

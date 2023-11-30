@@ -130,7 +130,7 @@
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">
-										<div id="editor"></div>
+										<div id="licenseCommentEditor"></div>
 									</div>
 								</div>
 							</td>

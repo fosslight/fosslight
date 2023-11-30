@@ -42,7 +42,7 @@ public class CommentController extends CoTopComponent {
         model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
         model.addAttribute("moreYn", false);
 
-        return "fragments/comment-fragments :: commentAreaFragment";
+        return "fragments/common-fragments :: commentAreaFragment";
     }
 
     @GetMapping(value = COMMENT.MORE_COMMENT_LIST, produces = "text/html; charset=utf-8")
@@ -102,7 +102,7 @@ public class CommentController extends CoTopComponent {
         List<CommentsHistory> result = commentService.getCommentList(commentsHistory);
         model.addAttribute("commentList", result);
 
-        return "fragments/comment-fragments :: commentAreaFragment";
+        return "fragments/common-fragments :: commentAreaFragment";
     }
 
     @PostMapping(value = COMMENT.TEMP_POPUP)

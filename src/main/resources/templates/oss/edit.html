@@ -195,8 +195,9 @@
                                 </div>
                                 <div class="card-footer clearfix">
                                     <a th:if="${isCopyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
-                                    <a class="btn btn-teal-01 float-right mx-2" href="javascript:void(0)" onclick="oss_edit_fn.save()" id="save">Save</a>
-                                    <a th:if="${isCopyData == null}" class="btn btn-lg-red float-right" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
+                                    <a class="btn btn-teal-01 float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.save()">Save</a>
+                                    <a th:if="${isCopyData == null}" class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
+                                    <a class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.syncOssPage()">Sync</a>
                                 </div>
                             </div>
                         </div>
@@ -225,7 +226,7 @@
                 </form>
             </section>
             <!-- loading bar -->
-            <th:block th:replace="fragments/popup-fragments :: loadingWrapFragment"></th:block>
+            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             <!-- /. loading bar -->
         </div>
     </div>

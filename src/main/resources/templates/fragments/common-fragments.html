@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="loadingWrapFragment">
+    <div class="loading" id="loading_wrap" style="display:none;">
+        <div class="loadingBlind"></div>
+        <img alt="loading" src="/images/loading.gif"/>
+    </div>
+</th:block>
 <th:block th:fragment="commentAreaFragment">
     <div class="row" id="commentAreaFragment">
         <th:block th:if="${!#lists.isEmpty(commentList)}">
@@ -41,16 +47,6 @@
                 <strong class="text-lg-gray">No comments were registered.</strong>
             </div>
         </th:block>
-    </div>
-</th:block>
-<th:block th:fragment="commentPopupFragment">
-   <div class="comment-popup">
-       <div class="row mt-2">
-           <div class="col-12">
-               <input type="hidden" id="modifiedCommentId" th:value="${data.commId}">
-               <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
-           </div>
-       </div>
     </div>
 </th:block>
 </html>

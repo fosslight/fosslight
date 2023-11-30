@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<th:block th:fragment="loadingWrapFragment">
-  <div id="loading_wrap" class="loading" style="display:none;">
-    <div class="loadingBlind"></div>
-    <img src="/images/loading.gif" alt="loading" />
-  </div>
+<th:block th:fragment="commentPopupFragment">
+    <div class="comment-popup">
+        <div class="row mt-2">
+            <div class="col-12">
+                <input type="hidden" id="modifiedCommentId" th:value="${data.commId}">
+                <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
+            </div>
+        </div>
+    </div>
 </th:block>
 <th:block th:fragment="promptPopupFragment">
-  <div id="promptPopup">
-    [[ ${data.context} ]]
-    <div class="row mt-3">
-      <div class="col-12">
-        <textarea class="form-control" id="editor" rows="5"></textarea>
-      </div>
+    <div id="promptPopup">
+        [[ ${data.context} ]]
+        <div class="row mt-3">
+            <div class="col-12">
+                <textarea class="form-control" id="promptPopupEditor" rows="5"></textarea>
+            </div>
+        </div>
     </div>
-  </div>
 </th:block>
 </html>

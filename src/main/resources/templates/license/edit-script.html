@@ -27,6 +27,7 @@
                 });
 
                 $("[name='commentInput']").summernote({
+                    height: 100,
                     callbacks: {
                         onInit: function() {
                             var content = $(this).summernote('code');
@@ -104,7 +105,6 @@
                     if (pData.restrictions != null) {
                         pData.restrictions = JSON.stringify(pData.restrictions);
                         $('input[name=restriction]').val(pData.restrictions.replace(/\"|\[|\]/gi, ""));
-                        console.log("restric ::" + pData.restrictions);
                     } else {
                         $('input[name=restriction]').val('');
                     }
@@ -209,7 +209,7 @@
                     return;
                 }
 
-                postAjaxData({'commId': commId}, "/comment/deleteComment", function (data) {
+                postAjaxData({'commId': commId}, "/comment/deleteComment", "json", function (res) {
                     alertify.error(String([[ #{msg.common.success}]]));
                     lic_edit_cmt.getCommentList();
                 }, function () {
@@ -219,7 +219,7 @@
             handlePromptPopupOpen: function (id, contents) {
                 const param = {
                     data : {commId : id},
-                    templateName: "comment-fragments",
+                    templateName: "popup-fragments",
                     fragmentName: "commentPopupFragment"
                 }
                 postAjaxJsonData(JSON.stringify(param), "/temp/popup", "html", function (res) {
@@ -233,7 +233,7 @@
                         .resizeTo('650px', '450px');
                 }, null, function () {
                     $("#modifiedCommentEditor").summernote({
-                        height: 200,
+                        height: 100,
                         callbacks: {
                             onInit: function() {
                                 $(this).summernote('code', contents);
@@ -253,7 +253,7 @@
                     'referenceId': referenceId
                 };
 
-                postAjaxData(param,"/comment/updateComment", function (json) {
+                postAjaxData(param,"/comment/updateComment", "json", function (json) {
                     alertify.success(String([[ #{msg.common.success} ]]), 0);
                 }, function () {
                     alertify.error(String([[ #{msg.common.valid2} ]]), 0);

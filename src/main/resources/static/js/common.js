@@ -158,6 +158,5 @@ function appendSingleTag(event, id) {
 }
 
 function deleteTag (el) {
-    console.log(el);
     $(el).closest(".tag-container").remove();
 }

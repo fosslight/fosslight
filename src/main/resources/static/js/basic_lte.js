@@ -142,8 +142,6 @@ const SELECTOR_TAB_NAVBAR_NAV = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .navbar
 const SELECTOR_TAB_NAVBAR_NAV_LINK = `${SELECTOR_TAB_NAVBAR_NAV} .nav-link`
 const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
 
-
-
 function createTab(title, link,  uniqueName, autoOpen) {
     const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + uniqueName + '"]') || null;
     if (existingPanel) {
@@ -373,7 +371,7 @@ function getAjaxJsonData(data, url, dataType, successCallback, errorCallback, co
         headers: {
             'Content-Type': 'application/json'
         },
-        dataType: dataType || 'html',
+        dataType: dataType,
         success: function (data, status, xhr) {
             if (successCallback && typeof successCallback === 'function') {
                 successCallback(data, status, xhr);
@@ -401,7 +399,7 @@ function postAjaxJsonData(data, url, dataType, successCallback, errorCallback, c
         headers: {
             'Content-Type': 'application/json'
         },
-        dataType: dataType || 'html',
+        dataType: dataType,
         success: function (data, status, xhr) {
             if (successCallback && typeof successCallback === 'function') {
                 successCallback(data, status, xhr);
@@ -419,11 +417,38 @@ function postAjaxJsonData(data, url, dataType, successCallback, errorCallback, c
         }
     });
 }
-function postAjaxData(data, url,successCallback, errorCallback, completeCallback) {
+
+function getAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+    return $.ajax({
+        type: 'GET',
+        url: url,
+        data: data,
+        dataType: dataType,
+        cache : false,
+        success: function (data, status, xhr) {
+            if (successCallback && typeof successCallback === 'function') {
+                successCallback(data, status, xhr);
+            }
+        },
+        error: function (xhr, status, error) {
+            if (errorCallback && typeof errorCallback === 'function') {
+                errorCallback(xhr, status, error);
+            }
+        },
+        complete: function (xhr, status, error) {
+            if (completeCallback && typeof completeCallback === 'function') {
+                completeCallback(xhr, status, error);
+            }
+        }
+    });
+}
+
+function postAjaxData(data, url, dataType, successCallback, errorCallback, completeCallback) {
     return $.ajax({
         type: 'POST',
         url: url,
         data: data,
+        dataType: dataType,
         cache : false,
         success: function (data, status, xhr) {
             if (successCallback && typeof successCallback === 'function') {

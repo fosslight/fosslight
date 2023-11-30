@@ -126,7 +126,7 @@
                 };
                 postAjaxJsonData(JSON.stringify(param), "/temp/popup", "html", function (res) {
                     alertify.confirm(res, function (e) {
-                        const comment = $("#editor").summernote('code');
+                        const comment = $("#promptPopupEditor").summernote('code');
                         if (e) {
                             if("" == comment){
                                 alertify.alert(String([[ #{msg.oss.required.deletion} ]]), function(){});
@@ -140,7 +140,7 @@
                     });
                     //initCKEditorToolbar("editor");
                 }, null, function () {
-                    $("#editor").summernote({
+                    $("#promptPopupEditor").summernote({
                         height: 150,
                         callbacks: {
                             onInit: function() {
@@ -158,8 +158,9 @@
         },
         multiDelAjax : function (deleteIds, comment) {
             loading.show();
+            const _param = {"ossIds" : deleteIds, "comment" : comment };
 
-            postAjaxData({"ossIds" : deleteIds, "comment" : comment}, "/oss/multiDelAjax", function (res) {
+            postAjaxData(_param, "/oss/multiDelAjax", "json", function (res) {
                 loading.hide();
                 var msg = String( [[ #{msg.common.success} ]] );
 
