@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="loignFragment">
+    <div class="replaceable-content">
+        <form id="loginForm" name="loginForm">
+            <div class="login-userInfo form-group mt-2">
+                <label class="text-dark-gray">ID</label>
+                <input class="form-control form-control-border" name="un" placeholder="foss.kim" type="text">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">Password</label>
+                <input class="form-control form-control-border border-width-2" name="up"
+                       type="password">
+            </div>
+            <div class="row px-2" style="font-size: .9rem">
+                <div class="icheck-primary icheck-md col-4">
+                    <input id="saveIdCheck" type="checkbox">
+                    <label class="text-dark-gray ml-1" for="saveIdCheck">
+                        SAVE ID
+                    </label>
+                </div>
+                <div class="icheck-primary col-8">
+                        <span class="float-right">
+                            <p><a class="text-right" href="javascript:void(0);"
+                                  onclick="signup_fn.renderPage(); return false;">Signup</a></p>
+                        </span>
+                    <span class="float-right mx-1"><a href="javascript:void(0);">|</a></span>
+                    <span class="float-right">
+                            <p><a class="text-right" href="javascript:void(0);"
+                                  onclick="resetPw_fn.renderPage(); return false;">ResetPassword</a></p>
+                        </span>
+                </div>
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-2 mb-3">
+            <button class="btn btn-block btn-lg bg-red " href="#" onclick="login_fn.excSubmit()" type="button">
+                LOGIN
+            </button>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="signUpFragment">
+    <div class="replaceable-content">
+        <form id="signupForm" name="signupForm">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-light-gray" style="font-weight: bolder">REGISTER</h2>
+                </div>
+            </div>
+            <div class="login-userInfo form-group mt-2">
+                <label class="text-dark-gray">ID</label>
+                <input class="form-control form-control-border" name="userId" placeholder="foss.kim" type="text">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">Password</label>
+                <input class="form-control form-control-border border-width-2" name="userPw"
+                       type="password">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">e-mail</label>
+                <input class="form-control form-control-border border-width-2" name="email"
+                       type="password">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">Name</label>
+                <input class="form-control form-control-border border-width-2" name="userName"
+                       type="password">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">Division</label>
+                <input class="form-control form-control-border border-width-2" name="up"
+                       type="password">
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-2 mb-3">
+        <div class="row mt-3">
+            <div class="col-6 p-1">
+                <button class="btn btn-block bg-red p-2 m-0" href="#" onclick="signup_fn.excSubmit()" type="button" style="font-size: 1rem">
+                    SIGN UP
+                </button>
+            </div>
+            <div class="col-6 p-1">
+                <button class="btn btn-block bg-lg-gray text-white p-2 m-0" href="#" onclick="signup_fn.cancelWithBack()" type="button" style="font-size: 1rem">
+                    CANCEL
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+</th:block>
+<th:block th:fragment="resetPasswordFragment">
+    <div class="replaceable-content">
+        <form id="resetPasswordForm" name="resetPasswordForm">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="text-light-gray" style="font-weight: bolder">RESET PASSWORD</h2>
+                </div>
+            </div>
+            <div class="login-userInfo form-group mt-2">
+                <label class="text-dark-gray">ID</label>
+                <input class="form-control form-control-border" name="userId" placeholder="foss.kim" type="text">
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="text-dark-gray">e-mail</label>
+                <input class="form-control form-control-border border-width-2" name="email"
+                       type="text">
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-2 mb-3">
+            <div class="row mt-3">
+                <div class="col-6 p-1">
+                    <button class="btn btn-block bg-red p-2 m-0" href="#" onclick="resetPw_fn.excSubmit()" type="button" style="font-size: 1rem">
+                        Reset Password
+                    </button>
+                </div>
+                <div class="col-6 p-1">
+                    <button class="btn btn-block bg-lg-gray text-white p-2 m-0" href="#" onclick="resetPw_fn.cancelWithBack()" type="button" style="font-size: 1rem">
+                        CANCEL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

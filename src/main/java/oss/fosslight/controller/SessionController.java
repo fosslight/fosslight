@@ -54,7 +54,7 @@ public class SessionController extends CoTopComponent{
 			}
 		*/
 		
-		return "main/index";
+		return "session/login";
 	}
 	
 	@GetMapping(value = SESSION.LOGIN_EXPIRED, produces = "text/html; charset=utf-8")

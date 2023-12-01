@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/header :: headFragment"></th:block>
+<th:block th:replace="fragments/script :: scriptFragment"></th:block>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" rel="stylesheet">
+<body class="hold-transition login-page custom-layout">
+<div class="login-box">
+    <div class="login-logo">
+        <a class="brand-link" href="./index.html" style="font-size:2.25rem;">
+            <img alt="FOSSLight hub Logo" class="brand-image img-circle" src="/images/logo_s.png"
+                 style="opacity: .5;max-height:50px;"><b>FOSSLight</b>&nbsp;&nbsp;hub</a>
+    </div>
+    <div class="card">
+        <div class="card-body mx-3 my-3" id="authenticationAreaFragment">
+            <div class="replaceable-content"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    $(window).load(function () {
+        login_fn.renderPage();
+    });
+
+    /* function handling action realated to the initial login page */
+    const login_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "loignFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+                $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+            });
+        },
+        excSubmit: function () {
+            formAjaxData("#loginForm", "/session/login-proc",
+                function (res) {
+                    if (res.response.error) {
+                        alertify.error(res.response.message, 0);
+                    } else {
+                        location.href = "/index?lang=" + res.response.locale;
+                        return;
+                    }
+                },
+                function (data, status) {
+                    alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
+                }
+            );
+        }
+    }
+
+    /* function handling action realated to the signup page */
+    const signup_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "signUpFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+                $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+            });
+        },
+        excSubmit: function () {
+            formAjaxData("#signupForm", "/system/user/saveAjax",
+                function (res) {
+                    if (res.response.error) {
+                        alertify.error(res.response.message, 0);
+                    } else {
+                        location.href = "/index?lang=" + res.response.locale;
+                        return;
+                    }
+                }, function (data, status) {
+                    alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
+                });
+        },
+        cancelWithBack: function () {
+            login_fn.renderPage();
+        }
+    }
+
+    /* function handling action realated to the reset password page */
+    const resetPw_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "resetPasswordFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html',
+                function (res) {
+                    $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+                });
+        },
+        excSubmit: function () {
+
+        },
+        cancelWithBack: function () {
+            login_fn.renderPage();
+        },
+    }
+</script>
+</html>

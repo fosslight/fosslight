@@ -4,7 +4,8 @@ ul { list-style-type: none; }
 .custom-layout .mr-xm { margin-right: .15rem!important; }
 .custom-layout .sidebar-dark-primary .nav-sidebar
 > .nav-item > .nav-link.active { background-color: #a50034;}
-.custom-layout .nav-item.copyright { position:fixed;bottom: 0;font-weight: 300; font-size: .8rem !important; }
+.custom-layout .sidebar.copyright { color: #FFFFFF; position: absolute; bottom: 0;width: 100%; font-size: .9rem; height: 100px;}
+.custom-layout .main-sidebar .brand-link .brand-image { margin-left: 0; }
 .custom-layout table thead th { background-color: #f9f9f9; }
 .custom-layout table thead input {box-sizing: border-box;}
 .custom-layout table thead input[type="checkbox"] {width: 22px;padding: 3px;}
@@ -92,8 +93,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 .content-wrapper.custom-layout { font-size: 1rem;}
 .custom-layout hr { margin-top: 0; margin-bottom: 0;}
-.custom-layout .login-box form a {color:#ced4da !important; }
-.custom-layout .login-box form a:hover {color:#999 !important; text-decoration:underline;}
+.custom-layout .login-box form a {color:#a2a7ac !important; }
+.custom-layout .login-box form a:hover {color: #343a40 !important; text-decoration:underline; font-weight: bolder}
 .custom-layout iframe html {height: auto;}
 .custom-layout .brand-link {
     display: flex;

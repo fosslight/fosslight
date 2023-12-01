@@ -63,37 +63,38 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// replay 어택을 막기 위한 csrf 토큰의 생성을 비활성화(disabled) 처리
 		.csrf().disable()
 		// 'X-Frame-Options' to 'DENY' 대응
-		.headers().frameOptions().disable().and();
-//		.authorizeRequests().antMatchers(Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
-//		.authorizeRequests().antMatchers(Url.USER.RESET_PASSWORD).permitAll().and() // 비밀번호 초기화 요청처리 예외
-//		.authorizeRequests().antMatchers("/*" + Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
-//		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
-//		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
-//		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and() // 공지사항 조회 요청처리 예외
-//
-//		// 요청에 대한 권한 매핑
-//		.authorizeRequests().anyRequest().authenticated()		// 모든 요청에 대해 권한 확인이 필요
-//
-//		// set login page url
-//		.and()
-//		.formLogin()
-//			.permitAll()
-//			.loginPage(AppConstBean.SECURITY_LOGIN_PAGE)
-//			.usernameParameter(AppConstBean.SECURITY_USERNAME_PARAMETER)
-//			.passwordParameter(AppConstBean.SECURITY_PASSWORD_PARAMETER)
-//			.authenticationDetailsSource(customWebAuthenticationDetailsSource)
-//			.defaultSuccessUrl(AppConstBean.SECURITY_DEFAULT_SUCCESS_URL)
-//            .loginProcessingUrl(AppConstBean.SECURITY_LOGIN_PROCESSING_URL)
-//            .failureHandler(failureHandler())
-//            .successHandler(successHandler())
-//            .permitAll()
-//            .and()
-//         .logout()
-//	         .logoutUrl(AppConstBean.SECURITY_LOGOUT_URL)
-//	         .logoutSuccessHandler(logoutSuccessHandler())
-//	         .deleteCookies("JSESSIONID")
-//	         .invalidateHttpSession(true) // is Default True
-//		;
+		.headers().frameOptions().disable().and()
+		.authorizeRequests().antMatchers(Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
+		.authorizeRequests().antMatchers(Url.USER.RESET_PASSWORD).permitAll().and() // 비밀번호 초기화 요청처리 예외
+		.authorizeRequests().antMatchers("/*" + Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
+		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
+		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
+		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and() // 공지사항 조회 요청처리 예외
+		.authorizeRequests().antMatchers(Url.RENDER.COMPONENT).permitAll().and() // 렌더링 컴포넌트 요청처리 예외
+
+		// 요청에 대한 권한 매핑
+		.authorizeRequests().anyRequest().authenticated()		// 모든 요청에 대해 권한 확인이 필요
+
+		// set auth page url
+		.and()
+		.formLogin()
+			.permitAll()
+			.loginPage(AppConstBean.SECURITY_LOGIN_PAGE)
+			.usernameParameter(AppConstBean.SECURITY_USERNAME_PARAMETER)
+			.passwordParameter(AppConstBean.SECURITY_PASSWORD_PARAMETER)
+			.authenticationDetailsSource(customWebAuthenticationDetailsSource)
+			.defaultSuccessUrl(AppConstBean.SECURITY_DEFAULT_SUCCESS_URL)
+            .loginProcessingUrl(AppConstBean.SECURITY_LOGIN_PROCESSING_URL)
+            .failureHandler(failureHandler())
+            .successHandler(successHandler())
+            .permitAll()
+            .and()
+         .logout()
+	         .logoutUrl(AppConstBean.SECURITY_LOGOUT_URL)
+	         .logoutSuccessHandler(logoutSuccessHandler())
+	         .deleteCookies("JSESSIONID")
+	         .invalidateHttpSession(true) // is Default True
+		;
 	}
 	
 	public LogoutSuccessHandler logoutSuccessHandler() {
@@ -198,7 +199,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     
 	private static class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 	    
-	    public static String DEFAULT_TARGET_PARAMETER = "spring-security-redirect-login-failure";
+	    public static String DEFAULT_TARGET_PARAMETER = "spring-security-redirect-auth-failure";
 	    private String targetUrlParameter = DEFAULT_TARGET_PARAMETER;
 	    
 		@Override

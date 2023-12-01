@@ -20,6 +20,7 @@ public final class Url {
 		
 		public static final String LOGIN_EXPIRED = PATH + "/loginExpired";
 		public static final String SESSION_SAVE_KEY_VAL = PATH + "KeyValSave/{sesKey}/**";
+
 	}
 	
 	/**
@@ -32,12 +33,18 @@ public final class Url {
 		public static final String INDEX_EMPTY             = "/";
 		public static final String INDEX             	   = "/index";
 		public static final String INDEX_JSP			   = TILES + PATH + "/index";
+
 	}
 	
 	public static final class AUTH {
 		public static final String LOGIN	= "";
 		public static final String LOGIN_PROC	= "";
 		public static final String LOGOUT	= "/";
+	}
+
+	public static final class RENDER {
+		public static final String INDEX 					=  "/render";
+		public static final String COMPONENT 				= INDEX + "/component";
 	}
 	
 	public static final class DASHBOARD {
@@ -112,9 +119,6 @@ public final class Url {
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
 		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
-
-		/* Popup */
-		public static final String TEMP_POPUP = "/temp/popup";
 	}
 	
 	public static final class PROCESSGUIDE {

@@ -219,10 +219,11 @@
             handlePromptPopupOpen: function (id, contents) {
                 const param = {
                     data : {commId : id},
+                    category : "fragments",
                     templateName: "popup-fragments",
                     fragmentName: "commentPopupFragment"
                 }
-                postAjaxJsonData(JSON.stringify(param), "/temp/popup", "html", function (res) {
+                postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             lic_edit_cmt.editComment();
@@ -230,7 +231,7 @@
                             return false;
                         }
                     }).set('resizable', true)
-                        .resizeTo('650px', '450px');
+                        .resizeTo('680px', '335px');
                 }, null, function () {
                     $("#modifiedCommentEditor").summernote({
                         height: 100,

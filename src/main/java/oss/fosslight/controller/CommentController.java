@@ -104,15 +104,5 @@ public class CommentController extends CoTopComponent {
 
         return "fragments/common-fragments :: commentAreaFragment";
     }
-
-    @PostMapping(value = COMMENT.TEMP_POPUP)
-    public String showPromptPopup(Model model, @RequestBody Map<String, Object> param) {
-        String templateName = (String) param.get("templateName");
-        String fragmentName = (String) param.get("fragmentName");
-
-        if (param.containsKey("data")) {
-            model.addAttribute("data", param.get("data"));
-        }
-        return String.format("fragments/%s :: %s", templateName ,fragmentName);
-    }
 }
+

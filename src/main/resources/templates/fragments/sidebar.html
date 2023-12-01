@@ -11,12 +11,19 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <!-- <div class="image">
-          <img src="dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-        </div> -->
-        <div class="info">
-          <a href="#" class="d-block">Alexander Pierce</a>
+      <div class="user-panel mt-2 pb-1 mb-3 text-center">
+        <div class="info" style="width: 100%;">
+          <div class="row">
+            <div class="col-6">
+              <strong class="text-right"><a th:text="${@CommonFunction.loginUserName()}"></a></strong>
+            </div>
+            <div class="col-1">
+              <span class="text-center"><a href="#">|</a></span>
+            </div>
+            <div class="col-4">
+              <span class="text-left"><a class="text-right" th:href="@{/session/logout-proc}">Logout</a></span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -35,8 +42,6 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -49,7 +54,6 @@
               <p>
                 License List
               </p>
-              <i class="fas fa-angle-left right"></i>
             </a>
           </li>
           <li class="nav-item">
@@ -58,7 +62,6 @@
               <p>
                 OSS List
               </p>
-              <i class="fas fa-angle-left right"></i>
             </a>
           </li>
           <li class="nav-item">
@@ -67,7 +70,6 @@
               <p>
                 Project List
               </p>
-              <i class="fas fa-angle-left right"></i>
             </a>
           </li>
           <li class="nav-item">
@@ -108,7 +110,6 @@
               <p>
                 Self-Check List
               </p>
-              <i class="fas fa-angle-left right"></i>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
@@ -125,7 +126,6 @@
               <p>
                 Compliance Status
               </p>
-              <i class="fas fa-angle-left right"></i>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
@@ -183,51 +183,22 @@
                   <p>History List</p>
                 </a>
               </li>
-
             </ul>
-          </li>
-          <li class="nav-item ml-3 mb-3 fixed copyright">
-            <div class="text-white">
-              <strong>Version 3.2.0</strong><br />
-              Copyright &copy; 2021 LG Electronics.<br />
-              All rights reserved.
-            </div>
           </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
     </div>
+    <div class="sidebar copyright p-3">
+      <strong>Version 3.2.0</strong><br />
+      Copyright &copy; 2021 LG Electronics.<br />
+      All rights reserved.
+    </div>
     <!-- /.sidebar -->
   </aside>
   <script type="text/javascript">
-    // iframe 강제 렌더링 ->  WebSecurityConfigurerAdapter > configure에서 'X-Frame-Options' to 'DENY' 대응이 불가할 경우 사용
-    // $(document).ready(function () {
-    //   $(".nav-link").on("click", function (e) {
-    //     e.preventDefault();
-    //
-    //     if (!this || !$(this).attr('id')) {
-    //       console.error("Invalid 'this' or 'id' attribute.");
-    //       return;
-    //     }
-    //
-    //     const elementId = $(this).attr('id');
-    //     const targetElementId = "panel-" + elementId;
-    //     const elementIds = elementId.split("-");
-    //
-    //     if (elementIds.length === 2) {
-    //       let url = "/" + elementIds.join("/");
-    //
-    //
-    //       ajaxRequest(url, "GET", "html", function (data) {
-    //         $("#" + targetElementId).html(data);
-    //       }, function (error) {
-    //         console.error("Error loading content: " + error);
-    //       });
-    //     } else {
-    //       console.error("Unexpected elementId format:", elementId);
-    //     }
-    //   });
-    // });
+    $(document).ready(function () {
+    });
   </script>
 </th:block>
 </html>
