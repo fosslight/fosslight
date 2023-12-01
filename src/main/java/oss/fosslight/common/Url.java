@@ -108,6 +108,8 @@ public final class Url {
 		public static final String PATH = "/comment";
 		
 		public static final String COMMENT_LIST = PATH + "/getCommentList";
+		public static final String CUS_COMMENT_LIST = PATH + "/getCusCommentList";
+		
 		public static final String MORE_COMMENT_LIST = PATH + "/getMoreCommentList";
 		public static final String COMMENT_LIST_JSP = TILES_ROOT + PATH + "/list";
 		

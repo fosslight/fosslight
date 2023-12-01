@@ -824,7 +824,11 @@ public class CoCodeManager extends CoTopComponent {
     
     public static Vector<CoCodeDtl> getCodeDtls(String s) {
     	CoCode code = getCodeInstance(s);
-    	return code.getCodeDtls();
+    	if (code != null) {
+    		return code.getCodeDtls();
+    	} else {
+    		return null;
+    	}
     }
 
 }

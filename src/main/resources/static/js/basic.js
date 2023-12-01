@@ -116,7 +116,7 @@ $(document).ready(function (){
 		var id = param.get("id");
 		var prjFlag = param.get("project");
 		if(id != null && prjFlag != null) {
-			createTab(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty",prjFlag == 'true' ? "#/project/edit/" + id : "#/partner/edit/" + id);
+			createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty",prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
 		} else {
 			var _defaultTabStr = $("#defaultTabAnchorArr").val()||"";
 
@@ -351,7 +351,7 @@ function receiveMessage(event) {
 	
 	switch(data.action){
 		case 'create':
-			createTab(data.tabData[0], data.tabData[1]);
+			createTabNew(data.tabData[0], data.tabData[1]);
 			
 			break;
 		case 'delete':
@@ -1595,7 +1595,7 @@ function viewRefresh(){
 
 // 브라우저 창 크기에 따라 jqGrid Width 자동 조절
 function tableRefresh(){
-	var width = $('#wrapIframe').width();
+	var width = $('.tab-content').width();
 	
 	$('.ui-jqgrid-btable').each(function(){
 		var id =  $(this).attr('id');
@@ -2248,4 +2248,85 @@ function findAndReplace(match) {
 		url += "/partner/view/" + id;
 	}
 	return "<a href=" + url +" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" +  match + "</a>";
+}
+
+/* UI 변경 시 추가 기능 */
+var createTabNew = function(tabNm, tabLk) {
+	var pattern = /\s/g;
+    var tabName = tabNm.replace(pattern, '-');
+            
+    if ($('.overflow-hidden').find('#tab--' + tabName).length > 0) {
+    	$("#tab--"+tabName).trigger("click");
+    } else {
+    	var $tabs = $('.overflow-hidden').tabs();
+        var tab_length = $tabs.find('.nav-item').length;
+            
+        var tabArr = tabLk.split('?'),
+        tabLink = tabArr[0],
+        tabAnchor = tabArr[0].replace(/#/g, '');
+                        
+        if (tab_length > 20) {
+        	alertify.error('Can not exceed 20 pages.', 0);
+        	return;
+       	}
+
+        $tabs.find('.nav-item').removeClass('active');
+        $tabs.find('.nav-link').removeClass('active');
+
+        var frameSrc = tabAnchor;
+        var checkProjIden = tabAnchor.split('/');
+
+       	if(checkProjIden[1] == 'oss'){
+        	frameSrc = tabLk.replace('#','');
+        }
+
+        $('.tab-pane').removeClass('show').removeClass('active');
+
+        var navItem = '<li class="nav-item active" role="presentation">';
+        navItem += '<a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a>';
+        navItem += '<a class="nav-link active" data-toggle="row" id="tab--' + tabName + '" href="#panel--' + tabName + '" role="tab" aria-controls="panel--' + tabName + '"> ' + tabName +' </a>';
+        $(".overflow-hidden").append(navItem);
+
+        var appendIFrame = "<iframe src='" + frameSrc + "'></iframe>";
+        $(".tab-content").append("<div id='panel--" + tabName + "' class='tab-pane fade active show' role='tabpanel' aria-labelledby='tab--" + tabName + "'>" + appendIFrame + "</div>");
+                
+        $("#tab--" + tabName).trigger("click");
+	}
+}
+
+var existsTabName = function(tabNm){
+	var existsTab = false;
+	if ($('.overflow-hidden').find('#tab--' + tabNm).length > 0) {
+		existsTab = true;
+	}
+	return existsTab;
+}
+
+var tableRefreshNew = function(id) {
+	const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
+								,"_binProjectList1", "_binProjectList2", "_binAddList"];
+	
+	if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
+		window.setTimeout(function(){
+			var width = $(".card-body").width() - 40;
+			$('.ui-jqgrid-btable').each(function(){
+				var id =  $(this).attr('id');
+				if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
+					$(this).jqGrid('setGridWidth', 0, true);
+					$(this).jqGrid('setGridWidth', width, true);
+				}
+			});
+		}, 300);
+	} else {
+		window.onload = function() {
+			var width = $(".card-body").width() - 40;
+			$('.ui-jqgrid-btable').each(function(){
+				var id =  $(this).attr('id');
+				if (tableRefreshList.includes(id)) {
+					$(this).jqGrid('setGridWidth', 0, true);
+					$(this).jqGrid('setGridWidth', width, true);
+				}
+			});
+		};
+	}
 }

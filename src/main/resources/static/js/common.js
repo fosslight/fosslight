@@ -275,7 +275,7 @@ var callDeleteTabInFrame = function(uniqueName){
     parent.postMessage(JSON.stringify(data),"*");
 }
 
-const loading = {
+var loading = {
     show: function(){
         if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
             $('#loading_wrap').show();

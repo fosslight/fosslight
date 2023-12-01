@@ -15,6 +15,15 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 
+$(document).ready(function () {
+	evt.init();
+	fn.getUserIdList("Y", "REVIEWER"); // 근무자
+	fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
+	$('.btnReject').hide();
+	showHelpLink("Project_List_Main");
+	$(".select2").select2();
+});
+
 //데이터 객체
 var gridTooltip = {
 	typeCodes : [],
@@ -71,6 +80,11 @@ var evt = {
 		$(".cal").on("keyup", function(e){
 			calValidation(this, e);
 		});
+		
+		var selectNames = ["division", "networkServerType", "distributionType", "statuses", "priority"];
+		for (var i in selectNames) {
+			$("select[name=" + selectNames[i] + "] option:eq(0)").prop("selected", true);
+		}
 	}
 };
 
@@ -115,26 +129,31 @@ var fn = {
 //			205 REQ		Request
 //			205 REV		Review
 		var display = "";
+		var progress = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_PROGRESS'))}]];
+		var request = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REQUEST'))}]];
+		var review = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REVIEW'))}]];
+		var complete = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
+		var drop = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
 		
 		switch(cellvalue){
-			case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_PROGRESS'))}":
-				display = "<span class=\"iconSt draft\">"+ cellvalue +"</span>";
+			case progress:
+				display = "<span class=\"text-success text-bold\">" + cellvalue + "</span>";
 
 				break;
-			case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_REQUEST'))}":
-				display = "<span class=\"iconSt request\">Request</span>";
+			case request:
+				display = "<span class=\"text-pink text-bold\">" + cellvalue + "</span>";
 
 				break;
-			case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_REVIEW'))}":
-				display = "<span class=\"iconSt review\">Review</span>";
+			case review:
+				display = "<span class=\"text-yellow text-bold\">" + cellvalue + "</span>";
 
 				break;
-			case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE'))}":
-				display = "<span class=\"iconSt complete\">"+cellvalue+"</span>";
+			case complete:
+				display = "<span class=\"text-dark-blue text-bold\">" + cellvalue + "</span>";
 
 				break;
-			case "${ct:getCodeString(ct:getConstDef('CD_PROJECT_STATUS'), ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP'))}":
-				display = "<span class=\"iconSt drop\">"+cellvalue+"</span>";
+			case drop:
+				display = "<span class=\"text-gray text-bold\">" + cellvalue + "</span>";
 
 				break;
 		}
@@ -154,6 +173,220 @@ var fn = {
 		}
 
 		return styleStr;
+	},
+	displayProgress : function(cellvalue, options, rowObject) {
+		var dropStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
+		var completeStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
+		var progress = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_PROGRESS'))}]];
+		var request = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REQUEST'))}]];
+		var review = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REVIEW'))}]];
+		var projectStatus = rowObject.status;
+		
+		var identificationStatus = rowObject.identificationStatus;
+		var verificationStatus = rowObject.verificationStatus;
+		var statusRequestYn = rowObject.statusRequestYn;
+		var destributionStatus = rowObject.destributionStatus;
+		
+		if (rowObject.prjId == "1343") console.log(rowObject);
+		var display = '<div class="row pl-3">';
+		// identification
+		switch(identificationStatus){
+			case "":
+				if(projectStatus == dropStatus){
+					display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
+				} else {
+					if("Y" == rowObject.androidFlag) {
+						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else {
+						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+					}
+				}
+				break;
+			case "N/A":
+				display += '<span class="badge badge-gray size-sm width-6rem">Identification(N/A)</span>';
+				break;
+			default:
+				if ("Y" == rowObject.androidFlag) {
+					if ("Confirm" == identificationStatus) {
+						display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else if (projectStatus == progress) {
+						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else if (projectStatus == request) {
+						display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else if (projectStatus == review) {
+						display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					}
+				} else {
+					if ("Confirm" == identificationStatus) {
+						display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+					} else {
+						if (projectStatus == progress) {
+							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == request) {
+							display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						} else if (review == projectStatus) {
+							display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						}
+					}
+				}
+				
+				break;
+		}
+		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+		// packaging
+		if(identificationStatus != 'Confirm') {
+			if (projectStatus == dropStatus || "Y" == rowObject.statusRequestYn) {
+				display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+			} else {
+				display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+			}
+		} else {
+			if (projectStatus == dropStatus) {
+				switch(verificationStatus) {
+					case "":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+
+						break;
+					case "Progress":
+					case "Request":
+					case "Review":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Drop)</span>';
+
+						break;
+					default:
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging('+cellvalue+')</span>';
+
+					break;
+				}
+			} else {
+				switch(verificationStatus) {
+					case "":
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else if ("" != identificationStatus) {
+							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+						}
+						break;
+					case "Progress":
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else {
+							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+						}
+						break;
+					case "N/A":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						
+						break;
+					case "Error":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Error)</span>';
+
+						break;
+					case "Drop":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Drop)</span>';
+
+						break;
+					default:
+						if("N/A" == rowObject.distributeTarget){
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else{
+							if ("Confirm" == verificationStatus) {
+								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							} else {
+								if (projectStatus == progress) {
+									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == request) {
+									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == review) {
+									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
+		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+		// distribution
+		if(identificationStatus == "Confirm" && "N/A" == verificationStatus && "N/A" == destributionStatus) {
+			display += '<span class="badge badge-transparent size-sm width-6rem">Distribution(N/A)</span>';
+		} else if ("Confirm" != verificationStatus) {
+			if (projectStatus == dropStatus){
+				switch(destributionStatus){
+					case "":
+						var statusText = ("Confirm" != verificationStatus) ? "N/A" : "Drop";
+						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+statusText+')</span>';
+						break;
+					case "Progress":
+						display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+					
+						break;
+					default:
+						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+				
+						break;
+				}
+			} else {
+				if(projectStatus != completeStatus && "Y" != rowObject.statusRequestYn) {
+					display += '<span class="badge badge-gray size-sm width-6rem">Distribution</span>';
+				} else {
+					display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+				}
+			}
+		} else {
+			if(projectStatus == dropStatus){
+				display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+			} else {
+				switch(destributionStatus){
+					case "":
+						if(projectStatus != completeStatus){
+							if (projectStatus == progress) {
+								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+							} else if (projectStatus == request) {
+								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							} else if (projectStatus == review) {
+								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							} else {
+								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+							}
+						} else {
+							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+						}
+						
+						break;
+					case "Error":
+						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+
+						break;
+					case "N/A":
+						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+
+						break;
+					default:
+						if("N/A" == rowObject.distributeTarget){
+							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+						} else{
+							if ("Done" == destributionStatus) {
+								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							} else {
+								if (projectStatus == progress) {
+									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == request) {
+									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == review) {
+									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								}
+							}
+						}
+						
+						break;
+				}
+			}
+		}
+		
+		display += '</div>';
+		
+        return display;
 	},
 	// Grid identification cell display
 	displayIdentification : function(cellvalue, options, rowObject){
@@ -396,43 +629,30 @@ var fn = {
 	// Grid download cell display
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
-
         if(rowObject.identificationStatus == "Confirm"){
-            display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel fa-lg ml-1\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
-                display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf fa-lg ml-1\" title=\"FOSSLight Review Report\"></i></span>';
             }
-        } else {
-            display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
         }
 		
 		if(rowObject.verificationStatus == "Confirm"){
 			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
-				display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";
 			} else {
-				display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" title=\"OSS Notice\">";
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code fa-lg ml-1\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId!=""){
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" title=\"Packaging File1\">";
-			} else {
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" disabled>";
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId2!=""){
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'2\',"+rowObject.permission+")\" title=\"Packaging File2\">";
-			} else {
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'2\',"+rowObject.permission+")\" disabled>";
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId3!=""){
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage\" onclick=\"fn.downloadPackageMulti(this, \'3\',"+rowObject.permission+")\" title=\"Packaging File3\">";
-			} else {
-				display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackageMulti(this, \'3\',"+rowObject.permission+")\" disabled>";
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File3\"></i></span>';
 			}
-		} else {
-			display+="<input type=\"button\" value=\"Notice\" class=\"downSet btnNotice dis\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\" disabled>";
-			display+="<input type=\"button\" value=\"Package\" class=\"downSet btnPackage dis\" onclick=\"fn.downloadPackage(this,"+rowObject.permission+")\" disabled>"
 		}
 		
 		return display;
@@ -440,34 +660,61 @@ var fn = {
 	// Grid vulnerability cell display
 	displayVulnerability : function(cellvalue, options, rowObject){
 		var display = "";
-		var _url = '/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
-		
-		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
-			display="<span style=\"font-size:0;\"></span>";
-		} else {
-			display=cellvalue;
+		var secCode = "";
+		if (typeof rowObject.secCode !== "undefined") {
+			secCode = rowObject.secCode;
 		}
+        if (parseInt(cellvalue) >= 8.0) {
+        	if ("" != secCode) {
+        		if ("NotFixed" == secCode) {
+        			 //Need to resolve : 8.0 이상 vulnerability 검출, 수정 필요 O
+                    display = '<span class="badge badge-cherry size-sm width-9rem">Need to resolve('+cellvalue+')</span>';
+        		} else {
+        			// Resolved : 8.0 이상 vulnerability 검출, 모두 수정 완료됨
+                    display = '<span class="badge badge-cherry size-sm width-8rem">Resolved('+cellvalue+')</span>';
+        		}
+        	} else {
+        		
+        	}
+        } else if (parseInt(cellvalue) < 8.0 && parseInt(cellvalue) > 0) {
+            // Discovered : 8.0 미만 vulnerability 검출, 수정 필요 X
+            display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered('+cellvalue+')</span>';
+        } else {
+        	display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered(N/A)</span>';
+        }
+        
+        return display;
 		
-		return display;
+		
+// 		var display = "";
+// 		var _url = '/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+		
+// 		if(parseInt(cellvalue) >= 9.0 ) {
+// 			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) >= 7.0 ) {
+// 			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) >= 4.0) {
+// 			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) > 0) {
+// 			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+// 			display="<span style=\"font-size:0;\"></span>";
+// 		} else {
+// 			display=cellvalue;
+// 		}
+		
+// 		return display;
 	},
 	displaySecurityTab : function(cellvalue, options, rowObject){
 		var display = "";
 		
 		if(rowObject.identificationSubStatusBom != 0 || "Y" == rowObject.androidFlag) {
 			if ('Fixed' == rowObject.secCode) {
-				display = "<div class=\"tcenter\"><a class=\"btnPG wauto\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</a></div>";
+				display = "<span class=\"badge badge-blue size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</spen>";
 			} else if ('NotFixed' == rowObject.secCode) { 
-				display = "<div class=\"tcenter\"><a class=\"btnPG wauto\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</a></div>";
+				display = "<span class=\"badge badge-blue size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
 			} else {
-				display += "<div class=\"tcenter\" title=\"<spring:message code='msg.project.security.tab.disabled'/>\"><a class=\"btnPG wauto off\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</a></div>";
+				display = "<span class=\"badge badge-outline-dark-blue size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
 			}
 		} 
 		
@@ -486,19 +733,19 @@ var fn = {
 	},
 	// Grid identification display event
 	mvIdentification : function(prjId, initDiv, permission){
-		if(parseInt(permission) > 0){
-//			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv');
-		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-		}
+//		if(parseInt(permission) > 0){
+			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv);
+//		} else {
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//		}
 	},
 	// Grid veritification display event
 	mvVerification : function(prjId, permission){
-		if(parseInt(permission) > 0){
-//			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
-		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-		}
+//		if(parseInt(permission) > 0){
+			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+//		} else {
+//			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+//		}
 	},
 	// Grid distribution display event
 	mvDistribution : function(prjId, permission){
@@ -537,7 +784,7 @@ var fn = {
 		})
 	},
 	downloadExcel : function(){
-		if(isMaximumRowCheck(totalRow)){
+//		if(isMaximumRowCheck(totalRow)){
 			var data = fn.setGridParam();
 			
 			$.ajax({
@@ -548,21 +795,23 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 				   success: function (data) {
+					   loading.hide();
+					   
 					   if("false" == data.isValid) {
 						   if(data.validMsg == "overflow"){
 							   alertify.error(getMsgMaxRowCnt(), 0);
 						   }else{
-			            	   alertify.error('<spring:message code="msg.common.valid2" />', 0);
+			            	   alertify.error([[#{msg.common.valid2}]], 0);
 						   }
 					   } else {
-					       window.location =  '/exceldownload/getFile?id='+data.validMsg;
+					       window.location = '/exceldownload/getFile?id='+data.validMsg;
 					   }
 				   },
 					error: function(data){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 			});
-		}
+//		}
 	},
 	downloadReport : function(obj, permission){
 		if(parseInt(permission) > 0){
@@ -629,7 +878,8 @@ var fn = {
 	},
 	setGridParam : function(){
 		var paramData=$('#projectSearch').serializeObject();
-
+		
+		//public 값 넣어주기
 		if($('#checkbox3').is(':checked')) {
 			paramData.publicYn = 'N';
 		} else {
@@ -656,11 +906,11 @@ var fn = {
 				break;
 			case 0:
 				isValid = false;
-				alertify.alert('<spring:message code="msg.oss.select.project" />', function(){});
+				alertify.alert([[#{msg.oss.select.project}]], function(){});
 				break;
 			default: // 2개 이상
 				isValid = false;
-				alertify.alert('<spring:message code="msg.project.select.only.project" />', function(){});
+				alertify.alert([[#{msg.project.select.only.project}]], function(){});
 				break;
 		}
 
@@ -671,7 +921,7 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-			if(parseInt(rowData["statusPermission"]) > 0) {
+//			if(parseInt(rowData["statusPermission"]) > 0) {
 				var rtnParameter = {};
 				
 				$.ajax({
@@ -685,19 +935,19 @@ var fn = {
 						var distributionStatus = data.distributionStatus;
 						
 						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert('<spring:message code="msg.project.distribution.loading" />', function(){});
+							alertify.alert([[#{msg.project.distribution.loading}]], function(){});
 							return false;
 						}
 						
 						fn.showChangeStatus(data);
 					},
 					error: function(data){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
-			} else {
-				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-			}
+//			} else {
+//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//			}
 		}
 	},
 	copy : function(){
@@ -705,11 +955,11 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-			if(parseInt(rowData["permission"]) > 0) {
-//				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
-			} else {
-				alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-			}
+//			if(parseInt(rowData["permission"]) > 0) {
+				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
+//			} else {
+//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//			}
 		}
 	},
 	showChangeStatus : function(paramObj){
@@ -1031,7 +1281,7 @@ var fn = {
 			$("#changeDivisionSelect").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
 			$("#changeDivisionPop").show();
 		} else {
-			alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
 		}
 	}, changeDivisionSave : function(){
 		var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
@@ -1510,52 +1760,35 @@ var fn = {
 // jqGrid
 var list = {
 	load : function(){
-		var distributionFlag = '*${distributionFlag}';
+		var distributionFlag = [[${distributionFlag}]];
 		var authority = '*${sessUserInfo.authority}';
 		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		var authority = '*${sessUserInfo.authority}';
-		var colNameArr = ['ID','Project Name (Version)', 'Project<br/>Version', 'Status', 'Identification'
-		  	, 'Packaging', 'Distribution', 'Download', 'Security', 'Vulnera<br/>bility', 'Distribution Type', 'CVE ID'
-		  	, 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
+		var colNameArr = ['ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
 		var colModelArr = [];
-		var colModelObj = {name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'};
+		var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 200, align: 'left',cellattr:fn.toolTipDoubleclick};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 130, align: 'left',cellattr:fn.toolTipDoubleclick};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true};
+		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, cellattr: fn.cellattrStatus, sortable : true};
+		colModelObj = {name: 'progress', index: 'progress', width: 200, align: 'left', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'identificationStatus', index: 'identificationStatus', width: 200, align: 'left', formatter: fn.displayIdentification, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'download', index: 'download', width: 70, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'verificationStatus', index: 'verificationStatus', width: 80, align: 'center', formatter: fn.displayVerification, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: '', index: '', width: 60, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'destributionStatus', index: 'destributionStatus', width: 80, align: 'center', formatter: fn.displayDistribution, unformatter: fn.unformatter, sortable : true, title:false};
-		if ("false" == distributionFlag) {
-			colModelObj["hidden"] = true;
-		}
+		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'download', index: 'download', width: 120, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: '', index: '', width: 80, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionType', index: 'distributionType', width: 100, align: 'left', sortable : true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'division', index: 'division', width: 70, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'creator', index: 'creator', width: 70, align: 'left', sortable : true};
+		colModelObj = {name: 'creator', index: 'creator', width: 50, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left',edittype:'text', formatter:fn.getUserName
+		colModelObj = {name: 'reviewer', index: 'reviewer', width: 50, align: 'left',edittype:'text', formatter:fn.getUserName
                 , editoptions: {
 					dataInit:
 						function (e) {
@@ -1591,18 +1824,6 @@ var list = {
 		} else {
 			colModelObj["editable"] = false;
 		}
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50,hidden:true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50,hidden:true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'priority', index: 'priority', width: 50,hidden:true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'permission', index: 'permission', width: 50,hidden:true};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
 		colModelArr.push(colModelObj);
 		
 		$("#list").jqGrid({
@@ -1653,96 +1874,14 @@ var list = {
 					}
 				}
 				
-				var idenStatusProg = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}";
-				var idenStatusReq = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}";
-				var idenStatusRev = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}";
-				var idenStatusConf = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}";
-				var prjStatusComp = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}";
-				var prjStatusDrop = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
-				var destStatusProg = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_DISTRIBUTE_STATUS_PROGRESS'))}";
-				var destStatusProg = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_DISTRIBUTE_STATUS_PROGRESS'))}";
-				var destStatusRes = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_DISTRIBUTE_STATUS_RESERVE'))}";
-				var destStatusDep = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED'))}";
-				
-				for(var idx in arr){
-					rowid = arr[idx];
-					selectEl = $("#list #"+arr[idx]);
-					status = data.rows[idx].identificationStatus;
-					
- 					if(status==idenStatusProg) {
- 						selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
-					} else if(status==idenStatusReq || status==idenStatusRev) {
-						selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
-					} else if(status==idenStatusConf) {
-						selectEl.find("td[aria-describedby=list_identificationStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
-					}
-					
- 					if(data.rows[idx].identificationStatus == 'Confirm') {
- 						status = data.rows[idx].verificationStatus;
- 						if((data.rows[idx].status != prjStatusComp || data.rows[idx].status != prjStatusDrop)
-	 							&& data.rows[idx].statusRequestYn == "N" 
- 								&& status==idenStatusProg) {
-	 						selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
-	 					} else if(status==idenStatusReq || status==idenStatusRev) {
-							selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
-						} else if(status==idenStatusConf) {
-							selectEl.find("td[aria-describedby=list_verificationStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
-						}	
- 					}
-					
- 					if(data.rows[idx].identificationStatus == 'Confirm' && data.rows[idx].verificationStatus == 'Confirm') {
- 						status = data.rows[idx].destributionStatus;
-	 					if(status==destStatusProg && data.rows[idx].distributeTarget != "NA") {
-	 						selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
-						} else if(status==destStatusRes) {
-							selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
-						} else if(status==destStatusDep) {
-							selectEl.find("td[aria-describedby=list_destributionStatus]").css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
-						}	 						
- 					}
- 					
- 					//prjName prjVersion 데이터 join
- 					var prjNmVer = data.rows[idx].prjName;
- 					
- 					if(data.rows[idx].prjVersion != ""){
- 						prjNmVer += " (ver "+data.rows[idx].prjVersion+")";
- 					}
- 					
- 					$("#list").jqGrid("setCell",rowid,"prjName",prjNmVer,"");
-				}
-				
-				// 툴팁 설정
-				if(!gridTooltip.existTooltip){
-					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
-						.attr("title", gridTooltip.tooltipCont).tooltip({
-							content: function () {
-								return $(this).prop('title');
-							}
-						});
-					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_download"))
-						.attr("title", gridTooltip.tooltipCont1).tooltip({
-							content: function () {
-								return $(this).prop('title');
-							}
-						});
-					
-						gridTooltip.existTooltip = true;
-					}
-				
 				$('input[id*="_releaseDate"]').attr('class', 'cal');
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				var role = '*${sessUserInfo.authority}';
 				
-				if(role=="ROLE_ADMIN"){
-					$("#list").jqGrid('saveRow',lastsel);
-					$("#list").jqGrid('editRow',rowid);
-					lastsel=rowid;
-				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				var rowData = $("#list").jqGrid('getRowData',rowid);
-				var isAdmin = "[[${@CommonFunction.isAdmin()}]]";
+				var isAdmin = [[${@CommonFunction.isAdmin()}]];
 				
 				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
 					fn.mvIdentification(rowid, "5", rowData['permission']);
@@ -1759,7 +1898,7 @@ var list = {
 						fn.mvDistribution(rowData['prjId'], rowData['permission']);
 					}
 				} else if(iCol != 0 && iCol != 5 && iCol != 14) {
-
+					createTabInFrame(rowData['prjId']+'_Project', '/project/edit/'+rowData['prjId']);
 				}
 			},
 			postData: refreshParam

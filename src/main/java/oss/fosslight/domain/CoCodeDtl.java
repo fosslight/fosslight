@@ -26,6 +26,14 @@ public class CoCodeDtl {
 		this.cdDtlNm = cdDtlNm;
 	}
 
+	public String getCdDtlExp() {
+		return cdDtlExp;
+	}
+
+	public void setCdDtlExp(String cdDtlExp) {
+		this.cdDtlExp = cdDtlExp;
+	}
+
 	/** The cd sub no. */
     String cdSubNo;
     

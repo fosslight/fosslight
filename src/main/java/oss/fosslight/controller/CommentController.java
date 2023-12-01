@@ -7,6 +7,7 @@ package oss.fosslight.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +45,17 @@ public class CommentController extends CoTopComponent {
 
         return "fragments/common-fragments :: commentAreaFragment";
     }
-
+    
+    @GetMapping(value={COMMENT.CUS_COMMENT_LIST})
+	public @ResponseBody ResponseEntity<Object> getCusCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
+		Map<String, Object> rtnMap = new HashMap<>();
+		rtnMap.put("commentList", commentService.getCommentListHis(commentsHistory));
+		rtnMap.put("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
+		rtnMap.put("moreYn", false);
+				
+		return makeJsonResponseHeader(rtnMap);
+	}
+    
     @GetMapping(value = COMMENT.MORE_COMMENT_LIST, produces = "text/html; charset=utf-8")
     public String getMoreCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
         model.addAttribute("commentList", commentService.getMoreCommentListHis(commentsHistory));

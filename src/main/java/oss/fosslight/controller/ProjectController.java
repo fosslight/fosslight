@@ -183,7 +183,7 @@ public class ProjectController extends CoTopComponent {
 		
 		CommonFunction.setProjectService(projectService);
 		
-		return "project/list :: content";
+		return "project/project-list_main";
 	}
 	
 	/**
@@ -374,7 +374,7 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
-		return PROJECT.EDIT_JSP;
+		return "project/edit";
 	}
 	
 	/**
@@ -400,7 +400,7 @@ public class ProjectController extends CoTopComponent {
 		project.setUserComment(commentService.getUserComment(comHisBean));
 
 		model.addAttribute("project", project);
-		model.addAttribute("detail", toJson(project));
+		model.addAttribute("detail", project);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -422,7 +422,8 @@ public class ProjectController extends CoTopComponent {
 				&& !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 			
-			return PROJECT.VIEW_JSP;
+			return "project/edit";
+//			return "project/view";
 		} else {
 			if (!permissionFlag) {
 				List<T2Users> userList = userService.selectAllUsers();
@@ -432,7 +433,7 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 			
-			return PROJECT.EDIT_JSP;
+			return "project/edit";
 		}
 	}
 	
@@ -2937,7 +2938,11 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", partnerFlag);
 		
-		return PROJECT.IDENTIFICATION_JSP;
+		if (initDiv.equals("4")) {
+			return "project/identification-android";
+		} else {
+			return "project/identification";
+		}
 	}
 	
 	/**
@@ -4035,7 +4040,7 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
-		return PROJECT.EDIT_JSP;
+		return "project/edit";
 	}
 	
 	/**

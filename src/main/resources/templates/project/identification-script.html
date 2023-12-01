@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+var partnerFlag = [[${partnerFlag}]];
+
+$(document).ready(function () {
+	com_evt.init();
+	if (partnerFlag) party_evt.init();
+	dep_evt.init();
+	src_evt.init();
+	bin_evt.init();
+	bom_evt.init();
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		$("#gridArea"+tabId).show();
+	});
+});
+
+$(document).click(function(e){
+	if(!$("#depExportContainer").has(e.target).length) {
+		$("#depExportList").hide();
+	}
+	if(!$("#srcExportContainer").has(e.target).length) {
+		$("#srcExportList").hide();
+	}
+	if(!$("#binExportContainer").has(e.target).length) {
+		$("#binExportList").hide();
+	}
+	if(!$("#ExportContainer").has(e.target).length) {
+		$("#ExportList").hide();
+	}
+});
+</script>
+</th:block>
+</html>
