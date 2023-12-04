@@ -29,8 +29,8 @@ public final class Url {
 		public static final String PATH = "/main";
 		
 		/**  메인 페이지: {@value #INDEX}. */
-		public static final String INDEX_EMPTY             = "/";
-		public static final String INDEX             	   = "/index";
+		public static final String INDEX_EMPTY			 = "/";
+		public static final String INDEX			 	   = "/index";
 		public static final String INDEX_JSP			   = TILES + PATH + "/index";
 	}
 	
@@ -828,7 +828,7 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/oss_report_selfcheck";
-			
+
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
 			
@@ -844,6 +844,97 @@ public final class Url {
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
 	}
 
+	public static final class APIV2 {
+		public static final String PATH = "/api/v2";
+
+		/** 3RD PARTY */
+			/** API 3rd Party 조회 */
+			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partners";
+
+			/** API 3rd Party Add Watcher */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
+
+		/** OSS */
+			/** API OSS List 조회 */
+			public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss";
+
+			/** API OSS List 조회 */
+			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss";
+
+
+		/** LICENSE */
+			/** API License List 조회 */
+			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/licenses";
+
+
+		/** PROJECT */
+			/** API create Project  */
+			public static final String FOSSLIGHT_API_PROJECT_CREATE			= "/projects";
+
+			/** API Project List 조회 */
+			public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/projects";
+
+			/** API Project Model List 조회 */
+			public static final String FOSSLIGHT_API_MODEL_SEARCH			= "/projects/models";
+
+			/** API Update Project Model */
+			public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/projects/{id}/models";
+
+			/** API Update Project Model WITH FILE */
+			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/projects/{id}/models/upload";
+
+			/** API Project BOM Tab Export */
+			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/projects/{id}/bom/export";
+
+			/** API Project BOM Tab Export JSON*/
+			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/projects/{id}/bom/json";
+
+			/** API BOM COMPARE */
+			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
+
+			/** API Project Add Watcher */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
+
+			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
+			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
+			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
+
+			/** API Verification Packaging Upload */
+			public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/projects/{id}/packages";
+
+
+		/** VULNABILITY */
+			/** vulnerability info search */
+			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
+
+			/** vulnerability max score info search */
+			public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/max-vulnerability";
+
+
+		/** SELFCHECK */
+			/** create SelfCheck */
+			public static final String FOSSLIGHT_API_SELFCHECK_CREATE			= "/selfchecks";
+
+			/** OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/selfchecks/{id}/report";
+
+			/** OSS Report upload */
+			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/selfchecks/{id}/export";
+
+			/** API SelfCheck Add Watcher */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfchecks/{id}/watchers";
+
+		/** BINARY */
+			/** API Binary List 조회 */
+			public static final String FOSSLIGHT_API_BINARY_SEARCH			= "/binaries";
+
+		/** CODE */
+			/** Code 조회 */
+			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
+	}
+
+
 	public static final class SEARCH {
 
 		public static final String PATH = "/searchFilter";
@@ -855,5 +946,5 @@ public final class Url {
 		public static final String VULNERABILITY = PATH + "/vulnerability";
 
 	}
-	
+
 }
