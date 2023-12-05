@@ -199,11 +199,15 @@ function reloadTab(link, uniqueName, act) {
             url = tmp[0];
         }
 
+        console.log(url)
+        console.log(link)
+
         if(url == link){
             if(act === "create" || act === "reload"){
                 $(this).attr('src', url);
             }
         }
+        console.log("her")
         activateTab(uniqueName);
     });
 }
@@ -273,19 +277,6 @@ var callDeleteTabInFrame = function(uniqueName){
     };
 
     parent.postMessage(JSON.stringify(data),"*");
-}
-
-var loading = {
-    show: function(){
-        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
-            $('#loading_wrap').show();
-        }
-    },
-    hide: function(){
-        if("Y" != doNotUseAutoLoadingHideFlag) {
-            $('#loading_wrap').hide();
-        }
-    }
 }
 
 /**
@@ -454,4 +445,45 @@ function appendSingleTag(event, id) {
 
 function deleteTag (el) {
     $(el).closest(".tag-container").remove();
+}
+
+/**
+ * Cookie action Utility
+ * */
+function getCookie(cookieName) {
+    cookieName = cookieName + '=';
+    let cookieData = document.cookie;
+    let start = cookieData.indexOf(cookieName);
+    let cookieValue = '';
+
+    if(start != -1){
+        start += cookieName.length;
+
+        let end = cookieData.indexOf(';', start);
+        if(end == -1) {
+            end = cookieData.length;
+        }
+
+
+
+        cookieValue = cookieData.substring(start, end);
+        console.log(cookieValue);
+    }
+
+    return unescape(cookieValue);
+}
+
+function setCookie(cookieName, value, exdays){
+    var exdate = new Date();
+    exdate.setDate(exdate.getDate() + exdays);
+
+    var cookieValue = escape(value) + ((exdays==null) ? "" : "; expires=" + exdate.toGMTString());
+    document.cookie = cookieName + "=" + cookieValue;
+}
+
+function deleteCookie(cookieName){
+    var expireDate = new Date();
+    expireDate.setDate(expireDate.getDate() - 1);
+
+    document.cookie = cookieName + "= " + "; expires=" + expireDate.toGMTString();
 }

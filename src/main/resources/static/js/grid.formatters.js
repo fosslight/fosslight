@@ -14,9 +14,7 @@ const lic_lst_fmt = {
     },
 
     licenseNameFormatter: function (cellvalue, options, rowObject) {
-        var display = "";
-        display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
-
+        const display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
         return display;
     },
     displayLicenseRestriction: function (cellvalue, options, rowObject) {
@@ -40,7 +38,6 @@ const lic_lst_fmt = {
     },
 }
 
-let linkFlag;
 // oss list page grid formatter
 const oss_lst_fmt = {
     ossTypeFormat: function (cellvalue, options, rowObject) {
@@ -59,22 +56,7 @@ const oss_lst_fmt = {
         return display;
     },
     ossNameLinkFormat : function(cellvalue, options, rowObject){
-        var display = "";
-
-        if("N" == linkFlag){
-            var _frameId = rowObject['ossId'] + "_Opensource";
-            var _frameTarget = "#/oss/edit/" + rowObject['ossId'];
-            display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
-        } else {
-            var url = '';
-            if("${ct:isAdmin()}"){
-                url = '<c:url value="/oss/edit/'+rowObject['ossId']+'"/>';
-            } else {
-                url = '<c:url value="/oss/view/'+rowObject['ossId']+'"/>';
-            }
-            display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
-        }
-
+        const display = "<a href=\"javascript:void(0);\" class='urlLink'>" + cellvalue + "</a>";
         return display;
     },
     obligationTypeFormat : function (cellvalue, options, rowObject) {

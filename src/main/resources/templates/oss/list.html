@@ -7,16 +7,15 @@
     <body class="hold-transition sidebar-mini" style="height: 100%;">
     <div class="wrapper">
         <div class="content-wrapper custom-layout">
-            <section class="content-header"></section>
-            <section class="content">
-                <div class="container-fluid">
-                    <form id="ossSearch" name="ossSearch">
+            <form id="ossSearch" name="ossSearch">
+                <section class="content-header"></section>
+                <section class="content">
+                    <div class="container-fluid">
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                     <!-- <div class="card collapsed-card search-form"> -->
                                     <div class="card-header" style="border-bottom: none;">
-
                                         <div class="row">
                                             <div class="col-md-1 d-flex align-items-center">
                                                 <div class="custom-control custom-checkbox">
@@ -64,12 +63,14 @@
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <div class="form-check">
-                                                        <input class="form-check-input text-orange" id="licenseNameAllSearchFlag"
+                                                        <input class="form-check-input text-orange"
+                                                               id="licenseNameAllSearchFlag"
                                                                th:checked="${searchBean.licenseNameAllSearchFlag eq 'Y'}"
                                                                type="checkbox">
                                                         <label class="form-check-label text-lg-gray"
                                                                for="licenseNameAllSearchFlag">Exact Match</label>
-                                                        <input class="form-check-input text-orange" name="licenseNameAllSearchFlag"
+                                                        <input class="form-check-input text-orange"
+                                                               name="licenseNameAllSearchFlag"
                                                                th:value="${searchBean.licenseNameAllSearchFlag}"
                                                                type="hidden">
                                                     </div>
@@ -82,12 +83,14 @@
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <div class="form-check text-orange">
-                                                        <input class="form-check-input text-orange" id="homepageAllSearchFlag"
+                                                        <input class="form-check-input text-orange"
+                                                               id="homepageAllSearchFlag"
                                                                th:checked="${searchBean.homepageAllSearchFlag eq 'Y'}"
                                                                type="checkbox">
                                                         <label class="form-check-label text-lg-gray"
                                                                for="homepageAllSearchFlag">Exact Match</label>
-                                                        <input class="form-check-input text-orange" name="homepageAllSearchFlag"
+                                                        <input class="form-check-input text-orange"
+                                                               name="homepageAllSearchFlag"
                                                                th:value="${searchBean.homepageAllSearchFlag}"
                                                                type="hidden">
                                                     </div>
@@ -99,7 +102,8 @@
 
                                             <div class="col-md-4 mt-4">
                                                 <div class="form-group">
-                                                    <textarea class="form-control" name="copyrights" placeholder="Copyright Text"
+                                                    <textarea class="form-control" name="copyrights"
+                                                              placeholder="Copyright Text"
                                                               rows="1"
                                                               th:text="${searchBean.copyright}"></textarea>
                                                 </div>
@@ -109,7 +113,8 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <textarea class="form-control" name="summaryDescription" placeholder="Copyright Text"
+                                                    <textarea class="form-control" name="summaryDescription"
+                                                              placeholder="Copyright Text"
                                                               rows="1"
                                                               th:text="${searchBean.summaryDescription}"></textarea>
                                                 </div>
@@ -120,7 +125,8 @@
                                                         Deactivate
                                                     </div>
                                                     <div class="col-md-3 d-flex">
-                                                        <input data-bootstrap-switch id="deactivateFlag" name="my-checkbox"
+                                                        <input data-bootstrap-switch id="deactivateFlag"
+                                                               name="my-checkbox"
                                                                th:checked="${searchBean.deactivateFlag eq 'Y'}"
                                                                type="checkbox">
                                                         <input name="deactivateFlag" type="hidden"
@@ -134,49 +140,50 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
-                    <div class="row px-1">
-                        <div class="col-md-6">
-                            <div class="row">
-                                <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" type="button" onclick="oss_lst_fn.deleteOss()">Delete
-                                </button>
+                        <div class="row px-1">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" onclick="oss_lst_fn.deleteOss()"
+                                            type="button">Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row float-right">
+                                    <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button">Bulk
+                                        Registration
+                                    </button>
+                                    <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3"
+                                            type="button"><i
+                                            class="far fa-file-excel mr-2"></i>Export
+                                    </button>
+                                    <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3"
+                                            onclick="callCreateTabInFrame('New_OpenSource', '/oss/edit', 'oss-edit', true)"
+                                            type="button">
+                                        Add
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="row float-right">
-                                <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button">Bulk
-                                    Registration
-                                </button>
-                                <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3"
-                                        type="button"><i
-                                        class="far fa-file-excel mr-2"></i>Export
-                                </button>
-                                <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3"
-                                        onclick="callCreateTabInFrame('New_OpenSource', '/oss/edit', 'oss-edit', true)"
-                                        type="button">
-                                    Add
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 mt-3" style="overflow-x: scroll;">
-                            <div class="jqGridSet">
-                                <table id="list">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
-                                <div id="pager"></div>
-                            </div>
+                        <div class="row">
+                            <div class="col-12 mt-3" style="overflow-x: scroll;">
+                                <div class="jqGridSet">
+                                    <table id="list">
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                    <div id="pager"></div>
+                                </div>
 
+                            </div>
                         </div>
                     </div>
-                </div>
-                <!-- loading bar -->
-                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
-                <!-- /. loading bar -->
-            </section>
+                    <!-- loading bar -->
+                    <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                    <!-- /. loading bar -->
+                </section>
+            </form>
         </div>
     </div>
     </body>

@@ -2,10 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="script">
     <script th:inline="javascript">
-        /*<![CDATA[*/
         var initParam = {};
         var totalRow = 0;
-        //const G_ROW_CNT = "*{gRowCnt}";
 
         $(window).load(function () {
             lic_lst_data.init();
@@ -42,14 +40,6 @@
                 $("#licenseNameAllSearchFlag").on("change", function(e){
                     $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
                 });
-
-                // Auto complete
-                // const licenseNameList = ["Artistic License 1.0 (Perl)", "Artistic License 1.0", "Artistic License 2.0", "Australian Public Licence B 1.0", "GNU General Public License v2.0 w/Linux Syscall Note", "CeCILL-B Free Software License Agreement"];
-                // const autocompleteLicenseName = $('#autocomplete-license-name');
-                // autocompleteLicenseName.on('focus', function () {
-                //     autocompleteLicenseName.typeahead('open');
-                // });
-                // autocompleteLicenseName.typeahead({ source: licenseNameList });
 
                 $('#search').on('click', function (e) {
                     e.preventDefault();
@@ -113,8 +103,8 @@
                         , {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link2'}
                         , {name: 'description', index: 'description', width: 150, align: 'left', formatter: common_fmt.truncateText, maxlength: 20 }
                     ],
-                    rowNum: 20,
-                    rowList: ['20', '40', '60'],
+                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
+                    rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
                     autowidth: true,
                     pager: '#pager',
                     gridview: true,
@@ -129,7 +119,6 @@
                             var cStartDate = $("#cStartDate").val() || 0;
                             var cEndDate = $("#cEndDate").val() || 0;
                             var diffNum = +cStartDate - +cEndDate;
-
 
                             var mStartDate = $("#mStartDate").val() || 0;
                             var mEndDate = $("#mEndDate").val() || 0;
@@ -154,7 +143,5 @@
                 });
             }
         }
-
-        /*]]>*/
     </script>
 </th:block>

@@ -204,7 +204,7 @@
                     var dataLength = $("#syncOssEditor").summernote('code').length;
 
                     if ((checkedSyncList.length > 0) || dataLength > 0) {
-                        $(".loading").show();
+                        // $(".loading").show();
 
                         $("input[name=ossIds]").val(checkedOssList);
                         let editorVal = $("#syncOssEditor").summernote('code');
@@ -225,7 +225,7 @@
                         };
 
                         postAjaxData(param, "/oss/ossSyncUpdate", "json", function (data) {
-                            $(".loading").hide();
+                            // $(".loading").hide();
                             if (data.isValid == 'true') {
                                 alertify.alert(String('[[ #{msg.common.success} ]]'), function () {
                                     self.close();

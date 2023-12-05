@@ -1,9 +1,22 @@
-const LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
+let LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 let onAjaxLoadingHide = false;
+let doNotUseAutoLoadingHideFlag = 'N';
+let gRowCnt = '';
 
+$( document ).ajaxSend(function( event, jqxhr, settings ) {
+    jqxhr.setRequestHeader("AJAX", true);
+});
+
+$( document ).ajaxError(function( event, jqxhr, settings, thrownError  ) {
+    if ( jqxhr != undefined && (jqxhr.status == 401 || jqxhr.status == 403) ) {
+        alert("Your session has expired. Please log in again");
+        location.href = "/";
+    }
+});
+
+/**
+ * alertify Default setting */
 $(document).ready(function (){
-    //alertify Default 설정
-
     if(typeof alertify !== 'undefined') {
         alertify.defaults = {
             // dialogs defaults
@@ -69,43 +82,105 @@ $( document ).ajaxError(function( event, jqxhr, settings, thrownError  ) {
     }
 });
 
-var doNotUseAutoLoadingHideFlag = 'N';
-$(document).ready(function (){
-    //form data -> json data
-    $.fn.serializeObject = function() {
-        "use strict";
-        var result = {};
-        var extend = function (i, element) {
-            var node = result[element.name];
-            // If node with same name exists already, need to convert it to an array as it
-            // is a multi-value field (i.e., checkboxes)
-
-            var isArrObject = "watchers" == element.name;
-
-            if ('undefined' !== typeof node && node !== null) {
-                if ($.isArray(node)) {
-                    node.push(element.value);
-                } else {
-                    result[element.name] = [node, element.value];
-                }
-            } else {
-                if(isArrObject) {
-                    node = [element.value];
-                    result[element.name] = node;
-                } else {
-                    result[element.name] = element.value;
-                }
+$( document ).ready(function (){
+    $(document).keydown(function(e){
+        if(e.target.nodeName != "INPUT" && e.target.nodeName != "TEXTAREA") {
+            if(e.keyCode === 8) {
+                return false;
             }
-        };
+        }
 
-        $.each(this.serializeArray(), extend);
+        if(e.keyCode===82 && e.altKey && !e.shiftKey){//Alt + R - 이전 탭으로 가기
+            returnTabInFrame();
+        }
 
-        return result;
-    }
+        if(e.keyCode===87 && e.altKey && !e.shiftKey){//Alt + W - 현재 탭 닫기
+            activeDeleteTabInFrame();
+        }
+
+        if(e.altKey && e.shiftKey && e.keyCode===87){//Shift + Alt + W - 전체 탭 닫기
+            allDeleteTabInFrame();
+        }
+
+        if(e.keyCode===37 && e.shiftKey && e.altKey){//Shift + Alt + Arrow Left - 탭 왼쪽으로 이동
+            changeTabInFrame('left');
+        }
+
+        if(e.keyCode===39 && e.shiftKey && e.altKey){//Shift + Alt + Arrow Right - 탭 오른쪽으로 이동
+            changeTabInFrame('right');
+        }
+    });
+
+    $(window).ajaxStart(function(event, jqxhr, settings){
+        var _targetUrl = event.target.URL;
+
+        if(_targetUrl && "function" != typeof(_targetUrl)) {
+            loading.show();
+
+            onAjaxLoadingHide = false;
+        }
+    }).ajaxStop(function(){
+        loading.hide();
+    }).ajaxError(function(event, jqxhr, ssettings, exception) {
+        doNotUseAutoLoadingHideFlag = "N";
+
+        loading.hide();
+    });
+
+    (function($){
+        //form data -> json data
+        $.fn.serializeObject = function() {
+            "use strict";
+            var result = {};
+            var extend = function (i, element) {
+                var node = result[element.name];
+                // If node with same name exists already, need to convert it to an array as it
+                // is a multi-value field (i.e., checkboxes)
+
+                var isArrObject = "watchers" == element.name;
+
+                if ('undefined' !== typeof node && node !== null) {
+                    if ($.isArray(node)) {
+                        node.push(element.value);
+                    } else {
+                        result[element.name] = [node, element.value];
+                    }
+                } else {
+                    if(isArrObject) {
+                        node = [element.value];
+
+                        result[element.name] = node;
+                    } else {
+                        result[element.name] = element.value;
+                    }
+                }
+            };
+
+            $.each(this.serializeArray(), extend);
+
+            return result;
+        }
+
+        //create combobox by code
+        $.fn.makeSelectByCodes = function(typeCodes){
+            "use strict";
+            var $this = this;
+
+            typeCodes.forEach(function(typeCode){
+                $('<option value="'+typeCode.cdDtlNo+'">'+typeCode.cdDtlNm+'</option>').appendTo($this);
+            });
+        }
+
+        //element value check
+        $.fn.isValueEmpty = function(){
+            return this.val() == null || this.val() == '';
+        }
+    }(jQuery));
 
     autoComplete.load();
     autoComplete.init();
 });
+
 // Auto complete
 const commonAjax = {
     getLicenseTags : function(data){
@@ -657,4 +732,27 @@ function findAndReplace(match) {
         url += "/partner/view/" + id;
     }
     return "<a href=" + url +" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" +  match + "</a>";
+}
+
+function stringToArray (str) {
+    return arr = str.split(",").map(Number);
+}
+
+function setMaxRowCnt(maxRowCnt){
+    if(!/.+/.test(gRowCnt)){
+        gRowCnt = maxRowCnt;
+    }
+}
+
+var loading = {
+    show: function(){
+        if($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide){
+            $('#loading_wrap').show();
+        }
+    },
+    hide: function(){
+        if("Y" != doNotUseAutoLoadingHideFlag) {
+            $('#loading_wrap').hide();
+        }
+    }
 }

@@ -2,15 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-        var totalRow = 0;
-        //const G_ROW_CNT = "*{gRowCnt}";
-
         $(window).load(function () {
             lic_edit_data.init();
-
-            if($('input[name=licenseId]').val()) {
-                lic_edit_cmt.getCommentList();
-            }
         });
 
         const lic_edit_data = {
@@ -76,6 +69,10 @@
                         }
                     });
                 });
+
+                if($('input[name=licenseId]').val()) {
+                    lic_edit_cmt.getCommentList();
+                }
             }
         }
 

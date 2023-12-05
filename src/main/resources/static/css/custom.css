@@ -24,6 +24,7 @@ ul { list-style-type: none; }
 .custom-layout .text-d-orange { color: #c95200; }
 .custom-layout .text-yellow { color: #ffc003; }
 .custom-layout .text-lg-gray { color: #6b6b6b; }
+.custom-layout .text-quartz-gray { color: #8f8986; }
 .custom-layout .text-light-gray { color: #9E9E9E; }
 .custom-layout .text-blue-gray { color: #596d82; }
 .custom-layout .text-dark-blue { color: #1F2D3D; }
@@ -93,8 +94,10 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 .content-wrapper.custom-layout { font-size: 1rem;}
 .custom-layout hr { margin-top: 0; margin-bottom: 0;}
-.custom-layout .login-box form a {color:#a2a7ac !important; }
-.custom-layout .login-box form a:hover {color: #343a40 !important; text-decoration:underline; font-weight: bolder}
+.custom-layout .login-box form a {color:#007bff !important; }
+.custom-layout .login-box form a:hover {text-decoration:underline;}
+.custom-layout .login-userInfo .top-text { font-size: .8rem; color : #a2a7ac; font-weight: 500 !important; margin-bottom: 0px}
+.custom-layout .replaceable-content hr { width: 10%; float: left; background-color: #dc5581}
 .custom-layout iframe html {height: auto;}
 .custom-layout .brand-link {
     display: flex;

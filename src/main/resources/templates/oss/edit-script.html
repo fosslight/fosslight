@@ -318,11 +318,48 @@
                     alertify.confirm(String([[ #{msg.common.confirm.save}]]), function (e) {
                         if (e) {
                             $('#_licenseChoice').jqGrid('saveRow', lastsel);
-                            registSubmit();
+                            oss_edit_fn.validate();
                         } else {
                             return false;
                         }
                     });
+                }
+            },
+            validate: function() {
+                if (validationDataSet()) {
+                    $("#ossForm").ajaxForm({
+                        url: "/oss/validation",
+                        type: 'POST',
+                        dataType: "json",
+                        cache: false,
+                        success: onValidSuccess,
+                        error: onError
+                    }).submit();
+                }
+            },
+            onRegist: function () {
+                loading.show();
+                saveRow();
+                const _editorVal = $("#commentCont").summernote('code');
+                $('input[name=comment]').val(replaceWithLink(_editorVal));
+                formAjaxData("#ossForm", "/oss/saveAjax", oss_edit_fn.onRegistSuccess, onError)
+            },
+            onRegistSuccess: function(json, status) {
+                loading.hide();
+
+                if (json.resCd == '10') {
+                    alertify.alert(String([[ #{msg.common.success}]]), function () {
+                        if(oss_edit_data.isCopyData) {
+                            callDeleteTabInFrame("oss-edit_" + oss_edit_data.ossId);
+                        } else {
+                            callDeleteTabInFrame("oss-edit_" + json.ossId);
+                        }
+                        callReloadTabInframe("/oss/list", "oss-list");
+                    });
+                } else {
+                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    renameFlag = 'N';
+                    $('input[name=renameFlag]').val(renameFlag);
                 }
             },
             checkValid: function () {
@@ -929,7 +966,7 @@
                     markTxt += ' <span> ' + ossLicenseComb + ' </span> ';
                 }
 
-                markTxt += `<a href="javascript:void(0)" onclick="callCreateTabInFrame('${row.licenseId}_License', '${url}', 'license-edit${row.licenseId}', true)">${licenseName}</a>`;
+                markTxt += `<a>${licenseName}</a>`;
             });
 
             var andTxts = markTxt.split('<span> OR </span>');
@@ -1053,26 +1090,12 @@
             return true;
         }
 
-        //OSS등록로직
-        function registSubmit() {
-            if (validationDataSet()) {
-                $("#ossForm").ajaxForm({
-                    url: "/oss/validation",
-                    type: 'POST',
-                    dataType: "json",
-                    cache: false,
-                    success: onValidSuccess,
-                    error: onError
-                }).submit();
-            }
-        }
-
         // OSS 삭제 체크 (기존에 CONF 상태로 등록된 OSS가 있는지 여부 검사)
         function checkExistOssConf() {
             var ossId = $('input[name=ossId]').val();
 
             $.ajax({
-                url: '<c:url value="/oss/checkExistOssConf"/>',
+                url: "/oss/checkExistOssConf",
                 type: 'GET',
                 dataType: 'json',
                 cache: false,
@@ -1153,21 +1176,6 @@
             }, function () {
                 alertify.error(String([[ #{msg.common.valid2}]]), 0);
             })
-            // $.ajax({
-            //     url : "/oss/checkVdiff",
-            //     type : 'POST',
-            //     data : JSON.stringify(postData),
-            //     dataType : 'json',
-            //     cache : false,
-            //     async : false,
-            //     contentType : 'application/json',
-            //     success : function(json){
-            //         rtnData = json.vFlag;
-            //     },
-            //     error : function(){
-            //         alertify.error('<spring:message code="msg.common.valid2" />', 0);
-            //     }
-            //});
 
             rtnData['ossVersion'] = ossVersion;
             return rtnData;
@@ -1389,7 +1397,7 @@
 
                                 alertify.firstVDiffDialog(vDiffDiv)
                                     .set('onok', function (closeEvent) {
-                                        onRegist();
+                                        oss_edit_fn.onRegist();
                                     })
                                     .set('oncancel', function (closeEvent) {
                                         return;
@@ -1397,7 +1405,7 @@
                             } else {
                                 alertify.firstVDiffDialog(vDiffDiv)
                                     .set('onok', function (closeEvent) {
-                                        onRegist();
+                                        oss_edit_fn.onRegist();
                                     })
                                     .set('oncancel', function (closeEvent) {
                                         return;
@@ -1405,12 +1413,12 @@
                                     .set('resizable', true).resizeTo('25%', height);
                             }
                         } else {
-                            onRegist();
+                            oss_edit_fn.onRegist();
                         }
                     } else {
                         alertify.confirm(String([[ #{msg.oss.confirm.ossVersion}]]), function (e) {
                             if (e) {
-                                onRegist();
+                                oss_edit_fn.onRegist();
                             } else {
                                 return false;
                             }
@@ -1420,7 +1428,7 @@
                     alertify.error(String([[ #{msg.common.valid2}]]), 0);
                     return;
                 } else {
-                    onRegist();
+                    oss_edit_fn.onRegist();
                 }
             }
         };
@@ -1483,36 +1491,6 @@
                 } else {
                     checkExistOssConf();
                 }
-            }
-        };
-
-        //저장함수
-        function onRegist() {
-            loading.show();
-            saveRow();
-            var editorVal = $("#commentCont").summernote('code');
-            $('input[name=comment]').val(replaceWithLink(editorVal));
-
-            formAjaxData("#ossForm", "/oss/saveAjax", onRegistSuccess, onError);
-        };
-
-        //등록성공콜백함수
-        function onRegistSuccess(json, status) {
-            loading.hide();
-
-            if (json.resCd == '10') {
-                alertify.alert(String([[ #{msg.common.success}]]), function () {
-                    if(oss_edit_data.isCopyData) {
-                        callDeleteTabInFrame("oss-edit_" + oss_edit_data.ossId);
-                    } else {
-                        callDeleteTabInFrame("oss-edit_" + json.ossId);
-                    }
-                    callReloadTabInframe("/oss/list", "oss-list");
-                });
-            } else {
-                alertify.error(String([[ #{msg.common.valid2}]]), 0);
-                renameFlag = 'N';
-                $('input[name=renameFlag]').val(renameFlag);
             }
         };
 
@@ -1745,9 +1723,9 @@
 
                     // 자기자신이 아닌 경우만
                     if ('Duplicated' == row['mergeStr'] && row['delOssId'] && row['delOssId'] != '${ossId}') {
-                        callcreateTabInFrame(row['delOssId'] + '_Opensource', "/oss/edit/" + row['delOssId']);
+                        callCreateTabInFrame(row['delOssId'] + '_Opensource', "/oss/edit/" + row['delOssId']);
                     } else if (row['ossId'] != '${ossId}') {
-                        createTabInFrame(row['ossId'] + '_Opensource', '#<c:url value="/oss/edit/' + row['ossId'] + '"/>');
+                        callCreateTabInFrame(row['ossId'] + '_Opensource', "/oss/edit/" +  row['ossId']);
                     }
 
                 }

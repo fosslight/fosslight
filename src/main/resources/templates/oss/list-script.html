@@ -2,12 +2,11 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
-    /*<![CDATA[*/
-    var initParam = {};
-    var groupBuffer='';
-    var totalRow = 0;
-    //const G_ROW_CNT = "*{gRowCnt}";
-    linkFlag = String([[ ${searchBean.linkFlag}]]);
+    let initParam = {};
+    let groupBuffer='';
+    let totalRow = 0;
+    let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) } ]];
+    linkFlag = String('[[ ${searchBean.linkFlag}]]');
 
     $(window).load(function () {
         oss_lst_evt.init();
@@ -15,6 +14,8 @@
 
     const oss_lst_evt = {
         init: function () {
+            setMaxRowCnt(G_ROW_CNT);
+
             //Initialize Select2 Elements
             $('.select2').select2();
 
@@ -264,8 +265,8 @@
                     }
                 ],
                 rowNum: 20,
-                // rowNum: ${ct:getConstDef("DISP_PAGENATION_DEFAULT")},
-                // rowList: [${ct:getConstDef("DISP_PAGENATION_LIST_STR")}],
+                rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
+                rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
                 autowidth: true,
                 pager: '#pager',
                 gridview: true,
