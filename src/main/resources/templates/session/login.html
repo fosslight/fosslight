@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/header :: headFragment"></th:block>
-<th:block th:replace="fragments/script :: scriptFragment"></th:block>
+<th:block th:replace="fragments/default-script :: scriptFragment"></th:block>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" rel="stylesheet">
 <body class="hold-transition login-page custom-layout">
@@ -211,16 +211,7 @@
         }
     }
 
-    function onError(data, status){
-        alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
-    }
 
-    function showErrMsg() {
-        $("div.retxt").show();
-    }
 
-    function hideErrMsg() {
-        $("div.retxt").hide();
-    }
 </script>
 </html>

@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
-    let initParam = {};
+    let isAdmin = [[ ${@CommonFunction.isAdmin() } ]];
     let groupBuffer='';
     let totalRow = 0;
     let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) } ]];
@@ -234,12 +234,6 @@
                     , { name: 'summaryDescription', index: 'summaryDescription', width: 150, height: 50, align: 'left' }
                     , { name: 'cveId', index: 'cveId', hidden: true }
                     , { name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: 'vuln' }
-                    // <c:if test="${ct:isAdmin()}">
-                    // , {name: 'creator', index: 'creator', width: 80, align: 'center'}
-                    // , {name: 'createdDate', index: 'createdDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
-                    // , {name: 'modifier', index: 'modifier', width: 80, align: 'center'}
-                    // , {name: 'modifiedDate', index: 'modifiedDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
-                    // </c:if>
                     , {
                         name: 'groupKey', index: 'groupKey', hidden: true
                         , cellattr: function (rowId, val, rawObject, cm, rdata) {
@@ -385,12 +379,13 @@
                         if("Y" != linkFlag) {
                             callCreateTabInFrame(rowData['ossId']+'_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
                         } else {
-                            var openNewWindow = window.open("about:blank");
-                            // if("${ct:isAdmin()}"){
-                            //     openNewWindow.location.href	= "/oss/edit/" + rowData['ossId'];
-                            // } else {
-                            //     openNewWindow.location.href	= "/oss/view/" + rowData['ossId'];
-                            // }
+                            const openNewWindow = window.open("about:blank");
+
+                            if(isAdmin){
+                                openNewWindow.location.href	= "/oss/edit/" + rowData['ossId'];
+                            } else {
+                                openNewWindow.location.href	= "/oss/view/" + rowData['ossId'];
+                            }
                         }
                     }
                 },

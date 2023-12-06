@@ -170,8 +170,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* submit form */
 .custom-layout .submit-form .tag-form { margin-bottom: .5rem !important; }
-.custom-layout .submit-form .external-event { color: #12b886;cursor: pointer;font-weight: 450;background-color: #F7F8F9FF; font-size: 1rem; box-shadow: none; }
-.custom-layout .submit-form .external-event:hover { background-color: rgb(128 126 126 / 16%); }
+.custom-layout .submit-form .external-event {color: #0d4ea6; cursor: pointer; font-weight: 500; background-color: rgb(212 228 250); font-size: 1rem; box-shadow: none; border-radius: 1.3rem;}
+.custom-layout .submit-form .external-event:hover {color: rgb(63, 85, 99);}
 .custom-layout .submit-form .external-event i { color: rgb(128 126 126 / 16%); }
 .custom-layout .submit-form .external-event i:hover { color: #999 }
 .custom-layout .submit-form .external-events { display: flex; }
@@ -243,12 +243,6 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
     opacity: 1;
 }
 .tooltip .tooltip-inner i { margin-right: 10px; }
-
-/*.tooltip {*/
-/*    float: left !important;*/
-/*    font-size: 8px;*/
-/*}*/
-
 
 /* jqGrid Table */
 .ui-widget input,

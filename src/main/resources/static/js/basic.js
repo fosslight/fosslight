@@ -376,7 +376,19 @@ function receiveMessage(event) {
 			break;
 		case 'change':
 			changeTab(data.tabData[0]);
-			
+
+			break;
+		case 'create_new':
+			createTab_new(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
+
+			break;
+		case 'delete_new':
+			deleteTab_new(data.tabData[0]);
+
+			break;
+		case 'reload_new':
+			reloadTab_new(data.tabData[0], data.tabData[1], data.action);
+
 			break;
 	}
 }
@@ -2329,4 +2341,17 @@ var tableRefreshNew = function(id) {
 			});
 		};
 	}
+}
+
+/* 2023-12-06 */
+function stringToArray (str) {
+	return arr = str.split(",").map(Number);
+}
+
+function onError(data, status){
+	alertify.error(String('[[ #{msg.common.valid} ]]'), 0);
+}
+
+function onError2(data, status){
+	alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
 }

@@ -132,32 +132,7 @@ const SELECTOR_TAB_NAVBAR_NAV = `${SELECTOR_CONTENT_WRAPPER}.iframe-mode .navbar
 const SELECTOR_TAB_NAVBAR_NAV_LINK = `${SELECTOR_TAB_NAVBAR_NAV} .nav-link`
 const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
 
-if ('addEventListener' in window){
-    window.addEventListener('message', receiveMessage, false);
-} else if ('attachEvent' in window){ //IE
-    window.attachEvent('onmessage', receiveMessage);
-}
-
-function receiveMessage(event) {
-    var data = JSON.parse(event.data);
-
-    switch(data.action){
-        case 'create':
-            createTab(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
-
-            break;
-        case 'delete':
-            deleteTab(data.tabData[0]);
-
-            break;
-        case 'reload':
-            reloadTab(data.tabData[0], data.tabData[1], data.action);
-
-            break;
-    }
-}
-
-function createTab(title, link,  uniqueName, autoOpen) {
+function createTab_new(title, link,  uniqueName, autoOpen) {
     const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + uniqueName + '"]') || null;
     if (existingPanel) {
         activateTab(uniqueName);
@@ -186,11 +161,11 @@ function createTab(title, link,  uniqueName, autoOpen) {
     }
 }
 
-function deleteTab (uniqueName) {
+function deleteTab_new (uniqueName) {
     $("#tab--" + uniqueName).parent().find('.btn-iframe-close').trigger("click");
 }
 
-function reloadTab(link, uniqueName, act) {
+function reloadTab_new(link, uniqueName, act) {
     $('iframe').each(function(){
         var url = $(this).attr('src');
 
@@ -248,7 +223,7 @@ function callCreateTabInFrame(title, link, uniqueName, autoOpen) {
 
     var data = {
         tabData: tabData,
-        action:'create'
+        action:'create_new'
     };
 
     parent.postMessage(JSON.stringify(data),"*");
@@ -261,7 +236,7 @@ var callReloadTabInframe = function(link, uniqueName){
 
     var data = {
         tabData:tabData,
-        action:'reload'
+        action:'reload_new'
     };
 
     parent.postMessage(JSON.stringify(data),"*");
@@ -273,7 +248,7 @@ var callDeleteTabInFrame = function(uniqueName){
 
     var data = {
         tabData:tabData,
-        action:'delete'
+        action:'delete_new'
     };
 
     parent.postMessage(JSON.stringify(data),"*");

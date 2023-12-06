@@ -34,10 +34,6 @@
                 $("[name='addTagButton']").click(function (e) {
                     const elId = this.id;
                     appendSingleTag(e, elId);
-
-                    // $("[name='deleteTagButton']").on("click", function () {
-                    //     $(this).closest(".tag-container").remove();
-                    // });
                 });
 
                 //save license
@@ -84,12 +80,11 @@
                     dataType:"json",
                     cache : false,
                     success: lic_edit_fn.onValidSuccess,
-                    error : lic_edit_fn.onError
+                    error : onError
                 }).submit();
             },
             onValidSuccess: function (json, status) {
                 if (json.isValid == 'false') {
-                    lic_edit_fn.createValidMsgComplex(json);
                     alertify.error(String([[ #{msg.common.valid} ]]), 0);
                 } else if (json.isValid == 'true') {
                     loading.show();
@@ -112,7 +107,7 @@
                         dataType: "json",
                         cache: false,
                         success: lic_edit_fn.onRegistSuccess,
-                        error: lic_edit_fn.onError
+                        error: onError
                     }).submit();
                 }
             },
@@ -127,53 +122,6 @@
                 } else {
                     alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 }
-            },
-            onError: function(data, status){
-                alertify.error(String([[ #{msg.common.valid2} ]]), 0);
-            },
-            createValidMsgComplex: function(msgData){
-                lic_edit_fn.hideErrMsg();
-
-                $.each(msgData,function(key,value) {
-                    if("isValid" != key && "validMsg" != key) {
-                        if(key.indexOf(".") > -1 ){
-                            var seqSuffix = key.split(".");
-                            var targetId = seqSuffix[1] + "_" + seqSuffix[0];
-
-                            if(seqSuffix[0]=='licenseNicknames'){
-                                $('input[name=licenseNicknames]:eq('+(Number(seqSuffix[1])-1)+')').focus().parent().next("span.retxt").html(value).show();
-                            }
-
-                            if($('input[id='+targetId+']').length > 0) {
-                                $('input[id='+targetId+']').focus().after(makeErrMsg(value)).show();
-                            } else if($('textarea[id='+targetId+']').length > 0) {
-                                $('textarea[id='+targetId+']').focus().after(makeErrMsg(value)).show();
-                            } else if($('select[id='+targetId+']').length > 0) {
-                                $('select[id='+targetId+']').focus().after(makeErrMsg(value)).show();
-                            }
-                        } else {
-                            if(key == 'licenseNicknames'){
-                                $('input[name=licenseNicknames]').focus().parent().next("span.retxt").html(value).show();
-                            }
-
-                            if(key == 'validMsgModelList') {
-                                $('#validMsgModelList').html(value).show();
-                            }
-
-                            if($('input[name='+key+']').length > 0) {
-                                $('input[name='+key+']').focus().next("span.retxt,div.retxt").html(value).show();
-                            } else if($('textarea[name='+key+']').length > 0) {
-                                $('textarea[name='+key+']').focus().next("span.retxt,div.retxt").html(value).show();
-                            } else if($('select[name='+key+']').length > 0) {
-                                $('select[name='+key+']').focus().parent().siblings("span.retxt,div.retxt").html(value).show();
-                            }
-                        }
-                    }
-                });
-            },
-            hideErrMsg: function () {
-                $("div.retxt").hide();
-                $("span.retxt").hide();
             }
         };
 
@@ -262,7 +210,6 @@
                 return false;
             }
         }
-
 
     </script>
 </th:block>
