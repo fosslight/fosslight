@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="script">
+    <script th:inline="javascript">
+        $(function () {
+
+            // word cloud
+            const words = [
+                { text: 'AFL-1.1', size: 65 },
+                { text: 'AFL-1', size: 65 },
+                { text: 'AML', size: 52 },
+                { text: 'Curl License', size: 52 },
+                { text: 'ICU License', size: 42 },
+                { text: 'Info-ZIP', size: 38 },
+                { text: 'Unicode-DFS-2016', size: 38 },
+                { text: 'Unicode-DFS-2023', size: 38 },
+                { text: 'OpenSSH License', size: 24 },
+                { text: 'STLport Licenser', size: 24 },
+                { text: 'Netperf License', size: 24 },
+                { text: 'Colt License', size: 24 },
+                { text: 'Matplotlib License', size: 24 },
+                { text: 'DBAD', size: 24 },
+                { text: 'AFL v6.0', size: 16 },
+                { text: '3GPP license', size: 16 },
+                { text: 'CPOL-1.02', size: 16 },
+                { text: 'ISC', size: 16 },
+                { text: 'HPND', size: 16 },
+                { text: '3GPP license', size: 16 },
+                { text: 'APAFML', size: 16 },
+                { text: 'TEST12', size: 16 },
+                { text: 'TEST123', size: 16 },
+                { text: 'TEST1234', size: 16 },
+                { text: 'TEST12345', size: 16 },
+                { text: 'TEST_122', size: 16 },
+                { text: 'TEST_12345', size: 16 },
+                { text: 'TEST_123456', size: 16 },
+                { text: 'TEST_12345_1207', size: 16 },
+                { text: 'TEST_12345_12256', size: 16 },
+                { text: 'TEST_12345_ABC', size: 16 },
+            ];
+
+            const width = 700;
+            const height = 365;
+            const margin = { left: 10, right: 10, top: 10, bottom: 10 };
+            const svgWidth = width + margin.left + margin.right;
+            const svgHeight = height + margin.top + margin.bottom;
+
+            const svg = d3.select('#wordcloud')
+                .append('svg')
+                .attr('width', svgWidth)
+                .attr('height', svgHeight)
+                .append('g')
+                .attr('transform', `translate(${(svgWidth / 2)}, ${(svgHeight / 2)})`);
+
+            const cloud = d3.layout.cloud()
+                .size([width, height])
+                .words(words)
+                .padding(3)
+                .rotate(function () { return Math.random() < 0.5 ? 0 : 90; })
+                .fontSize(function (d) { return d.size; })
+                .on('end', draw);
+
+            cloud.start();
+
+            function draw(words) {
+                const textElements = svg.selectAll('text')
+                    .data(words)
+                    .enter().append('text')
+                    .style('font-size', function (d) { return d.size + 'px'; })
+                    .style('font-weight', function (d) {
+                        if (d.size > 28) return '1000';
+                        if (d.size > 24) return '800';
+                        return '600';
+                    })
+                    .style('fill', function (d) {
+                        if (d.size > 60) return '#6C0707FF';
+                        else if(d.size > 50) return '#BB1B22FF';
+                        else if(d.size > 40) return '#a87e1c';
+                        else if(d.size > 30) return '#A30427FF';
+                        else if (d.size > 24) return '#AA5032FF';
+                        return '#b24201';
+                    })
+                    .style('text-anchor', 'middle')
+                    .attr('transform', function (d) {
+                        const rotation = d.rotate === 0 ? 0 : 90;
+                        return 'translate(' + [d.x, d.y] + ')rotate(' + rotation + ')';
+                    })
+                    .text(function (d) { return d.text; });
+            }
+
+            // pie plot
+            const donutData = [
+                {
+                    label: '<span class="badge badge-dark">CRITICAL</span>',
+                    data: 20809,
+                    color: '#000'
+                },
+                {
+                    label: '<span class="badge badge-danger">HIGH</span>',
+                    data: 56039,
+                    color: '#dc3545'
+                },
+                {
+                    label: '<span class="badge badge-orange">MEDIUM</span>',
+                    data: 54548,
+                    color: '#fc4e2a'
+                },
+                {
+                    label: '<span class="badge badge-warning">LOW</span>',
+                    data: 2360,
+                    color: 'orange'
+                }
+            ]
+
+            $.plot('#donut-chart', donutData, {
+                series: {
+                    pie: {
+                        show: true,
+                        radius: 0.8,
+                        innerRadius: 0.3,
+                        label: {
+                            show: true,
+                            radius: 2 / 3,
+                            formatter: labelFormatter,
+                            threshold: 0.1
+                        }
+                    }
+                },
+                legend: {
+                    show: false
+                }
+            })
+
+            function updateDataTable() {
+                var dataTable = $('#data-table tbody');
+                dataTable.empty();
+
+                for (var i = 0; i < donutData.length; i++) {
+                    var dataItem = donutData[i];
+                    dataTable.append(
+                        '<tr><td>' +
+                        dataItem.label +
+                        '</td><td>' +
+                        dataItem.data +
+                        '</td><td>'
+                    );
+                }
+            }
+
+            function labelFormatter(label, series) {
+                updateDataTable();
+                return "";
+                //   return '<div style="font-size:8pt; text-align:center; padding:2px; color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
+            }
+
+            // Summernote
+            $('#commpose-textarea-02').summernote();
+        });
+    </script>
+</th:block>

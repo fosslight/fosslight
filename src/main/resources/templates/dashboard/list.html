@@ -2,8 +2,25 @@
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="content">
-    <th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
-    <th:block th:replace="license/list-script :: script"></th:block>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css">
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.js"></script>
+    <script th:src="@{/js/flot/jquery.flot.js}"></script>
+    <script th:src="@{/js/flot/plugins/jquery.flot.resize.js}"></script>
+    <script th:src="@{/js/flot/plugins/jquery.flot.pie.js}"></script>
+    <script th:src="@{/js/d3-wordcloud/d3/d3.js}"></script>
+    <script th:src="@{/js/d3-wordcloud/d3/d3.layout.cloud.js}"></script>
+    <script th:src="@{/js/d3-wordcloud/d3.wordcloud.js}"></script>
+    <th:block th:replace="dashboard/list-script :: script"></th:block>
 
     <body class="hold-transition sidebar-mini" style="height: 100%;">
 
