@@ -5,12 +5,21 @@
 
 package oss.fosslight.common;
 
+import java.util.Arrays;
+import java.util.List;
+
 public final class Url {
 	
 	/** The Constant TILES_ROOT. */
 	public static final String TILES = "tiles";
 	public static final String TILES_ROOT = "tiles/admin";
 	public static final String TILES_AJAX_ROOT = "tiles/ajax";
+
+	public static final List<String> LITE_HUB_ORIGINS = Arrays.asList(
+			"http://localhost:3000",
+			"http://127.0.0.1:3000"
+			// TODO: add confirmed url of lite hub
+	);
 	
 	public static final class SESSION {
 		public static final String PATH = "/session";
@@ -932,6 +941,10 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
+	}
+
+	public static final class API_LITE {
+			public static final String PATH = "/api/lite";
 	}
 
 

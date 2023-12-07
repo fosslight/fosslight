@@ -48,20 +48,25 @@ import oss.fosslight.util.StringUtil;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired private T2UserService userService;
-	
+
 	@Autowired private CustomAuthenticationProvider customAuthenticationProvider;
 	@Autowired private CustomWebAuthenticationDetailsSource customWebAuthenticationDetailsSource;
-	
+
+    @Autowired private LiteAuthenticationEntryPoint liteAuthenticationEntryPoint;
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.authenticationProvider(customAuthenticationProvider);
 	}
-	
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 		// replay 어택을 막기 위한 csrf 토큰의 생성을 비활성화(disabled) 처리
 		.csrf().disable()
+			.exceptionHandling()
+			.authenticationEntryPoint(liteAuthenticationEntryPoint)
+		.and()
 		// 'X-Frame-Options' to 'DENY' 대응
 		.headers().frameOptions().disable().and()
 		.authorizeRequests().antMatchers(Url.USER.SAVE_AJAX).permitAll().and() // 사용자가입 요청처리 예외
@@ -70,6 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.authorizeRequests().antMatchers(Url.VULNERABILITY.VULN_POPUP).permitAll().and() // vulnerability popup 화면 예외
 		.authorizeRequests().antMatchers(Url.API.PATH+"/**").permitAll().and()
 		.authorizeRequests().antMatchers(Url.APIV2.PATH+"/**").permitAll().and()
+//		.authorizeRequests().antMatchers(Url.API_LITE.PATH+"/**").permitAll().and()
 		.authorizeRequests().antMatchers(Url.NOTICE.PUBLISHED_NOTICE).permitAll().and()
 		// 요청에 대한 권한 매핑
 		.authorizeRequests().anyRequest().authenticated()		// 모든 요청에 대해 권한 확인이 필요

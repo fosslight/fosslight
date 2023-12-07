@@ -5,9 +5,11 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import ExcelIcon from '@/public/images/excel.png';
+import axios from 'axios';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import qs from 'qs';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
@@ -93,16 +95,16 @@ export default function LicenseList() {
   // Rows/Columns
   const [rows, setRows] = useState<List.License[]>([]);
   const columns: List.Column[] = [
-    { name: 'ID', sort: 'id' },
-    { name: 'Name', sort: 'name' },
-    { name: 'Identifier', sort: 'idf' },
-    { name: 'Type', sort: 'type' },
-    { name: 'Obligations', sort: 'obg' },
-    { name: 'Restrictions', sort: 'res' },
-    { name: 'URL', sort: 'url' },
-    { name: 'Description', sort: 'desc' },
-    { name: 'Create', sort: 'create' },
-    { name: 'Modify', sort: 'modify' }
+    { name: 'ID', sort: 'LICENSE_ID' },
+    { name: 'Name', sort: 'LICENSE_NAME' },
+    { name: 'Identifier', sort: 'SHORT_IDENTIFIER' },
+    { name: 'Type', sort: 'TYPE' },
+    { name: 'Obligations', sort: 'OBLIGATION' },
+    { name: 'Restrictions', sort: '' },
+    { name: 'URL', sort: 'WEBPAGE' },
+    { name: 'Description', sort: 'DESCRIPTION' },
+    { name: 'Create', sort: 'CREATED_AT' },
+    { name: 'Modify', sort: 'MODIFIED_AT' }
   ];
 
   // Sorting
@@ -122,29 +124,39 @@ export default function LicenseList() {
       countPerPage
     };
 
+    const requestRows = async () => {
+      const signInRequest = async () => {
+        axios.defaults.withCredentials = true;
+        const response = await axios.post(
+          'http://localhost:8180/session/login-proc',
+          qs.stringify({
+            un: 'admin',
+            up: 'admin'
+          })
+        );
+      };
+      await signInRequest();
+
+      return await axios.get('http://localhost:8180/api/lite/licenses', {
+        params,
+        withCredentials: true,
+        paramsSerializer: (params) => {
+          console.log(params);
+          return qs.stringify(params, { arrayFormat: 'repeat' });
+        }
+      });
+    };
+
     setLoading(true);
-
-    setTimeout(() => {
-      setTotalCount(24);
-      setRows(
-        Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
-          licenseId: String(24 - 10 * (params.page - 1) - idx),
-          licenseName: 'Apache License 2.0',
-          licenseIdentifier: 'Apache-2.0',
-          licenseType: 'Permissive',
-          obligations: 'YY',
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
-          homepageUrl: 'https://spdx.org/licenses/blessing.html',
-          description: 'There are some descriptions here.',
-          creator: 'admin',
-          created: '2023-10-05 23:54:08.0',
-          modifier: 'admin',
-          modified: '2023-10-07 21:32:05.0'
-        }))
-      );
-
+    requestRows().then((res) => {
+      console.log(res);
+      setRows(res.data.list);
+      setTotalCount(res.data.totalCount);
       setLoading(false);
-    }, 500);
+    }).catch(rej => {
+      setLoading(false);
+    });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
