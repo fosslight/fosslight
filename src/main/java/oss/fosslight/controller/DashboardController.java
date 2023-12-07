@@ -39,7 +39,7 @@ public class DashboardController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		
-		return DASHBOARD.LIST_JSP;
+		return "dashboard/list :: content";
 	}
 	
 	@GetMapping(value=DASHBOARD.JOBSLIST)

@@ -46,7 +46,9 @@ ul { list-style-type: none; }
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
 .custom-layout .btn-lg-gray {background-color: #6b6b6b; font-weight: 500; color: #fff}
-.custom-layout .btn-lg-gray:hover {background-color: #3f3f3f;}
+.custom-layout .btn-lg-gray:hover {background-color: #3f3f3f; }
+.custom-layout .btn-light-gray {background-color: #ced4da; font-weight: 500; color: #333333}
+.custom-layout .btn-light-gray:hover {background-color: #595959; color: #fff;}
 .custom-layout .btn-onOff { background-color: #ecebe9;}
 .custom-layout .btn-onOff.active  { background-color: #007bff; color: #fff; }
 .custom-layout .btn-lg-orange { background-color: #ff5a00; font-weight: 500; color: #fff }
@@ -602,7 +604,7 @@ div.jqcloud span.w1 { color: #feb24c; }
 ul.ui-autocomplete {
     margin: 0px;
     font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    font-size: 1rem;
+    font-size: .9rem;
     font-weight: 400;
     line-height: 1.5;
     color: rgb(33, 37, 41);

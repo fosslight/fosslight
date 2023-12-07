@@ -1,0 +1,1419 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="content">
+    <th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+    <th:block th:replace="license/list-script :: script"></th:block>
+
+    <body class="hold-transition sidebar-mini" style="height: 100%;">
+
+    <div class="wrapper">
+    <div class="content-wrapper custom-layout dash-board">
+        <section class="content-header"></section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="small-box bg-danger">
+                                    <div class="inner">
+                                        <h3>32</h3>
+                                        <p>Progress</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-stats-bars"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small-box bg-secondary">
+                                    <div class="inner">
+                                        <h3>22</h3>
+                                        <p>Review</p>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="ion ion-stats-bars"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Job List</h3>
+                                            <div class="card-tools">
+                                                <div class="input-group input-group-sm" style="width: 150px;">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-default">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <div class="card-body table-responsive p-0" style="height: 30rem;">
+                                            <table class="table table-head-fixed text-nowrap">
+                                                <thead>
+                                                <tr>
+                                                <tr>
+                                                    <th class="text-center">ID</th>
+                                                    <th class="text-center">Name</th>
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Stage</th>
+                                                    <th class="text-center">Creator</th>
+                                                    <th class="text-center">Reviewer</th>
+                                                </tr>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-center">P-5772</td>
+                                                    <td>AMR_localization</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-success">Progress</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-green">Packaging</span></td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5800</td>
+                                                    <td>LG XBOOM for iOS</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-success">Progress</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-green">Packaging</span></td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5690</td>
+                                                    <td>AMR_localization</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-pink">Request</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-green">Packaging</span></td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5455</td>
+                                                    <td>NSHKJNNG2C</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-pink">Request</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-green">Packaging</span></td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5786</td>
+                                                    <td>LG CLOI ServeBot (Door type)</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-orange">Review</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-green">Packaging</span></td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5780</td>
+                                                    <td>webOS6.0_CTV_Binary_TEST</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-info">Complete</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-orange">Identification</span>
+                                                    </td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5776</td>
+                                                    <td>webOS22_KBHP_KBLP_CommercialTV</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-info">Complete</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-orange">Identification</span>
+                                                    </td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5772</td>
+                                                    <td>twitcast</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-secondary">Drop</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-orange">Identification</span>
+                                                    </td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5770</td>
+                                                    <td>NSHKCNNG1AP</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-secondary">Drop</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-orange">Identification</span>
+                                                    </td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">P-5768</td>
+                                                    <td>자동분석 테스트</td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-secondary">Drop</span></td>
+                                                    <td class="text-center"><span
+                                                            class="badge badge-outline-orange">Identification</span>
+                                                    </td>
+                                                    <td class="text-center">홍길동/선임연구원</td>
+                                                    <td></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- /.card-body -->
+                                    </div>
+                                    <!-- /.card -->
+                                </div>
+                            </div>
+
+
+                    </div>
+                    <div class="col-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Comment</h3>
+                                <!-- <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                        title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div> -->
+                            </div>
+                            <div class="card-body" scroll=auto style="height: 38.3rem;overflow-x:hidden">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            <tbody>
+                                            <tr>
+                                                <td style="border-top: none;">
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                                            <div class="row">
+                                                                <div class="col-md-9">
+                                                                            <span class="username">
+                                                                                <a href="#">Jonathan Burke Jr.</a>
+                                                                            </span>
+                                                                    <span class="description ml-0">Shared
+                                                                                publicly - 7:45 PM today</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="#" class="btn btn-default"
+                                                                           data-toggle="modal"
+                                                                           data-target="#modal-comment"><i
+                                                                                class="fas fa-pencil-alt"></i></a>
+                                                                        <a href="#" class="btn btn-lg-red"><i
+                                                                                class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for
+                                                            designers,
+                                                            typographers and the like. Some people hate it and
+                                                            argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                                            <div class="row">
+                                                                <div class="col-md-9">
+                                                                            <span class="username">
+                                                                                <a href="#">Jonathan Burke Jr.</a>
+                                                                            </span>
+                                                                    <span class="description ml-0">Shared
+                                                                                publicly - 7:45 PM today</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="#" class="btn btn-default"
+                                                                           data-toggle="modal"
+                                                                           data-target="#modal-comment"><i
+                                                                                class="fas fa-pencil-alt"></i></a>
+                                                                        <a href="#" class="btn btn-lg-red"><i
+                                                                                class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for
+                                                            designers,
+                                                            typographers and the like. Some people hate it and
+                                                            argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                                            <div class="row">
+                                                                <div class="col-md-9">
+                                                                            <span class="username">
+                                                                                <a href="#">Jonathan Burke Jr.</a>
+                                                                            </span>
+                                                                    <span class="description ml-0">Shared
+                                                                                publicly - 7:45 PM today</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="#" class="btn btn-default"
+                                                                           data-toggle="modal"
+                                                                           data-target="#modal-comment"><i
+                                                                                class="fas fa-pencil-alt"></i></a>
+                                                                        <a href="#" class="btn btn-lg-red"><i
+                                                                                class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for
+                                                            designers,
+                                                            typographers and the like. Some people hate it and
+                                                            argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="post">
+                                                        <div class="user-block">
+                                                            <div class="row">
+                                                                <div class="col-md-9">
+                                                                            <span class="username">
+                                                                                <a href="#">Jonathan Burke Jr.</a>
+                                                                            </span>
+                                                                    <span class="description ml-0">Shared
+                                                                                publicly - 7:45 PM today</span>
+                                                                </div>
+                                                                <div class="col-md-3">
+                                                                    <div class="btn-group btn-group-sm">
+                                                                        <a href="#" class="btn btn-default"
+                                                                           data-toggle="modal"
+                                                                           data-target="#modal-comment"><i
+                                                                                class="fas fa-pencil-alt"></i></a>
+                                                                        <a href="#" class="btn btn-lg-red"><i
+                                                                                class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p>
+                                                            Lorem ipsum represents a long-held tradition for
+                                                            designers,
+                                                            typographers and the like. Some people hate it and
+                                                            argue for
+                                                            its demise, but others ignore.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Mail List
+                                </h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body table-responsive p-0" scroll=auto style="height: 30rem;overflow-x:hidden">
+                                <table class="table table-head-fixed text-nowrap">
+                                    <thead>
+                                    <tr>
+                                        <th class="text-center">Sent Date</th>
+                                        <th class="text-center">Subject</th>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center">2023-05-26 11:24</td>
+                                        <td>[TEST][OSC] Vulnerability Discovered</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fas fa-chart-area mr-1"></i>Notification</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body" scroll=auto style="height: 30rem;overflow-x:hidden">
+                                <div class="row">
+                                    <div class="col-md-12 text-center">
+                                        <div class="col-md-12 text-center">
+                                            <table cellspacing="0" cellpadding="0" width="100%" border="1"
+                                                   style="font-size:12px;border-color:#ddd;">
+                                                <tbody>
+                                                <tr>
+                                                    <th style="padding:5px;background:#f0f0f0;">OSS Name</th>
+                                                    <th style="padding:5px;background:#f0f0f0;">OSS Version</th>
+                                                    <th style="padding:5px;background:#f0f0f0;">CVE ID</th>
+                                                    <th style="padding:5px;background:#f0f0f0;">Score</th>
+                                                    <th style="padding:5px;background:#f0f0f0;">Summary</th>
+                                                    <th style="padding:5px;background:#f0f0f0;">Published Date
+                                                    </th>
+                                                    <th style="padding:5px;background:#f0f0f0;">Modified Date
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-40186"
+                                                           target="_blank">CVE-2023-40186</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.8</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. Affected versions are subject to an
+                                                        IntegerOverflow leading to Out-Of-Bound Write
+                                                        Vulnerability in the `gdi_CreateSurface` function. This
+                                                        issue affects FreeRDP based clients only. FreeRDP
+                                                        proxies are not affected as image decoding is not done
+                                                        by a proxy. This issue has been addressed in versions
+                                                        2.11.0 and 3.0.0-beta3. Users are advised to upgrade.
+                                                        There are no known workarounds for this issue.</td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39352"
+                                                           target="_blank">CVE-2023-39352</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.8</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. Affected versions are subject to an
+                                                        invalid offset validation leading to Out Of Bound Write.
+                                                        This can be triggered when the values `rect-&gt;left`
+                                                        and `rect-&gt;top` are exactly equal to
+                                                        `surface-&gt;width` and `surface-&gt;height`. eg.
+                                                        `rect-&gt;left` == `surface-&gt;width` &amp;&amp;
+                                                        `rect-&gt;top` == `surface-&gt;height`. In practice this
+                                                        should cause a crash. This issue has been addressed in
+                                                        versions 2.11.0 and 3.0.0-beta3. Users are advised to
+                                                        upgrade. There are no known workarounds for this
+                                                        vulnerability.<br></td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-40567"
+                                                           target="_blank">CVE-2023-40567</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.8</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. Affected versions are subject to an
+                                                        Out-Of-Bounds Write in the `clear_decompress_bands_data`
+                                                        function in which there is no offset validation. Abuse
+                                                        of this vulnerability may lead to an out of bounds
+                                                        write. This issue has been addressed in versions 2.11.0
+                                                        and 3.0.0-beta3. Users are advised to upgrade. there are
+                                                        no known workarounds for this vulnerability.</td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-39356"
+                                                           target="_blank">CVE-2023-39356</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.1</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. In affected versions a missing offset
+                                                        validation may lead to an Out Of Bound Read in the
+                                                        function `gdi_multi_opaque_rect`. In particular there is
+                                                        no code to validate if the value
+                                                        `multi_opaque_rect-&gt;numRectangles` is less than 45.
+                                                        Looping through `multi_opaque_rect-&gt;`numRectangles
+                                                        without proper boundary checks can lead to Out-of-Bounds
+                                                        Read errors which will likely lead to a crash. This
+                                                        issue has been addressed in versions 2.11.0 and
+                                                        3.0.0-beta3. Users are advised to upgrade. There are no
+                                                        known workarounds for this vulnerability.<br></td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-40188"
+                                                           target="_blank">CVE-2023-40188</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.1</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. Affected versions are subject to an
+                                                        Out-Of-Bounds Read in the `general_LumaToYUV444`
+                                                        function. This Out-Of-Bounds Read occurs because
+                                                        processing is done on the `in` variable without checking
+                                                        if it contains data of sufficient length. Insufficient
+                                                        data for the `in` variable may cause errors or crashes.
+                                                        This issue has been addressed in versions 2.11.0 and
+                                                        3.0.0-beta3. Users are advised to upgrade. There are no
+                                                        known workarounds for this issue.</td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding:5px;">FreeRDP</td>
+                                                    <td style="padding:5px;">2.3.0</td>
+                                                    <td style="padding:5px;">
+                                                        <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-40181"
+                                                           target="_blank">CVE-2023-40181</a><a></a>
+                                                    </td>
+                                                    <td style="padding:5px;">9.1</td>
+                                                    <td style="padding:5px;">FreeRDP is a free implementation of
+                                                        the Remote Desktop Protocol (RDP), released under the
+                                                        Apache license. Affected versions are subject to an
+                                                        Integer-Underflow leading to Out-Of-Bound Read in the
+                                                        `zgfx_decompress_segment` function. In the context of
+                                                        `CopyMemory`, it's possible to read data beyond the
+                                                        transmitted packet range and likely cause a crash. This
+                                                        issue has been addressed in versions 2.11.0 and
+                                                        3.0.0-beta3. Users are advised to upgrade. There are no
+                                                        known workarounds for this issue.</td>
+                                                    <td style="padding:5px;">2023-08-31</td>
+                                                    <td style="padding:5px;">2023-09-07</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">NVD Dashboard</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <table class="table table-striped table-valign-middle nowrap"
+                                                       style="width: 100%;">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="text-center">Time Period</th>
+                                                        <th class="text-center">New CVEs<br /> Received by NVD
+                                                        </th>
+                                                        <th class="text-center">New CVEs<br /> Analyzed by NVD
+                                                        </th>
+                                                        <th class="text-center">Modified CVEs<br /> Received by
+                                                            NVD</th>
+                                                        <th class="text-center">Modified CVEs<br /> Re-analyzed
+                                                            by NVD
+                                                        </th>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td class="text-bold">Today</td>
+                                                        <td>49</td>
+                                                        <td>116</td>
+                                                        <td>39</td>
+                                                        <td>2</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-bold">This week</td>
+                                                        <td>49</td>
+                                                        <td>116</td>
+                                                        <td>39</td>
+                                                        <td>2</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-bold">This Month</td>
+                                                        <td>776</td>
+                                                        <td>808</td>
+                                                        <td>312</td>
+                                                        <td>7</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-bold">Last Month</td>
+                                                        <td>2466</td>
+                                                        <td>2451</td>
+                                                        <td>944</td>
+                                                        <td>234</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-bold">This Year</td>
+                                                        <td>19747</td>
+                                                        <td>20057</td>
+                                                        <td>8215</td>
+                                                        <td>3909</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="row mt-3">
+                                                    <div class="col-md-7">
+                                                        <div id="donut-chart" style="height: 300px;"></div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <table id="data-table"
+                                                               class="table table-striped table-valign-middle mr-1">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Severity</th>
+                                                                <th>Number of Vulns</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Last
+                                    20 Scored Vulnerability</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="latestVulnsArea">
+                                    <ul id="latestVulns">
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30717"
+                                                                   id="cveDetailAnchor-0">CVE-2023-30717</a></strong> -
+                                                        Sensitive information exposure vulnerability in SVCAgent
+                                                        prior
+                                                        to
+                                                        SMR Sep-2023 Release 1 allows attackers to get unresettable
+                                                        identifiers.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:14 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-0">
+                                                            <span id="cvss3-link-0"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30717&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-low"
+                                                                    data-testid="vuln-cvss3-link-0"
+                                                                    aria-label="V3 score for CVE-2023-30717">3.3
+                                                                    LOW</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30721"
+                                                                   id="cveDetailAnchor-1">CVE-2023-30721</a></strong> -
+                                                        Insertion of sensitive information into log vulnerability in
+                                                        Locksettings prior to SMR Sep-2023 Release 1 allows a
+                                                        privileged
+                                                        local attacker to get lock screen match information from the
+                                                        log.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:15 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-1">
+                                                            <span id="cvss3-link-1"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30721&amp;vector=AV:L/AC:L/PR:H/UI:N/S:U/C:H/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-1"
+                                                                    aria-label="V3 score for CVE-2023-30721">4.4
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30716"
+                                                                   id="cveDetailAnchor-2">CVE-2023-30716</a></strong> -
+                                                        Improper access control vulnerability in SVCAgent prior to
+                                                        SMR
+                                                        Sep-2023 Release 1 allows attackers to trigger certain
+                                                        commands.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:14 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-2">
+                                                            <span id="cvss3-link-2"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30716&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:H/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-2"
+                                                                    aria-label="V3 score for CVE-2023-30716">5.5
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30715"
+                                                                   id="cveDetailAnchor-3">CVE-2023-30715</a></strong> -
+                                                        Improper access control vulnerability in Weather prior to
+                                                        SMR
+                                                        Sep-2023 Release 1 allows attackers to access location
+                                                        information
+                                                        set in Weather without permission.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:14 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-3">
+                                                            <span id="cvss3-link-3"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30715&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:L/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-low"
+                                                                    data-testid="vuln-cvss3-link-3"
+                                                                    aria-label="V3 score for CVE-2023-30715">3.3
+                                                                    LOW</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30712"
+                                                                   id="cveDetailAnchor-4">CVE-2023-30712</a></strong> -
+                                                        Improper input validation in Settings Suggestions prior to
+                                                        SMR
+                                                        Sep-2023 Release 1 allows attackers to launch arbitrary
+                                                        activity.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:13 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-4">
+                                                            <span id="cvss3-link-4"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30712&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-4"
+                                                                    aria-label="V3 score for CVE-2023-30712">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-30711"
+                                                                   id="cveDetailAnchor-5">CVE-2023-30711</a></strong> -
+                                                        Improper authentication in Phone and Messaging Storage SMR
+                                                        SEP-2023
+                                                        Release 1 allows attacker to insert arbitrary data to the
+                                                        provider.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 06, 2023; 12:15:12 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-5">
+                                                            <span id="cvss3-link-5"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-30711&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-low"
+                                                                    data-testid="vuln-cvss3-link-5"
+                                                                    aria-label="V3 score for CVE-2023-30711">3.3
+                                                                    LOW</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-4487"
+                                                                   id="cveDetailAnchor-6">CVE-2023-4487</a></strong> -
+                                                        GE CIMPLICITY 2023 is by a process control vulnerability,
+                                                        which
+                                                        could allow a local attacker to insert malicious
+                                                        configuration
+                                                        files
+                                                        in the expected web server execution path to escalate
+                                                        privileges
+                                                        and
+                                                        gain full control of the HMI software.
+
+
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 7:15:08 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-6">
+                                                            <span id="cvss3-link-6"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-4487&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-6"
+                                                                    aria-label="V3 score for CVE-2023-4487">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2017-9453"
+                                                                   id="cveDetailAnchor-7">CVE-2017-9453</a></strong> -
+                                                        BMC
+                                                        Server Automation before 8.9.01 patch 1 allows Process
+                                                        Spawner
+                                                        command execution because of authentication bypass.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 2:15:08 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-7">
+                                                            <span id="cvss3-link-7"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2017-9453&amp;vector=AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-critical"
+                                                                    data-testid="vuln-cvss3-link-7"
+                                                                    aria-label="V3 score for CVE-2017-9453">9.8
+                                                                    CRITICAL</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2020-35593"
+                                                                   id="cveDetailAnchor-8">CVE-2020-35593</a></strong> -
+                                                        BMC
+                                                        PATROL Agent through 20.08.00 allows local privilege
+                                                        escalation
+                                                        via
+                                                        vectors involving pconfig +RESTART -host.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 3:15:48 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-8">
+                                                            <span id="cvss3-link-8"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2020-35593&amp;vector=AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-8"
+                                                                    aria-label="V3 score for CVE-2020-35593">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-34352"
+                                                                   id="cveDetailAnchor-9">CVE-2023-34352</a></strong> -
+                                                        A
+                                                        permissions issue was addressed with improved redaction of
+                                                        sensitive
+                                                        information. This issue is fixed in macOS Ventura 13.4, tvOS
+                                                        16.5,
+                                                        iOS 16.5 and iPadOS 16.5, watchOS 9.5. An attacker may be
+                                                        able
+                                                        to
+                                                        leak user account emails.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-9">
+                                                            <span id="cvss3-link-9"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-34352&amp;vector=AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-9"
+                                                                    aria-label="V3 score for CVE-2023-34352">5.3
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-32438"
+                                                                   id="cveDetailAnchor-10">CVE-2023-32438</a></strong>
+                                                        -
+                                                        This
+                                                        issue was addressed with improved checks to prevent
+                                                        unauthorized
+                                                        actions. This issue is fixed in tvOS 16.3, macOS Ventura
+                                                        13.2,
+                                                        watchOS 9.3, iOS 16.3 and iPadOS 16.3. An app may be able to
+                                                        bypass
+                                                        Privacy preferences.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-10">
+                                                            <span id="cvss3-link-10"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-32438&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-10"
+                                                                    aria-label="V3 score for CVE-2023-32438">5.5
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-32432"
+                                                                   id="cveDetailAnchor-11">CVE-2023-32432</a></strong>
+                                                        - A
+                                                        privacy issue was addressed with improved handling of
+                                                        temporary
+                                                        files. This issue is fixed in macOS Ventura 13.4, tvOS 16.5,
+                                                        iOS
+                                                        16.5 and iPadOS 16.5, watchOS 9.5. An app may be able to
+                                                        access
+                                                        user-sensitive data.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-11">
+                                                            <span id="cvss3-link-11"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-32432&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-11"
+                                                                    aria-label="V3 score for CVE-2023-32432">5.5
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-32428"
+                                                                   id="cveDetailAnchor-12">CVE-2023-32428</a></strong>
+                                                        -
+                                                        This
+                                                        issue was addressed with improved file handling. This issue
+                                                        is
+                                                        fixed
+                                                        in macOS Ventura 13.4, tvOS 16.5, iOS 16.5 and iPadOS 16.5,
+                                                        watchOS
+                                                        9.5. An app may be able to gain root privileges.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-12">
+                                                            <span id="cvss3-link-12"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-32428&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-12"
+                                                                    aria-label="V3 score for CVE-2023-32428">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-32426"
+                                                                   id="cveDetailAnchor-13">CVE-2023-32426</a></strong>
+                                                        - A
+                                                        logic issue was addressed with improved checks. This issue
+                                                        is
+                                                        fixed
+                                                        in macOS Ventura 13.3. An app may be able to gain root
+                                                        privileges.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-13">
+                                                            <span id="cvss3-link-13"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-32426&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-13"
+                                                                    aria-label="V3 score for CVE-2023-32426">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-32425"
+                                                                   id="cveDetailAnchor-14">CVE-2023-32425</a></strong>
+                                                        -
+                                                        The
+                                                        issue was addressed with improved memory handling. This
+                                                        issue is
+                                                        fixed in iOS 16.5 and iPadOS 16.5, watchOS 9.5. An app may
+                                                        be
+                                                        able
+                                                        to gain elevated privileges.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-14">
+                                                            <span id="cvss3-link-14"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-32425&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-14"
+                                                                    aria-label="V3 score for CVE-2023-32425">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-28209"
+                                                                   id="cveDetailAnchor-15">CVE-2023-28209</a></strong>
+                                                        - A
+                                                        buffer overflow issue was addressed with improved memory
+                                                        handling.
+                                                        This issue is fixed in macOS Ventura 13.3. An app may be
+                                                        able to
+                                                        cause unexpected system termination or write kernel memory.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:08 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-15">
+                                                            <span id="cvss3-link-15"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-28209&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-15"
+                                                                    aria-label="V3 score for CVE-2023-28209">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-28208"
+                                                                   id="cveDetailAnchor-16">CVE-2023-28208</a></strong>
+                                                        - A
+                                                        logic issue was addressed with improved state management.
+                                                        This
+                                                        issue
+                                                        is fixed in macOS Ventura 13.2, iOS 16.3 and iPadOS 16.3. A
+                                                        user
+                                                        may
+                                                        send a text from a secondary eSIM despite configuring a
+                                                        contact
+                                                        to
+                                                        use a primary eSIM.
+
+                                                        <br> <strong>Published:</strong>
+                                                        9월 05, 2023; 10:15:08 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-16">
+                                                            <span id="cvss3-link-16"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-28208&amp;vector=AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-16"
+                                                                    aria-label="V3 score for CVE-2023-28208">4.3
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2023-39365"
+                                                                   id="cveDetailAnchor-17">CVE-2023-39365</a></strong>
+                                                        -
+                                                        Cacti
+                                                        is an open source operational monitoring and fault
+                                                        management
+                                                        framework. Issues with Cacti Regular Expression validation
+                                                        combined
+                                                        with the external links feature can lead to limited SQL
+                                                        Injections
+                                                        and subsequent data leakage. This issue has ...
+
+                                                        <a href="/vuln/detail/CVE-2023-39365#vulnDescriptionTitle">read
+                                                            CVE-2023-39365</a><br> <strong>Published:</strong>
+                                                        9월 05, 2023; 6:15:09 오후 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-17">
+                                                            <span id="cvss3-link-17"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2023-39365&amp;vector=AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:L/A:L&amp;version=3.1&amp;source=NIST"
+                                                                    class="label label-warning"
+                                                                    data-testid="vuln-cvss3-link-17"
+                                                                    aria-label="V3 score for CVE-2023-39365">6.3
+                                                                    MEDIUM</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                        </li>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2022-30637"
+                                                                   id="cveDetailAnchor-18">CVE-2022-30637</a></strong>
+                                                        -
+                                                        Adobe
+                                                        Illustrator versions 26.0.2 (and earlier) and 25.4.5 (and
+                                                        earlier)
+                                                        are affected by an out-of-bounds write vulnerability that
+                                                        could
+                                                        result in arbitrary code execution in the context of the
+                                                        current
+                                                        user. Exploitation of this issue requires use...
+
+                                                        <a href="/vuln/detail/CVE-2022-30637#vulnDescriptionTitle">read
+                                                            CVE-2022-30637</a><br> <strong>Published:</strong>
+                                                        9월 07, 2023; 10:15:09 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-18">
+                                                            <span id="cvss3-link-18"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2022-30637&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=Adobe%20Systems%20Incorporated"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-18"
+                                                                    aria-label="V3 score for CVE-2022-30637">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-9">
+                                                    <p>
+                                                        <strong><a href="/vuln/detail/CVE-2022-30638"
+                                                                   id="cveDetailAnchor-19">CVE-2022-30638</a></strong>
+                                                        -
+                                                        Adobe
+                                                        Illustrator versions 26.0.2 (and earlier) and 25.4.5 (and
+                                                        earlier)
+                                                        are affected by an out-of-bounds write vulnerability that
+                                                        could
+                                                        result in arbitrary code execution in the context of the
+                                                        current
+                                                        user. Exploitation of this issue requires use...
+
+                                                        <a href="/vuln/detail/CVE-2022-30638#vulnDescriptionTitle">read
+                                                            CVE-2022-30638</a><br> <strong>Published:</strong>
+                                                        9월 07, 2023; 10:15:09 오전 -0400
+                                                    </p>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <p id="severity-score-19">
+                                                            <span id="cvss3-link-19"> <em>V3.1:</em> <a
+                                                                    href="/vuln-metrics/cvss/v3-calculator?name=CVE-2022-30638&amp;vector=AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H&amp;version=3.1&amp;source=Adobe%20Systems%20Incorporated"
+                                                                    class="label label-danger"
+                                                                    data-testid="vuln-cvss3-link-19"
+                                                                    aria-label="V3 score for CVE-2022-30638">7.8
+                                                                    HIGH</a><br>
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Most Recent License</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 text-center">
+                                        <div class="col-md-12 text-center">
+                                            <div id="wordcloud"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- modal -->
+        <div class="modal fade" id="modal-comment">
+            <!-- modal dialog -->
+            <div class="modal-dialog modal-lg">
+                <!-- modal-content -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Comment</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                            <textarea id="commpose-textarea-02" class="form-control" style="height: 800px" rows="3">
+                                <ul>
+                                    <li>List item one</li>
+                                    <li>List item two</li>
+                                    <li>List item three</li>
+                                    <li>List item four</li>
+                                </ul>
+                            </textarea>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--/. modal -->
+    </div>
+</div>
+    </body>
+
+
+</th:block>

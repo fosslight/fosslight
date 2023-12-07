@@ -24,10 +24,25 @@
         const binary_evt = {
             init: function () {
                 $('#updateRange').daterangepicker();
+
+                $('#search').on('click', function (e) {
+                    e.preventDefault();
+
+                    var postData = $('#batSearch').serializeObject();
+                    $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url: "/binary/listAjax" }).trigger('reloadGrid');
+                    resizingJqGidSet();
+                });
             }
         }
 
-        const binary_fn = {}
+        const binary_fn = {
+            getMaxIdNo: function(){
+                var ids = [];
+                ids = $("#list").jqGrid('getDataIDs');
+
+                return (ids.length == 0) ? 0 : Math.max.apply(Math, ids);
+            },
+        }
 
         const binary_grid = {
             modifyRowId: [],		//수정된 모든 rowID
@@ -39,11 +54,9 @@
 
                 //그리드 생성
                 $('#list').jqGrid({
-                    type: "GET"
-                    ,
-                    datatype: 'json'
-                    ,
-                    jsonReader: {
+                    type:"GET"
+                    , datatype: 'json'
+                    , jsonReader: {
                         repeatitems: false,
                         id: 'batId',
                         root: function (obj) {
@@ -267,17 +280,17 @@
                     ,
                     onSelectRow: function (rowid, iRow, iCol, e) {
                         // 마지막 수정된 row 저장
-                        if (batList.lastEditRowId && rowid != batList.lastEditRowId) {
+                        if (binary_grid.lastEditRowId && rowid != binary_grid.lastEditRowId) {
                             fn.saveLastRow();
                         }
 
-                        batList.lastEditRowId = rowid;
+                        binary_grid.lastEditRowId = rowid;
                     }
                     ,
                     loadComplete: function (data) {
                         totalRow = data.records;
                         // id(key값)의 max값을 lastIdNo에 설정
-                        batList.lastIdNo = fn.getMaxIdNo();
+                        binary_grid.lastIdNo = binary_fn.getMaxIdNo();
 
                         confirmFlag = false;
                     },
