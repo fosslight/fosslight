@@ -82,7 +82,6 @@ declare global {
       cveId: string;
       cvssScore: string;
       summary: string;
-      published: string;
       modified: string;
     }
   }
@@ -173,7 +172,6 @@ declare global {
       cveId: string;
       cvssScore: string;
       summary: string;
-      published: string;
       modified: string;
     }
 
@@ -264,7 +262,6 @@ declare global {
       cveId: string;
       cvssScore: string;
       summary: string;
-      published: string;
       modified: string;
       oss: VulnOSS[];
     }

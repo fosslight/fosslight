@@ -99,9 +99,7 @@ export default function ListSections({
                     <div className="text-sm text-darkgray">
                       <i className="fa-solid fa-check" />
                       &ensp;
-                      {vulnerability.published < vulnerability.modified
-                        ? `${vulnerability.modified.substring(0, 10)} modified`
-                        : `${vulnerability.published.substring(0, 10)} published`}
+                      {vulnerability.modified.substring(0, 10)} modified
                     </div>
                   </div>
                 </div>
