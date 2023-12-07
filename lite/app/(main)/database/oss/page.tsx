@@ -21,8 +21,6 @@ export default function OSSList() {
   const queryParams = useSearchParams();
 
   // Filters
-  const filtersQueryParam = queryParams.get('f') || '';
-  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'OSS Name', name: 'ossName', type: 'char-exact' },
@@ -88,6 +86,8 @@ export default function OSSList() {
       { label: 'Modified', name: 'modified', type: 'date' }
     ]
   };
+  const filtersQueryParam = queryParams.get('f') || '';
+  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam, filters) });
 
   // Rows/Columns
   const [rows, setRows] = useState<List.OSS[]>([]);
@@ -126,12 +126,12 @@ export default function OSSList() {
       const signInRequest = async () => {
         axios.defaults.withCredentials = true;
         const response = await axios.post(
-          'http://localhost:8180/session/login-proc',
+        'http://localhost:8180/session/login-proc',
           qs.stringify({
             un: 'admin',
             up: 'admin'
           })
-        );
+      );
       };
       await signInRequest();
 
@@ -141,13 +141,13 @@ export default function OSSList() {
         paramsSerializer: (params) => {
           return qs.stringify(params, { arrayFormat: 'repeat' });
         }
-      });
+        });
     };
     setLoading(true);
     requestRows().then((res) => {
       console.log(res);
       setRows(res.data.list);
-      setTotalCount(res.data.totalRows);
+        setTotalCount(res.data.totalRows);
       setLoading(false);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

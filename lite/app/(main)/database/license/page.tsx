@@ -21,8 +21,6 @@ export default function LicenseList() {
   const queryParams = useSearchParams();
 
   // Filters
-  const filtersQueryParam = queryParams.get('f') || '';
-  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
@@ -91,6 +89,8 @@ export default function LicenseList() {
       { label: 'Modified', name: 'modified', type: 'date' }
     ]
   };
+  const filtersQueryParam = queryParams.get('f') || '';
+  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam, filters) });
 
   // Rows/Columns
   const [rows, setRows] = useState<List.License[]>([]);
@@ -128,12 +128,12 @@ export default function LicenseList() {
       const signInRequest = async () => {
         axios.defaults.withCredentials = true;
         const response = await axios.post(
-          'http://localhost:8180/session/login-proc',
+        'http://localhost:8180/session/login-proc',
           qs.stringify({
             un: 'admin',
             up: 'admin'
           })
-        );
+      );
       };
       await signInRequest();
 
@@ -144,14 +144,14 @@ export default function LicenseList() {
           console.log(params);
           return qs.stringify(params, { arrayFormat: 'repeat' });
         }
-      });
+        });
     };
 
     setLoading(true);
     requestRows().then((res) => {
       console.log(res);
       setRows(res.data.list);
-      setTotalCount(res.data.totalCount);
+        setTotalCount(res.data.totalCount);
       setLoading(false);
     }).catch(rej => {
       setLoading(false);
