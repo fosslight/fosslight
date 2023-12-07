@@ -14,14 +14,31 @@ export function stringifyFilters(obj: FieldValues) {
   return JSON.stringify(cleanedObj);
 }
 
-export function parseFilters(str: string): FieldValues | undefined {
+export function parseFilters(
+  str: string,
+  filters: { default: List.Filter[]; hidden: List.Filter[] }
+): FieldValues | undefined {
+  const defaultValues: any = {};
+  filters.default.concat(filters.hidden).forEach((filter) => {
+    if (filter.type === 'char-exact') {
+      defaultValues[`${filter.name}Exact`] = false;
+    } else if (filter.type === 'checkbox') {
+      defaultValues[filter.name] = [];
+    } else if (filter.type === 'date') {
+      defaultValues[`${filter.name}From`] = '';
+      defaultValues[`${filter.name}To`] = '';
+    } else {
+      defaultValues[filter.name] = '';
+    }
+  });
+
   if (!str) {
-    return undefined;
+    return defaultValues;
   }
 
   try {
-    return JSON.parse(str);
+    return { ...defaultValues, ...JSON.parse(str) };
   } catch {
-    return undefined;
+    return defaultValues;
   }
 }
