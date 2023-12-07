@@ -4,12 +4,11 @@ import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
+import { useAPI } from '@/lib/hooks';
 import ExcelIcon from '@/public/images/excel.png';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import qs from 'qs';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
@@ -115,48 +114,26 @@ export default function LicenseList() {
   const countPerPage = 10;
   const currentPage = Number(queryParams.get('p') || '1');
 
+  // API for loading rows
+  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/licenses', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setTotalCount(res.data.totalCount);
+      setRows(res.data.list);
+    },
+    onFinish: () => setLoading(false)
+  });
+
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
-    const params = {
-      ...filtersForm.watch(),
-      sort: currentSort,
-      page: currentPage,
-      countPerPage
-    };
-
-    const requestRows = async () => {
-      const signInRequest = async () => {
-        axios.defaults.withCredentials = true;
-        const response = await axios.post(
-        'http://localhost:8180/session/login-proc',
-          qs.stringify({
-            un: 'admin',
-            up: 'admin'
-          })
-      );
-      };
-      await signInRequest();
-
-      return await axios.get('http://localhost:8180/api/lite/licenses', {
-        params,
-        withCredentials: true,
-        paramsSerializer: (params) => {
-          console.log(params);
-          return qs.stringify(params, { arrayFormat: 'repeat' });
-        }
-        });
-    };
-
-    setLoading(true);
-    requestRows().then((res) => {
-      console.log(res);
-      setRows(res.data.list);
-        setTotalCount(res.data.totalCount);
-      setLoading(false);
-    }).catch(rej => {
-      setLoading(false);
+    loadRowsRequest.execute({
+      params: {
+        ...filtersForm.watch(),
+        sort: currentSort,
+        page: currentPage,
+        countPerPage
+      }
     });
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
