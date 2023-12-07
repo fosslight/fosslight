@@ -15,7 +15,7 @@ function generatePagination(currPage: number, lastPage: number) {
 
   Array.from(pageCandidates)
     .filter((page) => page >= 1 && page <= lastPage)
-    .sort()
+    .sort((a, b) => a - b)
     .forEach((page, idx, arr) => {
       if (idx > 0 && page - arr[idx - 1] > 1) {
         pages.push(-1);
