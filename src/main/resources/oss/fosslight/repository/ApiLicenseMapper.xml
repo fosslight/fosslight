@@ -114,6 +114,7 @@
     <resultMap id="LicenseDtoMap" type="oss.fosslight.api.dto.LicenseDto">
         <result property="created" column="created_date"/>
         <result property="modified" column="modified_date"/>
+        <result property="licenseIdentifier" column="short_identifier"/>
     </resultMap>
     <select id="selectLicenseList" parameterType="oss.fosslight.api.dto.ListLicenseDto$Request"
             resultMap="LicenseDtoMap">
@@ -157,7 +158,7 @@
                 ORDER BY T1.LICENSE_NAME DESC
             </if>
         </if>
-        <if test="sortColumn eq 'shortIdentifier'">
+        <if test="sortColumn eq 'SHORT_IDENTIFIER'">
             <if test="sortDirection eq 'asc'">
                 ORDER BY T1.SHORT_IDENTIFIER ASC
             </if>
@@ -165,7 +166,7 @@
                 ORDER BY T1.SHORT_IDENTIFIER DESC
             </if>
         </if>
-        <if test="sortColumn eq 'licenseType'">
+        <if test="sortColumn eq 'TYPE'">
             <if test="sortDirection eq 'asc'">
                 ORDER BY T1.LICENSE_TYPE ASC
             </if>
@@ -181,7 +182,7 @@
                 ORDER BY T1.WEBPAGE DESC
             </if>
         </if>
-        <if test="sortColumn eq 'description'">
+        <if test="sortColumn eq 'DESCRIPTION'">
             <if test="sortDirection eq 'asc'">
                 ORDER BY T1.DESCRIPTION ASC
             </if>
@@ -195,14 +196,6 @@
             </if>
             <if test="sortDirection eq 'desc'">
                 ORDER BY T1.CREATOR DESC
-            </if>
-        </if>
-        <if test="sortColumn eq 'modifier'">
-            <if test="sortDirection eq 'asc'">
-                ORDER BY T1.MODIFIER ASC
-            </if>
-            <if test="sortDirection eq 'desc'">
-                ORDER BY T1.MODIFIER DESC
             </if>
         </if>
         <if test="sortColumn eq 'CREATED_AT'">
@@ -221,7 +214,7 @@
                 ORDER BY T1.MODIFIED_DATE DESC
             </if>
         </if>
-        <if test="sortColumn eq 'obligation'">
+        <if test="sortColumn eq 'OBLIGATION'">
             <if test="sortDirection eq 'asc'">
                 ORDER BY
                 OBLIGATION_CHECKS ASC

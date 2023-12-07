@@ -16,7 +16,7 @@ public class LicenseDto implements Comparable<LicenseDto> {
     private String licenseText;
     private LicenseObligation obligations = new LicenseObligation();
     private String obligationChecks;
-    private String shortIdentifier;
+    private String licenseIdentifier;
     private String webpage;
     private String description;
     private String creator;
