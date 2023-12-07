@@ -31,7 +31,7 @@ public class NoticeController extends CoTopComponent {
 
 	@GetMapping(value=NOTICE.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return NOTICE.LIST_JSP;
+		return "system/notice :: content";
 	}
 	
 	@GetMapping(value=NOTICE.LIST_AJAX)

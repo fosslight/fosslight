@@ -35,7 +35,7 @@ public class ProcessGuideController extends CoTopComponent {
 	 */
 	@GetMapping(value=PROCESSGUIDE.PAGE, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return PROCESSGUIDE.PAGE_JSP;
+		return "system/processGuide :: content";
 	}
 	
 	/**

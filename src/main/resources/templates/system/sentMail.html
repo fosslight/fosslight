@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="content">
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <th:block th:replace="system/sentMail-script :: script"></th:block>
+
+    <body class="hold-transition sidebar-mini" style="height: 100%;">
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row my-3" style="width: 100%;">
+                        <div class="col-md-12 jqGridSet">
+                            <table id="list">
+                                <tr>
+                                    <td></td>
+                                </tr>
+                            </table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    </body>
+</th:block>

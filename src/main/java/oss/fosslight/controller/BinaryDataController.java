@@ -38,7 +38,7 @@ public class BinaryDataController extends CoTopComponent  {
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
 		log.debug(" :: Start bat");
 		
-		return Url.TILES_ROOT + "/binary/list";
+		return "binary/list :: content";
 	}
 	
 	/**

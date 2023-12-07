@@ -86,6 +86,20 @@ const oss_edit_fmt = {
     },
 }
 
+// system code page grid formatter
+const sysCode_fmt = {
+    numberCheckFormat: function(){
+        if(!( (event.keyCode >= 48
+                && event.keyCode <= 57)
+            || (event.keyCode >= 96
+                && event.keyCode <= 105)
+            || event.keyCode == 8
+            || event.keyCode == 9 ) ) {
+            event.returnValue = false;
+        }
+    }
+}
+
 // common used grid formatter
 const common_fmt = {
     truncateText: function (cellValue, options, rowObject) {
@@ -100,3 +114,5 @@ const common_fmt = {
         return cellValue;
     }
 }
+
+

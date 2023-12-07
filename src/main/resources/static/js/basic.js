@@ -2355,3 +2355,7 @@ function onError(data, status){
 function onError2(data, status){
 	alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
 }
+
+function onSuccess(data, status){
+	alertify.error(String('[[ #{msg.common.success} ]]'), 0);
+}

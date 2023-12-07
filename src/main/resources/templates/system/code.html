@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="content">
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <th:block th:replace="system/code-script :: script"></th:block>
+
+    <body class="hold-transition sidebar-mini" style="height: 100%;">
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout bg-white">
+            <form>
+                <section class="content-header">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                    <!-- <div class="card collapsed-card search-form"> -->
+                                    <div class="card-header" style="border-bottom: none;">
+                                        <form action="simple-results.html">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="row pl-3">
+                                                        <div class="input-group">
+                                                            <input class="form-control" placeholder="Code No"
+                                                                   type="search">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="row pl-3">
+                                                        <div class="input-group">
+                                                            <input class="form-control" placeholder="Code Name"
+                                                                   type="search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default" type="submit">
+                                                                    <i class="fa fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3 mb-2">
+                            <div class="col-md-12 jqGridSet">
+                                <table id="list">
+                                    <tr>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                                <div id="pager"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 pr-3">
+                                <button class="btn btn-info btn-sm float-right" style="width: 8rem;"
+                                        type="button">Save
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row" id="divisionLine" style="display: none;">
+                            <div class="col-12 pr-3">
+                                <hr class="my-3">
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2" style="width: 100%;">
+                            <div class="col-md-12 jqGridSet">
+                                <table id="jqGrid_02">
+                                    <tr>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                                <div id="pager_02"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </form>
+
+        </div>
+    </div>
+
+    </body>
+
+
+</th:block>

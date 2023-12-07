@@ -29,7 +29,7 @@ public class HistoryController extends CoTopComponent {
 	
 	@GetMapping(value=HISTORY.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return HISTORY.LIST_JSP;
+		return "system/history :: content";
 	}
 	
 	@GetMapping(value=HISTORY.LIST_AJAX)

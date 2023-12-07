@@ -2,6 +2,7 @@ html { height: auto !important;}
 ul { list-style-type: none; }
 
 .custom-layout .mr-xm { margin-right: .15rem!important; }
+.custom-layout .sidebar.index {height: 80%}
 .custom-layout .sidebar-dark-primary .nav-sidebar
 > .nav-item > .nav-link.active { background-color: #a50034;}
 .custom-layout .sidebar.copyright { color: #FFFFFF; position: absolute; bottom: 0;width: 100%; font-size: .9rem; height: 100px;}

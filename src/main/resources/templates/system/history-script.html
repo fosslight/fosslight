@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="script">
+    <script th:inline="javascript">
+        let lastsel;
+
+        $(window).load(function () {
+            'use strict';
+            history_init.init();
+            code_grid.load();
+        });
+
+        const history_init = {
+            init: function () {
+                $('.select2').select2();
+            }
+        }
+
+        const code_fn = {}
+
+        const code_grid = {
+            modifyRowId: [],		// 수정된 모든 rowid
+            deleteRowList: [],		// 삭제할 LIST
+            lastEditRowId: "",		// 마지막 수정된 rowid 저장 변수
+            lastIdNo: "",			// 서버에서 가져온 마지막 id
+
+            load: function(){
+                code_grid.modifyRowId = [];
+                code_grid.deleteRowList = [];
+                code_grid.lastEditRowId = "";
+
+                $("#list").jqGrid({
+                    url: "/system/code/listAjax"
+                    , datatype: 'json'
+                    , jsonReader: {
+                        repeatitems: false,
+                        id:'gridId',
+                        root:function(obj){return obj.rows;},
+                        page:function(obj){return obj.page;},
+                        total:function(obj){return obj.total;},
+                        records:function(obj){return obj.records;}
+                    }
+                    , colNames: ['gridId','Code No','Code Name', 'Code Description']
+                    , colModel: [
+                        {name: 'gridId', index: 'gridId', key:true, editable:false, hidden:true},
+                        {name: 'cdNo', index: 'cdNo', width: 40, align: 'center', sorttype: "int", editable:true, editrules : {required: true}, editoptions:{dataEvents: [{type:'keydown', fn:sysCode_fmt.numberCheckFormat()}]} },
+                        {name: 'cdNm', index: 'cdNm', width: 250, align: 'left', editable:true, editrules : {required: true}},
+                        {name: 'cdExp', index: 'cdExp', width: 250, align: 'left', editable:true}
+                    ]
+                    , emptyrecords: "Nothing to display"
+                    , autoencode: true
+                    , editurl: 'clientArray'
+                    , rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]]
+                    , rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]])
+                    , autowidth: true
+                    , pager: '#pager'
+                    , gridview: true
+                    , sortable: function (permutation) {
+                    }
+                    , sortname: 'cdNo'
+                    , sortorder: 'asc'
+                    , viewrecords: true
+                    , height: 'auto'
+                    , loadonce: false
+                    // 데이터 로딩 후
+                    ,loadComplete: function(data) {
+                        // id(key값)의 max값을 lastIdNo에 설정
+                        codeList.lastIdNo = fn.getMaxIdNo('code');
+
+                        $("#btnSaveCodeDetail").hide();
+                        $("#list2").jqGrid('GridUnload');
+                    }
+                    // 다른 row 클릭 시
+                    , onSelectRow: function(rowid,status,eventObject) {
+                        // 코드상세 목록 load
+                        $("#list2").show();
+                        $("#btnSaveCodeDetail").show();
+
+                        ajax.getCodeDetailList(rowid);
+                        lastsel = rowid;
+                    }
+                    // row 더블클릭 시 편집모드
+                    , ondblClickRow: function(rowid,iRow,iCol,e) {
+                        $("#list").jqGrid('editRow',rowid,true,function(){
+                            $("input, select",e.target).focus();	// 더블클릭한 cell 위치로 포커스(기본포커스는 맨 앞 cell)
+                        });
+
+                        codeList.lastEditRowId = rowid;
+                    }
+                });
+                $("#list").jqGrid('navGrid',"#pager",{edit:true,add:true,del:true,search:false,refresh:false},updateDialogEdit, updateDialogAdd,updateDialogDel);
+            }
+        }
+
+        const updateDialogEdit = {
+            url:"/binary/modAjax"
+            , closeAfterEdit: true
+            , reloadAfterSubmit: true
+            , modal: true
+            , serializeEditData : function(postdata) {
+                if(multiSelectFlag){
+                    var postdataArr = new Array();
+
+                    for( var i in selectedRow) {
+                        var obj = $('#list').getRowData(selectedRow[i]);
+                        var editRowId = $("#FrmGrid_list  #filename").attr("rowid");
+                        var editRowData = $("#list").getRowData(editRowId);
+
+                        if(postdata["ossName"] != editRowData["ossName"]){
+                            obj["ossName"] 	= postdata["ossName"];
+                        }
+
+                        if(postdata["ossVersion"] != editRowData["ossVersion"]){
+                            obj["ossVersion"] = postdata["ossVersion"];
+                        }
+
+                        if(postdata["license"] != editRowData["license"]){
+                            obj["license"] 	= postdata["license"];
+                        }
+
+                        if(postdata["comment"] != editRowData["comment"]){
+                            obj["comment"] 	= postdata["comment"];
+                        }
+
+                        obj["updateDate"]	= postdata["updateDate"];
+                        obj["oper"]			= postdata["oper"];
+                        // id => concat( filename , '-' , checksum, '-', COALESCE(ossname,''), '-', COALESCE(ossversion,''), '-', COALESCE(license,'') )
+                        obj["id"]			= selectedRow[i];
+
+                        postdataArr.push(obj);
+                    }
+
+                    return {"parameter":JSON.stringify(postdataArr)};
+                } else {
+                    return postdata;
+                }
+            }
+            , beforeShowForm: function(formid) {
+                fn.getSelectedRowCnt();
+
+                if(multiSelectFlag){
+                    $("#pathName", formid).attr("disabled","disabled");
+                    $("#sourcePath", formid).attr("disabled","disabled");
+                    $("#parentName", formid).attr("disabled","disabled");
+                    $("#platformName", formid).attr("disabled","disabled");
+                    $("#platformVersion", formid).attr("disabled","disabled");
+                }
+
+                $("#fileName", formid).attr("disabled","disabled");
+                $("#checkSum", formid).attr("disabled","disabled");
+                $("#tlshCheckSum", formid).attr("disabled","disabled");
+                $("#downloadlocation", formid).attr("disabled","disabled");
+            }
+            , afterSubmit: function(response, postdata) {
+                if("false" == response.responseJSON.isValid) {
+                    onError();
+                    createValidMsg('FrmGrid_list', response.responseJSON);
+
+                    return [false, '[[ #{msg.common.valid} ]]', ""]
+                } else {
+                    onSuccess();
+
+                    return [true,"",""]
+                }
+            }
+            , beforeSubmit: function(postdata, formid) {
+                $("span.retxt", formid).remove();
+
+                if(multiSelectFlag && !confirmFlag){
+                    var result = "";
+
+                    alertify.confirm("More than one binary information will be modified.<br>Would you like to continue?"
+                        , function(){
+                            confirmFlag = true;
+                            $("#sData").trigger("click");
+                            result = [true];
+                        }
+                        , function(){
+                            $("#cData").trigger("click");
+                            result = [false];
+                        });
+
+                    return result;
+                } else {
+                    return [true];
+                }
+            }
+        }
+
+        const updateDialogDel = {
+            url:"/binary/modAjax"
+            , closeAfterDel: true
+            , reloadAfterSubmit: true
+            , modal: true
+            , onclickSubmit: function(params, rowid) {
+                var ajaxData = {};
+                var list = $("#list");
+                var selectedRow = list.jqGrid("getGridParam", "selarrrow");
+                //ajaxData = {ids: selectedRow};
+                return ajaxData;
+            }
+            , afterSubmit: function(response, postdata) {
+                if("false" == response.responseJSON.isValid) {
+                    onError();
+
+                    return [false, '[[ #{msg.common.valid} ]]', ""]
+                } else {
+                    onSuccess();
+                    $("#list").jqGrid().trigger('reloadGrid');
+
+                    return [true,"",""]
+                }
+            }
+        };
+
+    </script>
+</th:block>
