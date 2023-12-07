@@ -267,9 +267,9 @@ export default function ListTable({
             {generatePagination(
               pagination.currentPage,
               Math.max(Math.ceil(pagination.totalCount / pagination.countPerPage), 1)
-            ).map((page) => {
+            ).map((page, idx) => {
               if (page === -1) {
-                return <i key={page} className="fa-solid fa-ellipsis" />;
+                return <i key={`${page}${idx}`} className="fa-solid fa-ellipsis" />;
               }
 
               return (
