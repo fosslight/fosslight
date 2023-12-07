@@ -23,7 +23,7 @@ public class LicenseDto implements Comparable<LicenseDto> {
     private String modifier;
     private String created;
     private String modified;
-    private List<String> restrictions;
+    private List<String> restrictions = new ArrayList<>();
 
     @Override
     public int compareTo(LicenseDto o) {
@@ -43,7 +43,9 @@ public class LicenseDto implements Comparable<LicenseDto> {
     }
     public void setRestriction(String restriction) {
         var split = restriction.split(",");
-        restrictions = Arrays.stream(split).map(String::strip).collect(Collectors.toList());
+        restrictions = Arrays.stream(split).map(String::strip)
+                .filter(str -> str.length() > 0)
+                .collect(Collectors.toList());
     }
 
     @Data
