@@ -99,7 +99,7 @@ export default function LicenseList() {
     { name: 'Name', sort: 'LICENSE_NAME' },
     { name: 'Identifier', sort: 'SHORT_IDENTIFIER' },
     { name: 'Type', sort: 'TYPE' },
-    { name: 'Obligations', sort: 'obg' },
+    { name: 'Obligations', sort: 'OBLIGATION' },
     { name: 'Restrictions', sort: '' },
     { name: 'URL', sort: 'WEBPAGE' },
     { name: 'Description', sort: 'DESCRIPTION' },
@@ -225,8 +225,7 @@ export default function LicenseList() {
           }
 
           if (column === 'Restrictions') {
-            // return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
-            return <div className="whitespace-pre">{row.restriction}</div>;
+            return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
           }
 
           if (column === 'URL') {
