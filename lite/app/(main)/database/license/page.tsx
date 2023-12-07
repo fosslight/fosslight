@@ -97,12 +97,12 @@ export default function LicenseList() {
   const columns: List.Column[] = [
     { name: 'ID', sort: 'LICENSE_ID' },
     { name: 'Name', sort: 'LICENSE_NAME' },
-    { name: 'Identifier', sort: 'idf' },
-    { name: 'Type', sort: 'type' },
+    { name: 'Identifier', sort: 'SHORT_IDENTIFIER' },
+    { name: 'Type', sort: 'TYPE' },
     { name: 'Obligations', sort: 'obg' },
-    { name: 'Restrictions', sort: 'res' },
+    { name: 'Restrictions', sort: '' },
     { name: 'URL', sort: 'WEBPAGE' },
-    { name: 'Description', sort: 'desc' },
+    { name: 'Description', sort: 'DESCRIPTION' },
     { name: 'Create', sort: 'CREATED_AT' },
     { name: 'Modify', sort: 'MODIFIED_AT' }
   ];
