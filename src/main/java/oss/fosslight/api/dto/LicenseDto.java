@@ -2,7 +2,10 @@ package oss.fosslight.api.dto;
 
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class LicenseDto implements Comparable<LicenseDto> {
@@ -20,7 +23,7 @@ public class LicenseDto implements Comparable<LicenseDto> {
     private String modifier;
     private String created;
     private String modified;
-    private String restriction;
+    private List<String> restrictions;
 
     @Override
     public int compareTo(LicenseDto o) {
@@ -37,6 +40,10 @@ public class LicenseDto implements Comparable<LicenseDto> {
 
     public void setObligationNeedsCheckYn(String flag) {
         this.obligations.needsCheck = flag.equalsIgnoreCase("y");
+    }
+    public void setRestriction(String restriction) {
+        var split = restriction.split(",");
+        restrictions = Arrays.stream(split).map(String::strip).collect(Collectors.toList());
     }
 
     @Data
