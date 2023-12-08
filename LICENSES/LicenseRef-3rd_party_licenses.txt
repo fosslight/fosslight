@@ -2,20 +2,24 @@
 
 This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
 
-AspectJ Weaver  (EPL-2.0)
-Copyright (c) 2005 Contributors
-Copyright (c) 2002 Palo Alto Research Center, Incorporated (PARC)
-Copyright (c) 2001 The Apache Software Foundation
+ch.qos.logback:logback-classic  (EPL-1.0)
+Copyright (c) 1999-2011, QOS.ch.
 
-barcodes  (AGPL-3.0)
-Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
-Copyright (c) 1998-2022 iText Group NV Authors
-
-btf  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+ch.qos.logback:logback-core  (EPL-1.0)
+Copyright (c) 1999-2011, QOS.ch.
 
 ckeditor4  (MPL-1.1)
 Copyright (c) 2003-2021, CKSource - Frederico Knabben.
+
+com.github.java-json-tools:jackson-coreutils-equivalence  (LGPL-3.0)
+Copyright (c) 2013, Francis Galiegue <fgaliegue@gmail.com>
+
+com.googlecode.juniversalchardet:juniversalchardet  (MPL-1.1)
+Copyright (c) 1998 the Initial Developer.
+
+com.itextpdf:barcodes  (AGPL-3.0)
+Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
+Copyright (c) 1998-2022 iText Group NV Authors
 
 com.itextpdf:commons  (AGPL-3.0)
 Copyright (c) 1998-2022 iText Group NV Authors
@@ -44,574 +48,776 @@ com.itextpdf:layout  (AGPL-3.0)
 Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
 Copyright (c) 1998-2022 iText Group NV Authors
 
+com.itextpdf:pdfa  (AGPL-3.0)
+Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
+Copyright (c) 1998-2022 iText Group NV Authors
+
+com.itextpdf:sign  (AGPL-3.0)
+Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
+Copyright (c) 1998-2022 iText Group NV Authors
+
+com.itextpdf:styled-xml-parser  (AGPL-3.0)
+Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
+Copyright (c) 1998-2022 iText Group NV Authors
+
 com.itextpdf:svg  (AGPL-3.0)
 Copyright (c) 1998-2022 iText Group NV Authors
 Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
 
-ecj  (EPL-2.0)
-Copyright (c) 2000, 2005-2006, 2015-2019 IBM Corporation and others.
+com.mchange:mchange-commons-java  (EPL-1.0)
+Copyright (c) 2013 Machinery For Change, Inc.
+
+com.sun.mail:jakarta.mail  (EPL-2.0)
+Copyright (c) 1989, 1991 Free Software Foundation, Inc.
+
+com.sun.mail:mailapi  (CDDL-1.1)
+Copyright (c) 1997-2017 Oracle and/or its affiliates
 
 FOSSLight Hub  (AGPL-3.0)
 Copyright (c) 2021 LG Electronics Inc.
 
-Hibernate Commons Annotations  (LGPL-2.1)
-
-mariadb-java-client  (LGPL-2.1)
-
-hibernate-core  (LGPL-2.1)
-Copyright (c) 2008, Red Hat Middleware LLC
-Copyright (c) 2008, 2020 Oracle and/or its affiliates
-Copyright (c) 2012 Red Hat Inc.
-
-jackson-coreutils  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
-Copyright (c) 2013, Francis Galiegue <fgaliegue@gmail.com>
-
-Jakarta Annotations API  (EPL-2.0)
+jakarta.annotation:jakarta.annotation-api  (EPL-2.0)
 Copyright (c) 2005, 2009, 2012, 2018 Oracle and/or its affiliates. 
 
-jakarta.json  (EPL-2.0)
-Copyright (c) 1989, 1991 Free Software Foundation, Inc.
-Copyright (c) 2018, 2020 Oracle and/or its affiliates
-
-jakarta.mail  (EPL-2.0)
-Copyright (c) 1989, 1991 Free Software Foundation, Inc.
-
-jakarta.transaction-api  (EPL-2.0)
+jakarta.transaction:jakarta.transaction-api  (EPL-2.0)
 Copyright (c) 1997, 2010, 2013, 2018 Oracle and/or its affiliates.
 Copyright (c) 2013, 2018 Oracle and/or its affiliates.
 Copyright (c) 2010, 2018 Oracle and/or its affiliates.
 
-javax.annotation-api  (CDDL-1.1)
+javax.annotation:javax.annotation-api  (CDDL-1.1)
 Copyright (c) 2012-2013 Oracle and/or its affiliates.
 
-json-schema-core  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
-
-json-schema-validator  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
-
-jstl  (CDDL-1.0)
+javax.servlet:jstl  (CDDL-1.0)
 Copyright (c) 2005 Sun Microsystems, Inc.
 Copyright (c) Apache Software Foundation.
 
-juniversalchardet  (MPL-1.1)
-Copyright (c) 1998 the Initial Developer.
+org.aspectj:aspectjweaver  (EPL-2.0)
+Copyright (c) 2005 Contributors
+Copyright (c) 2002 Palo Alto Research Center, Incorporated (PARC)
+Copyright (c) 2001 The Apache Software Foundation
 
-logback  (EPL-1.0)
-Copyright (c) 1999-2011, QOS.ch.
+org.eclipse.jdt:ecj  (EPL-2.0)
+Copyright (c) 2000, 2005-2006, 2015-2019 IBM Corporation and others.
 
-mailapi  (CDDL-1.1)
-Copyright (c) 1997-2017 Oracle and/or its affiliates
+org.glassfish:jakarta.json  (EPL-2.0)
+Copyright (c) 1989, 1991 Free Software Foundation, Inc.
+Copyright (c) 2018, 2020 Oracle and/or its affiliates
 
-mariadb-java-client  (LGPL-2.1)
+org.hibernate.common:hibernate-commons-annotations  (LGPL-2.1)
+
+
+org.hibernate:hibernate-core  (LGPL-2.1)
+Copyright (c) 2008, Red Hat Middleware LLC
+Copyright (c) 2008, 2020 Oracle and/or its affiliates
+Copyright (c) 2012 Red Hat Inc.
+
+org.mariadb.jdbc:mariadb-java-client  (LGPL-2.1)
 Copyright (c) 2012-2014 Monty Program Ab
 Copyright (c) 2015-2020 MariaDB Corporation Ab
 Copyright (c) 2009-2011, Marcus Eriksson
-
-mchange-commons-java  (EPL-1.0)
-Copyright (c) 2013 Machinery For Change, Inc.
-
-msg-simple  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
 
 org.mozilla:rhino  (MPL-2.0)
 Copyright (c) 2010 the V8 project authors
 Copyright (c) 1997, 1998 Sun Microsystems, Inc.
 
-pdfa  (AGPL-3.0)
-Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
-Copyright (c) 1998-2022 iText Group NV Authors
-
-sign  (AGPL-3.0)
-Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
-Copyright (c) 1998-2022 iText Group NV Authors
-
-styled-xml-parser  (AGPL-3.0)
-Copyright (c) 1998-2022 iText Group NV Authors Bruno Lowagie, Paulo Soares
-Copyright (c) 1998-2022 iText Group NV Authors
-
-uri-template  (LGPL-3.0)
-Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
-
   
-Please be informed that   this  product may contain open source software listed in to tables below.
+Please be informed that   this  product may contain open source software listed in the tables below.
 
-ant-launcher  (Apache-2.0)
-
-antlr  (ANTLR-PD)
+antlr:antlr  (ANTLR-PD)
 Copyright (c) ANTLR 1989-2006 Developed by Terence Parr
 Copyright (c) University of San Francisco & jGuru.com
 
-Apache Ant  (Apache-2.0)
-Copyright (c) 1999-2010 The Apache Software Foundation
+com.apicatalog:titanium-json-ld  (Apache-2.0)
+Copyright (c) 2020 the original author or authors
 
-Apache Commons BeanUtils  (Apache-2.0)
-Copyright (c) 2016 The Apache Software Foundation.
+com.ethlo.time:itu  (Apache-2.0)
+Copyright (c) 2017 Morten Haraldsen
 
-Apache Commons Collections  (Apache-2.0)
-Copyright (c) 2001-2019 The Apache Software Foundation
-
-Apache Commons Compress  (Apache-2.0)
-Copyright (c) 2002-2018 The Apache Software Foundation
-Copyright (c) 1996-2019 Julian R Seward
-
-Apache Commons IO  (Apache-2.0)
-Copyright (c) 2002-2020 The Apache Software Foundation.
-
-Apache Commons Text  (Apache-2.0)
-Copyright (c) 2014-2019 The Apache Software Foundation
-
-Apache HttpClient  (Apache-2.0)
+com.fasterxml.jackson.core:jackson-annotations  (Apache-2.0)
 -
 
-Apache HttpClient Cache  (Apache-2.0)
-Copyright (c) 2010-2019 The Apache Software Foundation
+com.fasterxml.jackson.core:jackson-core  (Apache-2.0)
+-
 
-Apache HttpCore  (Apache-2.0)
-Copyright (c) 2005-2017 The Apache Software Foundation
+com.fasterxml.jackson.core:jackson-databind  (Apache-2.0)
+-
 
-Apache Log4j API  (Apache-2.0)
-Copyright (c) 1999-1969 The Apache Software Foundation
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml  (Apache-2.0)
+-
 
-Apache Log4j to SLF4J Adapter  (Apache-2.0)
-Copyright (c) 1999-2020 The Apache Software Foundation
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml  (Apache-2.0)
+-
 
-Apache Thrift  (Apache-2.0)
-Copyright (c) 2006-2017 The Apache Software Foundation.
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8  (Apache-2.0)
+-
 
-Apache Velocity  (Apache-2.0)
-Copyright (c) 2000-2007, The Apache Software Foundation
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310  (Apache-2.0)
+Copyright (c) 2013 FasterXML.com
 
-asm  (BSD-3-Clause)
-Copyright (c) 2000-2011 INRIA, France Telecom
+com.fasterxml.jackson.module:jackson-module-parameter-names  (Apache-2.0)
+-
 
-Autotag Core Runtime  (Apache-2.0)
-Copyright (c) 2001-2016 The Apache Software Foundation
+com.fasterxml.woodstox:woodstox-core  (Apache-2.0)
+Copyright (c) 2004,2005 Tatu Saloranta, tatu.saloranta@iki.fi
 
-bcpkix-jdk15on  (MIT)
-
-bcprov-jdk15on  (MIT)
-Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
-
-bcutil-jdk15on  (MIT)
-
-Byte Buddy (without Dependencies)  (Apache-2.0)
-Copyright (c) 2014 - Present Rafael Winterhalter
-Copyright (c) 2000-2011 INRIA, France Telecom
-
-cache-api  (Apache-2.0)
-Copyright (c) 2011-2016 Terracotta, Inc.
-Copyright (c) 2011-2016 Oracle America Incorporated
-
-checker-qual  (MIT)
-Copyright (c) 2004-present by the Checker Framework
-
-classgraph  (MIT)
-Copyright (c) 2016, 2019-2020 Luke Hutchison
-
-ClassMate  (Apache-2.0)
+com.fasterxml:classmate  (Apache-2.0)
 -
 
 com.github.andrewoma.dexx:collection  (MIT)
 Copyright (c) 2014 Andrew O'Malley
 
+com.github.java-json-tools:btf  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.java-json-tools:jackson-coreutils  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.java-json-tools:json-schema-core  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.java-json-tools:json-schema-validator  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.java-json-tools:msg-simple  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.java-json-tools:uri-template  (Apache-2.0)
+Copyright (c) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+
+com.github.jsonld-java:jsonld-java  (BSD-3-Clause)
+Copyright (c) 2012, Deutsche Forschungszentrum für Künstliche Intelligenz GmbH
+Copyright (c) 2012-2017, JSONLD-Java contributors
+
+com.github.package-url:packageurl-java  (MIT)
+
+com.github.virtuald:curvesapi  (BSD-3-Clause)
+Copyright (c) 2005, Graph Builder
+
+com.google.code.findbugs:jsr305  (Apache-2.0)
+-
+
+com.google.code.gson:gson  (Apache-2.0)
+Copyright (c) 2008, 2010, 2011 Google Inc. 
+
+com.google.errorprone:error_prone_annotations  (Apache-2.0)
+Copyright (c) 2015-2017 The Error Prone
+
+com.google.guava:failureaccess  (Apache-2.0)
+Copyright (c) 2018 The Guava Authors
+
+com.google.guava:guava  (Apache-2.0)
+Copyright (c) 2007-2012 The Guava Authors
+
+com.google.guava:listenablefuture  (Apache-2.0)
+-
+
+com.google.j2objc:j2objc-annotations  (Apache-2.0)
+Copyright (c) 2012 Google Inc.
+
 com.googlecode.java-diff-utils:diffutils  (Apache-2.0)
 Copyright 2010 Dmitry Naumenko (dm.naumenko@gmail.com)
 Copyright (c) 1999-2003 The Apache Software Foundation
 
-Commons CLI  (Apache-2.0)
-Copyright (c) 2001-2017, The Apache Software Foundation
+com.googlecode.libphonenumber:libphonenumber  (Apache-2.0)
+Copyright (c) 2009-2021, The Libphonenumber Authors
 
-commons-chain  (Apache-2.0)
+com.itextpdf:font-asian  (BSD-3-Clause)
+
+com.jcraft:jsch  (BSD-3-Clause)
+Copyright (c) 2002-2018 ymnk, JCraft,Inc.
+
+com.monitorjbl:xlsx-streamer  (Apache-2.0)
+-
+
+com.navercorp.lucy:lucy-xss  (Apache-2.0)
+Copyright (c) 2014 Naver Corp.
+
+com.networknt:json-schema-validator  (Apache-2.0)
+
+com.opencsv:opencsv  (Apache-2.0)
+Copyright (c) 2016-2018 Andrew Rucker Jones.
+
+com.sun.activation:jakarta.activation  (BSD-3-Clause)
+Copyright (c) 1997, 2018 Oracle and/or its affiliates
+
+com.sun.istack:istack-commons-runtime  (BSD-3-Clause)
+Copyright (c) 2017 Oracle and/or its affiliates
+
+com.zaxxer:HikariCP  (Apache-2.0)
+Copyright (c) 2013, 2014 Brett Wooldridge
+
+com.zaxxer:SparseBitSet  (Apache-2.0)
+-
+
+commons-beanutils:commons-beanutils  (Apache-2.0)
+Copyright (c) 2016 The Apache Software Foundation.
+
+commons-chain:commons-chain  (Apache-2.0)
 Copyright (c) 1999-2004 The Apache Software Foundation
 
-commons-codec  (Apache-2.0)
+commons-cli:commons-cli  (Apache-2.0)
+Copyright (c) 2001-2017, The Apache Software Foundation
+
+commons-codec:commons-codec  (Apache-2.0)
 Copyright (c) 2002-2020 The Apache Software Foundation
 Copyright (c) 2008 Alexander Beider & Stephen P. Morse
 Copyright (c) 2002 Kevin Atkinson (kevina@gnu.org)
 
-commons-digester  (Apache-2.0)
+commons-collections:commons-collections  (Apache-2.0)
 
-commons-lang  (Apache-2.0)
+commons-digester:commons-digester  (Apache-2.0)
+
+commons-io:commons-io  (Apache-2.0)
+Copyright (c) 2002-2020 The Apache Software Foundation.
+
+commons-lang:commons-lang  (Apache-2.0)
 Copyright (c) 2001-2018 The Apache Software Foundation
 
-commons-logging  (Apache-2.0)
+commons-logging:commons-logging  (Apache-2.0)
 Copyright (c) 2003-2014 The Apache Software Foundation
 
-commons-math  (Apache-2.0)
-Copyright (c) 2001-2013, The Apache Software Foundation
-Copyright (c) 2009 Google Inc.
+commons-validator:commons-validator  (Apache-2.0)
 
-commons-validator  (Apache-2.0)
-
-curvesapi  (BSD-3-Clause)
-Copyright (c) 2005, Graph Builder
-
-dom4j  (BSD-like License (dom4j))
+dom4j:dom4j  (BSD-like License (dom4j))
 Copyright 2001-2016 (c) MetaStuff, Ltd. and DOM4J contributors.
 
-ehcache  (Apache-2.0)
--
+io.github.classgraph:classgraph  (MIT)
+Copyright (c) 2016, 2019-2020 Luke Hutchison
 
-error_prone_annotations  (Apache-2.0)
-Copyright (c) 2015-2017 The Error Prone
-
-excel-streaming-reader  (Apache-2.0)
--
-
-failureaccess  (Apache-2.0)
-Copyright (c) 2018 The Guava Authors
-
-FindBugs JSR305  (Apache-2.0)
--
-
-font-asian  (BSD-3-Clause)
-
-gson  (Apache-2.0)
-Copyright (c) 2008, 2010, 2011 Google Inc. 
-
-guava  (Apache-2.0)
-Copyright (c) 2007-2012 The Guava Authors
-
-HikariCP  (Apache-2.0)
-Copyright (c) 2013, 2014 Brett Wooldridge
-
-istack-commons-runtime  (BSD-3-Clause)
-Copyright (c) 2017 Oracle and/or its affiliates
-
-J2ObjC  (Apache-2.0)
-Copyright (c) 2012 Google Inc.
-
-Jackson Datatype: JDK8  (Apache-2.0)
--
-
-Jackson Datatype: JSR310  (Apache-2.0)
-Copyright (c) 2013 FasterXML.com
-
-Jackson Module Parameter Names  (Apache-2.0)
--
-
-jackson-annotations  (Apache-2.0)
--
-
-jackson-core  (Apache-2.0)
--
-
-jackson-core-asl  (Apache-2.0)
-Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
-
-jackson-databind  (Apache-2.0)
--
-
-jackson-dataformat-xml  (Apache-2.0)
--
-
-jackson-dataformats-text  (Apache-2.0)
--
-
-jackson-mapper-asl  (Apache-2.0)
-
-jakarta.activation  (BSD-3-Clause)
-Copyright (c) 1997, 2018 Oracle and/or its affiliates
-
-jakarta.persistence-api  (BSD-3-Clause)
-Copyright (c) 2008, 2011, 2017, 2019 Oracle and/or its affiliates.
-Copyright (c) 2011, 2019 Oracle and/or its affiliates.
-Copyright (c) 2017, 2019 Oracle and/or its affiliates.
-
-jakarta.xml.bind-api  (BSD-3-Clause)
-Copyright (c) 2003-2018 Oracle and/or its affiliates.
-
-Java Annotation Indexer  (Apache-2.0)
-Copyright (c) 2013, 2014,2021 Red Hat, Inc., and individual contributors as indicated by the @author tags.
-
-java-spdx-library  (Apache-2.0)
-Copyright (c) 2019 Source Auditor Inc.
-
-javax.batch-api  (Apache-2.0)
-Copyright (c) 2012 International Business Machines Corp.
-
-jaxb-runtime  (BSD-3-Clause)
-Copyright (c) 2018 Oracle and/or its affiliates
-
-jboss-logging  (Apache-2.0)
-Copyright (c) 2010, 2013 Red Hat, Inc.
-
-jcl-over-slf4j  (Apache-2.0)
-Copyright (c) 2001-2004 The Apache Software Foundation
-
-jena-arq  (Apache-2.0)
-Copyright (c) 2021 The Apache Software Foundation
-
-jena-base  (Apache-2.0)
-Copyright (c) 2021 The Apache Software Foundation
-
-jena-core  (Apache-2.0)
-Copyright (c) 2021 The Apache Software Foundation
-
-jena-iri  (Apache-2.0)
-Copyright (c) 2021 The Apache Software Foundation
-
-jena-shaded-guava  (Apache-2.0)
-Copyright (c) 2021 The Apache Software Foundation
-
-Jettison  (Apache-2.0)
-
-jjwt-api  (Apache-2.0)
+io.jsonwebtoken:jjwt-api  (Apache-2.0)
 Copyright (c) 2014,2015,2019 jsonwebtoken.io
 
-jjwt-impl  (Apache-2.0)
+io.jsonwebtoken:jjwt-impl  (Apache-2.0)
 Copyright (c) 2014, 2015 jsonwebtoken.io
 Copyright (c) 2018 JWTK
 
-jjwt-jackson  (Apache-2.0)
+io.jsonwebtoken:jjwt-jackson  (Apache-2.0)
 Copyright (c) 2018 JWTK
 
-joda-time  (Apache-2.0)
-Copyright (c) 2001-2014 Stephen Colebourne
-
-jopt-simple  (MIT)
-Copyright (c) 2004-2015 Paul R. Holser, Jr.
-
-jqGrid  (MIT)
-Copyright (c) 2008, Tony Tomov, tony@trirand.com
-
-jsch  (BSD-3-Clause)
-Copyright (c) 2002-2018 ymnk, JCraft,Inc.
-
-JSON-java  (JSON)
-Copyright (c) 2002,2006,2008 JSON.org
-
-json-smart-v2  (Apache-2.0)
-Copyright (c) 2011 JSON-SMART authors
-
-jsonld-java  (BSD-3-Clause)
-Copyright (c) 2012, Deutsche Forschungszentrum für Künstliche Intelligenz GmbH
-Copyright (c) 2012-2017, JSONLD-Java contributors
-
-jsoup  (MIT)
-Copyright (c) 2009-2020 Jonathan Hedley <jonathan@hedley.net>
-
-libphonenumber  (Apache-2.0)
-Copyright (c) 2009-2021, The Libphonenumber Authors
-
-listenablefuture  (Apache-2.0)
--
-
-lucy-xss  (Apache-2.0)
-Copyright (c) 2014 Naver Corp.
-
-mapstruct  (Apache-2.0)
-Copyright (c) MapStruct Authors
-
-micrometer  (Apache-2.0)
-Copyright (c) 2017-2020 VMware Inc.
-
-mybatis  (Apache-2.0)
-Copyright (c) 2010 The Apache Software Foundation
-Copyright (c) 2004, Drew Davidson and Luke Blanshard
-
-mybatis-spring  (Apache-2.0)
-Copyright (c) 2010 The Apache Software Foundation
-Copyright (c) 2002-2010 the original author or authors
-
-mybatis-spring-boot-autoconfigure  (Apache-2.0)
-Copyright (c) 2015-2021 the original author or authors
-
-mybatis-spring-boot-starter  (Apache-2.0)
-Copyright (c) 2015-2021 the original author or authors
-
-NanumGothic (OFL-1.1)
-Copyright (c) 2010, NAVER Corporation (http://www.nhncorp.com)
-
-Netty  (Apache-2.0)
+io.netty:netty-buffer  (Apache-2.0)
 Copyright (c) 2014-2017,2021 The Netty Project
 
-opencsv  (Apache-2.0)
-Copyright (c) 2016-2018 Andrew Rucker Jones.
+io.netty:netty-codec  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-mybatis-migrations  (Apache-2.0)
+io.netty:netty-codec-dns  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-org.apache.commons:commons-csv  (Apache-2.0)
-Copyright (c) 2005-2020 The Apache Software Foundation
+io.netty:netty-codec-http  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-org.glassfish.jaxb:txw2  (BSD-3-Clause)
-Copyright (c) 2018 Oracle and/or its affiliates
+io.netty:netty-codec-http2  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-oro  (Apache-1.1)
-Copyright (c) 2000-2002 The Apache Software Foundation.
+io.netty:netty-codec-socks  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-poi  (Apache-2.0)
-Copyright (c) 2001-2007 The Apache Software Foundation
+io.netty:netty-common  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-poi-ooxml-schemas  (Apache-2.0)
-Copyright (c) The Apache Software Foundation
+io.netty:netty-handler  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-PostgreSQL JDBC Driver  (BSD-2-Clause)
-Copyright (c) 1997, PostgreSQL Global Development Group
+io.netty:netty-handler-proxy  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-QUARTZ  (Apache-2.0)
-Copyright (c) 2004-2005 OpenSymphony
+io.netty:netty-resolver  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-reactor-core  (Apache-2.0)
-Copyright (c) 2011-2022 VMware Inc.
+io.netty:netty-resolver-dns  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
 
-reactor-netty  (Apache-2.0)
+io.netty:netty-resolver-dns-classes-macos  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.netty:netty-resolver-dns-native-macos  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.netty:netty-transport  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.netty:netty-transport-classes-epoll  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.netty:netty-transport-native-epoll  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.netty:netty-transport-native-unix-common  (Apache-2.0)
+Copyright (c) 2014-2017,2021 The Netty Project
+
+io.projectreactor.netty:reactor-netty-core  (Apache-2.0)
 Copyright (c) 2020-2021 VMware Inc. or its affiliates
 
-slf4J  (MIT)
-Copyright (c) 2004-2022 QOS.ch Sarl (Switzerland)
+io.projectreactor.netty:reactor-netty-http  (Apache-2.0)
+Copyright (c) 2020-2021 VMware Inc. or its affiliates
 
-snakeyaml  (Apache-2.0)
-Copyright (c) 2008, http://www.snakeyaml.org
-Copyright (c) 2008 Google Inc.
-Copyright 2003-2010 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
+io.projectreactor:reactor-core  (Apache-2.0)
+Copyright (c) 2011-2022 VMware Inc.
 
-SparseBitSet  (Apache-2.0)
--
-
-spdx-jackson-store  (Apache-2.0)
-Copyright (c) 2020 Source Auditor Inc.
-
-spdx-rdf-store  (Apache-2.0)
-Copyright (c) 2020 Source Auditor Inc.
-
-spdx-spreadsheet-store  (Apache-2.0)
-Copyright (c) 2020 Source Auditor Inc.
-
-spdx-tagvalue-store  (Apache-2.0)
-Copyright (c) 2011 Source Auditor Inc.
-
-Spring Boot  (Apache-2.0)
-Copyright (c) 2012-2022 Pivotal Inc.
-
-Spring Data Core  (Apache-2.0)
-Copyright (c) 2010-2021 Pivotal Software, Inc.
-
-Spring Data JPA  (Apache-2.0)
-Copyright (c) 2011-2019 Pivotal Software Inc.
-
-Spring Framework  (Apache-2.0)
-Copyright (c) 2002-2020 the original author or authors.
-
-Spring Integration Core  (Apache-2.0)
-Copyright (c) 2002-2014 the original author or authors.
-
-Spring Retry  (Apache-2.0)
-Copyright (c) 2006-2019 the original author or authors
-
-spring-batch  (Apache-2.0)
-Copyright (c) 2006-2013 the original author or authors.
-
-spring-boot-starter-velocity  (Apache-2.0)
--
-
-spring-plugin-core  (Apache-2.0)
-Copyright (c) 2008-2019 the original author or authors.
-
-spring-plugin-metadata  (Apache-2.0)
-Copyright (c) 2008-2019 Pivotal Software, Inc.
-
-spring-security  (Apache-2.0)
-Copyright (c) 2002-2021 the original author or authors
-
-spring-security-acl  (Apache-2.0)
-Copyright (c) 2004, 2005, 2006 Acegi Technology Pty Limited
-
-spring-security-crypto  (Apache-2.0)
-Copyright (c) 2002-2022 the original author or authors
-
-Springfox  (Apache-2.0)
+io.springfox:springfox-bean-validators  (Apache-2.0)
 Copyright (c) 2015 Marty Pitt - @martypitt
 Copyright (c) 2015 Dilip Krishnan - @dilipkrish
 Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-sslext  (Apache-1.1)
-Copyright (c) 1999-2003 The Apache Software Foundation
+io.springfox:springfox-boot-starter  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-Stax2 API  (BSD-2-Clause)
-Copyright (c) 2008- Tatu Saloranta tatu.saloranta@iki.fi
+io.springfox:springfox-core  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-struts-core  (Apache-2.0)
-Copyright (c) 2000-2007 The Apache Software Foundation
+io.springfox:springfox-data-rest  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-struts-taglib  (Apache-2.0)
-Copyright (c) 2000-2007 The Apache Software Foundation
+io.springfox:springfox-oas  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-struts-tiles  (Apache-2.0)
-Copyright (c) 2000-2007 The Apache Software Foundation
+io.springfox:springfox-schema  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
 
-swagger-annotations  (Apache-2.0)
+io.springfox:springfox-spi  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-spring-web  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-spring-webflux  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-spring-webmvc  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-swagger-common  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-swagger-ui  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.springfox:springfox-swagger2  (Apache-2.0)
+Copyright (c) 2015 Marty Pitt - @martypitt
+Copyright (c) 2015 Dilip Krishnan - @dilipkrish
+Copyright (c) 2015 Adrian Kelly - @adrianbk,
+
+io.swagger.core.v3:swagger-annotations  (Apache-2.0)
 Copyright (c) 2017 SmartBear Software
+
+io.swagger.core.v3:swagger-models  (Apache-2.0)
+Copyright (c) 2017 SmartBear Software
+
+io.swagger:swagger-annotations  (Apache-2.0)
 Copyright (c) 2016 SmartBear Software
 
-swagger-models  (Apache-2.0)
-Copyright (c) 2017 SmartBear Software
+io.swagger:swagger-models  (Apache-2.0)
 
-taglibs-standard-impl  (Apache-2.0)
-Copyright (c) 2001-2015 The Apache Software Foundation
+jakarta.persistence:jakarta.persistence-api  (BSD-3-Clause)
+Copyright (c) 2008, 2011, 2017, 2019 Oracle and/or its affiliates.
+Copyright (c) 2011, 2019 Oracle and/or its affiliates.
+Copyright (c) 2017, 2019 Oracle and/or its affiliates.
 
-Tiles API  (Apache-2.0)
-Copyright (c) 2001-2017, The Apache Software Foundation
+jakarta.xml.bind:jakarta.xml.bind-api  (BSD-3-Clause)
+Copyright (c) 2003-2018 Oracle and/or its affiliates.
 
-Tiles Core Library  (Apache-2.0)
-Copyright (c) 1999-2009 The Apache Software Foundation.
+javax.batch:javax.batch-api  (Apache-2.0)
+Copyright (c) 2012 International Business Machines Corp.
 
-Tiles JSP Support  (Apache-2.0)
-Copyright (c) 1999-2009 The Apache Software Foundation.
+javax.cache:cache-api  (Apache-2.0)
+Copyright (c) 2011-2016 Terracotta, Inc.
+Copyright (c) 2011-2016 Oracle America Incorporated
 
-Tiles Request API  (Apache-2.0)
-Copyright (c) 2001-2017 The Apache Software Foundation
+joda-time:joda-time  (Apache-2.0)
+Copyright (c) 2001-2014 Stephen Colebourne
 
-Tiles Request Servlet Support  (Apache-2.0)
-Copyright (c) 2001-2017 The Apache Software Foundation.
+jqGrid  (MIT)
+Copyright (c) 2008, Tony Tomov, tony@trirand.com
 
-Tiles Servlet Support  (Apache-2.0)
-Copyright (c) 1999-2009 The Apache Software Foundation.
+net.minidev:accessors-smart  (Apache-2.0)
+Copyright (c) 2011 JSON-SMART authors
 
-Tiles Template Technologies Support  (Apache-2.0)
-Copyright (c) 2001-2017 The Apache Software Foundation.
+net.minidev:json-smart  (Apache-2.0)
+Copyright (c) 2011 JSON-SMART authors
 
-tiles-request  (Apache-2.0)
-Copyright (c) 2001-2017 The Apache Software Foundation.
+net.sf.jopt-simple:jopt-simple  (MIT)
+Copyright (c) 2004-2015 Paul R. Holser, Jr.
 
-titanium-json-ld  (Apache-2.0)
-Copyright (c) 2020 the original author or authors
-
-Tomcat Embed Core  (Apache-2.0)
-Copyright (c) 1999-2021 The Apache Software Foundation
-
-Tomcat Embed EL  (Apache-2.0)
-Copyright (c) 1999-2022, The Apache Software Foundation
-
-Tomcat Embed WebSocket  (Apache-2.0)
-Copyright (c) 1999-2022, The Apache Software Foundation
-
-tomcat-embed-jasper  (Apache-2.0)
-Copyright (c) 1999-2021 The Apache Software Foundation
-
-tools-java  (Apache-2.0)
-Copyright (c) 2013 Source Auditor Inc.
-
-VelocityTools  (Apache-2.0)
-Copyright (c) 2000-2007 The Apache Software Foundation
-
-woodstox  (Apache-2.0)
-Copyright (c) 2004,2005 Tatu Saloranta, tatu.saloranta@iki.fi
-
-xml-apis  (Apache-2.0)
-
-XmlBeans  (Apache-2.0)
-Copyright (c) 2003-2004, 2017-2018 The Apache Software Foundation
-
-xmlpull-xpp3  (BSD-3-Clause)
+net.sf.sociaal:xmlpull-xpp3  (BSD-3-Clause)
 -
 
-xmlschema-core  (Apache-2.0)
+org.apache.ant:ant  (Apache-2.0)
+Copyright (c) 1999-2010 The Apache Software Foundation
+
+org.apache.ant:ant-launcher  (Apache-2.0)
+
+org.apache.commons:commons-collections4  (Apache-2.0)
+Copyright (c) 2001-2019 The Apache Software Foundation
+
+org.apache.commons:commons-compress  (Apache-2.0)
+Copyright (c) 2002-2018 The Apache Software Foundation
+Copyright (c) 1996-2019 Julian R Seward
+
+org.apache.commons:commons-csv  (Apache-2.0)
+Copyright (c) 2005-2020 The Apache Software Foundation
+
+org.apache.commons:commons-lang3  (Apache-2.0)
+Copyright (c) 2001-2018 The Apache Software Foundation
+
+org.apache.commons:commons-math3  (Apache-2.0)
+Copyright (c) 2001-2013, The Apache Software Foundation
+Copyright (c) 2009 Google Inc.
+
+org.apache.commons:commons-text  (Apache-2.0)
+Copyright (c) 2014-2019 The Apache Software Foundation
+
+org.apache.httpcomponents:httpclient  (Apache-2.0)
+-
+
+org.apache.httpcomponents:httpclient-cache  (Apache-2.0)
+Copyright (c) 2010-2019 The Apache Software Foundation
+
+org.apache.jena:jena-arq  (Apache-2.0)
+Copyright (c) 2021 The Apache Software Foundation
+
+org.apache.jena:jena-base  (Apache-2.0)
+Copyright (c) 2021 The Apache Software Foundation
+
+org.apache.jena:jena-core  (Apache-2.0)
+Copyright (c) 2021 The Apache Software Foundation
+
+org.apache.jena:jena-iri  (Apache-2.0)
+Copyright (c) 2021 The Apache Software Foundation
+
+org.apache.jena:jena-shaded-guava  (Apache-2.0)
+Copyright (c) 2021 The Apache Software Foundation
+
+org.apache.logging.log4j:log4j-api  (Apache-2.0)
+Copyright (c) 1999-1969 The Apache Software Foundation
+
+org.apache.logging.log4j:log4j-to-slf4j  (Apache-2.0)
+Copyright (c) 1999-2020 The Apache Software Foundation
+
+org.apache.poi:poi  (Apache-2.0)
+Copyright (c) 2001-2007 The Apache Software Foundation
+
+org.apache.poi:poi-excelant  (Apache-2.0)
+Copyright (c) 2001-2007 The Apache Software Foundation
+
+org.apache.poi:poi-ooxml  (Apache-2.0)
+Copyright (c) 2001-2007 The Apache Software Foundation
+
+org.apache.poi:poi-ooxml-schemas  (Apache-2.0)
+Copyright (c) The Apache Software Foundation
+
+org.apache.poi:poi-scratchpad  (Apache-2.0)
+Copyright (c) 2001-2007 The Apache Software Foundation
+
+org.apache.struts:struts-core  (Apache-2.0)
+Copyright (c) 2000-2007 The Apache Software Foundation
+
+org.apache.struts:struts-taglib  (Apache-2.0)
+Copyright (c) 2000-2007 The Apache Software Foundation
+
+org.apache.struts:struts-tiles  (Apache-2.0)
+Copyright (c) 2000-2007 The Apache Software Foundation
+
+org.apache.taglibs:taglibs-standard-impl  (Apache-2.0)
+Copyright (c) 2001-2015 The Apache Software Foundation
+
+org.apache.thrift:libthrift  (Apache-2.0)
+Copyright (c) 2006-2017 The Apache Software Foundation.
+
+org.apache.tiles:tiles-api  (Apache-2.0)
+Copyright (c) 2001-2017, The Apache Software Foundation
+
+org.apache.tiles:tiles-autotag-core-runtime  (Apache-2.0)
+Copyright (c) 2001-2016 The Apache Software Foundation
+
+org.apache.tiles:tiles-core  (Apache-2.0)
+Copyright (c) 1999-2009 The Apache Software Foundation.
+
+org.apache.tiles:tiles-jsp  (Apache-2.0)
+Copyright (c) 1999-2009 The Apache Software Foundation.
+
+org.apache.tiles:tiles-request-api  (Apache-2.0)
+Copyright (c) 2001-2017 The Apache Software Foundation
+
+org.apache.tiles:tiles-request-jsp  (Apache-2.0)
+Copyright (c) 2001-2017 The Apache Software Foundation.
+
+org.apache.tiles:tiles-request-servlet  (Apache-2.0)
+Copyright (c) 2001-2017 The Apache Software Foundation.
+
+org.apache.tiles:tiles-servlet  (Apache-2.0)
+Copyright (c) 1999-2009 The Apache Software Foundation.
+
+org.apache.tiles:tiles-template  (Apache-2.0)
+Copyright (c) 2001-2017 The Apache Software Foundation.
+
+org.apache.tomcat.embed:tomcat-embed-core  (Apache-2.0)
+Copyright (c) 1999-2021 The Apache Software Foundation
+
+org.apache.tomcat.embed:tomcat-embed-el  (Apache-2.0)
+Copyright (c) 1999-2022, The Apache Software Foundation
+
+org.apache.tomcat.embed:tomcat-embed-jasper  (Apache-2.0)
+Copyright (c) 1999-2021 The Apache Software Foundation
+
+org.apache.tomcat.embed:tomcat-embed-websocket  (Apache-2.0)
+Copyright (c) 1999-2022, The Apache Software Foundation
+
+org.apache.velocity:velocity  (Apache-2.0)
+Copyright (c) 2000-2007, The Apache Software Foundation
+
+org.apache.velocity:velocity-tools  (Apache-2.0)
+Copyright (c) 2000-2007 The Apache Software Foundation
+
+org.apache.ws.xmlschema:xmlschema-core  (Apache-2.0)
 Copyright (c) 2006 International Business Machines Corp.
 Copyright (c) 2004-2020 The Apache Software Foundation
 Copyright (c) World Wide Web Consortium 2006, 2007
+
+org.apache.xmlbeans:xmlbeans  (Apache-2.0)
+Copyright (c) 2003-2004, 2017-2018 The Apache Software Foundation
+
+org.bouncycastle:bcpkix-jdk15on  (MIT)
+
+org.bouncycastle:bcprov-jdk15on  (MIT)
+Copyright (c) 2000-2021 The Legion of the Bouncy Castle Inc. (http://www.bouncycastle.org)
+
+org.bouncycastle:bcutil-jdk15on  (MIT)
+
+org.checkerframework:checker-qual  (MIT)
+Copyright (c) 2004-present by the Checker Framework
+
+org.codehaus.jackson:jackson-core-asl  (Apache-2.0)
+Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
+
+org.codehaus.jackson:jackson-mapper-asl  (Apache-2.0)
+
+org.codehaus.jettison:jettison  (Apache-2.0)
+
+org.codehaus.woodstox:stax2-api  (BSD-2-Clause)
+Copyright (c) 2008- Tatu Saloranta tatu.saloranta@iki.fi
+
+org.cyclonedx:cyclonedx-core-java  (Apache-2.0)
+Copyright (c) OWASP Foundation
+
+org.ehcache:ehcache  (Apache-2.0)
+-
+
+org.glassfish.jaxb:txw2  (BSD-3-Clause)
+Copyright (c) 2018 Oracle and/or its affiliates
+
+org.jboss.logging:jboss-logging  (Apache-2.0)
+Copyright (c) 2010, 2013 Red Hat, Inc.
+
+org.jboss:jandex  (Apache-2.0)
+Copyright (c) 2013, 2014,2021 Red Hat, Inc., and individual contributors as indicated by the @author tags.
+
+org.json:json  (JSON)
+Copyright (c) 2002,2006,2008 JSON.org
+
+org.jsoup:jsoup  (MIT)
+Copyright (c) 2009-2020 Jonathan Hedley <jonathan@hedley.net>
+
+org.mapstruct:mapstruct  (Apache-2.0)
+Copyright (c) MapStruct Authors
+
+org.mybatis.spring.boot:mybatis-spring-boot-autoconfigure  (Apache-2.0)
+Copyright (c) 2015-2021 the original author or authors
+
+org.mybatis.spring.boot:mybatis-spring-boot-starter  (Apache-2.0)
+Copyright (c) 2015-2021 the original author or authors
+
+org.mybatis:mybatis  (Apache-2.0)
+Copyright (c) 2010 The Apache Software Foundation
+Copyright (c) 2004, Drew Davidson and Luke Blanshard
+
+org.mybatis:mybatis-spring  (Apache-2.0)
+Copyright (c) 2010 The Apache Software Foundation
+Copyright (c) 2002-2010 the original author or authors
+
+org.ow2.asm:asm  (BSD-3-Clause)
+Copyright (c) 2000-2011 INRIA, France Telecom
+
+org.postgresql:postgresql  (BSD-2-Clause)
+Copyright (c) 1997, PostgreSQL Global Development Group
+
+org.quartz-scheduler:quartz  (Apache-2.0)
+Copyright (c) 2004-2005 OpenSymphony
+
+org.slf4j:jul-to-slf4j  (MIT)
+Copyright (c) 2004-2022 QOS.ch Sarl (Switzerland)
+
+org.slf4j:slf4j-api  (MIT)
+Copyright (c) 2004-2022 QOS.ch Sarl (Switzerland)
+
+org.spdx:java-spdx-library  (Apache-2.0)
+Copyright (c) 2019 Source Auditor Inc.
+
+org.spdx:spdx-jackson-store  (Apache-2.0)
+Copyright (c) 2020 Source Auditor Inc.
+
+org.spdx:spdx-rdf-store  (Apache-2.0)
+Copyright (c) 2020 Source Auditor Inc.
+
+org.spdx:spdx-spreadsheet-store  (Apache-2.0)
+Copyright (c) 2020 Source Auditor Inc.
+
+org.spdx:spdx-tagvalue-store  (Apache-2.0)
+Copyright (c) 2011 Source Auditor Inc.
+
+org.spdx:tools-java  (Apache-2.0)
+Copyright (c) 2013 Source Auditor Inc.
+
+org.springframework.batch:spring-batch-core  (Apache-2.0)
+Copyright (c) 2006-2013 the original author or authors.
+
+org.springframework.batch:spring-batch-infrastructure  (Apache-2.0)
+Copyright (c) 2006-2013 the original author or authors.
+
+org.springframework.boot:spring-boot  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-autoconfigure  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-aop  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-jdbc  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-json  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-logging  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-reactor-netty  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-tomcat  (Apache-2.0)
+Copyright (c) 2012-2022 Pivotal Inc.
+
+org.springframework.boot:spring-boot-starter-velocity  (Apache-2.0)
+-
+
+org.springframework.data:spring-data-commons  (Apache-2.0)
+Copyright (c) 2010-2021 Pivotal Software, Inc.
+
+org.springframework.data:spring-data-jpa  (Apache-2.0)
+Copyright (c) 2011-2019 Pivotal Software Inc.
+
+org.springframework.integration:spring-integration-core  (Apache-2.0)
+Copyright (c) 2002-2014 the original author or authors.
+
+org.springframework.ldap:spring-ldap-core  (Apache-2.0)
+Copyright (c) 2005-2015 the original author or authors
+
+org.springframework.plugin:spring-plugin-core  (Apache-2.0)
+Copyright (c) 2008-2019 the original author or authors.
+
+org.springframework.plugin:spring-plugin-metadata  (Apache-2.0)
+Copyright (c) 2008-2019 Pivotal Software, Inc.
+
+org.springframework.retry:spring-retry  (Apache-2.0)
+Copyright (c) 2006-2019 the original author or authors
+
+org.springframework.security:spring-security-acl  (Apache-2.0)
+Copyright (c) 2004, 2005, 2006 Acegi Technology Pty Limited
+
+org.springframework.security:spring-security-config  (Apache-2.0)
+Copyright (c) 2002-2021 the original author or authors
+
+org.springframework.security:spring-security-core  (Apache-2.0)
+Copyright (c) 2002-2021 the original author or authors
+
+org.springframework.security:spring-security-crypto  (Apache-2.0)
+Copyright (c) 2002-2022 the original author or authors
+
+org.springframework.security:spring-security-taglibs  (Apache-2.0)
+Copyright (c) 2002-2021 the original author or authors
+
+org.springframework.security:spring-security-web  (Apache-2.0)
+Copyright (c) 2002-2021 the original author or authors
+
+org.springframework:spring-aop  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-aspects  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-beans  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-context  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-context-support  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-core  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-expression  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-jcl  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-jdbc  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-messaging  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-tx  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-web  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-webflux  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.springframework:spring-webmvc  (Apache-2.0)
+Copyright (c) 2002-2020 the original author or authors.
+
+org.yaml:snakeyaml  (Apache-2.0)
+Copyright (c) 2008, http://www.snakeyaml.org
+Copyright (c) 2008 Google Inc.
+Copyright 2003-2010 Christian d'Heureuse, Inventec Informatik AG, Zurich, Switzerland
+
+oro:oro  (Apache-1.1)
+Copyright (c) 2000-2002 The Apache Software Foundation.
+
+sslext:sslext  (Apache-1.1)
+Copyright (c) 1999-2003 The Apache Software Foundation
+
+xml-apis:xml-apis  (Apache-2.0)
 
 		
 _________________________________________________________________________________________________________________________
@@ -2449,91 +2655,6 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
      This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
 
 
-SIL OPEN FONT LICENSE
-
-Version 1.1 - 26 February 2007
-
-PREAMBLE 
-
-The goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.
-
-The OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.
-
-DEFINITIONS 
-
-"Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.
-
-"Reserved Font Name" refers to any names specified as such after the copyright statement(s).
-
-"Original Version" refers to the collection of Font Software components as distributed by the Copyright Holder(s).
-
-"Modified Version" refers to any derivative made by adding to, deleting, or substituting — in part or in whole — any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.
-
-"Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.
-
-PERMISSION & CONDITIONS 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:
-
-1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.
-
-2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.
-
-3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.
-
-4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.
-
-5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
-
-TERMINATION 
-
-This license becomes null and void if any of the above conditions are not met.
-
-DISCLAIMER 
-
-THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
 		
-_________________________________________________________________________________________________________________________
-
-The source code for the above may be obtained from each download location.
-
-FOSSLight Hub     https://github.com/fosslight/fosslight
-AspectJ Weaver    https://eclipse.org/aspectj
-Hibernate Commons Annotations    http://hibernate.org
-Jakarta Annotations API    https://projects.eclipse.org/projects/ee4j.ca
-barcodes    https://mvnrepository.com/artifact/com.itextpdf/barcodes
-btf    https://github.com/java-json-tools/btf
-ckeditor4    https://github.com/ckeditor/ckeditor4
-com.itextpdf:commons    https://mvnrepository.com/artifact/com.itextpdf/commons
-com.itextpdf:forms    https://mvnrepository.com/artifact/com.itextpdf/forms
-com.itextpdf:html2pdf    https://mvnrepository.com/artifact/com.itextpdf/html2pdf
-com.itextpdf:hyph    https://mvnrepository.com/artifact/com.itextpdf/hyph
-com.itextpdf:io    https://mvnrepository.com/artifact/com.itextpdf/io
-com.itextpdf:kernel    https://mvnrepository.com/artifact/com.itextpdf/kernel
-com.itextpdf:layout    https://mvnrepository.com/artifact/com.itextpdf/layout
-com.itextpdf:svg    https://mvnrepository.com/artifact/com.itextpdf/svg
-ecj    https://mvnrepository.com/artifact/org.eclipse.jdt/ecj
-hibernate-core    https://mvnrepository.com/artifact/org.hibernate/hibernate-core
-jackson-coreutils    https://github.com/java-json-tools/jackson-coreutils
-jackson-coreutils    https://github.com/java-json-tools/jackson-coreutils
-jakarta.json    https://github.com/eclipse-ee4j/jsonp
-jakarta.mail    https://mvnrepository.com/artifact/com.sun.mail/jakarta.mail
-jakarta.transaction-api    https://mvnrepository.com/artifact/jakarta.transaction/jakarta.transaction-api
-javax.annotation-api    http://jcp.org/en/jsr/detail?id=250
-json-schema-core    https://github.com/java-json-tools/json-schema-core
-json-schema-validator    https://github.com/java-json-tools/json-schema-validator
-jstl    http://grepcode.com/project/repo1.maven.org/maven2/javax.servlet/jstl
-juniversalchardet    https://code.google.com/archive/p/juniversalchardet
-logback    https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-mailapi    https://mvnrepository.com/artifact/com.sun.mail/mailapi
-mariadb-java-client    https://mariadb.com/kb/en/mariadb/about-mariadb-connector-j
-mchange-commons-java    https://github.com/swaldman/mchange-commons-java
-msg-simple    https://github.com/java-json-tools/msg-simple
-org.mozilla:rhino    https://mvnrepository.com/artifact/org.mozilla/rhino
-pdfa    https://mvnrepository.com/artifact/com.itextpdf/pdfa
-sign    https://mvnrepository.com/artifact/com.itextpdf/sign
-styled-xml-parser    https://mvnrepository.com/artifact/com.itextpdf/styled-xml-parser
-uri-template    https://github.com/java-json-tools/uri-template 
-mariadb-java-client "https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
- 
-(OSSNotice-5022_FOSSLight Hub_1.5.0_230322)
+  
+(OSSNotice-6140_FOSSLight Hub_1.6.1_231208)
