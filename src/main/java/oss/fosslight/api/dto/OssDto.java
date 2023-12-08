@@ -23,12 +23,6 @@ public class OssDto {
     String created;
     String modifier;
     String modified;
-    List<Character> obligations;
+    String obligations;
 
-    public void setObligations(String obligationType) {
-        var typeArr = obligationType.toCharArray();
-        obligations = new ArrayList<>();
-        obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
-        obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
-    }
 }

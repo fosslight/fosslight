@@ -108,34 +108,36 @@
         LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
         LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON
         T1.LICENSE_ID = T3.LICENSE_ID
-        <include refid="queryLicense" />
+        <include refid="queryLicense"/>
     </select>
 
     <resultMap id="LicenseDtoMap" type="oss.fosslight.api.dto.LicenseDto">
         <result property="created" column="created_date"/>
         <result property="modified" column="modified_date"/>
         <result property="licenseIdentifier" column="short_identifier"/>
+        <result property="homepageUrl" column="webpage"/>
     </resultMap>
     <select id="selectLicenseList" parameterType="oss.fosslight.api.dto.ListLicenseDto$Request"
             resultMap="LicenseDtoMap">
         SELECT
-        T1.LICENSE_ID
-        , T1.LICENSE_NAME
-        , T2.CD_DTL_NM AS LICENSE_TYPE
-        , T1.OBLIGATION_NOTIFICATION_YN
-        , T1.OBLIGATION_DISCLOSING_SRC_YN
-        , T1.SHORT_IDENTIFIER
-        , T1.WEBPAGE
-        , T1.DESCRIPTION
-        , T1.LICENSE_TEXT
-        , T1.ATTRIBUTION
-        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
-        , T1.CREATED_DATE
-        , T1.MODIFIED_DATE
-        , T1.RESTRICTION
-        FROM
-        LICENSE_MASTER T1
+            T1.LICENSE_ID,
+            T1.LICENSE_NAME,
+            T2.CD_DTL_NM AS LICENSE_TYPE,
+            CONCAT(
+                IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
+                IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
+            ) as OBLIGATIONS,
+            T1.SHORT_IDENTIFIER,
+            T1.WEBPAGE,
+            T1.DESCRIPTION,
+            T1.LICENSE_TEXT,
+            T1.ATTRIBUTION,
+            IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR,
+            IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
+            T1.CREATED_DATE,
+            T1.MODIFIED_DATE,
+            T1.RESTRICTION
+        FROM LICENSE_MASTER T1
         LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
         LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON
         T1.LICENSE_ID = T3.LICENSE_ID
@@ -225,5 +227,45 @@
             </if>
         </if>
         <include refid="limitPage"/>
+    </select>
+
+    <resultMap id="LicenseDetailMap" type="oss.fosslight.api.dto.LicenseDetailsDto">
+        <result property="created" column="created_date"/>
+        <result property="modified" column="modified_date"/>
+        <result property="licenseIdentifier" column="short_identifier"/>
+        <result property="homepageUrl" column="webpage"/>
+    </resultMap>
+    <select id="selectLicenseById" parameterType="String"
+            resultMap="LicenseDetailMap">
+        SELECT
+            T1.LICENSE_ID,
+            T1.LICENSE_NAME,
+            T1.LICENSE_TYPE,
+            CONCAT(
+                IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
+                IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
+            ) as OBLIGATIONS,
+            T1.SHORT_IDENTIFIER,
+            T1.WEBPAGE,
+            T1.DESCRIPTION,
+            T1.LICENSE_TEXT,
+            T1.ATTRIBUTION,
+            T1.MODIFIER,
+            T1.MODIFIED_DATE,
+            T1.RESTRICTION,
+            T1.CREATOR,
+            T1.CREATED_DATE
+        FROM LICENSE_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+        AND T1.LICENSE_ID = #{licenseId}
+    </select>
+
+    <select id="selectLicenseNicknameList" parameterType="String" resultType="String">
+        SELECT
+        LICENSE_NICKNAME
+        FROM
+        LICENSE_NICKNAME
+        WHERE
+        LICENSE_NAME = #{licenseName}
     </select>
 </mapper>
