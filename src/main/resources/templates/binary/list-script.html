@@ -28,7 +28,7 @@
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
-                    var postData = $('#batSearch').serializeObject();
+                    var postData = binary_fn.serializeObjectHelper();
                     $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url: "/binary/listAjax" }).trigger('reloadGrid');
                     resizingJqGidSet();
                 });
@@ -36,6 +36,18 @@
         }
 
         const binary_fn = {
+            serializeObjectHelper: function () {
+                var postData = $('#batSearch').serializeObject();
+
+                if(postData.ossTypeSearch != null) {
+                    postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                    postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+                } else {
+                    postData.ossTypeSearch = "";
+                }
+
+                return postData;
+            },
             getMaxIdNo: function(){
                 var ids = [];
                 ids = $("#list").jqGrid('getDataIDs');
@@ -54,7 +66,7 @@
 
                 //그리드 생성
                 $('#list').jqGrid({
-                    type:"GET"
+                    url: "/binary/listAjax"
                     , datatype: 'json'
                     , jsonReader: {
                         repeatitems: false,
@@ -72,11 +84,9 @@
                             return obj.records;
                         }
                     }
-                    ,
-                    colNames: ['batId', 'Binary File name', 'Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment']
-                    ,
-                    colModel: [
-                        {name: 'batId', index: 'batId', hidden: true, key: true},
+                    , colNames: ['batId', 'Binary File name', 'Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment']
+                    , colModel: [
+                        { name: 'batId', index: 'batId', hidden: true, key: true },
                         {
                             name: 'fileName',
                             index: 'fileName',
@@ -246,10 +256,9 @@
                             template: searchStringOptions
                         }
                     ]
-                    ,
-                    editurl: 'clientArray'
-                    ,
-                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]]
+                    , editurl: 'clientArray'
+                    , rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]]
+                    , rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]])
                     //           <c:if test="${ct:isAdmin() eq true}">
                     //             , rowList:	[${ct:getConstDef('DISP_BINARYDB_PAGENATION_LIST_STR')}]
                     //           </c:if>
@@ -291,7 +300,6 @@
                         totalRow = data.records;
                         // id(key값)의 max값을 lastIdNo에 설정
                         binary_grid.lastIdNo = binary_fn.getMaxIdNo();
-
                         confirmFlag = false;
                     },
                     ondblClickRow: function (rowid, iRow, iCol, e) {

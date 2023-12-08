@@ -334,6 +334,7 @@ tr.ui-row-ltr,
     border-bottom: 1px solid #999;
 }
 
+
 .ui-jqgrid .ui-jqgrid-btable tr.ui-row-ltr td {
     border-top: none;
 }
@@ -348,6 +349,8 @@ tr.ui-row-ltr,
 .ui-th-ltr, .ui-jqgrid .ui-jqgrid-htable th.ui-th-ltr {
     border-left: 1px solid #dcdcdc !important;
     border-right: 1px solid #dcdcdc !important;
+    border-bottom: 1.5px solid #dcdcdc !important;
+    border-top: 1.5px solid #dcdcdc !important;
 }
 
 /* jqGrid pagination */
@@ -374,13 +377,13 @@ tr.ui-row-ltr,
     width: 225px;
 }
 
+tr.ui-search-toolbar th div { padding: 5px 0 !important; }
 tr.ui-search-toolbar input  {
     border: 1px solid #ddd !important;
     padding: 3px !important;
     border-radius: 4px !important;
     height: 25px;
 }
-
 
 .ui-pg-table .ui-pg-input, .ui-pg-table .ui-pg-selbox{
     border: 1px solid #ddd;
@@ -622,3 +625,40 @@ ul.ui-autocomplete .ui-menu-item:hover {
     color: white;
     border: none;
 }
+
+/* Toolbar Search Menu */
+.ui-search-menu {
+    position: absolute;
+    padding: 2px 5px;
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+.ui-search-menu.ui-menu .ui-menu-item { list-style-image: none; padding-right: 0; padding-left: 0; }
+.ui-search-menu.ui-menu .ui-menu-item a { display: block; }
+.ui-search-menu.ui-menu .ui-menu-item a.g-menu-item:hover {/* margin: -1px; */font-weight: normal;border: none;background-color: #8fc3ff;}
+.ui-jqgrid .ui-search-table { padding: 0; border: 0 none; height:20px; width:100%;}
+.ui-jqgrid .ui-search-table .ui-search-oper { width:20px; }
+a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
+.ui-jqgrid .ui-search-table .ui-search-input>input,
+.ui-jqgrid .ui-search-table .ui-search-input>select
+{
+    display: block;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0px 0px 0px 20px !important;
+    background-color: white;
+}
+.ui-jqgrid .ui-jqgrid-view input,
+.ui-jqgrid .ui-jqgrid-view select,
+.ui-jqgrid .ui-jqgrid-view textarea,
+.ui-jqgrid .ui-jqgrid-view button {
+    font-size: .7rem
+}
+.ui-jqgrid .ui-jqgrid-view input,
+.ui-jqgrid .ui-jqgrid-view select,
+.ui-jqgrid .ui-jqgrid-view textarea,
+.ui-jqgrid .ui-jqgrid-view button:hover {
+    border: none;
+    background-color: #c4e2ff;
+}
+

@@ -300,33 +300,6 @@ function resizingOuterJqGidSet() {
     }
 }
 
-var searchStringOptions = {
-    searchoptions: { sopt: ["cn", "eq", "ne", "bw", "bn", "ew", "en", "nc"] },
-};
-var searchNumberOptions = {
-    searchoptions: { sopt: ["ge", "le", "gt", "lt", "eq"] },
-};
-var searchDateOptions = {
-    searchoptions: { sopt: ["eq", "lt", "le", "gt", "ge"] },
-};
-
-var numberCommonOptions = {
-    align: "center",
-    resizable: true,
-    editable: true,
-    template: searchNumberOptions,
-    edittype: "text",
-    editoptions: { size: 1, maxlength: 15 },
-};
-
-var stringCommonOptions = {
-    align: "left",
-    resizable: true,
-    editable: true,
-    template: searchStringOptions,
-    edittype: "text",
-};
-
 function displayUrl(cellvalue) {
     var icon1 =
         '<a href="https://opensource.org/licenses/BSD-2-Clause" class="urlLink" target="_blank">https://opensource.org/licenses/BSD-2-Clause</a>';
