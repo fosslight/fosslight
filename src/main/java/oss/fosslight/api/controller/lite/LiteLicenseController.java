@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import oss.fosslight.api.dto.GetLicenseDetailsDto;
 import oss.fosslight.api.dto.ListLicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.common.Url;
@@ -26,6 +28,19 @@ public class LiteLicenseController {
     ) {
         try {
             var result = apiLicenseService.listLicenses(licenseRequest);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/licenses/{id}")
+    public @ResponseBody ResponseEntity<GetLicenseDetailsDto.Result> getLicense(
+            @ModelAttribute GetLicenseDetailsDto .Request licenseRequest
+    ) {
+        try {
+            var result = apiLicenseService.getLicense(licenseRequest);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

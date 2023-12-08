@@ -99,7 +99,7 @@ export default function OSSList() {
     { name: 'Licenses', sort: '' },
     { name: 'Obligations', sort: 'OBG' },
     { name: 'URL', sort: '' },
-    { name: 'Description', sort: 'DESC' },
+    { name: 'Description', sort: 'DESCRIPTION' },
     { name: 'Vuln', sort: 'VULN' },
     { name: 'Create', sort: 'CREATED_AT' },
     { name: 'Modify', sort: 'MODIFIED_AT' }

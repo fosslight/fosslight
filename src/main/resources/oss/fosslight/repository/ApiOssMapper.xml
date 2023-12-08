@@ -270,7 +270,6 @@
 	<resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
 		<result property="downloadUrl" column="download_location" />
 		<result property="homepageUrl" column="homepage" />
-		<result property="obligations" column="obligation_type" />
 		<result property="created" column="created_date" />
 		<result property="modified" column="modified_date" />
 <!--		<result property="creator" column="" />-->
@@ -301,7 +300,12 @@
 		, T1.CREATED_DATE
 		, T1.MODIFIED_DATE
 		, T3.LICENSE_NAME
-		, T1.OBLIGATION_TYPE
+		, CASE
+			WHEN T1.OBLIGATION_TYPE = '10' THEN 'YN'
+			WHEN T1.OBLIGATION_TYPE = '11' THEN 'YY'
+			ELSE ''
+		  END
+		AS OBLIGATIONS
 		, SUB1.OSS_TYPE AS OSS_TYPE
 		, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
