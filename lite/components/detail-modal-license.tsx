@@ -1,3 +1,4 @@
+import { RESTRICTIONS } from '@/lib/literals';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
@@ -119,7 +120,14 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
         />
         <DetailModalRow
           label="Restrictions"
-          value={<div className="whitespace-pre-line">{data.restrictions.join('\n')}</div>}
+          value={
+            <div className="whitespace-pre-line">
+              {(() => {
+                const idToDisplay = Object.fromEntries(RESTRICTIONS);
+                return data.restrictions.map((id) => idToDisplay[id]).join('\n');
+              })()}
+            </div>
+          }
           bottomBorder
         />
         <DetailModalRow

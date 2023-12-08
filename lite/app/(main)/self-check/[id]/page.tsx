@@ -4,7 +4,7 @@ import SelfCheckModal from '@/components/self-check-modal';
 import SelfCheckNotice from '@/components/self-check-notice';
 import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
-import { selfCheckTabs } from '@/lib/literals';
+import { SELF_CHECK_TABS } from '@/lib/literals';
 import clsx from 'clsx';
 import { Fragment, useState } from 'react';
 
@@ -68,7 +68,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
 
       {/* Tab selector */}
       <div className="flex justify-center items-center gap-x-2 mt-12 text-sm font-semibold">
-        {selfCheckTabs.map((selfCheckTab, idx) => {
+        {SELF_CHECK_TABS.map((selfCheckTab, idx) => {
           return (
             <Fragment key={selfCheckTab.name}>
               <button
@@ -91,7 +91,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
 
       {/* Tab description */}
       <div className="text-center mt-6 mb-12">
-        {selfCheckTabs.map(
+        {SELF_CHECK_TABS.map(
           (selfCheckTab) =>
             tab === selfCheckTab.name && (
               <Fragment key={selfCheckTab.name}>

@@ -5,6 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
+import { RESTRICTIONS } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -48,16 +49,10 @@ export default function LicenseList() {
         label: 'Restrictions',
         name: 'restrictions',
         type: 'checkbox',
-        options: [
-          { label: 'Non-commercial Use Only', value: '0' },
-          { label: 'Network Copyleft', value: '1' },
-          { label: 'Restricted Modifications', value: '2' },
-          { label: 'Platform Deployment Restriction', value: '3' },
-          { label: 'Prohibited Purpose', value: '4' },
-          { label: 'Specification Constraints', value: '5' },
-          { label: 'Restricted Redistribution', value: '6' },
-          { label: 'Commons Clause Restriction', value: '7' }
-        ]
+        options: RESTRICTIONS.map((restriction) => ({
+          label: restriction[1],
+          value: restriction[0]
+        }))
       },
       { label: 'Homepage URL', name: 'homepageUrl', type: 'char-exact' },
       { label: 'Description', name: 'description', type: 'text' },
@@ -202,7 +197,14 @@ export default function LicenseList() {
           }
 
           if (column === 'Restrictions') {
-            return <div className="whitespace-pre">{row.restrictions.join('\n')}</div>;
+            return (
+              <div className="whitespace-pre">
+                {(() => {
+                  const idToDisplay = Object.fromEntries(RESTRICTIONS);
+                  return row.restrictions.map((id) => idToDisplay[id]).join('\n');
+                })()}
+              </div>
+            );
           }
 
           if (column === 'URL') {
