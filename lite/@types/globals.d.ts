@@ -233,7 +233,7 @@ declare global {
       modified: string;
     }
 
-    type OSSTypes = Record<string, { name: string; desc: string }>;
+    type OSSTypes = Record<string, { name: string; desc: string; color: string }>;
 
     interface License {
       licenseName: string;
