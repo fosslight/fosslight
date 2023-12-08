@@ -1,3 +1,4 @@
+import { userState } from '@/lib/atoms';
 import { MENUS, ROOT_MENU } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
 import clsx from 'clsx';
@@ -5,8 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 export default function SideBar({ isShown }: { isShown: boolean }) {
+  const user = useRecoilValue(userState);
   const [isMenuShown, setIsMenuShown] = useState(
     Object.fromEntries(MENUS.map((menu) => [menu.name, true]))
   );
@@ -45,9 +48,19 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
           <div className="flex items-center gap-x-4 px-4 py-3 shadow-[0_0_6px_2px_rgba(0,0,0,0.5)]">
             <i className="text-lg fa-solid fa-user" />
             <div className="flex-1 text-xs overflow-x-hidden">
-              최덕경
-              <br />
-              <div className="leading-none overflow-hidden text-ellipsis">hjcdg197@gmail.com</div>
+              {user ? (
+                <div className="leading-tight">
+                  {user.name}
+                  <br />
+                  <div className="overflow-hidden text-ellipsis">{user.email}</div>
+                </div>
+              ) : (
+                <span className="leading-tight opacity-70">
+                  Loading
+                  <br />
+                  My Information...
+                </span>
+              )}
             </div>
           </div>
         </div>
