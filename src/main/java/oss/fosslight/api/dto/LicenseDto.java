@@ -1,6 +1,7 @@
 package oss.fosslight.api.dto;
 
 import lombok.Data;
+import oss.fosslight.domain.OssLicense;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,6 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected String licenseType;
     protected String ossId;
     protected String licenseText;
-    protected String obligations;
     protected String licenseIdentifier;
     protected String homepageUrl;
     protected String description;
@@ -23,6 +23,15 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected String created;
     protected String modified;
     protected List<String> restrictions = new ArrayList<>();
+    protected String ossLicenseComb;
+    protected List<Character> obligations;
+
+    public void setObligations(String obligationType) {
+        var typeArr = obligationType.toCharArray();
+        obligations = new ArrayList<>();
+        obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
+        obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
+    }
 
     @Override
     public int compareTo(LicenseDto o) {
@@ -34,5 +43,9 @@ public class LicenseDto implements Comparable<LicenseDto> {
         restrictions = Arrays.stream(split).map(String::strip)
                 .filter(str -> str.length() > 0)
                 .collect(Collectors.toList());
+    }
+
+    public OssLicense toOssLicense() {
+        return new OssLicense();
     }
 }
