@@ -19,7 +19,7 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
         licenseNicknames: ['Apache', 'Apaceh 2.0'],
         licenseIdentifier: 'Apache-2.0',
         licenseType: 'Permissive',
-        obligations: 'YY',
+        obligations: ['Y', 'Y'],
         restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
         homepageUrl: 'https://spdx.org/licenses/blessing.html',
         description: 'There are some descriptions here.',

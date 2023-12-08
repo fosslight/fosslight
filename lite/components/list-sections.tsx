@@ -295,7 +295,10 @@ export default function ListSections({
                       )}
                     </div>
                     {license.restrictions.length > 0 && (
-                      <div className="line-clamp-3 text-sm text-semiblack/80">
+                      <div
+                        className="line-clamp-3 text-sm text-semiblack/80"
+                        title={license.restrictions.join(', ')}
+                      >
                         {license.restrictions.join(', ')}
                       </div>
                     )}

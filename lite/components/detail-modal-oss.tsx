@@ -51,7 +51,7 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
           }
         ],
         licenseType: 'Copyleft',
-        obligations: 'YY',
+        obligations: ['Y', 'Y'],
         downloadUrl: 'http://cairographics.org/releases',
         homepageUrl: 'https://www.cairographics.org',
         description: 'Some files in util and test folder are released under GPL-2.0',
