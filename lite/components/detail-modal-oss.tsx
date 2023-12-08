@@ -23,7 +23,7 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
         ossName: 'cairo',
         ossNicknames: ['Cairo Vector Graphics', 'Cairo Vector Graphics Library'],
         ossVersion: '1.4.12',
-        ossType: 'MD',
+        ossType: '110',
         licenses: [
           {
             licenseId: '123',
@@ -124,14 +124,29 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
           label="Type"
           value={
             <div className="flex flex-col gap-y-3">
-              {data.ossType.split('').map((x) => (
-                <details key={x} open>
-                  <summary className="outline-none font-semibold cursor-pointer no-tap-highlight">
-                    {ossTypes[x].name}
-                  </summary>
-                  <div className="mt-0.5 text-sm text-semiblack/80">{ossTypes[x].desc}</div>
-                </details>
-              ))}
+              {(() => {
+                const idxToKey = Object.fromEntries(
+                  Object.keys(ossTypes).map((key, idx) => [idx, key])
+                );
+
+                return data.ossType.split('').map((x, idx) => {
+                  if (x !== '1') {
+                    return null;
+                  }
+
+                  const key = idxToKey[idx];
+                  const typeInfo = ossTypes[key];
+
+                  return (
+                    <details key={key} open>
+                      <summary className="outline-none font-semibold cursor-pointer no-tap-highlight">
+                        {typeInfo.name}
+                      </summary>
+                      <div className="mt-0.5 text-sm text-semiblack/80">{typeInfo.desc}</div>
+                    </details>
+                  );
+                });
+              })()}
             </div>
           }
           bottomBorder

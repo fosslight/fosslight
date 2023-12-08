@@ -5,6 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
+import { ossTypes } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -182,7 +183,39 @@ export default function OSSList() {
           }
 
           if (column === 'Type') {
-            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
+            return (
+              <div className="whitespace-nowrap">
+                {(() => {
+                  const idxToKey = Object.fromEntries(
+                    Object.keys(ossTypes).map((key, idx) => [idx, key])
+                  );
+
+                  return (
+                    <div className="flex gap-x-1">
+                      {row.ossType.split('').map((x, idx) => {
+                        if (x !== '1') {
+                          return null;
+                        }
+
+                        const key = idxToKey[idx];
+                        const typeInfo = ossTypes[key];
+
+                        return (
+                          <span
+                            key={key}
+                            className="px-1 rounded text-xs text-semiwhite"
+                            style={{ backgroundColor: typeInfo.color }}
+                            title={`[${typeInfo.name}] ${typeInfo.desc}`}
+                          >
+                            {key}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            );
           }
 
           if (column === 'Licenses') {
