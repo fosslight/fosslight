@@ -620,10 +620,11 @@
 	
 	<select id="selectPartnerWatcher" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerWatcher">
 	SELECT T1.PARTNER_ID
-		 , T1.DIVISION
-		 , T1.USER_ID
-		 , T2.USER_NAME
-		 , T1.EMAIL
+		 , T1.DIVISION PAR_DIVISION
+		 , T3.CD_DTL_NM PAR_DIVISION_NAME 
+		 , T1.USER_ID PAR_USER_ID
+		 , T2.USER_NAME PAR_USER_NAME
+		 , T1.EMAIL PAR_EMAIL
 		 , T2.USE_YN AS USER_USE_YN
 	     , T3.USE_YN AS DEPT_USE_YN
 	  FROM PARTNER_WATCHER T1 

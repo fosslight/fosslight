@@ -21,7 +21,6 @@ $(document).ready(function () {
 	fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
 	$('.btnReject').hide();
 	showHelpLink("Project_List_Main");
-	$(".select2").select2();
 });
 
 //데이터 객체
@@ -53,10 +52,20 @@ var evt = {
 	init : function(){
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
 		
-		$('select[name=distributionType]').val('*{searchBean.distributionType}').trigger('change');
-		$('select[name=prjDivision]').val('*{searchBean.prjDivision}').trigger('change');
-		$('select[name=networkServerType]').val('*{searchBean.networkServerType}').trigger('change');
-		$('select[name=priority]').val('*{searchBean.priority}').trigger('change');
+		$('select[name=networkServerType]').select2({placeholder: "Restriction", allowClear: true});
+		if ([[${{searchBean.distributionType}}]] != null) $('select[name=networkServerType]').val([[${{searchBean.distributionType}}]]).prop("selected", true);
+		
+		$('select[name=distributionType]').select2({placeholder: "Distribution Type", allowClear: true});
+		if ([[${{searchBean.distributionType}}]] != null) $('select[name=distributionType]').val([[${{searchBean.distributionType}}]]).prop("selected", true);
+		
+		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
+		if ([[${{searchBean.prjDivision}}]] != null) $('select[name=prjDivision]').val([[${{searchBean.prjDivision}}]]).prop("selected", true);
+		
+		$('select[name=priority]').select2({placeholder: "Priority", allowClear: true});
+		if ([[${{searchBean.priority}}]] != null) $('select[name=priority]').val([[${{searchBean.priority}}]]).prop("selected", true);
+		
+		$('#division').select2({placeholder: "Division", allowClear: true});
+		$('#statuses').select2({placeholder: "Status", allowClear: true});
 		
 		refreshParam = fn.setGridParam();
 		
@@ -81,10 +90,16 @@ var evt = {
 			calValidation(this, e);
 		});
 		
-		var selectNames = ["division", "networkServerType", "distributionType", "statuses", "priority"];
-		for (var i in selectNames) {
-			$("select[name=" + selectNames[i] + "] option:eq(0)").prop("selected", true);
-		}
+		$("#createdDate").daterangepicker()
+						.on('apply.daterangepicker', function(ev, picker) {
+		    				$("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+		    				$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+						})
+						.on('cancel.daterangepicker', function(ev, picker) {
+							$("#createdDate").val("");
+							$("input[name='schStartDate']").val("");
+		    				$("input[name='schEndDate']").val("");
+						});
 	}
 };
 
@@ -187,7 +202,6 @@ var fn = {
 		var statusRequestYn = rowObject.statusRequestYn;
 		var destributionStatus = rowObject.destributionStatus;
 		
-		if (rowObject.prjId == "1343") console.log(rowObject);
 		var display = '<div class="row pl-3">';
 		// identification
 		switch(identificationStatus){
@@ -206,26 +220,30 @@ var fn = {
 				display += '<span class="badge badge-gray size-sm width-6rem">Identification(N/A)</span>';
 				break;
 			default:
-				if ("Y" == rowObject.androidFlag) {
-					if ("Confirm" == identificationStatus) {
-						display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
-					} else if (projectStatus == progress) {
-						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
-					} else if (projectStatus == request) {
-						display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
-					} else if (projectStatus == review) {
-						display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
-					}
+				if(projectStatus == dropStatus){
+					display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
 				} else {
-					if ("Confirm" == identificationStatus) {
-						display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-					} else {
-						if (projectStatus == progress) {
-							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+					if ("Y" == rowObject.androidFlag) {
+						if ("Confirm" == identificationStatus) {
+							display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == progress) {
+							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						} else if (projectStatus == request) {
-							display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-						} else if (review == projectStatus) {
-							display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == review) {
+							display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						}
+					} else {
+						if ("Confirm" == identificationStatus) {
+							display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						} else {
+							if (projectStatus == progress) {
+								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							} else if (projectStatus == request) {
+								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							} else if (review == projectStatus) {
+								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							}
 						}
 					}
 				}
@@ -306,83 +324,83 @@ var fn = {
 				}
 			}
 		}
-		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+//		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 		// distribution
-		if(identificationStatus == "Confirm" && "N/A" == verificationStatus && "N/A" == destributionStatus) {
-			display += '<span class="badge badge-transparent size-sm width-6rem">Distribution(N/A)</span>';
-		} else if ("Confirm" != verificationStatus) {
-			if (projectStatus == dropStatus){
-				switch(destributionStatus){
-					case "":
-						var statusText = ("Confirm" != verificationStatus) ? "N/A" : "Drop";
-						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+statusText+')</span>';
-						break;
-					case "Progress":
-						display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+// 		if(identificationStatus == "Confirm" && "N/A" == verificationStatus && "N/A" == destributionStatus) {
+// 			display += '<span class="badge badge-transparent size-sm width-6rem">Distribution(N/A)</span>';
+// 		} else if ("Confirm" != verificationStatus) {
+// 			if (projectStatus == dropStatus){
+// 				switch(destributionStatus){
+// 					case "":
+// 						var statusText = ("Confirm" != verificationStatus) ? "N/A" : "Drop";
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+statusText+')</span>';
+// 						break;
+// 					case "Progress":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
 					
-						break;
-					default:
-						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+// 						break;
+// 					default:
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
 				
-						break;
-				}
-			} else {
-				if(projectStatus != completeStatus && "Y" != rowObject.statusRequestYn) {
-					display += '<span class="badge badge-gray size-sm width-6rem">Distribution</span>';
-				} else {
-					display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
-				}
-			}
-		} else {
-			if(projectStatus == dropStatus){
-				display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
-			} else {
-				switch(destributionStatus){
-					case "":
-						if(projectStatus != completeStatus){
-							if (projectStatus == progress) {
-								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
-							} else if (projectStatus == request) {
-								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-							} else if (projectStatus == review) {
-								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-							} else {
-								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
-							}
-						} else {
-							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
-						}
+// 						break;
+// 				}
+// 			} else {
+// 				if(projectStatus != completeStatus && "Y" != rowObject.statusRequestYn) {
+// 					display += '<span class="badge badge-gray size-sm width-6rem">Distribution</span>';
+// 				} else {
+// 					display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 				}
+// 			}
+// 		} else {
+// 			if(projectStatus == dropStatus){
+// 				display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+// 			} else {
+// 				switch(destributionStatus){
+// 					case "":
+// 						if(projectStatus != completeStatus){
+// 							if (projectStatus == progress) {
+// 								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else if (projectStatus == request) {
+// 								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else if (projectStatus == review) {
+// 								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else {
+// 								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							}
+// 						} else {
+// 							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 						}
 						
-						break;
-					case "Error":
-						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+// 						break;
+// 					case "Error":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
 
-						break;
-					case "N/A":
-						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+// 						break;
+// 					case "N/A":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
 
-						break;
-					default:
-						if("N/A" == rowObject.distributeTarget){
-							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
-						} else{
-							if ("Done" == destributionStatus) {
-								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-							} else {
-								if (projectStatus == progress) {
-									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-								} else if (projectStatus == request) {
-									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-								} else if (projectStatus == review) {
-									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-								}
-							}
-						}
+// 						break;
+// 					default:
+// 						if("N/A" == rowObject.distributeTarget){
+// 							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 						} else{
+// 							if ("Done" == destributionStatus) {
+// 								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else {
+// 								if (projectStatus == progress) {
+// 									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								} else if (projectStatus == request) {
+// 									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								} else if (projectStatus == review) {
+// 									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								}
+// 							}
+// 						}
 						
-						break;
-				}
-			}
-		}
+// 						break;
+// 				}
+// 			}
+// 		}
 		
 		display += '</div>';
 		
@@ -749,11 +767,11 @@ var fn = {
 	},
 	// Grid distribution display event
 	mvDistribution : function(prjId, permission){
-		if(parseInt(permission) > 0){
+//		if(parseInt(permission) > 0){
 //			createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
-		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
-		}
+//		} else {
+//			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+//		}
 	},
 	// Grid reviewer change event
 	reviewerChg : function(){
@@ -1571,11 +1589,17 @@ var fn = {
 
 		if(adId == "") {
 			$("#adId").focus();
-			return alertify.error('<spring:message code="enter.watcher.error" />', 0);
+			return alertify.error([[#{enter.watcher.error}]], 0);
 		}
 		
 		var _email = adId + "@" + domain;
+		
+		var regEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+		if (!regEmail.test(_email)) {
+			$("#adId").focus();
 
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
 		
 		$.ajax({
 			type: "POST",
@@ -1774,7 +1798,7 @@ var list = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 200, align: 'left', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'left', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 70, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);

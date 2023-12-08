@@ -104,8 +104,13 @@ public class VerificationController extends CoTopComponent {
 			model.addAttribute("ossNotice", _noticeInfo);
 		}
 		
-		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
-		list = verificationService.setMergeGridData(list);
+		List<OssComponents> list = null;
+		try {
+			list = verificationService.getVerifyOssList(projectMaster);
+			if (list != null) list = verificationService.setMergeGridData(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		List<String> duplLicenseCheckList = new ArrayList<>(); // 중목제거용
@@ -134,14 +139,14 @@ public class VerificationController extends CoTopComponent {
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
 		
-		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
-		model.addAttribute("ossList", toJson(list));
+		model.addAttribute("verify", verificationService.getVerificationOne(project));
+		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
 		
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
-		return VERIFICATION.PAGE_JSP;
+		return "project/verification";
 	}
 	
 	@GetMapping(value = VERIFICATION.PAGE_DIV_ID, produces = "text/html; charset=utf-8")

@@ -2316,7 +2316,7 @@ var existsTabName = function(tabNm){
 
 var tableRefreshNew = function(id) {
 	const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
-								,"_binProjectList1", "_binProjectList2", "_binAddList"];
+								,"_binProjectList1", "_binProjectList2", "_binAddList", "list"];
 	
 	if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
 		window.setTimeout(function(){
@@ -2329,7 +2329,20 @@ var tableRefreshNew = function(id) {
 				}
 			});
 		}, 300);
+	} else if ("list" == id) {
+		window.setTimeout(function(){
+			var width = $(".content").width();
+			if (width == null) width = $(".container-fluid").width();
+			$('.ui-jqgrid-btable').each(function(){
+				var id =  $(this).attr('id');
+				if ("list" == id) {
+					$(this).jqGrid('setGridWidth', 0, true);
+					$(this).jqGrid('setGridWidth', width, true);
+				}
+			});
+		}, 300);
 	} else {
+		if (id.startsWith('subAsList') || id.startsWith('subBeList')) {}
 		window.onload = function() {
 			var width = $(".card-body").width() - 40;
 			$('.ui-jqgrid-btable').each(function(){
@@ -2358,4 +2371,31 @@ function onError2(data, status){
 
 function onSuccess(data, status){
 	alertify.error(String('[[ #{msg.common.success} ]]'), 0);
+}
+
+function getAjaxJsonData(data, url, dataType, successCallback, errorCallback, completeCallback) {
+    return $.ajax({
+        type: 'GET',
+        url: url,
+        data: data,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        dataType: dataType,
+        success: function (data, status, xhr) {
+            if (successCallback && typeof successCallback === 'function') {
+                successCallback(data, status, xhr);
+            }
+        },
+        error: function (xhr, status, error) {
+            if (errorCallback && typeof errorCallback === 'function') {
+                errorCallback(xhr, status, error);
+            }
+        },
+        complete: function (xhr, status, error) {
+            if (completeCallback && typeof completeCallback === 'function') {
+                completeCallback(xhr, status, error);
+            }
+        }
+    });
 }

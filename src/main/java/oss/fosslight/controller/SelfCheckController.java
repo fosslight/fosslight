@@ -113,7 +113,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("searchBean", searchBean);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
-		return SELF_CHECK.LIST_JSP;
+		return "selfCheck/list";
 	}
 
 	/**
@@ -126,7 +126,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 
-		return SELF_CHECK.EDIT_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**
@@ -139,14 +139,15 @@ public class SelfCheckController extends CoTopComponent {
 		project.setPrjId(prjId);
 		project = selfCheckService.getProjectDetail(project);
 		T2Users user = userService.getLoginUserInfo();
-		project.setPrjEmail(user.getEmail());
+		if (user != null) project.setPrjEmail(user.getEmail());
 
 		model.addAttribute("project", project);
-		model.addAttribute("detail", toJson(project));
+		model.addAttribute("detail", project);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("ossNotice", new OssNotice());
 		
 		boolean permissionFlag = false;
 		// Admin인 경우 Creator 를 변경할 수 있도록 사용자 정보를 반환한다.
@@ -163,7 +164,7 @@ public class SelfCheckController extends CoTopComponent {
 			if (!permissionFlag) model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 		}
 		
-		return SELF_CHECK.EDIT_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**
@@ -311,7 +312,7 @@ public class SelfCheckController extends CoTopComponent {
 			model.addAttribute("project", new Project());
 		}
 		
-		return SELF_CHECK.VIEW_AJAX_JSP;
+		return "selfCheck/ajaxView";
 	}
 	
 	@GetMapping(value=SELF_CHECK.LICENSE_POPUP, produces = "text/html; charset=utf-8")
