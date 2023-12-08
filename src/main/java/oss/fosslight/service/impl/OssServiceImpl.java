@@ -2247,6 +2247,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 
 				if ( urlSearchSeq > -1 ) {
+					if(urlSearchSeq == 10) { //pythonhosted
+						String name[] =  bean.getDownloadLocation().split("/");
+						bean.setDownloadLocation(checkOssNameUrl.get(2) + name[name.length-2]);
+					}
+
 					bean = downloadlocationFormatter(bean, urlSearchSeq);
 					String downloadlocationUrl = bean.getDownloadLocation();
 					
