@@ -1,4 +1,8 @@
 declare global {
+  namespace Common {
+    type OSSTypes = Record<string, { name: string; desc: string; color: string }>;
+  }
+
   namespace Nav {
     interface RootMenu {
       name: string;
@@ -232,8 +236,6 @@ declare global {
       modifier: string;
       modified: string;
     }
-
-    type OSSTypes = Record<string, { name: string; desc: string; color: string }>;
 
     interface License {
       licenseName: string;
