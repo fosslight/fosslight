@@ -4,6 +4,7 @@ import lombok.*;
 import oss.fosslight.domain.OssMaster;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ListOssDto {
     public enum OssType {
@@ -29,20 +30,20 @@ public class ListOssDto {
         private String licenseName;
         @Builder.Default
         private Boolean licenseNameExact = false;
-        private String homepageUrl;
+        private String url;
         @Builder.Default
-        private Boolean homepageUrlExact = false;
+        private Boolean urlExact = false;
         private String description;
         private String copyright;
-        private Boolean deactivate;
+        private String deactivate;
         private String ossType;
         private String licenseType;
         private String creator;
-        private String createdAtFrom;
-        private String createdAtTo;
+        private String createdFrom;
+        private String createdTo;
         private String modifier;
-        private String modifiedAtFrom;
-        private String modifiedAtTo;
+        private String modifiedFrom;
+        private String modifiedTo;
 
 
         @Builder.Default
@@ -52,26 +53,58 @@ public class ListOssDto {
         private String cvssScore;
         private Boolean versionCheck;
 
-        public void setHomepageUrl(String url) {
-            homepageUrl = url
+        public void setUrl(String url) {
+            url = url
                     .replaceFirst("^((http|https)://)?(www\\.)?", "")
                     .replaceFirst("/$", "");
         }
 
+        public void setDeactivate(List<String> flagList) {
+            if (flagList.size() == 0 || (flagList.contains("1") && flagList.contains("0"))) {
+                deactivate = null;
+                return;
+            }
+            deactivate = Objects.equals(flagList.get(0), "1") ? "Y" : "N";
+        }
+
         public void setOssType(List<Integer> typeNumbers) {
             var typeStr = "";
+
+            if (typeNumbers.contains(0)) {
+                typeStr += "N";
+            }
             if (typeNumbers.contains(1)) {
                 typeStr += "M";
             }
-
             if (typeNumbers.contains(2)) {
                 typeStr += "D";
             }
-
             if (typeNumbers.contains(3)) {
                 typeStr += "V";
             }
             this.ossType = typeStr;
+        }
+
+        public void setLicenseType(String type) {
+            switch (type) {
+                case "0":
+                    licenseType = "PMS";
+                    break;
+                case "1":
+                    licenseType = "WCP";
+                    break;
+                case "2":
+                    licenseType = "CP";
+                    break;
+                case "3":
+                    licenseType = "NA";
+                    break;
+                case "4":
+                    licenseType = "PF";
+                    break;
+                default:
+                    break;
+            }
         }
 
         public String getLicenseNameQuery() {
@@ -85,20 +118,19 @@ public class ListOssDto {
             ossMaster.setOssNameAllSearchFlag((ossNameExact != null && ossNameExact) ? "Y" : "N");
             ossMaster.setLicenseName(licenseName);
             ossMaster.setLicenseNameAllSearchFlag((licenseNameExact != null && licenseNameExact) ? "Y" : "N");
-            ossMaster.setHomepage(homepageUrl);
-            ossMaster.setHomepageAllSearchFlag((homepageUrlExact != null && homepageUrlExact) ? "Y" : "N");
+            ossMaster.setHomepage(url);
+            ossMaster.setHomepageAllSearchFlag((urlExact != null && urlExact) ? "Y" : "N");
             ossMaster.setSummaryDescription(description);
-            ossMaster.setDeactivateFlag((deactivate != null && deactivate) ? "Y" : "N");
+            if (deactivate != null) {
+                ossMaster.setDeactivateFlag(deactivate);
+            }
             ossMaster.setOssType(ossType);
-            ossMaster.setcStartDate(createdAtFrom);
-            ossMaster.setcEndDate(createdAtTo);
-            ossMaster.setmStartDate(modifiedAtFrom);
-            ossMaster.setmEndDate(modifiedAtTo);
+            ossMaster.setcStartDate(createdFrom);
+            ossMaster.setcEndDate(createdTo);
+            ossMaster.setmStartDate(modifiedFrom);
+            ossMaster.setmEndDate(modifiedTo);
             ossMaster.setCreator(creator);
             ossMaster.setModifier(modifier);
-
-//            private String copyright;
-//            private String licenseType;
 
             return ossMaster;
         }
@@ -107,6 +139,6 @@ public class ListOssDto {
     @Builder
     public static class Result {
         public List<OssDto> list;
-        public int totalRows;
+        public int totalCount;
     }
 }

@@ -86,7 +86,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
-        int totalRows = ossMapper.selectOssMasterTotalCount(ossMaster);
+        int totalCount = ossMapper.selectOssMasterTotalCount(ossMaster);
 
         var rows = list.stream().flatMap(oss -> {
             if (!multiOssList.contains(oss.getOssName().toUpperCase())) {
@@ -121,7 +121,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 
         return ListOssDto.Result.builder()
                 .list(rows)
-                .totalRows(totalRows)
+                .totalCount(totalCount)
                 .build();
     }
 }
