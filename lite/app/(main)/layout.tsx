@@ -6,18 +6,27 @@ import FullSearchBar from '@/components/full-search-bar';
 import Loading from '@/components/loading';
 import SideBar from '@/components/side-bar';
 import TopBar from '@/components/top-bar';
-import { loadingState, viewState } from '@/lib/atoms';
+import { loadingState, userState, viewState } from '@/lib/atoms';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const setUser = useSetRecoilState(userState);
   const [view, setView] = useRecoilState(viewState);
   const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const isSubwindow = Boolean(window.opener);
+
+  useEffect(() => {
+    // TODO (API for fetching name and email, by JSESSIONID)
+    setTimeout(() => {
+      setUser({ name: '최덕경', email: 'hjcdg197@gmail.com' });
+    }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isMobile) setView('mobile');
