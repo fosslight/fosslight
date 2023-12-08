@@ -5,7 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
-import { ossTypes } from '@/lib/literals';
+import { OSS_TYPES } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -187,7 +187,7 @@ export default function OSSList() {
               <div className="whitespace-nowrap">
                 {(() => {
                   const idxToKey = Object.fromEntries(
-                    Object.keys(ossTypes).map((key, idx) => [idx, key])
+                    Object.keys(OSS_TYPES).map((key, idx) => [idx, key])
                   );
 
                   return (
@@ -198,7 +198,7 @@ export default function OSSList() {
                         }
 
                         const key = idxToKey[idx];
-                        const typeInfo = ossTypes[key];
+                        const typeInfo = OSS_TYPES[key];
 
                         return (
                           <span

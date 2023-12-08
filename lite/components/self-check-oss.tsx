@@ -1,6 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import { highlight } from '@/lib/commons';
-import { restrictions } from '@/lib/literals';
+import { RESTRICTIONS } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
@@ -369,7 +369,7 @@ export default function SelfCheckOSS() {
                   <i
                     className="text-crimson fa-solid fa-registered"
                     title={(() => {
-                      const idToDisplay = Object.fromEntries(restrictions);
+                      const idToDisplay = Object.fromEntries(RESTRICTIONS);
                       return oss.restrictions.map((id) => idToDisplay[id]).join('\n');
                     })()}
                   />

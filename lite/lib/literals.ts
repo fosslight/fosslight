@@ -1,4 +1,4 @@
-export const restrictions = [
+export const RESTRICTIONS = [
   ['1', 'Non-commercial Use Only'],
   ['2', 'Network Copyleft'],
   ['3', 'Restricted Modifications'],
@@ -9,12 +9,12 @@ export const restrictions = [
   ['8', 'Commons Clause Restriction']
 ];
 
-export const rootMenu: Nav.RootMenu = {
+export const ROOT_MENU: Nav.RootMenu = {
   name: 'Dashboard',
   icon: 'fa-solid fa-chart-line'
 };
 
-export const menus: Nav.Menu[] = [
+export const MENUS: Nav.Menu[] = [
   {
     name: 'Self-Check',
     icon: 'fa-solid fa-list-check',
@@ -32,7 +32,7 @@ export const menus: Nav.Menu[] = [
   }
 ];
 
-export const selfCheckTabs: SelfCheck.Tab[] = [
+export const SELF_CHECK_TABS: SelfCheck.Tab[] = [
   {
     name: 'OSS',
     title: 'Listing up your OSS',
@@ -52,7 +52,7 @@ export const selfCheckTabs: SelfCheck.Tab[] = [
   }
 ];
 
-export const ossTypes: Detail.OSSTypes = {
+export const OSS_TYPES: Detail.OSSTypes = {
   M: {
     name: 'Multi License',
     desc: 'It contains source codes under multiple licenses. (EX. lib is LGPL-2.1 and src is GPL-2.0)',
