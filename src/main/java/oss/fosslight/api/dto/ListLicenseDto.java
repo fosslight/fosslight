@@ -20,7 +20,7 @@ public class ListLicenseDto {
         String licenseType;
         String licenseText;
         String description;
-        String webpage;
+        String homepageUrl;
         String creator;
         String modifier;
         String createdFrom;
@@ -42,25 +42,46 @@ public class ListLicenseDto {
         @Setter(AccessLevel.NONE)
         Boolean obligationNone;
 
+        public void setLicenseType(String type) {
+            switch (type) {
+                case "0":
+                    licenseType = "PMS";
+                    break;
+                case "1":
+                    licenseType = "WCP";
+                    break;
+                case "2":
+                    licenseType = "CP";
+                    break;
+                case "3":
+                    licenseType = "NA";
+                    break;
+                case "4":
+                    licenseType = "PF";
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void setRestrictions(List<String> list) {
             if (list.size() == 1 && list.get(0).equals("false")) {
                 restrictions = null;
                 return;
             }
-            restrictions = list.stream()
-                    .map(i -> Integer.toString(Integer.parseInt(i) + 1))
-                    .collect(Collectors.toList());
+            restrictions = list;
         }
 
-        public void setObligations(List<String> list) {
-            if (list.isEmpty() || (list.size() == 1 && list.get(0).equals("false"))) {
-//                obligationNone = true;
-                return;
+        public void setObligations(String obligationChoice) {
+            if (obligationChoice.equals("0")) {
+                obligationNone = true;
             }
-            if (list.contains("0")) {
+            if (obligationChoice.equals("1")) {
                 obligationNotification = true;
+                obligationDisclosingSrc = false;
             }
-            if (list.contains("1")) {
+            if (obligationChoice.equals("2")) {
+                obligationNotification = true;
                 obligationDisclosingSrc = true;
             }
         }

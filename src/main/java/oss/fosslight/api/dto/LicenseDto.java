@@ -27,10 +27,10 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected List<Character> obligations;
 
     public void setObligations(String obligationType) {
-        var typeArr = obligationType.toCharArray();
         obligations = new ArrayList<>();
-        obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
-        obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
+        for (int i = 0; i < obligationType.length(); i++) {
+            obligations.add(obligationType.charAt(i));
+        }
     }
 
     @Override
