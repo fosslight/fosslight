@@ -97,7 +97,7 @@ export default function OSSList() {
     { name: 'Ver', sort: 'OSS_VERSION' },
     { name: 'Type', sort: '' },
     { name: 'Licenses', sort: '' },
-    { name: 'Obligations', sort: 'OBLIGATION' },
+    { name: 'Obligations', sort: '' },
     { name: 'URL', sort: '' },
     { name: 'Description', sort: '' },
     { name: 'Vuln', sort: 'CVSS_SCORE' },

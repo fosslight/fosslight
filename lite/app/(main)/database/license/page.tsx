@@ -39,10 +39,11 @@ export default function LicenseList() {
       {
         label: 'Obligations',
         name: 'obligations',
-        type: 'checkbox',
+        type: 'select',
         options: [
-          { label: 'Notice', value: '0' },
-          { label: 'Source', value: '1' }
+          { label: 'None', value: '0'},
+          { label: 'Notice', value: '1' },
+          { label: 'Notice & Source', value: '2' }
         ]
       },
       {
@@ -54,7 +55,7 @@ export default function LicenseList() {
           value: restriction[0]
         }))
       },
-      { label: 'Homepage URL', name: 'homepageUrl', type: 'char-exact' },
+      { label: 'Homepage URL', name: 'homepageUrl', type: 'char' },
       { label: 'Description', name: 'description', type: 'text' },
       { label: 'License Text', name: 'licenseText', type: 'text' }
     ],
@@ -93,9 +94,9 @@ export default function LicenseList() {
     { name: 'Name', sort: 'LICENSE_NAME' },
     { name: 'Identifier', sort: 'SHORT_IDENTIFIER' },
     { name: 'Type', sort: 'TYPE' },
-    { name: 'Obligations', sort: 'OBLIGATION' },
+    { name: 'Obligations', sort: '' },
     { name: 'Restrictions', sort: '' },
-    { name: 'URL', sort: 'WEBPAGE' },
+    { name: 'URL', sort: '' },
     { name: 'Description', sort: 'DESCRIPTION' },
     { name: 'Create', sort: 'CREATED_AT' },
     { name: 'Modify', sort: 'MODIFIED_AT' }

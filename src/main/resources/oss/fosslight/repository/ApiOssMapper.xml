@@ -36,9 +36,6 @@
 					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
 						LICENSE_TYPE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION', sortColumn)">
-						OBLIGATION_TYPE
-					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
 						DOWNLOAD_LOCATION
 					</when>
