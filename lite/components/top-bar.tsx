@@ -1,12 +1,16 @@
 'use client';
 
+import { userState } from '@/lib/atoms';
 import Logo from '@/public/images/logo.png';
+import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import Modal from './modal';
 
 export default function TopBar() {
+  const user = useRecoilValue(userState);
   const [isProfileShown, setIsProfileShown] = useState(false);
 
   return (
@@ -20,8 +24,8 @@ export default function TopBar() {
           <span className="text-lg font-light">Lite</span>
         </Link>
         <i
-          className="text-lg cursor-pointer no-tap-highlight fa-solid fa-user"
-          onClick={() => setIsProfileShown(true)}
+          className={clsx('text-lg fa-solid fa-user', user && 'cursor-pointer no-tap-highlight')}
+          onClick={() => user && setIsProfileShown(true)}
         />
       </div>
       <Modal show={isProfileShown} onHide={() => setIsProfileShown(false)} size="sm">
@@ -32,11 +36,11 @@ export default function TopBar() {
         <div className="flex flex-col gap-y-1 text-sm">
           <div className="flex gap-x-4 text-charcoal">
             <div className="font-bold">Name</div>
-            <div className="opacity-80">최덕경</div>
+            <div className="opacity-80">{user?.name}</div>
           </div>
           <div className="flex gap-x-4 text-charcoal">
             <div className="font-bold">Email</div>
-            <div className="opacity-80">hjcdg197@gmail.com</div>
+            <div className="opacity-80">{user?.email}</div>
           </div>
         </div>
       </Modal>

@@ -1,3 +1,4 @@
+import { RESTRICTIONS } from '@/lib/literals';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
@@ -20,7 +21,7 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
         licenseIdentifier: 'Apache-2.0',
         licenseType: 'Permissive',
         obligations: ['Y', 'Y'],
-        restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+        restrictions: ['1', '2'],
         homepageUrl: 'https://spdx.org/licenses/blessing.html',
         description: 'There are some descriptions here.',
         licenseText: 'There are some license texts here.',
@@ -111,7 +112,14 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
         />
         <DetailModalRow
           label="Restrictions"
-          value={<div className="whitespace-pre-line">{data.restrictions.join('\n')}</div>}
+          value={
+            <div className="whitespace-pre-line">
+              {(() => {
+                const idToDisplay = Object.fromEntries(RESTRICTIONS);
+                return data.restrictions.map((id) => idToDisplay[id]).join('\n');
+              })()}
+            </div>
+          }
           bottomBorder
         />
         <DetailModalRow

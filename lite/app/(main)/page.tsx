@@ -47,7 +47,7 @@ export default function Dashboard() {
           licenseName: 'Apache License 2.0',
           licenseIdentifier: 'Apache-2.0',
           obligations: ['Y', 'Y'],
-          restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+          restrictions: ['1', '2'],
           created: '2023-10-05 23:54:08.0',
           modified: '2023-10-07 21:32:05.0'
         }))
