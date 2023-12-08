@@ -1,10 +1,10 @@
-import { menus, rootMenu } from '@/lib/literals';
+import { MENUS, ROOT_MENU } from '@/lib/literals';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const defaultIsMenuShown = Object.fromEntries(menus.map((menu) => [menu.name, false]));
+const defaultIsMenuShown = Object.fromEntries(MENUS.map((menu) => [menu.name, false]));
 
 export default function BottomBar() {
   const [isMenuShown, setIsMenuShown] = useState(defaultIsMenuShown);
@@ -29,10 +29,10 @@ export default function BottomBar() {
         className={clsx('flex-1 pt-2.5 text-center', pathname === '/' && 'bg-semicharcoal/20')}
         href="/"
       >
-        <i className={clsx('text-lg', rootMenu.icon)} />
-        <div className="text-sm">{rootMenu.name}</div>
+        <i className={clsx('text-lg', ROOT_MENU.icon)} />
+        <div className="text-sm">{ROOT_MENU.name}</div>
       </Link>
-      {menus.map((menu) => {
+      {MENUS.map((menu) => {
         if (!menu.sub) {
           return (
             <Link

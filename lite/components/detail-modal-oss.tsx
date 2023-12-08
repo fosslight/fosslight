@@ -1,4 +1,4 @@
-import { ossTypes } from '@/lib/literals';
+import { OSS_TYPES } from '@/lib/literals';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
@@ -126,7 +126,7 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
             <div className="flex flex-col gap-y-3">
               {(() => {
                 const idxToKey = Object.fromEntries(
-                  Object.keys(ossTypes).map((key, idx) => [idx, key])
+                  Object.keys(OSS_TYPES).map((key, idx) => [idx, key])
                 );
 
                 return data.ossType.split('').map((x, idx) => {
@@ -135,7 +135,7 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
                   }
 
                   const key = idxToKey[idx];
-                  const typeInfo = ossTypes[key];
+                  const typeInfo = OSS_TYPES[key];
 
                   return (
                     <details key={key} open>

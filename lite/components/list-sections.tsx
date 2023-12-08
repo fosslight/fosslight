@@ -1,5 +1,5 @@
 import { highlight } from '@/lib/commons';
-import { restrictions } from '@/lib/literals';
+import { RESTRICTIONS } from '@/lib/literals';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -298,7 +298,7 @@ export default function ListSections({
                     {license.restrictions.length > 0 && (
                       <div className="line-clamp-3 text-sm text-semiblack/80">
                         {(() => {
-                          const idToDisplay = Object.fromEntries(restrictions);
+                          const idToDisplay = Object.fromEntries(RESTRICTIONS);
                           return license.restrictions.map((id) => idToDisplay[id]).join(', ');
                         })()}
                       </div>

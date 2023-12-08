@@ -1,4 +1,4 @@
-import { menus, rootMenu } from '@/lib/literals';
+import { MENUS, ROOT_MENU } from '@/lib/literals';
 import Logo from '@/public/images/logo.png';
 import clsx from 'clsx';
 import Image from 'next/image';
@@ -8,12 +8,12 @@ import { useEffect, useState } from 'react';
 
 export default function SideBar({ isShown }: { isShown: boolean }) {
   const [isMenuShown, setIsMenuShown] = useState(
-    Object.fromEntries(menus.map((menu) => [menu.name, true]))
+    Object.fromEntries(MENUS.map((menu) => [menu.name, true]))
   );
   const pathname = usePathname();
 
   useEffect(() => {
-    const currentMenu = menus.filter((menu) => pathname.startsWith(menu.path))[0];
+    const currentMenu = MENUS.filter((menu) => pathname.startsWith(menu.path))[0];
 
     if (currentMenu && currentMenu.sub && !isMenuShown[currentMenu.name]) {
       setIsMenuShown({ ...isMenuShown, [currentMenu.name]: true });
@@ -59,10 +59,10 @@ export default function SideBar({ isShown }: { isShown: boolean }) {
             )}
             href="/"
           >
-            <i className={rootMenu.icon} />
-            &ensp;{rootMenu.name}
+            <i className={ROOT_MENU.icon} />
+            &ensp;{ROOT_MENU.name}
           </Link>
-          {menus.map((menu) => {
+          {MENUS.map((menu) => {
             if (!menu.sub) {
               return (
                 <Link
