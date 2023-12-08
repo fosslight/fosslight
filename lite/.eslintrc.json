@@ -6,7 +6,8 @@
     "plugin:prettier/recommended"
   ],
   "rules": {
-    "import/prefer-default-export": "off"
+    "import/prefer-default-export": "off",
+    "no-alert": "off"
   },
   "parserOptions": {
     "project": ["tsconfig.json"]

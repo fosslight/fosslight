@@ -44,14 +44,17 @@ export const selfCheckTabs: SelfCheck.Tab[] = [
 export const ossTypes: Detail.OSSTypes = {
   M: {
     name: 'Multi License',
-    desc: 'It contains source codes under multiple licenses. (EX. lib is LGPL-2.1 and src is GPL-2.0)'
+    desc: 'It contains source codes under multiple licenses. (EX. lib is LGPL-2.1 and src is GPL-2.0)',
+    color: '#8487bc'
   },
   D: {
     name: 'Dual License',
-    desc: 'You can select one of the registered licenses. (EX. GPL-2.0 or MIT)'
+    desc: 'You can select one of the registered licenses. (EX. GPL-2.0 or MIT)',
+    color: '#cc8fbb'
   },
   V: {
     name: 'Version Different License',
-    desc: 'It is distributed under different licenses according to its versions. (EX. 1.0 is GPL-2.0, but 2.0 is BSD-3-Clause)'
+    desc: 'It is distributed under different licenses according to its versions. (EX. 1.0 is GPL-2.0, but 2.0 is BSD-3-Clause)',
+    color: '#ddae91'
   }
 };

@@ -138,7 +138,7 @@ export default function SelfCheckOSS() {
           { licenseId: '1', licenseIdentifier: 'MPL-1.1' },
           { licenseId: '2', licenseIdentifier: 'GPL-2.0' }
         ],
-        obligations: 'YY',
+        obligations: ['Y', 'Y'],
         restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
         downloadUrl: 'http://cairographics.org/releases',
         homepageUrl: 'https://www.cairographics.org',

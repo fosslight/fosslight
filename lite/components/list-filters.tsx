@@ -204,8 +204,9 @@ export default function ListFilters({
   useEffect(() => {
     const f = stringifyFilters(form.watch());
     if (f !== filtersQueryParam) {
-      form.reset(parseFilters(filtersQueryParam), { keepDefaultValues: true });
+      form.reset(parseFilters(filtersQueryParam, filters), { keepDefaultValues: true });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, form]);
 
   return (
