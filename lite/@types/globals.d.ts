@@ -48,7 +48,7 @@ declare global {
       ossType: string;
       licenseName: string;
       licenseType: string;
-      obligations: string;
+      obligations: string[];
       downloadUrl: string;
       homepageUrl: string;
       description: string;
@@ -65,7 +65,7 @@ declare global {
       licenseName: string;
       licenseIdentifier: string;
       licenseType: string;
-      obligations: string;
+      obligations: string[];
       restrictions: string[];
       homepageUrl: string;
       description: string;
@@ -115,7 +115,7 @@ declare global {
       ossName: string;
       ossVersion: string;
       licenses: OSSLicense[];
-      obligations: string;
+      obligations: string[];
       restrictions: string[];
       downloadUrl: string;
       homepageUrl: string;
@@ -180,7 +180,7 @@ declare global {
       ossName: string;
       ossVersion: string;
       licenseName: string;
-      obligations: string;
+      obligations: string[];
       cveId: string;
       cvssScore: string;
       created: string;
@@ -191,7 +191,7 @@ declare global {
       licenseId: string;
       licenseName: string;
       licenseIdentifier: string;
-      obligations: string;
+      obligations: string[];
       restrictions: string[];
       created: string;
       modified: string;
@@ -219,7 +219,7 @@ declare global {
       ossType: string;
       licenses: OSSLicense[];
       licenseType: string;
-      obligations: string;
+      obligations: string[];
       downloadUrl: string;
       homepageUrl: string;
       description: string;
@@ -240,7 +240,7 @@ declare global {
       licenseNicknames: string[];
       licenseIdentifier: string;
       licenseType: string;
-      obligations: string;
+      obligations: string[];
       restrictions: string[];
       homepageUrl: string;
       description: string;

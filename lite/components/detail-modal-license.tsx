@@ -14,31 +14,24 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
     }
 
     setData(null);
-
-    const requestRows = async () => {
-      const signInRequest = async () => {
-        axios.defaults.withCredentials = true;
-        const response = await axios.post(
-          'http://localhost:8180/session/login-proc',
-          qs.stringify({
-            un: 'admin',
-            up: 'admin'
-          })
-        );
-      };
-      await signInRequest();
-
-      return await axios.get(`http://localhost:8180/api/lite/licenses/${modalId}`, {
-        withCredentials: true,
-      });
-    };
-
-    requestRows().then((res) => {
-      console.log(res);
-      setData(res.data.license);
-    }).catch(rej => {
-    });
-
+      setTimeout(() => {
+          setData({
+              licenseName: 'Apache License 2.0',
+              licenseNicknames: ['Apache', 'Apaceh 2.0'],
+              licenseIdentifier: 'Apache-2.0',
+              licenseType: 'Permissive',
+              obligations: ['Y', 'Y'],
+              restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+              homepageUrl: 'https://spdx.org/licenses/blessing.html',
+              description: 'There are some descriptions here.',
+              licenseText: 'There are some license texts here.',
+              attribution: 'There are some attribution here.',
+              creator: 'admin',
+              created: '2023-10-05 23:54:08.0',
+              modifier: 'admin',
+              modified: '2023-10-07 21:32:05.0'
+          });
+      }, 500);
   }, [modalId]);
 
   if (!data) {
