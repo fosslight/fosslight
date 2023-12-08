@@ -14,9 +14,9 @@ export default function SignIn() {
   // API for signing in
   const signInRequest = useAPI('post', 'http://localhost:8180/session/login-proc', {
     onStart: () => setWait(true),
-    onSuccess: (data: any) => {
-      if (data.data.response.error) {
-        alert(data.data.response.message);
+    onSuccess: (res) => {
+      if (res.data.response.error) {
+        alert(res.data.response.message);
       } else {
         router.push('/');
       }
@@ -27,9 +27,9 @@ export default function SignIn() {
   return (
     <form
       className="flex flex-col gap-y-6 p-6 bg-white rounded"
-      onSubmit={handleSubmit((data) => {
-        signInRequest.execute({ body: { un: data.id, up: data.password } });
-      })}
+      onSubmit={handleSubmit((data) =>
+        signInRequest.execute({ body: { un: data.id, up: data.password } })
+      )}
     >
       <div className="flex flex-col gap-y-1">
         <div className="font-semibold">ID</div>

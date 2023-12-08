@@ -1,26 +1,24 @@
 import Modal from './modal';
 
 export default function SelfCheckModal({
-  mode,
-  data,
   show,
-  onHide
+  onHide,
+  values
 }: {
-  mode: 'create' | 'edit';
-  data?: SelfCheck.Set;
   show: boolean;
   onHide: () => void;
+  values?: SelfCheck.Edit;
 }) {
   return (
     <Modal show={show} onHide={onHide} size="sm" hideByBackdrop={false}>
       <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
-        {mode === 'create' ? (
+        {!values ? (
           <i className="text-sm fa-solid fa-plus" />
         ) : (
           <i className="text-sm fa-solid fa-pen" />
         )}
         &ensp;
-        {mode === 'create' ? 'Create a project to check' : 'Edit the project'}
+        {!values ? 'Create a project to check' : 'Edit the project'}
       </div>
       <div className="flex flex-col gap-y-4">
         <div className="flex flex-col gap-y-2">
@@ -30,7 +28,7 @@ export default function SelfCheckModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) FOSSLight Hub Lite"
-            defaultValue={data ? data.projectName : ''}
+            defaultValue={values?.projectName || ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -38,7 +36,7 @@ export default function SelfCheckModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) 1.0.0"
-            defaultValue={data ? data.projectVersion : ''}
+            defaultValue={values?.projectVersion || ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -46,12 +44,12 @@ export default function SelfCheckModal({
           <textarea
             className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
             rows={3}
-            defaultValue={data ? data.comment : ''}
+            defaultValue={values?.comment || ''}
           />
         </div>
       </div>
       <div className="flex justify-end gap-x-1 mt-4">
-        <button className="px-2 py-0.5 crimson-btn">{mode === 'create' ? 'Create' : 'Edit'}</button>
+        <button className="px-2 py-0.5 crimson-btn">{!values ? 'Create' : 'Edit'}</button>
         <button className="px-2 py-0.5 default-btn" onClick={onHide}>
           Cancel
         </button>

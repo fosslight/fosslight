@@ -56,14 +56,14 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
         </div>
       </div>
       <SelfCheckModal
-        mode="edit"
-        data={{
+        show={isModalShown}
+        onHide={() => setIsModalShown(false)}
+        values={{
+          projectId: params.id,
           projectName: 'FOSSLight Hub Lite',
           projectVersion: '1.0.0',
           comment: 'There are some comments here.'
         }}
-        show={isModalShown}
-        onHide={() => setIsModalShown(false)}
       />
 
       {/* Tab selector */}
