@@ -1,3 +1,4 @@
+import { restrictions } from '@/lib/literals';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
@@ -14,24 +15,25 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
     }
 
     setData(null);
-      setTimeout(() => {
-          setData({
-              licenseName: 'Apache License 2.0',
-              licenseNicknames: ['Apache', 'Apaceh 2.0'],
-              licenseIdentifier: 'Apache-2.0',
-              licenseType: 'Permissive',
-              obligations: ['Y', 'Y'],
-              restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
-              homepageUrl: 'https://spdx.org/licenses/blessing.html',
-              description: 'There are some descriptions here.',
-              licenseText: 'There are some license texts here.',
-              attribution: 'There are some attribution here.',
-              creator: 'admin',
-              created: '2023-10-05 23:54:08.0',
-              modifier: 'admin',
-              modified: '2023-10-07 21:32:05.0'
-          });
-      }, 500);
+
+    setTimeout(() => {
+      setData({
+        licenseName: 'Apache License 2.0',
+        licenseNicknames: ['Apache', 'Apaceh 2.0'],
+        licenseIdentifier: 'Apache-2.0',
+        licenseType: 'Permissive',
+        obligations: ['Y', 'Y'],
+        restrictions: ['1', '2'],
+        homepageUrl: 'https://spdx.org/licenses/blessing.html',
+        description: 'There are some descriptions here.',
+        licenseText: 'There are some license texts here.',
+        attribution: 'There are some attribution here.',
+        creator: 'admin',
+        created: '2023-10-05 23:54:08.0',
+        modifier: 'admin',
+        modified: '2023-10-07 21:32:05.0'
+      });
+    }, 500);
   }, [modalId]);
 
   if (!data) {
@@ -112,7 +114,14 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
         />
         <DetailModalRow
           label="Restrictions"
-          value={<div className="whitespace-pre-line">{data.restrictions.join('\n')}</div>}
+          value={
+            <div className="whitespace-pre-line">
+              {(() => {
+                const idToDisplay = Object.fromEntries(restrictions);
+                return data.restrictions.map((id) => idToDisplay[id]).join('\n');
+              })()}
+            </div>
+          }
           bottomBorder
         />
         <DetailModalRow

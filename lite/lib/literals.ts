@@ -1,3 +1,14 @@
+export const restrictions = [
+  ['1', 'Non-commercial Use Only'],
+  ['2', 'Network Copyleft'],
+  ['3', 'Restricted Modifications'],
+  ['4', 'Platform Deployment Restriction'],
+  ['5', 'Prohibited Purpose'],
+  ['6', 'Specification Constraints'],
+  ['7', 'Restricted Redistribution'],
+  ['8', 'Commons Clause Restriction']
+];
+
 export const rootMenu: Nav.RootMenu = {
   name: 'Dashboard',
   icon: 'fa-solid fa-chart-line'

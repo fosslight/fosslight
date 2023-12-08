@@ -1,5 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import { highlight } from '@/lib/commons';
+import { restrictions } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
@@ -139,7 +140,7 @@ export default function SelfCheckOSS() {
           { licenseId: '2', licenseIdentifier: 'GPL-2.0' }
         ],
         obligations: ['Y', 'Y'],
-        restrictions: ['Non-commercial Use Only', 'Network Copyleft'],
+        restrictions: ['1', '2'],
         downloadUrl: 'http://cairographics.org/releases',
         homepageUrl: 'https://www.cairographics.org',
         description: 'Some files in util and test folder are released under GPL-2.0',
@@ -367,7 +368,10 @@ export default function SelfCheckOSS() {
                   <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
                   <i
                     className="text-crimson fa-solid fa-registered"
-                    title={oss.restrictions.join('\n')}
+                    title={(() => {
+                      const idToDisplay = Object.fromEntries(restrictions);
+                      return oss.restrictions.map((id) => idToDisplay[id]).join('\n');
+                    })()}
                   />
                   {oss.downloadUrl && (
                     <a
