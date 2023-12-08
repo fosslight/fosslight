@@ -56,9 +56,9 @@
             AND REPLACE(REPLACE(REPLACE(IFNULL(T1.DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
             CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
         </if>
-        <if test="!@oss.fosslight.util.StringUtil@isEmpty(webpage)">
-            AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE
-            CONCAT('%',REGEXP_REPLACE(#{webpage}, '_', '\\\\_'),'%'))
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(homepageUrl)">
+            AND (T1.WEBPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepageUrl}, '_', '\\\\_'),'%') OR T3.WEBPAGE LIKE
+            CONCAT('%',REGEXP_REPLACE(#{homepageUrl}, '_', '\\\\_'),'%'))
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
             AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
@@ -67,16 +67,16 @@
             AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
-            AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdFrom}
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{createdFrom}
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
-            AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdTo}
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{createdTo}
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFrom)">
-            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{modifiedFrom}
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{modifiedFrom}
         </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedTo)">
-            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{modifiedTo}
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{modifiedTo}
         </if>
         <if test="obligationNeedsCheck">
             AND T1.OBLIGATION_NEEDS_CHECK_YN = 'Y'
@@ -85,7 +85,7 @@
             AND T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y'
         </if>
         <if test="obligationNotification">
-            AND T1.OBLIGATION_NOTIFICATION_YN = 'Y' AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N'
+            AND T1.OBLIGATION_NOTIFICATION_YN = 'Y'
         </if>
         <if test="obligationNone">
             AND IFNULL(T1.OBLIGATION_NEEDS_CHECK_YN, 'N') = 'N'
@@ -108,34 +108,36 @@
         LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
         LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON
         T1.LICENSE_ID = T3.LICENSE_ID
-        <include refid="queryLicense" />
+        <include refid="queryLicense"/>
     </select>
 
     <resultMap id="LicenseDtoMap" type="oss.fosslight.api.dto.LicenseDto">
         <result property="created" column="created_date"/>
         <result property="modified" column="modified_date"/>
         <result property="licenseIdentifier" column="short_identifier"/>
+        <result property="homepageUrl" column="webpage"/>
     </resultMap>
     <select id="selectLicenseList" parameterType="oss.fosslight.api.dto.ListLicenseDto$Request"
             resultMap="LicenseDtoMap">
         SELECT
-        T1.LICENSE_ID
-        , T1.LICENSE_NAME
-        , T2.CD_DTL_NM AS LICENSE_TYPE
-        , T1.OBLIGATION_NOTIFICATION_YN
-        , T1.OBLIGATION_DISCLOSING_SRC_YN
-        , T1.SHORT_IDENTIFIER
-        , T1.WEBPAGE
-        , T1.DESCRIPTION
-        , T1.LICENSE_TEXT
-        , T1.ATTRIBUTION
-        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
-        , T1.CREATED_DATE
-        , T1.MODIFIED_DATE
-        , T1.RESTRICTION
-        FROM
-        LICENSE_MASTER T1
+        T1.LICENSE_ID,
+        T1.LICENSE_NAME,
+        T2.CD_DTL_NM AS LICENSE_TYPE,
+        CONCAT(
+        IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
+        IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
+        ) as OBLIGATIONS,
+        T1.SHORT_IDENTIFIER,
+        T1.WEBPAGE,
+        T1.DESCRIPTION,
+        T1.LICENSE_TEXT,
+        T1.ATTRIBUTION,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
+        T1.CREATED_DATE,
+        T1.MODIFIED_DATE,
+        T1.RESTRICTION
+        FROM LICENSE_MASTER T1
         LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
         LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON
         T1.LICENSE_ID = T3.LICENSE_ID
@@ -214,16 +216,46 @@
                 ORDER BY T1.MODIFIED_DATE DESC
             </if>
         </if>
-        <if test="sortColumn eq 'OBLIGATION'">
-            <if test="sortDirection eq 'asc'">
-                ORDER BY
-                OBLIGATION_CHECKS ASC
-            </if>
-            <if test="sortDirection eq 'desc'">
-                ORDER BY
-                OBLIGATION_CHECKS DESC
-            </if>
-        </if>
         <include refid="limitPage"/>
+    </select>
+
+    <resultMap id="LicenseDetailMap" type="oss.fosslight.api.dto.LicenseDetailsDto">
+        <result property="created" column="created_date"/>
+        <result property="modified" column="modified_date"/>
+        <result property="licenseIdentifier" column="short_identifier"/>
+        <result property="homepageUrl" column="webpage"/>
+    </resultMap>
+    <select id="selectLicenseById" parameterType="String"
+            resultMap="LicenseDetailMap">
+        SELECT
+        T1.LICENSE_ID,
+        T1.LICENSE_NAME,
+        T1.LICENSE_TYPE,
+        CONCAT(
+        IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
+        IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
+        ) as OBLIGATIONS,
+        T1.SHORT_IDENTIFIER,
+        T1.WEBPAGE,
+        T1.DESCRIPTION,
+        T1.LICENSE_TEXT,
+        T1.ATTRIBUTION,
+        T1.MODIFIER,
+        T1.MODIFIED_DATE,
+        T1.RESTRICTION,
+        T1.CREATOR,
+        T1.CREATED_DATE
+        FROM LICENSE_MASTER T1
+        WHERE T1.USE_YN = 'Y'
+        AND T1.LICENSE_ID = #{licenseId}
+    </select>
+
+    <select id="selectLicenseNicknameList" parameterType="String" resultType="String">
+        SELECT
+        LICENSE_NICKNAME
+        FROM
+        LICENSE_NICKNAME
+        WHERE
+        LICENSE_NAME = #{licenseName}
     </select>
 </mapper>

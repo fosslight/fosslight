@@ -7,7 +7,9 @@ import Loading from '@/components/loading';
 import SideBar from '@/components/side-bar';
 import TopBar from '@/components/top-bar';
 import { loadingState, userState, viewState } from '@/lib/atoms';
+import { useAPI } from '@/lib/hooks';
 import clsx from 'clsx';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -17,14 +19,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [view, setView] = useRecoilState(viewState);
   const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
+  const router = useRouter();
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const isSubwindow = Boolean(window.opener);
 
+  // API for loading my info
+  const loadMeRequest = useAPI('get', 'http://localhost:8180/api/lite/me', {
+    onSuccess: (res) => {
+      setUser({ name: res.data.username, email: res.data.email });
+    },
+    onError: () => {
+      router.push('/sign-in');
+    }
+  });
+
   useEffect(() => {
-    // TODO (API for fetching name and email, by JSESSIONID)
-    setTimeout(() => {
-      setUser({ name: '최덕경', email: 'hjcdg197@gmail.com' });
-    }, 1000);
+    loadMeRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

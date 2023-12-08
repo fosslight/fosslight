@@ -36,9 +36,6 @@
 					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
 						LICENSE_TYPE
 					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION', sortColumn)">
-						OBLIGATION
-					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
 						DOWNLOAD_LOCATION
 					</when>
@@ -270,9 +267,10 @@
 	<resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
 		<result property="downloadUrl" column="download_location" />
 		<result property="homepageUrl" column="homepage" />
-		<result property="obligations" column="obligation_type" />
 		<result property="created" column="created_date" />
+		<result property="obligations" column="obligation_type" />
 		<result property="modified" column="modified_date" />
+		<result property="description" column="summary_description" />
 <!--		<result property="creator" column="" />-->
 	</resultMap>
 	<select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
@@ -313,7 +311,7 @@
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepageUrl)">
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
 			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
 		</if>
 		WHERE T1.USE_YN = 'Y'
@@ -377,24 +375,24 @@
 			</choose>
 			)
 		</if>
-<!--		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">-->
-<!--			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')-->
-<!--		</if>-->
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepageUrl)">
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
 			AND
 			<choose>
-				<when test="homepageExact">
+				<when test="urlExact">
 					(
-					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
 					)
 				</when>
 				<otherwise>
 					(
-					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
 					)
 				</otherwise>
 			</choose>
@@ -412,20 +410,20 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
 			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdAtFrom)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdAtFrom}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{createdFrom}
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdAtTo)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdAtTo}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{createdTo}
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedAtFrom)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{modifiedAtFrom}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFrom)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{modifiedFrom}
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedAtTo)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{modifiedAtTo}
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedTo)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{modifiedTo}
 		</if>
-		<if test="deactivate">
-			AND T1.DEACTIVATE_FLAG = #{deactivateFlag}
+		<if test="deactivate != null">
+			AND T1.DEACTIVATE_FLAG = #{deactivate}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
 			AND T1.LICENSE_TYPE = #{licenseType}

@@ -25,7 +25,7 @@ export default function OSSList() {
     default: [
       { label: 'OSS Name', name: 'ossName', type: 'char-exact' },
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
-      { label: 'Download URL', name: 'downloadUrl', type: 'char-exact' },
+      { label: 'URL', name: 'url', type: 'char-exact' },
       { label: 'Description', name: 'description', type: 'text' },
       { label: 'Copyright', name: 'copyright', type: 'text' },
       {
@@ -33,8 +33,8 @@ export default function OSSList() {
         name: 'deactivate',
         type: 'checkbox',
         options: [
-          { label: 'YES', value: '0' },
-          { label: 'NO', value: '1' }
+          { label: 'NO', value: '0' },
+          { label: 'YES', value: '1' }
         ]
       }
     ],
@@ -97,10 +97,10 @@ export default function OSSList() {
     { name: 'Ver', sort: 'OSS_VERSION' },
     { name: 'Type', sort: '' },
     { name: 'Licenses', sort: '' },
-    { name: 'Obligations', sort: 'OBG' },
+    { name: 'Obligations', sort: '' },
     { name: 'URL', sort: '' },
-    { name: 'Description', sort: 'DESC' },
-    { name: 'Vuln', sort: 'VULN' },
+    { name: 'Description', sort: '' },
+    { name: 'Vuln', sort: 'CVSS_SCORE' },
     { name: 'Create', sort: 'CREATED_AT' },
     { name: 'Modify', sort: 'MODIFIED_AT' }
   ];
@@ -117,7 +117,7 @@ export default function OSSList() {
   const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/oss', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
-      setTotalCount(res.data.totalRows);
+      setTotalCount(res.data.totalCount);
       setRows(res.data.list);
     },
     onFinish: () => setLoading(false)
