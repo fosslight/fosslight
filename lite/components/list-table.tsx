@@ -15,7 +15,7 @@ function generatePagination(currPage: number, lastPage: number) {
 
   Array.from(pageCandidates)
     .filter((page) => page >= 1 && page <= lastPage)
-    .sort()
+    .sort((a, b) => a - b)
     .forEach((page, idx, arr) => {
       if (idx > 0 && page - arr[idx - 1] > 1) {
         pages.push(-1);
@@ -44,10 +44,6 @@ export default function ListTable({
   render: (row: any, column: string) => React.ReactNode;
   onClickRow?: (row: any) => void;
 }) {
-  const currentSortObj = Object.fromEntries(
-    (currentSort || '').split(',').map((str) => str.split('-'))
-  );
-
   const view = useRecoilValue(viewState);
   const loading = useRecoilValue(loadingState);
   const [isColumnSelectorShown, setIsColumnSelectorShown] = useState(false);
@@ -60,46 +56,24 @@ export default function ListTable({
   const queryParams = useSearchParams();
 
   function setSort(sort: string) {
-    if (!sort || loading) {
+    if (currentSort === undefined || !sort || loading) {
       return;
     }
 
-    let newSortList: { key: string; asc: boolean }[];
+    let newSortInfo: string[] | null = [sort, 'asc'];
 
-    if (currentSort) {
-      let remove = false;
-      let asc = true;
-
-      newSortList = currentSort
-        .split(',')
-        .map((str) => {
-          const [f, d] = str.split('-');
-          return { key: f, asc: d === 'asc' };
-        })
-        .filter((obj) => {
-          if (obj.key === sort) {
-            if (obj.asc) {
-              asc = false;
-            } else {
-              remove = true;
-            }
-          }
-          return obj.key !== sort;
-        });
-      if (!remove) {
-        newSortList = [{ key: sort, asc }, ...newSortList];
+    if (currentSort.includes('-')) {
+      const [k, d] = currentSort.split('-');
+      if (k === sort) {
+        if (d === 'asc') newSortInfo = [sort, 'dsc'];
+        else if (d === 'dsc') newSortInfo = null;
       }
-    } else {
-      newSortList = [{ key: sort, asc: true }];
     }
 
     const urlQueryParams = new URLSearchParams(queryParams);
 
-    if (newSortList.length) {
-      urlQueryParams.set(
-        's',
-        newSortList.map((obj) => `${obj.key}-${obj.asc ? 'asc' : 'dsc'}`).join(',')
-      );
+    if (newSortInfo) {
+      urlQueryParams.set('s', `${newSortInfo[0]}-${newSortInfo[1]}`);
     } else {
       urlQueryParams.delete('s');
     }
@@ -150,19 +124,23 @@ export default function ListTable({
                     <button
                       className="flex gap-x-2"
                       onClick={() => setSort(column.sort)}
-                      disabled={!column.sort || loading}
+                      disabled={currentSort === undefined || !column.sort || loading}
                     >
                       {column.name}
 
                       {/* Sorting */}
-                      {column.sort && (
+                      {currentSort !== undefined && column.sort && (
                         <span className="relative inline-block w-2">
                           {(() => {
                             let [up, down] = [false, false];
-                            const d = currentSortObj[column.sort];
 
-                            if (d === 'asc') up = true;
-                            if (d === 'dsc') down = true;
+                            if (currentSort.includes('-')) {
+                              const [k, d] = currentSort.split('-');
+                              if (k === column.sort) {
+                                if (d === 'asc') up = true;
+                                else if (d === 'dsc') down = true;
+                              }
+                            }
 
                             return (
                               <>
@@ -267,9 +245,9 @@ export default function ListTable({
             {generatePagination(
               pagination.currentPage,
               Math.max(Math.ceil(pagination.totalCount / pagination.countPerPage), 1)
-            ).map((page) => {
+            ).map((page, idx) => {
               if (page === -1) {
-                return <i key={page} className="fa-solid fa-ellipsis" />;
+                return <i key={`${page}${idx}`} className="fa-solid fa-ellipsis" />;
               }
 
               return (

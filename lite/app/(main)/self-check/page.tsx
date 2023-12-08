@@ -20,8 +20,6 @@ export default function SelfCheckList() {
   const queryParams = useSearchParams();
 
   // Filters
-  const filtersQueryParam = queryParams.get('f') || '';
-  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'Project ID', name: 'projectId', type: 'number' },
@@ -32,6 +30,8 @@ export default function SelfCheckList() {
     ],
     hidden: []
   };
+  const filtersQueryParam = queryParams.get('f') || '';
+  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam, filters) });
 
   // Modal
   const [isModalShown, setIsModalShown] = useState(false);

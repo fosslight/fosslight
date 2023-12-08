@@ -4,12 +4,12 @@ import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
+import { useAPI } from '@/lib/hooks';
+import { ossTypes } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import qs from 'qs';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
@@ -21,8 +21,6 @@ export default function OSSList() {
   const queryParams = useSearchParams();
 
   // Filters
-  const filtersQueryParam = queryParams.get('f') || '';
-  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam) });
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'OSS Name', name: 'ossName', type: 'char-exact' },
@@ -88,6 +86,8 @@ export default function OSSList() {
       { label: 'Modified', name: 'modified', type: 'date' }
     ]
   };
+  const filtersQueryParam = queryParams.get('f') || '';
+  const filtersForm = useForm({ defaultValues: parseFilters(filtersQueryParam, filters) });
 
   // Rows/Columns
   const [rows, setRows] = useState<List.OSS[]>([]);
@@ -113,42 +113,25 @@ export default function OSSList() {
   const countPerPage = 10;
   const currentPage = Number(queryParams.get('p') || '1');
 
+  // API for loading rows
+  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/oss', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setTotalCount(res.data.totalRows);
+      setRows(res.data.list);
+    },
+    onFinish: () => setLoading(false)
+  });
+
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
-    const params = {
-      ...filtersForm.watch(),
-      sort: currentSort,
-      page: currentPage,
-      countPerPage
-    };
-
-    const requestRows = async () => {
-      const signInRequest = async () => {
-        axios.defaults.withCredentials = true;
-        const response = await axios.post(
-          'http://localhost:8180/session/login-proc',
-          qs.stringify({
-            un: 'admin',
-            up: 'admin'
-          })
-        );
-      };
-      await signInRequest();
-
-      return await axios.get('http://localhost:8180/api/lite/oss', {
-        params,
-        withCredentials: true,
-        paramsSerializer: (params) => {
-          return qs.stringify(params, { arrayFormat: 'repeat' });
-        }
-      });
-    };
-    setLoading(true);
-    requestRows().then((res) => {
-      console.log(res);
-      setRows(res.data.list);
-      setTotalCount(res.data.totalRows);
-      setLoading(false);
+    loadRowsRequest.execute({
+      params: {
+        ...filtersForm.watch(),
+        sort: currentSort,
+        page: currentPage,
+        countPerPage
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
@@ -200,7 +183,39 @@ export default function OSSList() {
           }
 
           if (column === 'Type') {
-            return <div className="whitespace-nowrap">{row.ossType.split('').join(', ')}</div>;
+            return (
+              <div className="whitespace-nowrap">
+                {(() => {
+                  const idxToKey = Object.fromEntries(
+                    Object.keys(ossTypes).map((key, idx) => [idx, key])
+                  );
+
+                  return (
+                    <div className="flex gap-x-1">
+                      {row.ossType.split('').map((x, idx) => {
+                        if (x !== '1') {
+                          return null;
+                        }
+
+                        const key = idxToKey[idx];
+                        const typeInfo = ossTypes[key];
+
+                        return (
+                          <span
+                            key={key}
+                            className="px-1 rounded text-xs text-semiwhite"
+                            style={{ backgroundColor: typeInfo.color }}
+                            title={`[${typeInfo.name}] ${typeInfo.desc}`}
+                          >
+                            {key}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            );
           }
 
           if (column === 'Licenses') {
