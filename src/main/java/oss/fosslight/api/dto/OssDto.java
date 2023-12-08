@@ -16,13 +16,19 @@ public class OssDto {
     String licenseType;
     String downloadUrl;
     String homepageUrl;
-    String summaryDescription;
+    String description;
     String cveId;
     String cvssScore;
     String creator;
     String created;
     String modifier;
     String modified;
-    String obligations;
+    List<Character> obligations;
 
+    public void setObligations(String obligationType) {
+        var typeArr = obligationType.toCharArray();
+        obligations = new ArrayList<>();
+        obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
+        obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
+    }
 }

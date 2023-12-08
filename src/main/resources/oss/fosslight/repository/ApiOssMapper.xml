@@ -271,7 +271,9 @@
 		<result property="downloadUrl" column="download_location" />
 		<result property="homepageUrl" column="homepage" />
 		<result property="created" column="created_date" />
+		<result property="obligations" column="obligation_type" />
 		<result property="modified" column="modified_date" />
+		<result property="description" column="summary_description" />
 <!--		<result property="creator" column="" />-->
 	</resultMap>
 	<select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
@@ -300,12 +302,7 @@
 		, T1.CREATED_DATE
 		, T1.MODIFIED_DATE
 		, T3.LICENSE_NAME
-		, CASE
-			WHEN T1.OBLIGATION_TYPE = '10' THEN 'YN'
-			WHEN T1.OBLIGATION_TYPE = '11' THEN 'YY'
-			ELSE ''
-		  END
-		AS OBLIGATIONS
+		, T1.OBLIGATION_TYPE
 		, SUB1.OSS_TYPE AS OSS_TYPE
 		, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME

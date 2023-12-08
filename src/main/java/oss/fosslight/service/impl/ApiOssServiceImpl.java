@@ -11,6 +11,7 @@ import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.OssLicense;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.ApiOssService;
@@ -97,14 +98,18 @@ public class ApiOssServiceImpl implements ApiOssService {
         // license name 처리
         if (!rows.isEmpty()) {
             var ossIdList = rows.stream().map(OssDto::getOssId).collect(Collectors.toList());
-
             List<LicenseDto> licenseList = apiOssMapper.selectOssLicenseList(ossIdList);
-
             rows.forEach(oss -> {
-                var licensesForOss = licenseList.stream().filter(license ->
-                        license.getOssId().equals(oss.getOssId())
-                ).sorted().collect(Collectors.toList());
-                oss.setOssLicenses(licensesForOss);
+                var licensesForOss = licenseList.stream()
+                        .filter(license -> license.getOssId().equals(oss.getOssId()))
+                        .map(license -> {
+                            var ossLicense = new OssLicense();
+                            ossLicense.setLicenseName(license.getLicenseName());
+                            ossLicense.setOssLicenseComb(license.getOssLicenseComb());
+                            return ossLicense;
+                        }).collect(Collectors.toList());
+                var licensesString = CommonFunction.makeLicenseExpression(licensesForOss);
+                oss.setLicenseName(licensesString);
             });
         }
 
