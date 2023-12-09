@@ -4,13 +4,16 @@ import SelfCheckModal from '@/components/self-check-modal';
 import SelfCheckNotice from '@/components/self-check-notice';
 import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
+import { loadingState } from '@/lib/atoms';
 import { useAPI } from '@/lib/hooks';
 import { SELF_CHECK_TABS } from '@/lib/literals';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
+  const setLoading = useSetRecoilState(loadingState);
   const [data, setData] = useState<SelfCheck.Basics>();
   const [wait, setWait] = useState(false);
   const [isModalShown, setIsModalShown] = useState(false);
@@ -19,7 +22,8 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
 
   // TODO (API for loading project)
   const loadProjectReuqest = {
-    execute: (() =>
+    execute: (() => {
+      setLoading(true);
       setTimeout(() => {
         setData({
           projectName: 'FOSSLight Hub Lite',
@@ -27,7 +31,9 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
           created: '2023-10-05 23:54:08.0',
           comment: '<p>aaa</p><p>bbb</p><p><strong>ccc</strong><br>ddd</p>'
         });
-      }, 1000)) as any
+        setLoading(false);
+      }, 500);
+    }) as any
   };
 
   // API for deleting project
@@ -162,7 +168,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       {/* Actions */}
       {tab === 'OSS' && <SelfCheckOSS />}
       {tab === 'Package' && <SelfCheckPackage />}
-      {tab === 'Notice' && <SelfCheckNotice />}
+      {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>
   );
 }
