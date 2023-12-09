@@ -63,11 +63,52 @@ export default function SelfCheckNotice() {
             Generate Custom Notice
           </label>
         </div>
+
+        {/* Buttons */}
         <div className="flex justify-end gap-x-1 mt-4 mb-2">
           <button className="px-2 py-0.5 crimson-btn">Generate</button>
           <button
             className="px-2 py-0.5 default-btn"
-            onClick={() => previewNoticeRequest.execute({ body: { prjId: 2 } })}
+            onClick={() => {
+              const body: any = { prjId: 2, previewOnly: 'N' };
+
+              if (method === 'custom') {
+                body.editNoticeYn = 'Y';
+
+                if (companyName) {
+                  body.editCompanyYn = 'Y';
+                  body.companyNameFull = companyName;
+                } else {
+                  body.editCompanyYn = 'N';
+                }
+
+                if (ossSite) {
+                  body.editDistributionSiteUrlYn = 'Y';
+                  body.distributionSiteUrl = ossSite;
+                } else {
+                  body.editDistributionSiteUrlYn = 'N';
+                }
+
+                if (email) {
+                  body.editEmailYn = 'Y';
+                  body.email = email;
+                } else {
+                  body.editEmailYn = 'N';
+                }
+
+                body.hideOssVersionYn = !isVerShown ? 'Y' : 'N';
+
+                if (append) {
+                  body.editAppendedYn = 'Y';
+                  body.appended = `<p>${append}</p>`;
+                  body.appendedTEXT = append;
+                } else {
+                  body.editAppendedYn = 'N';
+                }
+              }
+
+              previewNoticeRequest.execute({ body });
+            }}
           >
             Preview
           </button>
@@ -191,7 +232,7 @@ export default function SelfCheckNotice() {
                   className="w-full p-2 mt-2 border border-darkgray outline-none resize-none"
                   rows={6}
                   value={append}
-                  disabled={method === 'default' || append === null}
+                  disabled={method === 'default'}
                   onChange={(e) => setAppend(e.target.value)}
                 />
               )}
