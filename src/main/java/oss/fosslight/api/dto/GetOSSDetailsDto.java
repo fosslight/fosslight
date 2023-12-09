@@ -6,5 +6,6 @@ public class GetOSSDetailsDto {
     @Builder
     public static class Result {
         public OssDetailsDto oss;
+        public OssDto oss;
     }
 }

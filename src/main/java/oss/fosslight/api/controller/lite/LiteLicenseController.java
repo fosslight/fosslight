@@ -58,7 +58,7 @@ public class LiteLicenseController {
             @PathVariable("id") String id
     ) {
         try {
-            var result = apiLicenseService.getLicense(licenseRequest);
+            var result = apiLicenseService.getLicense(id);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

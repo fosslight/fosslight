@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import oss.fosslight.api.dto.GetOSSDetailsDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.Url;
@@ -54,7 +55,6 @@ public class LiteOssController {
         }
     }
 
-
     @GetMapping("/oss/{id}")
     public @ResponseBody ResponseEntity<GetOSSDetailsDto.Result> getOss(
             @PathVariable("id") String id
@@ -67,7 +67,6 @@ public class LiteOssController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
 
     @GetMapping("/oss/candidates/all")
     public @ResponseBody ResponseEntity<List<List<String>>> getAutocompleteCandidates(
@@ -83,4 +82,5 @@ public class LiteOssController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
 }

@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
-import oss.fosslight.api.dto.LicenseDto;
-import oss.fosslight.api.dto.ListOssDto;
-import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.api.dto.*;
 import oss.fosslight.domain.OssMaster;
 
 @Mapper
@@ -47,4 +45,5 @@ public interface ApiOssMapper {
 	List<VulnerabilityDto> getOssVulnerabilityList(String ossId);
 	List<OssDto> getOssAutocompleteCandidates();
 	List<OssDto> selectRecentOss(int limit);
+
 }

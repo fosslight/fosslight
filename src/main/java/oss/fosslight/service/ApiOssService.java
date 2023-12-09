@@ -5,6 +5,7 @@
 
 package oss.fosslight.service;
 
+import oss.fosslight.api.dto.GetOSSDetailsDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.dto.OssDto;
 
@@ -21,6 +22,7 @@ public interface ApiOssService {
 	String[] getOssNickNameListByOssName(String ossName);
 
 	ListOssDto.Result listOss(ListOssDto.Request request);
+
 
 	String getOssExcel(ListOssDto.Request request) throws Exception;
 
