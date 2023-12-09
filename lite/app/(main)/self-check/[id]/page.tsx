@@ -32,7 +32,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
           comment: '<p>aaa</p><p>bbb</p><p><strong>ccc</strong><br>ddd</p>'
         });
         setLoading(false);
-      }, 1000);
+      }, 500);
     }) as any
   };
 
