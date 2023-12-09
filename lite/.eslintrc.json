@@ -7,7 +7,8 @@
   ],
   "rules": {
     "import/prefer-default-export": "off",
-    "no-alert": "off"
+    "no-alert": "off",
+    "global-require": "off"
   },
   "parserOptions": {
     "project": ["tsconfig.json"]

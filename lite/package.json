@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^40.1.0",
+    "@ckeditor/ckeditor5-react": "^6.2.0",
     "axios": "^1.5.1",
     "clsx": "^2.0.0",
     "dayjs": "^1.11.10",
