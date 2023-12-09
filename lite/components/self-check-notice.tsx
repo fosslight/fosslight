@@ -5,10 +5,7 @@ import { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import Modal from './modal';
 
-// TODO (Project ID)
-const PRJ_ID = '2';
-
-export default function SelfCheckNotice() {
+export default function SelfCheckNotice({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'default' | 'custom'>('default');
   const [companyName, setCompanyName] = useState<string | null>('');
@@ -88,7 +85,7 @@ export default function SelfCheckNotice() {
   });
 
   function buildRequestBody() {
-    const body: any = { prjId: PRJ_ID, previewOnly: 'N' };
+    const body: any = { prjId: id, previewOnly: 'N' };
 
     if (method === 'custom') {
       body.editNoticeYn = 'Y';
@@ -339,7 +336,7 @@ export default function SelfCheckNotice() {
               onClick={() => {
                 downloadNoticeRequests.spdx.execute({
                   body: {
-                    prjId: PRJ_ID,
+                    prjId: id,
                     dataStr: JSON.stringify({ ...buildRequestBody(), isSimpleNotice: 'N' }),
                     type: type[0]
                   }
