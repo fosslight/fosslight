@@ -10,6 +10,7 @@ export function useAPI(
     onSuccess?: (res: any) => void;
     onError?: (err: unknown) => void;
     onFinish?: () => void;
+    sendJson?: boolean;
   }
 ) {
   const mutationOptions: any = {};
@@ -35,7 +36,12 @@ export function useAPI(
     }
 
     if (data?.body && method !== 'get') {
-      requestConfig.data = qs.stringify(data.body, { arrayFormat: 'repeat' });
+      if (config?.sendJson) {
+        requestConfig.data = data.body;
+        requestConfig.headers = { 'Content-Type': 'application/json' };
+      } else {
+        requestConfig.data = qs.stringify(data.body, { arrayFormat: 'repeat' });
+      }
     }
 
     return axios(requestConfig);
