@@ -1,636 +1,754 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.ApiOssMapper">
 
-	<sql id="limitPage">
-		LIMIT #{offset}, #{countPerPage}
-	</sql>
-	<sql id="orderby">
-		ORDER BY
-<!--		T1.DEACTIVATE_FLAG ASC,-->
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
-		</if>
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@isEmpty(sortColumn)"> OSS_ID desc</when>
-			<otherwise>
-				<choose>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sortColumn)">
-						OSS_ID
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sortColumn)">
-						OSS_TYPE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sortColumn)">
-						OSS_NAME
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sortColumn)">
-						OSS_VERSION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sortColumn)">
-						LICENSE_NAME
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
-						LICENSE_TYPE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
-						DOWNLOAD_LOCATION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sortColumn)">
-						HOMEPAGE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sortColumn)">
-						SUMMARY_DESCRIPTION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sortColumn)">
-						CVSS_SCORE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
-						CREATOR
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_AT', sortColumn)">
-						DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sortColumn)">
-						MODIFIER
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_AT', sortColumn)">
-						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
-					</when>
-				</choose>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirection)">
-					<choose>
-						<when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirection)">
-							ASC
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirection)">
-							DESC
-						</when>
-					</choose>
-				</if>
-			</otherwise>
-		</choose>
-	</sql>
+    <sql id="limitPage">
+        LIMIT
+        #{offset},
+        #{countPerPage}
+    </sql>
+    <sql id="orderby">
+        ORDER BY
+        <!--		T1.DEACTIVATE_FLAG ASC,-->
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+            CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
+        </if>
+        <choose>
+            <when test="@oss.fosslight.util.StringUtil@isEmpty(sortColumn)">OSS_ID desc</when>
+            <otherwise>
+                <choose>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sortColumn)">
+                        OSS_ID
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sortColumn)">
+                        OSS_TYPE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sortColumn)">
+                        OSS_NAME
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sortColumn)">
+                        OSS_VERSION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sortColumn)">
+                        LICENSE_NAME
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
+                        LICENSE_TYPE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
+                        DOWNLOAD_LOCATION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sortColumn)">
+                        HOMEPAGE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sortColumn)">
+                        SUMMARY_DESCRIPTION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sortColumn)">
+                        CVSS_SCORE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
+                        CREATOR
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CREATED_AT', sortColumn)">
+                        DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sortColumn)">
+                        MODIFIER
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_AT', sortColumn)">
+                        DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
+                    </when>
+                </choose>
+                <if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirection)">
+                    <choose>
+                        <when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirection)">
+                            ASC
+                        </when>
+                        <when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirection)">
+                            DESC
+                        </when>
+                    </choose>
+                </if>
+            </otherwise>
+        </choose>
+    </sql>
 
-	<select id="getOssInfo" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
-		SELECT OM.OSS_NAME
-			 , OM.OSS_VERSION
-			 , OM.LICENSE_DIV
-			 , TRIM(REPLACE(REPLACE(GROUP_CONCAT( CONCAT(OL.OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '), ' AND ', ','), ' OR ', '|')) AS DECLARED_LICENSE
-			 , (SELECT IFNULL(GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL
-			 						          , LM.LICENSE_NAME
-									          , LM.SHORT_IDENTIFIER)
-									       ORDER BY OSS_LICENSE_IDX ASC)
-							  , '')
-        		  FROM OSS_LICENSE_DETECTED ODT
-                 INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
-		         WHERE ODT.OSS_ID = OM.OSS_ID) AS DETECTED_LICENSE
-			 , OM.COPYRIGHT
-		  	 , IF(OM.OBLIGATION_TYPE = '10' OR OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS NOTICE
-			 , IF(OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS SOURCE
-			 , OM.DEACTIVATE_FLAG AS DEACTIVATE
-		  FROM OSS_MASTER OM
-		 INNER JOIN OSS_LICENSE_DECLARED OL ON OM.OSS_ID = OL.OSS_ID
-		 INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
-		 WHERE OM.OSS_NAME = #{ossName}
-		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-		   AND OM.OSS_VERSION = #{ossVersion}
-		 </if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(downloadLocation)">
-			AND OM.DOWNLOAD_LOCATION = #{downloadLocation}
-		</if>
-		 GROUP BY OM.OSS_ID
-	</select>
+    <select id="getOssInfo" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+        SELECT OM.OSS_NAME
+        , OM.OSS_VERSION
+        , OM.LICENSE_DIV
+        , TRIM(REPLACE(REPLACE(GROUP_CONCAT( CONCAT(OL.OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER = '' OR
+        LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '),
+        ' AND ', ','), ' OR ', '|')) AS DECLARED_LICENSE
+        , (SELECT IFNULL(GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL
+        , LM.LICENSE_NAME
+        , LM.SHORT_IDENTIFIER)
+        ORDER BY OSS_LICENSE_IDX ASC)
+        , '')
+        FROM OSS_LICENSE_DETECTED ODT
+        INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
+        WHERE ODT.OSS_ID = OM.OSS_ID) AS DETECTED_LICENSE
+        , OM.COPYRIGHT
+        , IF(OM.OBLIGATION_TYPE = '10' OR OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS NOTICE
+        , IF(OM.OBLIGATION_TYPE = '11', 'Y', 'N') AS SOURCE
+        , OM.DEACTIVATE_FLAG AS DEACTIVATE
+        FROM OSS_MASTER OM
+        INNER JOIN OSS_LICENSE_DECLARED OL ON OM.OSS_ID = OL.OSS_ID
+        INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
+        WHERE OM.OSS_NAME = #{ossName}
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+            AND OM.OSS_VERSION = #{ossVersion}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(downloadLocation)">
+            AND OM.DOWNLOAD_LOCATION = #{downloadLocation}
+        </if>
+        GROUP BY OM.OSS_ID
+    </select>
 
-	<select id="getOssName" parameterType="String" resultType="String">
-		SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossName}
-	</select>
+    <select id="getOssName" parameterType="String" resultType="String">
+        SELECT OSS_NAME
+        FROM OSS_NICKNAME
+        WHERE OSS_NICKNAME = #{ossName}
+    </select>
 
-	<select id="getOssInfoByDownloadLocation" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
-		SELECT OM.OSS_NAME
-			 , OM.OSS_VERSION
-			 , OM.LICENSE_DIV
-			 , TRIM(REPLACE(REPLACE(GROUP_CONCAT( CONCAT(OL.OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL, LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '), ' AND ', ','), ' OR ', '|')) AS DECLARED_LICENSE
-		  	 , (SELECT IFNULL(GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL
-			 						          , LM.LICENSE_NAME
-									          , LM.SHORT_IDENTIFIER)
-									       ORDER BY OSS_LICENSE_IDX ASC)
-					   , '')
-        		  FROM OSS_LICENSE_DETECTED ODT
-                 INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
-		         WHERE ODT.OSS_ID = OM.OSS_ID) AS DETECTED_LICENSE
-		  FROM OSS_MASTER OM
-		 INNER JOIN OSS_LICENSE_DECLARED OL ON OM.OSS_ID = OL.OSS_ID
-		 INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
-		 WHERE OM.DOWNLOAD_LOCATION = #{downloadLocation}
-		 GROUP BY OM.OSS_ID
-	</select>
+    <select id="getOssInfoByDownloadLocation" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+        SELECT OM.OSS_NAME
+             , OM.OSS_VERSION
+             , OM.LICENSE_DIV
+             , TRIM(REPLACE(REPLACE(GROUP_CONCAT(CONCAT(OL.OSS_LICENSE_COMB, ' ',
+                                                        IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL,
+                                                           LM.LICENSE_NAME,
+                                                           LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' '),
+                                    ' AND ', ','), ' OR ', '|')) AS DECLARED_LICENSE
+             , (SELECT IFNULL(GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL
+            , LM.LICENSE_NAME
+            , LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC)
+                           , '')
+                FROM OSS_LICENSE_DETECTED ODT
+                         INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
+                WHERE ODT.OSS_ID = OM.OSS_ID)                    AS DETECTED_LICENSE
+        FROM OSS_MASTER OM
+                 INNER JOIN OSS_LICENSE_DECLARED OL ON OM.OSS_ID = OL.OSS_ID
+                 INNER JOIN LICENSE_MASTER LM ON LM.LICENSE_ID = OL.LICENSE_ID
+        WHERE OM.DOWNLOAD_LOCATION = #{downloadLocation}
+        GROUP BY OM.OSS_ID
+    </select>
 
-	<select id="getLicenseInfo" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
-		SELECT A.*
-		  FROM (SELECT LM.LICENSE_NAME
-				     , IFNULL(LM.SHORT_IDENTIFIER, '') AS IDENTIFIER
-					 , IFNULL(GROUP_CONCAT(NICK.LICENSE_NICKNAME), '') AS NICKNAME
-					 , IFNULL(LM.OBLIGATION_NOTIFICATION_YN, 'N') AS NOTICE
-					 , IFNULL(LM.OBLIGATION_DISCLOSING_SRC_YN, 'N') AS SOURCE
-					 , LM.LICENSE_TEXT
-					 , LM.DESCRIPTION AS USER_GUIDE
-					 , (SELECT IFNULL(GROUP_CONCAT(CD_DTL_NM), '') FROM T2_CODE_DTL WHERE CD_NO = '226' AND LM.RESTRICTION LIKE CONCAT('%', CD_DTL_NO, '%')) AS RESTRICTION
-					 , IFNULL(LM.ATTRIBUTION, '') AS ATTRIBUTION
-					 , (SELECT IFNULL(CD_DTL_NM, '') FROM T2_CODE_DTL WHERE CD_NO = '201' AND CD_DTL_NO = LM.LICENSE_TYPE) AS LICENSE_TYPE
-				  FROM LICENSE_MASTER LM
-				  LEFT JOIN LICENSE_NICKNAME NICK ON LM.LICENSE_NAME = NICK.LICENSE_NAME
-				 WHERE (LM.LICENSE_NAME = #{licenseName}
-						OR LM.SHORT_IDENTIFIER = #{licenseName}
-			 			OR NICK.LICENSE_NICKNAME = #{licenseName})) A
-		 WHERE A.LICENSE_NAME IS NOT NULL
-	</select>
+    <select id="getLicenseInfo" parameterType="String" resultType="oss.fosslight.domain.CamelMap">
+        SELECT A.*
+        FROM (SELECT LM.LICENSE_NAME
+                   , IFNULL(LM.SHORT_IDENTIFIER, '')                         AS IDENTIFIER
+                   , IFNULL(GROUP_CONCAT(NICK.LICENSE_NICKNAME), '')         AS NICKNAME
+                   , IFNULL(LM.OBLIGATION_NOTIFICATION_YN, 'N')              AS NOTICE
+                   , IFNULL(LM.OBLIGATION_DISCLOSING_SRC_YN, 'N')            AS SOURCE
+                   , LM.LICENSE_TEXT
+                   , LM.DESCRIPTION                                          AS USER_GUIDE
+                   , (SELECT IFNULL(GROUP_CONCAT(CD_DTL_NM), '')
+                      FROM T2_CODE_DTL
+                      WHERE CD_NO = '226'
+                        AND LM.RESTRICTION LIKE CONCAT('%', CD_DTL_NO, '%')) AS RESTRICTION
+                   , IFNULL(LM.ATTRIBUTION, '')                              AS ATTRIBUTION
+                   , (SELECT IFNULL(CD_DTL_NM, '')
+                      FROM T2_CODE_DTL
+                      WHERE CD_NO = '201' AND CD_DTL_NO = LM.LICENSE_TYPE)   AS LICENSE_TYPE
+              FROM LICENSE_MASTER LM
+                       LEFT JOIN LICENSE_NICKNAME NICK ON LM.LICENSE_NAME = NICK.LICENSE_NAME
+              WHERE (LM.LICENSE_NAME = #{licenseName}
+                  OR LM.SHORT_IDENTIFIER = #{licenseName}
+                  OR NICK.LICENSE_NICKNAME = #{licenseName})) A
+        WHERE A.LICENSE_NAME IS NOT NULL
+    </select>
 
 
-	<select id="selectOssNicknameList" parameterType="String" resultType="String">
-		SELECT OSS_NICKNAME
-		FROM
-			OSS_NICKNAME
-		WHERE
-			OSS_NAME = #{ossName}
-		ORDER BY OSS_NICKNAME
-	</select>
+    <select id="selectOssNicknameList" parameterType="String" resultType="String">
+        SELECT OSS_NICKNAME
+        FROM OSS_NICKNAME
+        WHERE OSS_NAME = #{ossName}
+        ORDER BY OSS_NICKNAME
+    </select>
 
-	<select id="getOssInfoAll" resultType="hashMap">
-		<!--
-		SELECT
-			T1.OSS_ID
-			, T1.OSS_NAME
-			, T1.OSS_NAME AS OSS_NAME_TEMP
-			, T1.OSS_VERSION
-			, T1.LICENSE_DIV,T1.DOWNLOAD_LOCATION
-			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
-			,T1.HOMEPAGE
-			,T1.SUMMARY_DESCRIPTION
-			,T1.ATTRIBUTION
-			,T1.COPYRIGHT
-			,T1.CVSS_SCORE,T1.CVE_ID,T1.VULN_YN,T1.VULN_RECHECK,T1.VULN_DATE,T1.LICENSE_TYPE,T1.OBLIGATION_TYPE
-			,T2.LICENSE_ID,T2.OSS_LICENSE_IDX,T2.OSS_LICENSE_COMB,T2.OSS_COPYRIGHT, IF(IFNULL(T3.SHORT_IDENTIFIER,'') = '',T3.LICENSE_NAME,T3.SHORT_IDENTIFIER) AS LICENSE_NAME, T3.LICENSE_TYPE AS OSS_LICENSE_TYPE
-			,(SELECT CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = T1.OSS_ID ) AS OSS_TYPE
-			, SUB2.MULTI_LICENSE_FLAG
-			, SUB2.DUAL_LICENSE_FLAG
-			, SUB2.VERSION_DIFF_FLAG
-			, (SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL , LM.LICENSE_NAME , LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ', ')
-				 FROM OSS_LICENSE_DETECTED ODT
-				INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
-				WHERE ODT.OSS_ID = T1.OSS_ID) AS DETECTED_LICENSE
-		    , T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER T1
-			INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
-			INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
-			LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
-		WHERE T1.USE_YN = 'Y'
-		-->
-		SELECT
-			T1.OSS_ID as ossId
-			, T1.OSS_NAME as ossName
-			, T1.OSS_NAME AS ossNameTemp
-			, T1.OSS_VERSION as ossVersion
-			, T1.LICENSE_DIV as licenseDiv
-			, T1.DOWNLOAD_LOCATION as downloadLocation
-			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS downloadLocationGroup
-			,T1.HOMEPAGE as homepage
-			,T1.SUMMARY_DESCRIPTION as summaryDescription
-			,T1.ATTRIBUTION as attribution
-			,T1.COPYRIGHT as copyright
-			,T1.CVSS_SCORE as cvssScore
-			,T1.CVE_ID as cveId
-			,T1.VULN_YN as vulnYn
-			,T1.VULN_RECHECK as vulnRecheck
-			,T1.VULN_DATE as vulnDate
-			,T1.LICENSE_TYPE as licenseType
-			,T1.OBLIGATION_TYPE as obligationType
-			,T2.LICENSE_ID as licenseId
-			,T2.OSS_LICENSE_IDX as ossLicenseIdx
-			,T2.OSS_LICENSE_COMB as ossLicenseComb
-			,T2.OSS_COPYRIGHT as ossCopyright
-			, IF(IFNULL(T3.SHORT_IDENTIFIER,'') = '',T3.LICENSE_NAME,T3.SHORT_IDENTIFIER) AS licenseName
-			, T3.LICENSE_TYPE AS ossLicenseType
-			,(SELECT CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = T1.OSS_ID ) AS ossType
-			, SUB2.MULTI_LICENSE_FLAG as multiLicenseFlag
-			, SUB2.DUAL_LICENSE_FLAG as dualLicenseFlag
-			, SUB2.VERSION_DIFF_FLAG as versionDiffFlag
-			, (SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL , LM.LICENSE_NAME , LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ', ')
-				 FROM OSS_LICENSE_DETECTED ODT
-				INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
-				WHERE ODT.OSS_ID = T1.OSS_ID) AS detectedLicense
-		    , T1.DEACTIVATE_FLAG as deativateFlag
-		FROM OSS_MASTER T1
-			INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
-			INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
-			LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
-		WHERE T1.USE_YN = 'Y'
-	</select>
+    <select id="getOssInfoAll" resultType="hashMap">
+        <!--
+        SELECT
+            T1.OSS_ID
+            , T1.OSS_NAME
+            , T1.OSS_NAME AS OSS_NAME_TEMP
+            , T1.OSS_VERSION
+            , T1.LICENSE_DIV,T1.DOWNLOAD_LOCATION
+            ,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+            ,T1.HOMEPAGE
+            ,T1.SUMMARY_DESCRIPTION
+            ,T1.ATTRIBUTION
+            ,T1.COPYRIGHT
+            ,T1.CVSS_SCORE,T1.CVE_ID,T1.VULN_YN,T1.VULN_RECHECK,T1.VULN_DATE,T1.LICENSE_TYPE,T1.OBLIGATION_TYPE
+            ,T2.LICENSE_ID,T2.OSS_LICENSE_IDX,T2.OSS_LICENSE_COMB,T2.OSS_COPYRIGHT, IF(IFNULL(T3.SHORT_IDENTIFIER,'') = '',T3.LICENSE_NAME,T3.SHORT_IDENTIFIER) AS LICENSE_NAME, T3.LICENSE_TYPE AS OSS_LICENSE_TYPE
+            ,(SELECT CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = T1.OSS_ID ) AS OSS_TYPE
+            , SUB2.MULTI_LICENSE_FLAG
+            , SUB2.DUAL_LICENSE_FLAG
+            , SUB2.VERSION_DIFF_FLAG
+            , (SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL , LM.LICENSE_NAME , LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ', ')
+                 FROM OSS_LICENSE_DETECTED ODT
+                INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
+                WHERE ODT.OSS_ID = T1.OSS_ID) AS DETECTED_LICENSE
+            , T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+            INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+            INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
+            LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
+        WHERE T1.USE_YN = 'Y'
+        -->
+        SELECT
+        T1.OSS_ID as ossId
+        , T1.OSS_NAME as ossName
+        , T1.OSS_NAME AS ossNameTemp
+        , T1.OSS_VERSION as ossVersion
+        , T1.LICENSE_DIV as licenseDiv
+        , T1.DOWNLOAD_LOCATION as downloadLocation
+        ,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID
+        ) AS downloadLocationGroup
+        ,T1.HOMEPAGE as homepage
+        ,T1.SUMMARY_DESCRIPTION as summaryDescription
+        ,T1.ATTRIBUTION as attribution
+        ,T1.COPYRIGHT as copyright
+        ,T1.CVSS_SCORE as cvssScore
+        ,T1.CVE_ID as cveId
+        ,T1.VULN_YN as vulnYn
+        ,T1.VULN_RECHECK as vulnRecheck
+        ,T1.VULN_DATE as vulnDate
+        ,T1.LICENSE_TYPE as licenseType
+        ,T1.OBLIGATION_TYPE as obligationType
+        ,T2.LICENSE_ID as licenseId
+        ,T2.OSS_LICENSE_IDX as ossLicenseIdx
+        ,T2.OSS_LICENSE_COMB as ossLicenseComb
+        ,T2.OSS_COPYRIGHT as ossCopyright
+        , IF(IFNULL(T3.SHORT_IDENTIFIER,'') = '',T3.LICENSE_NAME,T3.SHORT_IDENTIFIER) AS licenseName
+        , T3.LICENSE_TYPE AS ossLicenseType
+        ,(SELECT CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = T1.OSS_ID ) AS ossType
+        , SUB2.MULTI_LICENSE_FLAG as multiLicenseFlag
+        , SUB2.DUAL_LICENSE_FLAG as dualLicenseFlag
+        , SUB2.VERSION_DIFF_FLAG as versionDiffFlag
+        , (SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL , LM.LICENSE_NAME ,
+        LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ', ')
+        FROM OSS_LICENSE_DETECTED ODT
+        INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
+        WHERE ODT.OSS_ID = T1.OSS_ID) AS detectedLicense
+        , T1.DEACTIVATE_FLAG as deativateFlag
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
+        LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
+        WHERE T1.USE_YN = 'Y'
+    </select>
 
-	<select id="getOssInfoAllWithNick" resultType="hashMap">
-		<!--
-		SELECT T1.OSS_ID
-			 , T4.OSS_NICKNAME AS OSS_NAME
-			 , T1.OSS_NAME AS OSS_NAME_TEMP
-			 , T1.OSS_VERSION
-			 , T1.DEACTIVATE_FLAG
-		  FROM OSS_MASTER T1
-		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
-		 WHERE T1.USE_YN = 'Y'
-		 -->
-		 SELECT T1.OSS_ID as ossId
-			 , T4.OSS_NICKNAME AS ossName
-			 , T1.OSS_NAME AS ossNameTemp
-			 , T1.OSS_VERSION as ossVersion
-			 , T1.DEACTIVATE_FLAG as deativateFlag
-		  FROM OSS_MASTER T1
-		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
-		 WHERE T1.USE_YN = 'Y'
-	</select>
+    <select id="getOssInfoAllWithNick" resultType="hashMap">
+        <!--
+        SELECT T1.OSS_ID
+             , T4.OSS_NICKNAME AS OSS_NAME
+             , T1.OSS_NAME AS OSS_NAME_TEMP
+             , T1.OSS_VERSION
+             , T1.DEACTIVATE_FLAG
+          FROM OSS_MASTER T1
+         INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
+         WHERE T1.USE_YN = 'Y'
+         -->
+        SELECT T1.OSS_ID as ossId
+        , T4.OSS_NICKNAME AS ossName
+        , T1.OSS_NAME AS ossNameTemp
+        , T1.OSS_VERSION as ossVersion
+        , T1.DEACTIVATE_FLAG as deativateFlag
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
+        WHERE T1.USE_YN = 'Y'
+    </select>
 
-	<select id="getOssAllNickNameList" resultType="hashMap">
-		<!--
-		SELECT OSS_NAME
-			 , GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME
-		  FROM OSS_NICKNAME
-	  GROUP BY OSS_NAME
-	  -->
-	    SELECT OSS_NAME as ossName
-			 , GROUP_CONCAT(OSS_NICKNAME) AS ossNickname
-		  FROM OSS_NICKNAME
-	  GROUP BY OSS_NAME
-	</select>
+    <select id="getOssAllNickNameList" resultType="hashMap">
+        <!--
+        SELECT OSS_NAME
+             , GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME
+          FROM OSS_NICKNAME
+      GROUP BY OSS_NAME
+      -->
+        SELECT OSS_NAME as ossName
+        , GROUP_CONCAT(OSS_NICKNAME) AS ossNickname
+        FROM OSS_NICKNAME
+        GROUP BY OSS_NAME
+    </select>
 
-	<resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
-		<result property="downloadUrl" column="download_location" />
-		<result property="homepageUrl" column="homepage" />
-		<result property="created" column="created_date" />
-		<result property="obligations" column="obligation_type" />
-		<result property="modified" column="modified_date" />
-		<result property="description" column="summary_description" />
-<!--		<result property="creator" column="" />-->
-	</resultMap>
-	<select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
-		SELECT
-		T1.OSS_ID
-		, T1.OSS_NAME
-		, T1.OSS_VERSION
-		, T1.LICENSE_DIV
-		, T1.HOMEPAGE
-		<choose>
-			<when test="searchFlag">
-				, SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
-			</when>
-			<otherwise>
-				, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
-				FROM OSS_DOWNLOADLOCATION D
-				WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
-			</otherwise>
-		</choose>
-		, T1.SUMMARY_DESCRIPTION
-		, T1.ATTRIBUTION
-		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
-		, T1.CVSS_SCORE
-		, T1.CVE_ID
-		, T1.CREATED_DATE
-		, T1.MODIFIED_DATE
-		, T3.LICENSE_NAME
-		, T1.OBLIGATION_TYPE
-		, SUB1.OSS_TYPE AS OSS_TYPE
-		, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
-		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
-		, T1.COPYRIGHT
-		, T1.ATTRIBUTION
-		, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER					T1
-		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
-		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
-		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
-		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
-			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
-		</if>
-		WHERE T1.USE_YN = 'Y'
-		/*검색 쿼리 시작*/
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			AND (
-			<choose>
-				<when test="ossNameExact">
-					T1.OSS_NAME = #{ossName}
-				</when>
-				<otherwise>
-					T1.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
-				</otherwise>
-			</choose>
-			OR EXISTS (SELECT *
-			FROM OSS_NICKNAME A1
-			WHERE A1.OSS_NAME = T1.OSS_NAME
-			<choose>
-				<when test="ossNameExact">
-					AND A1.OSS_NICKNAME = #{ossName}
-				</when>
-				<otherwise>
-					AND A1.OSS_NICKNAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
-				</otherwise>
-			</choose>
-			)
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-			AND (
-			<choose>
-				<when test="licenseNameExact">
-					UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(T3.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
-				</otherwise>
-			</choose>
-			OR
-			UPPER(T3.LICENSE_NAME) IN (
-			select  UPPER(LICENSE_NAME)
-			from LICENSE_NICKNAME
-			where
-			<choose>
-				<when test="licenseNameExact">
-					UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
-				</otherwise>
-			</choose>
-			)
-			OR
-			<choose>
-				<when test="licenseNameExact">
-					UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(T3.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
-				</otherwise>
-			</choose>
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
-			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
-			AND
-			<choose>
-				<when test="urlExact">
-					(
-					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
-					)
-				</when>
-				<otherwise>
-					(
-					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
-					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
-					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
-					)
-				</otherwise>
-			</choose>
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
-			AND (
-				REPLACE(REPLACE(REPLACE(IFNULL(T2.OSS_COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-			OR
-				REPLACE(REPLACE(REPLACE(IFNULL(T1.COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{createdFrom}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{createdTo}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFrom)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{modifiedFrom}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedTo)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{modifiedTo}
-		</if>
-		<if test="deactivate != null">
-			AND T1.DEACTIVATE_FLAG = #{deactivate}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
-			AND T1.LICENSE_TYPE = #{licenseType}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossType)">
-			AND
-			(
-			FALSE
-			<if test="@oss.fosslight.util.StringUtil@contains(ossType, 'N')">
-				OR OSS_TYPE LIKE '000'
-			</if>
-			<if test="@oss.fosslight.util.StringUtil@contains(ossType, 'M')">
-				OR OSS_TYPE LIKE '1__'
-			</if>
-			<if test="@oss.fosslight.util.StringUtil@contains(ossType, 'D')">
-				OR OSS_TYPE LIKE '_1_'
-			</if>
-			<if test="@oss.fosslight.util.StringUtil@contains(ossType, 'V')">
-				OR OSS_TYPE LIKE '__1'
-			</if>
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
-			<![CDATA[
+    <resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
+        <result property="downloadUrl" column="download_location"/>
+        <result property="homepageUrl" column="homepage"/>
+        <result property="created" column="created_date"/>
+        <result property="obligations" column="obligation_type"/>
+        <result property="modified" column="modified_date"/>
+        <result property="description" column="summary_description"/>
+        <!--		<result property="creator" column="" />-->
+    </resultMap>
+    <select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
+        SELECT
+        T1.OSS_ID
+        , T1.OSS_NAME
+        , T1.OSS_VERSION
+        , T1.LICENSE_DIV
+        , T1.HOMEPAGE
+        <choose>
+            <when test="searchFlag">
+                , SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
+            </when>
+            <otherwise>
+                , IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
+                FROM OSS_DOWNLOADLOCATION D
+                WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+            </otherwise>
+        </choose>
+        , T1.SUMMARY_DESCRIPTION
+        , T1.ATTRIBUTION
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
+        , T1.CVSS_SCORE
+        , T1.CVE_ID
+        , T1.CREATED_DATE
+        , T1.MODIFIED_DATE
+        , T3.LICENSE_NAME
+        , T1.OBLIGATION_TYPE
+        , SUB1.OSS_TYPE AS OSS_TYPE
+        , IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM )
+        AS LICENSE_TYPE
+        , (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS
+        OSS_NICKNAME
+        , T1.COPYRIGHT
+        , T1.ATTRIBUTION
+        , T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
+        INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID =
+        SUB1.OSS_ID
+        LEFT OUTER JOIN T2_CODE_DTL T5 ON T3.LICENSE_TYPE = T5.CD_DTL_NO AND T5.CD_NO = '201' /*Code Table*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+        </if>
+        WHERE T1.USE_YN = 'Y'
+        /*검색 쿼리 시작*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+            AND (
+            <choose>
+                <when test="ossNameExact">
+                    T1.OSS_NAME = #{ossName}
+                </when>
+                <otherwise>
+                    T1.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+                </otherwise>
+            </choose>
+            OR EXISTS (SELECT *
+            FROM OSS_NICKNAME A1
+            WHERE A1.OSS_NAME = T1.OSS_NAME
+            <choose>
+                <when test="ossNameExact">
+                    AND A1.OSS_NICKNAME = #{ossName}
+                </when>
+                <otherwise>
+                    AND A1.OSS_NICKNAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+                </otherwise>
+            </choose>
+            )
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+            AND (
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            OR
+            UPPER(T3.LICENSE_NAME) IN (
+            select UPPER(LICENSE_NAME)
+            from LICENSE_NICKNAME
+            where
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            )
+            OR
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+            AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            AND
+            <choose>
+                <when test="urlExact">
+                    (
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    )
+                </when>
+                <otherwise>
+                    (
+                    T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+            AND (
+            REPLACE(REPLACE(REPLACE(IFNULL(T2.OSS_COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+            OR
+            REPLACE(REPLACE(REPLACE(IFNULL(T1.COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+            AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+            AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{createdFrom}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{createdTo}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFrom)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{modifiedFrom}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedTo)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{modifiedTo}
+        </if>
+        <if test="deactivate != null">
+            AND T1.DEACTIVATE_FLAG = #{deactivate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+            AND T1.LICENSE_TYPE = #{licenseType}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossType)">
+            AND
+            (
+            FALSE
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'N')">
+                OR OSS_TYPE LIKE '000'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'M')">
+                OR OSS_TYPE LIKE '1__'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'D')">
+                OR OSS_TYPE LIKE '_1_'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'V')">
+                OR OSS_TYPE LIKE '__1'
+            </if>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+            <![CDATA[
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
-		</if>
-		<if test="versionCheck">
-			GROUP BY T1.OSS_NAME
-		</if>
-		<include refid="orderby"/>
-		<include refid="limitPage"/>
-	</select>
+        </if>
+        <if test="versionCheck">
+            GROUP BY T1.OSS_NAME
+        </if>
+        <include refid="orderby"/>
+        <include refid="limitPage"/>
+    </select>
 
-	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultMap="OssDtoMap">
-		SELECT
-		#{ossId} AS REF_OSS_ID
-		, T1.OSS_ID
-		, T1.OSS_NAME
-		, T1.OSS_VERSION
-		, T1.LICENSE_DIV
-		, T1.HOMEPAGE
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@notEquals(searchFlag,'N')">
-				, SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
-			</when>
-			<otherwise>
-				, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
-				FROM OSS_DOWNLOADLOCATION D
-				WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
-			</otherwise>
-		</choose>
-		, T1.SUMMARY_DESCRIPTION
-		, T1.ATTRIBUTION
-		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
-		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
-		, T1.CVE_ID
-		, T1.CVSS_SCORE
-		, T1.CREATED_DATE
-		, T1.MODIFIED_DATE
-		, T3.LICENSE_NAME
-		, T1.OBLIGATION_TYPE
-		, SUB1.OSS_TYPE AS OSS_TYPE
-		, T4.CD_DTL_NM AS LICENSE_TYPE
-		, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
-		, T1.COPYRIGHT
-		, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER					T1
-		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
-		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
-		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
-		LEFT OUTER JOIN T2_CODE_DTL 	T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
-		</if>
-		WHERE T1.USE_YN = 'Y'
-		AND T1.OSS_NAME = #{ossName}
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-			AND (
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
-					UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(T3.LICENSE_NAME) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
-				</otherwise>
-			</choose>
-			OR
-			UPPER(T3.LICENSE_NAME) IN (
-			select  UPPER(LICENSE_NAME)
-			from LICENSE_NICKNAME
-			where
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
-					UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
-				</otherwise>
-			</choose>
-			)
-			OR
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
-					UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
-				</when>
-				<otherwise>
-					UPPER(T3.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
-				</otherwise>
-			</choose>
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
-			AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			AND
-			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(homepageAllSearchFlag,'Y')">
-					(
-					SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
-					OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
-					)
-				</when>
-				<otherwise>
-					(
-					T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
-					)
-				</otherwise>
-			</choose>
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyrights)">
-			AND (
-			<foreach item="copyright" index="index" collection="copyrights" open=" (" separator="OR" close=")">
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
-					REPLACE(REPLACE(REPLACE(IFNULL(T2.OSS_COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-				</if>
-			</foreach>
-			OR
-			<foreach item="copyright" index="index" collection="copyrights" open=" (" separator="OR" close=")">
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
-					REPLACE(REPLACE(REPLACE(IFNULL(T1.COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
-				</if>
-			</foreach>
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cEndDate)">
-			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{cEndDate}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mStartDate)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{mStartDate}
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
-			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
-		</if>
-		GROUP BY T1.OSS_ID
-		ORDER BY
-		T1.OSS_VERSION DESC
-	</select>
+    <select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultMap="OssDtoMap">
+        SELECT
+        #{ossId} AS REF_OSS_ID
+        , T1.OSS_ID
+        , T1.OSS_NAME
+        , T1.OSS_VERSION
+        , T1.LICENSE_DIV
+        , T1.HOMEPAGE
+        <choose>
+            <when test="@oss.fosslight.util.StringUtil@notEquals(searchFlag,'N')">
+                , SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
+            </when>
+            <otherwise>
+                , IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
+                FROM OSS_DOWNLOADLOCATION D
+                WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+            </otherwise>
+        </choose>
+        , T1.SUMMARY_DESCRIPTION
+        , T1.ATTRIBUTION
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
+        , T1.CVE_ID
+        , T1.CVSS_SCORE
+        , T1.CREATED_DATE
+        , T1.MODIFIED_DATE
+        , T3.LICENSE_NAME
+        , T1.OBLIGATION_TYPE
+        , SUB1.OSS_TYPE AS OSS_TYPE
+        , T4.CD_DTL_NM AS LICENSE_TYPE
+        , (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS
+        OSS_NICKNAME
+        , T1.COPYRIGHT
+        , T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
+        INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID =
+        SUB1.OSS_ID
+        LEFT OUTER JOIN T2_CODE_DTL T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE = T4.CD_DTL_NO /*Code Table*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
+            LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+        </if>
+        WHERE T1.USE_YN = 'Y'
+        AND T1.OSS_NAME = #{ossName}
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+            AND (
+            <choose>
+                <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+                    UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.LICENSE_NAME) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
+                </otherwise>
+            </choose>
+            OR
+            UPPER(T3.LICENSE_NAME) IN (
+            select UPPER(LICENSE_NAME)
+            from LICENSE_NICKNAME
+            where
+            <choose>
+                <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+                    UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
+                </otherwise>
+            </choose>
+            )
+            OR
+            <choose>
+                <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+                    UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',#{licenseName},'%'))
+                </otherwise>
+            </choose>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(summaryDescription)">
+            AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{summaryDescription},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
+            AND
+            <choose>
+                <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(homepageAllSearchFlag,'Y')">
+                    (
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{homepage} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{homepage},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) =
+                    CONCAT(#{homepage},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{homepage} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) =
+                    CONCAT(#{homepage},"/")
+                    )
+                </when>
+                <otherwise>
+                    (
+                    T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+                    OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+                    OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(copyrights)">
+            AND (
+            <foreach item="copyright" index="index" collection="copyrights" open=" (" separator="OR" close=")">
+                <if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+                    REPLACE(REPLACE(REPLACE(IFNULL(T2.OSS_COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+                    CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+                </if>
+            </foreach>
+            OR
+            <foreach item="copyright" index="index" collection="copyrights" open=" (" separator="OR" close=")">
+                <if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+                    REPLACE(REPLACE(REPLACE(IFNULL(T1.COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+                    CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+                </if>
+            </foreach>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+            AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+            AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cStartDate)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{cStartDate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cEndDate)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{cEndDate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(mStartDate)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> #{mStartDate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(mEndDate)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> #{mEndDate}
+        </if>
+        GROUP BY T1.OSS_ID
+        ORDER BY
+        T1.OSS_VERSION DESC
+    </select>
 
-	<select id="selectOssLicenseList" resultType="oss.fosslight.api.dto.LicenseDto">
-		SELECT
-		T1.OSS_ID
-		, T1.LICENSE_ID
-		, T1.OSS_LICENSE_IDX
-		, T1.OSS_LICENSE_COMB
-		, T1.OSS_LICENSE_TEXT
-		, T1.OSS_COPYRIGHT
-		, T2.LICENSE_NAME
-		, IF(IFNULL(T2.SHORT_IDENTIFIER,'') = '',T2.LICENSE_NAME,T2.SHORT_IDENTIFIER) AS LICENSE_NAME_EX
-		, T3.CD_DTL_NM AS LICENSE_TYPE
-		, CONCAT(
-		IF(		T2.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'')
-		, IF(	T2.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
-		) AS OBLIGATION
-		, CONCAT(
-		IF(		T2.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N')
-		, IF(	T2.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'Y',	'N')
-		, IF(	T2.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
-		) AS OBLIGATION_CHECKS
+    <select id="selectOssLicenseList" resultType="oss.fosslight.api.dto.LicenseDto">
+        SELECT
+        T1.OSS_ID
+        , T1.LICENSE_ID
+        , T1.OSS_LICENSE_IDX
+        , T1.OSS_LICENSE_COMB
+        , T1.OSS_LICENSE_TEXT
+        , T1.OSS_COPYRIGHT
+        , T2.LICENSE_NAME
+        , IF(IFNULL(T2.SHORT_IDENTIFIER,'') = '',T2.LICENSE_NAME,T2.SHORT_IDENTIFIER) AS LICENSE_NAME_EX
+        , T3.CD_DTL_NM AS LICENSE_TYPE
+        , CONCAT(
+        IF( T2.OBLIGATION_NOTIFICATION_YN='Y' ,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>', '')
+        , IF( T2.OBLIGATION_DISCLOSING_SRC_YN='Y' ,'
+        <![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>', '')
+        ) AS OBLIGATION
+        , CONCAT(
+        IF( T2.OBLIGATION_NOTIFICATION_YN='Y' ,'Y', 'N')
+        , IF( T2.OBLIGATION_DISCLOSING_SRC_YN='Y' ,'Y', 'N')
+        , IF( T2.OBLIGATION_NEEDS_CHECK_YN='Y' ,'Y', 'N')
+        ) AS OBLIGATION_CHECKS
 
-		FROM
-		OSS_LICENSE_DECLARED 			T1
-		LEFT OUTER JOIN LICENSE_MASTER 	T2 ON T1.LICENSE_ID 	= T2.LICENSE_ID AND T2.USE_YN = 'Y'
-		LEFT OUTER JOIN T2_CODE_DTL		T3 ON T2.LICENSE_TYPE 	= T3.CD_DTL_NO
-		WHERE 1=1
-		AND T3.CD_NO='201'
-		<choose>
-			<when test="ossIdList != null">
-				<foreach collection="list" item="_ossId" open="AND T1.OSS_ID IN (" close=")" separator=",">
-					#{_ossId}
-				</foreach>
-			</when>
-			<otherwise>AND T1.OSS_ID = #{ossId}</otherwise>
-		</choose>
-		ORDER BY T1.OSS_ID, T1.OSS_LICENSE_IDX ASC;
-	</select>
+        FROM
+        OSS_LICENSE_DECLARED T1
+        LEFT OUTER JOIN LICENSE_MASTER T2 ON T1.LICENSE_ID = T2.LICENSE_ID AND T2.USE_YN = 'Y'
+        LEFT OUTER JOIN T2_CODE_DTL T3 ON T2.LICENSE_TYPE = T3.CD_DTL_NO
+        WHERE 1=1
+        AND T3.CD_NO='201'
+        <choose>
+            <when test="ossIdList != null">
+                <foreach collection="list" item="_ossId" open="AND T1.OSS_ID IN (" close=")" separator=",">
+                    #{_ossId}
+                </foreach>
+            </when>
+            <otherwise>AND T1.OSS_ID = #{ossId}</otherwise>
+        </choose>
+        ORDER BY T1.OSS_ID, T1.OSS_LICENSE_IDX ASC;
+    </select>
+
+    <resultMap id="OssDetailsDtoMap" type="oss.fosslight.api.dto.OssDetailsDto">
+        <result property="downloadUrl" column="download_location"/>
+        <result property="homepageUrl" column="homepage"/>
+        <result property="created" column="created_date"/>
+        <result property="obligations" column="obligation_type"/>
+        <result property="modified" column="modified_date"/>
+        <result property="description" column="summary_description"/>
+        <result property="deactivate" column="deactivate_flag"/>
+    </resultMap>
+    <select id="selectOssById" resultMap="OssDetailsDtoMap">
+        SELECT
+        T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.HOMEPAGE,
+        IFNULL(
+        (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
+        FROM OSS_DOWNLOADLOCATION D
+        WHERE D.OSS_ID = T1.OSS_ID
+        ), T1.DOWNLOAD_LOCATION
+        ) AS DOWNLOAD_LOCATION,
+        T1.SUMMARY_DESCRIPTION,
+        T1.ATTRIBUTION,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
+        T1.CVSS_SCORE,
+        T1.CVE_ID,
+        T1.CREATED_DATE,
+        T1.MODIFIED_DATE,
+        T3.LICENSE_NAME,
+        T1.OBLIGATION_TYPE,
+        SUB1.OSS_TYPE AS OSS_TYPE,
+        IFNULL(
+        (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE),
+        T5.CD_DTL_NM
+        ) AS LICENSE_TYPE,
+        (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS
+        OSS_NICKNAME,
+        T1.COPYRIGHT, T1.ATTRIBUTION, T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
+        INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID =
+        SUB1.OSS_ID
+        LEFT OUTER JOIN T2_CODE_DTL T5 ON T3.LICENSE_TYPE = T5.CD_DTL_NO AND T5.CD_NO = '201' /*Code Table*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+        </if>
+        WHERE T1.USE_YN = 'Y' AND T1.OSS_ID = #{oss_id}
+        GROUP BY T1.OSS_ID
+    </select>
+
+
+    <resultMap id="VulnerabilityDtoMap" type="oss.fosslight.api.dto.VulnerabilityDto">
+        <result property="ossName" column="product"/>
+        <result property="ossVersion" column="version"/>
+        <result property="summary" column="vuln_summary"/>
+        <result property="modified" column="modi_date"/>
+    </resultMap>
+    <select id="getOssVulnerabilityList" resultMap="VulnerabilityDtoMap">
+
+        SELECT T1.PRODUCT,
+               T1.VERSION,
+               T1.CVE_ID,
+               T1.CVSS_SCORE,
+               GROUP_CONCAT(DISTINCT(T1.VENDOR), ',') AS VENDOR,
+               T1.VULN_SUMMARY,
+               T1.MODI_DATE
+        FROM NVD_DATA_SCORE_V3 T1
+                 INNER JOIN (SELECT M1.OSS_ID,
+                                    M1.OSS_NAME,
+                                    CASE
+                                        WHEN M1.OSS_VERSION IS NULL THEN '-'
+                                        WHEN M1.OSS_VERSION = '' THEN '-'
+                                        ELSE M1.OSS_VERSION
+                                        END OSS_VERSION
+                             FROM OSS_MASTER M1
+                             WHERE M1.OSS_ID = #{ossId}) T2
+                            ON T1.PRODUCT = T2.OSS_NAME AND T1.VERSION = T2.OSS_VERSION
+        GROUP BY T1.PRODUCT, T1.VERSION, T1.CVE_ID
+        ORDER BY T1.CVSS_SCORE DESC, T1.MODI_DATE DESC
+    </select>
 </mapper>

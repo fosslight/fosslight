@@ -7,19 +7,16 @@ package oss.fosslight.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oss.fosslight.api.dto.LicenseDto;
-import oss.fosslight.api.dto.ListOssDto;
-import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.api.dto.*;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssLicense;
+import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.ApiOssService;
 import oss.fosslight.util.StringUtil;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -116,6 +113,22 @@ public class ApiOssServiceImpl implements ApiOssService {
         return ListOssDto.Result.builder()
                 .list(rows)
                 .totalCount(totalCount)
+                .build();
+    }
+
+    public GetOSSDetailsDto.Result getOss(String id) {
+        var oss = apiOssMapper.selectOssById(id);
+
+        var idList = Collections.singletonList(oss.getOssId());
+        List<LicenseDto> licenseList = apiOssMapper.selectOssLicenseList(idList);
+        oss.setLicenses(licenseList);
+
+        var vulnerabilityList = apiOssMapper.getOssVulnerabilityList(oss.getOssId());
+        oss.setVulnerabilities(vulnerabilityList);
+
+        return GetOSSDetailsDto.Result
+                .builder()
+                .oss(oss)
                 .build();
     }
 }

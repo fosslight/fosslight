@@ -28,8 +28,8 @@ public class ApiLicenseServiceImpl implements ApiLicenseService {
     }
 
     @Override
-    public GetLicenseDetailsDto.Result getLicense(GetLicenseDetailsDto.Request request) {
-        var license = apiLicenseMapper.selectLicenseById(request.getId());
+    public GetLicenseDetailsDto.Result getLicense(String id) {
+        var license = apiLicenseMapper.selectLicenseById(id);
         var nicknames = apiLicenseMapper.selectLicenseNicknameList(license.getLicenseName());
         license.setLicenseNicknames(nicknames);
         return GetLicenseDetailsDto.Result.builder()

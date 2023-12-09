@@ -5,6 +5,7 @@
 
 package oss.fosslight.service;
 
+import oss.fosslight.api.dto.GetOSSDetailsDto;
 import oss.fosslight.api.dto.ListOssDto;
 
 import java.util.List;
@@ -19,5 +20,6 @@ public interface ApiOssService {
 	
 	String[] getOssNickNameListByOssName(String ossName);
 
-	public ListOssDto.Result listOss(ListOssDto.Request request);
+	ListOssDto.Result listOss(ListOssDto.Request request);
+	GetOSSDetailsDto.Result getOss(String id);
 }

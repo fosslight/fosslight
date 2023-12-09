@@ -37,10 +37,10 @@ public class LiteLicenseController {
 
     @GetMapping("/licenses/{id}")
     public @ResponseBody ResponseEntity<GetLicenseDetailsDto.Result> getLicense(
-            @ModelAttribute GetLicenseDetailsDto .Request licenseRequest
+            @PathVariable("id")String id
     ) {
         try {
-            var result = apiLicenseService.getLicense(licenseRequest);
+            var result = apiLicenseService.getLicense(id);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
