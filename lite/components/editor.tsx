@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { UseFormReturn } from 'react-hook-form';
 
-export default function Editor({ form, name }: { form: UseFormReturn<any>; name: string }) {
+export default function Editor({
+  value,
+  setValue
+}: {
+  value: string;
+  setValue: (value: string) => void;
+}) {
   const [editorLoaded, setEditorLoaded] = useState(false);
   const editorRef = useRef<any>();
   const { CKEditor, ClassicEditor } = editorRef.current || {};
@@ -12,8 +17,6 @@ export default function Editor({ form, name }: { form: UseFormReturn<any>; name:
       ClassicEditor: require('@ckeditor/ckeditor5-build-classic')
     };
     setEditorLoaded(true);
-
-    form.register(name);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -21,8 +24,8 @@ export default function Editor({ form, name }: { form: UseFormReturn<any>; name:
     editorLoaded && (
       <CKEditor
         editor={ClassicEditor}
-        data={form.watch(name)}
-        onChange={(_: any, editor: any) => form.setValue(name, editor.getData())}
+        data={value}
+        onChange={(_: any, editor: any) => setValue(editor.getData())}
       />
     )
   );

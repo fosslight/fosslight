@@ -18,7 +18,7 @@ export default function SelfCheckModal({
 }) {
   const [wait, setWait] = useState(false);
   const router = useRouter();
-  const form = useForm({
+  const { register, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       projectName: values?.projectName || '',
       projectVersion: values?.projectVersion || '',
@@ -52,7 +52,7 @@ export default function SelfCheckModal({
   return (
     <Modal show={show} onHide={onHide} size="sm" hideByBackdrop={false}>
       <form
-        onSubmit={form.handleSubmit((data) => {
+        onSubmit={handleSubmit((data) => {
           if (!window.confirm('Are you sure to continue?')) {
             return;
           }
@@ -84,7 +84,7 @@ export default function SelfCheckModal({
             <input
               className="w-full px-2 py-1 border border-darkgray outline-none"
               placeholder="EX) FOSSLight Hub Lite"
-              {...form.register('projectName', { required: true })}
+              {...register('projectName', { required: true })}
             />
           </div>
           <div className="flex flex-col gap-y-2">
@@ -92,12 +92,12 @@ export default function SelfCheckModal({
             <input
               className="w-full px-2 py-1 border border-darkgray outline-none"
               placeholder="EX) 1.0.0"
-              {...form.register('projectVersion')}
+              {...register('projectVersion')}
             />
           </div>
           <div className="flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Comment</label>
-            <Editor form={form} name="comment" />
+            <Editor value={watch('comment')} setValue={(value) => setValue('comment', value)} />
           </div>
         </div>
         <div className="flex justify-end gap-x-1 mt-4">
