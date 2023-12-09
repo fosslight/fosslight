@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import Modal from './modal';
 
+// TODO (Project ID)
+const PRJ_ID = '2';
+
 export default function SelfCheckNotice() {
   const [method, setMethod] = useState<'default' | 'custom'>('default');
   const [companyName, setCompanyName] = useState<string | null>('');
@@ -39,6 +42,47 @@ export default function SelfCheckNotice() {
     onFinish: () => setLoading(false)
   });
 
+  function buildRequestBody() {
+    const body: any = { prjId: PRJ_ID, previewOnly: 'N' };
+
+    if (method === 'custom') {
+      body.editNoticeYn = 'Y';
+
+      if (companyName) {
+        body.editCompanyYn = 'Y';
+        body.companyNameFull = companyName;
+      } else {
+        body.editCompanyYn = 'N';
+      }
+
+      if (ossSite) {
+        body.editDistributionSiteUrlYn = 'Y';
+        body.distributionSiteUrl = ossSite;
+      } else {
+        body.editDistributionSiteUrlYn = 'N';
+      }
+
+      if (email) {
+        body.editEmailYn = 'Y';
+        body.email = email;
+      } else {
+        body.editEmailYn = 'N';
+      }
+
+      body.hideOssVersionYn = !isVerShown ? 'Y' : 'N';
+
+      if (append) {
+        body.editAppendedYn = 'Y';
+        body.appended = `<p>${append}</p>`;
+        body.appendedTEXT = append;
+      } else {
+        body.editAppendedYn = 'N';
+      }
+    }
+
+    return body;
+  }
+
   return (
     <>
       <div className="w-[calc(100%-4px)] shadow-box">
@@ -69,46 +113,7 @@ export default function SelfCheckNotice() {
           <button className="px-2 py-0.5 crimson-btn">Generate</button>
           <button
             className="px-2 py-0.5 default-btn"
-            onClick={() => {
-              const body: any = { prjId: 2, previewOnly: 'N' };
-
-              if (method === 'custom') {
-                body.editNoticeYn = 'Y';
-
-                if (companyName) {
-                  body.editCompanyYn = 'Y';
-                  body.companyNameFull = companyName;
-                } else {
-                  body.editCompanyYn = 'N';
-                }
-
-                if (ossSite) {
-                  body.editDistributionSiteUrlYn = 'Y';
-                  body.distributionSiteUrl = ossSite;
-                } else {
-                  body.editDistributionSiteUrlYn = 'N';
-                }
-
-                if (email) {
-                  body.editEmailYn = 'Y';
-                  body.email = email;
-                } else {
-                  body.editEmailYn = 'N';
-                }
-
-                body.hideOssVersionYn = !isVerShown ? 'Y' : 'N';
-
-                if (append) {
-                  body.editAppendedYn = 'Y';
-                  body.appended = `<p>${append}</p>`;
-                  body.appendedTEXT = append;
-                } else {
-                  body.editAppendedYn = 'N';
-                }
-              }
-
-              previewNoticeRequest.execute({ body });
-            }}
+            onClick={() => previewNoticeRequest.execute({ body: buildRequestBody() })}
           >
             Preview
           </button>
