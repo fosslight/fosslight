@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [isSideBarShown, setIsSideBarShown] = useState(true);
   const router = useRouter();
   const isMobile = useMediaQuery({ maxWidth: 768 });
-  const isSubwindow = Boolean(window.opener);
+  const isSubwindow = typeof window !== 'undefined' && Boolean(window.opener);
 
   // API for loading my info
   const loadMeRequest = useAPI('get', 'http://localhost:8180/api/lite/me', {
