@@ -3,6 +3,7 @@ import { useAPI } from '@/lib/hooks';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useSetRecoilState } from 'recoil';
+import Editor from './editor';
 import Modal from './modal';
 
 export default function SelfCheckNotice({ id }: { id: string }) {
@@ -115,8 +116,8 @@ export default function SelfCheckNotice({ id }: { id: string }) {
 
       if (append) {
         body.editAppendedYn = 'Y';
-        body.appended = `<p>${append}</p>`;
-        body.appendedTEXT = append;
+        body.appended = append;
+        body.appendedTEXT = append.replace(/(<([^>]+)>)/gi, '').trim();
       } else {
         body.editAppendedYn = 'N';
       }
@@ -273,17 +274,11 @@ export default function SelfCheckNotice({ id }: { id: string }) {
               </label>
             </div>
             <div className={inputWrapperClass}>
-              <div className={commentClass}>
+              <div className={clsx(commentClass, append !== null && 'mb-2')}>
                 * Select if there is something to add to the OSS Notice
               </div>
-              {append !== null && (
-                <textarea
-                  className="w-full p-2 mt-2 border border-darkgray outline-none resize-none"
-                  rows={6}
-                  value={append}
-                  disabled={method === 'default'}
-                  onChange={(e) => setAppend(e.target.value)}
-                />
+              {append !== null && method === 'custom' && (
+                <Editor value={append} setValue={setAppend} />
               )}
             </div>
           </div>
