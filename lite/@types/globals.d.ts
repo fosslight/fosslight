@@ -91,6 +91,13 @@ declare global {
   }
 
   namespace SelfCheck {
+    interface Basics {
+      projectName: string;
+      projectVersion: string;
+      created: string;
+      comment: string;
+    }
+
     interface Edit {
       projectId: string;
       projectName: string;
