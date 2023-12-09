@@ -9,6 +9,7 @@ import Modal from './modal';
 const PRJ_ID = '2';
 
 export default function SelfCheckNotice() {
+  const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'default' | 'custom'>('default');
   const [companyName, setCompanyName] = useState<string | null>('');
   const [ossSite, setOssSite] = useState<string | null>('');
@@ -16,10 +17,10 @@ export default function SelfCheckNotice() {
   const [isVerShown, setIsVerShown] = useState(true);
   const [append, setAppend] = useState<string | null>(null);
 
-  // Preview
-  const setLoading = useSetRecoilState(loadingState);
-  const [previewHtml, setPreviewHtml] = useState('');
+  // Download/Preview modals
+  const [isDownloadShown, setIsDownloadShown] = useState(false);
   const [isPreviewShown, setIsPreviewShown] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
 
   const rowClass = 'flex flex-col gap-2 lg:flex-row';
   const labelWrapperClass = 'flex-shrink-0 w-44';
@@ -27,6 +28,50 @@ export default function SelfCheckNotice() {
   const inputWrapperClass = 'flex-1';
   const inputClass = 'w-60 max-w-full px-2 py-0.5 mb-1.5 border border-darkgray outline-none';
   const commentClass = 'text-xs text-darkgray';
+
+  // APIs for downloading notice
+  const urlsForDownload = {
+    default: 'http://localhost:8180/selfCheck/downloadNoticePreview',
+    spdx: 'http://localhost:8180/spdxdownload/getFile'
+  };
+  const downloadNoticeRequests = {
+    html: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticePreview', {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false)
+    }),
+    text: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeText', {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false)
+    }),
+    simpleHtml: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeSimple', {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false)
+    }),
+    simpleText: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeTextSimple', {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false)
+    }),
+    spdx: useAPI('post', 'http://localhost:8180/spdxdownload/getSelfcheckSPDXPost', {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `${urlsForDownload.spdx}?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false),
+      sendJson: true
+    })
+  };
 
   // API for previewing notice
   const previewNoticeRequest = useAPI('post', 'http://localhost:8180/selfCheck/noticeAjax', {
@@ -110,7 +155,9 @@ export default function SelfCheckNotice() {
 
         {/* Buttons */}
         <div className="flex justify-end gap-x-1 mt-4 mb-2">
-          <button className="px-2 py-0.5 crimson-btn">Generate</button>
+          <button className="px-2 py-0.5 crimson-btn" onClick={() => setIsDownloadShown(true)}>
+            Download
+          </button>
           <button
             className="px-2 py-0.5 default-btn"
             onClick={() => previewNoticeRequest.execute({ body: buildRequestBody() })}
@@ -252,6 +299,58 @@ export default function SelfCheckNotice() {
           notice is on you, and FOSSLight Hub has no responsibility to you and any third party.
         </div>
       </div>
+
+      {/* Download */}
+      <Modal show={isDownloadShown} onHide={() => setIsDownloadShown(false)} size="md">
+        <div className="grid grid-cols-2 gap-4">
+          {(
+            [
+              ['html', 'Default (HTML)'],
+              ['text', 'Default (Text)'],
+              ['simpleHtml', 'Simple (HTML)'],
+              ['simpleText', 'Simple (Text)']
+            ] as ['html' | 'text' | 'simpleHtml' | 'simpleText', string][]
+          ).map((type) => (
+            <button
+              key={type[0]}
+              className="px-2 py-0.5 default-btn"
+              onClick={() =>
+                downloadNoticeRequests[type[0]].execute({
+                  body: {
+                    ...buildRequestBody(),
+                    isSimpleNotice: type[0].includes('simple') ? 'Y' : 'N'
+                  }
+                })
+              }
+            >
+              {type[1]}
+            </button>
+          ))}
+          {[
+            ['spdx', 'SPDX (Spreadsheet)'],
+            ['spdxRdf', 'SPDX (RDF)'],
+            ['spdxTag', 'SPDX (TAG)'],
+            ['spdxJson', 'SPDX (JSON)'],
+            ['spdxYaml', 'SPDX (YAML)']
+          ].map((type) => (
+            <button
+              key={type[0]}
+              className="px-2 py-0.5 charcoal-btn"
+              onClick={() => {
+                downloadNoticeRequests.spdx.execute({
+                  body: {
+                    prjId: PRJ_ID,
+                    dataStr: JSON.stringify({ ...buildRequestBody(), isSimpleNotice: 'N' }),
+                    type: type[0]
+                  }
+                });
+              }}
+            >
+              {type[1]}
+            </button>
+          ))}
+        </div>
+      </Modal>
 
       {/* Preview */}
       <Modal
