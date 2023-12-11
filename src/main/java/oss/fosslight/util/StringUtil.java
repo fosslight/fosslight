@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.CharUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.web.util.HtmlUtils;
  * 또한, Spring의 StringUtils, commons-lang의 StringUtils의 래퍼 기능을 제공한다.
  *
  */
+@Component("StringUtil")
 public final class StringUtil {
 	private StringUtil() {}
 	

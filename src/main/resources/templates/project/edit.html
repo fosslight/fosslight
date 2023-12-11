@@ -64,7 +64,6 @@
                                         </div>
                                     </div> 
                                 </div>
-
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="form-group">
@@ -87,7 +86,7 @@
                                             	</th:block>
                                             </select>
                                             <div class="row mt-2">
-                                                <p class="text-gray text-bold mx-3">Network service only?</p>
+                                                <p class="text-gray text-bold mx-3" th:text="'Network service only?'"></p>
                                                 <div class="form-group mb-0 ml-">
                                                     <div class="custom-control custom-switch">
                                                         <input name="networkServerType" type="checkbox" class="custom-control-input" id="customSwitch1" th:checked="${project != null && #strings.equals(project.networkServerType, 'Y')}">
@@ -109,7 +108,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="inputName">Model Information</label>
+                                    <label for="inputName" th:text="'Model Information'"></label>
                                     <div class="row">
                                         <div class="col-10 mb-2 d-flex">
                                        		<div class="float-left" id="modelFile" style="max-width: 100%;"></div>
@@ -168,7 +167,8 @@
                                         				</th:block>
                                         			</th:block>
                                             	</select>
-                                            	<input type="text" id="emailTemp" class="w220" style="display:none;"/>
+                                            	<input type="text" id="emailTemp" class="w220" style="display:none;"
+                                            			th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
                                         	</th:block>
                                         	<th:block th:if="${!useDomainFlag}">
                                         		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
@@ -208,8 +208,6 @@
                                 <a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right">Save</a>
                             </div>
                         </div>
-
-
                     </div>
                     <div class="col-md-3">
                         <div class="card card-lg-red">

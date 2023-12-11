@@ -287,7 +287,7 @@ var fn_grid_com = {
 		// 메인 그리드 체크박스 포메터
 		cboxFormatter : function(cellvalue, options, rowObject){
 			  return '<input id=\"'+options.rowId+'_excludeYn\" type="checkbox"' + (cellvalue=='Y' ? ' value ="Y" checked="checked"' : ' value ="N"') +
-		      'onclick="fn_grid_com.onCboxClick(\'' + options.rowId + '\',\'main\')';
+		      'onclick="fn_grid_com.onCboxClick(\'' + options.rowId + '\',\'main\')/>';
 		},
 		cboxUnFormatter : function(cellvalue, options, rowObject){
 			var cboxValue = $("#"+options.rowId+"_excludeYn").val();

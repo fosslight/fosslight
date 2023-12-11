@@ -29,7 +29,7 @@ public class HistoryController extends CoTopComponent {
 	
 	@GetMapping(value=HISTORY.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "system/history :: content";
+		return "system/history";
 	}
 	
 	@GetMapping(value=HISTORY.LIST_AJAX)
@@ -49,8 +49,7 @@ public class HistoryController extends CoTopComponent {
 		Map<String, Object> map = historyService.getAsToBeHistoryDataByGrid(history);
 		model.addAttribute("basicInfo", historyService.getData(history));
 		model.addAttribute("history", map);
-		model.addAttribute("historyJson", toJson(map));
 
-		return HISTORY.EDIT_JSP;
+		return "system/history-edit";
 	}
 }

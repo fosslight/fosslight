@@ -66,9 +66,8 @@ public class LicenseController extends CoTopComponent{
 		}
 		
 		model.addAttribute("searchBean", searchBean);
-		model.addAttribute("gRowCnt", CoCodeManager.getCodeExpString(CommonFunction.getCoConstDefVal("CD_EXCEL_DOWNLOAD"), CommonFunction.getCoConstDefVal("CD_MAX_ROW_COUNT")));
 		
-		return "license/list :: content";
+		return "license/list";
 	}
 	
 	@GetMapping(value=LICENSE.LIST_AJAX)
@@ -118,7 +117,7 @@ public class LicenseController extends CoTopComponent{
 	
 	@GetMapping(value=LICENSE.EDIT)
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
-		return "license/edit :: content";
+		return "license/edit";
 	}
 	
 	@GetMapping(value=LICENSE.EDIT_ID)
@@ -140,7 +139,7 @@ public class LicenseController extends CoTopComponent{
 		
 		model.addAttribute("detail", licenseMaster);
 		
-		return "license/edit :: content";
+		return "license/edit";
 //		if ("ROLE_ADMIN".equals(loginUserRole())) {
 //			return LICENSE.EDIT_JSP;
 //		} else {

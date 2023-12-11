@@ -43,174 +43,137 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
-            <a href="/dashboard/list" class="nav-link">
+            <a th:href="@{/dashboard/list}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>Dashboard</p>
+              	<p th:text="Dashboard"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="/license/list" class="nav-link" id="license-list">
+          	<a th:href="@{/license/list}" class="nav-link" id="license-list">
               <i class="nav-icon fas fa-th"></i>
-              <p>
-                License List
-              </p>
+              	<p th:text="'License List'"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="/oss/list" class="nav-link">
+            <a th:href="@{/oss/list}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                OSS List
-              </p>
+              	<p th:text="'OSS List'"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="/project/list" class="nav-link">
+            <a th:href="@{/project/list}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Project List
-              </p>
+              	<p th:text="'Project List'"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="./view/partner/partner-list.html" class="nav-link">
+            <a th:href="@{/partner/list}" class="nav-link">
               <i class="nav-icon fas fa-edit"></i>
-              <p>
-                3rd Party List
-              </p>
+              	<p th:text="'3rd Party List'"></p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./view/partner/partner-add.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>3rd Party Add</p>
-                </a>
-              </li>
-            </ul>
           </li>
           <li class="nav-item">
-            <a href="/binary" class="nav-link">
+            <a th:href="@{/binary}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Binary DB
-              </p>
+              	<p th:text="'Binary DB'"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="./view/vulnerability/vulnerabliity.html" class="nav-link">
+            <a th:href="@{/vulnerability/list}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Vulnerability
-              </p>
+              	<p th:text="Vulnerability"></p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="./view/selfCheck/selfCheck-list.html" class="nav-link">
+            <a th:href="@{/selfCheck/list}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Self-Check List
-              </p>
+              	<p th:text="'Self-Check List'"></p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./view/selfCheck/selfCheck-add.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Self-Check Add</p>
-                </a>
-              </li>
-            </ul>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${complianceStatusFlag and (projectFlag or partnerFlag)}">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Compliance Status
-              </p>
+              	<p th:text="Compliance Status"></p></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./view/compliance/oscSt-list.html" class="nav-link">
+              <li class="nav-item" th:if="${projectFlag}">
+                <a th:href="@{/compliance/modelStatus}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>MODEL(S/W) OSC Status</p>
+                  	<p th:text="'MODEL(S/W) OSC Status'"></p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="./view/compliance/partySt-list.html" class="nav-link">
+              <li class="nav-item" th:if="${partnerFlag}">
+                <a th:href="@{/compliance/3rdList}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>3rd Party Status</p>
+                  <p th:text="'3rd Party Status'"></p>
                 </a>
               </li>
             </ul>
           </li>
           <li class="nav-item">
-            <a href="./view/configuration/configuration.html" class="nav-link">
+            <a th:href="@{/system/configuration}" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
-              <p>
-                Configuration
-              </p>
+	          	<p th:text="Configuration"></p>
             </a>
           </li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon far fa-envelope"></i>
-              <p>
-                System
-                <i class="fas fa-angle-left right"></i>
-              </p>
+              	<p th:text="System"><i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a th:href="@{/statistics/view}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Statistics</p>
+                  	<p th:text="Statistics"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/code" class="nav-link">
+                <a th:href="@{/system/code}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Code management</p>
+                  	<p th:text="'Code management'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/user" class="nav-link">
+                <a th:href="@{/system/user}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>User management</p>
+                  	<p th:text="'User management'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/history" class="nav-link">
+                <a th:href="@{/system/history}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>History List</p>
+                  	<p th:text="'History List'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/notice" class="nav-link">
+                <a th:href="@{/system/notice}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Notification</p>
+                  	<p th:text="Notification"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/sentMail" class="nav-link">
+                <a th:href="@{/system/sentMail}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Sent Mail List</p>
+                  	<p th:text="'Sent Mail List'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/processGuide" class="nav-link">
+                <a th:href="@{/system/processGuide}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Help & Guide</p>
+                  	<p th:text="'Help & Guide'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/vulnerabilityHistory" class="nav-link">
+                <a th:href="@{/system/vulnerabilityHistory}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Vulnerability Log</p>
+                  	<p th:text="'Vulnerability Log'"></p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/system/binaryDataHistory" class="nav-link">
+                <a th:href="@{/system/binaryDataHistory}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>BinaryDB Log</p>
+                  	<p th:text="'BinaryDB Log'"></p>
                 </a>
               </li>
             </ul>
@@ -226,10 +189,5 @@
       All rights reserved.
     </div>
   </aside>
-
-  <script type="text/javascript">
-    $(document).ready(function () {
-    });
-  </script>
 </th:block>
 </html>

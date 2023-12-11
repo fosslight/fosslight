@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="system/history-edit-script :: script"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout">
+            <section class="content-header">
+                <div class="container-fluid">
+                	<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
+                        <div class="card-body">
+                            <div class="card p-1 mb-1">
+                            	<div class="row" name="info-form">
+                                 	<div class="col-12">
+                                      	<div class="p-3 mt-1">
+                                      		<div class="row">
+                                      			<div class="col-2">
+                                      				<div class="row">
+                                      					<div class="col-3">
+                          									<span class="text-bold" th:text="ID"></span>
+                      									</div>
+                      									<div class="col-8" th:text="${basicInfo.idx}"></div>
+                                      				</div>
+                                      			</div>
+                                      			<span class="text-gray text-bold mr-3">|</span>
+                                      			<div class="col-2">
+                                      				<div class="row">
+                                      					<div class="col-3">
+                          									<span class="text-bold" th:text="Name"></span>
+                      									</div>
+                      									<div class="col-8" th:text="${basicInfo.hTitle}"></div>
+                                      				</div>
+                                      			</div>
+                                      			<span class="text-gray text-bold mr-3">|</span>
+                                      			<div class="col-2">
+                                      				<div class="row">
+                                      					<div class="col-3">
+                          									<span class="text-bold" th:text="Type"></span>
+                      									</div>
+                      									<div class="col-8" th:text="${basicInfo.hTypeNm}"></div>
+                                      				</div>
+                                      			</div>
+                                      			<span class="text-gray text-bold mr-3">|</span>
+                                      			<div class="col-2">
+                                      				<div class="row">
+                                      					<div class="col-3">
+                          									<span class="text-bold" th:text="Action"></span>
+                      									</div>
+                      									<div class="col-8" th:text="${basicInfo.hAction}"></div>
+                                      				</div>
+                                      			</div>
+                                      			<span class="text-gray text-bold mr-3">|</span>
+                                      			<div class="col-3">
+                                      				<div class="row">
+                                      					<div class="col-3">
+                          									<span class="text-bold" th:text="Modifier"></span>
+                      									</div>
+                      									<div class="col-9" th:text="${basicInfo.modifier + ' (' + #strings.setSplit(basicInfo.modifiedDate, '.')[0] + ')'}"></div>
+                                      				</div>
+                                      			</div>
+                                      		</div>
+                                      	</div>
+                               		</div>
+                              	</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid" id="historyGirdArea">
+                	<div class="card card-dark p-2" style="background-color: #f5f4f3;">
+                		<div class="row mt-3 mb-2">
+                    		<div class="col-md-12 jqGridSet">
+                        		<table id="list"><tr><td></td></tr></table>
+                       		</div>
+                  		</div>
+                	<th:block th:if="${#maps.containsKey(history, 'sub')}">
+                		<th:block th:if="${#lists.size(history.get('sub')) > 0}">
+                		<div class="card-body">
+                			<div class="row mt-3 mb-2">
+                				<div class="col-12">
+                					<div class="row text-center">
+                						<div class="col-5" style="background-color:#f8f9fa; text-align:center; float:none; margin:0 auto" th:text="Before"></div>
+                						<span style="width:5px;"></span>
+                						<div class="col-5" style="background-color:#f8f9fa; text-align:center; float:none; margin:0 auto" th:text="After"></div>
+                					</div>
+                				</div>
+                			</div>
+                			<div class="row mt-3 mb-2" th:each="sub, status : ${history.sub}">
+                				<div class="col-md-12">
+                					<div class="row text-center">
+                						<div class="col-md-5 jqGridSet" style="float:none; margin:0 auto">
+                							<h6 align="left" th:text="${sub.type}"></h6>
+                							<table th:id="'subAsList'+${status.count}" ><tr><td></td></tr></table>
+                						</div>
+                						<div class="col-md-5 jqGridSet" style="float:none; margin:0 auto">
+                							<h6 align="left" th:text="${sub.type}"></h6>
+                							<table th:id="'subBeList'+${status.count}" ><tr><td></td></tr></table>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+                		</div>
+                		</th:block>
+                	</th:block>
+                	</div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

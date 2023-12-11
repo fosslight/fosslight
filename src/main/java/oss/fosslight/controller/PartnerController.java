@@ -147,7 +147,7 @@ public class PartnerController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return PARTNER.LIST_JSP;
+		return "partner/list";
 		
 		
 	}
@@ -158,7 +158,7 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return PARTNER.EDIT_JSP;
+		return "partner/edit";
 	}
 	
 	@GetMapping(value=PARTNER.EDIT_ID, produces = "text/html; charset=utf-8")
@@ -197,11 +197,11 @@ public class PartnerController extends CoTopComponent{
 		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
 		
 		if (prjList.size() > 0) {
-			model.addAttribute("prjList", toJson(prjList));
+			model.addAttribute("prjList", prjList);
 		}
 		
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", toJson(partnerMaster));
+		model.addAttribute("detailJson", partnerMaster);
 		model.addAttribute("confirmationFile", confirmationFile);
 		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
@@ -209,7 +209,7 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return PARTNER.EDIT_JSP;
+		return "partner/edit";
 	}
 	
 	

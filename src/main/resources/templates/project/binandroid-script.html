@@ -547,7 +547,11 @@ var binAndroid_fn = {
 						var resultFileId = fileData.androidResultFile;
 
 						if(noticeFileId.length > 0){
-							$('.androidNoticeFileAreaDummy').append('<li><span><strong><a href="/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm+'">'+noticeFileId[0].origNm+'</a></strong><input type="hidden" value="'+noticeFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'5\')"/></span></li>');
+							var _url = '/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm;
+							var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+noticeFileId[0].origNm+'</a><input type="hidden" value="'+noticeFileId[0].fileSeq+'"/>';
+							uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'5\')">X</span></li>';
+							
+							$('.androidNoticeFileAreaDummy').append(uploadFileTag);
 
 							if($('.androidNoticeFileAreaDummy').find('li').length == 0) {
 								$('#androidNoticeFileDummy').show();
@@ -557,8 +561,12 @@ var binAndroid_fn = {
 						}
 						
 						if(resultFileId.length > 0){
-							$('.androidResultFileAreaDummy').append('<li><span><strong><a href="/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm+'">'+resultFileId[0].origNm+'</a></strong><input type="hidden" value="'+resultFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'6\')"/></span></li>');
-
+							var _url = '/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm;
+							var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+resultFileId[0].origNm+'</a><input type="hidden" value="'+resultFileId[0].fileSeq+'"/>';
+							uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'6\')">X</span></li>';
+							
+							$('.androidResultFileAreaDummy').append(uploadFileTag);
+							
 							if($('.androidResultFileAreaDummy').find('li').length == 0) {
 								$('#androidResultFileDummy').show();
 							} else {
@@ -616,32 +624,44 @@ var binAndroid_fn = {
 	},
 	makeFileTag2 : function(obj){
 		var appendHtml = '&nbsp;&nbsp;'+obj.createdDate;
-		
-		$('.androidCsvFileArea').append('<li><span><strong style="max-width:752px;"><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'<input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'2\')"/></strong></span></li>');
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'2\')">X</span>'+appendHtml+'</li>';
+		$('.androidCsvFileArea').append(uploadFileTag);
 	},
 	makeFileTag3 : function(obj, deleteFlag){
 		var createdDate = '&nbsp;&nbsp;'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		// 여기에 xml,tar.gz,zip file의 경우 변환된 html file인지 확인하고 해당 될경우 delete button을 제거함.
-		var appendHtml = '<li><span><strong style="max-width:752px;"><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+createdDate+'</strong><input type="hidden" value="'+obj.registSeq+'"/>';
-
+		var appendHtml = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		if(deleteFlag) {
-			appendHtml += '<input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'3\')"/>';
+			appendHtml += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'3\')">X</span>';
 		}
 		
-		appendHtml += '</span></li>';
+		appendHtml += createdDate+'</li>';
 		
 		$('.androidNoticeFileArea').append(appendHtml);
 	},
 	makeFileTag4 : function(obj){
 		var appendHtml = '&nbsp;&nbsp;'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var makeFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		makeFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'4\')">X</span>'+appendHtml+'</li>';
 		
-		$('.androidResultFileArea').append('<li><span><strong style="max-width:752px;"><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a>'+appendHtml+'</strong><input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'4\')"/></span></li>');
+		$('.androidResultFileArea').append(makeFileTag);
 	},
 	makeFileTagDummy1 : function(obj){
-		$('.androidNoticeFileAreaDummy').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a></strong><input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'5\')"/></span></li>');
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var makeFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		makeFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'5\')">X</span></li>';
+		
+		$('.androidNoticeFileAreaDummy').append(makeFileTag);
 	},
 	makeFileTagDummy2 : function(obj){
-		$('.androidResultFileAreaDummy').append('<li><span><strong><a href="/download/'+obj.registSeq+'/'+obj.fileName+'">'+obj.originalFilename+'</a></strong><input type="hidden" value="'+obj.registSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'6\')"/></span></li>');
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var makeFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		makeFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'6\')">X</span></li>';
+		$('.androidResultFileAreaDummy').append(makeFileTag);
 	},
 	deleteCsv : function(obj, type){
 		var Seq = $(obj).prev().val();
@@ -998,8 +1018,10 @@ var binAndroid_fn = {
 						var _url ="";
 						
 						if(csvFileId.length > 0){
-							_url = '/download/'+csvFileId[0].fileSeq+'/'+csvFileId[0].logiNm+'"/>';
-							$('.androidCsvFileArea').html('<li><span><strong><a href="'+_url+'">'+csvFileId[0].origNm+'</a></strong><input type="hidden" value="'+csvFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'2\')"/></span></li>');
+							_url = '/download/'+csvFileId[0].fileSeq+'/'+csvFileId[0].logiNm;
+							var csvFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+csvFileId[0].origNm+'</a><input type="hidden" value="'+csvFileId[0].registSeq+'"/>';
+							csvFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'2\')">X</span></li>';
+							$('.androidCsvFileArea').html(csvFileTag);
 
 							if($('.androidCsvFileArea').find('li').length == 0){
 								$('#androidCsvFile').show();
@@ -1011,8 +1033,10 @@ var binAndroid_fn = {
 						}
 						
 						if(noticeFileId.length > 0){
-							_url = '/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm+'"/>';
-							$('.androidNoticeFileArea').html('<li><span><strong><a href="'+_url+'">'+noticeFileId[0].origNm+'</a></strong><input type="hidden" value="'+noticeFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'5\')"/></span></li>');
+							_url = '/download/'+noticeFileId[0].fileSeq+'/'+noticeFileId[0].logiNm;
+							var noticeFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+noticeFileId[0].origNm+'</a><input type="hidden" value="'+noticeFileId[0].registSeq+'"/>';
+							noticeFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'5\')">X</span></li>';
+							$('.androidNoticeFileArea').html(noticeFileTag);
 
 							if($('.androidNoticeFileArea').find('li').length == 0){
 								$('#androidNoticeFile').show();
@@ -1024,8 +1048,10 @@ var binAndroid_fn = {
 						}
 						
 						if(resultFileId.length > 0){
-							_url = '/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm+'"/>';
-							$('.androidResultFileArea').html('<li><span><strong><a href="'+_url+'">'+resultFileId[0].origNm+'</a></strong><input type="hidden" value="'+resultFileId[0].fileSeq+'"/><input type="button" value="Delete" class="smallDelete" onclick="binAndroid_fn.deleteCsv(this, \'6\')"/></span></li>');
+							_url = '/download/'+resultFileId[0].fileSeq+'/'+resultFileId[0].logiNm;
+							var resultFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+resultFileId[0].origNm+'</a><input type="hidden" value="'+resultFileId[0].registSeq+'"/>';
+							resultFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'6\')">X</span></li>';
+							$('.androidResultFileArea').html(resultFileTag);
 
 							if($('.androidResultFileArea').find('li').length == 0){
 								$('#androidResultFile').show();

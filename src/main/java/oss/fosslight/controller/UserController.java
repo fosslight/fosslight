@@ -55,7 +55,7 @@ public class UserController extends CoTopComponent {
 	
 	@GetMapping(value=USER.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "system/user :: content";
+		return "system/user";
 	}
 	
 	@GetMapping(value=USER.LIST_AJAX)

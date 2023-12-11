@@ -1,11 +1,8 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
-
-<th:block th:fragment="content">
-    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-    <th:block th:replace="system/user-script :: script"></th:block>
-
-    <body class="hold-transition sidebar-mini" style="height: 100%;">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="system/user-script :: script"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
     <div class="wrapper">
         <div class="content-wrapper custom-layout bg-white">
             <section class="content-header">
@@ -13,72 +10,47 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card card-dark card-outline collapsed-card search-form mb-3">
-                                <!-- <div class="card collapsed-card search-form"> -->
                                 <div class="card-header" style="border-bottom: none">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <div class="row">
-                                                <div class="input-group">
-                                                    <input class="form-control" name="fileName"
-                                                           placeholder="User Name" type="text"/>
-                                                    <div class="input-group-append">
-                                                        <button class="btn btn-default" type="submit">
-                                                            <i class="fa fa-search"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2 d-flex justify-content-start mx-2">
-                                            <div class="input-group-append d-flex align-items-center">
-                                                <a class="text-blue-gray" data-card-widget="collapse"
-                                                   style="font-size: 1rem" title="Collapse">
-                                                    <!-- <i class="fas fa-cart-plus fa-lg mr-2"></i> -->
-                                                    + advanced Search
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card-body py-1">
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <div class="form-group mb-1">
-                                                <input class="form-control" placeholder="Project Name"
-                                                       type="text"/>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="form-group mb-1">
-                                                <div class="form-group mb-1">
-                                                    <select class="select2" data-placeholder="Division"
-                                                            id="devisionSelect"
-                                                            name="hType" style="width: 100%;">
+                                	<form id="userSearch" >
+                                    	<div class="row">
+                                        	<div class="col-md-2">
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                  	<input class="form-control" placeholder="User Name" type="text" id="userName" name="userName"/>
+                                              	</div>
+                                         	</div>
+                                          	<div class="col-md-2">
+                                              	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                               		<input class="form-control" placeholder="User Id" id="userId" name="userId" type="text"/>
+                                            	</div>
+                                          	</div>
+                                        	<div class="col-md-2">
+                                           		<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                    <select class="form-control select2" id="division" name="division" style="width: 100%;">
                                                         <option value=""></option>
-                                                        <th:block
-                                                                th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
+                                                        <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
                                                     </select>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                         	</div>
+                                      		<div class="col-md-1">
+                                          		<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                               		<div class="input-group-append">
+                                                    	<button class="btn btn-default" type="submit" id="search"><i class="fa fa-search"></i></button>
+                                                   	</div>
+                                               	</div>
+                                         	</div>
+                                       	</div>
+                                 	</form>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="row px-1">
-                        <div class="col-md-6">
-                        </div>
+                        <div class="col-md-6"></div>
                         <div class="col-md-6">
                             <div class="row float-right nav-item">
-                                <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3"
-                                        type="button"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                <!--                    <th:block th:if="${@CommonFunction.isAdmin()}">-->
-                                <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btn-transition-page"
-                                        type="button">Save
-                                </button>
-                                <!--                    </th:block>-->
+                                <button class="btn btn-teal-01 btn-sm width-8rem mr-xm px-3" type="button" th:text="'Excel download'" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i></button>
+                                <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btn-transition-page" type="button" th:text="Save" th:onclick="|fn.saveUser()|"></button>
                             </div>
                         </div>
                     </div>
@@ -86,11 +58,7 @@
                     <div class="row">
                         <div class="col-12 mt-3" style="overflow-x: scroll">
                             <div class="jqGridSet">
-                                <table id="list">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
+                                <table id="list"><tr><td></td></tr></table>
                                 <div id="pager"></div>
                             </div>
                         </div>
@@ -99,7 +67,5 @@
             </section>
         </div>
     </div>
-    </body>
-
-
-</th:block>
+</body>
+</html>

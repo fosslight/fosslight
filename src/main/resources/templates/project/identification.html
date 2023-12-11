@@ -259,20 +259,19 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-7">
-                                                        	<div class="ajax-file-upload-container" style="margin-top:0px;">
-                                                        	<th:block th:if="${project.depCsvFile != null}">
-                                                        		<ul class="depCsvFileArea" th:each="csvFile : ${project.depCsvFile}">
-                                                                    <li th:if="${csvFile.delYn eq 'N'}">
-                                                                        <a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-                                                                        <input type="hidden" value="${csvFile.fileSeq}"/>
-                                                                        <span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-                                                                        <br>[[${csvFile.createdDate}]]
-                                                                    </li>
-                                                                </ul>
-                                                        	</th:block>
-                                                        	<th:block th:unless="${project.depCsvFile != null}">
-                                                        		<ul class="depCsvFileArea"></ul>
-                                                        	</th:block>
+                                                        	<div class="ajax-file-upload-container" style="margin-top:0px; width:100%;">
+                                                        		<ul class="depCsvFileArea">
+                                                        			<th:block th:if="${project.depCsvFile != null}">
+                                                        				<th:block th:each="csvFile : ${project.depCsvFile}">
+                                                                    		<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        		<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        		<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        		<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
+                                                                        		<br>[[${csvFile.createdDate}]]
+                                                                    		</li>
+                                                                		</th:block>
+                                                        			</th:block>
+                                                        		</ul>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -394,19 +393,18 @@
                                                         </div>
                                                         <div class="col-md-7">
                                                         	<div class="ajax-file-upload-container" style="margin-top:0px;">
-                                                        	<th:block th:if="${project.csvFile != null}">
-                                                        		<ul class="csvFileArea" th:each="csvFile : ${project.csvFile}">
-                                                        			<li th:if="${csvFile.delYn eq 'N'}">
-                                                        				<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-                                                        				<input type="hidden" value="${csvFile.fileSeq}"/>
-                                                        				<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-                                                        				<br>[[${csvFile.createdDate}]]
-                                                        			</li>
+                                                        		<ul class="csvFileArea">
+                                                        			<th:block th:if="${project.csvFile != null}">
+                                                        				<th:block th:each="csvFile : ${project.csvFile}">
+                                                                    		<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        		<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        		<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        		<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
+                                                                        		<br>[[${csvFile.createdDate}]]
+                                                                    		</li>
+                                                                		</th:block>
+                                                        			</th:block>
                                                         		</ul>
-                                                        	</th:block>
-                                                        	<th:block th:unless="${project.csvFile != null}">
-                                                        		<ul class="csvFileArea"></ul>
-                                                        	</th:block>
                                                         	</div>
                                                         </div>
                                                     </div>
@@ -527,19 +525,18 @@
                                                                 </div>
                                                                 <div class="col-md-5">
                                                             		<div class="ajax-file-upload-container" style="margin-top:0px;">
-                                                            		<th:block th:if="${project.binCsvFile != null}">
-                                                            			<ul class="binFileArea" th:each="csvFile : ${project.binCsvFile}">
-                                                                    		<li th:if="${csvFile.delYn eq 'N'}">
-                                                                        		<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-                                                                        		<input type="hidden" value="${csvFile.fileSeq}"/>
-                                                                        		<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
-                                                                        		<br>[[${csvFile.createdDate}]]
-                                                                   			</li>
-                                                                		</ul>
-                                                            		</th:block>
-                                                            		<th:block th:unless="${project.binCsvFile != null}">
-                                                            			<ul class="binFileArea"></ul>
-                                                            		</th:block>
+                                                            			<ul class="binFileArea">
+                                                        					<th:block th:if="${project.binCsvFile != null}">
+                                                        						<th:block th:each="csvFile : ${project.binCsvFile}">
+                                                                    				<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        				<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        				<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        				<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
+                                                                        				<br>[[${csvFile.createdDate}]]
+                                                                    				</li>
+                                                                				</th:block>
+                                                        					</th:block>
+                                                        				</ul>
                                                             		</div>
                                                         		</div>
                                                             </div>
@@ -552,19 +549,18 @@
                                                                 </div>
                                                                 <div class="col-md-5">
                                                                 	<div class="ajax-file-upload-container binary" style="margin-top:0px;">
-                                                                	<th:block th:if="${project.binBinaryFile != null}">
-                                                                		<ul class="binBinaryFileArea" th:each="csvFile : ${project.binBinaryFile}">
-                                                                    		<li th:if="${csvFile.delYn eq 'N'}">
-                                                                        		<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-                                                                        		<input type="hidden" value="${csvFile.fileSeq}"/>
-                                                                        		<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|">X</span>
-                                                                        		<br>[[${csvFile.createdDate}]]
-                                                                   			</li>
-                                                                		</ul>
-                                                                	</th:block>
-                                                                	<th:block th:unless="${project.binBinaryFile != null}">
-                                                                		<ul class="binBinaryFileArea"></ul>    
-                                                                	</th:block>
+                                                                		<ul class="binBinaryFileArea">
+                                                        					<th:block th:if="${project.binBinaryFile != null}">
+                                                        						<th:block th:each="csvFile : ${project.binBinaryFile}">
+                                                                    				<li th:if="${csvFile.delYn eq 'N'}">
+                                                                        				<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+                                                                        				<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        				<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|" th:text="X"></span>
+                                                                        				<br>[[${csvFile.createdDate}]]
+                                                                    				</li>
+                                                                				</th:block>
+                                                        					</th:block>
+                                                        				</ul>
                                                             		</div>
                                                                 </div>
                                                             </div>
