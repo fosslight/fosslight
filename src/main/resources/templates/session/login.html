@@ -10,7 +10,7 @@
     <div class="login-logo">
         <a class="brand-link" href="./index.html" style="font-size:2.25rem;">
             <img alt="FOSSLight hub Logo" class="brand-image img-circle" src="/images/logo_s.png"
-                 style="opacity: .5;max-height:50px;"><b>FOSSLight</b>&nbsp;&nbsp;hub</a>
+                 style="opacity: .5;max-height:50px;"><b>FOSSLight</b>&nbsp;&nbsp;Hub</a>
     </div>
     <div class="card">
         <div class="card-body mx-3" id="authenticationAreaFragment">
@@ -42,17 +42,17 @@
         excSubmit: function () {
             formAjaxData("#loginForm", "/session/login-proc",
                 function (res) {
-                    if (res.response.error) {
-                        alertify.error(res.response.message, 0);
+                    if ("false" == res.isValid) {
+                        alertify.error(res.validMsg, 0);
                     } else {
-                        location.href = "/index?lang=" + res.response.locale;
+                        location.href = "/index?lang=" + res.resultData.locale;
                         return;
                     }
                 }, onError);
         },
         setSaveIdChecked() {
             const userInputId = getCookie("userInputId");
-            $("input[name=un]").val(userInputId);
+            $("input[name=userId]").val(userInputId);
 
             if ($("input[name=un]").val() != "") {
                 $("#saveID").attr("checked", true);
@@ -89,7 +89,7 @@
             });
         },
         excSubmit: function () {
-            const dFlag = '[[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))} ]]';
+            const dFlag = "[[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))} ]]";
 
             if(dFlag) {
                 const domain = $("#emailTemp").val();
@@ -145,7 +145,7 @@
         emailChange(){
             const value = $("#emailSelect option:selected").val();
             const text = $("#emailSelect option:selected").text();
-            const etcDomain = '[[ ${@CommonFunction.getCoConstDefVal("CD_DTL_ECT_DOMAIN_NO")} ]]';
+            const etcDomain = '[[ ${@CommonFunction.getCoConstDefVal("CD_DTL_ECT_DOMAIN")} ]]';
 
             if(value == etcDomain){
                 $("#directEmailInput").val("").show();

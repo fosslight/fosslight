@@ -6,26 +6,55 @@
 package oss.fosslight.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.HandlerMapping;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.SESSION;
+import oss.fosslight.config.JwtTokenProvider;
+import oss.fosslight.domain.T2Authorities;
+import oss.fosslight.domain.T2Users;
+import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.CookieUtil;
+import oss.fosslight.util.ResponseUtil;
 
 @Controller
+@Slf4j
 public class SessionController extends CoTopComponent{
-	
+
+    @Autowired private JwtTokenProvider jwtTokenProvider;
+	@Autowired T2UserService userService;
+	/** The cookie util. */
+	@Autowired private CookieUtil cookieUtil;
+    
 	@GetMapping(value = SESSION.LOGIN, produces = "text/html; charset=utf-8")
 	public String user(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		if (isLogin()) {
@@ -54,7 +83,104 @@ public class SessionController extends CoTopComponent{
 			}
 		*/
 		
-		return "main/index";
+		return "session/login";
+	}
+	
+	@PostMapping(value = {"/session/login-proc"})
+	public ResponseEntity<Object> loginProc(@Validated @ModelAttribute("managerInfo") T2Users accountInfo, BindingResult bindingResult
+										, HttpServletRequest req, HttpServletResponse res, Model model) {
+
+        boolean loginSuccess = false;
+        Map<String, Object> rtnMap = new HashMap<>();
+        String userId = accountInfo.getUserId();
+        String rawPassword = accountInfo.getPassword();
+        
+        rtnMap.put("email", userId);
+        
+		try {
+			// 1. validation Check
+//			if(StringUtil.isEmpty(userId)) {
+//				bindingResult.rejectValue("usrId", "required", "필수 입력 항목입니다.");
+//			} else if(StringUtil.isEmpty(rawPassword)) {
+//				bindingResult.rejectValue("usrPw", "required", "필수 입력 항목입니다.");
+//			} else {
+//				// 2. get UserInfo
+//				accountInfo = adminUserService.getAdminInfo(userId);
+//				if(accountInfo == null) {
+//					bindingResult.rejectValue("usrId", "notfound", "사용자 정보를 찾을 수 없습니다.");
+//				} else {
+//					if(!commonUtil.hasLoginAuth(accountInfo.getAuthId(), userId)) {
+//						bindingResult.rejectValue("usrId", "notAuth", "사용 권한이 없습니다.");
+//					}
+//				}
+//			}
+//			
+//			if(bindingResult.hasErrors()) {
+//				return "/account/login :: formSectionFragment";
+//			}
+			
+	        String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+	        List<String> customAccounts = Arrays.asList(CommonFunction.emptyCheckProperty("custom.accounts", "").split(","));
+	        
+	        if (CoConstDef.FLAG_YES.equals(ldapFlag) && !customAccounts.contains(userId)) {
+	        	rtnMap = userService.checkByADUser(userId, rawPassword, rtnMap);
+	        	loginSuccess = (boolean) rtnMap.get("isAuthenticated");
+	        } else {
+	        	loginSuccess = userService.checkSystemUser(userId, rawPassword);
+	        }
+	        
+	        if (loginSuccess) {
+//	            List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
+//	            T2Users user = new T2Users();
+//	            user.setUserId(userId);
+//	            T2Users getUser = userService.getUserAndAuthorities(user);
+//	            
+//	            for (T2Authorities auth : getUser.getAuthoritiesList()) {
+//	            	roles.add(new SimpleGrantedAuthority(auth.getAuthority()));
+//	            }
+	        	
+	        	T2Users user = userService.getUser(accountInfo);
+				String token = jwtTokenProvider.generateToken(user);
+				cookieUtil.addCookie(res, "X-FOSS-AUTH-TOKEN", token, 60*60*24);
+				Map<String, String> loginData = new HashMap<>();
+				loginData.put("locale", user.getDefaultLocale());
+		        return makeJsonResponseHeader(true, null, loginData);
+//	            return new UsernamePasswordAuthenticationToken(user_id, user_pw, roles);          
+	        } else {
+	        	if (rtnMap.containsKey("msg")) {
+	        		throw new BadCredentialsException((String) rtnMap.get("msg"));
+	        	} else {
+	                throw new BadCredentialsException("Bad credentials");
+	        	}
+	        }
+
+//			// 5. token 값 생성 및 cookie에 담음.
+//			String token = jwtTokenProvider.generateToken(accountInfo);
+//			cookieUtil.addCookie(res, "X-AUTH-TOKEN-ADM", token, 60*60*24);
+//			ResponseUtil.redirect(res, "/index");
+//			return null;
+			
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+//			return "redirect:/account/login";
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+
+	}
+
+
+	/**
+	 * Logout.
+	 *
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the string
+	 */
+	@GetMapping("/logout")
+	public String logout(HttpServletRequest req, HttpServletResponse res, Model model) {
+		cookieUtil.deleteCookie(req, res, "X-AUTH-TOKEN-ADM");
+		return "redirect:/account/login";
 	}
 	
 	@GetMapping(value = SESSION.LOGIN_EXPIRED, produces = "text/html; charset=utf-8")

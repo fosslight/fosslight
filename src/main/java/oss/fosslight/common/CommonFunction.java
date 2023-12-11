@@ -72,7 +72,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-import org.mozilla.universalchardet.UniversalDetector;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -80,7 +79,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -1019,39 +1017,39 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return false;
 	}
 	
-	public static String getFileEncode(String filePath) {
-		String encoding = null;
-		java.io.FileInputStream fis = null;
-		
-		try {
-			byte[] buf = new byte[4096];
-		    String fileName = filePath;
-		    fis = new java.io.FileInputStream(fileName);
-
-		    UniversalDetector detector = new UniversalDetector(null);
-
-		    int nread;
-		    
-		    while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
-		      detector.handleData(buf, 0, nread);
-		    }
-		    
-		    detector.dataEnd();
-
-		    encoding = detector.getDetectedCharset();
-		    detector.reset();			
-		} catch (Exception e) {
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-	    return encoding;
-	}
+//	public static String getFileEncode(String filePath) {
+//		String encoding = null;
+//		java.io.FileInputStream fis = null;
+//		
+//		try {
+//			byte[] buf = new byte[4096];
+//		    String fileName = filePath;
+//		    fis = new java.io.FileInputStream(fileName);
+//
+//		    UniversalDetector detector = new UniversalDetector(null);
+//
+//		    int nread;
+//		    
+//		    while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+//		      detector.handleData(buf, 0, nread);
+//		    }
+//		    
+//		    detector.dataEnd();
+//
+//		    encoding = detector.getDetectedCharset();
+//		    detector.reset();			
+//		} catch (Exception e) {
+//		} finally {
+//			if (fis != null) {
+//				try {
+//					fis.close();
+//				} catch (Exception e2) {
+//				}
+//			}
+//		}
+//		
+//	    return encoding;
+//	}
 	
 	public static String sortLicenseName(List<OssLicense> ossLicenses) {
 		List<String> l = new ArrayList<>();
@@ -3189,7 +3187,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	@SuppressWarnings("unused")
 	public static List<String> getBinaryListBinBinaryTxt(T2File binaryTextFile) {
-		List<String> binaryList = Lists.newArrayList();
+		List<String> binaryList = new ArrayList<>();
 		
 		if (binaryTextFile != null) {
 			try {

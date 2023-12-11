@@ -7,6 +7,8 @@ package oss.fosslight.common;
 
 import java.util.regex.Pattern;
 
+import oss.fosslight.config.AppConstBean;
+
 public class CoConstDef {
 	
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
@@ -26,7 +28,13 @@ public class CoConstDef {
 	public static final String ENCRYPT_DEFAULT_SALT_KEY = "Fosslight-System";
 	
 	/** 정적 리소스 종류 */
-	private final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
+	public final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
+	
+	public final static String[] PERMIT_UTL_PATTERNS = { "/session/**", Url.USER.SAVE_AJAX, Url.USER.RESET_PASSWORD, "/*" + Url.USER.SAVE_AJAX,
+			Url.VULNERABILITY.VULN_POPUP, Url.VULNERABILITY.VULN_POPUP, Url.NOTICE.PUBLISHED_NOTICE,
+			Url.RENDER.COMPONENT, Url.API.PATH + "/**"
+			,CoConstDef.HEALTH_CHECK_URL, "/v2/api-docs", "/swagger-resources/**",
+            "/swagger-ui/**", "/webjars/**", "/swagger/**" };
 	/**
 	 *  정적 리소스 매핑 URL 패턴 ({@code CLASSPATH_RESOURCE_LOCATIONS}와 순서 맞출 것)
 	 *  @see #CLASSPATH_RESOURCE_LOCATIONS

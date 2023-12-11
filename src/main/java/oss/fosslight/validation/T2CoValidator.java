@@ -28,7 +28,7 @@ import oss.fosslight.util.StringUtil;
 @Slf4j
 public abstract class T2CoValidator extends CoTopComponent {
     /** The Constant DEFAULT_REQUIRED_MARKER. */
-    private final static String DEFAULT_REQUIRED_MARKER = "<span style=\"color:#f00\">*</span>";
+    private static final String DEFAULT_REQUIRED_MARKER = "<span style=\"color:#f00\">*</span>";
     
     /** The rule map. */
     private Map<String, Map<String, String>> ruleMap = null;
@@ -37,10 +37,10 @@ public abstract class T2CoValidator extends CoTopComponent {
     private Map<String, String> messageConfigMap = null;
     
     /** The hint. */
-    private List<String> hint = new ArrayList<String>(1);
+    private List<String> hint = new ArrayList<>(1);
     
     /** The ignore. */
-    private List<String> ignore = new ArrayList<String>(1);
+    private List<String> ignore = new ArrayList<>(1);
     
     /** The custom marker. */
     private String customMarker = null;
@@ -52,17 +52,19 @@ public abstract class T2CoValidator extends CoTopComponent {
     }
     
     public void setHint(String keys){
-        if (keys != null){
-            hint = Arrays.asList(keys.split("\\s*,\\s*"));
-            log.trace("HINT:" + hint);
-        }
+        if (keys == null) {
+			return;
+		}
+		hint = Arrays.asList(keys.split("\\s*,\\s*"));
+		log.trace("HINT:{}", hint);
     }
     
     public void setIgnore(String keys){
-        if (keys != null){
-            ignore = Arrays.asList(keys.split("\\s*,\\s*"));
-            log.trace("IGNORE:" + ignore);
-        }
+        if (keys == null) {
+			return;
+		}
+		ignore = Arrays.asList(keys.split("\\s*,\\s*"));
+		log.trace("IGNORE:{}", ignore);
     }
     
     public void setRequiredMarker(String maker) {
@@ -107,7 +109,7 @@ public abstract class T2CoValidator extends CoTopComponent {
             if (errCd != null) {
                 Map<String, String> rule = getRule(ruleKey);
                 
-                log.trace("basic validation for [" + ruleKey + "] ----------------");
+                log.trace("basic validation for [{}] ----------------", ruleKey);
                 log.trace( (isRequired(rule) ? "required" : "optional") + ", limit " + getLimitString(ruleKey) + ", format " + rule.get("FORMAT"));
                 log.trace(ruleKeySeq + "=" + inputValue + "[error code:" + errCd + "]");
             }
@@ -121,7 +123,7 @@ public abstract class T2CoValidator extends CoTopComponent {
     }
     
     public T2CoValidationResult validateRequest(Map<String, String> map, ServletRequest request, Map<String, String> keyPreMap){
-        Map<String, String> reqMap = new HashMap<String, String>();
+        Map<String, String> reqMap = new HashMap<>();
         saveRequest(request, reqMap, keyPreMap);
         T2CoValidationResult vr = validate(reqMap);
         
@@ -135,7 +137,7 @@ public abstract class T2CoValidator extends CoTopComponent {
         	Map<String, String> errMap = vr.getErrorCodeMap();
         	Map<String, String> replaceErrMap = new HashMap<>();
 
-        	for (String key : errMap.keySet()) {
+        	errMap.keySet().forEach(key -> {
         		if (key.indexOf("@") > -1) {
         			String paramName = key.substring(key.indexOf("@")+1);
         			String restoreKey = key.replaceAll(keyPreMap.get(paramName)+"@", "");
@@ -144,7 +146,7 @@ public abstract class T2CoValidator extends CoTopComponent {
         		} else {
         			replaceErrMap.put(key, errMap.get(key));
         		}
-        	}
+        	});
         	
         	vr.setErrorCodeMap(replaceErrMap);
         }
@@ -199,9 +201,7 @@ public abstract class T2CoValidator extends CoTopComponent {
         	Map<String, String> errMap = vr.getErrorCodeMap();
         	Map<String, String> replaceErrMap = new HashMap<>();
         	
-        	for (String key : errMap.keySet()) {
-        		replaceErrMap.put(key.replaceAll(keyPre+"@", ""), errMap.get(key));
-        	}
+        	errMap.keySet().forEach(key -> replaceErrMap.put(key.replaceAll(keyPre + "@", ""), errMap.get(key)));
         	
         	vr.setErrorCodeMap(replaceErrMap);
         }
@@ -212,7 +212,7 @@ public abstract class T2CoValidator extends CoTopComponent {
         	Map<String, String> addErrMap = new HashMap<>();
         	
         	 for (String key : errMap.keySet()) {
-        		 if (key.indexOf(".") > -1) {
+        		 if (key.contains(".")) {
         			 String seqStr = key.substring(key.indexOf(".") +1);
         			 int seq = StringUtil.string2integer(seqStr);
         			 
@@ -288,16 +288,10 @@ public abstract class T2CoValidator extends CoTopComponent {
 		
 		try {
 			if (name.startsWith("get")) {
-				objPropertyDescriptor = new PropertyDescriptor((String)name.substring(3), obj.getClass());
+				objPropertyDescriptor = new PropertyDescriptor(name.substring(3), obj.getClass());
 				variableValue = objPropertyDescriptor.getReadMethod() != null ? objPropertyDescriptor.getReadMethod().invoke(obj) : null;
 			}
-		} catch (IntrospectionException e) {
-			//if (log.isDebugEnabled()) {e.printStackTrace();}
-		} catch (IllegalAccessException e) {
-			//if (log.isDebugEnabled()) {e.printStackTrace();}
-		} catch (IllegalArgumentException e) {
-			//if (log.isDebugEnabled()) {e.printStackTrace();}
-		} catch (InvocationTargetException e) {
+		} catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException | IntrospectionException e) {
 			//if (log.isDebugEnabled()) {e.printStackTrace();}
 		}
 		return variableValue;
@@ -311,19 +305,17 @@ public abstract class T2CoValidator extends CoTopComponent {
             Iterator<String> itr = hint.iterator();
             
             while (itr.hasNext()){
-                String mustHave = (String)itr.next();
+                String mustHave = itr.next();
                 
-                if (!map.containsKey(mustHave)){
-                    map.put(mustHave, "");
-                }
+                map.putIfAbsent(mustHave, "");
             }
         }
 
         //검증
         T2CoValidationResult vr = new T2CoValidationResult(ruleMap, messageConfigMap);
-        Map<String, String> errMap = new HashMap<String, String>();  // error message
-        Map<String, String> diffMap = new HashMap<String, String>(); // warning message
-        Map<String, String> infoMap = new HashMap<String, String>(); // gray로 표시 추가정보 표시용도
+        Map<String, String> errMap = new HashMap<>();  // error message
+        Map<String, String> diffMap = new HashMap<>(); // warning message
+        Map<String, String> infoMap = new HashMap<>(); // gray로 표시 추가정보 표시용도
 
         vr.setErrorCodeMap(errMap);
         vr.setDataMap(map);
@@ -334,10 +326,10 @@ public abstract class T2CoValidator extends CoTopComponent {
             Iterator<String> itr = ruleMap.keySet().iterator();
             
             while (itr.hasNext()){
-                String ruleKey = (String)itr.next();
+                String ruleKey = itr.next();
                 boolean doValidate = false;
                 Map<String, String> rule = getRule(ruleKey);
-                List<String> seqSuffix = new ArrayList<String>();
+                List<String> seqSuffix = new ArrayList<>();
                 
                 if ("TRUE".equalsIgnoreCase(rule.get("USE_SEQUENCE"))) {
                     for (int i = 1; map.containsKey(ruleKey + "." + i); i++) {
@@ -350,24 +342,24 @@ public abstract class T2CoValidator extends CoTopComponent {
                 Iterator<String> itr2 = seqSuffix.iterator();
                 
                 while (itr2.hasNext()){
-                    String ruleKeySeq = ruleKey + (String)itr2.next(); // 연번 이없는 경우는 ruleKey 와 같음
+                    String ruleKeySeq = ruleKey + itr2.next(); // 연번 이없는 경우는 ruleKey 와 같음
                     
                     if (map.containsKey(ruleKeySeq)) {
                         doValidate = true;
                     } else if (rule.containsKey("COMPOSITE")) {
-                        StringBuffer buf = new StringBuffer();
+                        StringBuilder buf = new StringBuilder();
                         String[] comp = parseExp(rule.get("COMPOSITE"));
                         boolean hasInputKey = false;
                         boolean hasInputValue = false;
                         
-                        for (int i = 0; i < comp.length; i++){
-                            if (comp[i].matches("'.*'")){
-                                buf.append(comp[i].substring(1,comp[i].length() - 1));
+                        for (String aComp : comp) {
+                            if (aComp.matches("'.*'")){
+                                buf.append(aComp.substring(1,aComp.length() - 1));
                             }else{
-                                if (map.containsKey(comp[i])){
+                                if (map.containsKey(aComp)){
                                     doValidate = true;
                                     hasInputKey = true;
-                                    String s = map.get(comp[i]);
+                                    String s = map.get(aComp);
                                     hasInputValue = hasInputValue || !isEmpty(s);
                                     
                                     buf.append(s);
@@ -415,7 +407,7 @@ public abstract class T2CoValidator extends CoTopComponent {
         int maxLength = 0;
         
         try {
-            maxLength = Integer.parseInt((String)rule.get("LENGTH"));
+            maxLength = Integer.parseInt(rule.get("LENGTH"));
             
             if (maxLength < 0) {
             	throw new Exception();
@@ -505,7 +497,7 @@ public abstract class T2CoValidator extends CoTopComponent {
     }
     
     private boolean isRequired(Map<String, String> rule){
-        return rule.get("REQUIRED").toUpperCase().equals("TRUE");
+        return "TRUE".equals(rule.get("REQUIRED").toUpperCase());
     }
     
     public String getLimitString(String key){
@@ -518,7 +510,7 @@ public abstract class T2CoValidator extends CoTopComponent {
     		return messageConfigMap.get(key);
     	}
     	
-    	log.error("Can not find validation message config key : " + key);
+    	log.error("Can not find validation message config key : {}", key);
     	return "Error";
     }
     
@@ -540,11 +532,11 @@ public abstract class T2CoValidator extends CoTopComponent {
     
     public Map<String, String> getRequiredItemMap(String marker){
         checkStatus();
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         Iterator<String> itr = ruleMap.keySet().iterator();
         
         while (itr.hasNext()){
-            String key = (String) itr.next();
+            String key = itr.next();
             map.put(key, isRequired(key) ? marker : "");
         }
         
@@ -553,11 +545,11 @@ public abstract class T2CoValidator extends CoTopComponent {
     
     public Map<String, String> getLimitLengthMap(){
         checkStatus();
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         Iterator<String> itr = ruleMap.keySet().iterator();
         
         while (itr.hasNext()){
-            String key = (String) itr.next();
+            String key = itr.next();
             map.put(key, getLimitString(key));
         }
         
@@ -576,10 +568,10 @@ public abstract class T2CoValidator extends CoTopComponent {
       //확인 입력 등 기록 되지 않은 값 복원
         {
             Iterator<String> itr = map.keySet().iterator();
-            Map<String,String> addition = new HashMap<String, String>();
+            Map<String,String> addition = new HashMap<>();
             
             while (itr.hasNext()){
-                String key = (String)itr.next();
+                String key = itr.next();
                 Map<String,String> rule = getRule(key);
 
                 if (ruleMap.containsKey(key) && rule.get("COPY_WHEN_INIT") != null){
@@ -596,10 +588,10 @@ public abstract class T2CoValidator extends CoTopComponent {
         // COMPOSITE 로 지정된 분할 된 값 의 복원 
         {
             Iterator<String> itr = map.keySet().iterator();
-            Map<String,String> addition = new HashMap<String, String>();
+            Map<String,String> addition = new HashMap<>();
             
             while (itr.hasNext()){
-                String key = (String)itr.next();
+                String key = itr.next();
                 Map<String,String> rule = getRule(key);
 
                 if (rule.containsKey("COMPOSITE")){
@@ -632,7 +624,7 @@ public abstract class T2CoValidator extends CoTopComponent {
                                     if (comp[i + 1].matches("'.*'")) {
                                         // 다음 COMPOSITE 요소 가 리터럴 이라면, 그 리터럴 직전까지 ( 없으면 끝까지 ) 를 취득
                                         String literal = comp[i + 1].substring(1, comp[i + 1].length() - 1);
-                                        int p = val.indexOf(literal) < 0 ? val.length() : val.indexOf(literal);
+                                        int p = !val.contains(literal) ? val.length() : val.indexOf(literal);
                                         addition.put(comp[i], val.substring(0, p));
                                         val = val.substring(p);
                                     } else {

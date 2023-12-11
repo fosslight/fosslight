@@ -64,4 +64,7 @@ public interface T2UserService extends UserDetailsService {
 	public String[] checkUserInfo(T2Users userInfo);
 
 	public boolean isAdmin(String _token);
+	
+	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap);
+	public boolean checkSystemUser(String userId, String rawPassword);
 }
