@@ -35,6 +35,17 @@ var evt = {
 		
 		$('select[name=hType]').select2({placeholder: "Modify Type", allowClear: true});
 		$('select[name=hAction]').select2({placeholder: "Action", allowClear: true});
+		
+		$("#modifiedDate").daterangepicker()
+		.on('apply.daterangepicker', function(ev, picker) {
+			$("input[name='startDate']").val(picker.startDate.format('YYYYMMDD'));
+			$("input[name='endDate']").val(picker.endDate.format('YYYYMMDD'));
+		})
+		.on('cancel.daterangepicker', function(ev, picker) {
+			$("#modifiedDate").val("");
+			$("input[name='startDate']").val("");
+			$("input[name='endDate']").val("");
+		});
 	}
 };
 

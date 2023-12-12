@@ -96,7 +96,6 @@ var evt = {
 		    				$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
 						})
 						.on('cancel.daterangepicker', function(ev, picker) {
-							$("#createdDate").val("");
 							$("input[name='schStartDate']").val("");
 		    				$("input[name='schEndDate']").val("");
 						});

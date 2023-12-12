@@ -1,23 +1,37 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="script">
-<script type="text/javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
-<script type="text/javascript">
+<script th:inline="javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
+<script th:inline="javascript">
 var divisionList = new Array();
 var _popup = null;
 var isKeyUp = false;
-var projectFlag = "[[${projectFlag}]]";
-var partnerFlag = "[[${partnerFlag}]]";
+var projectFlag = [[${projectFlag}]];
+var partnerFlag = [[${partnerFlag}]];
+
+$(document).ready(function () {
+	common_fn.init();
+});
 
 var common_fn = {
 	init : function(){
-		divisionList = "[[*{divisionList}]]";
+		divisionList = [[${@CoCodeManager.getCodeNames(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}]];
 		if(typeof divisionList == "string"){
 			divisionList = divisionList.replace(/[\[\]]/g, "").split(",");
 		}
-		
+		$(".select2").select2();
 		common_fn.chartReload();
 		common_fn.bindEvent();
+		
+		$("#searchDate").daterangepicker()
+		.on('apply.daterangepicker', function(ev, picker) {
+			$("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+			$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+		})
+		.on('cancel.daterangepicker', function(ev, picker) {
+			$("input[name='schStartDate']").val("");
+			$("input[name='schEndDate']").val("");
+		});
 	},
 	bindEvent : function(){
 		$("#divisionalProjectChartSelect").on("change", function(){
@@ -48,7 +62,7 @@ var common_fn = {
 				_popup = window.open(url, "statisticsPopup_"+id, "width=900, height=700, toolbar=no, location=no, left=100, top=100, resizable=no");
 
 				if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-					alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
 				}
 			}else{
 				_popup.close();
@@ -80,37 +94,37 @@ var common_fn = {
 			
 			if (schStartDate.length == 8){
 				if (!date_pattern.test(schStartDate)){
-					alertify.error('<spring:message code="msg.common.valid" />', 0);
+					alertify.error([[#{msg.common.valid}]], 0);
 					$("input[name=schStartDate]").val("");
 					return;
 				} else {
 					var checkLastDate = new Date(schStartDate.substring(0,4), schStartDate.substring(4,6), 0);
 					if (parseInt(schStartDate.substring(6,8)) > parseInt(checkLastDate.getDate())){
-						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						alertify.error([[#{msg.common.valid}]], 0);
 						$("input[name=schStartDate]").val("");
 						return;
 					}
 				}
 			} else {
-				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				alertify.error([[#{msg.common.valid}]], 0);
 				$("input[name=schStartDate]").val("");
 			}
 			
 			if (schEndDate.length == 8){
 				if (!date_pattern.test(schEndDate)){
-					alertify.error('<spring:message code="msg.common.valid" />', 0);
+					alertify.error([[#{msg.common.valid}]], 0);
 					$("input[name=schEndDate]").val("");
 					return;
 				} else {
 					var checkLastDate = new Date(schStartDate.substring(0,4), schStartDate.substring(4,6), 0);
 					if (parseInt(schEndDate.substring(6,8)) > parseInt(checkLastDate.getDate())){
-						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						alertify.error([[#{msg.common.valid}]], 0);
 						$("input[name=schEndDate]").val("");
 						return;
 					}
 				}
 			} else {
-				alertify.error('<spring:message code="msg.common.valid" />', 0);
+				alertify.error([[#{msg.common.valid}]], 0);
 				$("input[name=schEndDate]").val("");
 			}
 			
@@ -129,6 +143,7 @@ var common_fn = {
 		chart_fn.updatedOssChartOpen();
 		chart_fn.updatedLicenseChartOpen();
 		chart_fn.userRelatedChartOpen();
+		if ([[${partnerFlag}]]) chart_fn.trdPartyRelatedChartOpen();
 	},
 	validation : function(type){
 		var startDate = $("#startDate").val();
@@ -138,17 +153,17 @@ var common_fn = {
 			case "DIV":
 				var divisionType = $("#divisionalProjectChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert('<spring:message code="msg.statistics.required.date" />', function(){});
+					alertify.alert([[#{msg.statistics.required.date}]], function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert('<spring:message code="msg.statistics.warn.daterange" />', function(){});
+					alertify.alert([[#{msg.statistics.warn.daterange}]], function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert('<spring:message code="msg.statistics.notice.admin" />', function(){});
+					alertify.alert([[#{msg.statistics.notice.admin}]], function(){});
 					return false;
 				}
 				
@@ -156,17 +171,17 @@ var common_fn = {
 			case "TRD":
 				var divisionType = $("#trdPartyRelatedChartSelect").val();
 				if(startDate.length == 0 || endDate.length == 0){
-					alertify.alert('<spring:message code="msg.statistics.required.date" />', function(){});
+					alertify.alert([[#{msg.statistics.required.date}]], function(){});
 					return false;
 				}
 
 				if(+startDate > +endDate){
-					alertify.alert('<spring:message code="msg.statistics.warn.daterange" />', function(){});
+					alertify.alert([[#{msg.statistics.warn.daterange}]], function(){});
 					return false;
 				}
 
 				if(divisionType.length == 0){
-					alertify.alert('<spring:message code="msg.statistics.notice.admin" />', function(){});
+					alertify.alert([[#{msg.statistics.notice.admin}]], function(){});
 					return false;
 				}
 				break;
@@ -174,7 +189,7 @@ var common_fn = {
 				var diffNum = +startDate - +endDate;
 				
 				if(diffNum > 0 && endDate > 0){
-					alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
+					alertify.alert([[#{msg.common.search.check.date}]], function(){});
 
 					return false;
 				}
@@ -228,7 +243,7 @@ var chart_fn = {
 					getBarChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -268,7 +283,7 @@ var chart_fn = {
 					getPieChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -308,7 +323,7 @@ var chart_fn = {
 					getPieChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -351,7 +366,7 @@ var chart_fn = {
 					getBarChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -394,7 +409,7 @@ var chart_fn = {
 					getBarChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -436,7 +451,7 @@ var chart_fn = {
 					getBarChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -486,7 +501,7 @@ var chart_fn = {
 					getBarChart(obj);
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
@@ -546,13 +561,13 @@ var chart_fn = {
 				contentType : 'application/json',
 				success: function (data) {
 					if("false" == data.isValid) {
-				    	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				    	alertify.error([[#{msg.common.valid2}]], 0);
 					} else {
-						window.location =  '/exceldownload/getFile?id='+data.validMsg;
+						window.location = '/exceldownload/getFile?id='+data.validMsg;
 					}
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		},
