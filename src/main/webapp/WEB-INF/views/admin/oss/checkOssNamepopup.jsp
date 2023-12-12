@@ -201,7 +201,6 @@
 													/**
 													 * params["referenceDiv"] is id of identification type
 													 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
-													 * 10 (3RD) -> tab index: 0
 													 * 16 (DEP) -> tab index: 1
 													 * 11 (SRC) -> tab index: 2
 													 * 15 (BIN) -> tab index: 3
@@ -399,7 +398,13 @@
 										}
 									}
 								}
-								
+
+								if ("identification" == targetName && referenceDiv.startsWith("16")) {
+									$("#btnChangeOss").removeClass('red');
+									$("#btnChangeOss").addClass('gray disabled');
+									$("#btnChangeOss").attr('disabled', true);
+								}
+
 								$('#loading_wrap_popup').hide();
 
 								if(ossValidMsg) {

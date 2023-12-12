@@ -1,6 +1,11 @@
 package oss.fosslight.util;
 
+import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
+import com.itextpdf.io.font.FontProgram;
+import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.layout.font.FontProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -9,14 +14,12 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.*;
+import oss.fosslight.domain.File;
 import oss.fosslight.repository.*;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VulnerabilityService;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -48,9 +51,17 @@ public final class PdfUtil extends CoTopComponent {
         }
         return instance;
     }
-    public static ByteArrayInputStream html2pdf(String html) {
+    public static ByteArrayInputStream html2pdf(String html) throws IOException {
+        String font = "src/main/resources/static/NanumGothicBold.ttf";
+
+        ConverterProperties properties = new ConverterProperties();
+        FontProvider fontProvider = new DefaultFontProvider(false,false,false);
+        FontProgram fontProgram = FontProgramFactory.createFont(font);
+        fontProvider.addFont(fontProgram);
+        properties.setFontProvider(fontProvider);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HtmlConverter.convertToPdf(html, outputStream);
+        HtmlConverter.convertToPdf(html, outputStream, properties);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         return inputStream;
     }
@@ -165,6 +176,7 @@ public final class PdfUtil extends CoTopComponent {
         props.put("resource.loader", "class");
         props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
         props.put("input.encoding", "UTF-8");
+        props.put("output.encoding", "UTF-8");
 
         vf.init(props);
 

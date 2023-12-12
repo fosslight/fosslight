@@ -1060,7 +1060,7 @@ var bom_data = {
 				}
 				, onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if(iCol == "0"){
-						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, null, com_fn.getLicenseName);
+						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					}
 				}
 				, ondblClickRow: function(rowid,iRow,iCol,e) {

@@ -39,6 +39,20 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
+				if (isAndroidModel) {
+					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
+						alertify.alert('<spring:message code="msg.project.validation.error" />');
+						
+						return false;
+					}
+				} else {
+					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
+						alertify.alert('<spring:message code="msg.project.validation.error" />');
+						
+						return false;
+					}
+				}
+				
 				if(com_fn.isAndroidOnly()) {
 					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
 					
@@ -1383,16 +1397,7 @@ var com_fn = {
         }
 
         if(rowCheckedArr.length > 0){
-        	for (var i in rowCheckedArr) {
-        		var licenseName = com_fn.getLicenseName(gridList.getRowData(rowCheckedArr[i]));
-        		gridList.jqGrid("setCell", rowCheckedArr[i], "licenseName", licenseName);
-				fn_grid_com.saveCellData(gridList.attr("id"), rowCheckedArr[i], "licenseName", licenseName, null, null);
-				gridList.jqGrid('saveRow', rowCheckedArr[i]);
-        	}
-        	
-            fn_grid_com.totalGridSaveMode(targetGird);
-
-			var _popup = null;
+        	var _popup = null;
 			
             if(_popup == null || _popup.closed){
             	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");

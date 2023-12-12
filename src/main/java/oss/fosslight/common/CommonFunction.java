@@ -3796,6 +3796,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			String ossNameTemp = "";
 			boolean ossNicknameFlag = false;
 			
+			String comment  = bean.getComment();
+			if (!isEmpty(comment)) userData.setComment(comment);
+			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				int ossNameCnt = errorMsg.entrySet()
 						.stream()
@@ -3810,7 +3813,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						.size();
 				
 				String copyright = bean.getOssCopyright();
-				String comment  = bean.getComment();
 				
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
@@ -3939,7 +3941,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							
 							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), bean.getOssVersion(), avoidNull(ossInfoByNickList.get(0).getOssNickname()).replaceAll("<br>", ",")
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
-									, ossInfoByNickList.get(0).getHomepage(), null, null, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
+									, ossInfoByNickList.get(0).getHomepage(), null, comment, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
 							ossInfoByNick.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + idx);
 							
 							ossAnalysisByNickList.add(ossInfoByNick);
@@ -4132,6 +4134,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setComment(comment);
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
 						}
@@ -5277,5 +5280,46 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 		
 		return vulDocMsg;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void setDeduplicatedMessageInfo(Map<String, Object> result) {
+		Map<String, String> rtnMsgMapByValid = new HashMap<>();
+		Map<String, String> rtnMsgMapByValidAndDiff = new HashMap<>();
+		
+		if (result.containsKey("infoData")) {
+			Map<String, String> infoDataMap = (Map<String, String>) result.get("infoData");
+			if (result.containsKey("validData")) {
+				Map<String, String> validDataMap = (Map<String, String>) result.get("validData");
+				for (String key : infoDataMap.keySet()) {
+					if (!validDataMap.containsKey(key)) {
+						rtnMsgMapByValid.put(key, infoDataMap.get(key));
+					}
+				}
+			}
+			
+			if(result.containsKey("diffData")) {
+				Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
+				if (!rtnMsgMapByValid.isEmpty()) {
+					for (String key : rtnMsgMapByValid.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValidAndDiff.put(key, rtnMsgMapByValid.get(key));
+						}
+					}
+				} else {
+					for (String key : diffDataMap.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValid.put(key, infoDataMap.get(key));
+						}
+					}
+				}
+			}
+		}
+		
+		if (!rtnMsgMapByValidAndDiff.isEmpty()) {
+			result.put("infoData", rtnMsgMapByValidAndDiff);
+		} else {
+			result.put("infoData", rtnMsgMapByValid);
+		}
 	}
 }

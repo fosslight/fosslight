@@ -3150,7 +3150,7 @@
 					#{componentId}
 					, LICENSE_ID
 				<if test="@oss.fosslight.util.StringUtil@equals('10', referenceDiv)">
-					, IFNULL(NULLIF((SELECT SHORT_IDENTIFIER FROM LICENSE_MASTER WHERE LICENSE_NAME = T1.LICENSE_NAME), ''), T1.LICENSE_NAME) AS LICENSE_NAME
+					, IFNULL(NULLIF((SELECT SHORT_IDENTIFIER FROM LICENSE_MASTER WHERE LICENSE_NAME = T1.LICENSE_NAME AND USE_YN = 'Y'), ''), T1.LICENSE_NAME) AS LICENSE_NAME
 				</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('50', referenceDiv)">
 					, LICENSE_NAME
