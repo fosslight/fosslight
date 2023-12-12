@@ -2,11 +2,13 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
+    //<![CDATA[
+    /*global $ */
     let isAdmin = [[ ${@CommonFunction.isAdmin() } ]];
     let groupBuffer='';
     let totalRow = 0;
     let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) } ]];
-    linkFlag = String('[[ ${searchBean.linkFlag}]]');
+    linkFlag = [[ ${searchBean.linkFlag}]];
 
     $(window).load(function () {
         oss_lst_evt.init();
@@ -223,8 +225,8 @@
                             return ' style="display:none;"';
                         }
                     }
-                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: oss_lst_fmt.ossTypeFormat }
-                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: oss_lst_fmt.ossNameLinkFormat }
+                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: fn_grid_com.ossTypeFormat }
+                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: fn_grid_com.ossNameLinkFormat }
                     , { name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left' }
                     , { name: 'licenseName', index: 'licenseName', width: 200, align: 'left' }
                     , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
@@ -393,5 +395,6 @@
             });
         }
     }
+    //]]>
 </script>
 </th:block>

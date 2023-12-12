@@ -99,7 +99,7 @@
                   loadedInfo = data['value'];
                   OssBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
                   OssBulkGridWarningMessageUtil.call();
-                  alertify.alert('<spring:message code="msg.common.success" />', function () {
+                  alertify.alert([[#{msg.common.success}]], function () {
                   });
                 } else if (data['res'] == false) {
                   showErrorMsg();
@@ -130,19 +130,19 @@
           colNames:['gridId', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
             'Homepage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
           colModel: [
-            { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false},
-            { name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
-            { name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
-            { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
-            { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
-            { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
-            { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
-            { name: 'homepage', index:'homepage', width: 250, align: 'left', editable:false},
-            { name: 'downloadLocation', index:'downloadLocation', width: 150, align: 'left', editable:false},
-            { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
-            { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
-            { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
-            { name: 'status', index:'status', width: 500, align: 'left'}
+            { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false },
+            { name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false },
+            { name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false },
+            { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false },
+            { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false },
+            { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false },
+            { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"} },
+            { name: 'homepage', index:'homepage', width: 250, align: 'left', editable:false },
+            { name: 'downloadLocation', index:'downloadLocation', width: 150, align: 'left', editable:false },
+            { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"} },
+            { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"} },
+            { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"} },
+            { name: 'status', index:'status', width: 500, align: 'left' }
           ],
           viewrecords: true,
           rowNum: rowNum,
@@ -220,7 +220,7 @@
 
     function showErrorMsg() {
 
-      alertify.error('<spring:message code="msg.common.valid"/>', 0);
+      alertify.error([[#{msg.common.valid}]], 0);
 
       $('.ajax-file-upload-statusbar').fadeOut('slow');
       $('.ajax-file-upload-statusbar').remove();

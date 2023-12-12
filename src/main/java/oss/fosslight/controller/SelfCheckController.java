@@ -337,7 +337,7 @@ public class SelfCheckController extends CoTopComponent {
 
 		model.addAttribute("isValid", !resultList.isEmpty());
 		
-		return SELF_CHECK.LICENSE_POPUP_JSP;
+		return "license/fragments/license-fragments :: licensePopupFragment";
 	}
 	
 	@PostMapping(value=SELF_CHECK.SEND_COMMENT)

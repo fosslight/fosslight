@@ -17,46 +17,6 @@ const lic_lst_fmt = {
     },
 }
 
-// oss list page grid formatter
-const oss_lst_fmt = {
-    ossTypeFormat: function (cellvalue, options, rowObject) {
-        var display = "";
-
-        if (cellvalue.includes("M")) {
-            display += "<span class=\"badge badge-primary mr-1\">M</span>";
-        }
-        if (cellvalue.includes("D")) {
-            display += "<span class=\"badge badge-info mr-1\">D</span>";
-        }
-        if (cellvalue.includes("V")) {
-            display += "<span class=\"badge badge-success mr-1\">V</span>";
-        }
-
-        return display;
-    },
-    ossNameLinkFormat : function(cellvalue, options, rowObject){
-        const display = "<a href=\"javascript:void(0);\" class='urlLink'>" + cellvalue + "</a>";
-        return display;
-    },
-    obligationTypeFormat : function (cellvalue, options, rowObject) {
-        var display = "";
-        switch(cellvalue) {
-            case "10" :
-                display = "<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i>";
-
-                break;
-            case "11" :
-                display = "<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i><i class=\"far fa-file-code fa-lg ml-1\" title=\"Source Code\"></i>";
-
-                break;
-            default:
-                display = '';
-
-                break;
-        }
-        return display;
-    }
-}
 
 // oss edit page grid formatter
 const oss_edit_fmt = {
