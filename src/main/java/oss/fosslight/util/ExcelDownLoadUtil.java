@@ -17,7 +17,16 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -55,12 +64,13 @@ import org.cyclonedx.model.OrganizationalContact;
 import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Tool;
 import org.cyclonedx.model.vulnerability.Vulnerability.Source;
+import org.spdx.library.SpdxVerificationHelper;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVWriter;
 
 import lombok.extern.slf4j.Slf4j;
@@ -101,8 +111,6 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
-
-import org.spdx.library.SpdxVerificationHelper;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -1819,66 +1827,66 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 	
-	private static String makeCsvFileId(String target, List<String[]> datas) throws IOException {
-		
-		UUID randomUUID = UUID.randomUUID();
-		String fileName = CommonFunction.replaceSlashToUnderline(target)+"_"+CommonFunction.getCurrentDateTime();
-		String logiFileName = fileName + "_" + randomUUID+".csv";
-		String excelFilePath = writepath+"/download/";
-		CSVWriter cw = null;
-		
-		FileWriter fileWriter = null;
-		CSVPrinter csvFilePrinter = null;
-		CSVFormat csvFileFormat = CSVFormat.EXCEL;
-		
-		FileOutputStream outFile = null;
-		
-		try {			
-			fileWriter = new FileWriter(excelFilePath + logiFileName);
-
-			if (!Files.exists(Paths.get(excelFilePath))) {
-				Files.createDirectories(Paths.get(excelFilePath));
-			}
-			
-			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
-			
-			for (String[] row : datas) {
-				csvFilePrinter.printRecord(Arrays.asList(row));
-			}
-			
-			fileWriter.flush();
-			// db 등록
-			return fileService.registFileDownload(excelFilePath, fileName + ".csv", logiFileName);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (outFile != null) {
-				try {
-					outFile.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (cw != null) {
-				try {
-					cw.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (fileWriter != null) {
-				try {
-					fileWriter.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (csvFilePrinter != null) {
-				try {
-					csvFilePrinter.close();
-				} catch (Exception e2) {}
-			}
-		}
-		
-		return null;
-	}
+//	private static String makeCsvFileId(String target, List<String[]> datas) throws IOException {
+//		
+//		UUID randomUUID = UUID.randomUUID();
+//		String fileName = CommonFunction.replaceSlashToUnderline(target)+"_"+CommonFunction.getCurrentDateTime();
+//		String logiFileName = fileName + "_" + randomUUID+".csv";
+//		String excelFilePath = writepath+"/download/";
+//		CSVWriter cw = null;
+//		
+//		FileWriter fileWriter = null;
+//		CSVPrinter csvFilePrinter = null;
+//		CSVFormat csvFileFormat = CSVFormat.EXCEL;
+//		
+//		FileOutputStream outFile = null;
+//		
+//		try {			
+//			fileWriter = new FileWriter(excelFilePath + logiFileName);
+//
+//			if (!Files.exists(Paths.get(excelFilePath))) {
+//				Files.createDirectories(Paths.get(excelFilePath));
+//			}
+//			
+//			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
+//			
+//			for (String[] row : datas) {
+//				csvFilePrinter.printRecord(Arrays.asList(row));
+//			}
+//			
+//			fileWriter.flush();
+//			// db 등록
+//			return fileService.registFileDownload(excelFilePath, fileName + ".csv", logiFileName);
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//		} finally {
+//			if (outFile != null) {
+//				try {
+//					outFile.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (cw != null) {
+//				try {
+//					cw.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (fileWriter != null) {
+//				try {
+//					fileWriter.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (csvFilePrinter != null) {
+//				try {
+//					csvFilePrinter.close();
+//				} catch (Exception e2) {}
+//			}
+//		}
+//		
+//		return null;
+//	}
 	
 	private static String makeAnalysisListExcelFileId(Workbook wb, String target, String exp, String prjId) throws IOException {
 		UUID randomUUID = UUID.randomUUID();

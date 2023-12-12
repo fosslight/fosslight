@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -29,8 +30,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Functions;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -5156,7 +5155,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> valuesList = binaryOssKeyMap.values().stream().distinct().collect(Collectors.toList());
 		
 		Map<String, String> collect = valuesList.stream()
-										.collect(Collectors.toMap(Functions.identity(), v -> binaryOssKeyMap.entrySet().stream()
+										.collect(Collectors.toMap(Function.identity(), v -> binaryOssKeyMap.entrySet().stream()
 												.filter(entry -> Objects.equals(v, entry.getValue()))
 												.map(Map.Entry<String, String>::getKey)
 												.reduce("", (s1, s2) -> isEmpty(s1) ? s2 : s1 + "," + s2)));
