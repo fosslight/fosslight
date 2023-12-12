@@ -619,7 +619,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) 
 							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) 
 							|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
-						_comm = avoidNull(bean.getComments());
+						_comm = avoidNull(bean.getComments().trim());
 						
 						params.add(_comm); 
 					}
@@ -4665,8 +4665,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, param.getOssName()
 					, param.getOssVersion()
 					, param.getLicenseName()
-					, param.getDownloadLocation()
-					, param.getHomepage()
+					, param.getDownloadLocation().replaceAll("%40", "@")
+					, param.getHomepage().replaceAll("%40", "@")
 				};
 				
 				rows.add(rowParam);
