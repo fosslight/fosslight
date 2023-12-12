@@ -2,29 +2,30 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
   <script th:inline="javascript">
-    let jsonData;
-    let withStatus;
-    let loadedInfo;
-    let licenseData = [];
-    let failLicense = [];
-    let postData;
-    let isClicked = false;
-    let stringDataForValid = ['licenseName','licenseType','obligationNotificationYn','obligationDisclosingSrcYn',
-      'shortIdentifier','description','licenseText', 'attribution', 'comment'];
-    let inputStringDataForValid = ['licenseName','licenseType','obligationNotificationYn','obligationDisclosingSrcYn',
-      'shortIdentifier'];
-    let listDataForValid = ["licenseNicknames", "webpages"];
-    let textAreaStringDataForValid = ['description', 'licenseText', 'attribution', 'comment'];
-    let editColList = ['gridId', "licenseNicknames", "webpages", "licenseName", 'licenseType', 'obligationNotificationYn',
-      'obligationDisclosingSrcYn', 'shortIdentifier','description','licenseText', 'attribution', 'comment'];
-    let selectedIds = new Set()
+    var jsonData;
+    var withStatus;
+    var loadedInfo;
+    var ossData = [];
+    var failOss = [];
+    var isClicked = false;
+    var postData; /**list data for sending to server*/
+    var stringDataForValid = ['ossName','ossVersion','copyright','homepage','downloadLocation'
+              ,'summaryDescription','attribution', 'comment'];
+    var inputStringDataForValid = ['ossName','ossVersion','homepage','downloadLocation'];
+    var textAreaStringDataForValid = ['copyright', 'summaryDescription', 'attribution', 'comment'];
+    var listDataForValid = ["ossNicknames", "declaredLicenses", "detectedLicenses"];
+    var editColList = ['id', "ossNicknames", "declaredLicenses", "detectedLicenses", 'ossName','ossVersion','copyright','homepage','downloadLocation'
+      ,'summaryDescription','attribution', 'comment'];
+    var selectedIds = new Set() /**set for selected rowids*/
+    var referenceId = '${projectData.prjId}';
+    var referenceDiv = '${projectData.referenceDiv}';
 
     $(document).ready(function() {
-      bulkReg_evt.init();
-      bulkReg_grid.load();
+      ossBulkReg_evt.init();
+      ossBulkReg_grid.load();
     });
 
-    const bulkReg_evt = {
+    const ossBulkReg_evt = {
       init: function () {
         let accept1 = '';
         let acceptList = [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_FILE_ACCEPT'))}]];
@@ -35,7 +36,7 @@
           }
         });
 
-        $('#bulkRestFile').uploadFile({
+        $('#csvFile').uploadFile({
           url: '/license/csvFile',
           multiple: false,
           dragDrop: true,
@@ -66,77 +67,86 @@
         });
 
         const target = $("#list");
-        if (isClicked == false) {
+        if(isClicked == false) {
           isClicked = true;
-
           $("#btn").click(() => {
-            LicenseBulkGridStatusMessageManager.cleanStatusMessages();
-            LicenseBulkGridWarningMessageUtil.cleanMessages();
+            loading.show();
+            OssBulkGridStatusMessageManager.cleanStatusMessages();
+            OssBulkGridWarningMessageUtil.cleanMessages();
             target.jqGrid('saveRow', _mainLastsel);
 
-            // load all rows in grid
-            const mainData = target.jqGrid('getRowData');
+            // load all rowIds checked in grid
+            var rowIds = target.jqGrid("getGridParam", "selarrrow");
 
+            // load all rows in grid
+            var mainData = target.jqGrid('getRowData');
+
+            //data Check and make postData
             dataValidCheck(mainData)
             makePostData()
 
             $.ajax({
               type: "POST",
               contentType: 'application/json',
-              url: "/license/bulkRegAjax",
+              url: "/oss/bulkRegAjax",
               data: JSON.stringify(postData),
               cache: false,
               dataType: "json",
               success: (data) => {
-                failLicense = []
+                failOss = []
                 _mainLastsel = -1;
                 if (data['res'] == true && data['value'] != []) {
                   loadedInfo = data['value'];
-
-                  LicenseBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
-                  LicenseBulkGridWarningMessageUtil.call();
-
-                  alertify.alert([[ #{msg.common.success} ]], function () {
+                  OssBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
+                  OssBulkGridWarningMessageUtil.call();
+                  alertify.alert('<spring:message code="msg.common.success" />', function () {
                   });
                 } else if (data['res'] == false) {
                   showErrorMsg();
-                  LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
+                  OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                 }
+                loading.hide();
               },
               error: (e) => {
-                LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
+                OssBulkGridWarningMessageUtil.setMessagesToCurPage();
+                loading.hide();
               }
             })
           })
         }
+        IdentificationGridDataExtractor.call();
       }
     }
 
-    const bulkReg_grid = {
+    const ossBulkReg_grid = {
       load : function () {
+        var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+        var rowList = rowStr.split(",");
+        var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+
         $("#list").jqGrid({
           datatype: "local",
           data : jsonData,
-          colNames:['gridId', 'License Name','License Type','Notice','Source Code','SPDX Short Identifier','Nickname',
-            'Website for the license','User Guide',  'License Text', 'Attribution','Comment', 'Status'],
+          colNames:['gridId', 'OSS Name','Nickname','Version','Declared License','Detected License','Copyright',
+            'Homepage','Download URL',  'Summary Description', 'Attribution','Comment', 'Status'],
           colModel: [
             { name: 'gridId', index: 'gridId', width: 75, key:true, hidden: true, editable:false},
-            { name: 'licenseName', index: 'License Name', width: 200, align: 'left', editable:false},
-            { name: 'licenseType', index: 'License Type', width: 200, align: 'left', editable:false},
-            { name: 'obligationNotificationYn', index: 'Notice', width: 75, align: 'left', editable:false},
-            { name: 'obligationDisclosingSrcYn', index: 'Source Code', width: 75, align: 'left', editable:false},
-            { name: 'shortIdentifier', index: 'SPDX Short Identifier', width: 300, align: 'left', editable:false},
-            { name: 'licenseNicknames', index: 'Nickname', width: 300, align: 'left', editable:false},
-            { name: 'webpages', index: 'Website for the license', width: 200, align: 'left', editable:false},
-            { name: 'description', index:'User Guide', width: 250, align: 'left', editable:false, edittype:"textarea"},
-            { name: 'licenseText', index:'License Text', width: 150, align: 'left', editable:false, edittype:"textarea"},
-            { name: 'attribution', index:'Attribution', width: 150, align: 'left', editable:false, edittype:"textarea"},
-            { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea"},
-            { name: 'status', index:'status', width: 150, align: 'left'}
+            { name: 'ossName', index: 'ossName', width: 200, align: 'left', editable:false},
+            { name: 'ossNicknames', index: 'ossNickNames', width: 200, align: 'left', editable:false},
+            { name: 'ossVersion', index: 'ossVersion', width: 75, align: 'left', editable:false},
+            { name: 'declaredLicenses', index: 'declaredLicenses', width: 300, align: 'left', editable:false},
+            { name: 'detectedLicenses', index: 'detectedLicenses', width: 300, align: 'left', editable:false},
+            { name: 'copyright', index: 'copyright', width: 200, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+            { name: 'homepage', index:'homepage', width: 250, align: 'left', editable:false},
+            { name: 'downloadLocation', index:'downloadLocation', width: 150, align: 'left', editable:false},
+            { name: 'summaryDescription', index:'summaryDescription', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+            { name: 'attribution', index:'attribution', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+            { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
+            { name: 'status', index:'status', width: 500, align: 'left'}
           ],
           viewrecords: true,
-          rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_DEFAULT')}]],
-          rowList: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]],
+          rowNum: rowNum,
+          rowList: rowList,
           autowidth: true,
           gridview: true,
           height: 'auto',
@@ -149,21 +159,20 @@
           cellsubmit : 'clientArray',
           ignoreCase: true,
           multiselect: true,
-
           /** check rows seleted when move page*/
           loadComplete: function(data) {
             _mainLastsel = -1;
             selectMarkWhenPageChange();
             makeBackGroundColor();
-            LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
+            OssBulkGridWarningMessageUtil.setMessagesToCurPage();
           },
           ondblClickRow: function(rowid,iRow,iCol,e) {
             if(rowid) {
               if (rowid != _mainLastsel) {
                 $("#list").jqGrid('saveRow', _mainLastsel);
-                LicenseBulkGridWarningMessageUtil.setMessageToRow(_mainLastsel);
+                OssBulkGridWarningMessageUtil.setMessageToRow(_mainLastsel);
               }
-              LicenseBulkGridWarningMessageUtil.cleanMessageOfRow(rowid);
+              OssBulkGridWarningMessageUtil.cleanMessageOfRow(rowid);
               editable()
               $("#list").jqGrid('editRow', rowid);
               _mainLastsel = rowid;
@@ -182,7 +191,7 @@
           },
           /** save data edited when move page */
           onPaging: function() {
-            LicenseBulkGridWarningMessageUtil.cleanMessages();
+            OssBulkGridWarningMessageUtil.cleanMessages();
 
             $("#list").jqGrid('saveRow', _mainLastsel);
 
@@ -211,7 +220,7 @@
 
     function showErrorMsg() {
 
-      alertify.error( [[ #{msg.common.valid} ]], 0);
+      alertify.error('<spring:message code="msg.common.valid"/>', 0);
 
       $('.ajax-file-upload-statusbar').fadeOut('slow');
       $('.ajax-file-upload-statusbar').remove();
@@ -248,6 +257,9 @@
       return $("#list").jqGrid("getDataIDs");
     }
 
+    /**
+     *
+     * */
     function selectMarkWhenPageChange() {
       for(let id of $("#list").jqGrid("getDataIDs")) {
         if(selectedIds.has(id)) {
@@ -258,64 +270,23 @@
     }
 
     /**
-     * data fot seding to server
+     * load rows in grid
      * */
-    function makePostData() {
-      postData = []
-      selectedIds.forEach((idx) => {
-        postData.push(licenseData[Number(idx)])
-      })
-    }
-
-
     function stubColData(){
       for(var i=0; i<jsonData.length ; i++ ){
-        withStatus = jsonData[i]['license'];
-        withStatus['status'] = jsonData[i]['status'];
+        withStatus = jsonData[i]['oss'];
+        withStatus.gridId = i;
         $('#list').jqGrid('addRowData', i, withStatus);
       }
       $("#list").trigger('reloadGrid');
     }
 
-    function makeLicenseDTOList() {
+    /**
+     * make ossData
+     * */
+    function makeOssDTOList() {
       for (var i = 0; i < jsonData.length; i++){
-
-        /**
-         * String Data NPE CHECK
-         * Space Issue CHECK
-         * */
-        stringDataForValid.forEach((strData) => {
-          if (jsonData[i]['license'][strData] == undefined) {
-            jsonData[i]['license'][strData] = ""
-          } else {
-            jsonData[i]['license'][strData] = jsonData[i]['license'][strData].trim()
-          }
-        })
-
-        /**
-         * List Data NPE CHECK
-         * Space Issue CHECK
-         * */
-        listDataForValid.forEach((listData) => {
-          if (jsonData[i]['license'][listData] == undefined) {
-            jsonData[i]['license'][listData] = []
-          } else {
-            checked_list = []
-            for (var j = 0; j < jsonData[i]['license'][listData].length; j++) {
-              if (jsonData[i]['license'][listData][j].trim() != "") {
-                checked_list.push(jsonData[i]['license'][listData][j].trim())
-              }
-            }
-            jsonData[i]['license'][listData] = checked_list
-          }
-        })
-
-        /**
-         * setGridId
-         * */
-        jsonData[i]['license']['gridId'] = i
-
-        licenseData.push(jsonData[i]['license']);
+        ossData.push(jsonData[i]['oss']);
       }
     }
 
@@ -326,37 +297,44 @@
     function dataValidCheck(mainData) {
       mainData.forEach((row) => {
         inputStringDataForValid.forEach((strData) => {
-          licenseData[row["gridId"]][strData] = row[strData].trim();
+          ossData[row["gridId"]][strData] = row[strData].trim();
         })
 
         textAreaStringDataForValid.forEach((strData) => {
-          licenseData[row["gridId"]][strData] = row[strData];
+          ossData[row["gridId"]][strData] = row[strData];
         })
 
         listDataForValid.forEach((listData) => {
-          licenseData[row["gridId"]][listData] = row[listData].trim()
-          if (licenseData[row["gridId"]][listData] == "") {
-            licenseData[row["gridId"]][listData] = []
+          ossData[row["gridId"]][listData] = row[listData].trim()
+          if (ossData[row["gridId"]][listData] == "") {
+            ossData[row["gridId"]][listData] = []
           } else {
-            checked_list = []
-            new_list = licenseData[row["gridId"]][listData].split(",")
-            for (var i = 0; i < new_list.length; i++) {
-              if (new_list[i].trim() != "") {
-                checked_list.push(new_list[i].trim())
-              }
-            }
-            licenseData[row["gridId"]][listData] = checked_list
+            ossData[row["gridId"]][listData] = ossData[row["gridId"]][listData].split(",")
+                    .map(item => item.trim()).filter(item => item.length);
           }
         })
       })
     }
 
+    /**
+     * make final data
+     * postdata will be sent to server
+     * */
+    function makePostData() {
+      postData = []
+      selectedIds.forEach((idx) => {
+        postData.push(ossData[Number(idx)])
+      })
+    }
+
     function checkLoaded(){
+
       $("#list").jqGrid('clearGridData');
+
       for (var i=0; i < jsonData.length; i++){
         var addedOSS = false;
         for (var j = 0; j < loadedInfo.length; j++){
-          if (jsonData[i]['license']['licenseName'] === loadedInfo[j]['licenseName']){
+          if (jsonData[i]['oss']['ossName'] === loadedInfo[j]['ossName']){
             jsonData[i]['status'] = 'Added';
             addedOSS = true;
             break;
@@ -372,21 +350,103 @@
 
     var fn = {
       downloadBulkSample : function(type){
-        const logiPath = "/sample/FOSSLight-License-Bulk-Sample.xls";
-        const fileName = "FOSSLight-License-Bulk-Sample.xls";
-        location.href = "/partner/sampleDownload?fileName=" + fileName + "&logiPath=" + logiPath;
+        var logiPath = "/sample/FOSSLight-OSS-Bulk-Sample.xls";
+        var fileName = "FOSSLight-OSS-Bulk-Sample.xls";
+        location.href = "/partner/sampleDownload?fileName=" +fileName+ "&logiPath=" +logiPath;
+      }
+    }
+
+    const IdentificationGridDataExtractor = {
+      call : function (){
+        if(this.isFromProjectIdentification()) {
+          $.ajax({
+            contentType: 'application/json',
+            url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}&merge=N`,
+            dataType: "json",
+            success: (data) => {
+              if (data.validData) {
+                this.addRows(data);
+                OssBulkGridWarningMessageUtil.call();
+              }
+            },
+            error: (e) => {
+              console.log(e);
+            }
+          })
+        }
+      },
+      isFromProjectIdentification : function (){
+        return referenceId && referenceDiv;
+      },
+      addRows(data) {
+        let mainData = referenceDiv == '20' ? data.mainData : data.rows;
+        const mainDataMap = this.getMapOfMainData(mainData);
+        const validData = data.validData;
+
+        jsonData = [];
+        delete validData.isValid;
+
+        const ids = this.getInValidGridIds(validData);
+
+        for(let i = 0; i < ids.length; ++i) {
+          const newRow = this.toOssInfo(mainDataMap[ids[i]]);
+          newRow.gridId = i;
+          $("#list").jqGrid('addRowData', i, newRow);
+          ossData.push(newRow);
+          jsonData.push({oss: newRow});
+        }
+        $("#list").trigger('reloadGrid');
+      },
+      getInValidGridIds(validData) {
+        let inValidGridId = new Set();
+
+        let ossVersionUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_VERSION.UNCONFIRMED.MSG")%>';
+        let ossNameUnconfirmedMsg = '<%=T2CoValidationConfig.getInstance().getRuleAllMap().get("OSS_NAME.UNCONFIRMED.MSG")%>'
+
+        for (let key in validData){
+          if (validData[key] == ossNameUnconfirmedMsg || validData[key] == ossVersionUnconfirmedMsg){
+            inValidGridId.add(key.split(".")[1])
+          }
+        }
+        return Array.from(inValidGridId);
+      },
+      getMapOfMainData(mainData) {
+        return mainData.reduce((obj, x) => {
+          if(referenceDiv == '20') {
+            obj[x.gridId] = x;
+          } else {
+            obj[x.componentId] = x;
+          }
+          return obj;
+        }, {});
+      },
+      toOssInfo(data) {
+        return {
+          //tab datas
+          comment: "",
+          copyright: data.copyrightText,
+          downloadLocation: data.downloadLocation,
+          homepage: data.homepage,
+          declaredLicenses: data.licenseName.trim() ? data.licenseName.trim().split(",") : [],
+          ossName: data.ossName,
+          ossVersion: data.ossVersion,
+          //oss datas
+          attribution: "",
+          detectedLicenses: [],
+          summaryDescription: "",
+          ossNicknames: []
+        }
       }
     }
     /**
      * change background color of failed oss row
      * */
     function makeBackGroundColor(){
-      for (const failLicenseGridId of failLicense) {
-        $("#list").jqGrid("setRowData", failLicenseGridId, false, {'background' : "rgba(255, 0, 0, 0.3)"});
+      for (const failOssGridId of failOss) {
+        $("#list").jqGrid("setRowData", failOssGridId, false, {'background' : "rgba(255, 0, 0, 0.3)"});
       }
     }
-
-    const LicenseBulkGridStatusMessageManager = {
+    const OssBulkGridStatusMessageManager = {
       cleanStatusMessages: function () {
         $("#list").jqGrid("getGridParam", "data").forEach(row => {
           row.status = ""
@@ -396,14 +456,14 @@
         for (const result of results){
           $("#list").jqGrid("getLocalRow", result.gridId).status = result.msg;
           if (!result.status) {
-            failLicense.push(result.gridId);
+            failOss.push(result.gridId);
           }
         }
         $("#list").trigger('reloadGrid', [{ page: 1}]);
       }
     };
 
-    const LicenseBulkGridWarningMessageUtil = (function() {
+    const OssBulkGridWarningMessageUtil = (function() {
       let validData = {};
       const gridStr = "list";
       return {
@@ -411,7 +471,6 @@
           this.cleanMessages();
           return this.requestMessages()
                   .then(response => {
-                    console.log(response)
                     this.setValidData(response);
                     this.setMessagesToCurPage();
                   });
@@ -420,14 +479,14 @@
           return $.ajax({
             type: "POST",
             contentType: 'application/json',
-            url: "/license/bulkValidation",
+            url: "/oss/bulkValidation",
             data: JSON.stringify(this.requestBody()),
             cache : false,
             dataType: "json"
           })
         },
         requestBody: function() {
-          licenseData.forEach((row) => {
+          ossData.forEach((row) => {
             stringDataForValid.forEach((strData) => {
               if(row[strData] === null || row[strData] === undefined)
                 row[strData] = "";
@@ -437,7 +496,7 @@
                 row[listData] = [];
             })
           })
-          return licenseData;
+          return ossData;
         },
         setValidData: (response) => { validData = response.validData; },
         setMessagesToCurPage: function () {
@@ -448,6 +507,8 @@
         setMessageToRow: function(rowId) { gridValidMsgRowId(validData, gridStr, rowId); }
       }
     })();
+
+
   </script>
 </th:block>
 </html>

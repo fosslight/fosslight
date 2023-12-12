@@ -13,7 +13,7 @@
                  style="opacity: .5;max-height:50px;"><b>FOSSLight</b>&nbsp;&nbsp;Hub</a>
     </div>
     <div class="card">
-        <div class="card-body mx-3" id="authenticationAreaFragment">
+        <div class="card-body mx-3 my-1" id="authenticationAreaFragment">
             <div class="replaceable-content"></div>
         </div>
     </div>
@@ -145,7 +145,7 @@
         emailChange(){
             const value = $("#emailSelect option:selected").val();
             const text = $("#emailSelect option:selected").text();
-            const etcDomain = '[[ ${@CommonFunction.getCoConstDefVal("CD_DTL_ECT_DOMAIN")} ]]';
+            const etcDomain = '[[ ${@CommonFunction.getCoConstDefVal("CD_DTL_ECT_DOMAIN_NO")} ]]';
 
             if(value == etcDomain){
                 $("#directEmailInput").val("").show();

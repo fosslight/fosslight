@@ -1080,7 +1080,7 @@ public class OssController extends CoTopComponent{
 	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model, @ModelAttribute Project projectData) {
 		model.addAttribute("projectData", projectData);
 
-		return OSS.OSS_BULK_REG_JSP;
+		return "oss/ossBulkReg";
 	}
 
 	@PostMapping(value = OSS.BULK_REG_AJAX)

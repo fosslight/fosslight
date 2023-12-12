@@ -407,9 +407,6 @@ function getCookie(cookieName) {
         if(end == -1) {
             end = cookieData.length;
         }
-
-
-
         cookieValue = cookieData.substring(start, end);
         console.log(cookieValue);
     }

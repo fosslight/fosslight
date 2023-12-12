@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="content">
+  <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+  <th:block th:replace="oss/ossBulkReg-script :: contentScript"></th:block>
+  <body class="hold-transition sidebar-mini">
+  <div class="content-wrapper custom-layout">
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12 mt-3">
+            <div id="csvFile"></div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="jqGridSet">
+              <table id="list">
+                <tr>
+                  <td></td>
+                </tr>
+              </table>
+              <div id="pager"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- loading bar -->
+    <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+    <!-- /. loading bar -->
+  </div>
+  </body>
+</th:block>
+</html>

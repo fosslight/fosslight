@@ -242,7 +242,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
     text-align: left;
     background-color: #333;
     border-radius: .25rem;
-    border: 1px solid #ced4da !important;
+    border: .8px solid #ced4da !important;
     box-shadow: inset 0 0 0 transparent  !important;
     opacity: 1;
 }
@@ -270,7 +270,7 @@ tr.ui-row-ltr,
 .ui-jqgrid tr.ui-state-highlight,
 .ui-jqgrid tr.ui-row-ltr td,
 .ui-jqgrid .ui-jqgrid-resize-mark {
-    border: 1px solid #9e9e9e40;
+    border: .8px solid #ced4da;
 }
 
 .ui-state-hover,
@@ -298,7 +298,7 @@ tr.ui-row-ltr,
 }
 
 .ui-widget.ui-widget-content {
-    border: none;
+    border:.8px solid #ced4da;
 }
 
 .ui-jqgrid .ui-jqgrid-titlebar,
@@ -320,8 +320,8 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-th-column {
     background-color: transparent;
     padding: 10px;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-top: .8px solid #ced4da;
+    border-bottom: .8px solid #ced4da;
 }
 
 .ui-jqgrid tr.ui-row-ltr td,
@@ -329,12 +329,6 @@ tr.ui-row-ltr,
     padding: 8px;
     font-size: .8rem;
 }
-
-.ui-jqgrid thead {
-    border-top: 1px solid #999;
-    border-bottom: 1px solid #999;
-}
-
 
 .ui-jqgrid .ui-jqgrid-btable tr.ui-row-ltr td {
     border-top: none;
@@ -359,10 +353,10 @@ tr.ui-row-ltr,
 }
 
 .ui-th-ltr, .ui-jqgrid .ui-jqgrid-htable th.ui-th-ltr {
-    border-left: 1px solid #dcdcdc !important;
-    border-right: 1px solid #dcdcdc !important;
-    border-bottom: 1.5px solid #dcdcdc !important;
-    border-top: 1.5px solid #dcdcdc !important;
+    border-left: .8px solid #ced4da !important;
+    border-right: .8px solid #ced4da !important;
+    border-bottom: .8px solid #ced4da !important;
+    border-top: .8px solid #ced4da !important;
 }
 
 /* jqGrid pagination */
@@ -372,8 +366,8 @@ tr.ui-row-ltr,
 
 .ui-jqgrid .ui-jqgrid-pager {
     background-color: #f7f7f7;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-top: .8px solid #ced4da;
+    border-bottom: .8px solid #ced4da;
     padding: 8px 0;
     display: flex;
     justify-content: center;
@@ -391,14 +385,14 @@ tr.ui-row-ltr,
 
 tr.ui-search-toolbar th div { padding: 5px 0 !important; }
 tr.ui-search-toolbar input  {
-    border: 1px solid #ddd !important;
+    border: .8px solid #ced4da !important;
     padding: 3px !important;
     border-radius: 4px !important;
     height: 25px;
 }
 
 .ui-pg-table .ui-pg-input, .ui-pg-table .ui-pg-selbox{
-    border: 1px solid #ddd;
+    border: .8px solid #ced4da;
     padding: 3px;
     border-radius: 4px;
 }
@@ -453,7 +447,6 @@ html .ui-button.ui-state-disabled:active {
     background: none;
     background-color: #f8f9fa !important;
     font-weight: bold !important;
-    color: #000;
     font-size: .8rem;
 }
 
@@ -481,7 +474,7 @@ html .ui-button.ui-state-disabled:active {
 #innerJqTable select.editable {
     width: 100%;
     padding: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid #999;
     font-size: 14px;
 }
 
@@ -562,7 +555,7 @@ div.jqcloud span.w1 { color: #feb24c; }
 .ui-jqgrid .ui-separator { margin: 0 5px; }
 
 .ui-pg-input {
-    border: 1px solid #ccc;
+    border: 1px solid #999;
     border-radius: 4px;
     padding: 4px;
     text-align: center;
@@ -570,7 +563,7 @@ div.jqcloud span.w1 { color: #feb24c; }
 
 /* Page select box */
 .ui-pg-selbox {
-    border: 1px solid #ccc;
+    border: 1px solid #999;
     border-radius: 4px;
     padding: 4px;
 }
@@ -604,7 +597,7 @@ ul.ui-autocomplete {
     color: rgb(33, 37, 41);
     text-align: left;
     background-color: rgb(255, 255, 255);
-    border: 1px solid #ced4da !important;
+    border: .8px solid #ced4da !important;
     border-radius: 0.25rem  !important;
     box-shadow: inset 0 0 0 transparent  !important;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
@@ -654,7 +647,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 }
 
 .ui-jqgrid .ui-pg-input {
-    border: 1px solid #ccc;
+    border: .8px solid #ced4da;;
     border-radius: 4px;
     padding: 4px;
     text-align: center;
@@ -664,7 +657,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 }
 
 .ui-jqgrid .ui-pg-selbox {
-    border: 1px solid #ccc;
+    border: .8px solid #ced4da;
     border-radius: 4px;
     padding: 5px 10px;
     text-align: center;
@@ -672,19 +665,8 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     height: auto;
     margin-left: .7rem;
 }
-
-.ui-jqgrid .ui-pg-input {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 4px;
-    text-align: center;
-    font-size: .8rem;
-    height: auto;
-    margin: 0 5px;
-}
-
 .ui-jqgrid .ui-jqgrid-view select {
-    border: 1px solid #ccc;
+    border: .8px solid #ced4da;
     border-radius: 4px;
     padding: 5px 10px;
     text-align: center;
@@ -694,7 +676,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 }
 
 .ui-jqgrid .ui-jqgrid-view input {
-    border: 1px solid #ccc;
+    border: .8px solid #ced4da;
     border-radius: 4px;
     padding: 4px;
     text-align: center;

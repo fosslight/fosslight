@@ -11,7 +11,7 @@
             </div>
             <div class="login-userInfo form-group mt-3 mb-0">
                 <label class="top-text">Password</label>
-                <input class="form-control form-control-border border-width-2" name="password"
+                <input class="form-control form-control-border" name="password"
                        type="password" autocomplete="false">
             </div>
             <div class="row d-flex align-items-center px-2" style="font-size: .9rem">
@@ -59,7 +59,7 @@
             </div>
             <div class="login-userInfo form-group">
                 <label class="top-text">Password</label>
-                <input class="form-control form-control-border border-width-2" name="userPw"
+                <input class="form-control form-control-border" name="userPw"
                        type="password" autocomplete="new-password">
                 <div class="retxt text-danger text-sm userPw"></div>
             </div>
@@ -77,7 +77,7 @@
                     </div>
                     <div class="form-group" th:style="${registDomainValues != null} ? 'display:none' : ''">
                         <label class="top-text" for="emailSelect">e-mail</label>
-                        <input class="form-control form-control-border border-width-2" id="emailTemp"
+                        <input class="form-control form-control-border" id="emailTemp"
                                type="text"
                                placeholder="example@lge.com"
                                th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"
@@ -89,7 +89,7 @@
             </div>
             <div class="login-userInfo form-group">
                 <label class="top-text">Name</label>
-                <input class="form-control form-control-border border-width-2" name="userName"
+                <input class="form-control form-control-border" name="userName"
                        type="text" autocomplete="new-password">
                 <div class="retxt text-danger text-sm userName"></div>
             </div>
@@ -135,7 +135,7 @@
             </div>
             <div class="login-userInfo form-group">
                 <label class="top-text">e-mail</label>
-                <input class="form-control form-control-border border-width-2" name="email" id="email"
+                <input class="form-control form-control-border" name="email" id="email"
                        type="text">
                 <div id="emailRequired" class="text-danger text-sm" style="display: none">Required</div>
             </div>

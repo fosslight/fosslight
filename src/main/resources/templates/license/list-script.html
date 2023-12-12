@@ -47,7 +47,7 @@ var evt = {
 		$('select[name=creator]').val('${searchBean.creator}').trigger('change');
 		$('select[name=modifier]').val('${searchBean.modifier}').trigger('change');
 		
-		initParam = fn.setGridParam();console.log([[${searchBean.defaultSearchFlag}]]);
+		initParam = fn.setGridParam();
 		var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
 		if(defaultSearchFlag != 'Y') {
 			// just make grid ui
