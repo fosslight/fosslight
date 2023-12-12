@@ -4,13 +4,52 @@ import SelfCheckModal from '@/components/self-check-modal';
 import SelfCheckNotice from '@/components/self-check-notice';
 import SelfCheckOSS from '@/components/self-check-oss';
 import SelfCheckPackage from '@/components/self-check-package';
+import { loadingState } from '@/lib/atoms';
+import { useAPI } from '@/lib/hooks';
 import { SELF_CHECK_TABS } from '@/lib/literals';
 import clsx from 'clsx';
-import { Fragment, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Fragment, useEffect, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 export default function SelfCheckDetail({ params }: { params: { id: string } }) {
+  const setLoading = useSetRecoilState(loadingState);
+  const [data, setData] = useState<SelfCheck.Basics>();
+  const [wait, setWait] = useState(false);
   const [isModalShown, setIsModalShown] = useState(false);
   const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
+  const router = useRouter();
+
+  // TODO (API for loading project)
+  const loadProjectReuqest = {
+    execute: (() => {
+      setLoading(true);
+      setTimeout(() => {
+        setData({
+          projectName: 'FOSSLight Hub Lite',
+          projectVersion: '1.0.0',
+          created: '2023-10-05 23:54:08.0',
+          comment: '<p>aaa</p><p>bbb</p><p><strong>ccc</strong><br>ddd</p>'
+        });
+        setLoading(false);
+      }, 500);
+    }) as any
+  };
+
+  // API for deleting project
+  const deleteProjectRequest = useAPI('post', 'http://localhost:8180/selfCheck/delAjax', {
+    onStart: () => setWait(true),
+    onSuccess: () => {
+      alert('Successfully deleted project');
+      router.push('/self-check');
+    },
+    onFinish: () => setWait(false)
+  });
+
+  useEffect(() => {
+    loadProjectReuqest.execute({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -30,41 +69,63 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
           <div className="flex flex-col gap-y-2 flex-1">
             <div className="flex">
               <div className="flex-shrink-0 w-32 font-semibold">Project Name</div>
-              <div className="flex-1 text-semiblack/80">FOSSLight Hub Lite</div>
+              <div className="flex-1 text-semiblack/80">{data?.projectName || ''}</div>
             </div>
             <div className="flex">
               <div className="flex-shrink-0 w-32 font-semibold">Project Version</div>
-              <div className="flex-1 text-semiblack/80">1.0.0</div>
+              <div className="flex-1 text-semiblack/80">{data?.projectVersion || ''}</div>
             </div>
           </div>
           <div className="flex flex-col gap-y-2 flex-1">
             <div className="flex">
               <div className="flex-shrink-0 w-32 font-semibold">Create</div>
-              <div className="flex-1 text-semiblack/80">2023-10-05 23:54</div>
+              <div className="flex-1 text-semiblack/80">{data?.created.substring(0, 16) || ''}</div>
             </div>
             <div className="flex">
               <div className="flex-shrink-0 w-32 font-semibold">Comment</div>
-              <div className="flex-1 text-semiblack/80">There are some comments here.</div>
+              <div
+                className="flex-1 text-semiblack/80"
+                dangerouslySetInnerHTML={{ __html: data?.comment || '' }}
+              />
             </div>
           </div>
         </div>
         <div className="flex justify-end gap-x-1 mt-2">
-          <button className="px-2 py-0.5 crimson-btn">Delete</button>
-          <button className="px-2 py-0.5 default-btn" onClick={() => setIsModalShown(true)}>
+          <button
+            className="px-2 py-0.5 crimson-btn"
+            onClick={() => {
+              if (!window.confirm('Are you sure to continue?')) {
+                return;
+              }
+
+              deleteProjectRequest.execute({ body: { prjId: params.id, deleteMemo: '' } });
+            }}
+            disabled={wait}
+          >
+            Delete
+          </button>
+          <button
+            className="px-2 py-0.5 default-btn"
+            onClick={() => setIsModalShown(true)}
+            disabled={!data}
+          >
             Edit
           </button>
         </div>
       </div>
-      <SelfCheckModal
-        mode="edit"
-        data={{
-          projectName: 'FOSSLight Hub Lite',
-          projectVersion: '1.0.0',
-          comment: 'There are some comments here.'
-        }}
-        show={isModalShown}
-        onHide={() => setIsModalShown(false)}
-      />
+      {data && (
+        <SelfCheckModal
+          show={isModalShown}
+          onHide={() => setIsModalShown(false)}
+          values={{
+            projectId: params.id,
+            projectName: data.projectName,
+            projectVersion: data.projectVersion,
+            comment: data.comment
+          }}
+          refetch={() => loadProjectReuqest.execute({})}
+        />
+      )}
 
       {/* Tab selector */}
       <div className="flex justify-center items-center gap-x-2 mt-12 text-sm font-semibold">
@@ -107,7 +168,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       {/* Actions */}
       {tab === 'OSS' && <SelfCheckOSS />}
       {tab === 'Package' && <SelfCheckPackage />}
-      {tab === 'Notice' && <SelfCheckNotice />}
+      {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>
   );
 }

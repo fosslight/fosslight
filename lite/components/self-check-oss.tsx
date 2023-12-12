@@ -25,7 +25,7 @@ export default function SelfCheckOSS() {
   const queryParams = useSearchParams();
 
   // Modal
-  const [modalData, setModalData] = useState<SelfCheck.SetOSS>();
+  const [modalValues, setModalValues] = useState<SelfCheck.EditOSS>();
   const [isModalShown, setIsModalShown] = useState(false);
 
   // Filters
@@ -224,7 +224,7 @@ export default function SelfCheckOSS() {
           <i
             className="cursor-pointer fa-solid fa-plus"
             onClick={() => {
-              setModalData(undefined);
+              setModalValues(undefined);
               setIsModalShown(true);
             }}
           />
@@ -395,7 +395,7 @@ export default function SelfCheckOSS() {
                     <i
                       className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
                       onClick={() => {
-                        setModalData({
+                        setModalValues({
                           path: oss.path,
                           ossName: oss.ossName,
                           ossVersion: oss.ossVersion,
@@ -424,10 +424,9 @@ export default function SelfCheckOSS() {
 
       {/* Modal */}
       <SelfCheckOSSModal
-        mode={!modalData ? 'add' : 'edit'}
-        data={modalData}
         show={isModalShown}
         onHide={() => setIsModalShown(false)}
+        values={modalValues}
       />
     </>
   );

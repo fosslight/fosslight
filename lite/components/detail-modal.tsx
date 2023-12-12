@@ -1,5 +1,3 @@
-'use client';
-
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailModalLicense from './detail-modal-license';

@@ -1,5 +1,3 @@
-'use client';
-
 import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 
@@ -8,12 +6,14 @@ export default function Modal({
   onHide,
   size,
   hideByBackdrop = true,
+  hideScrollbar = true,
   children
 }: {
   show: boolean;
   onHide: () => void;
   size: 'sm' | 'md' | 'lg';
   hideByBackdrop?: boolean;
+  hideScrollbar?: boolean;
   children: React.ReactNode;
 }) {
   const [visible, setVisible] = useState(show);
@@ -85,9 +85,10 @@ export default function Modal({
     >
       <div
         className={clsx(
-          'max-w-[calc(100%-24px)] max-h-[calc(100%-24px)] p-6 rounded-lg bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] overflow-y-auto no-scrollbar transition-[transform,opacity] duration-300',
+          'max-w-[calc(100%-24px)] max-h-[calc(100%-24px)] p-6 rounded-lg bg-white shadow-[0px_0px_4px_4px_rgba(0,0,0,0.2)] overflow-y-auto transition-[transform,opacity] duration-300',
           width,
-          animate ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
+          animate ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0',
+          hideScrollbar && 'no-scrollbar'
         )}
         onClick={(e) => e.stopPropagation()}
       >

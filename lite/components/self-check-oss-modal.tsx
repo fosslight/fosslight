@@ -1,24 +1,20 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import Modal from './modal';
 
 export default function SelfCheckOSSModal({
-  mode,
-  data,
   show,
-  onHide
+  onHide,
+  values
 }: {
-  mode: 'add' | 'edit';
-  data?: SelfCheck.SetOSS;
   show: boolean;
   onHide: () => void;
+  values?: SelfCheck.EditOSS;
 }) {
   const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
 
   useEffect(() => {
     if (show) {
-      setLicenses(data ? data.licenses : []);
+      setLicenses(values?.licenses || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
@@ -26,13 +22,13 @@ export default function SelfCheckOSSModal({
   return (
     <Modal show={show} onHide={onHide} size="lg" hideByBackdrop={false}>
       <div className="pb-4 mb-4 border-b border-b-semigray font-bold">
-        {mode === 'add' ? (
+        {!values ? (
           <i className="text-sm fa-solid fa-plus" />
         ) : (
           <i className="text-sm fa-solid fa-pen" />
         )}
         &ensp;
-        {mode === 'add' ? 'Add an OSS to the list' : 'Edit the OSS'}
+        {!values ? 'Add an OSS to the list' : 'Edit the OSS'}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2 flex flex-col gap-y-2">
@@ -40,7 +36,7 @@ export default function SelfCheckOSSModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) fosslight, foo/bar/fosslight"
-            defaultValue={data ? data.path : ''}
+            defaultValue={values?.path || ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -48,7 +44,7 @@ export default function SelfCheckOSSModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) fosslight"
-            defaultValue={data ? data.ossName : ''}
+            defaultValue={values?.ossName || ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
@@ -56,7 +52,7 @@ export default function SelfCheckOSSModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             placeholder="EX) 1.0.0"
-            defaultValue={data ? data.ossVersion : ''}
+            defaultValue={values?.ossVersion || ''}
           />
         </div>
         <div className="col-span-2 flex flex-col gap-y-2">
@@ -85,14 +81,14 @@ export default function SelfCheckOSSModal({
           <label className="text-sm font-semibold">Download URL</label>
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
-            defaultValue={data ? data.downloadUrl : ''}
+            defaultValue={values?.downloadUrl || ''}
           />
         </div>
         <div className="flex flex-col gap-y-2">
           <label className="text-sm font-semibold">Homepage URL</label>
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
-            defaultValue={data ? data.homepageUrl : ''}
+            defaultValue={values?.homepageUrl || ''}
           />
         </div>
         <div className="col-span-2 flex flex-col gap-y-2">
@@ -100,12 +96,12 @@ export default function SelfCheckOSSModal({
           <textarea
             className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
             rows={3}
-            defaultValue={data ? data.copyright : ''}
+            defaultValue={values?.copyright || ''}
           />
         </div>
       </div>
       <div className="flex justify-end gap-x-1 mt-4">
-        <button className="px-2 py-0.5 crimson-btn">{mode === 'add' ? 'Add' : 'Edit'}</button>
+        <button className="px-2 py-0.5 crimson-btn">{!values ? 'Add' : 'Edit'}</button>
         <button className="px-2 py-0.5 default-btn" onClick={onHide}>
           Cancel
         </button>

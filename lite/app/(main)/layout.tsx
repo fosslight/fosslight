@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [isSideBarShown, setIsSideBarShown] = useState(true);
   const router = useRouter();
   const isMobile = useMediaQuery({ maxWidth: 768 });
-  const isSubwindow = Boolean(window.opener);
+  const isSubwindow = typeof window !== 'undefined' && Boolean(window.opener);
 
   // API for loading my info
   const loadMeRequest = useAPI('get', 'http://localhost:8180/api/lite/me', {
@@ -52,7 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {view === 'pc' && !isSubwindow && <SideBar isShown={isSideBarShown} />}
 
       {/* Page body */}
-      <div className={view === 'pc' ? 'flex-1 min-w-0' : ''}>
+      <div className={clsx(view === 'pc' && 'flex-1 min-w-0', loading && 'opacity-50')}>
         {/* Areas fixed at the top of the page */}
         {!isSubwindow && (
           <div
@@ -82,18 +82,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div
           className={clsx(
             'pt-4 mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
-            view === 'pc' ? 'pb-8' : 'pt-4 pb-24',
-            loading && 'opacity-30'
+            view === 'pc' ? 'pb-8' : 'pt-4 pb-24'
           )}
         >
           {children}
-
-          {/* Loading */}
-          {loading && (
-            <div className="fixed center">
-              <Loading />
-            </div>
-          )}
         </div>
       </div>
 
@@ -102,6 +94,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Modal for detail view */}
       <DetailModal />
+
+      {/* Loading */}
+      {loading && (
+        <div className="fixed center">
+          <Loading />
+        </div>
+      )}
     </main>
   );
 }

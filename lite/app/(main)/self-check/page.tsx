@@ -115,7 +115,7 @@ export default function SelfCheckList() {
           <i className="text-sm fa-solid fa-plus" /> Create Project
         </button>
       </div>
-      <SelfCheckModal mode="create" show={isModalShown} onHide={() => setIsModalShown(false)} />
+      <SelfCheckModal show={isModalShown} onHide={() => setIsModalShown(false)} />
 
       {/* Table (Rows/Columns + Sorting + Pagination) */}
       <ListTable

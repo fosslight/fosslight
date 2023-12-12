@@ -91,7 +91,15 @@ declare global {
   }
 
   namespace SelfCheck {
-    interface Set {
+    interface Basics {
+      projectName: string;
+      projectVersion: string;
+      created: string;
+      comment: string;
+    }
+
+    interface Edit {
+      projectId: string;
       projectName: string;
       projectVersion: string;
       comment: string;
@@ -130,7 +138,7 @@ declare global {
       exclude: boolean;
     }
 
-    interface SetOSS {
+    interface EditOSS {
       path: string;
       ossName: string;
       ossVersion: string;

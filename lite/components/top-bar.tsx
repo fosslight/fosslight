@@ -1,5 +1,3 @@
-'use client';
-
 import { userState } from '@/lib/atoms';
 import Logo from '@/public/images/logo.png';
 import clsx from 'clsx';
