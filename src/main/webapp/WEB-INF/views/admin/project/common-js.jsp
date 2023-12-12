@@ -39,10 +39,18 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
-					alertify.alert('<spring:message code="msg.project.validation.error" />');
-					
-					return false;
+				if (isAndroidModel) {
+					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
+						alertify.alert('<spring:message code="msg.project.validation.error" />');
+						
+						return false;
+					}
+				} else {
+					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
+						alertify.alert('<spring:message code="msg.project.validation.error" />');
+						
+						return false;
+					}
 				}
 				
 				if(com_fn.isAndroidOnly()) {
