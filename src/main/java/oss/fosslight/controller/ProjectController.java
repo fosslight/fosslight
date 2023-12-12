@@ -522,6 +522,8 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		if (result != null) {
+			CommonFunction.setDeduplicatedMessageInfo(result);
+			
 			if (CoConstDef.CD_DTL_COMPONENT_BAT.equals(code) && isEmpty(identification.getReferenceId())
 					&& !isEmpty(identification.getRefBatId())) {
 				code = CoConstDef.CD_DTL_COMPONENT_ID_BAT;
@@ -2952,7 +2954,9 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.IDENTIFICATION_GRID_POST)
 	public @ResponseBody ResponseEntity<Object> srcMainGridAjaxPost(@RequestBody ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
-		return makeJsonResponseHeader(getOssComponentDataInfo(identification, identification.getReferenceDiv()));
+		Map<String, Object> result = getOssComponentDataInfo(identification, identification.getReferenceDiv());
+		if (result != null) CommonFunction.setDeduplicatedMessageInfo(result);
+		return makeJsonResponseHeader(result);
 	}
 	
 	/**
@@ -2992,6 +2996,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> result = getOssComponentDataInfo(identification, code);
 		
 		if (result != null) {
+			CommonFunction.setDeduplicatedMessageInfo(result);
 			// Project Identification에서 BAT Apply 인 경우 (BAT List 와
 			// Identification의 BAT 를 구분
 			if (CoConstDef.CD_DTL_COMPONENT_BAT.equals(code) && isEmpty(identification.getReferenceId())

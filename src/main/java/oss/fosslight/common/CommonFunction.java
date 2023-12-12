@@ -5281,4 +5281,45 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		return vulDocMsg;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static void setDeduplicatedMessageInfo(Map<String, Object> result) {
+		Map<String, String> rtnMsgMapByValid = new HashMap<>();
+		Map<String, String> rtnMsgMapByValidAndDiff = new HashMap<>();
+		
+		if (result.containsKey("infoData")) {
+			Map<String, String> infoDataMap = (Map<String, String>) result.get("infoData");
+			if (result.containsKey("validData")) {
+				Map<String, String> validDataMap = (Map<String, String>) result.get("validData");
+				for (String key : infoDataMap.keySet()) {
+					if (!validDataMap.containsKey(key)) {
+						rtnMsgMapByValid.put(key, infoDataMap.get(key));
+					}
+				}
+			}
+			
+			if(result.containsKey("diffData")) {
+				Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
+				if (!rtnMsgMapByValid.isEmpty()) {
+					for (String key : rtnMsgMapByValid.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValidAndDiff.put(key, rtnMsgMapByValid.get(key));
+						}
+					}
+				} else {
+					for (String key : diffDataMap.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValid.put(key, infoDataMap.get(key));
+						}
+					}
+				}
+			}
+		}
+		
+		if (!rtnMsgMapByValidAndDiff.isEmpty()) {
+			result.put("infoData", rtnMsgMapByValidAndDiff);
+		} else {
+			result.put("infoData", rtnMsgMapByValid);
+		}
+	}
 }
