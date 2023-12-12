@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import oss.fosslight.CoTopComponent;
@@ -38,8 +39,9 @@ public class DashboardController extends CoTopComponent{
 		model.addAttribute("userId", loginUserName());
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("jobsList", dashboardService.getCustomDashboardJobsList());
 		
-		return "dashboard/list :: content";
+		return "dashboard/list";
 	}
 	
 	@GetMapping(value=DASHBOARD.JOBSLIST)
@@ -58,15 +60,10 @@ public class DashboardController extends CoTopComponent{
 	
 	@GetMapping(value=DASHBOARD.COMMENTLIST)
     public @ResponseBody ResponseEntity<Object> commentsListAjax(
-    		CommentsHistory commentsHistory
-            , HttpServletRequest req
+    		HttpServletRequest req
             , HttpServletResponse res
             , Model model){
-        int page = Integer.parseInt(req.getParameter("page"));
-        int rows = Integer.parseInt(req.getParameter("rows"));
-        commentsHistory.setCurPage(page);
-        commentsHistory.setPageListSize(rows);
-        
+		CommentsHistory commentsHistory = new CommentsHistory();
         return makeJsonResponseHeader(dashboardService.getDashboardCommentsList(commentsHistory));
     }
 	
@@ -114,4 +111,37 @@ public class DashboardController extends CoTopComponent{
 		
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@GetMapping(value=DASHBOARD.PROGPROJECTCNT)
+    public @ResponseBody ResponseEntity<Object> progProjectCnt(
+            HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getProgProjectCnt());
+    }
+	
+	@GetMapping(value=DASHBOARD.DISCOVEREDEMLLIST)
+    public @ResponseBody ResponseEntity<Object> discoveredEmlListAjax(
+            HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getDiscoveredEmlList());
+    }
+	
+	@PostMapping(value=DASHBOARD.DISCOVEREDEMLMESSAGE)
+    public @ResponseBody ResponseEntity<Object> discoveredEmlMessage(
+    		@RequestBody HashMap<String, Object> param
+    		, HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getDiscoveredEmlMessage(param));
+    }
+	
+	@GetMapping(value=DASHBOARD.NVDDASHBOARDLIST)
+    public @ResponseBody ResponseEntity<Object> nvdDashboardList(
+            HttpServletRequest req
+            , HttpServletResponse res
+            , Model model){
+		return makeJsonResponseHeader(dashboardService.getNvdDashboardList());
+    }
 }

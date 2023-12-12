@@ -239,7 +239,7 @@
 					#{item}
 				</foreach>
 		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
-		        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+<!--	        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') --> 
 	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
 				AND T1.CONTENTS IS NOT NULL
 				AND T1.CONTENTS <![CDATA[<>]]> ''
@@ -361,7 +361,7 @@
 					#{item}
 				</foreach>
 		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
-		        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
+<!--	        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') -->
 	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
 				AND T1.CONTENTS IS NOT NULL
 				AND T1.CONTENTS <![CDATA[<>]]> ''
@@ -588,4 +588,40 @@
 	            </otherwise>
             </choose>
     </insert>
+    
+    <select id="selectProgProjectCnt" parameterType="Map" resultType="oss.fosslight.domain.CamelMap">
+		SELECT T1.STATUS, COUNT(1) AS STATUS_CNT
+		FROM
+		(
+			SELECT
+				T1.PRJ_ID
+				, CASE 
+					WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP' 
+					WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
+					WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV' THEN 'REV' 
+					WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
+					WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
+ 					WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+ 					WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					ELSE 'PROG' 
+				END STATUS
+			FROM PROJECT_MASTER T1
+			WHERE USE_YN = 'Y'
+		) T1
+		GROUP BY T1.STATUS
+	</select>
+	
+	<select id="getDiscoveredEmlList" parameterType="Map" resultType="oss.fosslight.domain.CamelMap">
+		SELECT SND_SEQ, EML_TITLE, DATE_FORMAT(LAST_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LAST_UPDATE_DATE
+		FROM EMAIL_SND_HIS 
+		WHERE MSG_TYPE = 91 OR MSG_TYPE = 93
+		ORDER BY SND_SEQ DESC
+		LIMIT 10
+	</select>
+	
+	<select id="getDiscoveredEmlMessage" parameterType="HashMap" resultType="string">
+		SELECT EML_MESSAGE
+		FROM EMAIL_SND_HIS 
+		WHERE SND_SEQ = #{sndSeq}
+	</select>
 </mapper>

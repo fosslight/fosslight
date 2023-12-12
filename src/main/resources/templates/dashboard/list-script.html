@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<th:block th:fragment="script">
+<th:block th:fragment="contentScript">
     <script th:inline="javascript">
         $(function () {
-
-            // word cloud
+        	fn.progProjectCnt();
+        	
+        	if ([[${projectFlag}]] || [[${partnerFlag}]]) {
+        		list.getJobsList();
+        		list.getCommentsList();
+        		list.getDiscoveredMailList();
+        	}
+        	
+        	list.getNvdDashboardList();
+        	
+			// word cloud
             const words = [
                 { text: 'AFL-1.1', size: 65 },
                 { text: 'AFL-1', size: 65 },
@@ -156,5 +165,241 @@
             // Summernote
             $('#commpose-textarea-02').summernote();
         });
+        
+        var fn = {
+        	progProjectCnt : function() {
+        		$.ajax({
+    				url : '/dashboard/progProjectCnt',
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				success : function(data){
+    					var cntList = new Array();
+    					cntList = data;
+    					
+    					var hTag;
+    					var pTag;
+    					
+    					if (cntList.length > 0) {
+    						for (var i in cntList) {
+    							var status = cntList[i].status;
+    							var cnt = cntList[i].statusCnt;
+    							switch (status) {
+    								case "PROG" :
+    									hTag = document.createElement("h3");
+    									pTag = document.createElement("p");
+    									hTag.innerText = cnt;
+    									pTag.innerText = "Progress";
+    									
+    									$("#progressView .bg-success .inner").empty();
+    									$("#progressView .bg-success .inner").append(hTag);
+    									$("#progressView .bg-success .inner").append(pTag);
+    									break;
+    								case "REV" :
+    									hTag = document.createElement("h3");
+    			    					pTag = document.createElement("p");
+    									hTag.innerText = cnt;
+    									pTag.innerText = "Review";
+    									
+    									$("#progressView .bg-warning .inner").empty();
+    									$("#progressView .bg-warning .inner").append(hTag);
+    									$("#progressView .bg-warning .inner").append(pTag);
+    									break;
+    							}
+    						}
+    					} else {
+    						hTag = document.createElement("h3");
+	    					pTag = document.createElement("p");
+							hTag.innerText = "0";
+							pTag.innerText = "Progress";
+							
+							$("#progressView .bg-success .inner").empty();
+							$("#progressView .bg-success .inner").append(hTag);
+							$("#progressView .bg-success .inner").append(pTag);
+							
+							hTag = document.createElement("h3");
+							pTag = document.createElement("p");
+							hTag.innerText = "0";
+							pTag.innerText = "Review";
+							
+							$("#progressView .bg-warning .inner").empty();
+							$("#progressView .bg-warning .inner").append(hTag);
+							$("#progressView .bg-warning .inner").append(pTag);
+    					}
+    				}
+        		});
+        	},
+        	discoveredEmlMessage : function(obj) {
+        		var sndSeq = $(obj).find('input').val();
+        		$.ajax({
+    				url : '/dashboard/discoveredEmlMessage',
+    				type : 'POST',
+    				data: JSON.stringify({"sndSeq" : sndSeq}),
+    				dataType : 'json',
+    				cache : false,
+					contentType : 'application/json',
+    				success : function(data){
+    					$("#discoveredEmlView").empty();
+    					if ("" != data.emlMessage) {
+    						$("#discoveredEmlView").html(data.emlMessage);
+    					}
+    				}
+        		});
+        	}
+        }
+        
+        var list = {
+            getJobsList : function() {
+            		
+            },
+            getCommentsList : function() {
+            	$.ajax({
+    				url : '/dashboard/commentsListAjax',
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				success : function(data){
+    					var commentList = new Array();
+    					commentList = data.rows;
+    					if (commentList.length > 0) {
+    						$("#dashboardComments").empty();
+    						
+    						var idx = 0;
+    						for (var i in commentList) {
+    							var tr = document.createElement('tr');
+    							var td = document.createElement('td');
+    							if (i == 0) $(td).css("border-top", "none");
+    							
+    							var row = document.createElement('div');
+    							$(row).addClass("row");
+    							$(row).addClass("commentsRow");
+    							
+    							var colspanDiv = document.createElement('div');
+    							$(colspanDiv).addClass("col-md-9");
+    							var div = document.createElement('div');
+    							$(div).addClass("post");
+    							var div2 = document.createElement('div');
+    							$(div2).addClass("user-block");
+    							var usernameSpan = document.createElement('span');
+    							$(usernameSpan).addClass("username");
+    							usernameSpan.textContent = commentList[i].creator;
+    							var createDateSpan = document.createElement('span');
+    							$(createDateSpan).addClass("description");
+    							$(createDateSpan).addClass("ml-0");
+    							createDateSpan.textContent = commentList[i].createdDate;
+    							
+    							div2.appendChild(usernameSpan);
+    							div2.appendChild(createDateSpan);
+    							div.appendChild(div2);
+    							var content = document.createElement('p');
+    							content.innerHTML = commentList[i].contents;
+    							
+    							div.appendChild(content);
+    							colspanDiv.appendChild(div);
+    							row.appendChild(colspanDiv);
+    							    							
+    							var colspanDiv2 = document.createElement('div');
+    							$(colspanDiv2).addClass("col-md-3");
+    							var tdBtn = document.createElement('td');
+    							$(tdBtn).addClass("text-right py-0 align-middle");
+    							$(tdBtn).css("border-top", "none");
+    							var divBtn = document.createElement('div');
+    							$(divBtn).addClass("btn-group btn-group-sm");
+    							var editBtn = document.createElement('button');
+    							$(editBtn).addClass("btn btn btn-default");
+    							var editBtnItag = document.createElement('i');
+    							$(editBtnItag).addClass("fas fa-pencil-alt");
+    							editBtn.appendChild(editBtnItag);
+    							var delBtn = document.createElement('button');
+    							$(delBtn).addClass("btn btn-lg-red");
+    							var delBtnItag = document.createElement('i');
+    							$(delBtnItag).addClass("fas fa-trash");
+    							delBtn.appendChild(delBtnItag);
+    							
+    							divBtn.appendChild(editBtn);
+    							divBtn.appendChild(delBtn);
+    							tdBtn.appendChild(divBtn);
+    							colspanDiv2.appendChild(tdBtn);
+    							row.appendChild(colspanDiv2);
+    							td.appendChild(row);
+    							tr.appendChild(td);
+    							
+    							$("#dashboardComments").append(tr);
+    							idx++;
+    						}
+    					} else {
+    						var tr = document.createElement('tr');
+    						var td = document.createElement('td');
+    						var content = document.createElement('p');
+    						$(content).css('margin','0');
+    						content.textContent = 'No comments were registered.';
+    						
+    						td.appendChild(content);
+    						tr.appendChild(td);
+    						
+    						$("#dashboardComments").append(tr);
+    					}
+    				}
+            	});
+            },
+            getDiscoveredMailList : function () {
+            	$.ajax({
+    				url : '/dashboard/discoveredEmlList',
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				success : function(data){
+    					var discoveredMailList = new Array();
+    					discoveredMailList = data;
+    					if (discoveredMailList.length > 0) {
+    						for (var i in discoveredMailList) {
+    							var tr = document.createElement('tr');
+								var tdDate = document.createElement('td');
+								$(tdDate).addClass("text-center");
+								var tdTitle = document.createElement('td');
+								$(tdTitle).addClass("text-left");
+								tdDate.innerText = discoveredMailList[i].lastUpdateDate;
+							
+								var span = document.createElement('span');
+								span.setAttribute("style", "cursor:pointer;");
+								span.setAttribute("onclick", "fn.discoveredEmlMessage(this)");
+								
+								var input = document.createElement('input');
+								input.setAttribute("type", "hidden");
+								input.value = discoveredMailList[i].sndSeq;
+								
+								span.innerText = discoveredMailList[i].emlTitle;
+								span.appendChild(input);
+								
+								tdTitle.appendChild(span);
+								tr.appendChild(tdDate);
+								tr.appendChild(tdTitle);
+								$("#discoveredSndMail").append(tr);
+    						}
+    						
+    						$("#discoveredSndMail > tr:first").find("span").trigger("click");
+    					} else {
+    						
+    					}
+    				}
+            	});
+            },
+            getNvdDashboardList : function () {
+            	$.ajax({
+    				url : '/dashboard/nvdDashboardList',
+    				type : 'GET',
+    				dataType : 'json',
+    				cache : false,
+    				success : function(data){
+    					
+    				}
+            	});
+            }
+     	}
+        
+        window.onload = function() {
+        	var width = $("#dashboardCommentsTable").parent().parent().parent().width();
+        	$(".commentsRow").width(width);
+        }
     </script>
 </th:block>

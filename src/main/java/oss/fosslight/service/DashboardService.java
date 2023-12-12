@@ -5,6 +5,8 @@
 
 package oss.fosslight.service;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.domain.CommentsHistory;
@@ -22,4 +24,14 @@ public interface DashboardService {
     Map<String,Object> getDashboardLicenseList(LicenseMaster licenseMaster);   
     
     void readConfirmAll(CommentsHistory commentsHistory);
+
+    List<Map<String, Object>> getProgProjectCnt();
+
+	List<Project> getCustomDashboardJobsList();
+
+	List<Map<String, Object>> getDiscoveredEmlList();
+
+	Map<String, Object> getDiscoveredEmlMessage(HashMap<String, Object> param);
+
+	List<Map<String, Object>> getNvdDashboardList();
 }

@@ -39,9 +39,8 @@ public class StatisticsController extends CoTopComponent{
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("divisionList", CoCodeManager.getCodeNames(CommonFunction.getCoConstDefVal("CD_USER_DIVISION")));
 				
-		return "statistics/view :: content";
+		return "statistics/view";
 	}
 	
 	@GetMapping(value=STATISTICS.DIVISIONAL_PROJECT_CHART)

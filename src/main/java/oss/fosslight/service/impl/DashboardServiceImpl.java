@@ -140,4 +140,61 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
     public void readConfirmAll(CommentsHistory commentsHistory) {
     	dashboardMapper.readConfirmAll(commentsHistory);
     }
+
+	@Override
+	public List<Map<String, Object>> getProgProjectCnt() {
+		List<Map<String, Object>> rtnList = new ArrayList<>();
+        Map<String, Object> paramMap = new HashMap<String, Object>();
+        
+        paramMap.put("loginUserName", loginUserName());
+        paramMap.put("loginUserRole", loginUserRole());
+        paramMap.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
+        paramMap.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
+        
+        rtnList = dashboardMapper.selectProgProjectCnt(paramMap);
+        return rtnList;
+	}
+
+	@Override
+	public List<Project> getCustomDashboardJobsList() {
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+        paramMap.put("loginUserName", loginUserName());
+        paramMap.put("loginUserRole", loginUserRole());
+        paramMap.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
+        paramMap.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
+        
+		return dashboardMapper.selectDashboardJobsList(paramMap);
+	}
+
+	@Override
+	public List<Map<String, Object>> getDiscoveredEmlList() {
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("loginUserName", loginUserName());
+		return dashboardMapper.getDiscoveredEmlList(paramMap);
+	}
+
+	@Override
+	public Map<String, Object> getDiscoveredEmlMessage(HashMap<String, Object> param) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		param.put("loginUserName", loginUserName());
+		param.put("loginUserRole", loginUserRole());
+		param.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
+		param.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
+        
+		String emlMessage = dashboardMapper.getDiscoveredEmlMessage(param);
+		if (emlMessage.indexOf("Vulnerability Information") > -1) {
+			emlMessage = emlMessage.split("Vulnerability Information")[1];
+			emlMessage = emlMessage.substring(emlMessage.indexOf("<table"), emlMessage.indexOf("</table>")+8);
+		} else {
+			emlMessage = "";
+		}
+		rtnMap.put("emlMessage", emlMessage);
+		return rtnMap;
+	}
+
+	@Override
+	public List<Map<String, Object>> getNvdDashboardList() {
+		
+		return null;
+	}
 }

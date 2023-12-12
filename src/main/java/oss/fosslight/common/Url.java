@@ -58,6 +58,11 @@ public final class Url {
 		public static final String OSSLIST = PATH + "/ossListAjax";
 		public static final String LICENSELIST = PATH + "/licenseListAjax";
 		public static final String READCONFIRM_ALL = PATH + "/readConfirmAll";
+		
+		public static final String PROGPROJECTCNT = PATH + "/progProjectCnt";
+		public static final String DISCOVEREDEMLLIST = PATH + "/discoveredEmlList";
+		public static final String DISCOVEREDEMLMESSAGE = PATH + "/discoveredEmlMessage";
+		public static final String NVDDASHBOARDLIST = PATH + "/nvdDashboardList";
 	}
 	
 	public static final class LICENSE {
@@ -407,23 +412,23 @@ public final class Url {
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
 	}
 	
-//	public static final class DISTRIBUTION {
-//		public static final String PATH = "/project/distribution";
-//		
-//		public static final String PAGE_ID = PATH + "/{prjId}";
-//		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
-//		
-//		public static final String AVAILABLE_CHECK = PATH + "/availableCheck";
-//		public static final String SAVE_AJAX = PATH + "/saveAjax";
-//		public static final String DISTRIBUTE_ACT = PATH + "/distribute/{action}";
-//		
-//		public static final String ACTION_LOG_HIS_LIST = PATH + "/getActionLogHisList";
-//		public static final String ACTION_LOG_HIS_LIST_JSP = TILES_AJAX_ROOT +  PATH + "/logHis";
-//		
-//		// complete 이후 packaging file upload, verify, distribution 처리 url 
-//		public static final String REGIST_FILE = PATH + "/registFile";
-//		public static final String VERIFY = PATH + "/verify";
-//	}
+	public static final class DISTRIBUTION {
+		public static final String PATH = "/project/distribution";
+		
+		public static final String PAGE_ID = PATH + "/{prjId}";
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
+		
+		public static final String AVAILABLE_CHECK = PATH + "/availableCheck";
+		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		public static final String DISTRIBUTE_ACT = PATH + "/distribute/{action}";
+		
+		public static final String ACTION_LOG_HIS_LIST = PATH + "/getActionLogHisList";
+		public static final String ACTION_LOG_HIS_LIST_JSP = TILES_AJAX_ROOT +  PATH + "/logHis";
+		
+		// complete 이후 packaging file upload, verify, distribution 처리 url 
+		public static final String REGIST_FILE = PATH + "/registFile";
+		public static final String VERIFY = PATH + "/verify";
+	}
 	
 	public static final class PARTNER {
 		public static final String PATH = "/partner";
