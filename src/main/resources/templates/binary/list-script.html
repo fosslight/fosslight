@@ -2,11 +2,15 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="script">
     <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        /*jslint browser: true, nomen: true */
+        //	var subGridUrl = true;
+
         let ossNames = [];
         let objs = [];
         let licenseNames = [];
-        let isAdmin = 'true';
-        // [[ ${@CommonFunction.isAdmin() }]];
+        let isAdmin = [[ ${@CommonFunction.isAdmin() }]];
         let totalRow = 0;
         let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
         let selectedRow = new Array();
@@ -15,7 +19,6 @@
 
         $(window).load(function () {
             'use strict';
-
             setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
             binary_evt.init();
             binary_grid.load();
@@ -25,6 +28,10 @@
             init: function () {
                 $('#updateRange').daterangepicker();
 
+                $('#btnSaveBat').click(function(){
+                    binary_fn.saveBat();
+                });
+
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
@@ -32,10 +39,69 @@
                     $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url: "/binary/listAjax" }).trigger('reloadGrid');
                     resizingJqGidSet();
                 });
+
+                // licenseNames auto complete
+                commonAjax.getLicenseTags().success(function(data, status, headers, config){
+                    if(data != null){
+                        var tag = "";
+
+                        data.forEach(function(obj){
+                            if(obj!=null) {
+                                tag = {
+                                    value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+                                    label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+                                    type : obj.licenseType,
+                                    obligation : obj.obligation,
+                                    obligationChecks : obj.obligationChecks
+                                }
+
+                                licenseNames.push(tag);
+                            }
+                        });
+                    }
+                });
+
+                $(".cal").on("keyup", function(e){
+                    calValidation(this, e);
+                });
             }
         }
 
         const binary_fn = {
+            // 저장된 rowid로 rowdata 가져와서 저장
+            saveBat: function(){
+                var modifyRowList = [];	// 수정된 LIST
+                var modifyRow = {};
+
+                binary_fn.saveLastRow();
+
+                binary_grid.modifyRowId.forEach(function(val){
+                    if(val){
+                        modifyRowList.push($("#list").jqGrid("getRowData",val));
+                    }
+                });
+
+                // {newRowList: [], modifyRowList: []} 형식으로 변환
+                modifyRow['modifyRowList'] = modifyRowList;
+
+                var data = JSON.stringify(modifyRowList);
+                binary_ajax.setBat(data);
+            },
+            saveLastRow: function(){
+                $("#list").jqGrid("editCell", 0, 0, false);		// $("#list").jqGrid("editCell", row, col, false); 반드시 edit focus를 해제시킨다. 해제 시키지 않을 경우 값이 <input ....>으로 저장된다.
+                $("#list").jqGrid("saveRow", binary_grid.lastEditRowId);
+
+                // 수정된 rowid 저장
+                if(binary_grid.modifyRowId.length == 0) {
+                    binary_grid.modifyRowId.push(binary_grid.lastEditRowId);
+                } else {
+                    binary_grid.modifyRowId.forEach(function() {		// 중복제외
+                        if(binary_grid.modifyRowId.indexOf(binary_grid.lastEditRowId) == -1) {
+                            binary_grid.modifyRowId.push(binary_grid.lastEditRowId);
+                        }
+                    });
+                }
+            },
             serializeObjectHelper: function () {
                 var postData = $('#batSearch').serializeObject();
 
@@ -54,7 +120,33 @@
 
                 return (ids.length == 0) ? 0 : Math.max.apply(Math, ids);
             },
+            getSelectedRowCnt : function(){
+                selectedRow = new Array();
+                selectedRow = $('#list').jqGrid('getGridParam', 'selarrrow');
+                multiSelectFlag = selectedRow.length > 1 ? true : false;
+            }
+
         }
+
+        const binary_ajax = {
+            //코드 저장
+            setBat: function(param) {
+                $.ajax({
+                    type: 'POST',
+                    url: "/binary/modAjax",
+                    data: param,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                }).success(function (data, status, headers, config) {
+                    alertify.success([[ #{msg.common.success}]]);
+                    $("#list").jqGrid().trigger('reloadGrid');
+                }).error(function (data, status, headers, config) {
+                    alertify.success(String([[ #{msg.common.valid2}]]));
+                });
+            }
+        };
 
         const binary_grid = {
             modifyRowId: [],		//수정된 모든 rowID
@@ -64,9 +156,101 @@
                 binary_grid.modifyRowId = [];
                 binary_grid.lastEditRowId = "";
 
+                if(isAdmin) {
+                    var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_BINARYDB_PAGENATION_LIST_STR')}]];
+                } else {
+                    var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+                }
+                var rowList = rowStr.split(",");
+                var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+                var colNameArr = ['batId', 'Binary File name', 'Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment'];
+                var colModelArr = [];
+                var colModelObj = {name: 'batId', index: 'batId', hidden: true, key: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'fileName', index: 'fileName', width: 150, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj =  {name: 'pathName', index: 'pathName', width: 150, allign: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'sourcePath', index: 'sourcePath', width: 150, allign: 'left',editable: true, template: searchStringOptions};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'ossName', index: 'ossName', width: 150, allign: 'left', editable: true, template: searchStringOptions,
+                    editoptions: {
+                        dataInit:
+                            function (e) {
+                                // ossName auto complete
+                                $(e).autocomplete({
+                                    source: ossNames
+                                    , minLength: 3
+                                    , open: function () {
+                                        $(this).attr('state', 'open');
+                                    }
+                                    , close: function () {
+                                        $(this).attr('state', 'closed');
+                                    }
+                                }).focus(function () {
+                                    if ($(this).attr('state') != 'open') {
+                                        $(this).autocomplete("search");
+                                    }
+                                }).on('autocompletechange', function () {
+                                    if (e.value != "") {
+                                        var rowid = (e.id).split('_')[0];
+                                        fn.griOssVersions($('#ossVersion'), e.value, 'list');
+                                    }
+                                });
+
+                                currentOssName = e.value;
+                            }
+                    }
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'license', index: 'license', width: 150, align: 'left', editable: true, template: searchStringOptions,
+                    editoptions: {
+                        dataInit: function (e) {
+                            // licenseName auto complete
+                            $(e).autocomplete({
+                                source: licenseNames
+                                , minLength: 0
+                                , open: function () {
+                                    $(this).attr('state', 'open');
+                                }
+                                , close: function () {
+                                    $(this).attr('state', 'closed');
+                                }
+                            }).focus(function () {
+                                if ($(this).attr('state') != 'open') {
+                                    $(this).autocomplete("search");
+                                }
+                            });
+
+                            // set license data
+                            $(e).on("autocompletechange", function () {
+                            });
+                        }
+                    }
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'downloadlocation', index: 'downloadlocation', width: 100, align: 'left', formatter: 'link', formatoptions: {target: '_blank'}, editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'parentName', index: 'parentName', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'platformName', index: 'platformName', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'platformVersion', index: 'platformVersion', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'checkSum', index: 'checkSum', width: 150, allign: 'center', editable: true, hidden: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'tlshCheckSum', index: 'tlshCheckSum', width: 150, allign: 'center', editable: true, hidden: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'updateDate', index: 'updateDate', width: 100, align: 'left', editable: false, formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, template: searchDateOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'comment', index: 'comment', width: 150, editable: true, hidden: true, edittype: 'textarea', editoptions: {maxlength: 2048, rows: 5}, editrules: {edithidden: true}, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+
                 //그리드 생성
                 $('#list').jqGrid({
-                    url: "/binary/listAjax"
+                    type:"GET"
                     , datatype: 'json'
                     , jsonReader: {
                         repeatitems: false,
@@ -84,225 +268,36 @@
                             return obj.records;
                         }
                     }
-                    , colNames: ['batId', 'Binary File name', 'Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment']
-                    , colModel: [
-                        { name: 'batId', index: 'batId', hidden: true, key: true },
-                        {
-                            name: 'fileName',
-                            index: 'fileName',
-                            width: 150,
-                            allign: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'pathName',
-                            index: 'pathName',
-                            width: 150,
-                            allign: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'sourcePath',
-                            index: 'sourcePath',
-                            width: 150,
-                            allign: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'ossName',
-                            index: 'ossName',
-                            width: 150,
-                            allign: 'left',
-                            editable: true,
-                            template: searchStringOptions,
-                            editoptions: {
-                                dataInit:
-                                    function (e) {
-                                        // ossName auto complete
-                                        $(e).autocomplete({
-                                            source: ossNames
-                                            , minLength: 3
-                                            , open: function () {
-                                                $(this).attr('state', 'open');
-                                            }
-                                            , close: function () {
-                                                $(this).attr('state', 'closed');
-                                            }
-                                        }).focus(function () {
-                                            if ($(this).attr('state') != 'open') {
-                                                $(this).autocomplete("search");
-                                            }
-                                        }).on('autocompletechange', function () {
-                                            if (e.value != "") {
-                                                var rowid = (e.id).split('_')[0];
-                                                fn.griOssVersions($('#ossVersion'), e.value, 'list');
-                                            }
-                                        });
-
-                                        currentOssName = e.value;
-                                    }
-                            }
-                        },
-                        {
-                            name: 'ossVersion',
-                            index: 'ossVersion',
-                            width: 80,
-                            align: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'license',
-                            index: 'license',
-                            width: 150,
-                            align: 'left',
-                            editable: true,
-                            template: searchStringOptions,
-                            editoptions: {
-                                dataInit: function (e) {
-                                    // licenseName auto complete
-                                    $(e).autocomplete({
-                                        source: licenseNames
-                                        , minLength: 0
-                                        , open: function () {
-                                            $(this).attr('state', 'open');
-                                        }
-                                        , close: function () {
-                                            $(this).attr('state', 'closed');
-                                        }
-                                    }).focus(function () {
-                                        if ($(this).attr('state') != 'open') {
-                                            $(this).autocomplete("search");
-                                        }
-                                    });
-
-                                    // set license data
-                                    $(e).on("autocompletechange", function () {
-                                    });
-                                }
-                            }
-                        },
-                        {
-                            name: 'downloadlocation',
-                            index: 'downloadlocation',
-                            width: 100,
-                            align: 'left',
-                            formatter: 'link',
-                            formatoptions: {target: '_blank'},
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'parentName',
-                            index: 'parentName',
-                            width: 100,
-                            align: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'platformName',
-                            index: 'platformName',
-                            width: 100,
-                            align: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'platformVersion',
-                            index: 'platformVersion',
-                            width: 100,
-                            align: 'left',
-                            editable: true,
-                            template: searchStringOptions
-                        },
-                        {
-                            name: 'checkSum',
-                            index: 'checkSum',
-                            width: 150,
-                            allign: 'center',
-                            editable: true,
-                            hidden: true
-                        },
-                        {
-                            name: 'tlshCheckSum',
-                            index: 'tlshCheckSum',
-                            width: 150,
-                            allign: 'center',
-                            editable: true,
-                            hidden: true
-                        },
-                        {
-                            name: 'updateDate',
-                            index: 'updateDate',
-                            width: 100,
-                            align: 'left',
-                            editable: false,
-                            formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'},
-                            template: searchDateOptions
-                        },
-                        {
-                            name: 'comment',
-                            index: 'comment',
-                            width: 150,
-                            editable: true,
-                            hidden: true,
-                            edittype: 'textarea',
-                            editoptions: {maxlength: 2048, rows: 5},
-                            editrules: {edithidden: true},
-                            template: searchStringOptions
-                        }
-                    ]
+                    , colNames: colNameArr
+                    , colModel: colModelArr
                     , editurl: 'clientArray'
-                    , rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]]
-                    , rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]])
-                    //           <c:if test="${ct:isAdmin() eq true}">
-                    //             , rowList:	[${ct:getConstDef('DISP_BINARYDB_PAGENATION_LIST_STR')}]
-                    //           </c:if>
-                    // <c:if test="${ct:isAdmin() ne true}">
-                    //   , rowList:	[${ct:getConstDef('DISP_PAGENATION_LIST_STR')}]
-                    // </c:if>
-                    ,
-                    autowidth: true
-                    ,
-                    pager: '#pager'
-                    ,
-                    gridview: true
-                    ,
-                    sortable: function (permutation) {
+                    , rowNum: rowNum
+                    , rowList: rowList
+                    , autowidth: true
+                    , pager: '#pager'
+                    , gridview: true
+                    , sortable: function (permutation) {
                     }
-                    ,
-                    sortname: 'fileName'
-                    ,
-                    viewrecords: true
-                    ,
-                    sortorder: 'asc'
-                    ,
-                    loadonce: false
-                    ,
-                    height: 'auto'
-                    ,
-                    multiselect: true
-                    ,
-                    onSelectRow: function (rowid, iRow, iCol, e) {
+                    , sortname: 'fileName'
+                    , viewrecords: true
+                    , sortorder: 'asc'
+                    , loadonce: false
+                    , height: 'auto'
+                    , multiselect: true
+                    , onSelectRow: function (rowid, iRow, iCol, e) {
                         // 마지막 수정된 row 저장
                         if (binary_grid.lastEditRowId && rowid != binary_grid.lastEditRowId) {
-                            fn.saveLastRow();
+                            binary_fn.saveLastRow();
                         }
-
                         binary_grid.lastEditRowId = rowid;
                     }
-                    ,
-                    loadComplete: function (data) {
+                    , loadComplete: function (data) {
                         totalRow = data.records;
                         // id(key값)의 max값을 lastIdNo에 설정
                         binary_grid.lastIdNo = binary_fn.getMaxIdNo();
                         confirmFlag = false;
-                    },
-                    ondblClickRow: function (rowid, iRow, iCol, e) {
+                    }
+                    , ondblClickRow: function (rowid, iRow, iCol, e) {
                     }
                 });
 
@@ -312,7 +307,7 @@
                     del: isAdmin,
                     search: false,
                     refresh: false
-                }, updateDialogEdit, null, updateDialogDel);
+                }, binaryUpdateDialogEdit, null, binaryUpdateDialogDel);
 
                 $("#list").jqGrid('filterToolbar', {
                     stringResult: true,
@@ -323,7 +318,7 @@
             }
         }
 
-        const updateDialogEdit = {
+        const binaryUpdateDialogEdit = {
             url:"/binary/modAjax"
             , closeAfterEdit: true
             , reloadAfterSubmit: true
@@ -367,7 +362,7 @@
                 }
             }
             , beforeShowForm: function(formid) {
-                fn.getSelectedRowCnt();
+                binary_fn.getSelectedRowCnt();
 
                 if(multiSelectFlag){
                     $("#pathName", formid).attr("disabled","disabled");
@@ -384,12 +379,12 @@
             }
             , afterSubmit: function(response, postdata) {
                 if("false" == response.responseJSON.isValid) {
-                    onError();
+                    alertify.error([[ #{msg.common.valid} ]], 0);
                     createValidMsg('FrmGrid_list', response.responseJSON);
 
                     return [false, '[[ #{msg.common.valid} ]]', ""]
                 } else {
-                    onSuccess();
+                    alertify.error([[ #{msg.common.success} ]], 0);
 
                     return [true,"",""]
                 }
@@ -418,7 +413,7 @@
             }
         }
 
-        const updateDialogDel = {
+        const binaryUpdateDialogDel = {
             url:"/binary/modAjax"
             , closeAfterDel: true
             , reloadAfterSubmit: true
@@ -432,17 +427,17 @@
             }
             , afterSubmit: function(response, postdata) {
                 if("false" == response.responseJSON.isValid) {
-                    onError();
+                    alertify.error([[ #{msg.common.valid2} ]], 0);
 
                     return [false, '[[ #{msg.common.valid} ]]', ""]
                 } else {
-                    onSuccess();
+                    alertify.success([[ #{msg.common.success} ]], 0);
                     $("#list").jqGrid().trigger('reloadGrid');
 
                     return [true,"",""]
                 }
             }
         };
-
+        //]]>
     </script>
 </th:block>

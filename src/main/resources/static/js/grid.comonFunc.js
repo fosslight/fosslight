@@ -156,13 +156,17 @@ var fn_grid_com = {
 
     return display;
   },
+  displayLicenseName: function (cellvalue, options, rowObject) {
+    const display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
+    return display;
+  },
   // License Restriction 포메터
   displayLicenseRestriction: function (cellvalue, options, rowObject) {
     var display = "";
 
     if (cellvalue != "" && cellvalue != undefined) {
       display =
-        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="top" title="' +
+        '<span class="badge badge-warning text-xm" data-placement="top" title="' +
         cellvalue +
         '" onclick="src_fn_com.showLicenseRestrictionViewPage(\'' +
         options.gid +

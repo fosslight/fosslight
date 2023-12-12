@@ -379,7 +379,7 @@ function receiveMessage(event) {
 
 			break;
 		case 'create_new':
-			createTab_new(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[2]);
+			createTab_new(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[3]);
 
 			break;
 		case 'delete_new':

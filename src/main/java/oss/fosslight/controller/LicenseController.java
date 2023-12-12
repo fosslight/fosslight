@@ -324,7 +324,7 @@ public class LicenseController extends CoTopComponent{
 	@GetMapping(value = LICENSE.LICENSE_BULK_REG, produces = "text/html; charset=utf-8")
 	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model) {
 
-		return LICENSE.LICENSE_BULK_REG_JSP;
+		return "license/licenseBulkReg";
 	}
 
 	/**

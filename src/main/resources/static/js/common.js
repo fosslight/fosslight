@@ -174,15 +174,11 @@ function reloadTab_new(link, uniqueName, act) {
             url = tmp[0];
         }
 
-        console.log(url)
-        console.log(link)
-
         if(url == link){
             if(act === "create" || act === "reload"){
                 $(this).attr('src', url);
             }
         }
-        console.log("her")
         activateTab(uniqueName);
     });
 }

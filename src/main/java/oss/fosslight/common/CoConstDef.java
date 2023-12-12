@@ -705,6 +705,7 @@ public class CoConstDef {
 	public static final String CD_REGIST_DOMAIN									= "703";
 	public static final String CD_DTL_DEFAULT_DOMAIN							= "100";
 	public static final String CD_DTL_ECT_DOMAIN								= "ETC";
+	public static final String CD_DTL_ECT_DOMAIN_NO								= "300";
 
 	/** 사용자별 Default Locale List 코드 **/
 	public static final String CD_DEFAULT_LOCALE 								= "704";

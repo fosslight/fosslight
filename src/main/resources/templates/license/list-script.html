@@ -178,7 +178,7 @@ var list = {
 		var colModelArr = [];
 		var colModelObj = {name: 'licenseId', index: 'licenseId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'licenseName', index: 'licenseName', width: 200, align: 'left', formatter: 'linkLicenseName'};
+		colModelObj = {name: 'licenseName', index: 'licenseName', width: 200, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter,};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left'};
 		colModelArr.push(colModelObj);
@@ -236,8 +236,7 @@ var list = {
 					var cStartDate = $("#cStartDate").val()||0;
 					var cEndDate = $("#cEndDate").val()||0;
 					var diffNum = +cStartDate - +cEndDate;
-					
-					
+
 					var mStartDate = $("#mStartDate").val()||0;
 					var mEndDate = $("#mEndDate").val()||0;
 					var diffNum2 = +mStartDate - +mEndDate;
@@ -306,9 +305,9 @@ var list = {
 			onSelectRow: function(id){
 				$('#'+id+'description').width(130).height(140);
 			},
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#list").jqGrid('getRowData',rowid);
-				createTabInFrame(rowData['licenseId']+'_License', '/license/edit/'+rowData['licenseId']);
+			ondblClickRow: function(rowid, iRow, iCol, e) {
+				var rowData = $("#list").jqGrid('getRowData', rowid);
+				callCreateTabInFrame(rowData['licenseId']+'_License', '/license/edit/'+rowData['licenseId'], 'license-edit_' + rowData['licenseId'], true);
 			}
 		});
 	}

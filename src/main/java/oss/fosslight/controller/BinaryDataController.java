@@ -37,7 +37,8 @@ public class BinaryDataController extends CoTopComponent  {
 	@GetMapping(value="", produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
 		log.debug(" :: Start bat");
-		
+		model.addAttribute("searchBean", new BinaryData());
+
 		return "binary/list :: content";
 	}
 	

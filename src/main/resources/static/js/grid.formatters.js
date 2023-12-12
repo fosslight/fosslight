@@ -12,27 +12,6 @@ const lic_lst_fmt = {
 
         return paramData;
     },
-
-    licenseNameFormatter: function (cellvalue, options, rowObject) {
-        const display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
-        return display;
-    },
-    displayLicenseRestriction: function (cellvalue, options, rowObject) {
-        var display = "";
-
-        if (cellvalue != "" && cellvalue != undefined) {
-            display =
-                '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="top" title="' +
-                cellvalue +
-                '" onclick="src_fn_com.showLicenseRestrictionViewPage(\'' +
-                options.gid +
-                "','" +
-                options.rowId +
-                "')\">R</span>";
-        }
-
-        return display;
-    },
     unformatter: function (cellvalue, options, rowObject) {
         return cellvalue;
     },

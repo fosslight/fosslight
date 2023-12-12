@@ -93,9 +93,10 @@
                         	<div class="col-md-6"></div>
                             <div class="col-md-6">
                             	<div class="row float-right nav-item">
-                                	<button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button" th:text="'Bulk Registration'" th:onclick="|createTabInFrame('BulkReg_License', '/license/licenseBulkReg')|"></button>
+                                	<button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button" th:text="'Bulk Registration'" th:onclick="|callCreateTabInFrame('BulkReg_License', '/license/licenseBulkReg', 'license-bulkReg', true)|"></button>
                                     <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" type="button" th:text="Export" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i></button>
-                                    <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btn-transition-page" th:onclick="|createTabInFrame('New_License', '/license/edit')|" th:text="Add"></button>
+                                    <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btn-transition-page"
+											th:onclick="|callCreateTabInFrame('New_License', '/license/edit', 'license-edit', true)|" th:text="Add"></button>
                                 </div>
                             </div>
                      	</div>
