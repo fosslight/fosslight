@@ -2266,11 +2266,11 @@ function findAndReplace(match) {
 var createTabNew = function(tabNm, tabLk) {
 	var pattern = /\s/g;
     var tabName = tabNm.replace(pattern, '-');
-            
-    if ($('.overflow-hidden').find('#tab--' + tabName).length > 0) {
+    
+    if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
     	$("#tab--"+tabName).trigger("click");
     } else {
-    	var $tabs = $('.overflow-hidden').tabs();
+    	var $tabs = $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").tabs();
         var tab_length = $tabs.find('.nav-item').length;
             
         var tabArr = tabLk.split('?'),
@@ -2288,27 +2288,25 @@ var createTabNew = function(tabNm, tabLk) {
         var frameSrc = tabAnchor;
         var checkProjIden = tabAnchor.split('/');
 
-       	if(checkProjIden[1] == 'oss'){
-        	frameSrc = tabLk.replace('#','');
-        }
-
         $('.tab-pane').removeClass('show').removeClass('active');
 
-        var navItem = '<li class="nav-item active" role="presentation">';
+       	let navItem = '<li class="nav-item" role="presentation">';
         navItem += '<a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a>';
-        navItem += '<a class="nav-link active" data-toggle="row" id="tab--' + tabName + '" href="#panel--' + tabName + '" role="tab" aria-controls="panel--' + tabName + '"> ' + tabName +' </a>';
-        $(".overflow-hidden").append(navItem);
+        navItem += '<a class="nav-link" data-toggle="row" id="tab--' + tabName + '" href="#panel--' + tabName + '" role="tab" aria-controls="panel--' + tabName + '"> ' + tabNm +' </a></li>';
+        $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").append(navItem);
 
-        var appendIFrame = "<iframe src='" + frameSrc + "'></iframe>";
-        $(".tab-content").append("<div id='panel--" + tabName + "' class='tab-pane fade active show' role='tabpanel' aria-labelledby='tab--" + tabName + "'>" + appendIFrame + "</div>");
+        const iframe = '<div class="tab-pane fade" id="panel--' + tabName + '" role="tabpanel" aria-labelledby="tab--' + tabName + '"><iframe src="' + frameSrc + '"></iframe></div>';
+        $(".content-wrapper.iframe-mode").children(".tab-content").append(iframe);
                 
         $("#tab--" + tabName).trigger("click");
 	}
+	
+	$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
 }
 
 var existsTabName = function(tabNm){
 	var existsTab = false;
-	if ($('.overflow-hidden').find('#tab--' + tabNm).length > 0) {
+	if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabNm).length > 0) {
 		existsTab = true;
 	}
 	return existsTab;
