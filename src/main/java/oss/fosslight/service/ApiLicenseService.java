@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ApiLicenseService {
     ListLicenseDto.Result listLicenses(ListLicenseDto.Request request);
-    GetLicenseDetailsDto.Result getLicense(GetLicenseDetailsDto.Request request);
+    GetLicenseDetailsDto.Result getLicense(String id);
 }

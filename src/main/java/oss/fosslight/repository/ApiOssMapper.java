@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
-import oss.fosslight.api.dto.LicenseDto;
-import oss.fosslight.api.dto.ListOssDto;
-import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.api.dto.*;
 import oss.fosslight.domain.OssMaster;
 
 @Mapper
@@ -39,4 +37,6 @@ public interface ApiOssMapper {
 	List<OssDto> selectOssSubList(OssMaster query);
 
 	List<LicenseDto> selectOssLicenseList(List<String> ossIdList);
+	OssDetailsDto selectOssById(String id);
+	List<VulnerabilityDto> getOssVulnerabilityList(String ossId);
 }

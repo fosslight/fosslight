@@ -11,7 +11,6 @@ public class OssDto {
     String ossType;
     String ossName;
     String ossVersion;
-    List<LicenseDto> ossLicenses;
     String licenseName;
     String licenseType;
     String downloadUrl;
