@@ -4,6 +4,54 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.ApiSelfCheckMapper">
+
+	<sql id="paging">
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(sortColumn)">
+			ORDER BY PRJ_ID DESC
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortColumn)">
+			ORDER BY
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('PRJ_ID', sortColumn)">
+					PRJ_ID
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('PRJ_NAME', sortColumn)">
+					PRJ_NAME
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('DESTRIBUTION_NAME', sortColumn)">
+					(SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '207' AND SORTCD.CD_DTL_NO = DISTRIBUTION_TYPE)
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sortColumn)">
+					CVSS_SCORE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('DIVISION', sortColumn)">
+					(SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '200' AND SORTCD.CD_DTL_NO = DIVISION)
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
+					CREATOR
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sortColumn)">
+					CREATED_DATE
+				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals('OS_TYPE_ETC', sortColumn)">
+					CASE WHEN OS_TYPE = '999' THEN OS_TYPE_ETC ELSE (SELECT SORTCD.CD_DTL_NM FROM T2_CODE_DTL SORTCD WHERE SORTCD.CD_NO = '213' AND SORTCD.CD_DTL_NO = OS_TYPE) END
+				</when>
+			</choose>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirction)">
+				<choose>
+					<when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirction)">
+						ASC
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirction)">
+						DESC
+					</when>
+				</choose>
+			</if>
+		</if>
+		LIMIT #{offset}, #{countPerPage}
+	</sql>
+
+
 	<insert id="createSelfCheck" parameterType="hashMap" useGeneratedKeys="true" keyProperty="prjId">
 		INSERT INTO	PRE_PROJECT_MASTER (
 			  PRJ_NAME
@@ -109,4 +157,97 @@
 	<insert id="insertWatcher" parameterType="hashMap">
 		INSERT INTO PRE_PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{email})
 	</insert>
+
+	<sql id="selfCheckQuery">
+		(SELECT
+		T1.PRJ_ID,
+		T1.PRJ_NAME,
+		T1.PRJ_VERSION,
+		T1.DISTRIBUTION_TYPE,
+		T1.COMMENT,
+		IFNULL(T1.CVSS_SCORE, 0) AS CVSS_SCORE,
+		T1.CVE_ID,
+		IFNULL(T1.SRC_CSV_FILE_ID, '') SRC_CSV_FILE_ID,
+		IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR,
+		T1.CREATED_DATE,
+		IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER,
+		T1.MODIFIED_DATE,
+		( SELECT COUNT(1) FROM PRE_OSS_COMPONENTS SUB WHERE T1.PRJ_ID = SUB.REFERENCE_ID AND SUB.REFERENCE_DIV = '10' ) AS OSS_COUNT
+-- 		T1.PACKAGE_FILE_ID,
+-- 		T1.PACKAGE_FILE_ID2,
+-- 		T1.PACKAGE_FILE_ID3,
+-- 		T1.NOTICE_FILE_ID,
+-- 		T1.REVIEW_REPORT_FILE_ID
+
+		FROM PRE_PROJECT_MASTER T1
+
+		WHERE T1.USE_YN = 'Y'
+
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(projectId)">
+			AND T1.PRJ_ID = #{projectId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(projectName)">
+			<if test="projectNameExact">
+				AND T1.PRJ_NAME = #{projectName}
+			</if>
+			<if test="!projectNameExact">
+				AND T1.PRJ_NAME LIKE CONCAT('%',#{projectName},'%')
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{createdFrom}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> #{createdTo}
+		</if>
+<!--		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">-->
+<!--			AND T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))-->
+<!--		</if>-->
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+			AND EXISTS(SELECT 1
+			FROM PRE_OSS_COMPONENTS X
+			LEFT OUTER JOIN PRE_OSS_COMPONENTS_LICENSE Y
+			ON CONCAT(X.REFERENCE_ID, '-', X.REFERENCE_DIV, '-', X.COMPONENT_IDX) = Y.COMPONENT_ID
+			WHERE  T1.PRJ_ID = X.REFERENCE_ID
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+				<if test="ossNameExact">
+					AND X.OSS_NAME = REGEXP_REPLACE(#{ossName}, '_', '\\\\_')
+				</if>
+				<if test="!ossNameExact">
+					AND X.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+				</if>
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+				<if test="licenseNameExact">
+					AND Y.LICENSE_NAME = REGEXP_REPLACE(#{licenseName}, '_', '\\\\_')
+				</if>
+				<if test="!licenseNameExact">
+					AND Y.LICENSE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%')
+				</if>
+			</if>
+			)
+		</if>
+		) A
+	</sql>
+
+	<resultMap id="SelfCheckDtoMap" type="oss.fosslight.api.dto.SelfCheckDto">
+		<result property="projectId" column="prj_id"/>
+		<result property="projectName" column="prj_name"/>
+		<result property="projectVersion" column="prj_version"/>
+		<result property="created" column="created_date"/>
+		<result property="modified" column="modified_date"/>
+		<result property="notice" column="notice_file_id"/>
+		<result property="report" column="review_report_files_id"/>
+	</resultMap>
+	<select id="selectSelfCheckList" resultMap="SelfCheckDtoMap">
+		SELECT * FROM
+		<include refid="selfCheckQuery" />
+		WHERE 1=1
+		<include refid="paging"/>
+	</select>
+
+	<select id="selectSelfCheckTotalCount" resultType="int">
+		SELECT COUNT(*) FROM
+		<include refid="selfCheckQuery" />
+	</select>
 </mapper>
