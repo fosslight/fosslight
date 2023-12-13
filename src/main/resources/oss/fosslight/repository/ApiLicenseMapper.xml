@@ -230,7 +230,7 @@
         SELECT
         T1.LICENSE_ID,
         T1.LICENSE_NAME,
-        T1.LICENSE_TYPE,
+        T2.CD_DTL_NM AS LICENSE_TYPE,
         CONCAT(
         IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
         IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
@@ -246,6 +246,7 @@
         T1.CREATOR,
         T1.CREATED_DATE
         FROM LICENSE_MASTER T1
+        LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
         WHERE T1.USE_YN = 'Y'
         AND T1.LICENSE_ID = #{licenseId}
     </select>
