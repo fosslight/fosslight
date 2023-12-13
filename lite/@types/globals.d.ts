@@ -263,7 +263,6 @@ declare global {
     }
 
     interface VulnOSS {
-      ossId: string;
       ossName: string;
       ossVersion: string;
     }
