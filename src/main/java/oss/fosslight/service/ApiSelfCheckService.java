@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.domain.ProjectIdentification;
 
 @Service
@@ -27,4 +28,6 @@ public interface ApiSelfCheckService {
 	boolean existsWatcherByEmail(String prjId, String email);
 
 	void insertWatcher(Map<String, Object> paramMap);
+
+	 ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request);
 }
