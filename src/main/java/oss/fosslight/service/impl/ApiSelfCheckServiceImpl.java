@@ -6,21 +6,20 @@
 package oss.fosslight.service.impl;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import oss.fosslight.api.dto.ListSelfCheckDto;
-import oss.fosslight.api.dto.SelfCheckDto;
+import oss.fosslight.api.dto.*;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.ApiSelfCheckMapper;
+import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.SelfCheckService;
@@ -35,6 +34,9 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
     @Autowired
     SelfCheckMapper selfcheckMapper;
+
+    @Autowired
+    LicenseMapper licenseMapper;
 
     @Override
     public int getCreateProjectCnt(String userId) {
@@ -137,6 +139,48 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
         return ListSelfCheckDto.Result.builder()
                 .list(results)
                 .totalCount(totalCount)
+                .build();
+    }
+
+
+    public ListSelfCheckOssDto.Result listSelfCheckOss(String id) {
+        var identification = new ProjectIdentification();
+        identification.setReferenceId(id);
+        identification.setReferenceDiv(CoConstDef.CD_DTL_SELF_COMPONENT_ID);
+        var res = selfCheckService.getIdentificationGridList(identification);
+        List<ProjectIdentification> mainData = (List<ProjectIdentification>) res.get("mainData");
+
+        List<SelfCheckOssDto> list = mainData.stream()
+                .map(projectIdentification -> {
+                    var oss = new SelfCheckOssDto(projectIdentification);
+                    var licenseList = projectIdentification.getComponentLicenseList();
+
+                    var licenseName = projectIdentification.getLicenseName();
+                    if (licenseName != null) {
+                        var licenseNames = licenseName.split(",");
+                        var licenses = Arrays.stream(licenseNames).map(name -> {
+                                    var uppercaseName = name.toUpperCase().trim();
+                                    var licenseDto = new LicenseDto();
+                                    licenseDto.setLicenseName(name);
+                                    if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(uppercaseName)) {
+                                        var license = CoCodeManager.LICENSE_INFO_UPPER.get(uppercaseName);
+                                        var licenseId = license.getLicenseId();
+                                        licenseDto.setLicenseId(licenseId);
+                                    } else if (!uppercaseName.isEmpty()) {
+                                        return licenseDto;
+                                    }
+                                    return null;
+                                })
+                                .filter(license -> license != null)
+                                .collect(Collectors.toList());
+                        oss.setLicenses(licenses);
+                    }
+                    return oss;
+                })
+                .collect(Collectors.toList());
+
+        return ListSelfCheckOssDto.Result.builder()
+                .list(list)
                 .build();
     }
 }
