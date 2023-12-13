@@ -1,3 +1,4 @@
+import { useAPI } from '@/lib/hooks';
 import { OSS_TYPES } from '@/lib/literals';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,72 +11,21 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
   const pathname = usePathname();
   const queryParams = useSearchParams();
 
+  // API for loading data
+  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/oss/${modalId}`, {
+    onSuccess: (res) => {
+      setData(res.data.oss);
+    }
+  });
+
   // Load data based on query parameter information
   useEffect(() => {
     if (!modalId) {
       return;
     }
 
-    setData(null);
-
-    setTimeout(() => {
-      setData({
-        ossName: 'cairo',
-        ossNicknames: ['Cairo Vector Graphics', 'Cairo Vector Graphics Library'],
-        ossVersion: '1.4.12',
-        ossType: '110',
-        licenses: [
-          {
-            licenseId: '123',
-            licenseName: 'Mozilla Public License 1.1',
-            licenseIdentifier: 'MPL-1.1',
-            comb: ''
-          },
-          {
-            licenseId: '124',
-            licenseName: 'GNU General Public License v2.0 only',
-            licenseIdentifier: 'GPL-2.0',
-            comb: 'AND'
-          },
-          {
-            licenseId: '125',
-            licenseName: 'GNU Lesser General Public License v2.1 only',
-            licenseIdentifier: 'LGPL-2.1',
-            comb: 'OR'
-          },
-          {
-            licenseId: '124',
-            licenseName: 'GNU General Public License v2.0 only',
-            licenseIdentifier: 'GPL-2.0',
-            comb: 'AND'
-          }
-        ],
-        licenseType: 'Copyleft',
-        obligations: ['Y', 'Y'],
-        downloadUrl: 'http://cairographics.org/releases',
-        homepageUrl: 'https://www.cairographics.org',
-        description: 'Some files in util and test folder are released under GPL-2.0',
-        copyright: 'Copyright (c) 2013 the PM2 project\nCopyright (c) 2013-present, Keymetrics',
-        attribution: 'There some content about attribution here.',
-        vulnerabilities: [
-          {
-            cveId: 'CVE-2020-35492',
-            cvssScore: '7.8',
-            summary: 'A flaw was found in cairo image-compositor.c.'
-          },
-          {
-            cveId: 'CVE-2020-35493',
-            cvssScore: '7.8',
-            summary: 'A flaw was found in cairo image-compositor.c.'
-          }
-        ],
-        deactivate: false,
-        creator: 'admin',
-        created: '2023-10-05 23:54:08.0',
-        modifier: 'admin',
-        modified: '2023-10-07 21:32:05.0'
-      });
-    }, 500);
+    loadDataRequest.execute({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalId]);
 
   if (!data) {
@@ -300,33 +250,43 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.vulnerabilities.map((vulnerability) => (
-                    <tr
-                      key={vulnerability.cveId}
-                      className="border-b border-semigray cursor-pointer"
-                      onClick={() => {
-                        const urlQueryParams = new URLSearchParams(queryParams);
-                        urlQueryParams.set('modal-type', 'vuln');
-                        urlQueryParams.set('modal-id', vulnerability.cveId);
-                        router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
-                      }}
-                    >
-                      <td className="p-1">{vulnerability.cveId}</td>
-                      <td className="p-1">
-                        <a
-                          className="text-crimson hover:underline"
-                          href={`https://nvd.nist.gov/vuln/detail/${vulnerability.cveId}`}
-                          target="_blank"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {vulnerability.cvssScore}
-                        </a>
-                      </td>
-                      <td className="p-1">
-                        <div className="whitespace-pre-line">{vulnerability.summary}</div>
+                  {data.vulnerabilities.length > 0 ? (
+                    data.vulnerabilities.map((vulnerability) => (
+                      <tr
+                        key={vulnerability.cveId}
+                        className="border-b border-semigray cursor-pointer"
+                        onClick={() => {
+                          const urlQueryParams = new URLSearchParams(queryParams);
+                          urlQueryParams.set('modal-type', 'vuln');
+                          urlQueryParams.set('modal-id', vulnerability.cveId);
+                          router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                            scroll: false
+                          });
+                        }}
+                      >
+                        <td className="p-1">{vulnerability.cveId}</td>
+                        <td className="p-1">
+                          <a
+                            className="text-crimson hover:underline"
+                            href={`https://nvd.nist.gov/vuln/detail/${vulnerability.cveId}`}
+                            target="_blank"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {vulnerability.cvssScore}
+                          </a>
+                        </td>
+                        <td className="p-1">
+                          <div className="whitespace-pre-line">{vulnerability.summary}</div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr className="border-b border-semigray text-center">
+                      <td className="px-1 py-2" colSpan={3}>
+                        There are no entries.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
