@@ -1,12 +1,18 @@
+import { useAPI } from '@/lib/hooks';
 import { RESTRICTIONS } from '@/lib/literals';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
-import axios from 'axios';
-import qs from 'qs';
 
 export default function DetailModalLicense({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.License | null>(null);
+
+  // API for loading data
+  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/licenses/${modalId}`, {
+    onSuccess: (res) => {
+      setData(res.data.license);
+    }
+  });
 
   // Load data based on query parameter information
   useEffect(() => {
@@ -14,32 +20,8 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
       return;
     }
 
-    setData(null);
-
-    const requestRows = async () => {
-      const signInRequest = async () => {
-        axios.defaults.withCredentials = true;
-        const response = await axios.post(
-          'http://localhost:8180/session/login-proc',
-          qs.stringify({
-            un: 'admin',
-            up: 'admin'
-          })
-        );
-      };
-      await signInRequest();
-
-      return await axios.get(`http://localhost:8180/api/lite/licenses/${modalId}`, {
-        withCredentials: true,
-      });
-    };
-
-    requestRows().then((res) => {
-      console.log(res);
-      setData(res.data.license);
-    }).catch(rej => {
-    });
-
+    loadDataRequest.execute({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalId]);
 
   if (!data) {
