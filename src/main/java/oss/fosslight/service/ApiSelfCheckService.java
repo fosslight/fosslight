@@ -11,6 +11,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import oss.fosslight.api.dto.ListSelfCheckDto;
+import oss.fosslight.api.dto.ListSelfCheckOssDto;
 import oss.fosslight.domain.ProjectIdentification;
 
 @Service
@@ -29,5 +30,7 @@ public interface ApiSelfCheckService {
 
 	void insertWatcher(Map<String, Object> paramMap);
 
-	 ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request);
+	ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request);
+
+	ListSelfCheckOssDto.Result listSelfCheckOss(String request);
 }
