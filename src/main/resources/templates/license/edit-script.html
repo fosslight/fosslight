@@ -137,7 +137,7 @@
                         $('#commentAreaFragment').replaceWith(res);
                         $("[name ='commentModifyBtn']").on("click", function (e){
                             e.preventDefault();
-                            lic_edit_cmt.handlePromptPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
+                            lic_edit_cmt.handleCommentPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
                         })
                         $("[name ='commentDeleteBtn']").on("click", function (e){
                             e.preventDefault();
@@ -161,11 +161,11 @@
                     alertify.error(String([[ #{msg.common.valid2}]]), 0);
                 });
             },
-            handlePromptPopupOpen: function (id, contents) {
+            handleCommentPopupOpen: function (id, contents) {
                 const param = {
                     data : {commId : id},
                     category : "fragments",
-                    templateName: "popup-fragments",
+                    templateName: "comment-fragments",
                     fragmentName: "commentPopupFragment"
                 }
                 postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {

@@ -1667,7 +1667,7 @@ function openCommentHistory(_url) {
 		_popupComment = window.open(_url, "commentPopup", "width=900, height=600, toolbar=no, location=no, left=100, top=100, scrollbars=yes, resizeable=yes");
 		
 		if(!_popupComment || _popupComment.closed || typeof _popupComment.closed=='undefined') {
-			alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+			alertify.alert('[[ #{msg.common.window.allowpopup} ]]', function(){});
 		}
 	} else {
 		_popupComment.close();
@@ -2048,6 +2048,36 @@ function moveTabInFrameByCommentPopup(prjId, stage){
 	} else {
 		createTabInFrame(tabIdx, urlTxt);
 	}
+}
+
+function moveTabInFrameByCommentPopup2(prjId, stage){
+	let tabIdx = "";
+	let urlTxt = "";
+	let uniqueName = "";
+
+	if(stage == "basicInfoPrj") {
+		tabIdx = prjId+"_Project";
+		urlTxt = '/project/edit/' + prjId;
+		uniqueName = "pjt-edit" + prjId;
+	} else if(stage == "identification") {
+		tabIdx = prjId+"_Identify";
+		urlTxt = '/project/identification/'+prjId+'/5';
+		uniqueName= "pjt-identification" + prjId;
+	} else if(stage == "packaging") {
+		tabIdx = prjId+"_Packaging";
+		urlTxt = '/project/verification/'+prjId;
+		uniqueName= "pjt-packaging" + prjId;
+	} else if(stage == "distribution") {
+		tabIdx = prjId+"_Distribute";
+		urlTxt = '/project/distribution/'+prjId;
+		uniqueName= "pjt-distribution" + prjId;
+	} else if(stage == "basicInfo3rd") {
+		tabIdx = prjId+"_3rdParty";
+		urlTxt = '/partner/edit/'+prjId;
+		uniqueName= "pjg-basicInfo3rd" + prjId;
+	}
+
+	callCreateTabInFrame(tabIdx, urlTxt, uniqueName, true);
 }
 
 function calValidation(target, e){

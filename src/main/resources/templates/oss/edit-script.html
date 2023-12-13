@@ -446,7 +446,7 @@
                     $("#commentAreaFragment").replaceWith(res);
                     $("[name ='commentModifyBtn']").on("click", function (e){
                         e.preventDefault();
-                        oss_edit_cmt.handlePromptPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
+                        oss_edit_cmt.handleCommentPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
                     })
                     $("[name ='commentDeleteBtn']").on("click", function (e){
                         e.preventDefault();
@@ -470,11 +470,11 @@
                 });
 
             },
-            handlePromptPopupOpen: function (id, contents)  {
+            handleCommentPopupOpen: function (id, contents)  {
                 const param = {
                     data : {commId : id},
                     category : "fragments",
-                    templateName: "popup-fragments",
+                    templateName: "comment-fragments",
                     fragmentName: "commentPopupFragment"
                 }
 

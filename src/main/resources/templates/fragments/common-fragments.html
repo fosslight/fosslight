@@ -6,47 +6,14 @@
         <img alt="loading" src="/images/loading.gif"/>
     </div>
 </th:block>
-<th:block th:fragment="commentAreaFragment">
-    <div class="row" id="commentAreaFragment">
-        <th:block th:if="${!#lists.isEmpty(commentList)}">
-            <div class="col-md-12" style="overflow-x: scroll;">
-                <table class="table">
-                    <tbody>
-                    <th:block th:each="comment : ${commentList}">
-                        <tr>
-                            <td>
-                                <div class="post">
-                                    <div class="user-block">
-									<span class="username">
-									  <a href="#">[[ ${comment.loginUserName} ]]</a>
-									</span>
-                                        <span class="description ml-0" th:text="${comment.createdDate}"></span>
-                                    </div>
-                                    <p th:utext="${comment.contents }">
-                                    </p>
-                                </div>
-                            </td>
-                            <td class="text-right py-0 align-middle">
-                            <td class="text-right py-0 align-middle">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn btn-default" name="commentModifyBtn" th:data-commId="${comment.commId}" th:data-contents ="${comment.contents}">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                    <button class="btn btn-lg-red" name="commentDeleteBtn" th:data-commId="${comment.commId}"><i
-                                            class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    </th:block>
-                    </tbody>
-                </table>
+<th:block th:fragment="promptPopupFragment">
+    <div id="promptPopup">
+        [[ ${data.context} ]]
+        <div class="row mt-3">
+            <div class="col-12">
+                <textarea class="form-control" id="promptPopupEditor" rows="5"></textarea>
             </div>
-        </th:block>
-        <th:block th:if="${#lists.isEmpty(commentList)}">
-            <div class="col-md-12" >
-                <strong class="text-lg-gray">No comments were registered.</strong>
-            </div>
-        </th:block>
+        </div>
     </div>
 </th:block>
 </html>

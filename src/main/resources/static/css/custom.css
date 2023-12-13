@@ -75,6 +75,9 @@ ul { list-style-type: none; }
 .custom-layout .btn-dark-04 { background-color: #595959; font-weight: 500; color: #fff }
 .custom-layout .btn-dark-04:hover { background-color: #001429; }
 
+.custom-layout .btn-purple { background-color: #8d79ae; font-weight: 500; color: #fff }
+.custom-layout .btn-purple:hover { background-color: #665B7AFF; font-weight: 500; color: #fff }
+
 /* bg color option */
 .custom-layout .bg-lg-red { background-color: #a50034; }
 .custom-layout .bg-lg-gray { background-color: #6b6b6b; }

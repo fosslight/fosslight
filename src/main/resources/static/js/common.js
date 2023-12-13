@@ -222,7 +222,9 @@ function callCreateTabInFrame(title, link, uniqueName, autoOpen) {
         action:'create_new'
     };
 
+    console.log(JSON.stringify(data));
     parent.postMessage(JSON.stringify(data),"*");
+
 }
 
 var callReloadTabInframe = function(link, uniqueName){
