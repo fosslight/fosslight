@@ -2301,7 +2301,9 @@ var createTabNew = function(tabNm, tabLk) {
         $("#tab--" + tabName).trigger("click");
 	}
 	
-	$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
+	if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
+		$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
+	}
 }
 
 var existsTabName = function(tabNm){
