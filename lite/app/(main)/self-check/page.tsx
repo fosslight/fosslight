@@ -5,6 +5,7 @@ import ListTable from '@/components/list-table';
 import SelfCheckModal from '@/components/self-check-modal';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
+import { useAPI } from '@/lib/hooks';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -39,14 +40,14 @@ export default function SelfCheckList() {
   // Rows/Columns
   const [rows, setRows] = useState<List.SelfCheck[]>([]);
   const columns: List.Column[] = [
-    { name: 'ID', sort: 'id' },
-    { name: 'Name', sort: 'name' },
-    { name: 'Ver', sort: 'ver' },
+    { name: 'ID', sort: 'PRJ_ID' },
+    { name: 'Name', sort: 'PRJ_NAME' },
+    { name: 'Ver', sort: 'PRJ_VERSION' },
     { name: 'Report', sort: '' },
     { name: 'Packages', sort: '' },
     { name: 'Notice', sort: '' },
-    { name: 'Vuln', sort: 'vuln' },
-    { name: 'Create', sort: 'create' }
+    { name: 'Vuln', sort: '' },
+    { name: 'Create', sort: 'CREATED_DATE' }
   ];
 
   // Sorting
@@ -57,35 +58,26 @@ export default function SelfCheckList() {
   const countPerPage = 10;
   const currentPage = Number(queryParams.get('p') || '1');
 
+  // API for loading rows
+  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/selfchecks', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setTotalCount(res.data.totalCount);
+      setRows(res.data.list);
+    },
+    onFinish: () => setLoading(false)
+  });
+
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
-    const params = {
-      ...filtersForm.watch(),
-      sort: currentSort,
-      page: currentPage,
-      countPerPage
-    };
-
-    setLoading(true);
-
-    setTimeout(() => {
-      setTotalCount(24);
-      setRows(
-        Array.from(Array(params.page < 3 ? 10 : 4)).map((_, idx) => ({
-          projectId: String(24 - 10 * (params.page - 1) - idx),
-          projectName: 'FOSSLight Hub Lite',
-          projectVersion: '1.0.0',
-          report: '0',
-          packages: ['0', '1'],
-          notice: '0',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8',
-          created: '2023-10-05 23:54:08.0'
-        }))
-      );
-
-      setLoading(false);
-    }, 500);
+    loadRowsRequest.execute({
+      params: {
+        ...filtersForm.watch(),
+        sort: currentSort,
+        page: currentPage,
+        countPerPage
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtersQueryParam, currentSort, currentPage, countPerPage]);
 
