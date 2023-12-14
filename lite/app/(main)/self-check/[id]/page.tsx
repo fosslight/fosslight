@@ -166,7 +166,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions */}
-      {tab === 'OSS' && <SelfCheckOSS />}
+      {tab === 'OSS' && <SelfCheckOSS id={params.id} />}
       {tab === 'Package' && <SelfCheckPackage />}
       {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>

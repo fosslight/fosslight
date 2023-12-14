@@ -117,35 +117,37 @@ declare global {
     }
 
     interface OSSLicense {
-      licenseId: string;
-      licenseIdentifier: string;
+      licenseId: string | null;
+      licenseName: string;
     }
 
     interface OSS {
-      path: string;
-      ossId: string;
+      gridId: string;
+      ossId: string | null;
       ossName: string;
       ossVersion: string;
-      licenses: OSSLicense[];
       obligations: string[];
-      restrictions: string[];
-      downloadUrl: string;
-      homepageUrl: string;
-      description: string;
-      copyright: string;
+      vuln: boolean;
       cveId: string;
       cvssScore: string;
+      licenses: OSSLicense[];
+      path: string;
+      userGuide: string;
+      copyright: string;
+      restrictions: string;
+      downloadUrl: string;
+      homepageUrl: string;
       exclude: boolean;
     }
 
     interface EditOSS {
-      path: string;
       ossName: string;
       ossVersion: string;
       licenses: OSSLicense[];
+      path: string;
+      copyright: string;
       downloadUrl: string;
       homepageUrl: string;
-      copyright: string;
     }
 
     interface OSSCheck {

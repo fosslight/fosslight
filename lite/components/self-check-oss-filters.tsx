@@ -11,9 +11,9 @@ export default function SelfCheckOSSFilters({
   const { control } = form;
   const sort = useFieldArray({ control, name: 'sort' });
   const sortCriteria = [
-    ['path', 'Path'],
     ['oss', 'OSS'],
     ['license', 'License'],
+    ['path', 'Path'],
     ['download', 'Download URL'],
     ['homepage', 'Homepage URL']
   ];
@@ -28,27 +28,27 @@ export default function SelfCheckOSSFilters({
     >
       <div className="grid grid-cols-1 gap-x-8 gap-y-2 text-sm lg:grid-cols-2">
         <div className="flex items-start gap-x-4">
-          <div className={labelClass}>Path</div>
-          <div className="flex-1">
-            <input className={clsx('w-full', inputClass)} {...form.register('path')} />
-          </div>
-        </div>
-        <div className="flex items-start gap-x-4">
           <div className={labelClass}>OSS/License</div>
           <div className="flex-1">
             <input className={clsx('w-full', inputClass)} {...form.register('keyword')} />
           </div>
         </div>
         <div className="flex items-start gap-x-4">
-          <div className={labelClass}>URL</div>
+          <div className={labelClass}>Path</div>
           <div className="flex-1">
-            <input className={clsx('w-full', inputClass)} {...form.register('url')} />
+            <input className={clsx('w-full', inputClass)} {...form.register('path')} />
           </div>
         </div>
         <div className="flex items-start gap-x-4">
           <div className={labelClass}>Copyright</div>
           <div className="flex-1">
             <input className={clsx('w-full', inputClass)} {...form.register('copyright')} />
+          </div>
+        </div>
+        <div className="flex items-start gap-x-4">
+          <div className={labelClass}>URL</div>
+          <div className="flex-1">
+            <input className={clsx('w-full', inputClass)} {...form.register('url')} />
           </div>
         </div>
         <div className="flex items-start gap-x-4">
