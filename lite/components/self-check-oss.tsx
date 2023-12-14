@@ -141,7 +141,6 @@ export default function SelfCheckOSS({ id }: { id: string }) {
     }
   );
 
-  // Load file/OSS list
   useEffect(() => {
     setTimeout(() => {
       setFiles(
