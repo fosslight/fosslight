@@ -6,9 +6,7 @@ import SelfCheckModal from '@/components/self-check-modal';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
-import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
-import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -92,14 +90,8 @@ export default function SelfCheckList() {
       {/* Filters */}
       <ListFilters form={filtersForm} filters={filters} />
 
-      {/* Buttons */}
-      <div className="flex justify-end gap-x-1 mt-8 mb-4">
-        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
-          <div className="relative w-4 h-4">
-            <Image src={ExcelIcon} fill sizes="32px" alt="export" />
-          </div>
-          Export
-        </button>
+      {/* Button */}
+      <div className="flex justify-end mt-8 mb-4">
         <button
           className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
           onClick={() => setIsModalShown(true)}
