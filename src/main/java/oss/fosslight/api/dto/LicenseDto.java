@@ -23,7 +23,7 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected String created;
     protected String modified;
     protected List<String> restrictions = new ArrayList<>();
-    protected String ossLicenseComb;
+    protected String comb;
     protected List<Character> obligations;
 
     public void setObligations(String obligationType) {
