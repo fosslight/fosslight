@@ -111,7 +111,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
                         .map(license -> {
                             var ossLicense = new OssLicense();
                             ossLicense.setLicenseName(license.getLicenseName());
-                            ossLicense.setOssLicenseComb(license.getOssLicenseComb());
+                            ossLicense.setOssLicenseComb(license.getComb());
                             return ossLicense;
                         }).collect(Collectors.toList());
                 var licensesString = CommonFunction.makeLicenseExpression(licensesForOss);
