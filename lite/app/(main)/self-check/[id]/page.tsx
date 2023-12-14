@@ -20,21 +20,14 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
   const router = useRouter();
 
-  // TODO (API for loading project)
-  const loadProjectReuqest = {
-    execute: (() => {
-      setLoading(true);
-      setTimeout(() => {
-        setData({
-          projectName: 'FOSSLight Hub Lite',
-          projectVersion: '1.0.0',
-          created: '2023-10-05 23:54:08.0',
-          comment: '<p>aaa</p><p>bbb</p><p><strong>ccc</strong><br>ddd</p>'
-        });
-        setLoading(false);
-      }, 500);
-    }) as any
-  };
+  // API for loading data
+  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/selfchecks/${params.id}`, {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setData(res.data.selfCheck);
+    },
+    onFinish: () => setLoading(false)
+  });
 
   // API for deleting project
   const deleteProjectRequest = useAPI('post', 'http://localhost:8180/selfCheck/delAjax', {
@@ -47,7 +40,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   });
 
   useEffect(() => {
-    loadProjectReuqest.execute({});
+    loadDataRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,7 +116,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
             projectVersion: data.projectVersion,
             comment: data.comment
           }}
-          refetch={() => loadProjectReuqest.execute({})}
+          refetch={() => loadDataRequest.execute({})}
         />
       )}
 
