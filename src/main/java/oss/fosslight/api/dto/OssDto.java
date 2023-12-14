@@ -24,6 +24,8 @@ public class OssDto {
     String modified;
     List<Character> obligations;
 
+    Boolean exclude = false;
+
     public void setObligations(String obligationType) {
         var typeArr = obligationType.toCharArray();
         obligations = new ArrayList<>();
