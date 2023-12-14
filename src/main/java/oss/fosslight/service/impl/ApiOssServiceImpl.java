@@ -124,4 +124,23 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
                 .totalCount(totalCount)
                 .build();
     }
+
+    public GetOSSDetailsDto.Result getOss(String id) {
+        var oss = apiOssMapper.selectOssById(id);
+
+        var idList = Collections.singletonList(oss.getOssId());
+        List<LicenseDto> licenseList = apiOssMapper.selectOssLicenseList(idList);
+        oss.setLicenses(licenseList);
+
+        var vulnerabilityList = apiOssMapper.getOssVulnerabilityList(oss.getOssId());
+        oss.setVulnerabilities(vulnerabilityList);
+
+        var nicknames = apiOssMapper.selectOssNicknameList(oss.getOssName());
+        oss.setOssNicknames(nicknames);
+
+        return GetOSSDetailsDto.Result
+                .builder()
+                .oss(oss)
+                .build();
+    }
 }
