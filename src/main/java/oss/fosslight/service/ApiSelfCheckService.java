@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import oss.fosslight.api.dto.GetSelfCheckDetailsDto;
 import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.api.dto.ListSelfCheckOssDto;
 import oss.fosslight.domain.ProjectIdentification;
@@ -33,4 +34,6 @@ public interface ApiSelfCheckService {
 	ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request);
 
 	ListSelfCheckOssDto.Result listSelfCheckOss(String request);
+
+	GetSelfCheckDetailsDto.Result getSelfCheck(String request);
 }
