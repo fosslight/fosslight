@@ -22,6 +22,8 @@ public class SelfCheckDto {
     String report;
     String notice;
 
+    String comment;
+
     private void addPackageFileId(String id) {
         if (id == null) return;
         packages.add(id);

@@ -250,4 +250,14 @@
 		SELECT COUNT(*) FROM
 		<include refid="selfCheckQuery" />
 	</select>
+
+	<select id="selectSelfCheckById" resultMap="SelfCheckDtoMap">
+		SELECT
+			PRJ_NAME,
+			PRJ_VERSION,
+			CREATED_DATE,
+			COMMENT
+		FROM PRE_PROJECT_MASTER
+		WHERE PRJ_ID = #{id}
+	</select>
 </mapper>
