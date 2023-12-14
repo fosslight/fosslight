@@ -12,7 +12,7 @@ public class OssDetailsDto extends OssDto {
     List<VulnerabilityDto> vulnerabilities;
     String copyright;
     Boolean deactivate;
-    String attribution;
+    String attribution = "";
 
     public void setDeactivate(String deactivateFlag) {
         deactivate = !"Y".equals(deactivateFlag);
