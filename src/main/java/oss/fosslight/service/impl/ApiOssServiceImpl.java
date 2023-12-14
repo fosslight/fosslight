@@ -126,6 +126,9 @@ public class ApiOssServiceImpl implements ApiOssService {
         var vulnerabilityList = apiOssMapper.getOssVulnerabilityList(oss.getOssId());
         oss.setVulnerabilities(vulnerabilityList);
 
+        var nicknames = apiOssMapper.selectOssNicknameList(oss.getOssName());
+        oss.setOssNicknames(nicknames);
+
         return GetOSSDetailsDto.Result
                 .builder()
                 .oss(oss)
