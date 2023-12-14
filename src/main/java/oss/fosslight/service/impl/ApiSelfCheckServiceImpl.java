@@ -183,4 +183,12 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                 .list(list)
                 .build();
     }
+
+    @Override
+    public GetSelfCheckDetailsDto.Result getSelfCheck(String request) {
+        var selfCheck = apiSelfcheckMapper.selectSelfCheckById(request);
+        return GetSelfCheckDetailsDto.Result.builder()
+                .selfCheck(selfCheck)
+                .build();
+    }
 }

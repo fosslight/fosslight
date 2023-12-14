@@ -30,4 +30,6 @@ public interface ApiSelfCheckMapper {
 	List<SelfCheckDto> selectSelfCheckList(ListSelfCheckDto.Request request);
 
 	int selectSelfCheckTotalCount(ListSelfCheckDto.Request request);
+
+	SelfCheckDto selectSelfCheckById(String id);
 }
