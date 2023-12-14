@@ -66,6 +66,16 @@ export default function SelfCheckList() {
     onFinish: () => setLoading(false)
   });
 
+  // API for downloading report
+  const downloadReportRequest = useAPI('post', 'http://localhost:8180/exceldownload/getExcelPost', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
+    },
+    onFinish: () => setLoading(false),
+    sendJson: true
+  });
+
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
     loadRowsRequest.execute({
@@ -122,11 +132,16 @@ export default function SelfCheckList() {
 
           if (column === 'Report') {
             return (
-              row.report && (
+              row.ossCount > 0 && (
                 <i
                   className="cursor-pointer fa-regular fa-file-excel"
                   title="FOSSLight Report"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadReportRequest.execute({
+                      body: { parameter: row.projectId, type: 'selfReport' }
+                    });
+                  }}
                 />
               )
             );

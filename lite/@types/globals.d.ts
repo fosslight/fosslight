@@ -37,7 +37,7 @@ declare global {
       projectId: string;
       projectName: string;
       projectVersion: string;
-      report: string;
+      ossCount: number;
       packages: string[];
       notice: string;
       cveId: string;
