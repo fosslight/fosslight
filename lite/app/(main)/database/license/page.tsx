@@ -41,7 +41,7 @@ export default function LicenseList() {
         name: 'obligations',
         type: 'select',
         options: [
-          { label: 'None', value: '0'},
+          { label: 'None', value: '0' },
           { label: 'Notice', value: '1' },
           { label: 'Notice & Source', value: '2' }
         ]

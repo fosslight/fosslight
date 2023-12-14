@@ -31,14 +31,6 @@ export default function SelfCheckOSSModal({
         {!values ? 'Add an OSS to the list' : 'Edit the OSS'}
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 flex flex-col gap-y-2">
-          <label className="text-sm font-semibold">Binary Name or Source Path</label>
-          <input
-            className="w-full px-2 py-1 border border-darkgray outline-none"
-            placeholder="EX) fosslight, foo/bar/fosslight"
-            defaultValue={values?.path || ''}
-          />
-        </div>
         <div className="flex flex-col gap-y-2">
           <label className="text-sm font-semibold">Name</label>
           <input
@@ -60,22 +52,36 @@ export default function SelfCheckOSSModal({
           <input className="w-full px-2 py-1 border border-darkgray outline-none" defaultValue="" />
           {licenses.length > 0 && (
             <div className="flex gap-x-1">
-              {licenses.map((license) => (
+              {licenses.map((license, idx) => (
                 <div
-                  key={license.licenseId}
+                  key={idx}
                   className="px-1.5 py-0.5 border border-semiblack/80 rounded text-sm text-semiblack/80"
                 >
-                  {license.licenseIdentifier}
+                  {license.licenseName}
                   <i
                     className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
-                    onClick={() =>
-                      setLicenses(licenses.filter((l) => l.licenseId !== license.licenseId))
-                    }
+                    onClick={() => setLicenses(licenses.filter((_, i) => i !== idx))}
                   />
                 </div>
               ))}
             </div>
           )}
+        </div>
+        <div className="col-span-2 flex flex-col gap-y-2">
+          <label className="text-sm font-semibold">Binary Name or Source Path</label>
+          <input
+            className="w-full px-2 py-1 border border-darkgray outline-none"
+            placeholder="EX) fosslight, foo/bar/fosslight"
+            defaultValue={values?.path || ''}
+          />
+        </div>
+        <div className="col-span-2 flex flex-col gap-y-2">
+          <label className="text-sm font-semibold">Copyright</label>
+          <textarea
+            className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
+            rows={3}
+            defaultValue={values?.copyright || ''}
+          />
         </div>
         <div className="flex flex-col gap-y-2">
           <label className="text-sm font-semibold">Download URL</label>
@@ -89,14 +95,6 @@ export default function SelfCheckOSSModal({
           <input
             className="w-full px-2 py-1 border border-darkgray outline-none"
             defaultValue={values?.homepageUrl || ''}
-          />
-        </div>
-        <div className="col-span-2 flex flex-col gap-y-2">
-          <label className="text-sm font-semibold">Copyright</label>
-          <textarea
-            className="w-full px-2 py-1 border border-darkgray outline-none resize-none"
-            rows={3}
-            defaultValue={values?.copyright || ''}
           />
         </div>
       </div>

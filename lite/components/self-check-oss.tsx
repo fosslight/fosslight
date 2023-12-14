@@ -1,6 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import { highlight } from '@/lib/commons';
-import { RESTRICTIONS } from '@/lib/literals';
+import { useAPI } from '@/lib/hooks';
 import ExcelIcon from '@/public/images/excel.png';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
@@ -9,12 +9,13 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
+import Modal from './modal';
 import SelfCheckOSSFilters from './self-check-oss-filters';
 import SelfCheckOSSModal from './self-check-oss-modal';
 import SelfCheckOSSPagination from './self-check-oss-pagination';
 import Toogle from './toggle';
 
-export default function SelfCheckOSS() {
+export default function SelfCheckOSS({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'file' | 'url'>('file');
   const [files, setFiles] = useState<SelfCheck.OSSFile[]>([]);
@@ -24,36 +25,43 @@ export default function SelfCheckOSS() {
   const pathname = usePathname();
   const queryParams = useSearchParams();
 
-  // Modal
-  const [modalValues, setModalValues] = useState<SelfCheck.EditOSS>();
-  const [isModalShown, setIsModalShown] = useState(false);
+  // Modals
+  const [editValues, setEditValues] = useState<SelfCheck.EditOSS>();
+  const [isOSSModalShown, setIsOSSModalShown] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalText, setModalText] = useState('');
+  const [isTextModalShown, setIsTextModalShown] = useState(false);
 
   // Filters
   const filtersForm = useForm();
-  const [filters, setFilters] = useState({ path: '', keyword: '', url: '', copyright: '' });
+  const [filters, setFilters] = useState({ keyword: '', path: '', copyright: '', url: '' });
   const filteredOssList = ossList.filter((oss) => {
-    let { path, keyword, url, copyright } = filters;
+    let { keyword, path, copyright, url } = filters;
 
-    if (!path && !keyword && !url && !copyright) {
+    if (!keyword && !path && !copyright && !url) {
       return true;
     }
 
-    path = path.toLowerCase();
     keyword = keyword.toLowerCase();
-    url = url.toLowerCase();
+    path = path.toLowerCase();
     copyright = copyright.toLowerCase();
+    url = url.toLowerCase();
 
     let result = false;
-
-    if (path) {
-      result = result || oss.path.toLowerCase().includes(path);
-    }
 
     if (keyword) {
       result =
         result ||
         oss.ossName.toLowerCase().includes(keyword) ||
-        oss.licenses.some((license) => license.licenseIdentifier.toLowerCase().includes(keyword));
+        oss.licenses.some((license) => license.licenseName.toLowerCase().includes(keyword));
+    }
+
+    if (path) {
+      result = result || oss.path.toLowerCase().includes(path);
+    }
+
+    if (copyright) {
+      result = result || oss.copyright.toLowerCase().includes(copyright);
     }
 
     if (url) {
@@ -61,10 +69,6 @@ export default function SelfCheckOSS() {
         result ||
         oss.downloadUrl.toLowerCase().includes(url) ||
         oss.homepageUrl.toLowerCase().includes(url);
-    }
-
-    if (copyright) {
-      result = result || oss.copyright.toLowerCase().includes(copyright);
     }
 
     return result;
@@ -77,16 +81,16 @@ export default function SelfCheckOSS() {
       const x = asc ? a : b;
       const y = asc ? b : a;
 
-      if (key === 'path') {
-        return x.path.localeCompare(y.path);
-      }
       if (key === 'oss') {
         return x.ossName.localeCompare(y.ossName);
       }
       if (key === 'license') {
-        const xLicenses = a.licenses.map((license) => license.licenseIdentifier).join(', ');
-        const yLicenses = b.licenses.map((license) => license.licenseIdentifier).join(', ');
+        const xLicenses = a.licenses.map((license) => license.licenseName).join(', ');
+        const yLicenses = b.licenses.map((license) => license.licenseName).join(', ');
         return xLicenses.localeCompare(yLicenses);
+      }
+      if (key === 'path') {
+        return x.path.localeCompare(y.path);
       }
       if (key === 'download') {
         return x.downloadUrl.localeCompare(y.downloadUrl);
@@ -99,7 +103,7 @@ export default function SelfCheckOSS() {
   });
 
   // Pagination
-  const countPerPage = 3;
+  const countPerPage = 200;
   const [currentPage, setCurrentPage] = useState(1);
   const lastPage = Math.max(Math.ceil(filteredOssList.length / countPerPage), 1);
   const paginatedOssList = filteredOssList.slice(
@@ -119,9 +123,26 @@ export default function SelfCheckOSS() {
     );
   }
 
-  useEffect(() => {
-    setLoading(true);
+  // API for loading OSS list
+  const loadOssListRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/list-oss`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        setOssList(res.data.list);
+        setExcludeList(
+          res.data.list
+            .filter((oss: SelfCheck.OSS) => oss.exclude)
+            .map((oss: SelfCheck.OSS) => oss.gridId)
+        );
+      },
+      onFinish: () => setLoading(false)
+    }
+  );
 
+  // Load file/OSS list
+  useEffect(() => {
     setTimeout(() => {
       setFiles(
         Array.from(Array(2)).map((_, idx) => ({
@@ -129,33 +150,9 @@ export default function SelfCheckOSS() {
           when: '2023-09-28 16:17:30'
         }))
       );
-
-      const data = Array.from(Array(5)).map((_, idx) => ({
-        path: 'aaa/bbb',
-        ossId: String(5 - idx),
-        ossName: 'cairo',
-        ossVersion: '1.4.12',
-        licenses: [
-          { licenseId: '1', licenseIdentifier: 'MPL-1.1' },
-          { licenseId: '2', licenseIdentifier: 'GPL-2.0' }
-        ],
-        obligations: ['Y', 'Y'],
-        restrictions: ['1', '2'],
-        downloadUrl: 'http://cairographics.org/releases',
-        homepageUrl: 'https://www.cairographics.org',
-        description: 'Some files in util and test folder are released under GPL-2.0',
-        copyright:
-          'Copyright (c) 2002 University of Southern California Copyright (c) 2005 Red Hat, Inc.',
-        cveId: 'CVE-2020-35492',
-        cvssScore: '7.8',
-        exclude: false
-      }));
-
-      setOssList(data);
-      setExcludeList(data.filter((oss) => oss.exclude).map((oss) => oss.ossId));
-
-      setLoading(false);
     }, 500);
+
+    loadOssListRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -224,8 +221,8 @@ export default function SelfCheckOSS() {
           <i
             className="cursor-pointer fa-solid fa-plus"
             onClick={() => {
-              setModalValues(undefined);
-              setIsModalShown(true);
+              setEditValues(undefined);
+              setIsOSSModalShown(true);
             }}
           />
         </div>
@@ -252,10 +249,10 @@ export default function SelfCheckOSS() {
         <SelfCheckOSSFilters
           form={filtersForm}
           onSubmit={(filterParams: FieldValues) => {
-            const { path, keyword, url, copyright } = filterParams;
+            const { keyword, path, copyright, url } = filterParams;
 
             // Filters
-            setFilters({ path, keyword, url, copyright });
+            setFilters({ keyword, path, copyright, url });
             setCurrentPage(1);
 
             // Sorting
@@ -266,10 +263,10 @@ export default function SelfCheckOSS() {
           <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
               <div
-                key={oss.ossId}
+                key={oss.gridId}
                 className={clsx(
                   'flex flex-col gap-y-1 p-4 border border-gray rounded',
-                  excludeList.includes(oss.ossId) && 'bg-semigray/50'
+                  excludeList.includes(oss.gridId) && 'bg-semigray/50'
                 )}
               >
                 <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
@@ -278,19 +275,19 @@ export default function SelfCheckOSS() {
                     <span
                       className={clsx(
                         'text-sm',
-                        excludeList.includes(oss.ossId) ? 'text-crimson' : 'text-darkgray'
+                        excludeList.includes(oss.gridId) ? 'text-crimson' : 'text-darkgray'
                       )}
                     >
                       exclude
                     </span>
                     <Toogle
                       icons={false}
-                      checked={excludeList.includes(oss.ossId)}
+                      checked={excludeList.includes(oss.gridId)}
                       onChange={() => {
-                        if (excludeList.includes(oss.ossId)) {
-                          setExcludeList(excludeList.filter((ossId) => ossId !== oss.ossId));
+                        if (excludeList.includes(oss.gridId)) {
+                          setExcludeList(excludeList.filter((gridId) => gridId !== oss.gridId));
                         } else {
-                          setExcludeList([...excludeList, oss.ossId]);
+                          setExcludeList([...excludeList, oss.gridId]);
                         }
                       }}
                     />
@@ -298,8 +295,12 @@ export default function SelfCheckOSS() {
                 </div>
                 <div className="flex items-center gap-x-2">
                   <div
-                    className="flex gap-x-1 font-semibold cursor-pointer"
+                    className={clsx('flex gap-x-1 font-semibold', oss.ossId && 'cursor-pointer')}
                     onClick={() => {
+                      if (!oss.ossId) {
+                        return;
+                      }
+
                       const urlQueryParams = new URLSearchParams(queryParams);
                       urlQueryParams.set('modal-type', 'oss');
                       urlQueryParams.set('modal-id', oss.ossId);
@@ -327,7 +328,7 @@ export default function SelfCheckOSS() {
                       )}
                     </div>
                   )}
-                  {oss.cveId && oss.cvssScore && (
+                  {oss.vuln && (
                     <div
                       className="flex-shrink-0 px-1 py-0.5 border border-crimson rounded text-xs text-crimson cursor-pointer"
                       onClick={() => {
@@ -343,6 +344,33 @@ export default function SelfCheckOSS() {
                     </div>
                   )}
                 </div>
+                {oss.licenses.length > 0 && (
+                  <div className="line-clamp-3 text-sm text-semiblack/80">
+                    {oss.licenses.map((license, idx) => (
+                      <span key={idx}>
+                        <span
+                          className={clsx(license.licenseId && 'cursor-pointer')}
+                          onClick={() => {
+                            if (!license.licenseId) {
+                              return;
+                            }
+
+                            const urlQueryParams = new URLSearchParams(queryParams);
+                            urlQueryParams.set('modal-type', 'license');
+                            urlQueryParams.set('modal-id', license.licenseId);
+                            router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                              scroll: false
+                            });
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(license.licenseName, filters.keyword)
+                          }}
+                        />
+                        {idx < oss.licenses.length - 1 && ', '}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="text-sm text-semiblack/80">
                   <i className="fa-regular fa-folder-open" />
                   &ensp;
@@ -352,27 +380,37 @@ export default function SelfCheckOSS() {
                     }}
                   />
                 </div>
-                {oss.licenses.length > 0 && (
-                  <div className="line-clamp-3 text-sm text-semiblack/80">
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: oss.licenses
-                          .map((license) => highlight(license.licenseIdentifier, filters.keyword))
-                          .join(', ')
+                <div className="flex items-center gap-x-2 text-sm">
+                  {oss.userGuide && (
+                    <i
+                      className="text-charcoal cursor-pointer fa-solid fa-circle-info"
+                      onClick={() => {
+                        setModalTitle('User Guide');
+                        setModalText(oss.userGuide.split('<br>').join('\n'));
+                        setIsTextModalShown(true);
                       }}
                     />
-                  </div>
-                )}
-                <div className="flex items-center gap-x-2 text-sm">
-                  <i className="text-charcoal fa-solid fa-circle-info" title={oss.description} />
-                  <i className="text-charcoal fa-solid fa-copyright" title={oss.copyright} />
-                  <i
-                    className="text-crimson fa-solid fa-registered"
-                    title={(() => {
-                      const idToDisplay = Object.fromEntries(RESTRICTIONS);
-                      return oss.restrictions.map((id) => idToDisplay[id]).join('\n');
-                    })()}
-                  />
+                  )}
+                  {oss.copyright && (
+                    <i
+                      className="text-charcoal cursor-pointer fa-solid fa-copyright"
+                      onClick={() => {
+                        setModalTitle('Copyright');
+                        setModalText(oss.copyright);
+                        setIsTextModalShown(true);
+                      }}
+                    />
+                  )}
+                  {oss.restrictions && (
+                    <i
+                      className="text-crimson cursor-pointer fa-solid fa-registered"
+                      onClick={() => {
+                        setModalTitle('Restrictions');
+                        setModalText(oss.restrictions);
+                        setIsTextModalShown(true);
+                      }}
+                    />
+                  )}
                   {oss.downloadUrl && (
                     <a
                       className="text-xs text-blue-500 hover:underline"
@@ -395,16 +433,16 @@ export default function SelfCheckOSS() {
                     <i
                       className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
                       onClick={() => {
-                        setModalValues({
-                          path: oss.path,
+                        setEditValues({
                           ossName: oss.ossName,
                           ossVersion: oss.ossVersion,
                           licenses: oss.licenses,
+                          path: oss.path,
+                          copyright: oss.copyright,
                           downloadUrl: oss.downloadUrl,
-                          homepageUrl: oss.homepageUrl,
-                          copyright: oss.copyright
+                          homepageUrl: oss.homepageUrl
                         });
-                        setIsModalShown(true);
+                        setIsOSSModalShown(true);
                       }}
                     />
                   </div>
@@ -422,12 +460,16 @@ export default function SelfCheckOSS() {
         lastPage={lastPage}
       />
 
-      {/* Modal */}
+      {/* Modals */}
       <SelfCheckOSSModal
-        show={isModalShown}
-        onHide={() => setIsModalShown(false)}
-        values={modalValues}
+        show={isOSSModalShown}
+        onHide={() => setIsOSSModalShown(false)}
+        values={editValues}
       />
+      <Modal show={isTextModalShown} onHide={() => setIsTextModalShown(false)} size="sm">
+        <div className="pb-4 mb-4 border-b border-b-semigray font-bold">{modalTitle}</div>
+        <div className="whitespace-pre-line">{modalText}</div>
+      </Modal>
     </>
   );
 }
