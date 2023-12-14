@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 @Data
 public class LicenseDetailsDto extends LicenseDto {
-
     private List<String> licenseNicknames;
-    private String attribution;
+    private String attribution = "";
 }

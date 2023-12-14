@@ -13,7 +13,6 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected String licenseId;
     protected String licenseName;
     protected String licenseType;
-    protected String identifier;
     protected String ossId;
     protected String licenseText;
     protected String licenseIdentifier;
