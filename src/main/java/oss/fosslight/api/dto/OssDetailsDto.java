@@ -1,5 +1,6 @@
 package oss.fosslight.api.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;

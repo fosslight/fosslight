@@ -5,10 +5,13 @@
 
 package oss.fosslight.repository;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import oss.fosslight.api.dto.ListSelfCheckDto;
+import oss.fosslight.api.dto.SelfCheckDto;
 
 @Mapper
 public interface ApiSelfCheckMapper {
@@ -23,4 +26,8 @@ public interface ApiSelfCheckMapper {
 	int existsWatcherByEmail(@Param("prjId") String prjId, @Param("email") String email);
 
 	void insertWatcher(Map<String, Object> paramMap);
+
+	List<SelfCheckDto> selectSelfCheckList(ListSelfCheckDto.Request request);
+
+	int selectSelfCheckTotalCount(ListSelfCheckDto.Request request);
 }
