@@ -21,6 +21,9 @@ public class SelfCheckDto {
     List<String> packages = new ArrayList<>();
     String report;
     String notice;
+    int ossCount;
+
+    String comment;
 
     private void addPackageFileId(String id) {
         if (id == null) return;

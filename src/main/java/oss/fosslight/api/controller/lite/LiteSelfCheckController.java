@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.dto.GetSelfCheckDetailsDto;
 import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.api.dto.ListSelfCheckOssDto;
 import oss.fosslight.common.Url;
@@ -71,7 +72,18 @@ public class LiteSelfCheckController extends CoTopComponent {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
-
     }
 
+    @GetMapping("/selfchecks/{id}")
+    public @ResponseBody ResponseEntity<GetSelfCheckDetailsDto.Result> selfCheckDetail(
+            @PathVariable("id") String id
+    ) {
+        try {
+            var result = apiSelfCheckService.getSelfCheck(id);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
