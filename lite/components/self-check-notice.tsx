@@ -67,7 +67,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
         window.location.href = `${urlsForDownload.spdx}?id=${res.data.validMsg}`;
       },
       onFinish: () => setLoading(false),
-      sendJson: true
+      type: 'json'
     })
   };
 

@@ -37,7 +37,7 @@ declare global {
       projectId: string;
       projectName: string;
       projectVersion: string;
-      report: string;
+      ossCount: number;
       packages: string[];
       notice: string;
       cveId: string;
@@ -112,40 +112,48 @@ declare global {
     }
 
     interface OSSFile {
-      name: string;
-      when: string;
+      fileId: string;
+      fileSeq: string;
+      logiNm: string;
+      orgNm: string;
+      created: string;
+      state?: 'add' | 'delete';
     }
 
     interface OSSLicense {
-      licenseId: string;
-      licenseIdentifier: string;
+      licenseId: string | null;
+      licenseName: string;
     }
 
     interface OSS {
-      path: string;
-      ossId: string;
+      gridId: string;
+      ossId: string | null;
       ossName: string;
       ossVersion: string;
-      licenses: OSSLicense[];
       obligations: string[];
-      restrictions: string[];
-      downloadUrl: string;
-      homepageUrl: string;
-      description: string;
-      copyright: string;
+      vuln: boolean;
       cveId: string;
       cvssScore: string;
+      licenses: OSSLicense[];
+      path: string;
+      userGuide: string;
+      copyright: string;
+      restrictions: string;
+      downloadUrl: string;
+      homepageUrl: string;
       exclude: boolean;
+      changed?: 'add' | 'edit';
     }
 
     interface EditOSS {
-      path: string;
+      gridId: string;
       ossName: string;
       ossVersion: string;
       licenses: OSSLicense[];
+      path: string;
+      copyright: string;
       downloadUrl: string;
       homepageUrl: string;
-      copyright: string;
     }
 
     interface OSSCheck {
@@ -163,8 +171,11 @@ declare global {
     }
 
     interface PackageFile {
-      name: string;
-      when: string;
+      fileId: string;
+      fileSeq: string;
+      logiNm: string;
+      orgNm: string;
+      created: string;
     }
 
     interface PackageOSS {
@@ -263,7 +274,6 @@ declare global {
     }
 
     interface VulnOSS {
-      ossId: string;
       ossName: string;
       ossVersion: string;
     }
