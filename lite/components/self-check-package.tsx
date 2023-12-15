@@ -1,14 +1,15 @@
 import { loadingState } from '@/lib/atoms';
+import { useAPI } from '@/lib/hooks';
 import dayjs from 'dayjs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import ListTable from './list-table';
 
-export default function SelfCheckPackage() {
+export default function SelfCheckPackage({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
-  const [files, setFiles] = useState<SelfCheck.PackageFile[]>([]);
-  const [rows, setRows] = useState<SelfCheck.PackageOSS[]>([]);
+  const [fileList, setFileList] = useState<SelfCheck.PackageFile[]>([]);
+  const [ossList, setOssList] = useState<SelfCheck.PackageOSS[]>([]);
   const columns = [
     { name: 'ID', sort: '' },
     { name: 'Name', sort: '' },
@@ -21,29 +22,41 @@ export default function SelfCheckPackage() {
   const pathname = usePathname();
   const queryParams = useSearchParams();
 
+  // API for loading file list
+  const loadFilesRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => setFileList(res.data.files),
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  // API for loading OSS list
+  const loadRowsRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/packages`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => setOssList(res.data.oss),
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  // API for uploading file
+  const uploadFileRequest = useAPI(
+    'post',
+    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
+    {
+      onSuccess: () => loadFilesRequest.execute({}),
+      type: 'file'
+    }
+  );
+
   useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setFiles(
-        Array.from(Array(2)).map((_, idx) => ({
-          name: `uploaded-package-${idx + 1}.zip`,
-          when: '2023-09-28 16:17:30'
-        }))
-      );
-      setRows(
-        Array.from(Array(5)).map((_, idx) => ({
-          ossId: String(5 - idx),
-          ossName: 'cairo',
-          ossVersion: '1.4.12',
-          licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
-          downloadUrl: 'http://cairographics.org/releases',
-          homepageUrl: 'https://www.cairographics.org'
-        }))
-      );
-
-      setLoading(false);
-    }, 500);
+    loadFilesRequest.execute({});
+    loadRowsRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -51,30 +64,76 @@ export default function SelfCheckPackage() {
     <>
       {/* Uploading files */}
       <div className="p-4 mb-12 border border-dashed border-semigray rounded text-center">
-        {files.length > 0 && (
-          <div className="flex flex-col gap-y-1 mb-6">
-            {files.map((file, idx) => (
-              <div key={idx} className="flex justify-center items-center gap-x-1.5 text-sm">
+        {fileList.length > 0 && (
+          <div className="flex flex-col items-center gap-y-1 mb-6">
+            {fileList.map((file, idx) => (
+              <a
+                key={idx}
+                className="flex justify-center items-center gap-x-1.5 text-sm"
+                href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                target="_blank"
+              >
                 <i className="fa-solid fa-cube" />
-                <span className="italic text-semiblack/80">{file.name}</span>
+                <span className="italic text-semiblack/80">{file.orgNm}</span>
                 <span className="text-semiblack/50">
-                  ({dayjs(file.when).format('YY.MM.DD HH:mm')})
+                  ({dayjs(file.created).format('YY.MM.DD HH:mm')})
                 </span>
-              </div>
+                <i
+                  className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // deleteFileRequest.execute({ body: { seq: file.fileSeq } });
+                  }}
+                />
+              </a>
             ))}
           </div>
         )}
-        <i className="fa-solid fa-arrow-up-from-bracket" />
-        &ensp;Upload your package files here
+        <span
+          className="cursor-pointer"
+          onClick={() => {
+            document.getElementById('upload-file')?.click();
+          }}
+        >
+          <i className="fa-solid fa-arrow-up-from-bracket" />
+          &ensp;Upload your package files here
+        </span>
         <div className="mt-1 text-sm text-darkgray">
           (Below are the OSS that must disclose the source codes.&ensp;
           <i className="fa-solid fa-turn-down" />)
         </div>
+        <input
+          id="upload-file"
+          className="hidden"
+          type="file"
+          accept=".zip, .tar.gz, .gz"
+          onChange={(e) => {
+            const input = e.target;
+
+            if (!input.files || input.files.length === 0) {
+              return;
+            }
+
+            const file = input.files[0];
+            const allowedExtensions = /\.(zip|tar\.gz|gz)$/i;
+            if (!allowedExtensions.test(file.name)) {
+              alert('Select a file with valid extension(zip, tar.gz, or gz)');
+              input.value = '';
+              return;
+            }
+
+            const formData = new FormData();
+            formData.append('selfCheckPackageFile', file, file.name);
+
+            uploadFileRequest.execute({ body: formData });
+            input.value = '';
+          }}
+        />
       </div>
 
       {/* Table */}
       <ListTable
-        rows={rows}
+        rows={ossList}
         columns={columns}
         render={(row: SelfCheck.PackageOSS, column: string) => {
           if (column === 'ID') {

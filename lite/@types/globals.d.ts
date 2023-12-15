@@ -171,8 +171,11 @@ declare global {
     }
 
     interface PackageFile {
-      name: string;
-      when: string;
+      fileId: string;
+      fileSeq: string;
+      logiNm: string;
+      orgNm: string;
+      created: string;
     }
 
     interface PackageOSS {

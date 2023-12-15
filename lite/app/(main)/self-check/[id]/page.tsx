@@ -171,7 +171,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
 
       {/* Actions */}
       {tab === 'OSS' && <SelfCheckOSS id={params.id} changed={changed} setChanged={setChanged} />}
-      {tab === 'Package' && <SelfCheckPackage />}
+      {tab === 'Package' && <SelfCheckPackage id={params.id} />}
       {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>
   );
