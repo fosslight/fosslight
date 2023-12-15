@@ -10,11 +10,11 @@ public class SelfCheckFileListDto {
     @Builder
     @Data
     public static class File {
-        String name;
-        String when;
-        String id;
+        String fileId;
+        String fileSeq;
         String logiName;
-        String seq;
+        String orgNm;
+        String created;
     }
 
     @Builder

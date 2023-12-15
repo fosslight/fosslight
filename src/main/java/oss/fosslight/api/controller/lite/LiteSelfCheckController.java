@@ -18,6 +18,7 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
@@ -201,13 +202,37 @@ public class LiteSelfCheckController extends CoTopComponent {
         }
     }
 
+
+    @GetMapping("/selfchecks/{id}/oss/files")
+    public @ResponseBody ResponseEntity<SelfCheckFileListDto.Response> getOssFiles(
+            @PathVariable("id") String id
+    ) {
+        var projectQuery = new Project();
+        projectQuery.setPrjId(id);
+        try {
+            var project = selfCheckService.getProjectDetail(projectQuery);
+            var files = project.getCsvFile();
+            var list = files.stream()
+                    .filter(file -> "N".equals(file.getDelYn()))
+                    .map(this::getFileInfoMap)
+                    .collect(Collectors.toList());
+            var result = SelfCheckFileListDto.Response.builder()
+                    .files(list)
+                    .build();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     private SelfCheckFileListDto.File getFileInfoMap(T2File file) {
         return SelfCheckFileListDto.File.builder()
-                .name(file.getOrigNm())
-                .when(file.getCreatedDate())
-                .id(file.getFileId())
+                .orgNm(file.getOrigNm())
+                .created(file.getCreatedDate())
+                .fileId(file.getFileId())
                 .logiName(file.getLogiNm())
-                .seq(file.getFileSeq())
+                .fileSeq(file.getFileSeq())
                 .build();
     }
 }
