@@ -208,9 +208,8 @@
 					<strong class="tit">Comments</strong>
 					<div class="commentBack" id="commentListArea"></div>
 					<div id="moreListDiv" class="btnLayout" style="text-align: center; display: none; padding: 0 0; margin-top: 10px;">
-						<span>
-							<input type="button" value="More" class="btnColor" onclick="fn_commemt.getMoreCommentList()"/>
-						</span>
+						<a class="small-box-footer" href="#" id="moreInfoBtn" onclick="fn_commemt.getMoreCommentList()">More info <i
+								class="fas fa-arrow-circle-down"></i></a>
                 	</div>
 				</div>
 			</div>

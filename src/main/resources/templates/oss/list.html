@@ -61,7 +61,7 @@
                                     </div>
                                     <div class="card-body py-1">
                                         <div class="row">
-                                            <div class="col-4">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <div class="form-check">
                                                         <input class="form-check-input text-orange"
@@ -81,7 +81,7 @@
                                                            type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-md-4">
                                                 <div class="form-group">
                                                     <div class="form-check text-orange">
                                                         <input class="form-check-input text-orange"
@@ -100,9 +100,8 @@
                                                            type="text">
                                                 </div>
                                             </div>
-
                                             <div class="col-md-4 mt-4">
-                                                <div class="form-group mb-1">
+                                                <div class="form-group mb-2">
                                                     <textarea class="form-control" name="copyrights"
                                                               placeholder="Copyright Text"
                                                               rows="1"
@@ -110,10 +109,9 @@
                                                 </div>
 
                                             </div>
-                                        </div>
-                                        <div class="row">
+
                                             <div class="col-md-4">
-                                                <div class="form-group mb-1">
+                                                <div class="form-group mb-2">
                                                     <textarea class="form-control" name="summaryDescription"
                                                               placeholder="Copyright Text"
                                                               rows="1"
@@ -121,22 +119,120 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="row">
-                                                    <div class="col-md-3">
-                                                        Deactivate
-                                                    </div>
-                                                    <div class="col-md-3 d-flex">
-                                                        <input data-bootstrap-switch id="deactivateFlag"
-                                                               name="my-checkbox"
-                                                               th:checked="${searchBean.deactivateFlag eq 'Y'}"
-                                                               type="checkbox">
-                                                        <input name="deactivateFlag" type="hidden"
-                                                               value="${searchBean.deactivateFlag}"/>
-                                                    </div>
-
+                                                <div class="icheck-secondary d-inline">
+                                                    <input id="deactivateFlag"
+                                                           th:checked="${searchBean.deactivateFlag eq 'Y'}"
+                                                           type="checkbox">
+                                                    <label class="mb-2" for="deactivateFlag"
+                                                           style="font-weight: normal">
+                                                        Deactive
+                                                    </label>
+                                                    <input name="deactivateFlag"
+                                                           th:value="${searchBean.deactivateFlag}"
+                                                           type="hidden"/>
                                                 </div>
                                             </div>
                                         </div>
+                                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                                            <a class="small-box-footer" href="#" id="moreInfoBtn">More <i
+                                                    class="fas fa-arrow-circle-down"></i></a>
+                                            <div class="more-search pt-2" id="moreSearchContent" style="display: none">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2">
+                                                            <select class="select2" id="creatorSelect" name="creator"
+                                                                    style="width: 100%;">
+                                                                <option value=""></option>
+                                                                <th:block
+                                                                        th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+                                                                <option th:text="None" th:value="NONE"></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2">
+                                                            <input class="form-control" id="createdDate" type="text"/>
+                                                            <input class="form-control" name="cStartDate"
+                                                                   type="hidden"/>
+                                                            <input class="form-control" name="cEndDate" type="hidden"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group mb-2">
+                                                            <select class="select2" id="modifierSelect" name="modifier"
+                                                                    style="width: 100%;">
+                                                                <option value=""></option>
+                                                                <th:block
+                                                                        th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+                                                                <option th:text="None" th:value="NONE"></option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3"
+                                                         th:if="${#lists.size(@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))) > 0}">
+                                                        <div class="form-group mb-2">
+                                                            <input class="form-control" id="modifiedDate"
+                                                                   placeholder="Modified Date" type="text"/>
+                                                            <input class="form-control" name="mStartDate"
+                                                                   th:value="${searchBean.mStartDate}"
+                                                                   type="hidden"/>
+                                                            <input class="form-control" name="mEndDate"
+                                                                   th:value="${searchBean.mEndDate}"
+                                                                   type="hidden"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <select class="select2" id="licenseTypeSelect"
+                                                                    name="licenseType"
+                                                                    style="width: 100%; color: gray;">
+                                                                <option value=""></option>
+                                                                <th:block
+                                                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 pt-2">
+                                                        <span>
+                                                            <div class="icheck-secondary d-inline ml-3">
+                                                                <input id="noneLicenseFlag" name="ossTypeSearch" value="N"/>
+                                                                <label class="mb-2" for="noneLicenseFlag"
+                                                                       style="font-weight: normal">
+                                                                   <span class="badge badge-dark">N</span>
+                                                                </label>
+                                                            </div>
+                                                            <div class="icheck-secondary d-inline ml-3">
+                                                                <input id="multiLicenseFlag"
+                                                                       th:checked="${searchBean.deactivateFlag eq 'Y'}"
+                                                                       type="checkbox">
+                                                                <label class="mb-2" for="multiLicenseFlag"
+                                                                       style="font-weight: normal">
+                                                                    <span class="badge badge-primary">M</span>
+                                                                </label>
+                                                            </div>
+                                                            <div class="icheck-secondary d-inline ml-3">
+                                                                <input id="deactivateFlag"
+                                                                       th:checked="${searchBean.deactivateFlag eq 'Y'}"
+                                                                       type="checkbox">
+                                                                <label class="mb-2" for="deactivateFlag"
+                                                                       style="font-weight: normal">
+                                                                  <span class="badge badge-danger">M</span>
+                                                                </label>
+                                                            </div>
+                                                             <div class="icheck-secondary d-inline ml-3">
+                                                                <input name="deactivateFlag"
+                                                                       th:value="${searchBean.deactivateFlag}"
+                                                                       type="checkbox"/>
+                                                                            <label class="mb-2" for="deactivateFlag"
+                                                                                   style="font-weight: normal">
+                                                                  <span class="badge badge-warning">v</span>
+                                                                </label>
+                                                             </div>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th:block>
                                     </div>
                                 </div>
                             </div>
@@ -144,7 +240,8 @@
                         <div class="row px-1">
                             <div class="col-md-6">
                                 <div class="row">
-                                    <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" onclick="oss_lst_fn.deleteOss()"
+                                    <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3"
+                                            onclick="oss_lst_fn.deleteOss()"
                                             type="button">Delete
                                     </button>
                                 </div>

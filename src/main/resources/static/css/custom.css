@@ -129,9 +129,16 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .card-lg-red:not(.card-outline)>.card-header { background-color: #a50034;color: #fff; }
 .card-lg-light-gray:not(.card-outline)>.card-header { background-color: #d9dadb;color: #343a40; }
 .card-dark:not(.card-outline)>.card-header { background-color: #343a40; }
-.card-dark.card-outline {
-    border-top: 3px solid #343a40;
-}
+.card-dark.card-outline { border-top: 3px solid #343a40; }
+.card .small-box-footer, .small-box-footer {
+    background-color: rgba(0,0,0,.1);
+    color: rgba(255,255,255,.8);
+    display: block;
+    padding: 3px 0;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    z-index: 10;}
 
 /* width size */
 .width-1rem { width: 1rem; }
@@ -166,6 +173,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .search-form .card-header {padding: .5rem 1.25rem;}
 .custom-layout .search-form .checkable-label label{ margin-top: .3rem; }
 .custom-layout .collapsed-card .card-header .card-title { color:#999; }
+/*.custom-layout .search-form .more-search { background-color : #e5e5e5; }*/
+
 /* The border and background color of the card are not visible.  */
 .card-transparent { background-color: transparent; box-shadow: none }
 .card-transparent .card-header { border-bottom: none; }

@@ -280,6 +280,10 @@ $(document).ready(function () {
         $('.editSearchUp, .threeRdSearch').toggle();
     });
 
+    $("#moreInfoBtn").click(function() {
+        $("#moreSearchContent").slideToggle();
+    });
+
     (function ($) {
         //form data -> json data
         $.fn.serializeObject = function () {
