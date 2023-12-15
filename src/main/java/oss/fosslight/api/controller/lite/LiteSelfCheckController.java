@@ -18,7 +18,6 @@ import oss.fosslight.domain.Project;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
@@ -85,8 +84,22 @@ public class LiteSelfCheckController extends CoTopComponent {
     public @ResponseBody ResponseEntity<ListSelfCheckOssDto.Result> listOss(
             @PathVariable("id") String id
     ) {
+        var projectQuery = new Project();
+        projectQuery.setPrjId(id);
         try {
-            var result = apiSelfCheckService.listSelfCheckOss(id);
+            var project = selfCheckService.getProjectDetail(projectQuery);
+            var files = project.getCsvFile();
+            var fileList = files.stream()
+                    .filter(file -> "N".equals(file.getDelYn()))
+                    .map(this::getFileInfoMap)
+                    .collect(Collectors.toList());
+            var ossList = apiSelfCheckService.listSelfCheckOss(id);
+            var fileId = project.getSrcCsvFileId();
+            var result = ListSelfCheckOssDto.Result.builder()
+                    .oss(ossList)
+                    .files(fileList)
+                    .fileId(fileId == null ? "" : fileId)
+                    .build();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -183,16 +196,17 @@ public class LiteSelfCheckController extends CoTopComponent {
         }
     }
 
-    @DeleteMapping("/selfchecks/{id}/packages/files/{fileId}")
-    public @ResponseBody ResponseEntity<SelfCheckFileListDto.Response> deleteFile(
-            @PathVariable("id") String id,
-            @PathVariable("fileId") String fileId
+    @DeleteMapping("/selfchecks/{id}/packages/files")
+    public @ResponseBody ResponseEntity<SelfCheckFileDeleteDto.Response> deleteFile(
+            @ModelAttribute SelfCheckFileDeleteDto.Request request,
+            @PathVariable("id") String id
     ) {
+        var fileId = request.getFileId();
         try {
             var list = apiVerificationService.deleteSelfCheckPackageFile(id, fileId)
                     .stream().map(this::getFileInfoMap)
                     .collect(Collectors.toList());
-            var result = SelfCheckFileListDto.Response.builder()
+            var result = SelfCheckFileDeleteDto.Response.builder()
                     .files(list)
                     .build();
             return ResponseEntity.ok(result);
@@ -202,36 +216,12 @@ public class LiteSelfCheckController extends CoTopComponent {
         }
     }
 
-
-    @GetMapping("/selfchecks/{id}/oss/files")
-    public @ResponseBody ResponseEntity<SelfCheckFileListDto.Response> getOssFiles(
-            @PathVariable("id") String id
-    ) {
-        var projectQuery = new Project();
-        projectQuery.setPrjId(id);
-        try {
-            var project = selfCheckService.getProjectDetail(projectQuery);
-            var files = project.getCsvFile();
-            var list = files.stream()
-                    .filter(file -> "N".equals(file.getDelYn()))
-                    .map(this::getFileInfoMap)
-                    .collect(Collectors.toList());
-            var result = SelfCheckFileListDto.Response.builder()
-                    .files(list)
-                    .build();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    private SelfCheckFileListDto.File getFileInfoMap(T2File file) {
-        return SelfCheckFileListDto.File.builder()
+    private FileDto getFileInfoMap(T2File file) {
+        return FileDto.builder()
                 .orgNm(file.getOrigNm())
                 .created(file.getCreatedDate())
                 .fileId(file.getFileId())
-                .logiName(file.getLogiNm())
+                .logiNm(file.getLogiNm())
                 .fileSeq(file.getFileSeq())
                 .build();
     }

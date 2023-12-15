@@ -147,7 +147,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
     }
 
 
-    public ListSelfCheckOssDto.Result listSelfCheckOss(String id) {
+    public List<SelfCheckOssDto> listSelfCheckOss(String id) {
         var identification = new ProjectIdentification();
         identification.setReferenceId(id);
         identification.setReferenceDiv(CoConstDef.CD_DTL_SELF_COMPONENT_ID);
@@ -184,9 +184,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                 })
                 .collect(Collectors.toList());
 
-        return ListSelfCheckOssDto.Result.builder()
-                .list(list)
-                .build();
+        return list;
     }
 
     @Override

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import oss.fosslight.api.dto.GetSelfCheckDetailsDto;
 import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.api.dto.ListSelfCheckOssDto;
+import oss.fosslight.api.dto.SelfCheckOssDto;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 
@@ -36,7 +37,7 @@ public interface ApiSelfCheckService {
 
 	ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request);
 
-	ListSelfCheckOssDto.Result listSelfCheckOss(String request);
+	List<SelfCheckOssDto> listSelfCheckOss(String request);
 
 	GetSelfCheckDetailsDto.Result getSelfCheck(String request);
 	List<T2File> listSelfCheckPackages(String id);
