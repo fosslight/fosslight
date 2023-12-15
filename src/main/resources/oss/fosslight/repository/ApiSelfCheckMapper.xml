@@ -263,4 +263,20 @@
 		FROM PRE_PROJECT_MASTER
 		WHERE PRJ_ID = #{id}
 	</select>
+
+	<select id="selectSelfCheckPackageIdsTextById" resultType="java.lang.String">
+		SELECT
+			PACKAGE_FILE_IDS
+		FROM PRE_PROJECT_MASTER
+		WHERE PRJ_ID = #{id}
+	</select>
+
+	<update id="saveSelfCheckPackages">
+		UPDATE
+			PRE_PROJECT_MASTER
+		SET
+			PACKAGE_FILE_IDS = #{idText}
+		WHERE
+			PRJ_ID = ${prjId}
+	</update>
 </mapper>
