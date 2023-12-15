@@ -144,6 +144,9 @@ public class CommentServiceImpl implements CommentService {
 	}
 
 	@Override
+	public String getContents(String commId) { return commentMapper.getContent(commId); }
+
+	@Override
 	public int updateComment(CommentsHistory bean) {
 		return updateComment(bean, true);
 	}

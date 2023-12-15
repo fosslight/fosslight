@@ -1257,7 +1257,7 @@
 			editorDialog : function(){
 				var editorVal = "";
 				if(!editorVal || editorVal == "") {
-					alertify.alert("<spring:message code='msg.project.enter.comment' />", function(){});
+					alertify.alert([[#{msg.project.enter.comment}]] , function(){});
 					
 					return false;
 				}

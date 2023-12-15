@@ -48,8 +48,8 @@
                             	</ul>
                         	</div>
                             <div class="float-right mr-3" style="margin-top: .35rem">
-                                <button type="button" class="btn btn-purple btn-xs px-3" data-toggle="on" th:text="'Show Comment History'"></button>
-                                <button type="button" class="btn btn-default btn-xs px-3" data-toggle="off" th:text="'Comment Edit'"></button>
+                                <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
+                                <button type="button" class="btn btn-default btn-xs px-3 commentBtn" data-toggle="off" th:text="'Comment Edit'"></button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -61,7 +61,7 @@
 								<input type="hidden" id="status" name="status" th:value="${detail != null} ? ${detail.status} : 'PROG'"/>
 								<input type="hidden" id="ossComponentsStr" name="ossComponentsStr"/>
 								<input type="hidden" id="ossComponentsLicenseStr" name="ossComponentsLicenseStr"/>
-								<input type="hidden" id="userComment" name="userComment"/>
+								<input type="hidden" id="userComment" name="userComment" th:value="${detail.userComment}"/>
 								<input type="hidden" id="description" name="description"/>
 								<input type="hidden" id="delDocumentsFile" name="delDocumentsFile"/>
                                     <div class="row mt-4 submit-form">

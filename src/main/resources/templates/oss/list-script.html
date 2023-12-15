@@ -39,7 +39,7 @@
 
                 const postData = oss_lst_fn.serializeObjectHelper();
                 postData.ignoreSearchFlag = "N";
-                $("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+                $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url : "/oss/listAjax"}).trigger('reloadGrid');
             });
 
             $(".cal").on("keyup", function(e){
@@ -190,7 +190,7 @@
         oldRowNum: 20,
         load: function () {
             $("#list").jqGrid({
-                url:"/oss/listAjax",
+                type:"GET",
                 datatype: 'json',
                 jsonReader: {
                     repeatitems: false,

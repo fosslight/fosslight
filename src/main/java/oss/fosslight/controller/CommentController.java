@@ -20,12 +20,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.COMMENT;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.util.StringUtil;
 
 @Controller
 public class CommentController extends CoTopComponent {
@@ -62,7 +64,7 @@ public class CommentController extends CoTopComponent {
         model.addAttribute("commentListCnt", 0);
         model.addAttribute("moreYn", true);
 
-        return COMMENT.COMMENT_LIST_JSP;
+        return "fragments/comment-fragments :: commentAreaFragment";
     }
 
     @RequestMapping(value = COMMENT.POPUP)
@@ -115,5 +117,21 @@ public class CommentController extends CoTopComponent {
 
         return "fragments/comment-fragments :: commentAreaFragment";
     }
+
+    @GetMapping(value = COMMENT.DIV_COMMENT_BY_ID)
+    public String getDivCommentByCommId(@RequestParam String commId, Model model) {
+        String contents = commentService.getContents(commId);
+        model.addAttribute("commId", commId);
+        model.addAttribute("contents", contents);
+
+        return "fragments/comment-fragments :: commentPopupFragment";
+    };
+
+    @GetMapping(value = COMMENT.DIV_USER_COMMENT)
+    public String getDivUserComment(CommentsHistory comHisBean, Model model) {
+        model.addAttribute("contents", commentService.getUserComment(comHisBean));
+
+        return "fragments/comment-fragments :: userCommentPopupFragment";
+    };
 }
 

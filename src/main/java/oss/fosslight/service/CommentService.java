@@ -22,7 +22,9 @@ public interface CommentService{
 	public String getUserComment(CommentsHistory comHisBean);
 
 	public List<CommentsHistory> getCommentListHis(CommentsHistory commentsHistory);
-	
+
+	public String getContents(String commId);
+
 	public int updateComment(CommentsHistory bean);
 	
 	public int updateComment(CommentsHistory bean, boolean emailSendFlag);

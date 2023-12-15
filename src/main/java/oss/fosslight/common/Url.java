@@ -126,6 +126,10 @@ public final class Url {
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
 		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
+
+		public static final String DIV_COMMENT_BY_ID =  PATH + "/getDivCommentByCommId";
+
+		public static final String DIV_USER_COMMENT = PATH + "/getDivUserComment";
 	}
 	
 	public static final class PROCESSGUIDE {

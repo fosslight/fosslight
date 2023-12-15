@@ -87,7 +87,7 @@ var partnerStatus = "${detail.status}";
 			
 			$('.btnCommentHistory').on('click', function(e){
 	            e.preventDefault();
-	            openCommentHistory('<c:url value="/comment/popup/3rd/${detail.partnerId}"/>');
+	            openCommentHistory("/comment/popup/3rd/${detail.partnerId}");
 	        });
 			
 			$(window).resize(function(){

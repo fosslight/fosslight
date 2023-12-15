@@ -996,7 +996,13 @@ var fn = {
 	},
 	sendEditor : function(type){
 		//코멘트 저장
-		var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor.getData());
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if(!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function(){});
+            return false;
+        }
+
 		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal, mailSendType : type};
 		
 		$.ajax({
@@ -1009,10 +1015,9 @@ var fn = {
 				if(json.isValid == 'false'){
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
-					$('.ajs-close').trigger("click");
-					alertify.success([[#{msg.project.sent.comments.success}]]);
-//					resetEditor(CKEDITOR.instances.editor);
-					$(".commentBtn open").trigger( "click" );
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#userComment").val('');
+                    editDailog.close();
 				}
 			},
 			error : function(){

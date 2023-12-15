@@ -89,10 +89,10 @@ public class VerificationController extends CoTopComponent {
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
 		}
 		
-		CommentsHistory comHisBean = new CommentsHistory();
-		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
-		comHisBean.setReferenceId(projectMaster.getPrjId());
-		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+//		CommentsHistory comHisBean = new CommentsHistory();
+//		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+//		comHisBean.setReferenceId(projectMaster.getPrjId());
+//		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
 		
 		//프로젝트 정보
 		model.addAttribute("project", projectMaster);

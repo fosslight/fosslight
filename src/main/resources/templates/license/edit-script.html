@@ -66,7 +66,7 @@
                     });
                 });
 
-                if($('input[name=licenseId]').val()) {
+                if(lic_edit_data.detail) {
                     lic_edit_cmt.getCommentList();
                 }
             }
@@ -116,7 +116,12 @@
 
                 if(json.resCd == '10') {
                     alertify.alert(String([[ #{msg.common.success} ]]), function(){
-                        callDeleteTabInFrame("license-edit_" + json.licenseId);
+
+                        if(lic_edit_data.detail) {
+                            callDeleteTabInFrame("license-edit_" + json.licenseId);
+                        } else {
+                            callDeleteTabInFrame("license-edit");
+                        }
                         callReloadTabInframe("/license/list", "license-list");
                     });
                 } else {
@@ -135,40 +140,35 @@
                 getAjaxJsonData(data, "/comment/getCommentList", 'html',
                     function (res) {
                         $('#commentAreaFragment').replaceWith(res);
-                        $("[name ='commentModifyBtn']").on("click", function (e){
+                        $("button[name='commentModifyBtn']").on("click", function (e){
                             e.preventDefault();
-                            lic_edit_cmt.handleCommentPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
-                        })
-                        $("[name ='commentDeleteBtn']").on("click", function (e){
+                            const commId = $(this).attr("data-commId");
+                            lic_edit_cmt.handleCommentPopupOpen(commId);
+                        });
+                        $("button[name='commentDeleteBtn']").on("click", function (e){
                             e.preventDefault();
-                            lic_edit_cmt.deleteComment($(this))
-                        })
+                            const commId = $(this).attr("data-commId");
+                            lic_edit_cmt.deleteComment(commId);
+                        });
                 },
                     function (xhr, ajaxOptions, thrownError) {
                         alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 });
             },
-            deleteComment: function (el) {
-                const commId = el.attr('data-commId');
+            deleteComment: function (_commId) {
                 if (!confirm("Are you sure you want to delete this comment?")) {
                     return;
                 }
 
-                postAjaxData({'commId': commId}, "/comment/deleteComment", "json", function (res) {
+                postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (res) {
                     alertify.error(String([[ #{msg.common.success}]]));
                     lic_edit_cmt.getCommentList();
                 }, function () {
                     alertify.error(String([[ #{msg.common.valid2}]]), 0);
                 });
             },
-            handleCommentPopupOpen: function (id, contents) {
-                const param = {
-                    data : {commId : id},
-                    category : "fragments",
-                    templateName: "comment-fragments",
-                    fragmentName: "commentPopupFragment"
-                }
-                postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+            handleCommentPopupOpen: function (_commId) {
+                getAjaxJsonData({commId : _commId}, "/comment/getDivCommentByCommId", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             lic_edit_cmt.editComment();
@@ -177,11 +177,13 @@
                         }
                     }).set('resizable', true)
                         .resizeTo('680px', '335px');
-                }, null, function () {
+
+                }, null, function (){
                     $("#modifiedCommentEditor").summernote({
                         height: 100,
                         callbacks: {
                             onInit: function() {
+                                const contents = $("#contents").val();
                                 $(this).summernote('code', contents);
                             }
                         }

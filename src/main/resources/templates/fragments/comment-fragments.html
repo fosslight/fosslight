@@ -1,49 +1,62 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="commentAreaFragment">
-    <div class="row" id="commentAreaFragment">
-        <th:block th:if="${!#lists.isEmpty(commentList)}">
-            <div class="col-md-12" style="overflow-x: scroll;">
-                <table class="table">
-                    <tbody>
-                    <th:block th:each="comment : ${commentList}">
-                        <tr>
-                            <td>
-                                <div class="post">
-                                    <div class="user-block">
+    <div>
+        <div class="row" id="commentAreaFragment">
+            <th:block th:if="${!#lists.isEmpty(commentList)}">
+                <div class="col-md-12">
+                    <table class="table">
+                        <tbody>
+                        <th:block th:each="comment, status : ${commentList}">
+                            <tr>
+                                <td>
+                                    <div class="post">
+                                        <div class="user-block">
 									<span class="username">
 									  <a href="#">[[ ${comment.loginUserName} ]]</a>
 									</span>
-                                        <span class="description ml-0" th:text="${comment.createdDate}"></span>
+                                            <span class="description ml-0" th:text="${comment.createdDate}"></span>
+                                        </div>
+                                        <p th:utext="${comment.contents}">
+                                        </p>
                                     </div>
-                                    <p th:utext="${comment.contents}">
-                                    </p>
-                                </div>
-                            </td>
-                            <td class="text-right py-0 align-middle">
-                            <td class="text-right py-0 align-middle">
-                                <div class="btn-group btn-group-sm">
-                                    <button class="btn btn btn-default" name="commentModifyBtn"
-                                            th:data-commId="${comment.commId}" th:data-contents="${comment.contents}">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </button>
-                                    <button class="btn btn-lg-red" name="commentDeleteBtn"
-                                            th:data-commId="${comment.commId}"><i
-                                            class="fas fa-trash"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    </th:block>
-                    </tbody>
-                </table>
-            </div>
-        </th:block>
-        <th:block th:if="${#lists.isEmpty(commentList)}">
-            <div class="col-md-12">
-                <strong class="text-lg-gray">No comments were registered.</strong>
-            </div>
-        </th:block>
+                                </td>
+                                <td class="text-right py-0 align-middle">
+                                <td class="text-right py-0 align-middle">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" name="commentModifyBtn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+            <th:block th:if="${#lists.isEmpty(commentList)}">
+                <div class="col-md-12">
+                    <strong class="text-lg-gray">No comments were registered.</strong>
+                </div>
+            </th:block>
+        </div>
     </div>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            const commentCnt = [[ ${commentListCnt} ]];
+            const moreYn = [[ ${moreYn} ]];
+
+            if(commentCnt > 5 && !moreYn) {
+                $("#moreListDiv").show();
+            }else{
+                $("#moreListDiv").hide();
+            }
+        });
+    </script>
 </th:block>
 <th:block th:fragment="commentHistoryAreaFragment">
     <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
@@ -73,7 +86,7 @@
                     </th:block>
                     <div class="col-sm-6">
                         <form class="mb-0" id="commentSchForm"
-                              onkeydown="javascript:if(event.keyCode==13){fn_commemt.getCommentList(); return false;}">
+                              onkeydown="javascript: if(event.keyCode==13) { fn_commemt.getCommentList(); return false; }">
                             <div class="row mt-2">
                                 <div class="col-4">
                                     <select class="custom-select float-right" data-placeholder="Section"
@@ -101,17 +114,15 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="col-6">
-                                    <input class="form-control filter" id="schKeyword" name="schKeyword"
-                                           style="width: 100%"
-                                           type="text"/>
-
+                                <div class="col-8">
+                                    <div class="input-group">
+                                        <input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                        </div>
+                                    </div>
                                     <input name="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
                                     <input name="referenceId" th:value="${basicInfo.referenceId}" type="hidden">
-                                </div>
-                                <div class="col-2">
-                                    <button class="btn btn-secondary mr-xm float-right" style="width: 100%">Search
-                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -121,7 +132,7 @@
         </section>
         <section class="content mt-1">
             <div class="container-fluid">
-                <div class="card card-danger">
+                <div class="card card-lg-red">
                     <div class="card-header">
                         <h3 class="card-title">Comment</h3>
                         <!-- <div class="card-tools">
@@ -131,15 +142,15 @@
                         </button>
                     </div> -->
                     </div>
-                    <div class="card-body" scroll="auto" style="height: auto">
-                        <div class="commentBack" id="commentListArea"></div>
+                    <div class="card-body pt-0" scroll="auto" style="height: auto">
+                        <div class="commentBack" id="commentListArea"><div></div></div>
                     </div>
                 </div>
                 <div class="btnLayout" id="moreListDiv"
                      style="text-align: center; display: none; padding: 0 0; margin-top: 10px;">
 						<span>
-							<input class="btn btn-light" onclick="fn_comment.getMoreCommentList()" type="button"
-                                   value="More"/>
+							<input class="btn btn-outline-secondary btn-lg text-lg mb-3" onclick="fn_comment.getMoreCommentList()" type="button"
+                                   value="More" style="width: 20%"/>
 						</span>
                 </div>
             </div>
@@ -152,6 +163,7 @@
             fn_comment.getCommentList();
 
             $('#search').on('click', function (e) {
+                event.preventDefault();
                 fn_comment.getCommentList();
             });
 
@@ -166,7 +178,6 @@
                     }
 
                     opener.moveTabInFrameByCommentPopup2(paramId, $(this).attr('id'));
-
                     window.focus();
                 } catch (e) {
                 }
@@ -182,15 +193,17 @@
                     cache: false,
                     data: $('#commentSchForm').serialize(),
                     success: function (res) {
-                        $('#commentListArea').html(res);
-                        $("[name ='commentModifyBtn']").on("click", function (e){
+                        $('#commentListArea div').replaceWith(res);
+                        $("button[name='commentModifyBtn']").on("click", function (e){
                             e.preventDefault();
-                            fn_comment.handleCommentPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
-                        })
-                        $("[name ='commentDeleteBtn']").on("click", function (e){
+                            const commId = $(this).attr("data-commId");
+                            fn_comment.handleCommentPopupOpen(commId);
+                        });
+                        $("button[name='commentDeleteBtn']").on("click", function (e){
                             e.preventDefault();
-                            fn_comment.deleteComment($(this))
-                        })
+                            const commId = $(this).attr("data-commId");
+                            fn_comment.deleteComment(commId);
+                        });
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         alertify.error([[ #{msg.common.valid2}]], 0);
@@ -198,21 +211,15 @@
                 });
             },
             deleteComment: function (_commId) {
-                if (!confirm("Are you sure you want to delete this comment?")) return;
-                $.ajax({
-                    url: "/comment/deleteComment",
-                    type: 'POST',
-                    dataType: 'json',
-                    cache: false,
-                    data: {'commId': _commId},
-                    success: function (data) {
-                        alertify.success([[ #{msg.common.success}]]);
+                if (!confirm(String([[#{msg.oss.confirm.delete.comment}]]))) {
+                    return;
+                }
 
-                        fn_commemt.getCommentList();
-                    },
-                    error: function () {
-                        alertify.error([[ #{msg.common.valid2}]], 0);
-                    }
+                postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (data) {
+                    alertify.error(String([[ #{msg.common.success}]]));
+                    fn_comment.getCommentList();
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
                 });
             },
             getMoreCommentList: function () {
@@ -230,15 +237,8 @@
                     }
                 });
             },
-            handleCommentPopupOpen: function (id, contents)  {
-                const param = {
-                    data : {commId : id},
-                    category : "fragments",
-                    templateName: "comment-fragments",
-                    fragmentName: "commentPopupFragment"
-                }
-
-                postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+            handleCommentPopupOpen: function (_commId)  {
+                postAjaxJsonData(JSON.stringify({commId : _commId}), "/comment/getDivCommentByCommId", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             fn_comment.editComment();
@@ -285,8 +285,25 @@
     <div class="comment-popup">
         <div class="row mt-2">
             <div class="col-12">
-                <input type="hidden" id="modifiedCommentId" th:value="${data.commId}">
+                <input type="hidden" id="modifiedCommentId" th:value="${commId}">
+                <input type="hidden" id="contents"  th:value="${contents}">
                 <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="userCommentPopupFragment">
+    <div class="comment-popup">
+        <div class="row mt-2">
+            <div class="col-12">
+                <input type="hidden" id="contents"  th:value="${contents}">
+                <textarea class="form-control" id="modifiedCommentInPjtEditor" name="commentInput" rows="3" style="margin:0 auto;"></textarea>
+                <div class="row">
+                    <div class="col-12 my-2">
+                        <input type="button" value="Save draft" class="btn btn-default btn-sm float-right" onclick="fn.saveEditor();"/>
+                        <input type="button" value="Save & Send comment" class="btn btn-info btn-sm float-right mx-1" onclick="fn.sendEditor('WR');"/>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

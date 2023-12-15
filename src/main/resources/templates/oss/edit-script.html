@@ -349,11 +349,17 @@
 
                 if (json.resCd == '10') {
                     alertify.alert(String([[ #{msg.common.success}]]), function () {
-                        if(oss_edit_data.isCopyData) {
-                            callDeleteTabInFrame("oss-edit_" + oss_edit_data.ossId);
+
+                        if(oss_edit_data.detail) {
+                            if(oss_edit_data.isCopyData) {
+                                callDeleteTabInFrame("oss-edit_" + oss_edit_data.ossId);
+                            } else {
+                                callDeleteTabInFrame("oss-edit_" + json.ossId);
+                            }
                         } else {
-                            callDeleteTabInFrame("oss-edit_" + json.ossId);
+                            callDeleteTabInFrame("oss-edit");
                         }
+
                         callReloadTabInframe("/oss/list", "oss-list");
                     });
                 } else {
@@ -425,7 +431,8 @@
             },
             copyOssPage : function () {
                 const ossId = oss_edit_data.ossId;
-                window.location.href = "/oss/copy/" + ossId;
+                callDeleteTabInFrame('oss-edit_' + ossId);
+                callCreateTabInFrame('copy_'+ossId+'_Opensource',"/oss/copy/" + ossId, "oss-edit_"+ ossId, true);
             },
             replaceGetParamChar : function(_param) {
                 _param = _param.replace(/&/g,"%26");
@@ -444,25 +451,26 @@
 
                 getAjaxJsonData(data, "/comment/getDivCommentList", 'html', function (res) {
                     $("#commentAreaFragment").replaceWith(res);
-                    $("[name ='commentModifyBtn']").on("click", function (e){
+                    $("button[name='commentModifyBtn']").on("click", function (e){
                         e.preventDefault();
-                        oss_edit_cmt.handleCommentPopupOpen($(this).attr("data-commId"), $(this).attr("data-contents"));
+                        const commId = $(this).attr("data-commId");
+                        oss_edit_cmt.handleCommentPopupOpen(commId);
                     })
-                    $("[name ='commentDeleteBtn']").on("click", function (e){
+                    $("button[name='commentDeleteBtn']").on("click", function (e){
                         e.preventDefault();
-                        oss_edit_cmt.deleteComment($(this))
+                        const commId = $(this).attr("data-commId");
+                        oss_edit_cmt.deleteComment(commId);
                     })
                 }, function (xhr, ajaxOptions, thrownError) {
                     alertify.error(String([[ #{msg.common.valid2}]]), 0);
                 });
             },
-            deleteComment: function (event) {
-                const commId = event.attr('data-commId');
+            deleteComment: function (_commId) {
                 if (!confirm(String([[#{msg.oss.confirm.delete.comment}]]))) {
                     return;
                 }
 
-                postAjaxData({'commId': commId}, "/comment/deleteComment", "json", function (data) {
+                postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (data) {
                     alertify.error(String([[ #{msg.common.success}]]));
                     oss_edit_cmt.getCommentList();
                 }, function () {
@@ -470,15 +478,8 @@
                 });
 
             },
-            handleCommentPopupOpen: function (id, contents)  {
-                const param = {
-                    data : {commId : id},
-                    category : "fragments",
-                    templateName: "comment-fragments",
-                    fragmentName: "commentPopupFragment"
-                }
-
-                postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+            handleCommentPopupOpen: function (_commId)  {
+                getAjaxJsonData({commId : _commId}, "/comment/getDivCommentByCommId", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             oss_edit_cmt.editComment();
@@ -492,6 +493,7 @@
                         height: 100,
                         callbacks: {
                             onInit: function() {
+                                const contents = $("#contents").val();
                                 $(this).summernote('code', contents);
                             }
                         }
@@ -1133,7 +1135,7 @@
             };
 
             $.ajax({
-                url: '<c:url value="/oss/delAjax"/>',
+                url: "/oss/delAjax",
                 type: 'POST',
                 data: sendData,
                 dataType: "json",
@@ -1141,7 +1143,7 @@
                 success: function (json) {
                     loading.hide();
                     if (json.resCd == '10') {
-                        alertify.alert('<spring:message code="msg.common.success" />', function () {
+                        alertify.alert([[ #{msg.common.success} ]], function () {
                             deleteTabInFrame('#<c:url value="/oss/edit/' + ossId + '"/>');
                             reloadTabInframe('<c:url value="/oss/list"/>');
                         });
@@ -1679,7 +1681,7 @@
             //$("#div_mergeOssCheckPop_change").text(${ossId} + " => ");
 
             $('#_ossMergeCheckList').jqGrid({
-                url: '<c:url value="/oss/ossMergeCheckList/${ossId}/' + newOssId + '"/>',
+                url: "/oss/ossMergeCheckList/${ossId}/" + newOssId,
                 datatype: 'json',
                 jsonReader: {
                     repeatitems: false,

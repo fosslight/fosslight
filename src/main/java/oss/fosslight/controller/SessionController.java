@@ -99,25 +99,25 @@ public class SessionController extends CoTopComponent{
         
 		try {
 			// 1. validation Check
-//			if(StringUtil.isEmpty(userId)) {
-//				bindingResult.rejectValue("usrId", "required", "필수 입력 항목입니다.");
-//			} else if(StringUtil.isEmpty(rawPassword)) {
-//				bindingResult.rejectValue("usrPw", "required", "필수 입력 항목입니다.");
-//			} else {
-//				// 2. get UserInfo
-//				accountInfo = adminUserService.getAdminInfo(userId);
-//				if(accountInfo == null) {
-//					bindingResult.rejectValue("usrId", "notfound", "사용자 정보를 찾을 수 없습니다.");
-//				} else {
-//					if(!commonUtil.hasLoginAuth(accountInfo.getAuthId(), userId)) {
-//						bindingResult.rejectValue("usrId", "notAuth", "사용 권한이 없습니다.");
-//					}
-//				}
-//			}
-//			
-//			if(bindingResult.hasErrors()) {
-//				return "/account/login :: formSectionFragment";
-//			}
+		//			if(StringUtil.isEmpty(userId)) {
+		//				bindingResult.rejectValue("usrId", "required", "필수 입력 항목입니다.");
+		//			} else if(StringUtil.isEmpty(rawPassword)) {
+		//				bindingResult.rejectValue("usrPw", "required", "필수 입력 항목입니다.");
+		//			} else {
+		//				// 2. get UserInfo
+		//				accountInfo = adminUserService.getAdminInfo(userId);
+		//				if(accountInfo == null) {
+		//					bindingResult.rejectValue("usrId", "notfound", "사용자 정보를 찾을 수 없습니다.");
+		//				} else {
+		//					if(!commonUtil.hasLoginAuth(accountInfo.getAuthId(), userId)) {
+		//						bindingResult.rejectValue("usrId", "notAuth", "사용 권한이 없습니다.");
+		//					}
+		//				}
+		//			}
+		//
+		//			if(bindingResult.hasErrors()) {
+		//				return "/account/login :: formSectionFragment";
+		//			}
 			
 	        String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
 	        List<String> customAccounts = Arrays.asList(CommonFunction.emptyCheckProperty("custom.accounts", "").split(","));
@@ -177,10 +177,10 @@ public class SessionController extends CoTopComponent{
 	 * @param model the model
 	 * @return the string
 	 */
-	@GetMapping("/logout")
+	@GetMapping("/session/logout")
 	public String logout(HttpServletRequest req, HttpServletResponse res, Model model) {
 		cookieUtil.deleteCookie(req, res, "X-AUTH-TOKEN-ADM");
-		return "redirect:/account/login";
+		return "redirect:/session/login";
 	}
 	
 	@GetMapping(value = SESSION.LOGIN_EXPIRED, produces = "text/html; charset=utf-8")
