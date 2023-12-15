@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.ListSelfCheckVerifyOssDto;
+import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.ApiSelfCheckMapper;
@@ -18,6 +21,7 @@ import oss.fosslight.repository.VerificationMapper;
 import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
+import oss.fosslight.util.StringUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +47,21 @@ public class ApiVerificationServiceImpl extends CoTopComponent implements ApiVer
 
     @Override
     public ListSelfCheckVerifyOssDto.Result getVerifyOssList(String id) {
-        var ossList = verificationMapper.selectSelfCheckVerifyOssList(id);
+        var ossList = verificationMapper.selectSelfCheckVerifyOssList(id)
+                .stream()
+                .map(oss -> {
+                    var ossInfoKey = (oss.getOssName() + "_" + oss.getOssVersion()).toUpperCase();
+                    if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoKey)) {
+                        OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
+                        var obligation = ossInfo.getObligationType();
+                        oss.setObligations(obligation);
+                    }
+                    return oss;
+                }).filter(oss -> {
+                    var obligation = oss.getObligations();
+                    return obligation != null && obligation.get(1).equals('Y');
+                }).collect(Collectors.toList());
+
         return ListSelfCheckVerifyOssDto.Result
                 .builder()
                 .oss(ossList)
@@ -74,7 +92,10 @@ public class ApiVerificationServiceImpl extends CoTopComponent implements ApiVer
                 .filter(id -> !Objects.equals(id, fileId))
                 .collect(Collectors.toList());
         var idText = String.join(",", seqList);
-        apiSelfCheckMapper.saveSelfCheckPackages(selfCheckId, idText);
+        apiSelfCheckMapper.saveSelfCheckPackages(
+                selfCheckId,
+                StringUtil.isEmpty(idText) ? null : idText
+        );
         return apiSelfCheckService.listSelfCheckPackages(selfCheckId);
     }
 }

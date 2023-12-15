@@ -5,17 +5,15 @@ import lombok.Data;
 
 import java.util.List;
 
-public class ListSelfCheckOssDto {
-    @Builder
+@Data
+public class SelfCheckFileDeleteDto {
     @Data
     public static class Request {
-        String projectId;
+        String fileId;
     }
 
     @Builder
-    public static class Result {
-        List<SelfCheckOssDto> oss;
+    public static class Response {
         List<FileDto> files;
-        String fileId;
     }
 }
