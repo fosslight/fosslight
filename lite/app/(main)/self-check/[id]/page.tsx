@@ -17,6 +17,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   const [data, setData] = useState<SelfCheck.Basics>();
   const [wait, setWait] = useState(false);
   const [isModalShown, setIsModalShown] = useState(false);
+  const [changed, setChanged] = useState(false);
   const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
   const router = useRouter();
 
@@ -133,7 +134,17 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
                     : 'border-darkgray text-darkgray'
                 )}
                 disabled={tab === selfCheckTab.name}
-                onClick={() => setTab(selfCheckTab.name)}
+                onClick={() => {
+                  if (changed && idx > 0) {
+                    alert('You should save first');
+                    document
+                      .getElementById('oss-scroll-pos')
+                      ?.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                  }
+
+                  setTab(selfCheckTab.name);
+                }}
               >
                 {idx + 1}. {selfCheckTab.name}
               </button>
@@ -159,7 +170,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions */}
-      {tab === 'OSS' && <SelfCheckOSS id={params.id} />}
+      {tab === 'OSS' && <SelfCheckOSS id={params.id} changed={changed} setChanged={setChanged} />}
       {tab === 'Package' && <SelfCheckPackage />}
       {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>
