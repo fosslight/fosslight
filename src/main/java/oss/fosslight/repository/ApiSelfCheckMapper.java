@@ -32,4 +32,8 @@ public interface ApiSelfCheckMapper {
 	int selectSelfCheckTotalCount(ListSelfCheckDto.Request request);
 
 	SelfCheckDto selectSelfCheckById(String id);
+
+	String selectSelfCheckPackageIdsTextById(String id);
+
+	void saveSelfCheckPackages(@Param("prjId") String prjId, @Param("idText") String idText);
 }
