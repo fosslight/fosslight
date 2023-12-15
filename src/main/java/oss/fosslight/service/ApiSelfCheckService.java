@@ -5,15 +5,18 @@
 
 package oss.fosslight.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.github.jsonldjava.utils.Obj;
 import org.springframework.stereotype.Service;
 
 import oss.fosslight.api.dto.GetSelfCheckDetailsDto;
 import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.api.dto.ListSelfCheckOssDto;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2File;
 
 @Service
 public interface ApiSelfCheckService {
@@ -36,4 +39,7 @@ public interface ApiSelfCheckService {
 	ListSelfCheckOssDto.Result listSelfCheckOss(String request);
 
 	GetSelfCheckDetailsDto.Result getSelfCheck(String request);
+	List<T2File> listSelfCheckPackages(String id);
+
+
 }

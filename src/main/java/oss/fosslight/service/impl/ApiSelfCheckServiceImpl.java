@@ -22,6 +22,7 @@ import oss.fosslight.repository.ApiSelfCheckMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.service.ApiSelfCheckService;
+import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
 
 @Service
@@ -37,6 +38,9 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
     @Autowired
     LicenseMapper licenseMapper;
+
+    @Autowired
+    FileService fileService;
 
     @Override
     public int getCreateProjectCnt(String userId) {
@@ -166,6 +170,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                                         var license = CoCodeManager.LICENSE_INFO_UPPER.get(uppercaseName);
                                         var licenseId = license.getLicenseId();
                                         licenseDto.setLicenseId(licenseId);
+                                        return licenseDto;
                                     } else if (!uppercaseName.isEmpty()) {
                                         return licenseDto;
                                     }
@@ -190,5 +195,18 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
         return GetSelfCheckDetailsDto.Result.builder()
                 .selfCheck(selfCheck)
                 .build();
+    }
+
+    @Override
+    public List<T2File> listSelfCheckPackages(String id) {
+        var selfCheckPackageIdsText = apiSelfcheckMapper.selectSelfCheckPackageIdsTextById(id);
+        if (selfCheckPackageIdsText == null) {
+            return new ArrayList<>();
+        }
+        List<T2File> files = Arrays.stream(selfCheckPackageIdsText.split(","))
+                .map(String::trim)
+                .map(fileId -> fileService.selectFileInfoById(fileId))
+                .collect(Collectors.toList());
+        return files;
     }
 }
