@@ -511,6 +511,12 @@ export default function SelfCheckOSS({
         <div className="py-2 bg-charcoal font-semibold text-semiwhite text-center">
           <i className="fa-solid fa-list" />
           &ensp; OSS List ({filteredOssList.length})
+          {changed && (
+            <span
+              className="inline-block align-top w-2 h-2 ml-1.5 bg-red-500 rounded-full text-semiwhite"
+              title="There are some changes to save"
+            />
+          )}
         </div>
         <SelfCheckOSSFilters
           form={filtersForm}
@@ -525,7 +531,6 @@ export default function SelfCheckOSS({
             setSort(filterParams.sort);
           }}
         />
-        {changed && <div className="pl-4 text-crimson">* You should save the changes</div>}
         {paginatedOssList.length > 0 ? (
           <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
