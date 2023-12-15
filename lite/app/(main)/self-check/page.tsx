@@ -73,7 +73,7 @@ export default function SelfCheckList() {
       window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
     },
     onFinish: () => setLoading(false),
-    sendJson: true
+    type: 'json'
   });
 
   // Load new rows when changing page or applying filters (including initial load)

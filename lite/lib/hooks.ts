@@ -10,7 +10,7 @@ export function useAPI(
     onSuccess?: (res: any) => void;
     onError?: (err: unknown) => void;
     onFinish?: () => void;
-    sendJson?: boolean;
+    type?: 'json' | 'file';
   }
 ) {
   const mutationOptions: any = {};
@@ -36,9 +36,12 @@ export function useAPI(
     }
 
     if (data?.body && method !== 'get') {
-      if (config?.sendJson) {
+      if (config?.type === 'json') {
         requestConfig.data = data.body;
         requestConfig.headers = { 'Content-Type': 'application/json' };
+      } else if (config?.type === 'file') {
+        requestConfig.data = data.body;
+        requestConfig.headers = { 'Content-Type': 'multipart/form-data' };
       } else {
         requestConfig.data = qs.stringify(data.body, { arrayFormat: 'repeat' });
       }
