@@ -10,9 +10,11 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.GetSelfCheckDetailsDto;
 import oss.fosslight.api.dto.ListSelfCheckDto;
 import oss.fosslight.api.dto.ListSelfCheckOssDto;
+import oss.fosslight.api.dto.ListSelfCheckVerifyOssDto;
 import oss.fosslight.common.Url;
 import oss.fosslight.domain.Project;
 import oss.fosslight.service.ApiSelfCheckService;
+import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.SelfCheckService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +33,9 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @Autowired
     private ApiSelfCheckService apiSelfCheckService;
+
+    @Autowired
+    private ApiVerificationService apiVerificationService;
 
     @GetMapping("/selfchecks")
     public @ResponseBody ResponseEntity<ListSelfCheckDto.Result> list(
@@ -80,6 +85,19 @@ public class LiteSelfCheckController extends CoTopComponent {
     ) {
         try {
             var result = apiSelfCheckService.getSelfCheck(id);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/selfchecks/{id}/package")
+    public @ResponseBody ResponseEntity<ListSelfCheckVerifyOssDto.Result> serlfCheckPackage(
+            @PathVariable("id") String id
+    ) {
+        try {
+            var result = apiVerificationService.getVerifyOssList(id);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
