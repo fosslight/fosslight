@@ -112,8 +112,11 @@ declare global {
     }
 
     interface OSSFile {
-      name: string;
-      when: string;
+      fileSeq: string;
+      logiNm: string;
+      orgNm: string;
+      created: string;
+      deleted: boolean;
     }
 
     interface OSSLicense {
@@ -138,9 +141,11 @@ declare global {
       downloadUrl: string;
       homepageUrl: string;
       exclude: boolean;
+      changed?: 'add' | 'edit';
     }
 
     interface EditOSS {
+      gridId: string;
       ossName: string;
       ossVersion: string;
       licenses: OSSLicense[];

@@ -15,12 +15,20 @@ import SelfCheckOSSModal from './self-check-oss-modal';
 import SelfCheckOSSPagination from './self-check-oss-pagination';
 import Toogle from './toggle';
 
-export default function SelfCheckOSS({ id }: { id: string }) {
+export default function SelfCheckOSS({
+  id,
+  changed,
+  setChanged
+}: {
+  id: string;
+  changed: boolean;
+  setChanged: (changed: boolean) => void;
+}) {
   const setLoading = useSetRecoilState(loadingState);
   const [method, setMethod] = useState<'file' | 'url'>('file');
-  const [files, setFiles] = useState<SelfCheck.OSSFile[]>([]);
+  const [fileId, setFileId] = useState('');
+  const [fileList, setFileList] = useState<SelfCheck.OSSFile[]>([]);
   const [ossList, setOssList] = useState<SelfCheck.OSS[]>([]);
-  const [excludeList, setExcludeList] = useState<string[]>([]);
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
@@ -111,6 +119,41 @@ export default function SelfCheckOSS({ id }: { id: string }) {
     currentPage * countPerPage
   );
 
+  // API for loading file/OSS list
+  const loadDataListRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/list-oss`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        setFileId('98');
+        setFileList([
+          {
+            fileSeq: '104',
+            logiNm: '5ed22fd8-88d1-489d-aa9e-4a398356f30f.xlsx',
+            orgNm: 'fosslight_report_all_230907_0155.xlsx',
+            created: '2023-12-15 02:02:35',
+            deleted: false
+          }
+        ]);
+        setOssList(res.data.list);
+      },
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  // API for saving file/OSS List
+  const saveOSSRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveSrc', {
+    onStart: () => setLoading(true),
+    onSuccess: () => {
+      alert('Successfully saved files and OSS');
+      setChanged(false);
+      loadDataListRequest.execute({});
+    },
+    onFinish: () => setLoading(false),
+    type: 'json'
+  });
+
   function openSubwindowForCheck() {
     const [width, height] = [900, 600];
     const left = window.innerWidth / 2 - width / 2;
@@ -123,35 +166,20 @@ export default function SelfCheckOSS({ id }: { id: string }) {
     );
   }
 
-  // API for loading OSS list
-  const loadOssListRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/list-oss`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => {
-        setOssList(res.data.list);
-        setExcludeList(
-          res.data.list
-            .filter((oss: SelfCheck.OSS) => oss.exclude)
-            .map((oss: SelfCheck.OSS) => oss.gridId)
-        );
-      },
-      onFinish: () => setLoading(false)
-    }
-  );
+  function toggleExclude(gridId: string) {
+    const idx = ossList.findLastIndex((oss) => oss.gridId === gridId);
+    const oss = ossList[idx];
+
+    setOssList([
+      ...ossList.slice(0, idx),
+      { ...oss, exclude: !oss.exclude, changed: oss.changed || 'edit' },
+      ...ossList.slice(idx + 1)
+    ]);
+    setChanged(true);
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      setFiles(
-        Array.from(Array(2)).map((_, idx) => ({
-          name: `uploaded-oss-list-${idx + 1}.zip`,
-          when: '2023-09-28 16:17:30'
-        }))
-      );
-    }, 500);
-
-    loadOssListRequest.execute({});
+    loadDataListRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -183,17 +211,24 @@ export default function SelfCheckOSS({ id }: { id: string }) {
         {/* Tools for listing up OSS */}
         {method === 'file' ? (
           <div className="p-4 border border-dashed border-semigray rounded text-center">
-            {files.length > 0 && (
+            {fileList.some((file) => !file.deleted) && (
               <div className="flex flex-col gap-y-1 mb-6">
-                {files.map((file, idx) => (
-                  <div key={idx} className="flex justify-center items-center gap-x-1.5 text-sm">
-                    <i className="fa-solid fa-cube" />
-                    <span className="italic text-semiblack/80">{file.name}</span>
-                    <span className="text-semiblack/50">
-                      ({dayjs(file.when).format('YY.MM.DD HH:mm')})
-                    </span>
-                  </div>
-                ))}
+                {fileList
+                  .filter((file) => !file.deleted)
+                  .map((file, idx) => (
+                    <a
+                      key={idx}
+                      className="flex justify-center items-center gap-x-1.5 text-sm"
+                      href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                      target="_blank"
+                    >
+                      <i className="fa-solid fa-cube" />
+                      <span className="italic text-semiblack/80">{file.orgNm}</span>
+                      <span className="text-semiblack/50">
+                        ({dayjs(file.created).format('YY.MM.DD HH:mm')})
+                      </span>
+                    </a>
+                  ))}
               </div>
             )}
             <i className="fa-solid fa-arrow-up-from-bracket" />
@@ -214,9 +249,24 @@ export default function SelfCheckOSS({ id }: { id: string }) {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-between items-center mt-12 mb-2">
+      <div id="oss-scroll-pos" className="flex justify-between items-center mt-12 mb-2">
         <div className="flex gap-x-3 text-charcoal">
-          <i className="cursor-pointer fa-solid fa-trash" />
+          <i
+            className="cursor-pointer fa-solid fa-trash"
+            onClick={() => {
+              const gridIdsToDelete = Array.from(
+                document.querySelectorAll('.oss-to-delete:checked')
+              ).map((input) => (input as HTMLInputElement).value);
+
+              if (gridIdsToDelete.length === 0) {
+                alert('Check OSS to delete');
+                return;
+              }
+
+              setOssList(ossList.filter((oss) => !gridIdsToDelete.includes(oss.gridId)));
+              setChanged(true);
+            }}
+          />
           <i
             className="cursor-pointer fa-solid fa-plus"
             onClick={() => {
@@ -235,7 +285,48 @@ export default function SelfCheckOSS({ id }: { id: string }) {
           <button className="px-2 py-0.5 default-btn" onClick={openSubwindowForCheck}>
             Check
           </button>
-          <button className="px-2 py-0.5 crimson-btn">Save</button>
+          <button
+            className="px-2 py-0.5 crimson-btn"
+            onClick={() => {
+              if (!window.confirm('Are you sure to continue?')) {
+                return;
+              }
+
+              saveOSSRequest.execute({
+                body: {
+                  prjId: id,
+                  mainData: JSON.stringify(
+                    ossList.map((oss) => {
+                      const obj: any = {
+                        gridId: oss.gridId,
+                        ossName: oss.ossName,
+                        ossVersion: oss.ossVersion,
+                        licenseName: oss.licenses.map((license) => license.licenseName).join(','),
+                        filePath: oss.path,
+                        copyrightText: oss.copyright,
+                        downloadLocation: oss.downloadUrl,
+                        homepage: oss.homepageUrl,
+                        excludeYn: oss.exclude ? 'Y' : 'N'
+                      };
+
+                      if (oss.changed !== 'add') {
+                        const [referenceId, referenceDiv, componentIdx] = oss.gridId.split('-');
+
+                        obj.componentId = oss.gridId;
+                        obj.referenceId = referenceId;
+                        obj.referenceDiv = referenceDiv;
+                        obj.componentIdx = componentIdx;
+                      }
+
+                      return obj;
+                    })
+                  )
+                }
+              });
+            }}
+          >
+            Save
+          </button>
         </div>
       </div>
 
@@ -258,37 +349,35 @@ export default function SelfCheckOSS({ id }: { id: string }) {
             setSort(filterParams.sort);
           }}
         />
+        {changed && <div className="pl-4 text-crimson">* You should save the changes</div>}
         {paginatedOssList.length > 0 ? (
           <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
               <div
                 key={oss.gridId}
                 className={clsx(
-                  'flex flex-col gap-y-1 p-4 border border-gray rounded',
-                  excludeList.includes(oss.gridId) && 'bg-semigray/50'
+                  'flex flex-col gap-y-1 p-4 border rounded',
+                  oss.exclude && 'bg-semigray/50',
+                  // eslint-disable-next-line no-nested-ternary
+                  oss.changed
+                    ? oss.changed === 'add'
+                      ? 'border-green-500'
+                      : 'border-orange-500'
+                    : 'border-gray'
                 )}
               >
                 <div className="flex justify-between items-center pb-2 mb-1 border-b border-b-darkgray">
-                  <input className="w-4 h-4" type="checkbox" />
+                  <input className="oss-to-delete w-4 h-4" type="checkbox" value={oss.gridId} />
                   <label className="flex items-center gap-x-2">
                     <span
-                      className={clsx(
-                        'text-sm',
-                        excludeList.includes(oss.gridId) ? 'text-crimson' : 'text-darkgray'
-                      )}
+                      className={clsx('text-sm', oss.exclude ? 'text-crimson' : 'text-darkgray')}
                     >
                       exclude
                     </span>
                     <Toogle
                       icons={false}
-                      checked={excludeList.includes(oss.gridId)}
-                      onChange={() => {
-                        if (excludeList.includes(oss.gridId)) {
-                          setExcludeList(excludeList.filter((gridId) => gridId !== oss.gridId));
-                        } else {
-                          setExcludeList([...excludeList, oss.gridId]);
-                        }
-                      }}
+                      checked={oss.exclude}
+                      onChange={() => toggleExclude(oss.gridId)}
                     />
                   </label>
                 </div>
@@ -373,16 +462,21 @@ export default function SelfCheckOSS({ id }: { id: string }) {
                 <div className="text-sm text-semiblack/80">
                   <i className="fa-regular fa-folder-open" />
                   &ensp;
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: highlight(oss.path, filters.path)
-                    }}
-                  />
+                  {oss.path ? (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: highlight(oss.path, filters.path)
+                      }}
+                    />
+                  ) : (
+                    <span className="text-darkgray">no path set</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-x-2 text-sm">
                   {oss.userGuide && (
                     <i
                       className="text-charcoal cursor-pointer fa-solid fa-circle-info"
+                      title="User Guide"
                       onClick={() => {
                         setModalTitle('User Guide');
                         setModalText(oss.userGuide.split('<br>').join('\n'));
@@ -393,6 +487,7 @@ export default function SelfCheckOSS({ id }: { id: string }) {
                   {oss.copyright && (
                     <i
                       className="text-charcoal cursor-pointer fa-solid fa-copyright"
+                      title="Copyright"
                       onClick={() => {
                         setModalTitle('Copyright');
                         setModalText(oss.copyright);
@@ -403,6 +498,7 @@ export default function SelfCheckOSS({ id }: { id: string }) {
                   {oss.restrictions && (
                     <i
                       className="text-crimson cursor-pointer fa-solid fa-registered"
+                      title="Restrictions"
                       onClick={() => {
                         setModalTitle('Restrictions');
                         setModalText(oss.restrictions);
@@ -433,6 +529,7 @@ export default function SelfCheckOSS({ id }: { id: string }) {
                       className="text-sm text-darkgray cursor-pointer fa-solid fa-pen"
                       onClick={() => {
                         setEditValues({
+                          gridId: oss.gridId,
                           ossName: oss.ossName,
                           ossVersion: oss.ossVersion,
                           licenses: oss.licenses,
@@ -464,10 +561,13 @@ export default function SelfCheckOSS({ id }: { id: string }) {
         show={isOSSModalShown}
         onHide={() => setIsOSSModalShown(false)}
         values={editValues}
+        ossList={ossList}
+        setOssList={setOssList}
+        setChanged={setChanged}
       />
-      <Modal show={isTextModalShown} onHide={() => setIsTextModalShown(false)} size="sm">
+      <Modal show={isTextModalShown} onHide={() => setIsTextModalShown(false)} size="md">
         <div className="pb-4 mb-4 border-b border-b-semigray font-bold">{modalTitle}</div>
-        <div className="whitespace-pre-line">{modalText}</div>
+        <div className="text-sm whitespace-pre-line">{modalText}</div>
       </Modal>
     </>
   );
