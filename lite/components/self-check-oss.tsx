@@ -128,19 +128,9 @@ export default function SelfCheckOSS({
     {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
-        // setFileId(res.data.fileId);
-        // setFileList(res.data.files.filter((file: any) => file.delYn === 'N'));
-        setFileId('98');
-        setFileList([
-          {
-            fileId: '98',
-            fileSeq: '148',
-            logiNm: '9664d67c-eb5c-49e1-8f2e-5ebce0d0728f.xlsx',
-            orgNm: 'fosslight_report_all_230907_0155.xlsx',
-            created: '2023-12-15 22:14:46'
-          }
-        ]);
-        setOssList(res.data.list);
+        setFileId(res.data.fileId);
+        setFileList(res.data.files);
+        setOssList(res.data.oss);
       },
       onFinish: () => setLoading(false)
     }
