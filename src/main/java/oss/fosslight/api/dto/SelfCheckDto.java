@@ -1,10 +1,15 @@
 package oss.fosslight.api.dto;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
+import javax.xml.bind.annotation.XmlElementDecl;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -18,27 +23,18 @@ public class SelfCheckDto {
     String cveId;
     String cvssScore;
 
-    List<String> packages = new ArrayList<>();
+    List<FileDto> packages = new ArrayList<>();
     String report;
     String notice;
     int ossCount;
 
     String comment;
 
-    private void addPackageFileId(String id) {
-        if (id == null) return;
-        packages.add(id);
-    }
+    private List<String> fileIds = new ArrayList<>();
 
-    public void setPackageFileId(String id) {
-        addPackageFileId(id);
-    }
+    public void setPackageFileIds(String idText) {
+        fileIds = Arrays.stream(idText.split(","))
+                .map(String::trim).collect(Collectors.toList());
 
-    public void setPackageFileId2(String id) {
-        addPackageFileId(id);
-    }
-
-    public void setPackageFileId3(String id) {
-        addPackageFileId(id);
     }
 }

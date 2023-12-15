@@ -54,6 +54,15 @@ export default function SelfCheckPackage({ id }: { id: string }) {
     }
   );
 
+  // API for deleting file
+  const deleteFileRequest = useAPI(
+    'delete',
+    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
+    {
+      onSuccess: () => loadFilesRequest.execute({}),
+    }
+  );
+
   useEffect(() => {
     loadFilesRequest.execute({});
     loadRowsRequest.execute({});
@@ -82,7 +91,7 @@ export default function SelfCheckPackage({ id }: { id: string }) {
                   className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
                   onClick={(e) => {
                     e.preventDefault();
-                    // deleteFileRequest.execute({ body: { seq: file.fileSeq } });
+                    deleteFileRequest.execute({ params: { fileId: file.fileId } });
                   }}
                 />
               </a>

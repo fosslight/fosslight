@@ -134,8 +134,20 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
                 customNvdMaxScoreInfoList.clear();
             }
+            var fileIds = selfCheck.getFileIds();
 
-            selfCheck.setPackages(Arrays.asList("a", "b")); // TODO
+            var files = fileIds.stream().map(id -> {
+                var file = fileService.selectFileInfoById(id);
+                return FileDto.builder()
+                        .orgNm(file.getOrigNm())
+                        .created(file.getCreatedDate())
+                        .fileId(file.getFileId())
+                        .logiNm(file.getLogiNm())
+                        .fileSeq(file.getFileSeq())
+                        .build();
+            }).collect(Collectors.toList());
+            selfCheck.setPackages(files);
+
             selfCheck.setReport("rep"); // TODO
             selfCheck.setNotice("not"); // TODO
         }

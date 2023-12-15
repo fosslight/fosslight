@@ -151,13 +151,16 @@ export default function SelfCheckList() {
             return (
               row.packages.length > 0 && (
                 <div className="flex gap-x-2 whitespace-nowrap">
-                  {row.packages.map((_, idx) => (
-                    <i
+                  {row.packages.map((file, idx) => (
+                    <a
                       key={idx}
-                      className="cursor-pointer fa-solid fa-cube"
-                      title={`Package ${idx + 1}`}
+                      href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                      target="_blank"
+                      title={file.orgNm}
                       onClick={(e) => e.stopPropagation()}
-                    />
+                    >
+                      <i className="fa-solid fa-cube" />
+                    </a>
                   ))}
                 </div>
               )

@@ -38,7 +38,7 @@ declare global {
       projectName: string;
       projectVersion: string;
       ossCount: number;
-      packages: string[];
+      packages: SelfCheck.PackageFile[];
       notice: string;
       cveId: string;
       cvssScore: string;
@@ -288,4 +288,4 @@ declare global {
   }
 }
 
-export {};
+export { };
