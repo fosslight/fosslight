@@ -36,6 +36,8 @@ export default function SelfCheckOSS({
   // Modals
   const [editValues, setEditValues] = useState<SelfCheck.EditOSS>();
   const [isOSSModalShown, setIsOSSModalShown] = useState(false);
+  const [fileInfo, setFileInfo] = useState<{ file: SelfCheck.OSSFile; sheets: string[] }>();
+  const [isFileModalShown, setIsFileModalShown] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalText, setModalText] = useState('');
   const [isTextModalShown, setIsTextModalShown] = useState(false);
@@ -126,14 +128,16 @@ export default function SelfCheckOSS({
     {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
+        // setFileId(res.data.fileId);
+        // setFileList(res.data.files.filter((file: any) => file.delYn === 'N'));
         setFileId('98');
         setFileList([
           {
-            fileSeq: '104',
-            logiNm: '5ed22fd8-88d1-489d-aa9e-4a398356f30f.xlsx',
+            fileId: '98',
+            fileSeq: '148',
+            logiNm: '9664d67c-eb5c-49e1-8f2e-5ebce0d0728f.xlsx',
             orgNm: 'fosslight_report_all_230907_0155.xlsx',
-            created: '2023-12-15 02:02:35',
-            deleted: false
+            created: '2023-12-15 22:14:46'
           }
         ]);
         setOssList(res.data.list);
@@ -142,17 +146,131 @@ export default function SelfCheckOSS({
     }
   );
 
+  // API for uploading file
+  const uploadFileRequest = useAPI('post', 'http://localhost:8180/project/csvFile', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      const result = JSON.parse(res.data);
+
+      if (result[0][0] && result[1] && result[1].length > 0) {
+        Array.from(document.querySelectorAll('.sheet-checkbox:checked')).forEach((cb: any) => {
+          // eslint-disable-next-line no-param-reassign
+          cb.checked = false;
+        });
+
+        const { registFileId, registSeq, fileName, originalFilename, createdDate } = result[0][0];
+
+        setFileInfo({
+          file: {
+            fileId: registFileId,
+            fileSeq: registSeq,
+            logiNm: fileName,
+            orgNm: originalFilename,
+            created: createdDate
+          },
+          sheets: result[1].map((sheet: any) => sheet.name)
+        });
+        setIsFileModalShown(true);
+      }
+    },
+    onFinish: () => setLoading(false),
+    type: 'file'
+  });
+
+  // API for loading sheets
+  const loadSheetsRequest = useAPI('post', 'http://localhost:8180/project/getSheetData', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      const loadedOssList = res.data.resultData.mainData;
+
+      setOssList([
+        ...ossList,
+        ...loadedOssList.map((oss: any) => ({
+          gridId: oss.gridId,
+          ossId: null,
+          ossName: oss.ossName,
+          ossVersion: oss.ossVersion,
+          obligations: [],
+          vuln: false,
+          cveId: '',
+          cvssScore: '',
+          licenses: oss.componentLicenseList.map((license: any) => ({
+            licenseId: null,
+            licenseName: license.licenseName
+          })),
+          path: oss.filePath,
+          userGuide: '',
+          copyright: oss.copyrightText,
+          restrictions: '',
+          downloadUrl: oss.downloadLocation,
+          homepageUrl: oss.homepage,
+          exclude: oss.excludeYn === 'Y',
+          changed: 'add'
+        }))
+      ]);
+      setChanged(true);
+    },
+    onFinish: () => setLoading(false),
+    type: 'json'
+  });
+
   // API for saving file/OSS List
   const saveOSSRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveSrc', {
     onStart: () => setLoading(true),
     onSuccess: () => {
       alert('Successfully saved files and OSS');
-      setChanged(false);
+
       loadDataListRequest.execute({});
+      setChanged(false);
     },
     onFinish: () => setLoading(false),
     type: 'json'
   });
+
+  function loadSheets() {
+    if (!fileInfo) {
+      return;
+    }
+
+    const fileSeq = String(fileInfo.file.fileSeq);
+    const selectedSheetNums = Array.from(document.querySelectorAll('.sheet-checkbox:checked')).map(
+      (cb: any) => cb.value
+    );
+
+    if (selectedSheetNums.length === 0) {
+      alert('Select sheets to load');
+      return;
+    }
+
+    if (!fileId) {
+      setFileId(fileInfo.file.fileId);
+    }
+    setFileList([...fileList, { ...fileInfo.file, state: 'add' }]);
+    setIsFileModalShown(false);
+
+    loadSheetsRequest.execute({
+      body: { prjId: id, fileSeq, sheetNums: selectedSheetNums, readType: 'self' }
+    });
+  }
+
+  function deleteFile(seq: string) {
+    const idx = fileList.findLastIndex((f) => f.fileSeq === seq);
+    const file = fileList[idx];
+
+    if (file.state === 'delete') {
+      return;
+    }
+
+    if (file.state === 'add') {
+      setFileList([...fileList.slice(0, idx), ...fileList.slice(idx + 1)]);
+    } else {
+      setFileList([
+        ...fileList.slice(0, idx),
+        { ...file, state: 'delete' },
+        ...fileList.slice(idx + 1)
+      ]);
+    }
+  }
 
   function openSubwindowForCheck() {
     const [width, height] = [900, 600];
@@ -211,10 +329,10 @@ export default function SelfCheckOSS({
         {/* Tools for listing up OSS */}
         {method === 'file' ? (
           <div className="p-4 border border-dashed border-semigray rounded text-center">
-            {fileList.some((file) => !file.deleted) && (
-              <div className="flex flex-col gap-y-1 mb-6">
+            {fileList.some((file) => file.state !== 'delete') && (
+              <div className="flex flex-col items-center gap-y-1 mb-6">
                 {fileList
-                  .filter((file) => !file.deleted)
+                  .filter((file) => file.state !== 'delete')
                   .map((file, idx) => (
                     <a
                       key={idx}
@@ -227,15 +345,58 @@ export default function SelfCheckOSS({
                       <span className="text-semiblack/50">
                         ({dayjs(file.created).format('YY.MM.DD HH:mm')})
                       </span>
+                      <i
+                        className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          deleteFile(file.fileSeq);
+                        }}
+                      />
                     </a>
                   ))}
               </div>
             )}
-            <i className="fa-solid fa-arrow-up-from-bracket" />
-            &ensp;Upload a file here
+            <span
+              className="cursor-pointer"
+              onClick={() => {
+                document.getElementById('upload-file')?.click();
+              }}
+            >
+              <i className="fa-solid fa-arrow-up-from-bracket" />
+              &ensp;Upload a file here
+            </span>
             <div className="mt-1 text-sm text-darkgray">
               (The file must contain information of OSS to be listed.)
             </div>
+            <input
+              id="upload-file"
+              className="hidden"
+              type="file"
+              accept=".xlsx, .xls, .xlsm, .csv"
+              onChange={(e) => {
+                const input = e.target;
+
+                if (!input.files || input.files.length === 0) {
+                  return;
+                }
+
+                const file = input.files[0];
+                const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
+                if (!allowedExtensions.test(file.name)) {
+                  alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                  input.value = '';
+                  return;
+                }
+
+                const formData = new FormData();
+                formData.append('myfile', file, file.name);
+                formData.append('registFileId', fileId);
+                formData.append('tabNm', 'SELF');
+
+                uploadFileRequest.execute({ body: formData });
+                input.value = '';
+              }}
+            />
           </div>
         ) : (
           <div className="flex gap-x-2">
@@ -292,9 +453,24 @@ export default function SelfCheckOSS({
                 return;
               }
 
+              const addFileSeqs = fileList
+                .filter((file) => file.state === 'add')
+                .map((file) => file.fileSeq);
+
+              const delFileSeqs = fileList
+                .filter((file) => file.state === 'delete')
+                .map((file) => file.fileSeq);
+
               saveOSSRequest.execute({
                 body: {
                   prjId: id,
+
+                  // Files
+                  csvFileId: addFileSeqs.length > 0 ? fileId : '',
+                  csvFileSeqs: JSON.stringify(addFileSeqs.map((seq) => ({ fileSeq: Number(seq) }))),
+                  csvDelFileIds: JSON.stringify(delFileSeqs.map((seq) => ({ fileSeq: seq }))),
+
+                  // OSS
                   mainData: JSON.stringify(
                     ossList.map((oss) => {
                       const obj: any = {
@@ -351,7 +527,7 @@ export default function SelfCheckOSS({
         />
         {changed && <div className="pl-4 text-crimson">* You should save the changes</div>}
         {paginatedOssList.length > 0 ? (
-          <div className="grid grid-cols-1 gap-2 max-h-[700px] p-4 overflow-y-auto no-scrollbar md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
               <div
                 key={oss.gridId}
@@ -565,6 +741,26 @@ export default function SelfCheckOSS({
         setOssList={setOssList}
         setChanged={setChanged}
       />
+      <Modal show={isFileModalShown} onHide={() => setIsFileModalShown(false)} size="sm">
+        <div className="pb-4 mb-4 border-b border-b-semigray font-bold">Select sheets</div>
+        <div className="flex flex-col items-start gap-y-1 text-sm">
+          {fileInfo?.sheets.map((sheet, idx) => (
+            <label key={idx} className="flex items-center cursor-pointer hover:opacity-70">
+              <input className="sheet-checkbox" type="checkbox" value={idx} />
+              &ensp;
+              {sheet}
+            </label>
+          ))}
+        </div>
+        <div className="flex justify-end gap-x-1 mt-4">
+          <button className="px-2 py-0.5 crimson-btn" onClick={loadSheets}>
+            Load
+          </button>
+          <button className="px-2 py-0.5 default-btn" onClick={() => setIsFileModalShown(false)}>
+            Cancel
+          </button>
+        </div>
+      </Modal>
       <Modal show={isTextModalShown} onHide={() => setIsTextModalShown(false)} size="md">
         <div className="pb-4 mb-4 border-b border-b-semigray font-bold">{modalTitle}</div>
         <div className="text-sm whitespace-pre-line">{modalText}</div>

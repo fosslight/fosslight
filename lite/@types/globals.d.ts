@@ -112,11 +112,12 @@ declare global {
     }
 
     interface OSSFile {
+      fileId: string;
       fileSeq: string;
       logiNm: string;
       orgNm: string;
       created: string;
-      deleted: boolean;
+      state?: 'add' | 'delete';
     }
 
     interface OSSLicense {
