@@ -1,13 +1,21 @@
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
 
 export default function DetailModalVuln({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.Vuln | null>(null);
-  const router = useRouter();
-  const pathname = usePathname();
-  const queryParams = useSearchParams();
+
+  // API for loading data
+  const loadDataRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/vulnerabilities/${modalId}`,
+    {
+      onSuccess: (res) => {
+        setData(res.data.vulnerability);
+      }
+    }
+  );
 
   // Load data based on query parameter information
   useEffect(() => {
@@ -15,20 +23,8 @@ export default function DetailModalVuln({ modalId }: { modalId: string }) {
       return;
     }
 
-    setData(null);
-
-    setTimeout(() => {
-      setData({
-        cveId: 'CVE-2020-35492',
-        cvssScore: '7.8',
-        summary: 'A flaw was found in cairo image-compositor.c in all versions prior to 1.17.4.',
-        modified: '2023-05-03 21:32:05.0',
-        oss: [
-          { ossId: '123', ossName: 'cairo', ossVersion: '1.4.12' },
-          { ossId: '124', ossName: 'cairo', ossVersion: '1.4.12' }
-        ]
-      });
-    }, 500);
+    loadDataRequest.execute({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modalId]);
 
   if (!data) {
@@ -72,28 +68,17 @@ export default function DetailModalVuln({ modalId }: { modalId: string }) {
         <DetailModalRow
           label="OSS"
           value={
-            <div className="overflow-x-auto no-scrollbar">
+            <div className="max-h-[300px] overflow-auto no-scrollbar">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-semiblack text-semiwhite text-left whitespace-nowrap overflow-hidden">
-                    <th className="px-1.5 py-1 rounded-tl font-semibold">ID</th>
                     <th className="px-1.5 py-1 font-semibold">Name</th>
                     <th className="px-1.5 py-1 rounded-tr font-semibold">Ver</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.oss.map((oss) => (
-                    <tr
-                      key={oss.ossId}
-                      className="border-b border-semigray cursor-pointer"
-                      onClick={() => {
-                        const urlQueryParams = new URLSearchParams(queryParams);
-                        urlQueryParams.set('modal-type', 'oss');
-                        urlQueryParams.set('modal-id', oss.ossId);
-                        router.push(`${pathname}?${urlQueryParams.toString()}`, { scroll: false });
-                      }}
-                    >
-                      <td className="p-1">{oss.ossId}</td>
+                  {data.oss.map((oss, idx) => (
+                    <tr key={idx} className={'border-b border-semigray'}>
                       <td className="p-1">{oss.ossName}</td>
                       <td className="p-1">{oss.ossVersion}</td>
                     </tr>

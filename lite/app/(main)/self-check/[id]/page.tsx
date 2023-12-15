@@ -17,24 +17,18 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   const [data, setData] = useState<SelfCheck.Basics>();
   const [wait, setWait] = useState(false);
   const [isModalShown, setIsModalShown] = useState(false);
+  const [changed, setChanged] = useState(false);
   const [tab, setTab] = useState<SelfCheck.Tab['name']>('OSS');
   const router = useRouter();
 
-  // TODO (API for loading project)
-  const loadProjectReuqest = {
-    execute: (() => {
-      setLoading(true);
-      setTimeout(() => {
-        setData({
-          projectName: 'FOSSLight Hub Lite',
-          projectVersion: '1.0.0',
-          created: '2023-10-05 23:54:08.0',
-          comment: '<p>aaa</p><p>bbb</p><p><strong>ccc</strong><br>ddd</p>'
-        });
-        setLoading(false);
-      }, 500);
-    }) as any
-  };
+  // API for loading data
+  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/selfchecks/${params.id}`, {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setData(res.data.selfCheck);
+    },
+    onFinish: () => setLoading(false)
+  });
 
   // API for deleting project
   const deleteProjectRequest = useAPI('post', 'http://localhost:8180/selfCheck/delAjax', {
@@ -47,7 +41,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   });
 
   useEffect(() => {
-    loadProjectReuqest.execute({});
+    loadDataRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,7 +117,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
             projectVersion: data.projectVersion,
             comment: data.comment
           }}
-          refetch={() => loadProjectReuqest.execute({})}
+          refetch={() => loadDataRequest.execute({})}
         />
       )}
 
@@ -140,7 +134,17 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
                     : 'border-darkgray text-darkgray'
                 )}
                 disabled={tab === selfCheckTab.name}
-                onClick={() => setTab(selfCheckTab.name)}
+                onClick={() => {
+                  if (changed && idx > 0) {
+                    alert('You should save first');
+                    document
+                      .getElementById('oss-scroll-pos')
+                      ?.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                  }
+
+                  setTab(selfCheckTab.name);
+                }}
               >
                 {idx + 1}. {selfCheckTab.name}
               </button>
@@ -166,8 +170,8 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
       </div>
 
       {/* Actions */}
-      {tab === 'OSS' && <SelfCheckOSS />}
-      {tab === 'Package' && <SelfCheckPackage />}
+      {tab === 'OSS' && <SelfCheckOSS id={params.id} changed={changed} setChanged={setChanged} />}
+      {tab === 'Package' && <SelfCheckPackage id={params.id} />}
       {tab === 'Notice' && <SelfCheckNotice id={params.id} />}
     </>
   );
