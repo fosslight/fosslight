@@ -170,6 +170,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                                         var license = CoCodeManager.LICENSE_INFO_UPPER.get(uppercaseName);
                                         var licenseId = license.getLicenseId();
                                         licenseDto.setLicenseId(licenseId);
+                                        return licenseDto;
                                     } else if (!uppercaseName.isEmpty()) {
                                         return licenseDto;
                                     }
