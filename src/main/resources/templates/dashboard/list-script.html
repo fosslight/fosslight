@@ -1,236 +1,377 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
+<script th:inline="javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
     <script th:inline="javascript">
         $(function () {
-        	fn.progProjectCnt();
-        	
         	if ([[${projectFlag}]] || [[${partnerFlag}]]) {
+        		// progress List
+        		list.progProjectCnt();
+        		
+        		// Job List
         		list.getJobsList();
-        		list.getCommentsList();
-        		list.getDiscoveredMailList();
         	}
         	
+        	// Discovered Mail List
+        	list.getDiscoveredMailList();
+        	
+        	// NVD Dashboard
         	list.getNvdDashboardList();
         	
-			// word cloud
-            const words = [
-                { text: 'AFL-1.1', size: 65 },
-                { text: 'AFL-1', size: 65 },
-                { text: 'AML', size: 52 },
-                { text: 'Curl License', size: 52 },
-                { text: 'ICU License', size: 42 },
-                { text: 'Info-ZIP', size: 38 },
-                { text: 'Unicode-DFS-2016', size: 38 },
-                { text: 'Unicode-DFS-2023', size: 38 },
-                { text: 'OpenSSH License', size: 24 },
-                { text: 'STLport Licenser', size: 24 },
-                { text: 'Netperf License', size: 24 },
-                { text: 'Colt License', size: 24 },
-                { text: 'Matplotlib License', size: 24 },
-                { text: 'DBAD', size: 24 },
-                { text: 'AFL v6.0', size: 16 },
-                { text: '3GPP license', size: 16 },
-                { text: 'CPOL-1.02', size: 16 },
-                { text: 'ISC', size: 16 },
-                { text: 'HPND', size: 16 },
-                { text: '3GPP license', size: 16 },
-                { text: 'APAFML', size: 16 },
-                { text: 'TEST12', size: 16 },
-                { text: 'TEST123', size: 16 },
-                { text: 'TEST1234', size: 16 },
-                { text: 'TEST12345', size: 16 },
-                { text: 'TEST_122', size: 16 },
-                { text: 'TEST_12345', size: 16 },
-                { text: 'TEST_123456', size: 16 },
-                { text: 'TEST_12345_1207', size: 16 },
-                { text: 'TEST_12345_12256', size: 16 },
-                { text: 'TEST_12345_ABC', size: 16 },
-            ];
-
-            const width = 700;
-            const height = 365;
-            const margin = { left: 10, right: 10, top: 10, bottom: 10 };
-            const svgWidth = width + margin.left + margin.right;
-            const svgHeight = height + margin.top + margin.bottom;
-
-            const svg = d3.select('#wordcloud')
-                .append('svg')
-                .attr('width', svgWidth)
-                .attr('height', svgHeight)
-                .append('g')
-                .attr('transform', `translate(${(svgWidth / 2)}, ${(svgHeight / 2)})`);
-
-            const cloud = d3.layout.cloud()
-                .size([width, height])
-                .words(words)
-                .padding(3)
-                .rotate(function () { return Math.random() < 0.5 ? 0 : 90; })
-                .fontSize(function (d) { return d.size; })
-                .on('end', draw);
-
-            cloud.start();
-
-            function draw(words) {
-                const textElements = svg.selectAll('text')
-                    .data(words)
-                    .enter().append('text')
-                    .style('font-size', function (d) { return d.size + 'px'; })
-                    .style('font-weight', function (d) {
-                        if (d.size > 28) return '1000';
-                        if (d.size > 24) return '800';
-                        return '600';
-                    })
-                    .style('fill', function (d) {
-                        if (d.size > 60) return '#6C0707FF';
-                        else if(d.size > 50) return '#BB1B22FF';
-                        else if(d.size > 40) return '#a87e1c';
-                        else if(d.size > 30) return '#A30427FF';
-                        else if (d.size > 24) return '#AA5032FF';
-                        return '#b24201';
-                    })
-                    .style('text-anchor', 'middle')
-                    .attr('transform', function (d) {
-                        const rotation = d.rotate === 0 ? 0 : 90;
-                        return 'translate(' + [d.x, d.y] + ')rotate(' + rotation + ')';
-                    })
-                    .text(function (d) { return d.text; });
-            }
-
-            // pie plot
-            const donutData = [
-                {
-                    label: '<span class="badge badge-dark">CRITICAL</span>',
-                    data: 20809,
-                    color: '#000'
-                },
-                {
-                    label: '<span class="badge badge-danger">HIGH</span>',
-                    data: 56039,
-                    color: '#dc3545'
-                },
-                {
-                    label: '<span class="badge badge-orange">MEDIUM</span>',
-                    data: 54548,
-                    color: '#fc4e2a'
-                },
-                {
-                    label: '<span class="badge badge-warning">LOW</span>',
-                    data: 2360,
-                    color: 'orange'
-                }
-            ]
-
-            $.plot('#donut-chart', donutData, {
-                series: {
-                    pie: {
-                        show: true,
-                        radius: 0.8,
-                        innerRadius: 0.3,
-                        label: {
-                            show: true,
-                            radius: 2 / 3,
-                            formatter: labelFormatter,
-                            threshold: 0.1
-                        }
-                    }
-                },
-                legend: {
-                    show: false
-                }
-            })
-
-            function updateDataTable() {
-                var dataTable = $('#data-table tbody');
-                dataTable.empty();
-
-                for (var i = 0; i < donutData.length; i++) {
-                    var dataItem = donutData[i];
-                    dataTable.append(
-                        '<tr><td>' +
-                        dataItem.label +
-                        '</td><td>' +
-                        dataItem.data +
-                        '</td><td>'
-                    );
-                }
-            }
-
-            function labelFormatter(label, series) {
-                updateDataTable();
-                return "";
-                //   return '<div style="font-size:8pt; text-align:center; padding:2px; color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-            }
-
-            // Summernote
-            $('#commpose-textarea-02').summernote();
+        	// Last 20 Scored Vulnerability
+        	list.getLastScoredVulnerability();
+        	
+        	// OSS & License related
+        	chart_fn.mostUsedOssChartOpen();
+        	chart_fn.mostUsedLicenseChartOpen();
+        	
+        	common_fn.bindEvent();
         });
         
-        var fn = {
-        	progProjectCnt : function() {
+        let _rowPrjId;
+        let _rowPrjDivision;
+        let _referenceDiv;
+        
+        $(document).on('click', '#jobListTable > tbody > tr', function(event) {
+        	var rowData = $("#jobListTable").DataTable().row($(this)).data();
+        	_rowPrjId = rowData.prjId;
+        	_rowPrjDivision = rowData.prjDivision;
+			var param = {"prjId" : rowData.prjId, "prjDivision" : rowData.prjDivision};
+			comment_fn.getCommentsList(param);
+        });
+        
+        $(document).on("click", "[name ='commentModifyBtn']", function (e){
+        	e.preventDefault();
+        	_referenceDiv = $(this).nextAll('input').val();
+        	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
+        	comment_fn.editComments($(this).attr("data-commId"), _rowPrjId, _referenceDiv, successCallbackParam);
+        });
+        
+        $(document).on("click", "[name ='commentDeleteBtn']", function (e){
+        	e.preventDefault();
+        	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
+        	comment_fn.deleteComments($(this).attr("data-commId"), successCallbackParam);
+        });
+        
+        var list = {
+      	  	progProjectCnt : function() {
+               	$.ajax({
+           			url : '/dashboard/progProjectCnt',
+           			type : 'GET',
+           			dataType : 'json',
+           			cache : false,
+           			success : function(data){
+           				var cntList = new Array();
+           				cntList = data;
+           				
+           				var hTag;
+           				var pTag;
+           				
+           				if (cntList.length > 0) {
+           					for (var i in cntList) {
+           						var status = cntList[i].status;
+           						var cnt = cntList[i].statusCnt;
+           						switch (status) {
+           							case "PROG" :
+           								hTag = document.createElement("h3");
+           								pTag = document.createElement("p");
+           								hTag.innerText = cnt;
+           								pTag.innerText = "Progress";
+           								
+           								$("#progressView .bg-success .inner").empty();
+           								$("#progressView .bg-success .inner").append(hTag);
+           								$("#progressView .bg-success .inner").append(pTag);
+           								break;
+           							case "REV" :
+           								hTag = document.createElement("h3");
+           		    					pTag = document.createElement("p");
+           								hTag.innerText = cnt;
+           								pTag.innerText = "Review";
+           								
+           								$("#progressView .bg-warning .inner").empty();
+           								$("#progressView .bg-warning .inner").append(hTag);
+           								$("#progressView .bg-warning .inner").append(pTag);
+           								break;
+           						}
+           					}
+           				} else {
+           					hTag = document.createElement("h3");
+            				pTag = document.createElement("p");
+        					hTag.innerText = "0";
+        					pTag.innerText = "Progress";
+        					
+        					$("#progressView .bg-success .inner").empty();
+        					$("#progressView .bg-success .inner").append(hTag);
+        					$("#progressView .bg-success .inner").append(pTag);
+        					
+        					hTag = document.createElement("h3");
+        					pTag = document.createElement("p");
+        					hTag.innerText = "0";
+        					pTag.innerText = "Review";
+        					
+        					$("#progressView .bg-warning .inner").empty();
+        					$("#progressView .bg-warning .inner").append(hTag);
+        					$("#progressView .bg-warning .inner").append(pTag);
+           				}
+           			}
+               	});
+           	},
+            getJobsList : function() {
+               	$.ajax({
+        			url : '/dashboard/jobsListAjax',
+        			type : 'GET',
+        			dataType : 'json',
+        			cache : false,
+        			success : function(data){
+        				if (data.records > 0) {
+        					$('#jobListTable').DataTable({
+                        		paging : true,
+                        		searching : true,
+                        		info : true,
+                        		autoWidth : false,
+                        		responsive : true,
+                        		lengthChange : true,
+                        		lengthMenu : [ 10, 30, 50 ],
+                        		ordering : true,
+                        		data : data.rows,
+                        		columns : [ {
+                        				data : "prjDivisionId"
+                        			}, {
+                        		  		data : "prjName"
+                        			}, {
+                        		 		data : "status",
+                        				render : function(data){
+                        					var rtnDisplay = "";
+                        					switch(data) {
+                        						case "Progress" :
+                        							rtnDisplay = '<span class="badge badge-success">' + data + '</span>';
+                        							break;
+                        						case "Request" :
+                        							rtnDisplay = '<span class="badge badge-pink">' + data + '</span>';
+                        							break;
+                        						case "Review" :
+                        							rtnDisplay = '<span class="badge badge-orange">' + data + '</span>';
+                        							break;
+                        						case "Complete" :
+                        							rtnDisplay = '<span class="badge badge-info">' + data + '</span>';
+                        							break;
+                        					}
+                        					return rtnDisplay;
+                        				}
+                        			}, {
+                        		 		data : "stage",
+                        				render : function(data){
+        	           						var rtnDisplay = "";
+        	           						switch(data) {
+        	           							case "I" :
+        	           								rtnDisplay = '<span class="badge badge-outline-orange">Identification</span>';
+        	           								break;
+        	           							case "P" :
+        	           								rtnDisplay = '<span class="badge badge-outline-green">Packaging</span>';
+        	           								break;
+        	           						}
+        	           						return rtnDisplay;
+        	           					}
+                        			}, {
+                        				data : "creator"
+                        			}, {
+                        				data : "reviewerName"
+                        			} ],
+                        		columnDefs : [
+            	            		{
+            	            			targets : [0],
+            	            			className : "text-center"
+            	            		},
+            	            		{
+            	            			targets : [2],
+            	            			className : "text-center"
+            	            		},
+            	            		{
+            	            			targets : [3],
+            	            			className : "text-center"
+            	            		},
+            	            		{
+            	            			targets : [4],
+            	            			className : "text-center"
+            	            		},
+            	            		{
+            	            			targets : [5],
+            	            			className : "text-center"
+            	            		}
+            	            	]
+            	            });
+        					
+        					$('#jobListTable > tbody > tr:first').trigger('click');
+        				}
+        			}
+                });
+          	},
+            getDiscoveredMailList : function () {
+            	$.ajax({
+        			url : '/dashboard/discoveredEmlList',
+        			type : 'GET',
+        			dataType : 'html',
+        			cache : false,
+        			success : function(data){
+        				$("#discoveredSndMail").empty();
+        				$("#discoveredSndMail").html(data);
+        				$("#discoveredSndMail > tr:first").find("span").trigger("click");
+        			}
+                });
+         	},
+            getNvdDashboardList : function () {
+            	$.ajax({
+        			url : '/dashboard/nvdDashboardList',
+        			type : 'GET',
+        			dataType : 'html',
+        			cache : false,
+        			success : function(res){
+        				$("#nvdDashboardArea").html(res);
+        				
+        				let donutDatas = [];
+        				$(".severityCnt").each(function(index) {
+        					let donutData = {};
+        					donutData["data"] = $(this).text();
+        					if (index == 0) {
+        						donutData["color"] = "#343a40";
+        					} else if (index == 1) {
+        						donutData["color"] = "#dc3545";
+        					} else if (index == 2) {
+        						donutData["color"] = "#ffa500";
+        					} else {
+        						donutData["color"] = "#ffc107";
+        					}
+        					donutDatas.push(donutData);
+        				});
+        				
+        				$.plot('#severityChart', donutDatas, {
+    		                series: {
+    		                    pie: {
+    		                        show: true,
+    		                        radius: 0.8,
+    		                        innerRadius: 0.3,
+    		                        label: {
+    		                            show: true,
+    		                            radius: 2 / 3,
+    		                            threshold: 0.1
+    		                        }
+    		                    }
+    		                },
+    		                legend: {
+    		                    show: false
+    		                }
+    		            });
+        			}
+                });
+           	},
+            getLastScoredVulnerability : function () {
+               	$.ajax({
+        			url : '/dashboard/latestScoredVulns',
+        			type : 'GET',
+        			dataType : 'html',
+        			cache : false,
+        			success : function(data){
+        				$("#latestVulns").empty();
+        				$("#latestVulns").html(data);
+        			}
+               	});
+            }
+      	}
+
+        var chart_fn = {
+          	mostUsedOssChartOpen : function(){
+               	var params = {};
+           		params["startDate"] = $("#startDate").val();;
+           		params["endDate"] = $("#endDate").val();
+           		params["divisionNo"] = "";
+           		params["pieSize"] = $("#mostUsedOssChartPieSize").val();
+           		params["chartType"] = "OSS";
+           		params["isRawData"] = "N";
+           		
+           		$.ajax({
+           			url : '/statistics/mostUsedChart',
+           			type : 'GET',
+           			dataType : 'json',
+           			cache : false,
+           			data : params,
+           			success : function(data){
+           				var data = data.chartData;
+           				var obj = new Object();
+           				var chartData = new Array();
+           				var idx = 0;
+           				for(var i in data){
+           					var result = {
+           						name: data[i].columnName
+           						, y: data[i].columnCnt
+           					}
+           					chartData.push(result);
+          					idx++;
+          				}
+           					
+           				obj["chartId"] = 'mostUsedOssChart';
+           				obj["chartData"] = chartData;
+           					
+           				getPieChart(obj);
+       				},
+       				error: function(data){
+        				alertify.error([[#{msg.common.valid2}]], 0);
+        			}
+        		});
+       		},
+           	mostUsedLicenseChartOpen : function(){
+        		var params = {};
+        		params["startDate"] = $("#startDate").val();
+        		params["endDate"] = $("#endDate").val();
+        		params["divisionNo"] = "";
+        		params["pieSize"] = $("#mostUsedLicenseChartPieSize").val();
+        		params["chartType"] = "LICENSE";
+        		params["isRawData"] = "N";
+        		
         		$.ajax({
-    				url : '/dashboard/progProjectCnt',
-    				type : 'GET',
-    				dataType : 'json',
-    				cache : false,
-    				success : function(data){
-    					var cntList = new Array();
-    					cntList = data;
-    					
-    					var hTag;
-    					var pTag;
-    					
-    					if (cntList.length > 0) {
-    						for (var i in cntList) {
-    							var status = cntList[i].status;
-    							var cnt = cntList[i].statusCnt;
-    							switch (status) {
-    								case "PROG" :
-    									hTag = document.createElement("h3");
-    									pTag = document.createElement("p");
-    									hTag.innerText = cnt;
-    									pTag.innerText = "Progress";
-    									
-    									$("#progressView .bg-success .inner").empty();
-    									$("#progressView .bg-success .inner").append(hTag);
-    									$("#progressView .bg-success .inner").append(pTag);
-    									break;
-    								case "REV" :
-    									hTag = document.createElement("h3");
-    			    					pTag = document.createElement("p");
-    									hTag.innerText = cnt;
-    									pTag.innerText = "Review";
-    									
-    									$("#progressView .bg-warning .inner").empty();
-    									$("#progressView .bg-warning .inner").append(hTag);
-    									$("#progressView .bg-warning .inner").append(pTag);
-    									break;
-    							}
-    						}
-    					} else {
-    						hTag = document.createElement("h3");
-	    					pTag = document.createElement("p");
-							hTag.innerText = "0";
-							pTag.innerText = "Progress";
-							
-							$("#progressView .bg-success .inner").empty();
-							$("#progressView .bg-success .inner").append(hTag);
-							$("#progressView .bg-success .inner").append(pTag);
-							
-							hTag = document.createElement("h3");
-							pTag = document.createElement("p");
-							hTag.innerText = "0";
-							pTag.innerText = "Review";
-							
-							$("#progressView .bg-warning .inner").empty();
-							$("#progressView .bg-warning .inner").append(hTag);
-							$("#progressView .bg-warning .inner").append(pTag);
-    					}
-    				}
+        			url : '/statistics/mostUsedChart',
+        			type : 'GET',
+        			dataType : 'json',
+        			cache : false,
+        			data : params,
+        			success : function(data){
+        				var data = data.chartData;
+        				var obj = new Object();
+        				var chartData = new Array();
+        				var idx = 0;
+        				for(var i in data){
+        					var result = {
+        						name: data[i].columnName
+        					  	, y: data[i].columnCnt
+        					}
+
+        					chartData.push(result);
+        					idx++;
+        				}
+        				
+        				obj["chartId"] = 'mostUsedLicenseChart';
+        				obj["chartData"] = chartData;
+        					
+        				getPieChart(obj);
+        			},
+        			error: function(data){
+        				alertify.error([[#{msg.common.valid2}]], 0);
+        			}
+        		});
+        	}
+        }
+        
+        var common_fn = {
+        	bindEvent : function(){
+        		$("#mostUsedOssChartPieSize").on("change", function(){
+        			chart_fn.mostUsedOssChartOpen();
+        		});
+
+        		$("#mostUsedLicenseChartPieSize").on("change", function(){
+        			chart_fn.mostUsedLicenseChartOpen();
         		});
         	},
         	discoveredEmlMessage : function(obj) {
-        		var sndSeq = $(obj).find('input').val();
+        		var sndSeq = $(obj).next().val();
         		$.ajax({
     				url : '/dashboard/discoveredEmlMessage',
     				type : 'POST',
@@ -248,158 +389,101 @@
         	}
         }
         
-        var list = {
-            getJobsList : function() {
-            		
-            },
-            getCommentsList : function() {
-            	$.ajax({
+        var comment_fn = {
+        	getCommentsList : function(param) {
+               	$.ajax({
+        			url : '/dashboard/commentsListAjax',
+        			type : 'POST',
+        			dataType : 'html',
+        			data : JSON.stringify(param),
+        			cache : false,
+        			contentType : 'application/json',
+        			success : function(res){
+        				$("#dashboardComments").html(res);
+        			}
+               	});
+          	},
+        	getMoreCommentsList : function(prjId, prjDivision, obj) {
+        		var param = {
+        			"prjId" : prjId,
+        			"prjDivision" : prjDivision,
+        			"moreYn" : "Y"
+        		};
+        		
+        		$.ajax({
     				url : '/dashboard/commentsListAjax',
-    				type : 'GET',
-    				dataType : 'json',
+    				type : 'POST',
+    				data : JSON.stringify(param),
+    				dataType : 'html',
     				cache : false,
-    				success : function(data){
-    					var commentList = new Array();
-    					commentList = data.rows;
-    					if (commentList.length > 0) {
-    						$("#dashboardComments").empty();
-    						
-    						var idx = 0;
-    						for (var i in commentList) {
-    							var tr = document.createElement('tr');
-    							var td = document.createElement('td');
-    							if (i == 0) $(td).css("border-top", "none");
-    							
-    							var row = document.createElement('div');
-    							$(row).addClass("row");
-    							$(row).addClass("commentsRow");
-    							
-    							var colspanDiv = document.createElement('div');
-    							$(colspanDiv).addClass("col-md-9");
-    							var div = document.createElement('div');
-    							$(div).addClass("post");
-    							var div2 = document.createElement('div');
-    							$(div2).addClass("user-block");
-    							var usernameSpan = document.createElement('span');
-    							$(usernameSpan).addClass("username");
-    							usernameSpan.textContent = commentList[i].creator;
-    							var createDateSpan = document.createElement('span');
-    							$(createDateSpan).addClass("description");
-    							$(createDateSpan).addClass("ml-0");
-    							createDateSpan.textContent = commentList[i].createdDate;
-    							
-    							div2.appendChild(usernameSpan);
-    							div2.appendChild(createDateSpan);
-    							div.appendChild(div2);
-    							var content = document.createElement('p');
-    							content.innerHTML = commentList[i].contents;
-    							
-    							div.appendChild(content);
-    							colspanDiv.appendChild(div);
-    							row.appendChild(colspanDiv);
-    							    							
-    							var colspanDiv2 = document.createElement('div');
-    							$(colspanDiv2).addClass("col-md-3");
-    							var tdBtn = document.createElement('td');
-    							$(tdBtn).addClass("text-right py-0 align-middle");
-    							$(tdBtn).css("border-top", "none");
-    							var divBtn = document.createElement('div');
-    							$(divBtn).addClass("btn-group btn-group-sm");
-    							var editBtn = document.createElement('button');
-    							$(editBtn).addClass("btn btn btn-default");
-    							var editBtnItag = document.createElement('i');
-    							$(editBtnItag).addClass("fas fa-pencil-alt");
-    							editBtn.appendChild(editBtnItag);
-    							var delBtn = document.createElement('button');
-    							$(delBtn).addClass("btn btn-lg-red");
-    							var delBtnItag = document.createElement('i');
-    							$(delBtnItag).addClass("fas fa-trash");
-    							delBtn.appendChild(delBtnItag);
-    							
-    							divBtn.appendChild(editBtn);
-    							divBtn.appendChild(delBtn);
-    							tdBtn.appendChild(divBtn);
-    							colspanDiv2.appendChild(tdBtn);
-    							row.appendChild(colspanDiv2);
-    							td.appendChild(row);
-    							tr.appendChild(td);
-    							
-    							$("#dashboardComments").append(tr);
-    							idx++;
-    						}
-    					} else {
-    						var tr = document.createElement('tr');
-    						var td = document.createElement('td');
-    						var content = document.createElement('p');
-    						$(content).css('margin','0');
-    						content.textContent = 'No comments were registered.';
-    						
-    						td.appendChild(content);
-    						tr.appendChild(td);
-    						
-    						$("#dashboardComments").append(tr);
-    					}
+    				contentType : 'application/json',
+    				success : function(res){
+    					$("#dashboardComments").html(res);
     				}
             	});
-            },
-            getDiscoveredMailList : function () {
-            	$.ajax({
-    				url : '/dashboard/discoveredEmlList',
-    				type : 'GET',
-    				dataType : 'json',
+        	},
+        	editComments : function (_commId, _prjId, _referenceDiv, successCallbackParam) {
+        		$.ajax({
+        			url : '/comment/getEditPopup',
+    				type : 'POST',
+    				data : {'commId' : _commId},
+    				dataType : 'html',
     				cache : false,
-    				success : function(data){
-    					var discoveredMailList = new Array();
-    					discoveredMailList = data;
-    					if (discoveredMailList.length > 0) {
-    						for (var i in discoveredMailList) {
-    							var tr = document.createElement('tr');
-								var tdDate = document.createElement('td');
-								$(tdDate).addClass("text-center");
-								var tdTitle = document.createElement('td');
-								$(tdTitle).addClass("text-left");
-								tdDate.innerText = discoveredMailList[i].lastUpdateDate;
-							
-								var span = document.createElement('span');
-								span.setAttribute("style", "cursor:pointer;");
-								span.setAttribute("onclick", "fn.discoveredEmlMessage(this)");
-								
-								var input = document.createElement('input');
-								input.setAttribute("type", "hidden");
-								input.value = discoveredMailList[i].sndSeq;
-								
-								span.innerText = discoveredMailList[i].emlTitle;
-								span.appendChild(input);
-								
-								tdTitle.appendChild(span);
-								tr.appendChild(tdDate);
-								tr.appendChild(tdTitle);
-								$("#discoveredSndMail").append(tr);
-    						}
-    						
-    						$("#discoveredSndMail > tr:first").find("span").trigger("click");
-    					} else {
-    						
-    					}
-    				}
-            	});
-            },
-            getNvdDashboardList : function () {
-            	$.ajax({
-    				url : '/dashboard/nvdDashboardList',
-    				type : 'GET',
-    				dataType : 'json',
-    				cache : false,
-    				success : function(data){
+    				success : function(res){
+    					alertify.confirm(res)
+    					.set('title', 'Comments Edit')
+    					.set('onok', function(closeEvent){
+    						comment_fn.updateComments(_commId, _prjId, _referenceDiv, successCallbackParam);
+    					})
+    					.set('oncancel', function(closeEvent){
+    						return;
+    					})
+    					.set('resizable', true).resizeTo('950px', '450px');
     					
+    					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
     				}
+        		});
+        	},
+        	updateComments : function (_commId, _referenceId, _referenceDiv, successCallbackParam) {
+        		var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
+        		
+        		$.ajax({
+                	url : '/comment/updateComment',
+                    type : 'POST',
+                    dataType : 'json',
+                    cache : false,
+                    data : param,
+                    success : function(json){
+                        alertify.success([[#{msg.common.success}]]);
+            			comment_fn.getCommentsList(successCallbackParam);
+                    },
+                    error : function(){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+        	},
+        	deleteComments : function (_commId, successCallbackParam) {
+        		alertify.confirm([[#{msg.oss.confirm.delete.comment}]], function (e) {
+            		if (e) {
+            			$.ajax({
+            	        	url : '/comment/deleteComment',
+            	            type : 'POST',
+            	            dataType : 'json',
+            	            cache : false,
+            	            data : {'commId' : _commId},
+            	            success : function(data){
+            	                alertify.success([[#{msg.common.success}]]);
+            	                fn_commemt.getCommentList(successCallbackParam);
+            	            },
+            	            error : function(){
+            	                alertify.error([[#{msg.common.valid2}]], 0);
+            	            }
+            	        });
+            		} else {
+            			return false;
+            		}
             	});
-            }
-     	}
-        
-        window.onload = function() {
-        	var width = $("#dashboardCommentsTable").parent().parent().parent().width();
-        	$(".commentsRow").width(width);
+        	}
         }
     </script>
 </th:block>

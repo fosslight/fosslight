@@ -23,7 +23,7 @@
 			, RESULT.STAGE
 			, RESULT.MODIFIER
 			, RESULT.MODIFIED_DATE
-			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE RESULT.REVIEWER  = USER_ID), RESULT.REVIEWER) AS REVIEWER_NAME
+			, IFNULL(IFNULL((SELECT USER_NAME FROM T2_USERS WHERE RESULT.REVIEWER  = USER_ID), ''), RESULT.REVIEWER) AS REVIEWER_NAME
 			, RESULT.REVIEWER AS REVIEWER
 			, RESULT.PRIORITY
 	 	FROM (
@@ -68,7 +68,6 @@
 					OR EXISTS (
 						SELECT 1
 						FROM PROJECT_WATCHER A1
-							<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
 						WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
 					)
 				)
@@ -225,7 +224,7 @@
 			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
 					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
 			     END AS USER
-		    FROM
+			FROM
 		        COMMENTS_HISTORY T1
 		        LEFT OUTER JOIN COMMENTS_HISTORY_READ T2 ON (
 		        	T1.COMM_ID = T2.COMM_ID
@@ -233,68 +232,75 @@
 		        	AND T1.REFERENCE_DIV = T2.REFERENCE_DIV 
 		        	AND T2.CREATOR = #{loginUserName}
 		        )
-		    WHERE
+		  	WHERE
 		        T1.USE_YN = 'Y'
 		        <foreach collection="referenceDivList" item="item" open="AND T1.REFERENCE_DIV IN  (" close=")" separator=", ">
 					#{item}
 				</foreach>
-		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
-<!--	        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') --> 
-	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
+<!-- 	        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
+	        	AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), INTERVAL - 1 MONTH), '%Y%m%d')
+	            AND T1.CREATED_DATE <![CDATA[<=]]> now() -->
 				AND T1.CONTENTS IS NOT NULL
 				AND T1.CONTENTS <![CDATA[<>]]> ''
+				AND T1.REFERENCE_ID = #{prjId}
 	       	 	<choose>
 		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-		            	AND (
-		            			(
-				            		T1.REFERENCE_ID IN (
-									SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 
-									WHERE
-										A1.USE_YN = 'Y'
-										AND (
-											A1.CREATOR = #{loginUserName}
-											OR EXISTS (
-												SELECT 1 
-												FROM PROJECT_WATCHER A1
-													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
-											)
-										)
-				            		)
-			            		) OR (
-				            		T1.REFERENCE_ID IN (
-									SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 
-									WHERE
-										A1.USE_YN = 'Y'
-										AND (
-											A1.CREATOR = #{loginUserName}
-											OR EXISTS (
-												SELECT 1 
-												FROM PARTNER_WATCHER A1
-													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
-											)
-										)
-				            		)
-		            			)
+		            	AND
+		            	<if test="@oss.fosslight.util.StringUtil@equals('PRJ', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PROJECT_MASTER
+		            			WHERE USE_YN = 'Y' 
+		            			AND PRJ_ID = #{prjId}
+		            			AND (
+									CREATOR = #{loginUserName}
+									OR EXISTS (
+										SELECT 1 
+										FROM PROJECT_WATCHER A1
+										WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
+									)
+								)
 		            		)
+		            	</if>
+		            	<if test="@oss.fosslight.util.StringUtil@equals('3RD', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PARTNER_MASTER
+		            			WHERE USE_YN = 'Y' 
+		            			AND PARTNER_ID = #{prjId}
+		            			AND (
+									CREATOR = #{loginUserName}
+									OR EXISTS (
+										SELECT 1 
+										FROM PROJECT_WATCHER A1
+										WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
+									)
+								)
+		            		)
+		            	</if>
 		            </when>
 		            <otherwise>
-		            	AND (
-		            			( T1.REFERENCE_ID IN ( SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
-		            			OR ( T1.REFERENCE_ID IN ( SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            	AND
+		            	<if test="@oss.fosslight.util.StringUtil@equals('PRJ', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PROJECT_MASTER
+		            			WHERE USE_YN = 'Y'
+		            			AND (
+		            				REVIEWER = #{loginUserName}
+		            				OR IFNULL(REVIEWER, '') = ''
+		            			)
 		            		)
+		            	</if>
+		            	<if test="@oss.fosslight.util.StringUtil@equals('3RD', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PARTNER_MASTER
+		            			WHERE USE_YN = 'Y'
+		            			AND (
+		            				REVIEWER = #{loginUserName}
+		            				OR IFNULL(REVIEWER, '') = ''
+		            			)
+		            		)
+		            	</if>
 		            </otherwise>
 	            </choose>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-	                AND T1.CREATOR LIKE CONCAT('%',#{modifier},'%')
-	            </if>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
-	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
-	            </if>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
-	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
-	            </if>
 	    	) G1
     </select>
 	
@@ -347,7 +353,7 @@
 			    ,CASE WHEN T1.REFERENCE_DIV = '20' THEN (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PARTNER_MASTER ST1 WHERE ST1.PARTNER_ID = T1.REFERENCE_ID )
 					  ELSE (SELECT IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) FROM PROJECT_MASTER ST1 WHERE ST1.PRJ_ID = T1.REFERENCE_ID )
 			     END AS USER
-		    FROM
+			FROM
 		        COMMENTS_HISTORY T1
 		        LEFT OUTER JOIN COMMENTS_HISTORY_READ T2 ON (
 		        	T1.COMM_ID = T2.COMM_ID
@@ -355,70 +361,81 @@
 		        	AND T1.REFERENCE_DIV = T2.REFERENCE_DIV 
 		        	AND T2.CREATOR = #{loginUserName}
 		        )
-		    WHERE
+		   	WHERE
 		        T1.USE_YN = 'Y'
 		        <foreach collection="referenceDivList" item="item" open="AND T1.REFERENCE_DIV IN  (" close=")" separator=", ">
 					#{item}
 				</foreach>
-		        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
-<!--	        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') -->
-	            AND T1.CREATED_DATE <![CDATA[<=]]> now()
+<!--	        AND T1.CREATOR <![CDATA[<>]]> #{loginUserName}
+		        AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), INTERVAL - 1 MONTH), '%Y%m%d')
+	            AND T1.CREATED_DATE <![CDATA[<=]]> now() -->
 				AND T1.CONTENTS IS NOT NULL
 				AND T1.CONTENTS <![CDATA[<>]]> ''
+				AND T1.REFERENCE_ID = #{prjId}
 	       	 	<choose>
 		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-		            	AND (
-		            			(
-				            		T1.REFERENCE_ID IN (
-									SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 
-									WHERE
-										A1.USE_YN = 'Y'
-										AND (
-											A1.CREATOR = #{loginUserName}
-											OR EXISTS (
-												SELECT 1 
-												FROM PROJECT_WATCHER A1
-													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-												WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
-											)
-										)
-				            		)
-			            		) OR (
-				            		T1.REFERENCE_ID IN (
-									SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 
-									WHERE
-										A1.USE_YN = 'Y'
-										AND (
-											A1.CREATOR = #{loginUserName}
-											OR EXISTS (
-												SELECT 1 
-												FROM PARTNER_WATCHER A1
-													<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-												WHERE A1.PARTNER_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
-											)
-										)
-				            		)
-		            			)
+		            	AND 
+		            	<if test="@oss.fosslight.util.StringUtil@equals('PRJ', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PROJECT_MASTER
+		            			WHERE USE_YN = 'Y' 
+		            			AND PRJ_ID = #{prjId}
+		            			AND (
+									CREATOR = #{loginUserName}
+									OR EXISTS (
+										SELECT 1 
+										FROM PROJECT_WATCHER A1
+										WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
+									)
+								)
 		            		)
+		            	</if>
+		            	<if test="@oss.fosslight.util.StringUtil@equals('3RD', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PARTNER_MASTER
+		            			WHERE USE_YN = 'Y' 
+		            			AND PARTNER_ID = #{prjId}
+		            			AND (
+									CREATOR = #{loginUserName}
+									OR EXISTS (
+										SELECT 1 
+										FROM PROJECT_WATCHER A1
+										WHERE A1.PRJ_ID = T1.REFERENCE_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}) ))
+									)
+								)
+		            		)
+		            	</if>
 		            </when>
 		            <otherwise>
-		            	AND (
-		            			( T1.REFERENCE_ID IN ( SELECT A1.PRJ_ID FROM PROJECT_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
-		            			OR ( T1.REFERENCE_ID IN ( SELECT A1.PARTNER_ID FROM PARTNER_MASTER A1 WHERE A1.USE_YN = 'Y' AND (A1.REVIEWER = #{loginUserName} OR IFNULL(A1.REVIEWER, '') = '')) )
+		            	AND
+		            	<if test="@oss.fosslight.util.StringUtil@equals('PRJ', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PROJECT_MASTER
+		            			WHERE USE_YN = 'Y'
+		            			AND (
+		            				REVIEWER = #{loginUserName}
+		            				OR IFNULL(REVIEWER, '') = ''
+		            			)
 		            		)
+		            	</if>
+		            	<if test="@oss.fosslight.util.StringUtil@equals('3RD', prjDivision)">
+		            		EXISTS (
+		            			SELECT 1 FROM PARTNER_MASTER
+		            			WHERE USE_YN = 'Y'
+		            			AND (
+		            				REVIEWER = #{loginUserName}
+		            				OR IFNULL(REVIEWER, '') = ''
+		            			)
+		            		)
+		            	</if>
 		            </otherwise>
 	            </choose>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-	                AND T1.CREATOR LIKE CONCAT('%',#{modifier},'%')
-	            </if>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(startDate)">
-	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{startDate}, '%Y%m%d')
-	            </if>
-	            <if test="!@oss.fosslight.util.StringUtil@isEmpty(endDate)">
-	                AND T1.CREATED_DATE <![CDATA[>=]]> DATE_FORMAT(#{endDate}, '%Y%m%d')
-	            </if>
+	            
 	    	) G1
-	    ORDER BY G1.CREATED_DATE DESC
+	    	ORDER BY G1.CREATED_DATE DESC
+	   	<if test="@oss.fosslight.util.StringUtil@isEmpty(moreYn)">
+	    	LIMIT 5
+	    </if>
     </select>
     
     <select id="selectDashboardOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -623,5 +640,188 @@
 		SELECT EML_MESSAGE
 		FROM EMAIL_SND_HIS 
 		WHERE SND_SEQ = #{sndSeq}
+	</select>
+	
+	<select id="getLatestScoredVulns" resultType="oss.fosslight.domain.CamelMap">
+		SELECT CVE_ID
+			, VULN_SUMMARY
+			, PUBL_DATE
+			, BASE_METRIC
+			, CVSS_SCORE
+			, CASE WHEN CVSS_SCORE <![CDATA[>=]]> 9.0 THEN 'Critical' 
+					WHEN CVSS_SCORE <![CDATA[>=]]> 7.0 THEN 'High'
+					WHEN CVSS_SCORE <![CDATA[>=]]> 4.0 THEN 'Medium'
+					ELSE 'Low' END CRITICAL_SCORE
+		FROM NVD_CVE_V3
+		ORDER BY REG_DATE DESC
+		LIMIT 20
+	</select>
+	
+	<select id="getNvdDashboardList" resultType="oss.fosslight.domain.CamelMap">
+	<![CDATA[
+		SELECT TODAY.*
+		FROM 
+		(
+			SELECT 
+				(
+					SELECT COUNT(1)
+					FROM NVD_CVE_V3
+					WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d')
+				) AS NEW_CNT
+				,(
+					SELECT COUNT(1)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (
+							SELECT 1 FROM NVD_CVE_V3
+							WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d')
+							AND CVE_ID = NVD.CVE_ID
+					)
+				) AS NEW_MAT_CNT
+				,(
+					SELECT COUNT(1) AS MAT_OSS_CNT
+					FROM OSS_MASTER OM
+					WHERE OM.VULN_YN = 'Y'
+					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d')
+				) AS OM_M_CNT
+		) TODAY
+		
+		UNION ALL
+		
+		SELECT THIS_WEEK.*
+		FROM 
+		(
+			SELECT 
+				(
+					SELECT COUNT(1)
+					FROM NVD_CVE_V3
+					WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 WEEK), '%Y-%m-%d')
+				) AS NEW_CNT
+				,(
+					SELECT COUNT(1)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (
+							SELECT 1 FROM NVD_CVE_V3
+							WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 WEEK), '%Y-%m-%d')
+							AND CVE_ID = NVD.CVE_ID
+					)
+				) AS NEW_MAT_CNT
+				,(
+					SELECT COUNT(1) AS MAT_OSS_CNT
+					FROM OSS_MASTER OM
+					WHERE OM.VULN_YN = 'Y'
+					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 WEEK), '%Y-%m-%d')
+				) AS OM_M_CNT
+		) THIS_WEEK
+		
+		UNION ALL
+		
+		SELECT THIS_MONTH.*
+		FROM 
+		(
+			SELECT 
+				(
+					SELECT COUNT(1)
+					FROM NVD_CVE_V3
+					WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+				) AS NEW_CNT
+				,(
+					SELECT COUNT(1)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (
+							SELECT 1 FROM NVD_CVE_V3
+							WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+							AND CVE_ID = NVD.CVE_ID
+					)
+				) AS NEW_MAT_CNT
+				,(
+					SELECT COUNT(1) AS MAT_OSS_CNT
+					FROM OSS_MASTER OM
+					WHERE OM.VULN_YN = 'Y'
+					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+				) AS OM_M_CNT
+		) THIS_MONTH
+		
+		UNION ALL
+		
+		SELECT LAST_MONTH.*
+		FROM 
+		(
+			SELECT 
+				(
+					SELECT COUNT(1)
+					FROM NVD_CVE_V3
+					WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 2 MONTH), '%Y-%m-%d') AND DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+				) AS NEW_CNT
+				,(
+					SELECT COUNT(1)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (
+							SELECT 1 FROM NVD_CVE_V3
+							WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 2 MONTH), '%Y-%m-%d') AND DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+							AND CVE_ID = NVD.CVE_ID
+					)
+				) AS NEW_MAT_CNT
+				,(
+					SELECT COUNT(1) AS MAT_OSS_CNT
+					FROM OSS_MASTER OM
+					WHERE OM.VULN_YN = 'Y'
+					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 2 MONTH), '%Y-%m-%d') AND DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
+				) AS OM_M_CNT
+		) LAST_MONTH
+		
+		UNION ALL
+		
+		SELECT THIS_YEAR.*
+		FROM 
+		(
+			SELECT 
+				(
+					SELECT COUNT(1)
+					FROM NVD_CVE_V3
+					WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 12 MONTH), '%Y-%m-%d')
+				) AS NEW_CNT
+				,(
+					SELECT COUNT(1)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE EXISTS (
+							SELECT 1 FROM NVD_CVE_V3
+							WHERE DATE_FORMAT(REG_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 12 MONTH), '%Y-%m-%d')
+							AND CVE_ID = NVD.CVE_ID
+					)
+				) AS NEW_MAT_CNT
+				,(
+					SELECT COUNT(1) AS MAT_OSS_CNT
+					FROM OSS_MASTER OM
+					WHERE OM.VULN_YN = 'Y'
+					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 12 MONTH), '%Y-%m-%d')
+				) AS OM_M_CNT
+		) THIS_YEAR
+	]]>
+	</select>
+	
+	<select id="getNvdSeverityList" resultType="oss.fosslight.domain.CamelMap">
+	<![CDATA[
+		SELECT 'CRITICAL' AS SEVERITY, COUNT(1) AS CNT
+		FROM NVD_CVE_V3
+		WHERE CVSS_SCORE >= 9.0
+
+		UNION ALL
+
+		SELECT 'HIGH' AS SEVERITY, COUNT(1) AS CNT
+		FROM NVD_CVE_V3
+		WHERE CVSS_SCORE >= 7.0 AND CVSS_SCORE < 9.0
+
+		UNION ALL
+
+		SELECT 'MEDIUM' AS SEVERITY, COUNT(1) AS CNT
+		FROM NVD_CVE_V3
+		WHERE CVSS_SCORE >= 4.0 AND CVSS_SCORE < 7.0
+
+		UNION ALL
+
+		SELECT 'LOW' AS SEVERITY, COUNT(1) AS CNT
+		FROM NVD_CVE_V3
+		WHERE CVSS_SCORE < 4.0
+	]]>
 	</select>
 </mapper>

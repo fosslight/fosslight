@@ -63,6 +63,7 @@ public final class Url {
 		public static final String DISCOVEREDEMLLIST = PATH + "/discoveredEmlList";
 		public static final String DISCOVEREDEMLMESSAGE = PATH + "/discoveredEmlMessage";
 		public static final String NVDDASHBOARDLIST = PATH + "/nvdDashboardList";
+		public static final String LATESTSCOREDVULNS = PATH + "/latestScoredVulns";
 	}
 	
 	public static final class LICENSE {
@@ -120,6 +121,7 @@ public final class Url {
 		
 		public static final String POPUP = PATH + "/popup/{rDiv}/{rId}";
 		public static final String POPUP_JSP  = TILES_ROOT + PATH + "/popup";
+		public static final String EDIT_POPUP  = PATH + "/getEditPopup";
 		
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";

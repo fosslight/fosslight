@@ -786,12 +786,12 @@
                                         <button th:if="${autoAnalysisFlag and @CommonFunction.isAdmin() and project.dropYn ne 'Y'}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
                                         <button th:if="${@CommonFunction.isAdmin() and project.dropYn ne 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="|fn_grid_com.ossBulkReg(${project.prjId},'13')|"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg(${project.prjId},'13')"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|bom_fn.binaryDBSave(${project.prjId})|" th:text="'Save (Binary DB)'"></button>
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave(${project.prjId})" th:text="'Save (Binary DB)'"></button>
                                         <div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
                                         	<button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|bom_fn.exportList(this)|" th:text="Export"></button>
 											<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">

@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="row">
+		<div class="col-12">
+			<div class="row">
+    			<div class="col-12" style="display:inline;">
+    				<div class="float-right" style="display:inline-block;" th:text="${'(' + comments.info.createdDate + ')'}"></div>
+    				<div class="float-right text-bold" style="display:inline-block; color:#007bff; margin: 0px 5px 0px 10px;" th:text="${comments.info.loginUserName}"></div>
+    				<div class="float-right text-bold" style="display:inline-block;" th:text="Creator"></div>
+    			</div>
+    		</div>
+ 		</div>
+	</div>
+    <div class="row">
+     	<div class="col-12">
+          	<textarea class="form-control" id="commentEdit" rows="5">[[${comments.info.contents}]]</textarea>
+        </div>
+	</div>
+</body>
+</html>

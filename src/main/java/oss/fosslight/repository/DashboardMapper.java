@@ -41,4 +41,10 @@ public interface DashboardMapper {
 	List<Map<String, Object>> getDiscoveredEmlList(Map<String, Object> paramMap);
 
 	String getDiscoveredEmlMessage(HashMap<String, Object> param);
+
+	List<Map<String, Object>> getLatestScoredVulns();
+
+	List<Map<String, Object>> getNvdDashboardList();
+
+	List<Map<String, Object>> getNvdSeverityList();
 }
