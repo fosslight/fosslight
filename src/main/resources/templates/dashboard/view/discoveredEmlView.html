@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:if="${not #lists.isEmpty(discoveredEmlList)}">
+	<tr th:each="eml : ${discoveredEmlList}">
+		<td class="text-center" th:text="${eml.lastUpdateDate}">
+		<td class="ext-left">
+			<span style="cursor:pointer" th:onclick="common_fn.discoveredEmlMessage(this)" th:text="${eml.emlTitle}"></span>
+			<input type="hidden" th:value="${eml.sndSeq}"/>
+		</td>
+	</tr>
+</th:block>
+<th:block th:if="${#lists.isEmpty(discoveredEmlList)}">
+	<tr>
+		<td colspan="2" class="text-center">
+			<span th:text="'There is no history of receiving discovered mail'"></span>
+		</td>
+	</tr>
+</th:block>
+</html>

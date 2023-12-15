@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:if="${comments.records > 0}">
+	<tr th:each="comment, status : ${comments.rows}">
+		<td th:style="${status.index == 0} ? 'border-top: none;'">
+			<div class="row">
+				<div class="col-md-10">
+					<div class="post">
+              			<div class="user-block">
+							<span class="username"><a href="#" th:text="${comment.loginUserName}"></a></span>
+                    		<span class="description ml-0" th:text="${comment.createdDate}"></span>
+              			</div>
+             			<p th:utext="${comment.contents}"></p>
+          			</div>
+				</div>
+				<div class="col-md-2">
+					<div class="btn-group btn-group-sm">
+               			<button class="btn btn btn-default" name="commentModifyBtn" th:data-commId="${comment.commId}"><i class="fas fa-pencil-alt"></i></button>
+               			<button class="btn btn-lg-red" name="commentDeleteBtn" th:data-commId="${comment.commId}"><i class="fas fa-trash"></i></button>
+               			<input type="hidden" th:value="${comment.referenceDiv}"/>
+         			</div>
+				</div>
+			</div>
+      	</td>
+	</tr>
+	<th:block th:if="${comments.records > 5 and #maps.containsKey(comments, 'moreYn')}">
+		<tr>
+			<td>
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:onclick="comment_fn.getMoreCommentsList([[${comments.prjId}]], [[${comments.prjDivision}]], this)" th:text="'More +'"></button>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</th:block>
+</th:block>
+<th:block th:if="${comments.records == 0}">
+	<tr>
+		<td th:style="'border-top: none;'">
+			<div class="row">
+				<div class="col-md-12">
+					<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+				</div>
+			</div>
+		</td>
+	</tr>
+</th:block>
+</html>

@@ -17,7 +17,7 @@ import oss.fosslight.domain.Project;
 public interface DashboardService {
 	Map<String,Object> getDashboardJobsList(Project project);	
 	
-	Map<String,Object> getDashboardCommentsList(CommentsHistory commentsHistory);  
+	Map<String,Object> getDashboardCommentsList(Map<String, Object> param);
 
     Map<String,Object> getDashboardOssList(OssMaster ossMaster);   
 
@@ -33,5 +33,7 @@ public interface DashboardService {
 
 	Map<String, Object> getDiscoveredEmlMessage(HashMap<String, Object> param);
 
-	List<Map<String, Object>> getNvdDashboardList();
+	Map<String, Object> getNvdDashboardList();
+
+	List<Map<String, Object>> getLatestScoredVulns();
 }

@@ -50,7 +50,6 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         map.put("records", records);
         
         List<Project> list = dashboardMapper.selectDashboardJobsList(paramMap);
-        // TODO bin 변경  > ???
         
         if (list != null) {
 			// 코드변환처리
@@ -67,9 +66,9 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
     }
 	
 	@Override
-    public Map<String, Object> getDashboardCommentsList(CommentsHistory commentsHistory) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        Map<String, Object> paramMap = new HashMap<String, Object>();
+    public Map<String, Object> getDashboardCommentsList(Map<String, Object> param) {
+		boolean moreYn = param.containsKey("moreYn");
+		HashMap<String, Object> map = new HashMap<String, Object>();
         List<String> referenceDivList = new ArrayList<>();
         boolean projectFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
         boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -85,17 +84,23 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         	referenceDivList.add(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
         }
         
-        paramMap.put("loginUserName", loginUserName());
-        paramMap.put("loginUserRole", loginUserRole());
-        paramMap.put("referenceDivList", referenceDivList);
+        param.put("loginUserName", loginUserName());
+        param.put("loginUserRole", loginUserRole());
+        param.put("referenceDivList", referenceDivList);
         
-        int records = dashboardMapper.selectDashboardCommentsTotalCount(paramMap);
-        commentsHistory.setTotListSize(records);
-
-        map.put("page", commentsHistory.getCurPage());
-        map.put("total", commentsHistory.getTotBlockSize());
-        map.put("records", records);
-        map.put("rows", dashboardMapper.selectDashboardCommentsList(paramMap));
+        if (moreYn) {
+        	map.put("records", dashboardMapper.selectDashboardCommentsTotalCount(param));
+        	map.put("rows", dashboardMapper.selectDashboardCommentsList(param));
+        } else {
+        	int records = dashboardMapper.selectDashboardCommentsTotalCount(param);
+        	if (records > 5) {
+        		map.put("moreYn", true);
+        		map.put("prjId", (String) param.get("prjId"));
+            	map.put("prjDivision", (String) param.get("prjDivision"));
+        	}
+            map.put("records", records);
+            map.put("rows", dashboardMapper.selectDashboardCommentsList(param));
+        }
         
         return map;
     }
@@ -178,8 +183,7 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
 		Map<String, Object> rtnMap = new HashMap<>();
 		param.put("loginUserName", loginUserName());
 		param.put("loginUserRole", loginUserRole());
-		param.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
-		param.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
+		// User email must be set in param
         
 		String emlMessage = dashboardMapper.getDiscoveredEmlMessage(param);
 		if (emlMessage.indexOf("Vulnerability Information") > -1) {
@@ -193,8 +197,24 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
 	}
 
 	@Override
-	public List<Map<String, Object>> getNvdDashboardList() {
+	public Map<String, Object> getNvdDashboardList() {
+		Map<String, Object> rtnMap = new HashMap<>();
 		
-		return null;
+		// time period
+		List<Map<String, Object>> nvdDashboardList = dashboardMapper.getNvdDashboardList();
+		if (nvdDashboardList == null) nvdDashboardList = new ArrayList<>();
+		rtnMap.put("timePeriodCntList", nvdDashboardList);
+		
+		// severity
+		List<Map<String, Object>> nvdSeverityList = dashboardMapper.getNvdSeverityList();
+		if (nvdSeverityList == null) nvdSeverityList = new ArrayList<>();
+		rtnMap.put("nvdSeverityList", nvdSeverityList);
+		
+		return rtnMap;
+	}
+
+	@Override
+	public List<Map<String, Object>> getLatestScoredVulns() {
+		return dashboardMapper.getLatestScoredVulns();
 	}
 }

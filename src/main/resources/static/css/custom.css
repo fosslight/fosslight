@@ -216,6 +216,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .badge.badge-carrot {background-color: #fd7e14; color: #fff;  }
 .badge.badge-disabled {background-color: #cccccc; color: #cccccc;  }
 .badge.badge-blue { background-color: #0080ff; color: #fff; }
+.badge.badge-orange { background-color: #ffa500; color: #fff; }
+.badge.badge-yellow2 { background-color: #ffff00; color: #000; }
 
 /* text color */
 .custom-layout .text-gray { color: #555555; }

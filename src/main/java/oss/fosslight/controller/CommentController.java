@@ -133,5 +133,12 @@ public class CommentController extends CoTopComponent {
 
         return "fragments/comment-fragments :: userCommentPopupFragment";
     };
+    
+    @PostMapping(value = COMMENT.EDIT_POPUP)
+    public String editPopup(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
+    	Map<String, Object> map = commentService.getCommnetInfo(commentsHistory.getCommId());
+    	model.addAttribute("comments", map);
+        return "comment/editPopupFragments";
+    }
 }
 

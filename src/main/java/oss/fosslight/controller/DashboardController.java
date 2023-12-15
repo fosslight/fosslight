@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,7 +40,6 @@ public class DashboardController extends CoTopComponent{
 		model.addAttribute("userId", loginUserName());
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("jobsList", dashboardService.getCustomDashboardJobsList());
 		
 		return "dashboard/list";
 	}
@@ -50,21 +50,16 @@ public class DashboardController extends CoTopComponent{
 			, HttpServletRequest req
 			, HttpServletResponse res
 			, Model model){
-		int page = Integer.parseInt(req.getParameter("page"));
-		int rows = Integer.parseInt(req.getParameter("rows"));
-		project.setCurPage(page);
-		project.setPageListSize(rows);
+		project.setCurPage(1);
+		project.setPageListSize(1);
 		
 		return makeJsonResponseHeader(dashboardService.getDashboardJobsList(project));
 	}
 	
-	@GetMapping(value=DASHBOARD.COMMENTLIST)
-    public @ResponseBody ResponseEntity<Object> commentsListAjax(
-    		HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
-		CommentsHistory commentsHistory = new CommentsHistory();
-        return makeJsonResponseHeader(dashboardService.getDashboardCommentsList(commentsHistory));
+	@PostMapping(value=DASHBOARD.COMMENTLIST)
+    public String commentsListAjax(@RequestBody Map<String, Object> param, HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("comments", dashboardService.getDashboardCommentsList(param));
+		return "dashboard/view/commentsView";
     }
 	
 	@GetMapping(value=DASHBOARD.OSSLIST)
@@ -92,7 +87,8 @@ public class DashboardController extends CoTopComponent{
         licenseMaster.setCurPage(page);
         licenseMaster.setPageListSize(rows);
         
-        return makeJsonResponseHeader(dashboardService.getDashboardLicenseList(licenseMaster));
+        Map<String, Object> map = dashboardService.getDashboardLicenseList(licenseMaster);
+        return makeJsonResponseHeader(map);
     }
 	
 	@PostMapping(value=DASHBOARD.READCONFIRM_ALL)
@@ -121,11 +117,9 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@GetMapping(value=DASHBOARD.DISCOVEREDEMLLIST)
-    public @ResponseBody ResponseEntity<Object> discoveredEmlListAjax(
-            HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
-		return makeJsonResponseHeader(dashboardService.getDiscoveredEmlList());
+    public String discoveredEmlListAjax(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("discoveredEmlList", dashboardService.getDiscoveredEmlList());
+		return "dashboard/view/discoveredEmlView";
     }
 	
 	@PostMapping(value=DASHBOARD.DISCOVEREDEMLMESSAGE)
@@ -138,10 +132,14 @@ public class DashboardController extends CoTopComponent{
     }
 	
 	@GetMapping(value=DASHBOARD.NVDDASHBOARDLIST)
-    public @ResponseBody ResponseEntity<Object> nvdDashboardList(
-            HttpServletRequest req
-            , HttpServletResponse res
-            , Model model){
-		return makeJsonResponseHeader(dashboardService.getNvdDashboardList());
+    public String nvdDashboardList(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("nvdDashboard", dashboardService.getNvdDashboardList());
+		return "dashboard/view/nvdDashboardView";
+    }
+	
+	@GetMapping(value=DASHBOARD.LATESTSCOREDVULNS)
+    public String latestScoredVulns(HttpServletRequest req, HttpServletResponse res, Model model){
+		model.addAttribute("lstestScoredVulns", dashboardService.getLatestScoredVulns());
+		return "dashboard/view/latestScoredVulnsView";
     }
 }
