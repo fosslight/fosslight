@@ -302,6 +302,10 @@ public abstract class T2CoValidator extends CoTopComponent {
 		}
 		return variableValue;
 	}
+
+    public T2CoValidationResult validate() {
+        return validate(new HashMap<>());
+    }
 	
     public T2CoValidationResult validate(Map<String, String> map){
         checkStatus();

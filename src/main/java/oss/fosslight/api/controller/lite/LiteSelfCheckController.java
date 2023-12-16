@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.*;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url;
 import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
@@ -22,13 +24,13 @@ import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -91,7 +93,7 @@ public class LiteSelfCheckController extends CoTopComponent {
             var files = project.getCsvFile();
             var fileList = files.stream()
                     .filter(file -> "N".equals(file.getDelYn()))
-                    .map(this::getFileInfoMap)
+                    .map(FileDto::new)
                     .collect(Collectors.toList());
             var ossList = apiSelfCheckService.listSelfCheckOss(id);
             var fileId = project.getSrcCsvFileId();
@@ -141,7 +143,7 @@ public class LiteSelfCheckController extends CoTopComponent {
         try {
             var packages = apiSelfCheckService.listSelfCheckPackages(id);
             var list = packages.stream()
-                    .map(this::getFileInfoMap)
+                    .map(FileDto::new)
                     .collect(Collectors.toList());
             var result = SelfCheckFileListDto.Response.builder()
                     .files(list)
@@ -184,7 +186,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
         try {
             var fileList = apiVerificationService.saveUploadedFile(id, uploadedList)
-                    .stream().map(this::getFileInfoMap)
+                    .stream().map(FileDto::new)
                     .collect(Collectors.toList());
             var result = SelfCheckFileListDto.Response.builder()
                     .files(fileList)
@@ -204,7 +206,7 @@ public class LiteSelfCheckController extends CoTopComponent {
         var fileId = request.getFileId();
         try {
             var list = apiVerificationService.deleteSelfCheckPackageFile(id, fileId)
-                    .stream().map(this::getFileInfoMap)
+                    .stream().map(FileDto::new)
                     .collect(Collectors.toList());
             var result = SelfCheckFileDeleteDto.Response.builder()
                     .files(list)
@@ -216,13 +218,21 @@ public class LiteSelfCheckController extends CoTopComponent {
         }
     }
 
-    private FileDto getFileInfoMap(T2File file) {
-        return FileDto.builder()
-                .orgNm(file.getOrigNm())
-                .created(file.getCreatedDate())
-                .fileId(file.getFileId())
-                .logiNm(file.getLogiNm())
-                .fileSeq(file.getFileSeq())
-                .build();
+
+    @GetMapping("/selfchecks/{id}/oss/check")
+    public @ResponseBody ResponseEntity<SelfCheckVerifyOssDto.Response> checkOss(
+            @PathVariable("id") String id
+    ) {
+        var ossIdentificationList = apiSelfCheckService.validateOss(id);
+
+        try {
+            return ResponseEntity.ok(SelfCheckVerifyOssDto.Response.builder()
+                    .verificationOss(ossIdentificationList)
+                    .build());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+
     }
 }
