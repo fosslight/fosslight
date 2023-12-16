@@ -2,6 +2,7 @@
 
 import ListSections from '@/components/list-sections';
 import { loadingState } from '@/lib/atoms';
+import { useAPI } from '@/lib/hooks';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
@@ -15,50 +16,21 @@ export default function FullSearch() {
   const queryParams = useSearchParams();
   const keyword = queryParams.get('keyword') || '';
 
+  // API for loading search result
+  const searchRequest = useAPI('get', 'http://localhost:8180/api/lite/dashboard/search', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      const { vulnerabilities, oss, licenses } = res.data;
+      setVulnerabilityList(vulnerabilities);
+      setOssList(oss);
+      setLicenseList(licenses);
+    },
+    onFinish: () => setLoading(false)
+  });
+
   // Load recent rows for each section
   useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setVulnerabilityList(
-        Array.from(Array(3)).map(() => ({
-          ossName: 'cairo',
-          ossVersion: '1.4.12',
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8',
-          summary: 'A flaw was found in cairo image-compositor.c in all versions prior to 1.17.4.',
-          modified: '2023-05-03 21:32:05.0'
-        }))
-      );
-
-      setOssList(
-        Array.from(Array(3)).map((_, idx) => ({
-          ossId: String(3 - idx),
-          ossName: 'cairo',
-          ossVersion: '1.4.12',
-          licenseName: '(MPL-1.1 AND GPL-2.0) OR (LGPL-2.1 AND GPL-2.0)',
-          obligations: ['Y', 'Y'],
-          cveId: 'CVE-2020-35492',
-          cvssScore: '7.8',
-          created: '2023-10-05 23:54:08.0',
-          modified: '2023-10-07 21:32:05.0'
-        }))
-      );
-
-      setLicenseList(
-        Array.from(Array(3)).map((_, idx) => ({
-          licenseId: String(3 - idx),
-          licenseName: 'Apache License 2.0',
-          licenseIdentifier: 'Apache-2.0',
-          obligations: ['Y', 'Y'],
-          restrictions: ['1', '2'],
-          created: '2023-10-05 23:54:08.0',
-          modified: '2023-10-07 21:32:05.0'
-        }))
-      );
-
-      setLoading(false);
-    }, 500);
+    searchRequest.execute({ params: { query: keyword } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword]);
 
