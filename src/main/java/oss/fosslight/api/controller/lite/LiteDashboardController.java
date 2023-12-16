@@ -36,11 +36,7 @@ public class LiteDashboardController extends CoTopComponent {
     ) {
         final int LIMIT = 5;
         try {
-            var ossQuery = ListOssDto.Request.builder()
-                    .ossName(query)
-                    .build();
-            ossQuery.setLimit(LIMIT);
-            var ossSearchResults = apiOssService.listNameSearchResult(ossQuery);
+            var ossSearchResults = apiOssService.listNameSearchResult(query, LIMIT);
             var licenseQuery = ListLicenseDto.Request.builder()
                     .licenseName(query)
                     .build();
