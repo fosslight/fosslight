@@ -289,6 +289,6 @@
         WHERE T1.USE_YN = 'Y'
           AND T2.CD_NO = '201'
         ORDER BY T1.MODIFIED_DATE DESC
-        LIMIT 5
+        LIMIT ${limit}
     </select>
 </mapper>
