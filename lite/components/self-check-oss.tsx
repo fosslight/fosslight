@@ -29,6 +29,7 @@ export default function SelfCheckOSS({
   const [fileId, setFileId] = useState('');
   const [fileList, setFileList] = useState<SelfCheck.OSSFile[]>([]);
   const [ossList, setOssList] = useState<SelfCheck.OSS[]>([]);
+  const [validMap, setValidMap] = useState<SelfCheck.OSSValidMap>({});
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
@@ -121,6 +122,38 @@ export default function SelfCheckOSS({
     currentPage * countPerPage
   );
 
+  // API for loading validation result
+  const loadValidationListRequest = useAPI(
+    'get',
+    `http://localhost:8180/selfCheck/ossGrid/${id}/10`,
+    {
+      onSuccess: (res) => {
+        const { validData } = res.data;
+        const map: SelfCheck.OSSValidMap = {};
+
+        if (validData) {
+          const entries = Object.entries(validData) as [string, string][];
+
+          entries.forEach(([key, value]) => {
+            const [field, gridId] = key.split('.');
+
+            if (!field || !gridId) {
+              return;
+            }
+
+            if (!map[gridId]) {
+              map[gridId] = {};
+            }
+
+            map[gridId][field] = value;
+          });
+        }
+
+        setValidMap(map);
+      }
+    }
+  );
+
   // API for loading file/OSS list
   const loadDataListRequest = useAPI(
     'get',
@@ -131,6 +164,9 @@ export default function SelfCheckOSS({
         setFileId(res.data.fileId);
         setFileList(res.data.files);
         setOssList(res.data.oss);
+
+        // Load validation result
+        loadValidationListRequest.execute({ params: { referenceId: id } });
       },
       onFinish: () => setLoading(false)
     }
@@ -568,13 +604,17 @@ export default function SelfCheckOSS({
                       });
                     }}
                   >
-                    <div className="line-clamp-1 break-all">
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: highlight(oss.ossName, filters.keyword)
-                        }}
-                      />
-                    </div>
+                    {oss.ossName ? (
+                      <div className="line-clamp-1 break-all">
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(oss.ossName, filters.keyword)
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-red-500">OSS required</span>
+                    )}
                     {oss.ossVersion && <div className="flex-shrink-0">({oss.ossVersion})</div>}
                   </div>
                   {(oss.obligations[0] === 'Y' || oss.obligations[1] === 'Y') && (
@@ -602,34 +642,80 @@ export default function SelfCheckOSS({
                       {oss.cvssScore}
                     </div>
                   )}
-                </div>
-                {oss.licenses.length > 0 && (
-                  <div className="line-clamp-3 text-sm text-semiblack/80">
-                    {oss.licenses.map((license, idx) => (
-                      <span key={idx}>
-                        <span
-                          className={clsx(license.licenseId && 'cursor-pointer')}
-                          onClick={() => {
-                            if (!license.licenseId) {
-                              return;
-                            }
+                  {(() => {
+                    if (
+                      !validMap[oss.gridId] ||
+                      (!validMap[oss.gridId].ossName && !validMap[oss.gridId].ossVersion)
+                    ) {
+                      return null;
+                    }
 
-                            const urlQueryParams = new URLSearchParams(queryParams);
-                            urlQueryParams.set('modal-type', 'license');
-                            urlQueryParams.set('modal-id', license.licenseId);
-                            router.push(`${pathname}?${urlQueryParams.toString()}`, {
-                              scroll: false
-                            });
-                          }}
-                          dangerouslySetInnerHTML={{
-                            __html: highlight(license.licenseName, filters.keyword)
-                          }}
-                        />
-                        {idx < oss.licenses.length - 1 && ', '}
-                      </span>
-                    ))}
+                    const errors = [];
+                    if (validMap[oss.gridId].ossName) {
+                      errors.push(`Name: ${validMap[oss.gridId].ossName}`);
+                    }
+                    if (validMap[oss.gridId].ossVersion) {
+                      errors.push(`Version: ${validMap[oss.gridId].ossVersion}`);
+                    }
+
+                    return (
+                      <i
+                        className="text-red-500 fa-solid fa-triangle-exclamation"
+                        title={errors.join('\n')}
+                      />
+                    );
+                  })()}
+                </div>
+                <div className="flex text-sm">
+                  <div
+                    className="text-semiblack/80 line-clamp-1 break-all"
+                    title={
+                      oss.licenses.length > 0
+                        ? oss.licenses.map((license) => license.licenseName).join(', ')
+                        : undefined
+                    }
+                  >
+                    {oss.licenses.length > 0 ? (
+                      oss.licenses.map((license, idx) => (
+                        <span key={idx}>
+                          <span
+                            className={clsx(license.licenseId && 'cursor-pointer')}
+                            onClick={() => {
+                              if (!license.licenseId) {
+                                return;
+                              }
+
+                              const urlQueryParams = new URLSearchParams(queryParams);
+                              urlQueryParams.set('modal-type', 'license');
+                              urlQueryParams.set('modal-id', license.licenseId);
+                              router.push(`${pathname}?${urlQueryParams.toString()}`, {
+                                scroll: false
+                              });
+                            }}
+                            dangerouslySetInnerHTML={{
+                              __html: highlight(license.licenseName, filters.keyword)
+                            }}
+                          />
+                          {idx < oss.licenses.length - 1 && ', '}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-red-500">License required</span>
+                    )}
                   </div>
-                )}
+                  {(() => {
+                    if (!validMap[oss.gridId] || !validMap[oss.gridId].licenseName) {
+                      return null;
+                    }
+
+                    return (
+                      <i
+                        className="flex-shrink-0 pt-1 pl-1.5 text-red-500 fa-solid fa-triangle-exclamation"
+                        title={`License: ${validMap[oss.gridId].licenseName}`}
+                      />
+                    );
+                  })()}
+                </div>
                 <div className="text-sm text-semiblack/80">
                   <i className="fa-regular fa-folder-open" />
                   &ensp;
@@ -640,7 +726,7 @@ export default function SelfCheckOSS({
                       }}
                     />
                   ) : (
-                    <span className="text-darkgray">no path set</span>
+                    <span className="text-darkgray">Path not set</span>
                   )}
                 </div>
                 <div className="flex items-center gap-x-2 text-sm">

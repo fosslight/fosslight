@@ -145,6 +145,8 @@ declare global {
       changed?: 'add' | 'edit';
     }
 
+    type OSSValidMap = Record<string, Record<string, string>>;
+
     interface EditOSS {
       gridId: string;
       ossName: string;
@@ -288,4 +290,4 @@ declare global {
   }
 }
 
-export { };
+export {};
