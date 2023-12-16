@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
 import { useSetRecoilState } from 'recoil';
 import Modal from './modal';
@@ -30,6 +30,7 @@ export default function SelfCheckOSS({
   const [fileList, setFileList] = useState<SelfCheck.OSSFile[]>([]);
   const [ossList, setOssList] = useState<SelfCheck.OSS[]>([]);
   const [validMap, setValidMap] = useState<SelfCheck.OSSValidMap>({});
+  const checkRef = useRef<Window>();
   const router = useRouter();
   const pathname = usePathname();
   const queryParams = useSearchParams();
@@ -240,6 +241,16 @@ export default function SelfCheckOSS({
     type: 'json'
   });
 
+  // API for downloading report
+  const downloadReportRequest = useAPI('post', 'http://localhost:8180/exceldownload/getExcelPost', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
+    },
+    onFinish: () => setLoading(false),
+    type: 'json'
+  });
+
   // API for saving file/OSS List
   const saveOSSRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveSrc', {
     onStart: () => setLoading(true),
@@ -303,11 +314,11 @@ export default function SelfCheckOSS({
     const left = window.innerWidth / 2 - width / 2;
     const top = window.innerHeight / 2 - height / 2;
 
-    window.open(
+    checkRef.current = window.open(
       `${pathname}/check?`,
       'selfCheckDetailCheck',
       `width=${width}, height=${height}, left=${left}, top=${top}`
-    );
+    ) as Window;
   }
 
   function checkAll() {
@@ -346,6 +357,53 @@ export default function SelfCheckOSS({
     loadDataListRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    function handlePostMessage(e: MessageEvent<any>) {
+      if (e.source === checkRef.current) {
+        const data = JSON.parse(e.data);
+        let newOssList: SelfCheck.OSS[];
+
+        // Change OSS names
+        if (data.ossCheck) {
+          newOssList = ossList.map((oss) => {
+            if (oss.gridId in data.ossCheck) {
+              const newOssName = data.ossCheck[oss.gridId];
+              return { ...oss, ossName: newOssName, changed: oss.changed || 'edit' };
+            }
+            return oss;
+          });
+        }
+
+        // Change Licenses
+        else {
+          newOssList = ossList.map((oss) => {
+            if (oss.gridId in data.licenseCheck) {
+              const newLicenses = data.licenseCheck[oss.gridId];
+              return {
+                ...oss,
+                licenses: newLicenses.map((license: string) => ({
+                  licenseId: null,
+                  licenseName: license
+                })),
+                changed: oss.changed || 'edit'
+              };
+            }
+            return oss;
+          });
+        }
+
+        setOssList(newOssList);
+        setChanged(true);
+      }
+    }
+
+    window.addEventListener('message', handlePostMessage);
+    return () => {
+      window.removeEventListener('message', handlePostMessage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ossList]);
 
   return (
     <>
@@ -478,13 +536,33 @@ export default function SelfCheckOSS({
           />
         </div>
         <div className="flex justify-end gap-x-1">
-          <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
+          <button
+            className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
+            onClick={() => {
+              if (changed) {
+                alert('You should save first');
+                return;
+              }
+
+              downloadReportRequest.execute({ body: { parameter: id, type: 'selfReport' } });
+            }}
+          >
             <div className="relative w-4 h-4">
               <Image src={ExcelIcon} fill sizes="32px" alt="export" />
             </div>
             Export
           </button>
-          <button className="px-2 py-0.5 default-btn" onClick={openSubwindowForCheck}>
+          <button
+            className="px-2 py-0.5 default-btn"
+            onClick={() => {
+              if (changed) {
+                alert('You should save first');
+                return;
+              }
+
+              openSubwindowForCheck();
+            }}
+          >
             Check
           </button>
           <button

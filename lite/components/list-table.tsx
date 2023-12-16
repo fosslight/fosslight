@@ -113,7 +113,7 @@ export default function ListTable({
   return (
     <>
       <div className="relative overflow-x-auto no-scrollbar">
-        <table className={clsx('w-full text-sm', rows.length === 0 && 'min-h-[200px]')}>
+        <table className={clsx('w-full text-sm', rows.length === 0 && 'min-h-[160px]')}>
           {/* Columns */}
           <thead>
             <tr className="border-b-2 border-charcoal/80 text-left whitespace-nowrap">
@@ -227,7 +227,9 @@ export default function ListTable({
         </table>
 
         {/* When there are no rows */}
-        {rows.length === 0 && <div className="absolute center">There are no entries.</div>}
+        {rows.length === 0 && (
+          <div className="absolute center text-darkgray">There are no entries.</div>
+        )}
       </div>
 
       {/* Pagination */}

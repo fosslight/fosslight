@@ -159,17 +159,19 @@ declare global {
     }
 
     interface OSSCheck {
+      gridIds: string[];
       downloadUrl: string;
-      ossName: string;
-      newOssName: string;
+      before: { value: string; msg?: string };
+      after: { value: string; msg?: string };
     }
 
     interface LicenseCheck {
+      gridId: string;
       ossName: string;
       ossVersion: string;
       downloadUrl: string;
-      licenses: string[];
-      newLicenses: string[];
+      before: { value: string[]; msg?: string };
+      after: { value: string[]; msg?: string };
     }
 
     interface PackageFile {
