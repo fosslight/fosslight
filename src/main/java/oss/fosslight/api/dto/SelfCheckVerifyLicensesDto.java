@@ -10,16 +10,17 @@ public class SelfCheckVerifyLicensesDto {
     @Data
     @Builder
     public static class LicenseEntry {
-//        List<String> value;
-        String value;
+        List<String> value;
         String msg;
     }
 
     @Data
     @Builder
     public static class LicenseCheckResult {
-//        List<String> gridIds;
         String gridId;
+        String ossName;
+        String ossVersion;
+        String downloadUrl;
         LicenseEntry before;
         LicenseEntry after;
     }

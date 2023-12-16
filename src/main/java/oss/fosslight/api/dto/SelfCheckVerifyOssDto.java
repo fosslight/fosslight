@@ -19,6 +19,7 @@ public class SelfCheckVerifyOssDto {
     @Builder
     public static class OssCheckResult {
         List<String> gridIds;
+        String downloadUrl;
         OssEntry before;
         OssEntry after;
     }
