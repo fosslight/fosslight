@@ -179,7 +179,7 @@ export default function SelfCheckOSS({
       const result = JSON.parse(res.data);
 
       if (result[0][0] && result[1] && result[1].length > 0) {
-        Array.from(document.querySelectorAll('.sheet-checkbox:checked')).forEach((cb: any) => {
+        document.querySelectorAll('.sheet-checkbox:checked').forEach((cb: any) => {
           // eslint-disable-next-line no-param-reassign
           cb.checked = false;
         });
@@ -308,6 +308,26 @@ export default function SelfCheckOSS({
       'selfCheckDetailCheck',
       `width=${width}, height=${height}, left=${left}, top=${top}`
     );
+  }
+
+  function checkAll() {
+    const checkedCnt = document.querySelectorAll('.oss-to-delete:checked').length;
+
+    // Check all
+    if (paginatedOssList.length > checkedCnt) {
+      document.querySelectorAll('.oss-to-delete:not(:checked)').forEach((cb: any) => {
+        // eslint-disable-next-line no-param-reassign
+        cb.checked = true;
+      });
+    }
+
+    // Uncheck all
+    else {
+      document.querySelectorAll('.oss-to-delete:checked').forEach((cb: any) => {
+        // eslint-disable-next-line no-param-reassign
+        cb.checked = false;
+      });
+    }
   }
 
   function toggleExclude(gridId: string) {
@@ -557,6 +577,9 @@ export default function SelfCheckOSS({
             setSort(filterParams.sort);
           }}
         />
+        <button className="px-2 py-0.5 ml-4 text-sm default-btn" onClick={checkAll}>
+          Check all
+        </button>
         {paginatedOssList.length > 0 ? (
           <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
