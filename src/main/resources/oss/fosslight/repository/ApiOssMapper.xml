@@ -752,14 +752,8 @@
         GROUP BY T1.PRODUCT, T1.VERSION, T1.CVE_ID
         ORDER BY T1.CVSS_SCORE DESC, T1.MODI_DATE DESC
     </select>
-    <select id="getOssAutocompleteCandidates" resultType="java.lang.String">
-        SELECT *
-        FROM ((SELECT OSS_NAME
-               FROM OSS_MASTER
-               WHERE OSS_NAME LIKE CONCAT(#{query}, '%') LIMIT 10)
-              UNION
-              (SELECT OSS_NAME
-               FROM OSS_MASTER
-               WHERE OSS_NAME LIKE CONCAT('_%', #{query}, '%') LIMIT 10)) T1 LIMIT 10
+
+    <select id="getOssAutocompleteCandidates" resultMap="OssDtoMap">
+        SELECT OSS_NAME, OSS_VERSION FROM OSS_MASTER;
     </select>
 </mapper>

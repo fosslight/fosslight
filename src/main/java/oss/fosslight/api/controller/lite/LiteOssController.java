@@ -1,5 +1,6 @@
 package oss.fosslight.api.controller.lite;
 
+import com.github.andrewoma.dexx.collection.Pair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.api.dto.GetOSSDetailsDto;
 import oss.fosslight.api.dto.ListOssDto;
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.Url;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.service.ApiOssService;
@@ -14,6 +16,7 @@ import oss.fosslight.service.ApiOssService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,12 +55,15 @@ public class LiteOssController {
         }
     }
 
-    @GetMapping("/oss/autocomplete")
-    public @ResponseBody ResponseEntity<List<String>> getAutocompleteCandidates(
-        @RequestParam("query") String query
+
+    @GetMapping("/oss/candidates/all")
+    public @ResponseBody ResponseEntity<List<List<String>>> getAutocompleteCandidates(
     ) {
         try {
-            var result = ossMapper.getOssAutocompleteCandidates(query);
+            var result = ossMapper.getOssAutocompleteCandidates()
+                    .stream().map(oss ->
+                            List.of(oss.getOssName(), oss.getOssVersion())
+                    ).collect(Collectors.toList());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
