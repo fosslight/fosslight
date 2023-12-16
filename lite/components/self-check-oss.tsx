@@ -179,7 +179,7 @@ export default function SelfCheckOSS({
       const result = JSON.parse(res.data);
 
       if (result[0][0] && result[1] && result[1].length > 0) {
-        Array.from(document.querySelectorAll('.sheet-checkbox:checked')).forEach((cb: any) => {
+        document.querySelectorAll('.sheet-checkbox:checked').forEach((cb: any) => {
           // eslint-disable-next-line no-param-reassign
           cb.checked = false;
         });
@@ -310,6 +310,26 @@ export default function SelfCheckOSS({
     );
   }
 
+  function checkAll() {
+    const checkedCnt = document.querySelectorAll('.oss-to-delete:checked').length;
+
+    // Check all
+    if (paginatedOssList.length > checkedCnt) {
+      document.querySelectorAll('.oss-to-delete:not(:checked)').forEach((cb: any) => {
+        // eslint-disable-next-line no-param-reassign
+        cb.checked = true;
+      });
+    }
+
+    // Uncheck all
+    else {
+      document.querySelectorAll('.oss-to-delete:checked').forEach((cb: any) => {
+        // eslint-disable-next-line no-param-reassign
+        cb.checked = false;
+      });
+    }
+  }
+
   function toggleExclude(gridId: string) {
     const idx = ossList.findLastIndex((oss) => oss.gridId === gridId);
     const oss = ossList[idx];
@@ -382,47 +402,42 @@ export default function SelfCheckOSS({
                   ))}
               </div>
             )}
-            <span
-              className="cursor-pointer"
-              onClick={() => {
-                document.getElementById('upload-file')?.click();
-              }}
-            >
+            <div className="relative">
               <i className="fa-solid fa-arrow-up-from-bracket" />
               &ensp;Upload a file here
-            </span>
-            <div className="mt-1 text-sm text-darkgray">
-              (The file must contain information of OSS to be listed.)
-            </div>
-            <input
-              id="upload-file"
-              className="hidden"
-              type="file"
-              accept=".xlsx, .xls, .xlsm, .csv"
-              onChange={(e) => {
-                const input = e.target;
+              <div className="mt-1 text-sm text-darkgray">
+                (The file must contain information of OSS to be listed.)
+              </div>
+              <input
+                id="upload-file"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                type="file"
+                accept=".xlsx, .xls, .xlsm, .csv"
+                onChange={(e) => {
+                  const input = e.target;
 
-                if (!input.files || input.files.length === 0) {
-                  return;
-                }
+                  if (!input.files || input.files.length === 0) {
+                    return;
+                  }
 
-                const file = input.files[0];
-                const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
-                if (!allowedExtensions.test(file.name)) {
-                  alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                  const file = input.files[0];
+                  const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
+                  if (!allowedExtensions.test(file.name)) {
+                    alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                    input.value = '';
+                    return;
+                  }
+
+                  const formData = new FormData();
+                  formData.append('myfile', file, file.name);
+                  formData.append('registFileId', fileId);
+                  formData.append('tabNm', 'SELF');
+
+                  uploadFileRequest.execute({ body: formData });
                   input.value = '';
-                  return;
-                }
-
-                const formData = new FormData();
-                formData.append('myfile', file, file.name);
-                formData.append('registFileId', fileId);
-                formData.append('tabNm', 'SELF');
-
-                uploadFileRequest.execute({ body: formData });
-                input.value = '';
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex gap-x-2">
@@ -557,6 +572,9 @@ export default function SelfCheckOSS({
             setSort(filterParams.sort);
           }}
         />
+        <button className="px-2 py-0.5 ml-4 text-sm default-btn" onClick={checkAll}>
+          Check all
+        </button>
         {paginatedOssList.length > 0 ? (
           <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginatedOssList.map((oss) => (
@@ -644,6 +662,7 @@ export default function SelfCheckOSS({
                   )}
                   {(() => {
                     if (
+                      oss.changed ||
                       !validMap[oss.gridId] ||
                       (!validMap[oss.gridId].ossName && !validMap[oss.gridId].ossVersion)
                     ) {
@@ -704,7 +723,7 @@ export default function SelfCheckOSS({
                     )}
                   </div>
                   {(() => {
-                    if (!validMap[oss.gridId] || !validMap[oss.gridId].licenseName) {
+                    if (oss.changed || !validMap[oss.gridId] || !validMap[oss.gridId].licenseName) {
                       return null;
                     }
 

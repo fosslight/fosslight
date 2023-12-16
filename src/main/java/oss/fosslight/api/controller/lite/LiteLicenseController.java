@@ -4,18 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.api.dto.GetLicenseDetailsDto;
+import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListLicenseDto;
-import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.common.Url;
-import oss.fosslight.controller.LicenseController;
 import oss.fosslight.repository.ApiLicenseMapper;
 import oss.fosslight.service.ApiLicenseService;
-import oss.fosslight.service.ApiOssService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,7 +41,7 @@ public class LiteLicenseController {
 
     @GetMapping("/licenses/{id}")
     public @ResponseBody ResponseEntity<GetLicenseDetailsDto.Result> getLicense(
-            @PathVariable("id")String id
+            @PathVariable("id") String id
     ) {
         try {
             var result = apiLicenseService.getLicense(id);
@@ -54,12 +52,13 @@ public class LiteLicenseController {
         }
     }
 
-    @GetMapping("/licenses/autocomplete")
-    public @ResponseBody ResponseEntity<List<String>> getAutocompleteCandidates(
-            @RequestParam("query") String query
-    ) {
+    @GetMapping("/licenses/candidates/all")
+    public @ResponseBody ResponseEntity<List<List<String>>> getAutocompleteCandidates() {
         try {
-            var result = apiLicenseMapper.getLicenseAutocompleteCandidates(query);
+            var result = apiLicenseMapper.getLicenseAutocompleteCandidates()
+                    .stream().map(license ->
+                            List.of(license.getLicenseName(), license.getLicenseIdentifier())
+                    ).collect(Collectors.toList());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
