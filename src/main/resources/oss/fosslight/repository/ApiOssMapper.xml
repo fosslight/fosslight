@@ -634,20 +634,111 @@
         , IF( T2.OBLIGATION_NEEDS_CHECK_YN='Y' ,'Y', 'N')
         ) AS OBLIGATION_CHECKS
 
-		FROM
-		OSS_LICENSE_DECLARED 			T1
-		LEFT OUTER JOIN LICENSE_MASTER 	T2 ON T1.LICENSE_ID 	= T2.LICENSE_ID AND T2.USE_YN = 'Y'
-		LEFT OUTER JOIN T2_CODE_DTL		T3 ON T2.LICENSE_TYPE 	= T3.CD_DTL_NO
-		WHERE 1=1
-		AND T3.CD_NO='201'
-		<choose>
-			<when test="ossIdList != null">
-				<foreach collection="list" item="_ossId" open="AND T1.OSS_ID IN (" close=")" separator=",">
-					#{_ossId}
-				</foreach>
-			</when>
-			<otherwise>AND T1.OSS_ID = #{ossId}</otherwise>
-		</choose>
-		ORDER BY T1.OSS_ID, T1.OSS_LICENSE_IDX ASC;
-	</select>
+        FROM
+        OSS_LICENSE_DECLARED T1
+        LEFT OUTER JOIN LICENSE_MASTER T2 ON T1.LICENSE_ID = T2.LICENSE_ID AND T2.USE_YN = 'Y'
+        LEFT OUTER JOIN T2_CODE_DTL T3 ON T2.LICENSE_TYPE = T3.CD_DTL_NO
+        WHERE 1=1
+        AND T3.CD_NO='201'
+        <choose>
+            <when test="ossIdList != null">
+                <foreach collection="list" item="_ossId" open="AND T1.OSS_ID IN (" close=")" separator=",">
+                    #{_ossId}
+                </foreach>
+            </when>
+            <otherwise>AND T1.OSS_ID = #{ossId}</otherwise>
+        </choose>
+        ORDER BY T1.OSS_ID, T1.OSS_LICENSE_IDX ASC;
+    </select>
+
+    <resultMap id="OssDetailsDtoMap" type="oss.fosslight.api.dto.OssDetailsDto">
+        <result property="downloadUrl" column="download_location"/>
+        <result property="homepageUrl" column="homepage"/>
+        <result property="created" column="created_date"/>
+        <result property="obligations" column="obligation_type"/>
+        <result property="modified" column="modified_date"/>
+        <result property="description" column="summary_description"/>
+        <result property="deactivate" column="deactivate_flag"/>
+    </resultMap>
+    <select id="selectOssById" resultMap="OssDetailsDtoMap">
+        SELECT
+        T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.HOMEPAGE,
+        IFNULL(
+        (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
+        FROM OSS_DOWNLOADLOCATION D
+        WHERE D.OSS_ID = T1.OSS_ID
+        ), T1.DOWNLOAD_LOCATION
+        ) AS DOWNLOAD_LOCATION,
+        T1.SUMMARY_DESCRIPTION,
+        T1.ATTRIBUTION,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR,
+        IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
+        T1.CVSS_SCORE,
+        T1.CVE_ID,
+        T1.CREATED_DATE,
+        T1.MODIFIED_DATE,
+        T3.LICENSE_NAME,
+        T1.OBLIGATION_TYPE,
+        SUB1.OSS_TYPE AS OSS_TYPE,
+        IFNULL(
+        (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE),
+        T5.CD_DTL_NM
+        ) AS LICENSE_TYPE,
+        (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS
+        OSS_NICKNAME,
+        T1.COPYRIGHT, T1.ATTRIBUTION, T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
+        INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID =
+        SUB1.OSS_ID
+        LEFT OUTER JOIN T2_CODE_DTL T5 ON T3.LICENSE_TYPE = T5.CD_DTL_NO AND T5.CD_NO = '201' /*Code Table*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+        </if>
+        WHERE T1.USE_YN = 'Y' AND T1.OSS_ID = #{oss_id}
+        GROUP BY T1.OSS_ID
+    </select>
+
+
+    <resultMap id="VulnerabilityDtoMap" type="oss.fosslight.api.dto.VulnerabilityDto">
+        <result property="ossName" column="product"/>
+        <result property="ossVersion" column="version"/>
+        <result property="summary" column="vuln_summary"/>
+        <result property="modified" column="modi_date"/>
+    </resultMap>
+    <select id="getOssVulnerabilityList" resultMap="VulnerabilityDtoMap">
+
+        SELECT T1.PRODUCT,
+               T1.VERSION,
+               T1.CVE_ID,
+               T1.CVSS_SCORE,
+               GROUP_CONCAT(DISTINCT(T1.VENDOR), ',') AS VENDOR,
+               T1.VULN_SUMMARY,
+               T1.MODI_DATE
+        FROM NVD_DATA_SCORE_V3 T1
+                 INNER JOIN (SELECT M1.OSS_ID,
+                                    M1.OSS_NAME,
+                                    CASE
+                                        WHEN M1.OSS_VERSION IS NULL THEN '-'
+                                        WHEN M1.OSS_VERSION = '' THEN '-'
+                                        ELSE M1.OSS_VERSION
+                                        END OSS_VERSION
+                             FROM OSS_MASTER M1
+                             WHERE M1.OSS_ID = #{ossId}) T2
+                            ON T1.PRODUCT = T2.OSS_NAME AND T1.VERSION = T2.OSS_VERSION
+        GROUP BY T1.PRODUCT, T1.VERSION, T1.CVE_ID
+        ORDER BY T1.CVSS_SCORE DESC, T1.MODI_DATE DESC
+    </select>
+    <select id="getOssAutocompleteCandidates" resultType="java.lang.String">
+        SELECT *
+        FROM ((SELECT OSS_NAME
+               FROM OSS_MASTER
+               WHERE OSS_NAME LIKE CONCAT(#{query}, '%') LIMIT 10)
+              UNION
+              (SELECT OSS_NAME
+               FROM OSS_MASTER
+               WHERE OSS_NAME LIKE CONCAT('_%', #{query}, '%') LIMIT 10)) T1 LIMIT 10
+    </select>
 </mapper>
