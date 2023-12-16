@@ -120,8 +120,13 @@ public class ApiOssServiceImpl implements ApiOssService {
         return addLicenseInfo(rows);
     }
 
-    public List<OssDto> listNameSearchResult(ListOssDto.Request query) {
-        var rows = apiOssMapper.selectOssList(query);
+    public List<OssDto> listNameSearchResult(String query, int limit) {
+        var ossQuery = ListOssDto.Request.builder()
+                .ossName(query)
+                .build();
+        ossQuery.setLimit(limit);
+        ossQuery.setVersionCheck(true);
+        var rows = apiOssMapper.selectOssList(ossQuery);
         return addLicenseInfo(rows);
     }
 

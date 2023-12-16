@@ -23,7 +23,7 @@ public interface ApiOssService {
 
 	ListOssDto.Result listOss(ListOssDto.Request request);
 
-	List<OssDto> listNameSearchResult(ListOssDto.Request query);
+	List<OssDto> listNameSearchResult(String name, int limit);
 	List<OssDto> listRecentOss(int limit);
 	GetOSSDetailsDto.Result getOss(String id);
 }
