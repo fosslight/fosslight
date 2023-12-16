@@ -23,10 +23,8 @@ import oss.fosslight.domain.*;
 import oss.fosslight.repository.ApiSelfCheckMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.SelfCheckMapper;
-import oss.fosslight.service.ApiSelfCheckService;
-import oss.fosslight.service.FileService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.SelfCheckService;
+import oss.fosslight.service.*;
+import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Service
@@ -48,6 +46,12 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
     @Autowired
     OssService ossService;
+
+    @Autowired
+    ProjectService projectService;
+
+    @Autowired
+    AutoFillOssInfoService autoFillOssInfoService;
 
     @Override
     public int getCreateProjectCnt(String userId) {
@@ -291,6 +295,66 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                             .build())
                     .build();
             resultList.add(checkResult);
+        }
+
+        return resultList;
+    }
+
+    public List<SelfCheckVerifyLicensesDto.LicenseCheckResult> validateLicenses(String id) {
+        var query = new ProjectIdentification();
+        query.setReferenceDiv(CoConstDef.CD_DTL_SELF_COMPONENT_ID);
+        query.setReferenceId(id);
+
+        List<ProjectIdentification> result = new ArrayList<>();
+
+        Map<String, Object> map = selfCheckService.getIdentificationGridList(query);
+
+        if (map == null) {
+            return new ArrayList<>();
+        }
+
+        T2CoProjectValidator validator = new T2CoProjectValidator();
+
+        validator.setProcType(validator.PROC_TYPE_IDENTIFICATION_SOURCE);
+        List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+        validator.setAppendix("mainList", mainData);
+        validator.setAppendix("subListMap", map.get("subData"));
+
+        T2CoValidationResult vr = validator.validate();
+
+        if (!vr.isValid()) {
+            Map<String, String> validMap = vr.getValidMessageMap();
+            result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, validMap, null));
+//            resMap.put("validMap", validMap);
+        }
+
+        if (!vr.isDiff()) {
+            Map<String, String> diffMap = vr.getDiffMessageMap();
+            result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
+//            resMap.put("diffMap", diffMap);
+        }
+
+        if (result.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Object> data = autoFillOssInfoService.checkOssLicense(result);
+
+        List<SelfCheckVerifyLicensesDto.LicenseCheckResult> resultList = new ArrayList<>();
+        var checkedLicenses = (List<ProjectIdentification>) data.get("checkedData");
+        for (ProjectIdentification oss: checkedLicenses) {
+            var license = SelfCheckVerifyLicensesDto.LicenseCheckResult.builder()
+                    .gridId(oss.getComponentId())
+                    .after(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
+                            .value(oss.getLicenseName())
+                            .msg(null)
+                            .build())
+                    .after(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
+                            .value(oss.getCheckLicense())
+                            .msg(null)
+                            .build())
+                    .build();
+            resultList.add(license);
         }
 
         return resultList;

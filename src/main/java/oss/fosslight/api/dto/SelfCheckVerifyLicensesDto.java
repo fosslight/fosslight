@@ -9,21 +9,23 @@ import java.util.List;
 public class SelfCheckVerifyLicensesDto {
     @Data
     @Builder
-    static class LicenseEntry {
-        List<String> value;
+    public static class LicenseEntry {
+//        List<String> value;
+        String value;
         String msg;
     }
 
     @Data
     @Builder
-    static class LicenseCheckResult {
-        List<String> gridIds;
+    public static class LicenseCheckResult {
+//        List<String> gridIds;
+        String gridId;
         LicenseEntry before;
         LicenseEntry after;
     }
 
     @Builder
     public static class Response {
-        List<LicenseCheckResult> verificationOss;
+        List<LicenseCheckResult> verificationLicenses;
     }
 }
