@@ -36,13 +36,7 @@ export default function Dashboard() {
       <h2 className="breadcrumb">Dashboard</h2>
 
       {/* Description */}
-      <h3 className="pb-8">
-        Insights on your projects, and recently registered vulnerabilities, OSS, and licenses.
-      </h3>
-
-      {/* Projects */}
-      <h4 className="shadow-box-header">Insights on Projects</h4>
-      <div className="w-[calc(100%-4px)] mb-8 shadow-box">...</div>
+      <h3 className="pb-8">Insights on vulnerabilities, OSS, and licenses.</h3>
 
       {/* Vulnerabilities, OSS, licenses */}
       <h4 className="shadow-box-header">Recently Registered in Database</h4>
