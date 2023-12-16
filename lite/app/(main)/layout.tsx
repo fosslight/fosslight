@@ -12,10 +12,10 @@ import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const setUser = useSetRecoilState(userState);
+  const [user, setUser] = useRecoilState(userState);
   const [view, setView] = useRecoilState(viewState);
   const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
@@ -47,60 +47,80 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (view === 'none') return null;
 
   return (
-    <main className={clsx('min-h-screen', view === 'pc' && 'flex')}>
-      {/* Left navigation bar (PC) */}
-      {view === 'pc' && !isSubwindow && <SideBar isShown={isSideBarShown} />}
-
-      {/* Page body */}
-      <div className={clsx(view === 'pc' && 'flex-1 min-w-0', loading && 'opacity-50')}>
-        {/* Areas fixed at the top of the page */}
-        {!isSubwindow && (
-          <div
-            className={clsx(
-              'sticky top-0 bg-white z-10',
-              view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-4'
-            )}
-          >
-            {/* Hamburger button (PC) or Top bar (Mobile) */}
-            {view === 'pc' ? (
-              <button
-                className="w-6 h-6 text-xl text-charcoal"
-                onClick={() => setIsSideBarShown(!isSideBarShown)}
-              >
-                <i className="fa-solid fa-bars" />
-              </button>
-            ) : (
-              <TopBar />
-            )}
-
-            {/* Full search bar */}
-            <FullSearchBar />
-          </div>
+    <>
+      {/* Wait until detecting logined user */}
+      <div
+        className={clsx(
+          'fixed center flex flex-col items-center z-[1000] transition-opacity duration-200',
+          user ? 'opacity-0' : 'opacity-100'
         )}
-
-        {/* Page content */}
-        <div
-          className={clsx(
-            'pt-4 mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
-            view === 'pc' ? 'pb-8' : 'pt-4 pb-24'
-          )}
-        >
-          {children}
-        </div>
+      >
+        <div className="mb-4 text-lg font-bold">Loading . . .</div>
+        <Loading />
       </div>
 
-      {/* Bottom navigation bar (Mobile) */}
-      {view === 'mobile' && !isSubwindow && <BottomBar />}
+      {/* Main content */}
+      <main
+        className={clsx(
+          'min-h-screen transition-opacity duration-200',
+          view === 'pc' && 'flex',
+          user ? 'opacity-100' : 'opacity-0'
+        )}
+      >
+        {/* Left navigation bar (PC) */}
+        {view === 'pc' && !isSubwindow && <SideBar isShown={isSideBarShown} />}
 
-      {/* Modal for detail view */}
-      <DetailModal />
+        {/* Page body */}
+        <div className={clsx(view === 'pc' && 'flex-1 min-w-0', loading && 'opacity-50')}>
+          {/* Areas fixed at the top of the page */}
+          {!isSubwindow && (
+            <div
+              className={clsx(
+                'sticky top-0 bg-white z-10',
+                view === 'pc' && 'flex flex-col gap-y-10 pt-4 px-4 pb-4'
+              )}
+            >
+              {/* Hamburger button (PC) or Top bar (Mobile) */}
+              {view === 'pc' ? (
+                <button
+                  className="w-6 h-6 text-xl text-charcoal"
+                  onClick={() => setIsSideBarShown(!isSideBarShown)}
+                >
+                  <i className="fa-solid fa-bars" />
+                </button>
+              ) : (
+                <TopBar />
+              )}
 
-      {/* Loading */}
-      {loading && (
-        <div className="fixed center">
-          <Loading />
+              {/* Full search bar */}
+              <FullSearchBar />
+            </div>
+          )}
+
+          {/* Page content */}
+          <div
+            className={clsx(
+              'pt-4 mx-4 overflow-x-auto transition-opacity duration-300 no-scrollbar',
+              view === 'pc' ? 'pb-8' : 'pt-4 pb-24'
+            )}
+          >
+            {children}
+          </div>
         </div>
-      )}
-    </main>
+
+        {/* Bottom navigation bar (Mobile) */}
+        {view === 'mobile' && !isSubwindow && <BottomBar />}
+
+        {/* Modal for detail view */}
+        <DetailModal />
+
+        {/* Loading */}
+        {loading && (
+          <div className="fixed center">
+            <Loading />
+          </div>
+        )}
+      </main>
+    </>
   );
 }

@@ -1,6 +1,14 @@
+import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import Select from 'react-select/creatable';
 import Modal from './modal';
+
+const options = [
+  { value: 'chocolate', label: 'Chocolate' },
+  { value: 'strawberry', label: 'Strawberry' },
+  { value: 'vanilla', label: 'Vanilla' }
+];
 
 export default function SelfCheckOSSModal({
   show,
@@ -18,10 +26,41 @@ export default function SelfCheckOSSModal({
   setChanged: (changed: boolean) => void;
 }) {
   const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset, watch, control } = useForm();
+
+  // Autocomplete
+  const [autocompleteOss, setAutocompleteOss] = useState<[string, string][]>([]);
+  const [autocompleteLicense, setAutocompleteLicense] = useState<[string, string][]>([]);
+  const ossNameOptions = Array.from(new Set(autocompleteOss.map((oss) => oss[0]))).map((oss) => ({
+    value: oss,
+    label: oss
+  }));
+  const ossVersionOptions = autocompleteOss
+    .filter((oss) => oss[0] === watch('ossName'))
+    .map((oss) => ({ value: oss[1], label: oss[1] }));
+  const licenseOptions = autocompleteLicense.map((license) => ({
+    value: license[1],
+    label: `${license[0]} (${license[1]})`
+  }));
 
   // Mode (add or edit)
   const isAdd = !values;
+
+  // APIs for loading data for autocomplete
+  const loadAutocompleteOSSRequest = useAPI(
+    'get',
+    'http://localhost:8180/api/lite/oss/candidates/all',
+    {
+      onSuccess: (res) => setAutocompleteOss(res.data)
+    }
+  );
+  const loadAutocompleteLicenseRequest = useAPI(
+    'get',
+    'http://localhost:8180/api/lite/licenses/candidates/all',
+    {
+      onSuccess: (res) => setAutocompleteLicense(res.data)
+    }
+  );
 
   useEffect(() => {
     if (show) {
@@ -31,6 +70,9 @@ export default function SelfCheckOSSModal({
   }, [show]);
 
   useEffect(() => {
+    loadAutocompleteOSSRequest.execute({});
+    loadAutocompleteLicenseRequest.execute({});
+
     reset({
       ossName: values?.ossName || '',
       ossVersion: values?.ossVersion || '',
@@ -102,44 +144,63 @@ export default function SelfCheckOSSModal({
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Name</label>
-            <input
-              className="w-full px-2 py-1 border border-darkgray outline-none"
-              placeholder="EX) fosslight"
-              {...register('ossName')}
+            <Controller
+              name="ossName"
+              control={control}
+              render={({ field: { onChange, value, name, ref } }) => (
+                <Select
+                  classNames={{ control: () => '!border-darkgray !rounded-none' }}
+                  name={name}
+                  value={options.find((option) => option.value === value)}
+                  options={ossNameOptions}
+                  onChange={(selectedOption) => {
+                    onChange(selectedOption?.value || '');
+                  }}
+                  placeholder="EX) fosslight"
+                  ref={ref}
+                />
+              )}
             />
           </div>
           <div className="flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Version</label>
-            <input
-              className="w-full px-2 py-1 border border-darkgray outline-none"
-              placeholder="EX) 1.0.0"
-              {...register('ossVersion')}
+            <Controller
+              name="ossVersion"
+              control={control}
+              render={({ field: { onChange, value, name, ref } }) => (
+                <Select
+                  classNames={{ control: () => '!border-darkgray !rounded-none' }}
+                  name={name}
+                  value={options.find((option) => option.value === value)}
+                  options={ossVersionOptions}
+                  onChange={(selectedOption) => {
+                    onChange(selectedOption?.value || '');
+                  }}
+                  placeholder="EX) 1.0.0"
+                  ref={ref}
+                />
+              )}
             />
           </div>
           <div className="col-span-2 flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Licenses</label>
-            <input
-              className="w-full px-2 py-1 border border-darkgray outline-none"
-              onKeyDown={(e) => {
-                const input = e.target as HTMLInputElement;
+            <Select
+              classNames={{
+                control: () => '!border-darkgray !rounded-none'
+              }}
+              options={licenseOptions}
+              value={null}
+              onChange={(selectedOption) => {
+                if (!selectedOption) {
+                  return;
+                }
 
-                if (e.code === 'Enter') {
-                  e.preventDefault();
-
-                  if (input.value) {
-                    setLicenses([...licenses, { licenseId: null, licenseName: input.value }]);
-                    input.value = '';
-                  }
+                const licenseName = selectedOption.value;
+                if (!licenses.some((license) => license.licenseName === licenseName)) {
+                  setLicenses([...licenses, { licenseId: null, licenseName }]);
                 }
               }}
-              onBlur={(e) => {
-                const input = e.target as HTMLInputElement;
-
-                if (input.value) {
-                  setLicenses([...licenses, { licenseId: null, licenseName: input.value }]);
-                  input.value = '';
-                }
-              }}
+              placeholder="EX) Apache-2.0"
             />
             {licenses.length > 0 && (
               <div className="flex gap-x-1">
