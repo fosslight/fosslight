@@ -359,7 +359,7 @@ export default function SelfCheckOSS({
           newOssList = ossList.map((oss) => {
             if (oss.gridId in data.ossCheck) {
               const newOssName = data.ossCheck[oss.gridId];
-              return { ...oss, ossName: newOssName };
+              return { ...oss, ossName: newOssName, changed: oss.changed || 'edit' };
             }
             return oss;
           });
@@ -375,7 +375,8 @@ export default function SelfCheckOSS({
                 licenses: newLicenses.map((license: string) => ({
                   licenseId: null,
                   licenseName: license
-                }))
+                })),
+                changed: oss.changed || 'edit'
               };
             }
             return oss;
@@ -392,7 +393,7 @@ export default function SelfCheckOSS({
       window.removeEventListener('message', handlePostMessage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ossList]);
 
   return (
     <>
