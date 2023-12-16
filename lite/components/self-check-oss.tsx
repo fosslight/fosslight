@@ -402,47 +402,42 @@ export default function SelfCheckOSS({
                   ))}
               </div>
             )}
-            <span
-              className="cursor-pointer"
-              onClick={() => {
-                document.getElementById('upload-file')?.click();
-              }}
-            >
+            <div className="relative">
               <i className="fa-solid fa-arrow-up-from-bracket" />
               &ensp;Upload a file here
-            </span>
-            <div className="mt-1 text-sm text-darkgray">
-              (The file must contain information of OSS to be listed.)
-            </div>
-            <input
-              id="upload-file"
-              className="hidden"
-              type="file"
-              accept=".xlsx, .xls, .xlsm, .csv"
-              onChange={(e) => {
-                const input = e.target;
+              <div className="mt-1 text-sm text-darkgray">
+                (The file must contain information of OSS to be listed.)
+              </div>
+              <input
+                id="upload-file"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                type="file"
+                accept=".xlsx, .xls, .xlsm, .csv"
+                onChange={(e) => {
+                  const input = e.target;
 
-                if (!input.files || input.files.length === 0) {
-                  return;
-                }
+                  if (!input.files || input.files.length === 0) {
+                    return;
+                  }
 
-                const file = input.files[0];
-                const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
-                if (!allowedExtensions.test(file.name)) {
-                  alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                  const file = input.files[0];
+                  const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
+                  if (!allowedExtensions.test(file.name)) {
+                    alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                    input.value = '';
+                    return;
+                  }
+
+                  const formData = new FormData();
+                  formData.append('myfile', file, file.name);
+                  formData.append('registFileId', fileId);
+                  formData.append('tabNm', 'SELF');
+
+                  uploadFileRequest.execute({ body: formData });
                   input.value = '';
-                  return;
-                }
-
-                const formData = new FormData();
-                formData.append('myfile', file, file.name);
-                formData.append('registFileId', fileId);
-                formData.append('tabNm', 'SELF');
-
-                uploadFileRequest.execute({ body: formData });
-                input.value = '';
-              }}
-            />
+                }}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex gap-x-2">
