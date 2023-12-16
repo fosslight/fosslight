@@ -1,13 +1,14 @@
 import { loadingState } from '@/lib/atoms';
 import { useAPI } from '@/lib/hooks';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import Editor from './editor';
 import Modal from './modal';
 
 export default function SelfCheckNotice({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
+  const [isValid, setIsValid] = useState(false);
   const [method, setMethod] = useState<'default' | 'custom'>('default');
   const [companyName, setCompanyName] = useState<string | null>('');
   const [ossSite, setOssSite] = useState<string | null>('');
@@ -16,6 +17,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const [append, setAppend] = useState<string | null>(null);
 
   // Download/Preview modals
+  const [isWarningShown, setIsWarningShown] = useState(false);
   const [isDownloadShown, setIsDownloadShown] = useState(false);
   const [isPreviewShown, setIsPreviewShown] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
@@ -26,6 +28,26 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const inputWrapperClass = 'flex-1';
   const inputClass = 'w-60 max-w-full px-2 py-0.5 mb-1.5 border border-darkgray outline-none';
   const commentClass = 'text-xs text-darkgray';
+
+  // API for loading validation result
+  const loadValidationListRequest = useAPI(
+    'get',
+    `http://localhost:8180/selfCheck/ossGrid/${id}/10`,
+    {
+      onSuccess: (res) => {
+        const { validData } = res.data;
+
+        if (validData) {
+          const keys = Object.keys(validData);
+          if (keys.some((key) => key.startsWith('licenseName'))) {
+            return;
+          }
+        }
+
+        setIsValid(true);
+      }
+    }
+  );
 
   // APIs for downloading notice
   const urlsForDownload = {
@@ -126,6 +148,11 @@ export default function SelfCheckNotice({ id }: { id: string }) {
     return body;
   }
 
+  useEffect(() => {
+    loadValidationListRequest.execute({ params: { referenceId: id } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
       <div className="w-[calc(100%-4px)] shadow-box">
@@ -153,12 +180,29 @@ export default function SelfCheckNotice({ id }: { id: string }) {
 
         {/* Buttons */}
         <div className="flex justify-end gap-x-1 mt-4 mb-2">
-          <button className="px-2 py-0.5 crimson-btn" onClick={() => setIsDownloadShown(true)}>
+          <button
+            className="px-2 py-0.5 crimson-btn"
+            onClick={() => {
+              if (!isValid) {
+                setIsWarningShown(true);
+                return;
+              }
+
+              setIsDownloadShown(true);
+            }}
+          >
             Download
           </button>
           <button
             className="px-2 py-0.5 default-btn"
-            onClick={() => previewNoticeRequest.execute({ body: buildRequestBody() })}
+            onClick={() => {
+              if (!isValid) {
+                setIsWarningShown(true);
+                return;
+              }
+
+              previewNoticeRequest.execute({ body: buildRequestBody() });
+            }}
           >
             Preview
           </button>
@@ -291,6 +335,19 @@ export default function SelfCheckNotice({ id }: { id: string }) {
           notice is on you, and FOSSLight Hub has no responsibility to you and any third party.
         </div>
       </div>
+
+      {/* Warning */}
+      <Modal show={isWarningShown} onHide={() => setIsWarningShown(false)} size="sm">
+        <div className="mb-4">
+          There are some <span className="font-semibold text-crimson">incorrect license</span>{' '}
+          information. If you want to generate the appropriate notice,{' '}
+          <span className="font-semibold text-crimson">please fix it in the OSS tab first</span>.
+        </div>
+        <div className="mb-4 text-darkgray">
+          If you want to inform your administrator, click the button below to send an email.
+        </div>
+        <button className="px-2 py-0.5 charcoal-btn">Send an email to admin</button>
+      </Modal>
 
       {/* Download */}
       <Modal show={isDownloadShown} onHide={() => setIsDownloadShown(false)} size="md">
