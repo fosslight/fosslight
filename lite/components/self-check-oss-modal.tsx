@@ -1,3 +1,4 @@
+import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select/creatable';
@@ -25,10 +26,41 @@ export default function SelfCheckOSSModal({
   setChanged: (changed: boolean) => void;
 }) {
   const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
-  const { register, handleSubmit, reset, control } = useForm();
+  const { register, handleSubmit, reset, watch, control } = useForm();
+
+  // Autocomplete
+  const [autocompleteOss, setAutocompleteOss] = useState<[string, string][]>([]);
+  const [autocompleteLicense, setAutocompleteLicense] = useState<[string, string][]>([]);
+  const ossNameOptions = Array.from(new Set(autocompleteOss.map((oss) => oss[0]))).map((oss) => ({
+    value: oss,
+    label: oss
+  }));
+  const ossVersionOptions = autocompleteOss
+    .filter((oss) => oss[0] === watch('ossName'))
+    .map((oss) => ({ value: oss[1], label: oss[1] }));
+  const licenseOptions = autocompleteLicense.map((license) => ({
+    value: license[1],
+    label: `${license[0]} (${license[1]})`
+  }));
 
   // Mode (add or edit)
   const isAdd = !values;
+
+  // APIs for loading data for autocomplete
+  const loadAutocompleteOSSRequest = useAPI(
+    'get',
+    'http://localhost:8180/api/lite/oss/autocomplete',
+    {
+      onSuccess: (res) => setAutocompleteOss(res.data)
+    }
+  );
+  const loadAutocompleteLicenseRequest = useAPI(
+    'get',
+    'http://localhost:8180/api/lite/licenses/autocomplete',
+    {
+      onSuccess: (res) => setAutocompleteLicense(res.data)
+    }
+  );
 
   useEffect(() => {
     if (show) {
@@ -38,6 +70,9 @@ export default function SelfCheckOSSModal({
   }, [show]);
 
   useEffect(() => {
+    loadAutocompleteOSSRequest.execute({});
+    loadAutocompleteLicenseRequest.execute({});
+
     reset({
       ossName: values?.ossName || '',
       ossVersion: values?.ossVersion || '',
@@ -117,11 +152,11 @@ export default function SelfCheckOSSModal({
                   classNames={{ control: () => '!border-darkgray !rounded-none' }}
                   name={name}
                   value={options.find((option) => option.value === value)}
-                  options={options}
+                  options={ossNameOptions}
                   onChange={(selectedOption) => {
                     onChange(selectedOption?.value || '');
                   }}
-              placeholder="EX) fosslight"
+                  placeholder="EX) fosslight"
                   ref={ref}
                 />
               )}
@@ -137,11 +172,11 @@ export default function SelfCheckOSSModal({
                   classNames={{ control: () => '!border-darkgray !rounded-none' }}
                   name={name}
                   value={options.find((option) => option.value === value)}
-                  options={options}
+                  options={ossVersionOptions}
                   onChange={(selectedOption) => {
                     onChange(selectedOption?.value || '');
                   }}
-              placeholder="EX) 1.0.0"
+                  placeholder="EX) 1.0.0"
                   ref={ref}
                 />
               )}
@@ -153,7 +188,7 @@ export default function SelfCheckOSSModal({
               classNames={{
                 control: () => '!border-darkgray !rounded-none'
               }}
-              options={options}
+              options={licenseOptions}
               value={null}
               onChange={(selectedOption) => {
                 if (!selectedOption) {
