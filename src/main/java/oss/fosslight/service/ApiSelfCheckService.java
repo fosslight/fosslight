@@ -38,4 +38,6 @@ public interface ApiSelfCheckService {
 	List<T2File> listSelfCheckPackages(String id);
 
 	List<SelfCheckVerifyOssDto.OssCheckResult> validateOss(String id);
+
+	List<SelfCheckVerifyLicensesDto.LicenseCheckResult> validateLicenses(String id);
 }

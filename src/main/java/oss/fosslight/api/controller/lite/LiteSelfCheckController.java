@@ -218,7 +218,6 @@ public class LiteSelfCheckController extends CoTopComponent {
         }
     }
 
-
     @GetMapping("/selfchecks/{id}/oss/check")
     public @ResponseBody ResponseEntity<SelfCheckVerifyOssDto.Response> checkOss(
             @PathVariable("id") String id
@@ -233,6 +232,21 @@ public class LiteSelfCheckController extends CoTopComponent {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
 
+    @GetMapping("/selfchecks/{id}/licenses/check")
+    public @ResponseBody ResponseEntity<SelfCheckVerifyLicensesDto.Response> checkLicenses(
+            @PathVariable("id") String id
+    ) {
+        var licenseIdentificationList = apiSelfCheckService.validateLicenses(id);
+
+        try {
+            return ResponseEntity.ok(SelfCheckVerifyLicensesDto.Response.builder()
+                    .verificationLicenses(licenseIdentificationList)
+                    .build());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
