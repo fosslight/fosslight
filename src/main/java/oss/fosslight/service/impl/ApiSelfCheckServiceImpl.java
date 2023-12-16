@@ -345,7 +345,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
             var license = SelfCheckVerifyLicensesDto.LicenseCheckResult.builder()
                     .gridId(oss.getComponentId())
                     .downloadUrl(oss.getDownloadLocation())
-                    .after(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
+                    .before(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
                             .value(Arrays.stream(oss.getLicenseName().split(","))
                                     .map(String::trim).collect(Collectors.toList()))
                             .msg(null)

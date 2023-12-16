@@ -115,6 +115,16 @@ public class ApiOssServiceImpl implements ApiOssService {
                 .build();
     }
 
+    public List<OssDto> listRecentOss(int limit) {
+        var rows = apiOssMapper.selectRecentOss(limit);
+        return addLicenseInfo(rows);
+    }
+
+    public List<OssDto> listNameSearchResult(ListOssDto.Request query) {
+        var rows = apiOssMapper.selectOssList(query);
+        return addLicenseInfo(rows);
+    }
+
     public GetOSSDetailsDto.Result getOss(String id) {
         var oss = apiOssMapper.selectOssById(id);
 
@@ -132,5 +142,23 @@ public class ApiOssServiceImpl implements ApiOssService {
                 .builder()
                 .oss(oss)
                 .build();
+    }
+
+    private List<OssDto> addLicenseInfo(List<OssDto> list) {
+        var ossIdList = list.stream().map(OssDto::getOssId).collect(Collectors.toList());
+        List<LicenseDto> licenseList = apiOssMapper.selectOssLicenseList(ossIdList);
+        list.forEach(oss -> {
+            var licensesForOss = licenseList.stream()
+                    .filter(license -> license.getOssId().equals(oss.getOssId()))
+                    .map(license -> {
+                        var ossLicense = new OssLicense();
+                        ossLicense.setLicenseName(license.getLicenseName());
+                        ossLicense.setOssLicenseComb(license.getComb());
+                        return ossLicense;
+                    }).collect(Collectors.toList());
+            var licensesString = CommonFunction.makeLicenseExpression(licensesForOss);
+            oss.setLicenseName(licensesString);
+        });
+        return list;
     }
 }
