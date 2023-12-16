@@ -241,6 +241,16 @@ export default function SelfCheckOSS({
     type: 'json'
   });
 
+  // API for downloading report
+  const downloadReportRequest = useAPI('post', 'http://localhost:8180/exceldownload/getExcelPost', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
+    },
+    onFinish: () => setLoading(false),
+    type: 'json'
+  });
+
   // API for saving file/OSS List
   const saveOSSRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveSrc', {
     onStart: () => setLoading(true),
@@ -526,13 +536,33 @@ export default function SelfCheckOSS({
           />
         </div>
         <div className="flex justify-end gap-x-1">
-          <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn">
+          <button
+            className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
+            onClick={() => {
+              if (changed) {
+                alert('You should save first');
+                return;
+              }
+
+              downloadReportRequest.execute({ body: { parameter: id, type: 'selfReport' } });
+            }}
+          >
             <div className="relative w-4 h-4">
               <Image src={ExcelIcon} fill sizes="32px" alt="export" />
             </div>
             Export
           </button>
-          <button className="px-2 py-0.5 default-btn" onClick={openSubwindowForCheck}>
+          <button
+            className="px-2 py-0.5 default-btn"
+            onClick={() => {
+              if (changed) {
+                alert('You should save first');
+                return;
+              }
+
+              openSubwindowForCheck();
+            }}
+          >
             Check
           </button>
           <button
