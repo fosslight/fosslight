@@ -11,6 +11,8 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.*;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.repository.*;
+import oss.fosslight.service.ApiOssService;
+import oss.fosslight.service.impl.ApiOssServiceImpl;
 
 import java.util.stream.Collectors;
 
@@ -20,25 +22,25 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/api/lite")
 public class LiteDashboardController extends CoTopComponent {
     @Autowired
-    ApiOssMapper apiOssMapper;
-
-    @Autowired
     ApiLicenseMapper apiLicenseMapper;
 
     @Autowired
     ApiVulnerabilityMapper apiVulnerabilityMapper;
 
+    @Autowired
+    ApiOssService apiOssService;
+
     @GetMapping("/dashboard/search")
     public @ResponseBody ResponseEntity<SearchAllDto.Response> searchAll(
             @RequestParam("query") String query
     ) {
-        final int LIMIT = 10;
+        final int LIMIT = 5;
         try {
             var ossQuery = ListOssDto.Request.builder()
                     .ossName(query)
                     .build();
             ossQuery.setLimit(LIMIT);
-            var ossSearchResults = apiOssMapper.selectOssList(ossQuery);
+            var ossSearchResults = apiOssService.listNameSearchResult(ossQuery);
             var licenseQuery = ListLicenseDto.Request.builder()
                     .licenseName(query)
                     .build();
@@ -63,10 +65,11 @@ public class LiteDashboardController extends CoTopComponent {
     @GetMapping("/dashboard")
     public @ResponseBody ResponseEntity<SearchAllDto.Response> dashboard(
     ) {
+        final int LIMIT = 5;
         try {
-            var ossSearchResults = apiOssMapper.selectRecentOss();
-            var licenseSearchResults = apiLicenseMapper.selectRecentLicenses();
-            var vulnerabilitySearchResults = apiVulnerabilityMapper.selectRecentVulnerabilities();
+            var ossSearchResults = apiOssService.listRecentOss(LIMIT);
+            var licenseSearchResults = apiLicenseMapper.selectRecentLicenses(LIMIT);
+            var vulnerabilitySearchResults = apiVulnerabilityMapper.selectRecentVulnerabilities(LIMIT);
             return ResponseEntity.ok(SearchAllDto.Response.builder()
                     .oss(ossSearchResults)
                     .licenses(licenseSearchResults)

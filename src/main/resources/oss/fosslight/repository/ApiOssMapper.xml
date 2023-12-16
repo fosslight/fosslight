@@ -793,6 +793,6 @@
         LEFT OUTER JOIN T2_CODE_DTL T5 ON T3.LICENSE_TYPE = T5.CD_DTL_NO AND T5.CD_NO = '201' /*Code Table*/
         WHERE T1.USE_YN = 'Y'
         ORDER BY T1.MODIFIED_DATE DESC
-        LIMIT 5
+        LIMIT #{limit}
     </select>
 </mapper>
