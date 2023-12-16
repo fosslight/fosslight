@@ -38,4 +38,9 @@ public class Paging {
             return "desc";
         }
     }
+
+    public void setLimit(int limit) {
+        page = 1;
+        countPerPage = limit;
+    }
 }

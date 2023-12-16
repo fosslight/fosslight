@@ -262,4 +262,33 @@
     <select id="getLicenseAutocompleteCandidates" resultMap="LicenseDetailMap">
         SELECT LICENSE_NAME, SHORT_IDENTIFIER FROM LICENSE_MASTER;
     </select>
+
+    <select id="selectRecentLicenses" resultMap="LicenseDtoMap">
+        SELECT
+            T1.LICENSE_ID,
+            T1.LICENSE_NAME,
+            T2.CD_DTL_NM AS LICENSE_TYPE,
+            CONCAT(
+                    IF(T1.OBLIGATION_NOTIFICATION_YN = 'Y', 'Y', 'N'),
+                    IF(T1.OBLIGATION_DISCLOSING_SRC_YN = 'Y', 'Y', 'N')
+            ) as OBLIGATIONS,
+            T1.SHORT_IDENTIFIER,
+            T1.WEBPAGE,
+            T1.DESCRIPTION,
+            T1.LICENSE_TEXT,
+            T1.ATTRIBUTION,
+            IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR,
+            IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
+            T1.CREATED_DATE,
+            T1.MODIFIED_DATE,
+            T1.RESTRICTION
+        FROM LICENSE_MASTER T1
+                 LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
+                 LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON
+            T1.LICENSE_ID = T3.LICENSE_ID
+        WHERE T1.USE_YN = 'Y'
+          AND T2.CD_NO = '201'
+        ORDER BY T1.MODIFIED_DATE DESC
+        LIMIT 5
+    </select>
 </mapper>
