@@ -59,7 +59,7 @@ export default function SelfCheckPackage({ id }: { id: string }) {
     'delete',
     `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
     {
-      onSuccess: () => loadFilesRequest.execute({}),
+      onSuccess: () => loadFilesRequest.execute({})
     }
   );
 
@@ -98,46 +98,41 @@ export default function SelfCheckPackage({ id }: { id: string }) {
             ))}
           </div>
         )}
-        <span
-          className="cursor-pointer"
-          onClick={() => {
-            document.getElementById('upload-file')?.click();
-          }}
-        >
+        <div className="relative">
           <i className="fa-solid fa-arrow-up-from-bracket" />
           &ensp;Upload your package files here
-        </span>
-        <div className="mt-1 text-sm text-darkgray">
-          (Below are the OSS that must disclose the source codes.&ensp;
-          <i className="fa-solid fa-turn-down" />)
-        </div>
-        <input
-          id="upload-file"
-          className="hidden"
-          type="file"
-          accept=".zip, .tar.gz, .gz"
-          onChange={(e) => {
-            const input = e.target;
+          <div className="mt-1 text-sm text-darkgray">
+            (Below are the OSS that must disclose the source codes.&ensp;
+            <i className="fa-solid fa-turn-down" />)
+          </div>
+          <input
+            id="upload-file"
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            type="file"
+            accept=".zip, .tar.gz, .gz"
+            onChange={(e) => {
+              const input = e.target;
 
-            if (!input.files || input.files.length === 0) {
-              return;
-            }
+              if (!input.files || input.files.length === 0) {
+                return;
+              }
 
-            const file = input.files[0];
-            const allowedExtensions = /\.(zip|tar\.gz|gz)$/i;
-            if (!allowedExtensions.test(file.name)) {
-              alert('Select a file with valid extension(zip, tar.gz, or gz)');
+              const file = input.files[0];
+              const allowedExtensions = /\.(zip|tar\.gz|gz)$/i;
+              if (!allowedExtensions.test(file.name)) {
+                alert('Select a file with valid extension(zip, tar.gz, or gz)');
+                input.value = '';
+                return;
+              }
+
+              const formData = new FormData();
+              formData.append('selfCheckPackageFile', file, file.name);
+
+              uploadFileRequest.execute({ body: formData });
               input.value = '';
-              return;
-            }
-
-            const formData = new FormData();
-            formData.append('selfCheckPackageFile', file, file.name);
-
-            uploadFileRequest.execute({ body: formData });
-            input.value = '';
-          }}
-        />
+            }}
+          />
+        </div>
       </div>
 
       {/* Table */}
