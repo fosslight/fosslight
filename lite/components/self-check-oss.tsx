@@ -644,6 +644,7 @@ export default function SelfCheckOSS({
                   )}
                   {(() => {
                     if (
+                      oss.changed ||
                       !validMap[oss.gridId] ||
                       (!validMap[oss.gridId].ossName && !validMap[oss.gridId].ossVersion)
                     ) {
@@ -704,7 +705,7 @@ export default function SelfCheckOSS({
                     )}
                   </div>
                   {(() => {
-                    if (!validMap[oss.gridId] || !validMap[oss.gridId].licenseName) {
+                    if (oss.changed || !validMap[oss.gridId] || !validMap[oss.gridId].licenseName) {
                       return null;
                     }
 
