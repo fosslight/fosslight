@@ -292,11 +292,13 @@ export default function ListSections({
                           />
                         </div>
                         <div className="flex-shrink-0">
+                          (
                           <span
                             dangerouslySetInnerHTML={{
                               __html: highlight(license.licenseIdentifier, searchKeyword)
                             }}
                           />
+                          )
                         </div>
                       </div>
                       {(license.obligations[0] === 'Y' || license.obligations[1] === 'Y') && (
