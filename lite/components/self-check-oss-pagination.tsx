@@ -56,6 +56,7 @@ export default function SelfCheckOSSPagination({
           }}
           onBlur={() => setPageDisplay(String(currentPage))}
         />
+        &nbsp; of {lastPage}
       </div>
       <i
         className={clsx(
