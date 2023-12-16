@@ -11,8 +11,11 @@ import oss.fosslight.api.dto.ListLicenseDto;
 import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.common.Url;
 import oss.fosslight.controller.LicenseController;
+import oss.fosslight.repository.ApiLicenseMapper;
 import oss.fosslight.service.ApiLicenseService;
 import oss.fosslight.service.ApiOssService;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -21,6 +24,9 @@ import oss.fosslight.service.ApiOssService;
 public class LiteLicenseController {
     @Autowired
     ApiLicenseService apiLicenseService;
+
+    @Autowired
+    ApiLicenseMapper apiLicenseMapper;
 
     @GetMapping("/licenses")
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getPage(
@@ -41,6 +47,19 @@ public class LiteLicenseController {
     ) {
         try {
             var result = apiLicenseService.getLicense(id);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/licenses/autocomplete")
+    public @ResponseBody ResponseEntity<List<String>> getAutocompleteCandidates(
+            @RequestParam("query") String query
+    ) {
+        try {
+            var result = apiLicenseMapper.getLicenseAutocompleteCandidates(query);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
