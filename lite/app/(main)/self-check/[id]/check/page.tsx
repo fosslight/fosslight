@@ -6,29 +6,19 @@ import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-function SelfCheckDetailCheckOSS({ id }: { id: string }) {
-  const setLoading = useSetRecoilState(loadingState);
-
-  // Rows/Columns
-  const [rows, setRows] = useState<SelfCheck.OSSCheck[]>([]);
+function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
+  const [completed, setCompleted] = useState(false);
   const columns: List.Column[] = [
     { name: 'Download URL', sort: '' },
     { name: 'OSS Name (now)', sort: '' },
     { name: 'OSS Name (to be changed)', sort: '' }
   ];
 
-  // API for loading OSS check result
-  const checkOssRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/oss/check`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => setRows(res.data.verificationOss),
-      onFinish: () => setLoading(false)
-    }
-  );
-
   function changeOssName() {
+    if (!window.confirm('Are you sure to continue?')) {
+      return;
+    }
+
     const data: any = {};
     rows.forEach((row) => {
       row.gridIds.forEach((gridId) => {
@@ -42,12 +32,8 @@ function SelfCheckDetailCheckOSS({ id }: { id: string }) {
     }
 
     window.opener.postMessage(JSON.stringify({ ossCheck: data }));
+    setCompleted(true);
   }
-
-  useEffect(() => {
-    checkOssRequest.execute({});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <>
@@ -63,15 +49,22 @@ function SelfCheckDetailCheckOSS({ id }: { id: string }) {
           hideColumnSelector
           render={(row: SelfCheck.OSSCheck, column: string) => {
             if (column === 'Download URL') {
+              const urls = row.downloadUrl.split(',');
+
               return (
-                <a
-                  className="text-blue-500 whitespace-nowrap hover:underline"
-                  href={row.downloadUrl}
-                  target="_blank"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {row.downloadUrl}
-                </a>
+                <div className="whitespace-nowrap">
+                  {urls.map((url, idx) => (
+                    <a
+                      key={idx}
+                      className="block text-blue-500 hover:underline"
+                      href={url}
+                      target="_blank"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {url}
+                    </a>
+                  ))}
+                </div>
               );
             }
 
@@ -101,7 +94,7 @@ function SelfCheckDetailCheckOSS({ id }: { id: string }) {
           }}
         />
       </div>
-      {rows.length > 0 && (
+      {rows.length > 0 && !completed && (
         <div className="mt-3 text-right">
           <button className="px-2 py-0.5 crimson-btn" onClick={changeOssName}>
             Change OSS Name
@@ -112,11 +105,8 @@ function SelfCheckDetailCheckOSS({ id }: { id: string }) {
   );
 }
 
-function SelfCheckDetailCheckLicense({ id }: { id: string }) {
-  const setLoading = useSetRecoilState(loadingState);
-
-  // Rows/Columns
-  const [rows, setRows] = useState<SelfCheck.LicenseCheck[]>([]);
+function SelfCheckDetailCheckLicense({ rows }: { rows: SelfCheck.LicenseCheck[] }) {
+  const [completed, setCompleted] = useState(false);
   const columns: List.Column[] = [
     { name: 'OSS Name', sort: '' },
     { name: 'OSS Version', sort: '' },
@@ -125,18 +115,11 @@ function SelfCheckDetailCheckLicense({ id }: { id: string }) {
     { name: 'Licenses (to be changed)', sort: '' }
   ];
 
-  // API for loading license check result
-  const checkLicenseRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/licenses/check`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => setRows(res.data.verificationLicenses),
-      onFinish: () => setLoading(false)
-    }
-  );
-
   function changeLicenses() {
+    if (!window.confirm('Are you sure to continue?')) {
+      return;
+    }
+
     const data: any = {};
     rows.forEach((row) => {
       data[row.gridId] = row.after.value;
@@ -148,16 +131,12 @@ function SelfCheckDetailCheckLicense({ id }: { id: string }) {
     }
 
     window.opener.postMessage(JSON.stringify({ licenseCheck: data }));
+    setCompleted(true);
   }
-
-  useEffect(() => {
-    checkLicenseRequest.execute({});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <>
-      <h4 className="mb-2 text-lg font-bold">License Check</h4>
+      <h4 className="mt-16 mb-2 text-lg font-bold">License Check</h4>
       <div className="mb-3 text-sm text-semiblack/80">
         The list of licenses that can be changed to the <b>registered licenses</b>, which are found
         based on the <b>OSS name/version and download URL</b>.
@@ -215,7 +194,7 @@ function SelfCheckDetailCheckLicense({ id }: { id: string }) {
           }}
         />
       </div>
-      {rows.length > 0 && (
+      {rows.length > 0 && !completed && (
         <div className="mt-3 text-right">
           <button className="px-2 py-0.5 crimson-btn" onClick={changeLicenses}>
             Change Licenses
@@ -227,11 +206,39 @@ function SelfCheckDetailCheckLicense({ id }: { id: string }) {
 }
 
 export default function SelfCheckDetailCheck({ params }: { params: { id: string } }) {
+  const setLoading = useSetRecoilState(loadingState);
+  const [ossRows, setOssRows] = useState<SelfCheck.OSSCheck[]>([]);
+  const [licenseRows, setLicenseRows] = useState<SelfCheck.LicenseCheck[]>([]);
+
+  // API for loading OSS check result
+  const checkOssRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${params.id}/oss/check`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => setOssRows(res.data.verificationOss)
+    }
+  );
+
+  // API for loading license check result
+  const checkLicenseRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${params.id}/licenses/check`,
+    {
+      onSuccess: (res) => setLicenseRows(res.data.verificationLicenses),
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  useEffect(() => {
+    checkOssRequest.executeAsync({}).then(() => checkLicenseRequest.execute({}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <>
-      <SelfCheckDetailCheckOSS id={params.id} />
-      <hr className="my-8 border-semigray" />
-      <SelfCheckDetailCheckLicense id={params.id} />
+      <SelfCheckDetailCheckOSS rows={ossRows} />
+      <SelfCheckDetailCheckLicense rows={licenseRows} />
     </>
   );
 }
