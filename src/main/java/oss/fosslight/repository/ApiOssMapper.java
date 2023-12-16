@@ -39,4 +39,5 @@ public interface ApiOssMapper {
 	List<LicenseDto> selectOssLicenseList(List<String> ossIdList);
 	OssDetailsDto selectOssById(String id);
 	List<VulnerabilityDto> getOssVulnerabilityList(String ossId);
+	List<String> getOssAutocompleteCandidates(String string);
 }

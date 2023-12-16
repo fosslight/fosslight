@@ -23,4 +23,5 @@ public interface ApiLicenseMapper {
 	List<LicenseDto> selectLicenseList(ListLicenseDto.Request request);
 	LicenseDetailsDto selectLicenseById(String id);
 	List<String> selectLicenseNicknameList(String name);
+	List<String> getLicenseAutocompleteCandidates(String name);
 }
