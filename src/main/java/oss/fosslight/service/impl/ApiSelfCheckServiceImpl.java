@@ -277,7 +277,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
         for (var oss : mergedList) {
             var beforeMsg = validMap == null ? null : validMap.get("ossName." + oss.getComponentId());
-            String afterMsg = null; // TODO: move to front?
+            String afterMsg = null;
             if (oss.getCheckOssList().equals("I")) {
                 afterMsg = "Invalid download location";
             } else if (oss.getRedirectLocation() != null) {
@@ -285,6 +285,7 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
             }
             var checkResult = SelfCheckVerifyOssDto.OssCheckResult.builder()
                     .gridIds(oss.getComponentIdList())
+                    .downloadUrl(oss.getDownloadLocation())
                     .before(SelfCheckVerifyOssDto.OssEntry.builder()
                             .value(oss.getOssName())
                             .msg(beforeMsg)
@@ -325,13 +326,11 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
         if (!vr.isValid()) {
             Map<String, String> validMap = vr.getValidMessageMap();
             result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, validMap, null));
-//            resMap.put("validMap", validMap);
         }
 
         if (!vr.isDiff()) {
             Map<String, String> diffMap = vr.getDiffMessageMap();
             result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
-//            resMap.put("diffMap", diffMap);
         }
 
         if (result.isEmpty()) {
@@ -342,15 +341,18 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
         List<SelfCheckVerifyLicensesDto.LicenseCheckResult> resultList = new ArrayList<>();
         var checkedLicenses = (List<ProjectIdentification>) data.get("checkedData");
-        for (ProjectIdentification oss: checkedLicenses) {
+        for (ProjectIdentification oss : checkedLicenses) {
             var license = SelfCheckVerifyLicensesDto.LicenseCheckResult.builder()
                     .gridId(oss.getComponentId())
+                    .downloadUrl(oss.getDownloadLocation())
                     .after(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
-                            .value(oss.getLicenseName())
+                            .value(Arrays.stream(oss.getLicenseName().split(","))
+                                    .map(String::trim).collect(Collectors.toList()))
                             .msg(null)
                             .build())
                     .after(SelfCheckVerifyLicensesDto.LicenseEntry.builder()
-                            .value(oss.getCheckLicense())
+                            .value(Arrays.stream(oss.getCheckLicense().split(","))
+                                    .map(String::trim).collect(Collectors.toList()))
                             .msg(null)
                             .build())
                     .build();
