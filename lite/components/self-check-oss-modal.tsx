@@ -49,14 +49,14 @@ export default function SelfCheckOSSModal({
   // APIs for loading data for autocomplete
   const loadAutocompleteOSSRequest = useAPI(
     'get',
-    'http://localhost:8180/api/lite/oss/autocomplete',
+    'http://localhost:8180/api/lite/oss/candidates/all',
     {
       onSuccess: (res) => setAutocompleteOss(res.data)
     }
   );
   const loadAutocompleteLicenseRequest = useAPI(
     'get',
-    'http://localhost:8180/api/lite/licenses/autocomplete',
+    'http://localhost:8180/api/lite/licenses/candidates/all',
     {
       onSuccess: (res) => setAutocompleteLicense(res.data)
     }
