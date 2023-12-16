@@ -272,15 +272,22 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
         var resultList = new ArrayList<SelfCheckVerifyOssDto.OssCheckResult>();
 
         for (var oss : mergedList) {
-            var msg = validMap == null ? null : validMap.get("ossName." + oss.getComponentId());
+            var beforeMsg = validMap == null ? null : validMap.get("ossName." + oss.getComponentId());
+            String afterMsg = null; // TODO: move to front?
+            if (oss.getCheckOssList().equals("I")) {
+                afterMsg = "Invalid download location";
+            } else if (oss.getRedirectLocation() != null) {
+                afterMsg = "redirect url: " + oss.getRedirectLocation();
+            }
             var checkResult = SelfCheckVerifyOssDto.OssCheckResult.builder()
                     .gridIds(oss.getComponentIdList())
                     .before(SelfCheckVerifyOssDto.OssEntry.builder()
-                            .msg(msg)
                             .value(oss.getOssName())
+                            .msg(beforeMsg)
                             .build())
                     .after(SelfCheckVerifyOssDto.OssEntry.builder()
                             .value(oss.getCheckName())
+                            .msg(afterMsg)
                             .build())
                     .build();
             resultList.add(checkResult);
