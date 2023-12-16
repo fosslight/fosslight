@@ -5,7 +5,6 @@
 
 package oss.fosslight.repository;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,5 +45,5 @@ public interface ApiOssMapper {
 
 	OssDetailsDto selectOssById(String id);
 	List<VulnerabilityDto> getOssVulnerabilityList(String ossId);
-	List<String> getOssAutocompleteCandidates(String string);
+	List<OssDto> getOssAutocompleteCandidates();
 }
