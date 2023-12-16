@@ -2,10 +2,11 @@
 
 import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
+import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
-function SelfCheckDetailCheckOSS() {
+function SelfCheckDetailCheckOSS({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
 
   // Rows/Columns
@@ -16,20 +17,35 @@ function SelfCheckDetailCheckOSS() {
     { name: 'OSS Name (to be changed)', sort: '' }
   ];
 
+  // API for loading OSS check result
+  const checkOssRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/oss/check`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => setRows(res.data.verificationOss),
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  function changeOssName() {
+    const data: any = {};
+    rows.forEach((row) => {
+      row.gridIds.forEach((gridId) => {
+        data[gridId] = row.after.value;
+      });
+    });
+
+    if (Object.keys(data).length === 0) {
+      alert('Nohting to change');
+      return;
+    }
+
+    window.opener.postMessage(JSON.stringify({ ossCheck: data }));
+  }
+
   useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setRows(
-        Array.from(Array(10)).map(() => ({
-          downloadUrl: 'http://cairographics.org/releases',
-          ossName: 'cair',
-          newOssName: 'cairo'
-        }))
-      );
-
-      setLoading(false);
-    }, 500);
+    checkOssRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -60,25 +76,43 @@ function SelfCheckDetailCheckOSS() {
             }
 
             if (column === 'OSS Name (now)') {
-              return row.ossName;
+              return (
+                <>
+                  {row.before.value}
+                  {row.before.msg && (
+                    <div className="mt-1 text-xs text-red-500">{row.before.msg}</div>
+                  )}
+                </>
+              );
             }
 
             if (column === 'OSS Name (to be changed)') {
-              return row.newOssName;
+              return (
+                <>
+                  {row.after.value}
+                  {row.after.msg && (
+                    <div className="mt-1 text-xs text-red-500">{row.after.msg}</div>
+                  )}
+                </>
+              );
             }
 
             return null;
           }}
         />
       </div>
-      <div className="mt-3 text-right">
-        <button className="px-2 py-0.5 crimson-btn">Change OSS Name</button>
-      </div>
+      {rows.length > 0 && (
+        <div className="mt-3 text-right">
+          <button className="px-2 py-0.5 crimson-btn" onClick={changeOssName}>
+            Change OSS Name
+          </button>
+        </div>
+      )}
     </>
   );
 }
 
-function SelfCheckDetailCheckLicense() {
+function SelfCheckDetailCheckLicense({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
 
   // Rows/Columns
@@ -91,22 +125,33 @@ function SelfCheckDetailCheckLicense() {
     { name: 'Licenses (to be changed)', sort: '' }
   ];
 
+  // API for loading license check result
+  const checkLicenseRequest = useAPI(
+    'get',
+    `http://localhost:8180/api/lite/selfchecks/${id}/licenses/check`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => setRows(res.data.verificationLicenses),
+      onFinish: () => setLoading(false)
+    }
+  );
+
+  function changeLicenses() {
+    const data: any = {};
+    rows.forEach((row) => {
+      data[row.gridId] = row.after.value;
+    });
+
+    if (Object.keys(data).length === 0) {
+      alert('Nohting to change');
+      return;
+    }
+
+    window.opener.postMessage(JSON.stringify({ licenseCheck: data }));
+  }
+
   useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      setRows(
-        Array.from(Array(10)).map(() => ({
-          ossName: 'cairo',
-          ossVersion: '1.0.0',
-          downloadUrl: 'http://cairographics.org/releases',
-          licenses: ['MPL-1.1', 'GPL-2.0'],
-          newLicenses: ['Apache-2.0']
-        }))
-      );
-
-      setLoading(false);
-    }, 500);
+    checkLicenseRequest.execute({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -145,30 +190,48 @@ function SelfCheckDetailCheckLicense() {
             }
 
             if (column === 'Licenses (now)') {
-              return row.licenses.join(', ');
+              return (
+                <>
+                  {row.before.value.join(', ')}
+                  {row.before.msg && (
+                    <div className="mt-1 text-xs text-red-500">{row.before.msg}</div>
+                  )}
+                </>
+              );
             }
 
             if (column === 'Licenses (to be changed)') {
-              return row.newLicenses.join(', ');
+              return (
+                <>
+                  {row.after.value.join(', ')}
+                  {row.after.msg && (
+                    <div className="mt-1 text-xs text-red-500">{row.after.msg}</div>
+                  )}
+                </>
+              );
             }
 
             return null;
           }}
         />
       </div>
-      <div className="mt-3 text-right">
-        <button className="px-2 py-0.5 crimson-btn">Change Licenses</button>
-      </div>
+      {rows.length > 0 && (
+        <div className="mt-3 text-right">
+          <button className="px-2 py-0.5 crimson-btn" onClick={changeLicenses}>
+            Change Licenses
+          </button>
+        </div>
+      )}
     </>
   );
 }
 
-export default function SelfCheckDetailCheck() {
+export default function SelfCheckDetailCheck({ params }: { params: { id: string } }) {
   return (
     <>
-      <SelfCheckDetailCheckOSS />
+      <SelfCheckDetailCheckOSS id={params.id} />
       <hr className="my-8 border-semigray" />
-      <SelfCheckDetailCheckLicense />
+      <SelfCheckDetailCheckLicense id={params.id} />
     </>
   );
 }
