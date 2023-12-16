@@ -259,14 +259,7 @@
         WHERE
         LICENSE_NAME = #{licenseName}
     </select>
-    <select id="getLicenseAutocompleteCandidates" resultType="java.lang.String">
-        SELECT *
-        FROM ((SELECT LICENSE_NAME
-               FROM LICENSE_MASTER
-               WHERE LICENSE_NAME LIKE CONCAT(#{query}, '%') LIMIT 10)
-              UNION
-              (SELECT LICENSE_NAME
-               FROM LICENSE_MASTER
-               WHERE LICENSE_NAME LIKE CONCAT('_%', #{query}, '%') LIMIT 10)) T1 LIMIT 10
+    <select id="getLicenseAutocompleteCandidates" resultMap="LicenseDetailMap">
+        SELECT LICENSE_NAME, SHORT_IDENTIFIER FROM LICENSE_MASTER;
     </select>
 </mapper>
