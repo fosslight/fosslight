@@ -28,11 +28,16 @@ export default function ListSections({
       <div className="col-span-2 shadow-box">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">Vulnerability</div>
-          {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/vulnerability?s=modify-dsc">
-              show more here
-            </Link>
-          )}
+          <Link
+            className="text-charcoal"
+            href={`/database/vulnerability?s=MODIFIED_AT-dsc${
+              searchKeyword
+                ? `&f=${encodeURIComponent(JSON.stringify({ cveId: searchKeyword }))}`
+                : ''
+            }`}
+          >
+            show more here
+          </Link>
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
@@ -116,11 +121,16 @@ export default function ListSections({
       <div className="col-span-2 self-start shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">OSS</div>
-          {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/oss?s=modify-dsc">
-              show more here
-            </Link>
-          )}
+          <Link
+            className="text-charcoal"
+            href={`/database/oss?s=MODIFIED_AT-dsc${
+              searchKeyword
+                ? `&f=${encodeURIComponent(JSON.stringify({ ossName: searchKeyword }))}`
+                : ''
+            }`}
+          >
+            show more here
+          </Link>
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
@@ -225,11 +235,16 @@ export default function ListSections({
       <div className="col-span-2 self-start shadow-box lg:col-span-1">
         <div className="flex items-center gap-x-3 text-sm">
           <div className="px-2 py-0.5 bg-charcoal rounded text-semiwhite">License</div>
-          {searchKeyword === undefined && (
-            <Link className="text-charcoal" href="/database/license?s=modify-dsc">
-              show more here
-            </Link>
-          )}
+          <Link
+            className="text-charcoal"
+            href={`/database/license?s=MODIFIED_AT-dsc${
+              searchKeyword
+                ? `&f=${encodeURIComponent(JSON.stringify({ licenseName: searchKeyword }))}`
+                : ''
+            }`}
+          >
+            show more here
+          </Link>
           <div className="flex-1 text-right">
             <button
               className="no-tap-highlight"
