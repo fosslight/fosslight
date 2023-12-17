@@ -363,4 +363,10 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
         return resultList;
     }
+
+    @Override
+    public boolean sendLicenseNoticeEmail() {
+        CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT);
+        return CoMailManager.getInstance().sendMail(mailBean);
+    }
 }
