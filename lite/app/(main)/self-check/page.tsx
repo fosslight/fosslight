@@ -76,6 +76,19 @@ export default function SelfCheckList() {
     type: 'json'
   });
 
+  // API for downloading notice
+  const downloadNoticeRequest = useAPI(
+    'post',
+    'http://localhost:8180/selfCheck/makeNoticePreview',
+    {
+      onStart: () => setLoading(true),
+      onSuccess: (res) => {
+        window.location.href = `http://localhost:8180/selfCheck/downloadNoticePreview?id=${res.data.validMsg}`;
+      },
+      onFinish: () => setLoading(false)
+    }
+  );
+
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
     loadRowsRequest.execute({
@@ -135,7 +148,7 @@ export default function SelfCheckList() {
               row.ossCount > 0 && (
                 <i
                   className="cursor-pointer fa-regular fa-file-excel"
-                  title="FOSSLight Report"
+                  title="Download FOSSLight Report"
                   onClick={(e) => {
                     e.stopPropagation();
                     downloadReportRequest.execute({
@@ -156,7 +169,7 @@ export default function SelfCheckList() {
                       key={idx}
                       href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
                       target="_blank"
-                      title={file.orgNm}
+                      title={`Download ${file.orgNm}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <i className="fa-solid fa-cube" />
@@ -172,8 +185,17 @@ export default function SelfCheckList() {
               row.notice && (
                 <i
                   className="cursor-pointer fa-solid fa-file-lines"
-                  title="Notice"
-                  onClick={(e) => e.stopPropagation()}
+                  title="Download Notice"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadNoticeRequest.execute({
+                      body: {
+                        prjId: row.projectId,
+                        previewOnly: 'N',
+                        isSimpleNotice: 'N'
+                      }
+                    });
+                  }}
                 />
               )
             );
