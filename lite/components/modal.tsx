@@ -36,7 +36,9 @@ export default function Modal({
       setVisible(true);
 
       // Animation on show
-      setAnimate(true);
+      setTimeout(() => {
+        setAnimate(true);
+      }, 100);
     }
 
     // Hide the modal
@@ -73,7 +75,7 @@ export default function Modal({
     <div
       className={clsx(
         'fixed inset-0 flex justify-center items-center bg-charcoal/50 transition-opacity duration-300 z-50',
-        visible ? 'visible' : 'invisible -z-50',
+        visible ? 'block' : 'hidden',
         animate ? 'opacity-100' : 'opacity-0'
       )}
       onClick={() => {
