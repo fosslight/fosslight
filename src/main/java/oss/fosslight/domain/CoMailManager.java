@@ -737,6 +737,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
+			case CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT:
     			bean.setToIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
