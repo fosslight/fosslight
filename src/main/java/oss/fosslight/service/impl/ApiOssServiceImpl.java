@@ -32,20 +32,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-<<<<<<< HEAD
-public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
-	/** The api oss mapper. */
-	@Autowired ApiOssMapper apiOssMapper;
-	@Autowired OssService ossService;
-	@Autowired HistoryService historyService;
-=======
 public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
     /**
      * The api oss mapper.
      */
     @Autowired
     ApiOssMapper apiOssMapper;
->>>>>>> 387b5e70 ([Add] Implement file download for oss)
 
     @Autowired
     OssMapper ossMapper;
