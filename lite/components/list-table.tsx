@@ -30,6 +30,7 @@ function generatePagination(currPage: number, lastPage: number) {
 export default function ListTable({
   rows,
   columns,
+  checkbox,
   currentSort,
   pagination,
   hideColumnSelector = false,
@@ -38,6 +39,12 @@ export default function ListTable({
 }: {
   rows: any[];
   columns: List.Column[];
+  checkbox?: {
+    name: string;
+    checkedList: number[];
+    setCheckedList: (checkedList: number[]) => void;
+    disabledList: number[];
+  };
   currentSort?: string;
   pagination?: { totalCount: number; currentPage: number; countPerPage: number };
   hideColumnSelector?: boolean;
@@ -110,6 +117,11 @@ export default function ListTable({
     };
   }, []);
 
+  let validCheckList = rows.map((_, idx) => Number(idx));
+  if (checkbox && checkbox.disabledList.length > 0) {
+    validCheckList = validCheckList.filter((idx) => !checkbox.disabledList.includes(idx));
+  }
+
   return (
     <>
       <div className="relative overflow-x-auto no-scrollbar">
@@ -117,6 +129,33 @@ export default function ListTable({
           {/* Columns */}
           <thead>
             <tr className="border-b-2 border-charcoal/80 text-left whitespace-nowrap">
+              {checkbox && (
+                <th className="p-2">
+                  <input
+                    type="checkbox"
+                    checked={
+                      validCheckList.length > 0
+                        ? validCheckList.length ===
+                          checkbox.checkedList.filter((idx) => !checkbox.disabledList.includes(idx))
+                            .length
+                        : false
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        checkbox.setCheckedList(
+                          checkbox.disabledList
+                            .filter((idx) => checkbox.checkedList.includes(idx))
+                            .concat(validCheckList)
+                        );
+                      } else {
+                        checkbox.setCheckedList(
+                          checkbox.checkedList.filter((idx) => checkbox.disabledList.includes(idx))
+                        );
+                      }
+                    }}
+                  />
+                </th>
+              )}
               {columns
                 .filter((column) => isColumnShown[column.name])
                 .map((column) => (
@@ -213,6 +252,28 @@ export default function ListTable({
                 )}
                 onClick={() => onClickRow && onClickRow(row)}
               >
+                {checkbox && (
+                  <td className="px-2 py-1.5">
+                    <input
+                      className={checkbox.name}
+                      type="checkbox"
+                      checked={checkbox.checkedList.includes(idx)}
+                      disabled={checkbox.disabledList.includes(idx)}
+                      value={idx}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          checkbox.setCheckedList([...checkbox.checkedList, idx]);
+                        } else {
+                          const sliceIdx = checkbox.checkedList.findIndex((i) => i === idx);
+                          checkbox.setCheckedList([
+                            ...checkbox.checkedList.slice(0, sliceIdx),
+                            ...checkbox.checkedList.slice(sliceIdx + 1)
+                          ]);
+                        }
+                      }}
+                    />
+                  </td>
+                )}
                 {columns
                   .filter((column) => isColumnShown[column.name])
                   .map((column) => (

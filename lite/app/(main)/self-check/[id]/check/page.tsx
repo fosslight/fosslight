@@ -7,32 +7,37 @@ import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
-  const [completed, setCompleted] = useState(false);
+  const [checkedList, setCheckedList] = useState<number[]>([]);
+  const [completedList, setCompletedList] = useState<number[]>([]);
   const columns: List.Column[] = [
     { name: 'Download URL', sort: '' },
     { name: 'OSS Name (now)', sort: '' },
     { name: 'OSS Name (to be changed)', sort: '' }
   ];
+  const checkbox = { name: 'oss-idx', checkedList, setCheckedList, disabledList: completedList };
 
   function changeOssName() {
+    const validCheckList = checkedList.filter((idx) => !completedList.includes(idx));
+    if (validCheckList.length === 0) {
+      alert('Nohting to change');
+      return;
+    }
+
     if (!window.confirm('Are you sure to continue?')) {
       return;
     }
 
     const data: any = {};
-    rows.forEach((row) => {
-      row.gridIds.forEach((gridId) => {
-        data[gridId] = row.after.value;
+    rows
+      .filter((_, idx) => validCheckList.includes(idx))
+      .forEach((row) => {
+        row.gridIds.forEach((gridId) => {
+          data[gridId] = row.after.value;
+        });
       });
-    });
-
-    if (Object.keys(data).length === 0) {
-      alert('Nohting to change');
-      return;
-    }
 
     window.opener.postMessage(JSON.stringify({ ossCheck: data }));
-    setCompleted(true);
+    setCompletedList([...completedList, ...validCheckList]);
   }
 
   return (
@@ -46,6 +51,7 @@ function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
         <ListTable
           rows={rows}
           columns={columns}
+          checkbox={checkbox}
           hideColumnSelector
           render={(row: SelfCheck.OSSCheck, column: string) => {
             if (column === 'Download URL') {
@@ -53,9 +59,9 @@ function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
 
               return (
                 <div className="whitespace-nowrap">
-                  {urls.map((url, idx) => (
+                  {urls.map((url, urlIdx) => (
                     <a
-                      key={idx}
+                      key={urlIdx}
                       className="block text-blue-500 hover:underline"
                       href={url}
                       target="_blank"
@@ -94,7 +100,7 @@ function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
           }}
         />
       </div>
-      {rows.length > 0 && !completed && (
+      {rows.length > 0 && (
         <div className="mt-3 text-right">
           <button className="px-2 py-0.5 crimson-btn" onClick={changeOssName}>
             Change OSS Name
@@ -106,7 +112,8 @@ function SelfCheckDetailCheckOSS({ rows }: { rows: SelfCheck.OSSCheck[] }) {
 }
 
 function SelfCheckDetailCheckLicense({ rows }: { rows: SelfCheck.LicenseCheck[] }) {
-  const [completed, setCompleted] = useState(false);
+  const [checkedList, setCheckedList] = useState<number[]>([]);
+  const [completedList, setCompletedList] = useState<number[]>([]);
   const columns: List.Column[] = [
     { name: 'OSS Name', sort: '' },
     { name: 'OSS Version', sort: '' },
@@ -114,24 +121,33 @@ function SelfCheckDetailCheckLicense({ rows }: { rows: SelfCheck.LicenseCheck[] 
     { name: 'Licenses (now)', sort: '' },
     { name: 'Licenses (to be changed)', sort: '' }
   ];
+  const checkbox = {
+    name: 'license-idx',
+    checkedList,
+    setCheckedList,
+    disabledList: completedList
+  };
 
   function changeLicenses() {
+    const validCheckList = checkedList.filter((idx) => !completedList.includes(idx));
+    if (validCheckList.length === 0) {
+      alert('Nohting to change');
+      return;
+    }
+
     if (!window.confirm('Are you sure to continue?')) {
       return;
     }
 
     const data: any = {};
-    rows.forEach((row) => {
-      data[row.gridId] = row.after.value;
-    });
-
-    if (Object.keys(data).length === 0) {
-      alert('Nohting to change');
-      return;
-    }
+    rows
+      .filter((_, idx) => validCheckList.includes(idx))
+      .forEach((row) => {
+        data[row.gridId] = row.after.value;
+      });
 
     window.opener.postMessage(JSON.stringify({ licenseCheck: data }));
-    setCompleted(true);
+    setCompletedList([...completedList, ...validCheckList]);
   }
 
   return (
@@ -145,6 +161,7 @@ function SelfCheckDetailCheckLicense({ rows }: { rows: SelfCheck.LicenseCheck[] 
         <ListTable
           rows={rows}
           columns={columns}
+          checkbox={checkbox}
           hideColumnSelector
           render={(row: SelfCheck.LicenseCheck, column: string) => {
             if (column === 'OSS Name') {
@@ -194,7 +211,7 @@ function SelfCheckDetailCheckLicense({ rows }: { rows: SelfCheck.LicenseCheck[] 
           }}
         />
       </div>
-      {rows.length > 0 && !completed && (
+      {rows.length > 0 && (
         <div className="mt-3 text-right">
           <button className="px-2 py-0.5 crimson-btn" onClick={changeLicenses}>
             Change Licenses
