@@ -29,11 +29,8 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const inputClass = 'w-60 max-w-full px-2 py-0.5 mb-1.5 border border-darkgray outline-none';
   const commentClass = 'text-xs text-darkgray';
 
-  // API for loading validation result
-  const loadValidationListRequest = useAPI(
-    'get',
-    `http://localhost:8180/selfCheck/ossGrid/${id}/10`,
-    {
+  // API for validating notice
+  const validateNoticeRequest = useAPI('get', `http://localhost:8180/selfCheck/ossGrid/${id}/10`, {
       onSuccess: (res) => {
         const { validData } = res.data;
 
@@ -46,8 +43,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
 
         setIsValid(true);
       }
-    }
-  );
+  });
 
   // API for sending email
   const sendEmailRequest = useAPI(
@@ -163,7 +159,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   }
 
   useEffect(() => {
-    loadValidationListRequest.execute({ params: { referenceId: id } });
+    validateNoticeRequest.execute({ params: { referenceId: id } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
