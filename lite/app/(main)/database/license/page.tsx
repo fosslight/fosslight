@@ -5,7 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
-import { RESTRICTIONS } from '@/lib/literals';
+import { RESTRICTIONS, serverOrigin } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -111,7 +111,7 @@ export default function LicenseList() {
   const currentPage = Number(queryParams.get('p') || '1');
 
   // API for loading rows
-  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/licenses', {
+  const loadRowsRequest = useAPI('get', '/api/lite/licenses', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       setTotalCount(res.data.totalCount);
@@ -121,15 +121,11 @@ export default function LicenseList() {
   });
 
   // API for exporting
-  const downloadExcelRequest = useAPI(
-    'get',
-    'http://localhost:8180/api/lite/licenses/export/excel',
-    {
-      onSuccess: (res) => {
-        window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data}`;
-      }
+  const downloadExcelRequest = useAPI('get', '/api/lite/licenses/export/excel', {
+    onSuccess: (res) => {
+      window.location.href = `${serverOrigin}/exceldownload/getFile?id=${res.data}`;
     }
-  );
+  });
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {

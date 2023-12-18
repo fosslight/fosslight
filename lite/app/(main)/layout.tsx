@@ -25,7 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isSubwindow = typeof window !== 'undefined' && Boolean(window.opener);
 
   // API for loading my info
-  const loadMeRequest = useAPI('get', 'http://localhost:8180/api/lite/me', {
+  const loadMeRequest = useAPI('get', '/api/lite/me', {
     onSuccess: (res) => {
       setUser({ name: res.data.username, email: res.data.email });
 

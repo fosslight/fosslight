@@ -8,7 +8,7 @@ export default function DetailModalLicense({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.License | null>(null);
 
   // API for loading data
-  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/licenses/${modalId}`, {
+  const loadDataRequest = useAPI('get', `/api/lite/licenses/${modalId}`, {
     onSuccess: (res) => {
       setData(res.data.license);
     }

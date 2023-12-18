@@ -1,5 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import { useAPI } from '@/lib/hooks';
+import { serverOrigin } from '@/lib/literals';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
@@ -31,7 +32,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const commentClass = 'text-xs text-darkgray';
 
   // API for validating notice
-  const validateNoticeRequest = useAPI('get', `http://localhost:8180/selfCheck/ossGrid/${id}/10`, {
+  const validateNoticeRequest = useAPI('get', `/selfCheck/ossGrid/${id}/10`, {
     onSuccess: (res) => {
       const { validData } = res.data;
 
@@ -47,55 +48,51 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   });
 
   // API for sending email
-  const sendEmailRequest = useAPI(
-    'post',
-    `http://localhost:8180/api/lite/selfchecks/${id}/license-notice-email`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: () => {
-        alert('Successfully sent email');
-        setIsWarningShown(false);
-      },
-      onError: () => alert('Failed in sending email'),
-      onFinish: () => setLoading(false)
-    }
-  );
+  const sendEmailRequest = useAPI('post', `/api/lite/selfchecks/${id}/license-notice-email`, {
+    onStart: () => setLoading(true),
+    onSuccess: () => {
+      alert('Successfully sent email');
+      setIsWarningShown(false);
+    },
+    onError: () => alert('Failed in sending email'),
+    onFinish: () => setLoading(false)
+  });
 
   // APIs for downloading notice
   const urlsForDownload = {
-    default: 'http://localhost:8180/selfCheck/downloadNoticePreview',
-    spdx: 'http://localhost:8180/spdxdownload/getFile'
+    default: `${serverOrigin}/selfCheck/downloadNoticePreview`,
+    spdx: `${serverOrigin}/spdxdownload/getFile`
   };
   const downloadNoticeRequests = {
-    html: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticePreview', {
+    html: useAPI('post', '/selfCheck/makeNoticePreview', {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
         window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
       },
       onFinish: () => setLoading(false)
     }),
-    text: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeText', {
+    text: useAPI('post', '/selfCheck/makeNoticeText', {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
         window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
       },
       onFinish: () => setLoading(false)
     }),
-    simpleHtml: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeSimple', {
+    simpleHtml: useAPI('post', '/selfCheck/makeNoticeSimple', {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
         window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
       },
       onFinish: () => setLoading(false)
     }),
-    simpleText: useAPI('post', 'http://localhost:8180/selfCheck/makeNoticeTextSimple', {
+    simpleText: useAPI('post', '/selfCheck/makeNoticeTextSimple', {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
         window.location.href = `${urlsForDownload.default}?id=${res.data.validMsg}`;
       },
       onFinish: () => setLoading(false)
     }),
-    spdx: useAPI('post', 'http://localhost:8180/spdxdownload/getSelfcheckSPDXPost', {
+    spdx: useAPI('post', '/spdxdownload/getSelfcheckSPDXPost', {
       onStart: () => setLoading(true),
       onSuccess: (res) => {
         window.location.href = `${urlsForDownload.spdx}?id=${res.data.validMsg}`;
@@ -106,7 +103,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   };
 
   // API for previewing notice
-  const previewNoticeRequest = useAPI('post', 'http://localhost:8180/selfCheck/noticeAjax', {
+  const previewNoticeRequest = useAPI('post', '/selfCheck/noticeAjax', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       if (res.data.isValid) {

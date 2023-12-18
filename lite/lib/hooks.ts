@@ -1,10 +1,11 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import qs from 'qs';
 import { useMutation } from 'react-query';
+import { serverOrigin } from './literals';
 
 export function useAPI(
   method: 'get' | 'post' | 'put' | 'patch' | 'delete',
-  url: string,
+  path: string,
   config?: {
     onStart?: () => void;
     onSuccess?: (res: any) => void;
@@ -26,6 +27,8 @@ export function useAPI(
   if (config?.onFinish) {
     mutationOptions.onSettled = config.onFinish;
   }
+
+  const url = `${serverOrigin}${path}`;
 
   const mutation = useMutation(async (data: { params?: any; body?: any } | null) => {
     const requestConfig: AxiosRequestConfig = { method, url, withCredentials: true };
