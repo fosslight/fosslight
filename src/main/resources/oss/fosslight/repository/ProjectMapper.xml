@@ -4772,9 +4772,7 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(securityPatchLink)">
 			, SECURITY_PATCH_LINK
 		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(securityComments)">
 			, SECURITY_COMMENTS
-		</if>
             )
             VALUES
             (
@@ -4799,10 +4797,16 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(securityComments)">
 			, #{securityComments}
 		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(securityComments)">
+			, null
+		</if>
             ) ON DUPLICATE KEY UPDATE
            	VULNERABILITY_RESOLUTION	= #{vulnerabilityResolution}
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(securityComments)">
 			, SECURITY_COMMENTS = #{securityComments}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(securityComments)">
+			, SECURITY_COMMENTS = null
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(securityPatchLink)">
 			, SECURITY_PATCH_LINK = #{securityPatchLink}
