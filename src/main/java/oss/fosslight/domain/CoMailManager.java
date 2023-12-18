@@ -695,6 +695,13 @@ public class CoMailManager extends CoTopComponent {
 					convertDataMap.put("contentsSubTitle", subTitle);
 				}
     		}
+
+			if (CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT.equals(bean.getMsgType())) {
+				var flhSelfCheckUrl = avoidNull(bean.getParamExpansion1())
+						+ "/self-check/"
+						+ avoidNull(bean.getParamExpansion2());
+				convertDataMap.put("url", flhSelfCheckUrl);
+			}
     		
     		// mail Template
     		String msgContents = getVelocityTemplateContent(getTemplateFilePath(bean.getMsgType()), convertDataMap);
