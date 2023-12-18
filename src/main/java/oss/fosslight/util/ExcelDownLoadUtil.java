@@ -54,6 +54,7 @@ import com.opencsv.CSVWriter;
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.ExcelData;
+import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -2202,8 +2203,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				break;
 			case "lite-oss":
 				Type ossListType = new TypeToken<List<OssDto>>(){}.getType();
-				var data = (List<OssDto>) fromJson(dataStr, ossListType);
-				downloadId = makeExcelDataId(data, "OssList");
+				var liteOssData = (List<OssDto>) fromJson(dataStr, ossListType);
+				downloadId = makeExcelDataId(liteOssData, "OssList");
+				break;
+			case "lite-licenses":
+				Type licenseListType = new TypeToken<List<LicenseDto>>(){}.getType();
+				var liteLicenseData = (List<LicenseDto>) fromJson(dataStr, licenseListType);
+				downloadId = makeExcelDataId(liteLicenseData, "LicenseList");
 				break;
 			default:
 				break;

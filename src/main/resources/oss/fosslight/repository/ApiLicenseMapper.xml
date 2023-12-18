@@ -6,7 +6,9 @@
 <mapper namespace="oss.fosslight.repository.ApiLicenseMapper">
 
     <sql id="limitPage">
-        LIMIT #{offset}, #{countPerPage}
+        <if test="countPerPage != 0">
+            LIMIT #{offset}, #{countPerPage}
+        </if>
     </sql>
 
     <sql id="queryLicense">
