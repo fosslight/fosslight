@@ -22,7 +22,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   const router = useRouter();
 
   // API for loading data
-  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/selfchecks/${params.id}`, {
+  const loadDataRequest = useAPI('get', `/api/lite/selfchecks/${params.id}`, {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       setData(res.data.selfCheck);
@@ -31,7 +31,7 @@ export default function SelfCheckDetail({ params }: { params: { id: string } }) 
   });
 
   // API for deleting project
-  const deleteProjectRequest = useAPI('post', 'http://localhost:8180/selfCheck/delAjax', {
+  const deleteProjectRequest = useAPI('post', '/selfCheck/delAjax', {
     onStart: () => setWait(true),
     onSuccess: () => {
       alert('Successfully deleted project');

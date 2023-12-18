@@ -12,7 +12,7 @@ export default function SignUp() {
   const { register, handleSubmit } = useForm();
 
   // API for signing up
-  const signUpRequest = useAPI('post', 'http://localhost:8180/system/user/saveAjax', {
+  const signUpRequest = useAPI('post', '/system/user/saveAjax', {
     onStart: () => setWait(true),
     onSuccess: (res) => {
       if (res.data.isValid === 'true') {

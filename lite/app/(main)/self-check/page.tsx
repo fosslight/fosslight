@@ -7,6 +7,7 @@ import SelfCheckNoticeWarningModal from '@/components/self-check-notice-warning-
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
+import { serverOrigin } from '@/lib/literals';
 import dayjs from 'dayjs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -58,7 +59,7 @@ export default function SelfCheckList() {
   const currentPage = Number(queryParams.get('p') || '1');
 
   // API for loading rows
-  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/selfchecks', {
+  const loadRowsRequest = useAPI('get', '/api/lite/selfchecks', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       setTotalCount(res.data.totalCount);
@@ -68,10 +69,10 @@ export default function SelfCheckList() {
   });
 
   // API for downloading report
-  const downloadReportRequest = useAPI('post', 'http://localhost:8180/exceldownload/getExcelPost', {
+  const downloadReportRequest = useAPI('post', '/exceldownload/getExcelPost', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
-      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
+      window.location.href = `${serverOrigin}/exceldownload/getFile?id=${res.data.validMsg}`;
     },
     onFinish: () => setLoading(false),
     type: 'json'
@@ -79,16 +80,13 @@ export default function SelfCheckList() {
 
   // API for validating notice
   const [selfcheckId, setSelfcheckId] = useState('');
-  const validateNoticeRequest = useAPI(
-    'get',
-    `http://localhost:8180/selfCheck/ossGrid/${selfcheckId}/10`
-  );
+  const validateNoticeRequest = useAPI('get', `/selfCheck/ossGrid/${selfcheckId}/10`);
 
   // API for sending email
   const [isWarningShown, setIsWarningShown] = useState(false);
   const sendEmailRequest = useAPI(
     'post',
-    `http://localhost:8180/api/lite/selfchecks/${selfcheckId}/license-notice-email`,
+    `/api/lite/selfchecks/${selfcheckId}/license-notice-email`,
     {
       onStart: () => setLoading(true),
       onSuccess: () => {
@@ -101,17 +99,13 @@ export default function SelfCheckList() {
   );
 
   // API for downloading notice
-  const downloadNoticeRequest = useAPI(
-    'post',
-    'http://localhost:8180/selfCheck/makeNoticePreview',
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => {
-        window.location.href = `http://localhost:8180/selfCheck/downloadNoticePreview?id=${res.data.validMsg}`;
-      },
-      onFinish: () => setLoading(false)
-    }
-  );
+  const downloadNoticeRequest = useAPI('post', '/selfCheck/makeNoticePreview', {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      window.location.href = `${serverOrigin}/selfCheck/downloadNoticePreview?id=${res.data.validMsg}`;
+    },
+    onFinish: () => setLoading(false)
+  });
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
@@ -191,7 +185,7 @@ export default function SelfCheckList() {
                   {row.packages.map((file, idx) => (
                     <a
                       key={idx}
-                      href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                      href={`${serverOrigin}/download/${file.fileSeq}/${file.logiNm}`}
                       target="_blank"
                       title={`Download ${file.orgNm}`}
                       onClick={(e) => e.stopPropagation()}

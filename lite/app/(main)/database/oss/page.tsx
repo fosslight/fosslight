@@ -5,7 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
-import { OSS_TYPES } from '@/lib/literals';
+import { OSS_TYPES, serverOrigin } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -114,7 +114,7 @@ export default function OSSList() {
   const currentPage = Number(queryParams.get('p') || '1');
 
   // API for loading rows
-  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/oss', {
+  const loadRowsRequest = useAPI('get', '/api/lite/oss', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       setTotalCount(res.data.totalCount);
@@ -124,9 +124,9 @@ export default function OSSList() {
   });
 
   // API for exporting
-  const downloadExcelRequest = useAPI('get', 'http://localhost:8180/api/lite/oss/export/excel', {
+  const downloadExcelRequest = useAPI('get', '/api/lite/oss/export/excel', {
     onSuccess: (res) => {
-      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data}`;
+      window.location.href = `${serverOrigin}/exceldownload/getFile?id=${res.data}`;
     }
   });
 

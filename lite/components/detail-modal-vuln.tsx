@@ -7,15 +7,11 @@ export default function DetailModalVuln({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.Vuln | null>(null);
 
   // API for loading data
-  const loadDataRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/vulnerabilities/${modalId}`,
-    {
-      onSuccess: (res) => {
-        setData(res.data.vulnerability);
-      }
+  const loadDataRequest = useAPI('get', `/api/lite/vulnerabilities/${modalId}`, {
+    onSuccess: (res) => {
+      setData(res.data.vulnerability);
     }
-  );
+  });
 
   // Load data based on query parameter information
   useEffect(() => {

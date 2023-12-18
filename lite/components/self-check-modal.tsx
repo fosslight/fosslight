@@ -30,7 +30,7 @@ export default function SelfCheckModal({
   const isCreate = !values;
 
   // API for creating/editing project
-  const createEditProjectRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveAjax', {
+  const createEditProjectRequest = useAPI('post', '/selfCheck/saveAjax', {
     onStart: () => setWait(true),
     onSuccess: (res) => {
       if (res.data.isValid) {

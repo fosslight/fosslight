@@ -1,6 +1,7 @@
 import { loadingState } from '@/lib/atoms';
 import { highlight } from '@/lib/commons';
 import { useAPI } from '@/lib/hooks';
+import { serverOrigin } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
@@ -123,57 +124,49 @@ export default function SelfCheckOSS({
   );
 
   // API for loading validation result
-  const loadValidationListRequest = useAPI(
-    'get',
-    `http://localhost:8180/selfCheck/ossGrid/${id}/10`,
-    {
-      onSuccess: (res) => {
-        const { validData } = res.data;
-        const map: SelfCheck.OSSValidMap = {};
+  const loadValidationListRequest = useAPI('get', `/selfCheck/ossGrid/${id}/10`, {
+    onSuccess: (res) => {
+      const { validData } = res.data;
+      const map: SelfCheck.OSSValidMap = {};
 
-        if (validData) {
-          const entries = Object.entries(validData) as [string, string][];
+      if (validData) {
+        const entries = Object.entries(validData) as [string, string][];
 
-          entries.forEach(([key, value]) => {
-            const [field, gridId] = key.split('.');
+        entries.forEach(([key, value]) => {
+          const [field, gridId] = key.split('.');
 
-            if (!field || !gridId) {
-              return;
-            }
+          if (!field || !gridId) {
+            return;
+          }
 
-            if (!map[gridId]) {
-              map[gridId] = {};
-            }
+          if (!map[gridId]) {
+            map[gridId] = {};
+          }
 
-            map[gridId][field] = value;
-          });
-        }
-
-        setValidMap(map);
+          map[gridId][field] = value;
+        });
       }
+
+      setValidMap(map);
     }
-  );
+  });
 
   // API for loading file/OSS list
-  const loadDataListRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/list-oss`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => {
-        setFileId(res.data.fileId);
-        setFileList(res.data.files);
-        setOssList(res.data.oss);
+  const loadDataListRequest = useAPI('get', `/api/lite/selfchecks/${id}/list-oss`, {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => {
+      setFileId(res.data.fileId);
+      setFileList(res.data.files);
+      setOssList(res.data.oss);
 
-        // Load validation result
-        loadValidationListRequest.execute({ params: { referenceId: id } });
-      },
-      onFinish: () => setLoading(false)
-    }
-  );
+      // Load validation result
+      loadValidationListRequest.execute({ params: { referenceId: id } });
+    },
+    onFinish: () => setLoading(false)
+  });
 
   // API for uploading file
-  const uploadFileRequest = useAPI('post', 'http://localhost:8180/project/csvFile', {
+  const uploadFileRequest = useAPI('post', '/project/csvFile', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       const result = JSON.parse(res.data);
@@ -204,7 +197,7 @@ export default function SelfCheckOSS({
   });
 
   // API for loading sheets
-  const loadSheetsRequest = useAPI('post', 'http://localhost:8180/project/getSheetData', {
+  const loadSheetsRequest = useAPI('post', '/project/getSheetData', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       const loadedOssList = res.data.resultData.mainData;
@@ -241,17 +234,17 @@ export default function SelfCheckOSS({
   });
 
   // API for downloading report
-  const downloadReportRequest = useAPI('post', 'http://localhost:8180/exceldownload/getExcelPost', {
+  const downloadReportRequest = useAPI('post', '/exceldownload/getExcelPost', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
-      window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data.validMsg}`;
+      window.location.href = `${serverOrigin}/exceldownload/getFile?id=${res.data.validMsg}`;
     },
     onFinish: () => setLoading(false),
     type: 'json'
   });
 
   // API for saving file/OSS List
-  const saveOSSRequest = useAPI('post', 'http://localhost:8180/selfCheck/saveSrc', {
+  const saveOSSRequest = useAPI('post', '/selfCheck/saveSrc', {
     onStart: () => setLoading(true),
     onSuccess: () => {
       alert('Successfully saved files and OSS');
@@ -416,7 +409,7 @@ export default function SelfCheckOSS({
                 <a
                   key={idx}
                   className="flex justify-center items-center gap-x-1.5 text-sm"
-                  href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                  href={`${serverOrigin}/download/${file.fileSeq}/${file.logiNm}`}
                   target="_blank"
                 >
                   <i className="fa-solid fa-cube" />

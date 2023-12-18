@@ -12,7 +12,7 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
   const queryParams = useSearchParams();
 
   // API for loading data
-  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/oss/${modalId}`, {
+  const loadDataRequest = useAPI('get', `/api/lite/oss/${modalId}`, {
     onSuccess: (res) => {
       setData(res.data.oss);
     }
