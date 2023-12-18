@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import oss.fosslight.api.dto.GetLicenseDetailsDto;
 import oss.fosslight.api.dto.LicenseDto;
 import oss.fosslight.api.dto.ListLicenseDto;
+import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.common.Url;
 import oss.fosslight.repository.ApiLicenseMapper;
 import oss.fosslight.service.ApiLicenseService;
@@ -33,6 +34,19 @@ public class LiteLicenseController {
         try {
             var result = apiLicenseService.listLicenses(licenseRequest);
             return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/licenses/export/excel")
+    public @ResponseBody ResponseEntity<String> getExport(
+            @ModelAttribute ListLicenseDto.Request licenseRequest
+    ) {
+        try {
+            var id = apiLicenseService.getLicenseExcel(licenseRequest);
+            return ResponseEntity.ok(id);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
