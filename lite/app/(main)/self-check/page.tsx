@@ -3,6 +3,7 @@
 import ListFilters from '@/components/list-filters';
 import ListTable from '@/components/list-table';
 import SelfCheckModal from '@/components/self-check-modal';
+import SelfCheckNoticeWarningModal from '@/components/self-check-notice-warning-modal';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
@@ -75,6 +76,29 @@ export default function SelfCheckList() {
     onFinish: () => setLoading(false),
     type: 'json'
   });
+
+  // API for validating notice
+  const [selfcheckId, setSelfcheckId] = useState('');
+  const validateNoticeRequest = useAPI(
+    'get',
+    `http://localhost:8180/selfCheck/ossGrid/${selfcheckId}/10`
+  );
+
+  // API for sending email
+  const [isWarningShown, setIsWarningShown] = useState(false);
+  const sendEmailRequest = useAPI(
+    'post',
+    `http://localhost:8180/api/lite/selfchecks/${selfcheckId}/license-notice-email`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: () => {
+        alert('Successfully sent email');
+        setIsWarningShown(false);
+      },
+      onError: () => alert('Failed in sending email'),
+      onFinish: () => setLoading(false)
+    }
+  );
 
   // API for downloading notice
   const downloadNoticeRequest = useAPI(
@@ -182,22 +206,42 @@ export default function SelfCheckList() {
 
           if (column === 'Notice') {
             return (
-              row.notice && (
-                <i
-                  className="cursor-pointer fa-solid fa-file-lines"
-                  title="Download Notice"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    downloadNoticeRequest.execute({
-                      body: {
-                        prjId: row.projectId,
-                        previewOnly: 'N',
-                        isSimpleNotice: 'N'
-                      }
-                    });
-                  }}
-                />
-              )
+              <i
+                className="cursor-pointer fa-solid fa-file-lines"
+                title="Download Notice"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setSelfcheckId(row.projectId);
+                  setTimeout(() => {
+                    validateNoticeRequest
+                      .executeAsync({ params: { referenceId: row.projectId } })
+                      .then((res) => {
+                        const { validData } = res.data;
+                        let isValid = true;
+
+                        if (validData) {
+                          const keys = Object.keys(validData);
+                          if (keys.some((key) => key.startsWith('licenseName'))) {
+                            isValid = false;
+                          }
+                        }
+
+                        if (isValid) {
+                          downloadNoticeRequest.execute({
+                            body: {
+                              prjId: row.projectId,
+                              previewOnly: 'N',
+                              isSimpleNotice: 'N'
+                            }
+                          });
+                        } else {
+                          setIsWarningShown(true);
+                        }
+                      });
+                  }, 0);
+                }}
+              />
             );
           }
 
@@ -225,6 +269,13 @@ export default function SelfCheckList() {
           return null;
         }}
         onClickRow={(row: List.SelfCheck) => router.push(`${pathname}/${row.projectId}`)}
+      />
+
+      {/* Warning */}
+      <SelfCheckNoticeWarningModal
+        show={isWarningShown}
+        onHide={() => setIsWarningShown(false)}
+        sendEmail={() => sendEmailRequest.execute({})}
       />
     </>
   );
