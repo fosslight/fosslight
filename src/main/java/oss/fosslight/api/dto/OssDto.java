@@ -2,6 +2,7 @@ package oss.fosslight.api.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssComponents;
 
 import java.util.ArrayList;
@@ -44,14 +45,18 @@ public class OssDto implements ExcelData {
         var notice = 'Y' == obligations.get(0);
         var source = 'Y' == obligations.get(1);
         var obligationString = "";
-        if (notice && source) obligationString = "Notice, Source";
+        if (notice && source) obligationString = "Notice & Distribute";
         else if (notice) obligationString = "Notice";
-        return new String[] {
+        var nicknameString = "";
+        if (nicknames != null) {
+            nicknameString = nicknames.replaceAll("\\|", "\r\n");
+        }
+        return new String[]{
                 ossId,
                 ossName,
-                nicknames,
+                nicknameString,
                 ossVersion,
-                ossType,
+                getOssTypeString(),
                 licenseName,
                 licenseType,
                 obligationString,
@@ -61,5 +66,25 @@ public class OssDto implements ExcelData {
                 attribution,
                 cvssScore
         };
+    }
+
+    private String getOssTypeString() {
+        var rtn = new ArrayList<String>();
+        if (CommonFunction.isEmpty(ossType)) {
+            return "";
+        }
+        var ossTypeFlags = ossType.toCharArray();
+        if (ossType.toCharArray()[0] == '1') {
+            rtn.add("Multi");
+        }
+
+        if (ossType.toCharArray()[1] == '1') {
+            rtn.add("Dual");
+        }
+
+        if (ossType.toCharArray()[2] == '1') {
+            rtn.add("v-Diff");
+        }
+        return String.join(", ", rtn);
     }
 }
