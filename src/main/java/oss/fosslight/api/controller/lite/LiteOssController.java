@@ -42,6 +42,20 @@ public class LiteOssController {
         }
     }
 
+    @GetMapping("/oss/export/excel")
+    public @ResponseBody ResponseEntity<String> getExport(
+            @ModelAttribute ListOssDto.Request ossQuery
+    ) {
+        try {
+            var id = ossService.getOssExcel(ossQuery);
+            return ResponseEntity.ok(id);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+
     @GetMapping("/oss/{id}")
     public @ResponseBody ResponseEntity<GetOSSDetailsDto.Result> getOss(
             @PathVariable("id") String id
