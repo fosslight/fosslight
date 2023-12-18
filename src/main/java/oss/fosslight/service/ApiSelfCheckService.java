@@ -40,4 +40,6 @@ public interface ApiSelfCheckService {
 	List<SelfCheckVerifyOssDto.OssCheckResult> validateOss(String id);
 
 	List<SelfCheckVerifyLicensesDto.LicenseCheckResult> validateLicenses(String id);
+
+	boolean sendLicenseNoticeEmail(String origin, String id);
 }
