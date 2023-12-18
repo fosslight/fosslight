@@ -365,8 +365,10 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
     }
 
     @Override
-    public boolean sendLicenseNoticeEmail() {
+    public boolean sendLicenseNoticeEmail(String origin, String id) {
         CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT);
+        mailBean.setParamExpansion1(origin);
+        mailBean.setParamExpansion2(id);
         return CoMailManager.getInstance().sendMail(mailBean);
     }
 }

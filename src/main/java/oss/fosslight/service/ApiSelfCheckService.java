@@ -41,5 +41,5 @@ public interface ApiSelfCheckService {
 
 	List<SelfCheckVerifyLicensesDto.LicenseCheckResult> validateLicenses(String id);
 
-	boolean sendLicenseNoticeEmail();
+	boolean sendLicenseNoticeEmail(String origin, String id);
 }

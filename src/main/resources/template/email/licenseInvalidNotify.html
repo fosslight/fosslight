@@ -27,16 +27,12 @@
 							#if( $contentsTitle )
 								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
 							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
+							<p style="font-size:12px;">[Action Required] Please check the below link(OSS tab) to fix some incorrect license information. It is required to generate the notice.
+							</p>
+							#if( $url )
+								<a style="font-size:12px;" href="$url" target="_blank">$!url</a>
 							#end
-								#if($comment && $comment != "")
-									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

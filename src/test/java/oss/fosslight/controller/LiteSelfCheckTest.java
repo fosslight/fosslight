@@ -29,7 +29,7 @@ public class LiteSelfCheckTest {
 
     @Test
     void noticeMailShouldBeSent () {
-        var result = apiSelfCheckService.sendLicenseNoticeEmail();
+        var result = apiSelfCheckService.sendLicenseNoticeEmail("http://localhost:3000", "1");
         assertThat(result);
     }
 }
