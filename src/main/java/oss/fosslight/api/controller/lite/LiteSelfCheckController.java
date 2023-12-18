@@ -249,4 +249,18 @@ public class LiteSelfCheckController extends CoTopComponent {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PostMapping("/selfchecks/{id}/license-notice-email")
+    public @ResponseBody ResponseEntity<Object> sendLicenseNoticeEmail(
+            @RequestHeader(value="Origin") String origin,
+            @PathVariable("id") String id
+    ) {
+        try {
+            apiSelfCheckService.sendLicenseNoticeEmail(origin, id);
+            return ResponseEntity.ok(null);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

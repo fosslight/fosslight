@@ -6,9 +6,11 @@
 <mapper namespace="oss.fosslight.repository.ApiOssMapper">
 
     <sql id="limitPage">
-        LIMIT
-        #{offset},
-        #{countPerPage}
+        <if test="countPerPage != 0">
+            LIMIT
+            #{offset},
+            #{countPerPage}
+        </if>
     </sql>
     <sql id="orderby">
         ORDER BY
@@ -286,7 +288,7 @@
         <result property="obligations" column="obligation_type"/>
         <result property="modified" column="modified_date"/>
         <result property="description" column="summary_description"/>
-        <!--		<result property="creator" column="" />-->
+        <result property="nicknames" column="oss_nickname"/>
     </resultMap>
     <select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
         SELECT
