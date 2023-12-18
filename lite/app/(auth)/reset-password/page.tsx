@@ -1,3 +1,6 @@
+/**
+ * Use this file if you want to implement reset-password page later
+ */
 import Link from 'next/link';
 
 export default function ResetPassword() {
