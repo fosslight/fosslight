@@ -126,7 +126,6 @@ export default function OSSList() {
   const downloadUrl = "http://localhost:8180/exceldownload/getFile"
   const downloadExcelRequest= useAPI('get', 'http://localhost:8180/api/lite/oss/export/excel', {
     onSuccess: (res) => {
-      console.log(res)
       window.location.href = `${downloadUrl}?id=${res.data}`;
     },
   });

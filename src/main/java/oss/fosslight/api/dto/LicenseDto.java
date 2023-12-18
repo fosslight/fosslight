@@ -1,6 +1,8 @@
 package oss.fosslight.api.dto;
 
 import lombok.Data;
+import oss.fosslight.common.CoCodeManager;
+import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssLicense;
 
 import java.util.ArrayList;
@@ -9,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class LicenseDto implements Comparable<LicenseDto> {
+public class LicenseDto implements Comparable<LicenseDto>, ExcelData {
     protected String licenseId;
     protected String licenseName;
     protected String licenseType;
@@ -24,6 +26,7 @@ public class LicenseDto implements Comparable<LicenseDto> {
     protected String modified;
     protected List<String> restrictions = new ArrayList<>();
     protected String comb;
+    protected String attribution;
     protected List<Character> obligations;
 
     public void setObligations(String obligationType) {
@@ -47,5 +50,36 @@ public class LicenseDto implements Comparable<LicenseDto> {
 
     public OssLicense toOssLicense() {
         return new OssLicense();
+    }
+
+    @Override
+    public String[] toRow() {
+        var restrictionString = "";
+        var nicknameString = "";
+        var notice = 'Y' == obligations.get(0);
+        var source = 'Y' == obligations.get(1);
+        var obligationString = "";
+        if (notice && source) obligationString = "Notice, Source";
+        else if (notice) obligationString = "Notice";
+
+        if (CoCodeManager.LICENSE_INFO_BY_ID.containsKey(licenseId)) {
+            LicenseMaster master = CoCodeManager.LICENSE_INFO_BY_ID.get(licenseId);
+
+            nicknameString = String.join(",", master.getLicenseNicknameList());
+            restrictionString = master.getRestrictionStr();
+        }
+
+        return new String[] {
+                licenseId,
+                licenseName,
+                licenseIdentifier,
+                nicknameString,
+                licenseType,
+                restrictionString,
+                obligationString,
+                homepageUrl,
+                description, // user guide
+                attribution
+        };
     }
 }
