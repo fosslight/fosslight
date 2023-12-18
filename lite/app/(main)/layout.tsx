@@ -10,7 +10,7 @@ import { loadingState, userState, viewState } from '@/lib/atoms';
 import { useAPI } from '@/lib/hooks';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -19,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [view, setView] = useRecoilState(viewState);
   const loading = useRecoilValue(loadingState);
   const [isSideBarShown, setIsSideBarShown] = useState(true);
+  const userLoadingRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const isSubwindow = typeof window !== 'undefined' && Boolean(window.opener);
@@ -27,6 +28,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const loadMeRequest = useAPI('get', 'http://localhost:8180/api/lite/me', {
     onSuccess: (res) => {
       setUser({ name: res.data.username, email: res.data.email });
+
+      const userLoading = userLoadingRef.current;
+      userLoading?.addEventListener('transitionend', function handleTransitionEnd() {
+        userLoading?.removeEventListener('transitionend', handleTransitionEnd);
+        userLoading.style.display = 'none';
+      });
     },
     onError: () => {
       router.push('/sign-in');
@@ -54,6 +61,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           'fixed center flex flex-col items-center z-[1000] transition-opacity duration-200',
           user ? 'opacity-0' : 'opacity-100'
         )}
+        ref={userLoadingRef}
       >
         <div className="mb-4 text-lg font-bold">Loading . . .</div>
         <Loading />
