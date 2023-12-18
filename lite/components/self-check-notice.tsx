@@ -49,6 +49,20 @@ export default function SelfCheckNotice({ id }: { id: string }) {
     }
   );
 
+  // API for sending email
+  const sendEmailRequest = useAPI(
+    'post',
+    `http://localhost:8180/api/lite/selfchecks/${id}/license-notice-email`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: () => {
+        alert('Successfully sent email');
+        setIsWarningShown(false);
+      },
+      onFinish: () => setLoading(false)
+    }
+  );
+
   // APIs for downloading notice
   const urlsForDownload = {
     default: 'http://localhost:8180/selfCheck/downloadNoticePreview',
@@ -346,7 +360,9 @@ export default function SelfCheckNotice({ id }: { id: string }) {
         <div className="mb-4 text-darkgray">
           If you want to inform your administrator, click the button below to send an email.
         </div>
-        <button className="px-2 py-0.5 charcoal-btn">Send an email to admin</button>
+        <button className="px-2 py-0.5 charcoal-btn" onClick={() => sendEmailRequest.execute({})}>
+          Send an email to admin
+        </button>
       </Modal>
 
       {/* Download */}
