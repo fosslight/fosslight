@@ -25,7 +25,6 @@ export default function SelfCheckOSS({
   setChanged: (changed: boolean) => void;
 }) {
   const setLoading = useSetRecoilState(loadingState);
-  const [method, setMethod] = useState<'file' | 'url'>('file');
   const [fileId, setFileId] = useState('');
   const [fileList, setFileList] = useState<SelfCheck.OSSFile[]>([]);
   const [ossList, setOssList] = useState<SelfCheck.OSS[]>([]);
@@ -407,109 +406,75 @@ export default function SelfCheckOSS({
 
   return (
     <>
-      <div className="w-[calc(100%-4px)] shadow-box">
-        {/* File vs URL */}
-        <div className="flex flex-col items-start gap-y-2 mb-4">
-          <label className="flex items-center gap-x-2">
-            <input
-              type="radio"
-              value="file"
-              checked={method === 'file'}
-              onChange={() => setMethod('file')}
-            />
-            Upload File (Source Analysis Result)
-          </label>
-          <label className="flex items-center gap-x-2">
-            <input
-              type="radio"
-              value="url"
-              checked={method === 'url'}
-              onChange={() => setMethod('url')}
-            />
-            Enter Source URL
-          </label>
-        </div>
-
-        {/* Tools for listing up OSS */}
-        {method === 'file' ? (
-          <div className="p-4 border border-dashed border-semigray rounded text-center">
-            {fileList.some((file) => file.state !== 'delete') && (
-              <div className="flex flex-col items-center gap-y-1 mb-6">
-                {fileList
-                  .filter((file) => file.state !== 'delete')
-                  .map((file, idx) => (
-                    <a
-                      key={idx}
-                      className="flex justify-center items-center gap-x-1.5 text-sm"
-                      href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
-                      target="_blank"
-                    >
-                      <i className="fa-solid fa-cube" />
-                      <span className="italic text-semiblack/80">{file.orgNm}</span>
-                      <span className="text-semiblack/50">
-                        ({dayjs(file.created).format('YY.MM.DD HH:mm')})
-                      </span>
-                      <i
-                        className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          deleteFile(file.fileSeq);
-                        }}
-                      />
-                    </a>
-                  ))}
-              </div>
-            )}
-            <div className="relative">
-              <i className="fa-solid fa-arrow-up-from-bracket" />
-              &ensp;Upload a file here
-              <div className="mt-1 text-sm text-darkgray">
-                (The file must contain information of OSS to be listed.)
-              </div>
-              <input
-                id="upload-file"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                type="file"
-                accept=".xlsx, .xls, .xlsm, .csv"
-                onChange={(e) => {
-                  const input = e.target;
-
-                  if (!input.files || input.files.length === 0) {
-                    return;
-                  }
-
-                  const file = input.files[0];
-                  const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
-                  if (!allowedExtensions.test(file.name)) {
-                    alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
-                    input.value = '';
-                    return;
-                  }
-
-                  const formData = new FormData();
-                  formData.append('myfile', file, file.name);
-                  formData.append('registFileId', fileId);
-                  formData.append('tabNm', 'SELF');
-
-                  uploadFileRequest.execute({ body: formData });
-                  input.value = '';
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="flex gap-x-2">
-            <input
-              className="flex-1 w-0 px-2 py-1 border border-darkgray outline-none"
-              placeholder="The source URL to be analyzed"
-            />
-            <button className="flex-shrink-0 px-2 py-0.5 crimson-btn">Send</button>
+      {/* Uploading files */}
+      <div className="p-4 mb-12 border border-dashed border-semigray rounded text-center">
+        {fileList.some((file) => file.state !== 'delete') && (
+          <div className="flex flex-col items-center gap-y-1 mb-6">
+            {fileList
+              .filter((file) => file.state !== 'delete')
+              .map((file, idx) => (
+                <a
+                  key={idx}
+                  className="flex justify-center items-center gap-x-1.5 text-sm"
+                  href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                  target="_blank"
+                >
+                  <i className="fa-solid fa-cube" />
+                  <span className="italic text-semiblack/80">{file.orgNm}</span>
+                  <span className="text-semiblack/50">
+                    ({dayjs(file.created).format('YY.MM.DD HH:mm')})
+                  </span>
+                  <i
+                    className="px-0.5 ml-1.5 text-xs text-crimson cursor-pointer fa-solid fa-x"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      deleteFile(file.fileSeq);
+                    }}
+                  />
+                </a>
+              ))}
           </div>
         )}
+        <div className="relative">
+          <i className="fa-solid fa-arrow-up-from-bracket" />
+          &ensp;Upload a source analysis result file here
+          <div className="mt-1 text-sm text-darkgray">
+            (The file must contain information of OSS to be listed.)
+          </div>
+          <input
+            id="upload-file"
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            type="file"
+            accept=".xlsx, .xls, .xlsm, .csv"
+            onChange={(e) => {
+              const input = e.target;
+
+              if (!input.files || input.files.length === 0) {
+                return;
+              }
+
+              const file = input.files[0];
+              const allowedExtensions = /\.(xlsx|xls|xlsm|csv)$/i;
+              if (!allowedExtensions.test(file.name)) {
+                alert('Select a file with valid extension(xlsx, xls, xlsm, or csv)');
+                input.value = '';
+                return;
+              }
+
+              const formData = new FormData();
+              formData.append('myfile', file, file.name);
+              formData.append('registFileId', fileId);
+              formData.append('tabNm', 'SELF');
+
+              uploadFileRequest.execute({ body: formData });
+              input.value = '';
+            }}
+          />
+        </div>
       </div>
 
       {/* Buttons */}
-      <div id="oss-scroll-pos" className="flex justify-between items-center mt-12 mb-2">
+      <div id="oss-scroll-pos" className="flex justify-between items-center mb-2">
         <div className="flex gap-x-3 text-charcoal">
           <i
             className="cursor-pointer fa-solid fa-trash"
