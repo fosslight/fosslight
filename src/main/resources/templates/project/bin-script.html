@@ -583,7 +583,7 @@ var bin_fn = {
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
-		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'2\')">X</span>'+appendHtml+'</li>';console.log(uploadFileTag);
+		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'2\')">X</span>'+appendHtml+'</li>';
 		$('.binBinaryFileArea').append(uploadFileTag);
 	},
 	deleteCsv : function(obj, type){

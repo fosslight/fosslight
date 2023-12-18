@@ -29,7 +29,7 @@ public class BinaryDataHistoryController extends CoTopComponent {
 	
 	@GetMapping(value=BINARY_DATA_HISTORY.PAGE, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "system/binaryDataHistory :: content";
+		return "system/binaryDataHistory";
 	}
 	
 	@GetMapping(value=BINARY_DATA_HISTORY.LIST_AJAX)
