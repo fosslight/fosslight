@@ -59,13 +59,15 @@ public class LicenseDto implements Comparable<LicenseDto>, ExcelData {
         var notice = 'Y' == obligations.get(0);
         var source = 'Y' == obligations.get(1);
         var obligationString = "";
-        if (notice && source) obligationString = "Notice, Source";
+        if (notice && source) obligationString = "Notice & Distribute";
         else if (notice) obligationString = "Notice";
 
         if (CoCodeManager.LICENSE_INFO_BY_ID.containsKey(licenseId)) {
             LicenseMaster master = CoCodeManager.LICENSE_INFO_BY_ID.get(licenseId);
-
-            nicknameString = String.join(",", master.getLicenseNicknameList());
+            var nicknameList = master.getLicenseNicknameList();
+            if (nicknameList != null) {
+                nicknameString = String.join("\r\n", master.getLicenseNicknameList());
+            }
             restrictionString = master.getRestrictionStr();
         }
 
