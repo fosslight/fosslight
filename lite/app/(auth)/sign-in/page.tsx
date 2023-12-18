@@ -54,9 +54,13 @@ export default function SignIn() {
           Sign Up
         </Link>
       </div>
-      {/* <Link className="mx-auto text-sm text-darkgray" href="/reset-password">
+      {/* 
+      ※ Use this link if you want to implement reset-password page later
+
+      <Link className="mx-auto text-sm text-darkgray" href="/reset-password">
         Forgot password? Click here.
-      </Link> */}
+      </Link>
+      */}
     </form>
   );
 }

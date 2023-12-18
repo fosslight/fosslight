@@ -1,14 +1,8 @@
 import { useAPI } from '@/lib/hooks';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import Select from 'react-select/creatable';
+import { useForm } from 'react-hook-form';
+import InputWithAutocomplete from './input-with-autocomplete';
 import Modal from './modal';
-
-const options = [
-  { value: 'chocolate', label: 'Chocolate' },
-  { value: 'strawberry', label: 'Strawberry' },
-  { value: 'vanilla', label: 'Vanilla' }
-];
 
 export default function SelfCheckOSSModal({
   show,
@@ -26,7 +20,17 @@ export default function SelfCheckOSSModal({
   setChanged: (changed: boolean) => void;
 }) {
   const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
-  const { register, handleSubmit, reset, watch, control } = useForm();
+  const { register, handleSubmit, reset, watch, setValue } = useForm({
+    defaultValues: {
+      ossName: '',
+      ossVersion: '',
+      licenseName: '',
+      path: '',
+      copyright: '',
+      downloadUrl: '',
+      homepageUrl: ''
+    }
+  });
 
   // Autocomplete
   const [autocompleteOss, setAutocompleteOss] = useState<[string, string][]>([]);
@@ -76,6 +80,7 @@ export default function SelfCheckOSSModal({
     reset({
       ossName: values?.ossName || '',
       ossVersion: values?.ossVersion || '',
+      licenseName: '',
       path: values?.path || '',
       copyright: values?.copyright || '',
       downloadUrl: values?.downloadUrl || '',
@@ -144,62 +149,38 @@ export default function SelfCheckOSSModal({
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Name</label>
-            <Controller
-              name="ossName"
-              control={control}
-              render={({ field: { onChange, value, name, ref } }) => (
-                <Select
-                  classNames={{ control: () => '!border-darkgray !rounded-none' }}
-                  name={name}
-                  value={options.find((option) => option.value === value)}
-                  options={ossNameOptions}
-                  onChange={(selectedOption) => {
-                    onChange(selectedOption?.value || '');
-                  }}
-                  placeholder="EX) fosslight"
-                  ref={ref}
-                />
-              )}
+            <InputWithAutocomplete
+              value={watch('ossName')}
+              setValue={(value) => setValue('ossName', value)}
+              options={ossNameOptions}
+              placeholder="EX) fosslight"
             />
           </div>
           <div className="flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Version</label>
-            <Controller
-              name="ossVersion"
-              control={control}
-              render={({ field: { onChange, value, name, ref } }) => (
-                <Select
-                  classNames={{ control: () => '!border-darkgray !rounded-none' }}
-                  name={name}
-                  value={options.find((option) => option.value === value)}
-                  options={ossVersionOptions}
-                  onChange={(selectedOption) => {
-                    onChange(selectedOption?.value || '');
-                  }}
-                  placeholder="EX) 1.0.0"
-                  ref={ref}
-                />
-              )}
+            <InputWithAutocomplete
+              value={watch('ossVersion')}
+              setValue={(value) => setValue('ossVersion', value)}
+              options={ossVersionOptions}
+              placeholder="EX) 1.0.0"
             />
           </div>
           <div className="col-span-2 flex flex-col gap-y-2">
             <label className="text-sm font-semibold">Licenses</label>
-            <Select
-              classNames={{
-                control: () => '!border-darkgray !rounded-none'
-              }}
-              options={licenseOptions}
-              value={null}
-              onChange={(selectedOption) => {
-                if (!selectedOption) {
+            <InputWithAutocomplete
+              value={watch('licenseName')}
+              setValue={(value) => setValue('licenseName', value)}
+              pickValue={(value: string) => {
+                if (!value) {
                   return;
                 }
 
-                const licenseName = selectedOption.value;
-                if (!licenses.some((license) => license.licenseName === licenseName)) {
-                  setLicenses([...licenses, { licenseId: null, licenseName }]);
+                if (!licenses.some((license) => license.licenseName === value)) {
+                  setLicenses([...licenses, { licenseId: null, licenseName: value }]);
                 }
+                setValue('licenseName', '');
               }}
+              options={licenseOptions}
               placeholder="EX) Apache-2.0"
             />
             {licenses.length > 0 && (

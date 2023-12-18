@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 import Editor from './editor';
 import Modal from './modal';
+import SelfCheckNoticeWarningModal from './self-check-notice-warning-modal';
 
 export default function SelfCheckNotice({ id }: { id: string }) {
   const setLoading = useSetRecoilState(loadingState);
@@ -16,7 +17,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const [isVerShown, setIsVerShown] = useState(true);
   const [append, setAppend] = useState<string | null>(null);
 
-  // Download/Preview modals
+  // Modals
   const [isWarningShown, setIsWarningShown] = useState(false);
   const [isDownloadShown, setIsDownloadShown] = useState(false);
   const [isPreviewShown, setIsPreviewShown] = useState(false);
@@ -29,23 +30,34 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   const inputClass = 'w-60 max-w-full px-2 py-0.5 mb-1.5 border border-darkgray outline-none';
   const commentClass = 'text-xs text-darkgray';
 
-  // API for loading validation result
-  const loadValidationListRequest = useAPI(
-    'get',
-    `http://localhost:8180/selfCheck/ossGrid/${id}/10`,
-    {
-      onSuccess: (res) => {
-        const { validData } = res.data;
+  // API for validating notice
+  const validateNoticeRequest = useAPI('get', `http://localhost:8180/selfCheck/ossGrid/${id}/10`, {
+    onSuccess: (res) => {
+      const { validData } = res.data;
 
-        if (validData) {
-          const keys = Object.keys(validData);
-          if (keys.some((key) => key.startsWith('licenseName'))) {
-            return;
-          }
+      if (validData) {
+        const keys = Object.keys(validData);
+        if (keys.some((key) => key.startsWith('licenseName'))) {
+          return;
         }
-
-        setIsValid(true);
       }
+
+      setIsValid(true);
+    }
+  });
+
+  // API for sending email
+  const sendEmailRequest = useAPI(
+    'post',
+    `http://localhost:8180/api/lite/selfchecks/${id}/license-notice-email`,
+    {
+      onStart: () => setLoading(true),
+      onSuccess: () => {
+        alert('Successfully sent email');
+        setIsWarningShown(false);
+      },
+      onError: () => alert('Failed in sending email'),
+      onFinish: () => setLoading(false)
     }
   );
 
@@ -149,7 +161,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
   }
 
   useEffect(() => {
-    loadValidationListRequest.execute({ params: { referenceId: id } });
+    validateNoticeRequest.execute({ params: { referenceId: id } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -337,17 +349,11 @@ export default function SelfCheckNotice({ id }: { id: string }) {
       </div>
 
       {/* Warning */}
-      <Modal show={isWarningShown} onHide={() => setIsWarningShown(false)} size="sm">
-        <div className="mb-4">
-          There are some <span className="font-semibold text-crimson">incorrect license</span>{' '}
-          information. If you want to generate the appropriate notice,{' '}
-          <span className="font-semibold text-crimson">please fix it in the OSS tab first</span>.
-        </div>
-        <div className="mb-4 text-darkgray">
-          If you want to inform your administrator, click the button below to send an email.
-        </div>
-        <button className="px-2 py-0.5 charcoal-btn">Send an email to admin</button>
-      </Modal>
+      <SelfCheckNoticeWarningModal
+        show={isWarningShown}
+        onHide={() => setIsWarningShown(false)}
+        sendEmail={() => sendEmailRequest.execute({})}
+      />
 
       {/* Download */}
       <Modal show={isDownloadShown} onHide={() => setIsDownloadShown(false)} size="md">

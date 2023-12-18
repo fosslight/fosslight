@@ -21,7 +21,6 @@
     "react-hook-form": "^7.47.0",
     "react-query": "^3.39.3",
     "react-responsive": "^9.0.2",
-    "react-select": "^5.8.0",
     "react-toggle": "^4.1.3",
     "recoil": "^0.7.7"
   },
