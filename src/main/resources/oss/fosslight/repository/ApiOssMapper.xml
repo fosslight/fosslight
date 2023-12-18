@@ -5,75 +5,80 @@
 
 <mapper namespace="oss.fosslight.repository.ApiOssMapper">
 
-	<sql id="limitPage">
-		LIMIT #{offset}, #{countPerPage}
-	</sql>
-	<sql id="orderby">
-		ORDER BY
-<!--		T1.DEACTIVATE_FLAG ASC,-->
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-			CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
-		</if>
-		<choose>
-			<when test="@oss.fosslight.util.StringUtil@isEmpty(sortColumn)"> OSS_ID desc</when>
-			<otherwise>
-				<choose>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sortColumn)">
-						OSS_ID
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sortColumn)">
-						OSS_TYPE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sortColumn)">
-						OSS_NAME
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sortColumn)">
-						OSS_VERSION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sortColumn)">
-						LICENSE_NAME
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
-						LICENSE_TYPE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
-						DOWNLOAD_LOCATION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sortColumn)">
-						HOMEPAGE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sortColumn)">
-						SUMMARY_DESCRIPTION
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sortColumn)">
-						CVSS_SCORE
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
-						CREATOR
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_AT', sortColumn)">
-						DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sortColumn)">
-						MODIFIER
-					</when>
-					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_AT', sortColumn)">
-						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
-					</when>
-				</choose>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirection)">
-					<choose>
-						<when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirection)">
-							ASC
-						</when>
-						<when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirection)">
-							DESC
-						</when>
-					</choose>
-				</if>
-			</otherwise>
-		</choose>
-	</sql>
+    <sql id="limitPage">
+        <if test="countPerPage != 0">
+            LIMIT
+            #{offset},
+            #{countPerPage}
+        </if>
+    </sql>
+    <sql id="orderby">
+        ORDER BY
+        <!--		T1.DEACTIVATE_FLAG ASC,-->
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+            CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
+        </if>
+        <choose>
+            <when test="@oss.fosslight.util.StringUtil@isEmpty(sortColumn)">OSS_ID desc</when>
+            <otherwise>
+                <choose>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sortColumn)">
+                        OSS_ID
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sortColumn)">
+                        OSS_TYPE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sortColumn)">
+                        OSS_NAME
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sortColumn)">
+                        OSS_VERSION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sortColumn)">
+                        LICENSE_NAME
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sortColumn)">
+                        LICENSE_TYPE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sortColumn)">
+                        DOWNLOAD_LOCATION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sortColumn)">
+                        HOMEPAGE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sortColumn)">
+                        SUMMARY_DESCRIPTION
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sortColumn)">
+                        CVSS_SCORE
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sortColumn)">
+                        CREATOR
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('CREATED_AT', sortColumn)">
+                        DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sortColumn)">
+                        MODIFIER
+                    </when>
+                    <when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_AT', sortColumn)">
+                        DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
+                    </when>
+                </choose>
+                <if test="!@oss.fosslight.util.StringUtil@isEmpty(sortDirection)">
+                    <choose>
+                        <when test="@oss.fosslight.util.StringUtil@equals('asc', sortDirection)">
+                            ASC
+                        </when>
+                        <when test="@oss.fosslight.util.StringUtil@equals('desc', sortDirection)">
+                            DESC
+                        </when>
+                    </choose>
+                </if>
+            </otherwise>
+        </choose>
+    </sql>
+
 
 	<select id="getOssInfo" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
 		SELECT OM.OSS_NAME
@@ -273,6 +278,7 @@
 		SELECT DOWNLOAD_LOCATION from OSS_MASTER where oss_name = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N'
 	</select>
 
+<<<<<<< HEAD
 	<select id = "getHomepageListByOssName" parameterType="String" resultType="String">
 		SELECT DISTINCT HOMEPAGE
 		FROM OSS_MASTER
@@ -463,6 +469,202 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
 			<![CDATA[
+=======
+    <resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
+        <result property="downloadUrl" column="download_location"/>
+        <result property="homepageUrl" column="homepage"/>
+        <result property="created" column="created_date"/>
+        <result property="obligations" column="obligation_type"/>
+        <result property="modified" column="modified_date"/>
+        <result property="description" column="summary_description"/>
+        <result property="nicknames" column="oss_nickname"/>
+    </resultMap>
+    <select id="selectOssList" parameterType="oss.fosslight.api.dto.ListOssDto$Request" resultMap="OssDtoMap">
+        SELECT
+        T1.OSS_ID
+        , T1.OSS_NAME
+        , T1.OSS_VERSION
+        , T1.LICENSE_DIV
+        , T1.HOMEPAGE
+        <choose>
+            <when test="searchFlag">
+                , SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
+            </when>
+            <otherwise>
+                , IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC)
+                FROM OSS_DOWNLOADLOCATION D
+                WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+            </otherwise>
+        </choose>
+        , T1.SUMMARY_DESCRIPTION
+        , T1.ATTRIBUTION
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+        , IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
+        , T1.CVSS_SCORE
+        , T1.CVE_ID
+        , T1.CREATED_DATE
+        , T1.MODIFIED_DATE
+        , T3.LICENSE_NAME
+        , T1.OBLIGATION_TYPE
+        , SUB1.OSS_TYPE AS OSS_TYPE
+        , IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM )
+        AS LICENSE_TYPE
+        , (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS
+        OSS_NICKNAME
+        , T1.COPYRIGHT
+        , T1.ATTRIBUTION
+        , T1.DEACTIVATE_FLAG
+        FROM OSS_MASTER T1
+        INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+        INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
+        INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'),
+        IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID =
+        SUB1.OSS_ID
+        LEFT OUTER JOIN T2_CODE_DTL T5 ON T3.LICENSE_TYPE = T5.CD_DTL_NO AND T5.CD_NO = '201' /*Code Table*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+        </if>
+        WHERE T1.USE_YN = 'Y'
+        /*검색 쿼리 시작*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+            AND (
+            <choose>
+                <when test="ossNameExact">
+                    T1.OSS_NAME = #{ossName}
+                </when>
+                <otherwise>
+                    T1.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+                </otherwise>
+            </choose>
+            OR EXISTS (SELECT *
+            FROM OSS_NICKNAME A1
+            WHERE A1.OSS_NAME = T1.OSS_NAME
+            <choose>
+                <when test="ossNameExact">
+                    AND A1.OSS_NICKNAME = #{ossName}
+                </when>
+                <otherwise>
+                    AND A1.OSS_NICKNAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
+                </otherwise>
+            </choose>
+            )
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+            AND (
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            OR
+            UPPER(T3.LICENSE_NAME) IN (
+            select UPPER(LICENSE_NAME)
+            from LICENSE_NICKNAME
+            where
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            )
+            OR
+            <choose>
+                <when test="licenseNameExact">
+                    UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
+                </when>
+                <otherwise>
+                    UPPER(T3.SHORT_IDENTIFIER) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+                </otherwise>
+            </choose>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(description)">
+            AND REPLACE(REPLACE(REPLACE(IFNULL(T1.SUMMARY_DESCRIPTION, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{description},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(url)">
+            AND
+            <choose>
+                <when test="urlExact">
+                    (
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.HOMEPAGE, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    OR SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{url} OR
+                    SUBSTRING_INDEX(SUBSTRING_INDEX(DOWN.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = CONCAT(#{url},"/")
+                    )
+                </when>
+                <otherwise>
+                    (
+                    T1.HOMEPAGE LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{url}, '_', '\\\\_'),'%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(copyright)">
+            AND (
+            REPLACE(REPLACE(REPLACE(IFNULL(T2.OSS_COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+            OR
+            REPLACE(REPLACE(REPLACE(IFNULL(T1.COPYRIGHT, ''),'\r\n', ' '),'\n', ' '), ' ', '') LIKE
+            CONCAT('%',REPLACE(REPLACE(REPLACE(#{copyright},'\r\n', ' '),'\n', ' '), ' ', ''),'%')
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+            AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
+            AND T1.MODIFIER LIKE CONCAT('%',#{modifier},'%')
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdFrom)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{createdFrom}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(createdTo)">
+            AND DATE_FORMAT(T1.CREATED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{createdTo}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedFrom)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{modifiedFrom}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(modifiedTo)">
+            AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{modifiedTo}
+        </if>
+        <if test="deactivate != null">
+            AND T1.DEACTIVATE_FLAG = #{deactivate}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseType)">
+            AND T1.LICENSE_TYPE = #{licenseType}
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossType)">
+            AND
+            (
+            FALSE
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'N')">
+                OR OSS_TYPE LIKE '000'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'M')">
+                OR OSS_TYPE LIKE '1__'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'D')">
+                OR OSS_TYPE LIKE '_1_'
+            </if>
+            <if test="@oss.fosslight.util.StringUtil@contains(ossType, 'V')">
+                OR OSS_TYPE LIKE '__1'
+            </if>
+            )
+        </if>
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(cvssScore)">
+            <![CDATA[
+>>>>>>> 387b5e70 ([Add] Implement file download for oss)
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
 		</if>

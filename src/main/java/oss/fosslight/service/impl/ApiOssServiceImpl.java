@@ -5,23 +5,24 @@
 
 package oss.fosslight.service.impl;
 
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oss.fosslight.CoTopComponent;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import oss.fosslight.api.dto.LicenseDto;
-import oss.fosslight.api.dto.ListOssDto;
-import oss.fosslight.api.dto.OssDto;
+import oss.fosslight.api.dto.*;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssLicense;
+import oss.fosslight.domain.T2File;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.HistoryService;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.ApiOssService;
+import oss.fosslight.service.FileService;
+import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.StringUtil;
+
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 import java.util.Collections;
@@ -31,14 +32,33 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+<<<<<<< HEAD
 public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 	/** The api oss mapper. */
 	@Autowired ApiOssMapper apiOssMapper;
 	@Autowired OssService ossService;
 	@Autowired HistoryService historyService;
+=======
+public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
+    /**
+     * The api oss mapper.
+     */
+    @Autowired
+    ApiOssMapper apiOssMapper;
+>>>>>>> 387b5e70 ([Add] Implement file download for oss)
 
     @Autowired
     OssMapper ossMapper;
+
+    @Autowired
+    FileService fileService;
+
+    private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
+
+    @PostConstruct
+    public void setResourcePathPrefix() {
+        RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+    }
 
     @Override
     public List<Map<String, Object>> getOssInfo(Map<String, Object> paramMap) {
@@ -123,6 +143,17 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
                 .list(rows)
                 .totalCount(totalCount)
                 .build();
+    }
+
+    public String getOssExcel(ListOssDto.Request request) throws Exception {
+        var ossList = listOss(request).list;
+        var dataStr = toJson(ossList);
+        var downloadId = ExcelDownLoadUtil.getExcelDownloadId(
+                "lite-oss",
+                dataStr,
+                RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX
+        );
+        return downloadId;
     }
 
     public List<OssDto> listRecentOss(int limit) {
