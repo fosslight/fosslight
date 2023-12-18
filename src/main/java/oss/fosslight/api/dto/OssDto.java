@@ -29,7 +29,7 @@ public class OssDto implements ExcelData {
 
     String copyright;
     String nicknames;
-    String attribution;
+    String attribution = "";
 
     Boolean exclude = false;
 
