@@ -56,6 +56,7 @@ export default function SelfCheckNotice({ id }: { id: string }) {
         alert('Successfully sent email');
         setIsWarningShown(false);
       },
+      onError: () => alert('Failed in sending email'),
       onFinish: () => setLoading(false)
     }
   );
