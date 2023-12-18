@@ -120,12 +120,16 @@ export default function LicenseList() {
     onFinish: () => setLoading(false)
   });
 
-  const downloadUrl = "http://localhost:8180/exceldownload/getFile"
-  const downloadExcelRequest= useAPI('get', 'http://localhost:8180/api/lite/licenses/export/excel', {
-    onSuccess: (res) => {
-      window.location.href = `${downloadUrl}?id=${res.data}`;
-    },
-  });
+  // API for exporting
+  const downloadExcelRequest = useAPI(
+    'get',
+    'http://localhost:8180/api/lite/licenses/export/excel',
+    {
+      onSuccess: (res) => {
+        window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data}`;
+      }
+    }
+  );
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
@@ -157,13 +161,14 @@ export default function LicenseList() {
 
       {/* Button */}
       <div className="flex justify-end gap-x-1 mt-8 mb-4">
-        <button className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn" onClick={
-          () => downloadExcelRequest.execute({
-            params: {
-              ...filtersForm.watch(),
-            }
-          })
-        }>
+        <button
+          className="flex items-center gap-x-1.5 px-2 py-0.5 default-btn"
+          onClick={() =>
+            downloadExcelRequest.execute({
+              params: { ...filtersForm.watch() }
+            })
+          }
+        >
           <div className="relative w-4 h-4">
             <Image src={ExcelIcon} fill sizes="32px" alt="export" />
           </div>
