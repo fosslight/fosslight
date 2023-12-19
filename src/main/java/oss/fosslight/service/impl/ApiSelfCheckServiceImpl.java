@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import oss.fosslight.api.dto.*;
@@ -52,6 +53,9 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
     @Autowired
     AutoFillOssInfoService autoFillOssInfoService;
+
+    @Autowired
+    T2UserService userService;
 
     @Override
     public int getCreateProjectCnt(String userId) {
@@ -113,6 +117,8 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
 
     @Override
     public ListSelfCheckDto.Result listSelfChecks(ListSelfCheckDto.Request request) {
+        T2Users user = userService.getLoginUserInfo();
+        request.setCreator(user.getUserId());
         int totalCount = apiSelfcheckMapper.selectSelfCheckTotalCount(request);
         var results = apiSelfcheckMapper.selectSelfCheckList(request);
 

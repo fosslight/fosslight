@@ -1,11 +1,13 @@
 package oss.fosslight.api.dto;
 
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
 public class ListSelfCheckDto {
     @Builder
+    @Data
     public static class Request extends Paging {
         String projectId;
         String createdFrom;
@@ -16,6 +18,7 @@ public class ListSelfCheckDto {
         Boolean licenseNameExact;
         String ossName;
         Boolean ossNameExact;
+        String creator;
     }
 
     @Builder
