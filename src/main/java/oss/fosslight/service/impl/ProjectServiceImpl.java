@@ -801,10 +801,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxList.clear();
 					
 					String comments = "";
-					if (!isEmpty(loadToListComment)) comments = loadToListComment;
-					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+					if (!isEmpty(loadToListComment)) {
+						comments = loadToListComment;
+						if (!isEmpty(project.getComments())) {
+							comments += " " + project.getComments();
+						}
+					}
 					if (!isEmpty(comments)) project.setComments(comments);
-					
 					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) project.setDependencies(avoidNull(project.getDependencies()));
 				}
 				
