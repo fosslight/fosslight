@@ -14,6 +14,6 @@ public class OssDetailsDto extends OssDto {
     Boolean deactivate;
 
     public void setDeactivate(String deactivateFlag) {
-        deactivate = !"Y".equals(deactivateFlag);
+        deactivate = "Y".equals(deactivateFlag);
     }
 }
