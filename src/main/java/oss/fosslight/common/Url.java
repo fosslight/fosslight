@@ -912,13 +912,14 @@ public final class Url {
 			/** API Verification Packaging Upload */
 			public static final String FOSSLIGHT_API_PACKAGE_UPLOAD			= "/projects/{id}/packages";
 
+			public static final String FOSSLIGHT_API_PROJECT_GET_NOTICE		= "/projects/{id}/notice";
 
 		/** VULNABILITY */
 			/** vulnerability info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
 
 			/** vulnerability max score info search */
-			public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/max-vulnerability";
+			public static final String FOSSLIGHT_API_VULNERABILITY_MAX_DATA	= "/max-vulnerabilities";
 
 
 		/** SELFCHECK */
@@ -933,6 +934,10 @@ public final class Url {
 
 			/** API SelfCheck Add Watcher */
 			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfchecks/{id}/watchers";
+
+			public static final String FOSSLIGHT_API_SELFCHECK_GET		= "/selfchecks/{id}";
+
+			public static final String FOSSLIGHT_API_SELFCHECK_GET_NOTICE		= "/selfchecks/{id}/notice";
 
 		/** BINARY */
 			/** API Binary List 조회 */
