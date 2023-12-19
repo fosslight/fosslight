@@ -200,42 +200,44 @@ export default function SelfCheckList() {
 
           if (column === 'Notice') {
             return (
-              <i
-                className="cursor-pointer fa-solid fa-file-lines"
-                title="Download Notice"
-                onClick={(e) => {
-                  e.stopPropagation();
+              row.ossCount > 0 && (
+                <i
+                  className="cursor-pointer fa-solid fa-file-lines"
+                  title="Download Notice"
+                  onClick={(e) => {
+                    e.stopPropagation();
 
-                  setSelfcheckId(row.projectId);
-                  setTimeout(() => {
-                    validateNoticeRequest
-                      .executeAsync({ params: { referenceId: row.projectId } })
-                      .then((res) => {
-                        const { validData } = res.data;
-                        let isValid = true;
+                    setSelfcheckId(row.projectId);
+                    setTimeout(() => {
+                      validateNoticeRequest
+                        .executeAsync({ params: { referenceId: row.projectId } })
+                        .then((res) => {
+                          const { validData } = res.data;
+                          let isValid = true;
 
-                        if (validData) {
-                          const keys = Object.keys(validData);
-                          if (keys.some((key) => key.startsWith('licenseName'))) {
-                            isValid = false;
-                          }
-                        }
-
-                        if (isValid) {
-                          downloadNoticeRequest.execute({
-                            body: {
-                              prjId: row.projectId,
-                              previewOnly: 'N',
-                              isSimpleNotice: 'N'
+                          if (validData) {
+                            const keys = Object.keys(validData);
+                            if (keys.some((key) => key.startsWith('licenseName'))) {
+                              isValid = false;
                             }
-                          });
-                        } else {
-                          setIsWarningShown(true);
-                        }
-                      });
-                  }, 0);
-                }}
-              />
+                          }
+
+                          if (isValid) {
+                            downloadNoticeRequest.execute({
+                              body: {
+                                prjId: row.projectId,
+                                previewOnly: 'N',
+                                isSimpleNotice: 'N'
+                              }
+                            });
+                          } else {
+                            setIsWarningShown(true);
+                          }
+                        });
+                    }, 0);
+                  }}
+                />
+              )
             );
           }
 
