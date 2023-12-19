@@ -276,7 +276,9 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
                           </a>
                         </td>
                         <td className="p-1">
-                          <div className="whitespace-pre-line">{vulnerability.summary}</div>
+                          <div className="whitespace-pre-line line-clamp-3">
+                            {vulnerability.summary}
+                          </div>
                         </td>
                       </tr>
                     ))
