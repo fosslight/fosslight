@@ -1,8 +1,26 @@
 # Changelog
 
-## v1.6.2 (01/01/1970)
+## v1.6.2 (19/12/2023)
 ## Changes
-* No changes
+## 🚀 Features
+
+- Help Message is added (Role of Creator & Reviewer, How to use FOSSLight) @FOSSLight-dev (#1020)
+
+## 🐛 Hotfixes
+
+- Bug fix where removing empty space when uploading report file and loading data into oss table. @FOSSLight-dev (#1022)
+- Bug fix where modified comments are not saved in the security tab. @FOSSLight-dev  (#1021)
+- In Self-check, null license is generated. @FOSSLight-dev (#1020)
+- Modify notice template css in Self-Check. @FOSSLight-dev (#1020)
+- Bug fix where the loaded list only shows up to 20 items and is no longer displayed in Project > Identification. @FOSSLight-dev (#1020)
+- Bug fix where warning message disappears when ID is clicked in BOM tab. @FOSSLight-dev (#1020)
+- Bug fix where remove duplicates of rows with the same oss name, version, license, and copyright in OSS Notice of self-check. @FOSSLight-dev (#1020)
+- Bug fix where clicking "confirm" button, a success pop up appears even if there is a warning message in bom tab. @FOSSLight-dev (#1020)
+- Bug fix where saving the oss table loaded in the 3rd party tab. @FOSSLight-dev (#1020)
+- Bug fix where a warning message is added to the license in case of a dual license when clicking Bulk Edit button. @FOSSLight-dev (#1020)
+- Bug fix where warning messages are displayed in duplicate in the oss table. @FOSSLight-dev (#1020)
+- Fix to prevent Korean language from being broken in PDF @MyunghyunNero (#1008)
+- Change CheckOSSName Button in DEP tab @hyeinlee00 (#1017)
 
 ---
 
