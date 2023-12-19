@@ -90,7 +90,6 @@ export default function SelfCheckOSSModal({
           // Add
           if (isAdd) {
             setOssList([
-              ...ossList,
               {
                 gridId: `jqg${ossList.filter((oss) => oss.gridId.startsWith('jqg')).length + 1}`,
                 ossId: null,
@@ -109,7 +108,8 @@ export default function SelfCheckOSSModal({
                 homepageUrl: formData.homepageUrl,
                 exclude: false,
                 changed: 'add'
-              }
+              },
+              ...ossList
             ]);
           }
 
