@@ -1579,7 +1579,15 @@ var com_fn = {
 			contentType : 'application/json',
 			success: function (data) {
 				if("false" == data.isValid) {
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					if (typeof data.validMsg !== "undefined") {
+						if (data.validMsg.indexOf("generation failed") != -1) {
+							alertify.error(data.validMsg, 0);
+						} else {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					} else {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
 				} else {
 					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
 				}
@@ -1599,7 +1607,15 @@ var com_fn = {
 			contentType : 'application/json',
 			success: function (data) {
 				if("false" == data.isValid) {
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					if (typeof data.validMsg !== "undefined") {
+						if (data.validMsg.indexOf("generation failed") != -1) {
+							alertify.error(data.validMsg, 0);
+						} else {
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					} else {
+						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					}
 				} else {
 					window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
 				}
