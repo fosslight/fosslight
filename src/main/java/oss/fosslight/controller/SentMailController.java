@@ -30,7 +30,7 @@ public class SentMailController extends CoTopComponent {
 	
 	@GetMapping(value=SENT_MAIL.PAGE, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "system/sentMail :: content";
+		return "system/sentMail";
 	}
 	
 	@GetMapping(value=SENT_MAIL.LIST_AJAX)

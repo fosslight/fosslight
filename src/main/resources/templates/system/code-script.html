@@ -191,7 +191,7 @@ var fn = {
 var gridFormatter = {
 		// row 삭제버튼 동적 추가
 		delBtn: function(cellvalue, options, rowObject){
-			var button = "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.delRow("+"'"+options.gid+"'"+",'"+options.rowId+"')\" />";
+			var button = "<button class=\"btn bg-light-gray btn-sm width-4rem mr-xm px-3\" style=\"text-align:center; color:#fff;\" onclick=\"fn.delRow("+"'"+options.gid+"'"+",'"+options.rowId+"')\">Delete</button>";
 
 			return button;
 		}
@@ -204,7 +204,7 @@ var ajax = {
 	getCodeList: function(){
 		$("#list").jqGrid('GridUnload');	// Grid 초기화
 		
-			var codeNo = $('#codeNo').val();
+		var codeNo = $('#codeNo').val();
 		var codeName = $('#codeName').val();
 		var data = "cdNo=" + codeNo + "&cdNm=" + codeName; 
 		
@@ -231,6 +231,7 @@ var ajax = {
 			}).success(function (data, status, headers, config) {
 				codeDetailList.nowCodeNo = rowid;	// 코드상세 신규추가 시 필요한 상위 코드번호 설정
 				codeDetailList.load(data.codeDetailList);
+				$(".ui-jqgrid-sortable").css("padding", "0");
 			}).error(function (data, status, headers, config) {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			});
@@ -496,6 +497,7 @@ var codeDetailList = {
 					// id(key값)의 max값을 lastIdNo에 설정
 					codeDetailList.lastIdNo = fn.getMaxIdNo('codeDtl');
 					hidePageNav('pager2');
+					$("#list2").addClass("ui-jqgrid-htable");
 				},
                 ondblClickRow: function(rowid,iRow,iCol,e) {
                 	gridListBulkEdit("list2");
