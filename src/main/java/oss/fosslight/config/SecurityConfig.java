@@ -39,47 +39,47 @@ import oss.fosslight.util.ResponseUtil;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    /** The jwt token provider. */
-    private final JwtTokenProvider jwtTokenProvider;
-    private final CookieUtil cookieUtil;
-    /** The unauthorized handler. */
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    
-    @Bean
+	/** The jwt token provider. */
+	private final JwtTokenProvider jwtTokenProvider;
+	private final CookieUtil cookieUtil;
+	/** The unauthorized handler. */
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+
+	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		
+
 		return http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exceptionHandling -> exceptionHandling
-				.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
+						.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
 				.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 				.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeRequests(
 						authorize -> authorize.antMatchers(CoConstDef.STATIC_RESOURCES_URL_PATTERNS).permitAll()
-						.antMatchers(CoConstDef.PERMIT_UTL_PATTERNS).permitAll()
-						.anyRequest().authenticated())
+								.antMatchers(CoConstDef.PERMIT_UTL_PATTERNS).permitAll()
+								.anyRequest().authenticated())
 				.formLogin(FormLoginConfigurer::disable)
 				.logout().logoutUrl(AppConstBean.SECURITY_LOGOUT_URL).logoutSuccessHandler(logoutSuccessHandler()).and()
 				.addFilterBefore(new JwtAuthenticationFilter(this.jwtTokenProvider, this.cookieUtil), UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
-    
+
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	public LogoutSuccessHandler logoutSuccessHandler() {
 		LogoutSuccessHandler successHandler = new CustomLogoutSuccessHandler();
-        return successHandler;
-    }
-	
+		return successHandler;
+	}
+
 	public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler implements LogoutSuccessHandler {
-	    @Override
+		@Override
 		public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
-				Authentication authentication) throws IOException, ServletException {
-	    	ResponseUtil.setDefaultLocalStorage(response);
-	    	cookieUtil.deleteCookie(request, response, "X-FOSS-AUTH-TOKEN");
+									Authentication authentication) throws IOException, ServletException {
+			ResponseUtil.setDefaultLocalStorage(response);
+			cookieUtil.deleteCookie(request, response, "X-FOSS-AUTH-TOKEN");
 			response.sendRedirect(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL);
 		}
 	}
