@@ -53,14 +53,18 @@ public class BinaryDataService  extends CoTopComponent {
 	public Map<String, Object> getBinaryList(String page, String rows , BinaryData vo) {
 		int records = 0;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		
+
+		String filterCondition = CommonFunction.getFilterToString(vo.getFilters());
+		vo.setFilterCondition(filterCondition);
+
 		if(!StringUtil.isEmpty(vo.getFileName()) && vo.getFileName().indexOf("/") > -1) {
 			String[] splitFileName = vo.getFileName().split("/");
 			vo.setFileName(splitFileName[splitFileName.length-1]);
 		}
 		
 		records = binaryDataMapper.countBinaryList(vo);
-				
+		vo.setTotListSize(records);
+
 		if(CoConstDef.FLAG_NO.equals(vo.getBinaryPopupFlag())) {
 			vo.setCurPage(Integer.parseInt( StringUtil.isNotEmpty(page) ? page : "1"));
 			vo.setPageListSize(Integer.parseInt( StringUtil.isNotEmpty(rows) ? rows : "20"));

@@ -471,6 +471,9 @@ html .ui-button.ui-state-disabled:active {
     height: auto;
 }
 
+/* jqdialog */
+.ui-jqdialog-content .EditTable { font-size: .8rem }
+
 #innerJqTable { width: 100%; border-collapse: collapse; }
 #innerJqTable th { background-color: #f2f2f2; border: 1px solid #ccc; padding: 10px; text-align: center; }
 #innerJqTable td { border: 1px solid #ccc; text-align: center; }

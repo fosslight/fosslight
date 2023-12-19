@@ -134,9 +134,9 @@
                                             </div>
                                         </div>
                                         <th:block th:if="${@CommonFunction.isAdmin()}">
-                                            <a class="small-box-footer" href="#" id="moreInfoBtn">More <i
+                                            <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i
                                                     class="fas fa-arrow-circle-down"></i></a>
-                                            <div class="more-search pt-2" id="moreSearchContent" style="display: none">
+                                            <div class="more-search" id="moreSearchContent" style="display: none">
                                                 <div class="row">
                                                     <div class="col-md-3">
                                                         <div class="form-group mb-2">
@@ -194,38 +194,33 @@
                                                     </div>
                                                     <div class="col-md-4 pt-2">
                                                         <span>
-                                                            <div class="icheck-secondary d-inline ml-3">
-                                                                <input id="noneLicenseFlag" name="ossTypeSearch" value="N"/>
+                                                            <div class="icheck-secondary d-inline mx-2">
+                                                                <input type="checkbox"  id="noneLicenseFlag" name="ossTypeSearch" value="N"/>
                                                                 <label class="mb-2" for="noneLicenseFlag"
-                                                                       style="font-weight: normal">
+                                                                       style="font-weight: normal" title="None">
                                                                    <span class="badge badge-dark">N</span>
                                                                 </label>
                                                             </div>
-                                                            <div class="icheck-secondary d-inline ml-3">
-                                                                <input id="multiLicenseFlag"
-                                                                       th:checked="${searchBean.deactivateFlag eq 'Y'}"
-                                                                       type="checkbox">
+                                                            <div class="icheck-secondary d-inline mx-2">
+                                                                <input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" value = "M">
                                                                 <label class="mb-2" for="multiLicenseFlag"
-                                                                       style="font-weight: normal">
+                                                                       style="font-weight: normal" title="Multi">
                                                                     <span class="badge badge-primary">M</span>
                                                                 </label>
                                                             </div>
-                                                            <div class="icheck-secondary d-inline ml-3">
-                                                                <input id="deactivateFlag"
-                                                                       th:checked="${searchBean.deactivateFlag eq 'Y'}"
-                                                                       type="checkbox">
-                                                                <label class="mb-2" for="deactivateFlag"
-                                                                       style="font-weight: normal">
-                                                                  <span class="badge badge-danger">M</span>
+                                                            <div class="icheck-secondary d-inline mx-2">
+                                                                <input type="checkbox" id="dualLicenseFlag" name="ossTypeSearch" value = "D">
+                                                                <label class="mb-2" for="dualLicenseFlag"
+                                                                       style="font-weight: normal" title="Dual">
+                                                                  <span class="badge badge-danger">D</span>
                                                                 </label>
                                                             </div>
-                                                             <div class="icheck-secondary d-inline ml-3">
-                                                                <input name="deactivateFlag"
-                                                                       th:value="${searchBean.deactivateFlag}"
-                                                                       type="checkbox"/>
-                                                                            <label class="mb-2" for="deactivateFlag"
-                                                                                   style="font-weight: normal">
-                                                                  <span class="badge badge-warning">v</span>
+                                                             <div class="icheck-secondary d-inline mx-2">
+                                                                <input type="checkbox" id="versionDiffFlag" name="ossTypeSearch" value = "V"/>
+                                                                            <label class="mb-2" for="versionDiffFlag"
+                                                                                   style="font-weight: normal"
+                                                                                   title="Version Difference">
+                                                                  <span class="badge badge-warning">V</span>
                                                                 </label>
                                                              </div>
                                                         </span>

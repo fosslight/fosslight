@@ -5,6 +5,7 @@ var LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 
 $(document).ajaxSend(function (event, jqxhr, settings) {
     jqxhr.setRequestHeader("AJAX", true);
+
 });
 
 $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
@@ -22,11 +23,11 @@ var gRowCnt = "";
 
 $(document).ready(function () {
     $(document).keydown(function (e) {
-        if (e.target.nodeName != "INPUT" && e.target.nodeName != "TEXTAREA") {
-            if (e.keyCode === 8) {
-                return false;
-            }
-        }
+        // if (e.target.nodeName != "INPUT" && e.target.nodeName != "TEXTAREA") {
+        //     if (e.keyCode === 8) {
+        //         return false;
+        //     }
+        // }
 
         if (e.keyCode === 82 && e.altKey && !e.shiftKey) {//Alt + R - 이전 탭으로 가기
             returnTabInFrame();

@@ -16,6 +16,7 @@
         let selectedRow = new Array();
         let multiSelectFlag = false;
         let confirmFlag = false;
+        let listData = [];
 
         $(window).load(function () {
             'use strict';
@@ -23,6 +24,19 @@
             binary_evt.init();
             binary_grid.load();
         });
+
+        const binary_data = {
+            load: function (data) {
+                getAjaxData(data, "/binary/listAjax", 'json', function (data) {
+                    $("#list").jqGrid('GridUnload');
+
+                    listData = data.rows;
+                    binary_grid.load();
+                }, function(){
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                })
+            }
+        }
 
         const binary_evt = {
             init: function () {
@@ -34,9 +48,8 @@
 
                 $('#search').on('click', function (e) {
                     e.preventDefault();
-
                     var postData = binary_fn.serializeObjectHelper();
-                    $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url: "/binary/listAjax" }).trigger('reloadGrid');
+                    binary_data.load(postData);
                     resizingJqGidSet();
                 });
 
@@ -125,7 +138,6 @@
                 selectedRow = $('#list').jqGrid('getGridParam', 'selarrrow');
                 multiSelectFlag = selectedRow.length > 1 ? true : false;
             }
-
         }
 
         const binary_ajax = {
@@ -250,8 +262,8 @@
 
                 //그리드 생성
                 $('#list').jqGrid({
-                    type:"GET"
-                    , datatype: 'json'
+                    datatype: 'local'
+                    , data : listData
                     , jsonReader: {
                         repeatitems: false,
                         id: 'batId',
@@ -321,6 +333,7 @@
         const binaryUpdateDialogEdit = {
             url:"/binary/modAjax"
             , closeAfterEdit: true
+            , width : 450
             , reloadAfterSubmit: true
             , modal: true
             , serializeEditData : function(postdata) {
@@ -382,7 +395,7 @@
                     alertify.error([[ #{msg.common.valid} ]], 0);
                     createValidMsg('FrmGrid_list', response.responseJSON);
 
-                    return [false, '[[ #{msg.common.valid} ]]', ""]
+                    return [false, [[ #{msg.common.valid} ]], ""]
                 } else {
                     alertify.error([[ #{msg.common.success} ]], 0);
 
@@ -429,7 +442,7 @@
                 if("false" == response.responseJSON.isValid) {
                     alertify.error([[ #{msg.common.valid2} ]], 0);
 
-                    return [false, '[[ #{msg.common.valid} ]]', ""]
+                    return [false, [[ #{msg.common.valid} ]], ""]
                 } else {
                     alertify.success([[ #{msg.common.success} ]], 0);
                     $("#list").jqGrid().trigger('reloadGrid');

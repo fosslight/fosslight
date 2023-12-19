@@ -240,7 +240,7 @@
                 });
             },
             handleCommentPopupOpen: function (_commId)  {
-                postAjaxJsonData(JSON.stringify({commId : _commId}), "/comment/getDivCommentByCommId", "html", function (res) {
+                getAjaxJsonData({commId : _commId}, "/comment/getDivCommentByCommId", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             fn_comment.editComment();
@@ -254,6 +254,7 @@
                         height: 100,
                         callbacks: {
                             onInit: function() {
+                                const contents = $("#contents").val();
                                 $(this).summernote('code', contents);
                             }
                         }
