@@ -68,7 +68,6 @@ public class SecurityConfig {
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
 	public LogoutSuccessHandler logoutSuccessHandler() {
 		LogoutSuccessHandler successHandler = new CustomLogoutSuccessHandler();
 		return successHandler;
