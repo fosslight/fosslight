@@ -89,7 +89,7 @@ public class ApiOssV2Controller extends CoTopComponent {
         try {
             List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
             if (content.size() == 0) {
-                return ResponseEntity.notFound().build();
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "license not found");
             }
             resultMap.put("content", content);
             return ResponseEntity.ok(resultMap);
