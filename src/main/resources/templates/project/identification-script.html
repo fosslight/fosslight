@@ -18,6 +18,11 @@ $(document).ready(function () {
 		$("[name=gridArea]").hide();
 		$("#gridArea"+tabId).show();
 	});
+
+    $('.btnCommentHistory').on('click', function (e) {
+        e.preventDefault();
+        openCommentHistory('/comment/popup/prj/' + [[${project.prjId}]]);
+    });
 });
 
 $(document).click(function(e){
@@ -34,6 +39,109 @@ $(document).click(function(e){
 		$("#ExportList").hide();
 	}
 });
+
+/* identification 코멘트 관련 함수 */
+var fn = {
+    handleUserCommentPopupOpen: function () {
+        // 코멘트 팝업
+        const param = {
+            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
+            "referenceId" : [[${project.prjId}]]
+        }
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                if (!alertify.editDialog) {
+                    alertify.dialog('editDialog', function () {
+                        return {
+                            main: function (content) {
+                                this.setContent(content);
+                            },
+                            setup: function () {
+                                return {
+                                    buttons: [],
+                                    focus: {element: 0}
+                                };
+                            }
+                        };
+                    });
+                }
+
+                editDailog = alertify.editDialog(res).set('resizable', true).resizeTo('25%', 380);
+            },
+            null,
+            function () {
+                $("#modifiedCommentInPjtEditor").summernote({
+                    height: 100,
+                    callbacks: {
+                        onInit: function () {
+                            $(this).summernote('code', $("#contents").val());
+                        }
+                    }
+                });
+            });
+    },
+    sendEditor: function (type) {
+        //코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if (!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function () {
+            });
+            return false;
+        }
+        var referenceId = [[${project.prjId}]]
+        var param = {referenceId: referenceId, referenceDiv: '12', contents: editorVal, mailSendType: type};
+
+        $.ajax({
+            url: '/project/sendComment',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#userComment").val('');
+                    editDailog.close();
+                }
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    saveEditor: function () {
+        //코멘트 임시저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        var referenceId = [[${project.prjId}]]
+        var param = {
+            referenceId: referenceId
+            , referenceDiv: '13'
+            , contents: editorVal
+        };
+        $.ajax({
+            url: "/project/saveComment",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.common.success}]]);
+                }
+                $("#userComment").val(editorVal);
+                editDailog.close();
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+}
 </script>
 </th:block>
 </html>
