@@ -25,6 +25,7 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.NoticeMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
@@ -72,6 +73,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     private final CodeMapper codeMapper;
 
+    private final NoticeMapper noticeMapper;
+
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
@@ -81,6 +84,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
             @RequestHeader String authorization,
+            @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
+            @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
             @ApiParam(value = "Division (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String division,
             @ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
@@ -106,6 +111,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("modelName", modelName);
             paramMap.put("status", status);
             paramMap.put("prjIdList", prjIdList);
+            paramMap.put("prjName", prjName);
+            paramMap.put("prjNameExactYn", prjNameExactYn);
 
             try {
                 resultMap = apiProjectService.selectProjectList(paramMap);
@@ -1443,6 +1450,39 @@ public class ApiProjectV2Controller extends CoTopComponent {
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+    }
+
+    @ApiOperation(value = "Project get Notice", notes = "Project Get")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
+    public ResponseEntity getSelfcheckReport(
+            @RequestHeader String authorization,
+            @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
+            HttpServletRequest req
+    ) {
+        try {
+            var ossNotice = verificationService.selectOssNoticeOne(prjId);
+
+            if (ossNotice == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");
+            }
+            var downloadId = verificationService.getNoticeHtmlFileForPreview(ossNotice);
+
+            T2File fileInfo = fileService.selectFileInfo(downloadId);
+            String filePath = fileInfo.getLogiPath();
+
+            if (!filePath.endsWith("/")) {
+                filePath += "/";
+            }
+
+            filePath += fileInfo.getLogiNm();
+
+            return excelToResponseEntity(filePath, fileInfo.getOrigNm());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

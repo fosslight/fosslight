@@ -123,7 +123,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "name", required = true) String prjId,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
 
