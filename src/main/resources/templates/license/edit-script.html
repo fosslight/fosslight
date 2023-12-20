@@ -9,15 +9,7 @@
         const lic_edit_data = {
             detail : [[${ detail }]],
             init: function () {
-                $('#licenseTypeSelect').select2({
-                    placeholder: "License Type",
-                    allowClear: true,
-                });
-
-                $("#restrictionSelect").select2({
-                    placeholder: "Restriction",
-                    allowClear: true,
-                });
+                $('.select2').select2();
 
                 $("[name='commentInput']").summernote({
                     height: 100,

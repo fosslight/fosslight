@@ -81,7 +81,7 @@
                                                            type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <div class="form-check text-orange">
                                                         <input class="form-check-input text-orange"
@@ -100,21 +100,23 @@
                                                            type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4 mt-4">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
                                                     <textarea class="form-control" name="copyrights"
                                                               placeholder="Copyright Text"
-                                                              rows="1"
+                                                              rows="3"
                                                               th:text="${searchBean.copyright}"></textarea>
                                                 </div>
 
                                             </div>
 
-                                            <div class="col-md-4">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
                                                     <textarea class="form-control" name="summaryDescription"
-                                                              placeholder="Copyright Text"
-                                                              rows="1"
+                                                              placeholder="Description"
+                                                              rows="3"
                                                               th:text="${searchBean.summaryDescription}"></textarea>
                                                 </div>
                                             </div>
@@ -192,27 +194,27 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-4 pt-2">
+                                                    <div class="col-md-3 pt-2">
                                                         <span>
                                                             <div class="icheck-secondary d-inline mx-2">
                                                                 <input type="checkbox"  id="noneLicenseFlag" name="ossTypeSearch" value="N"/>
                                                                 <label class="mb-2" for="noneLicenseFlag"
                                                                        style="font-weight: normal" title="None">
-                                                                   <span class="badge badge-dark">N</span>
+                                                                   <span class="badge badge-dark">None</span>
                                                                 </label>
                                                             </div>
                                                             <div class="icheck-secondary d-inline mx-2">
                                                                 <input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" value = "M">
                                                                 <label class="mb-2" for="multiLicenseFlag"
                                                                        style="font-weight: normal" title="Multi">
-                                                                    <span class="badge badge-primary">M</span>
+                                                                    <span class="badge badge-primary">Multi</span>
                                                                 </label>
                                                             </div>
                                                             <div class="icheck-secondary d-inline mx-2">
                                                                 <input type="checkbox" id="dualLicenseFlag" name="ossTypeSearch" value = "D">
                                                                 <label class="mb-2" for="dualLicenseFlag"
                                                                        style="font-weight: normal" title="Dual">
-                                                                  <span class="badge badge-danger">D</span>
+                                                                  <span class="badge badge-info">Dual</span>
                                                                 </label>
                                                             </div>
                                                              <div class="icheck-secondary d-inline mx-2">
@@ -220,7 +222,7 @@
                                                                             <label class="mb-2" for="versionDiffFlag"
                                                                                    style="font-weight: normal"
                                                                                    title="Version Difference">
-                                                                  <span class="badge badge-warning">V</span>
+                                                                  <span class="badge badge-success">v-Diff</span>
                                                                 </label>
                                                              </div>
                                                         </span>

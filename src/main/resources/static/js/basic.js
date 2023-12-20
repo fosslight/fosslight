@@ -5,7 +5,6 @@ var LINKREGEXP = /PRJ-\d+(?!.*\<\/a\>)|3rd-\d+(?!.*\<\/a\>)/gi;
 
 $(document).ajaxSend(function (event, jqxhr, settings) {
     jqxhr.setRequestHeader("AJAX", true);
-
 });
 
 $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
@@ -3155,4 +3154,8 @@ function deleteCookie(cookieName) {
     expireDate.setDate(expireDate.getDate() - 1);
 
     document.cookie = cookieName + "= " + "; expires=" + expireDate.toGMTString();
+}
+
+function selectLang(lang) {
+    window.location.replace('?lang=' + lang);
 }

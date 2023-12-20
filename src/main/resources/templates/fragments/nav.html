@@ -14,45 +14,63 @@
 		<!-- Right navbar links -->
 		<ul class="navbar-nav ml-auto">
 			<!-- Navbar Search -->
-			<li class="nav-item">
-				<a class="nav-link" data-toggle="dropdown" href="#">
-					<i class="fas fa-book"></i>
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" data-toggle="dropdown" href="#">
-					<i class="fas fa-bullhorn"></i>
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" data-toggle="dropdown" href="#">
-					<i class="fas fa-question"></i>
-				</a>
-			</li>
+<!--			<li class="nav-item">-->
+<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
+<!--					<i class="fas fa-book"></i>-->
+<!--				</a>-->
+<!--			</li>-->
+<!--			<li class="nav-item">-->
+<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
+<!--					<i class="fas fa-bullhorn"></i>-->
+<!--				</a>-->
+<!--			</li>-->
+<!--			<li class="nav-item">-->
+<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
+<!--					<i class="fas fa-question"></i>-->
+<!--				</a>-->
+<!--			</li>-->
 			<li class="nav-item">
 				<a class="nav-link" data-widget="fullscreen" href="#" role="button">
 					<i class="fas fa-expand-arrows-alt"></i>
 				</a>
 			</li>
+<!--			<li class="nav-item">-->
+<!--				<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">-->
+<!--					<i class="fas fa-th-large"></i>-->
+<!--				</a>-->
+<!--			</li>-->
 			<li class="nav-item">
-				<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-					<i class="fas fa-th-large"></i>
-				</a>
-			</li>
-			<li class="nav-item">
-				<a class="nav-link" data-toggle="dropdown" href="#">
+				<a class="nav-link" data-toggle="dropdown" href="#" id="languageToggle">
 					<i class="flag-icon flag-icon-us"></i>
 				</a>
 				<div class="dropdown-menu dropdown-menu-right p-0">
-					<a href="#" class="dropdown-item active">
+					<a href="#" class="dropdown-item active" onclick="selectLang('en_US')">
 						<i class="flag-icon flag-icon-us mr-2"></i> English
 					</a>
-					<a href="#" class="dropdown-item">
+					<a href="#" class="dropdown-item" onclick="selectLang('ko_KR')">
 						<i class="flag-icon flag-icon-kr mr-2"></i> Korean
 					</a>
 				</div>
 			</li>
 		</ul>
 	</nav>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			setLanguageFromUrl();
+		});
+
+		function setLanguageFromUrl() {
+			const urlParams = new URLSearchParams(window.location.search);
+			const langParam = urlParams.get('lang');
+
+			const navLink = document.getElementById('languageToggle');
+
+			if (langParam === 'en_US') {
+				navLink.innerHTML = '<i class="flag-icon flag-icon-us"></i>';
+			} else if (langParam === 'ko_KR') {
+				navLink.innerHTML = '<i class="flag-icon flag-icon-kr"></i>';
+			}
+		}
+	</script>
 </th:block>
 </html>

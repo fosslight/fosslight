@@ -45,7 +45,7 @@
                                                th:text="#{msg.common.field.licenseType}"></label>
                                         <select class="select2" id="licenseTypeSelect" name="licenseType"
                                                 style="width: 100%;">
-                                            <option value=""></option>
+                                            <option value="" disabled selected> </option>
                                             <th:block
                                                     th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
                                                 <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}"
@@ -58,7 +58,6 @@
                                         <label th:text="#{msg.common.field.restriction}"></label>
                                         <select class="select2" id="restrictionSelect" multiple="multiple"
                                                 name="restriction" style="width: 100%;">
-                                            <option value=""></option>
                                             <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
                                                     th:text="${code.cdDtlNm}"
                                                     th:value="${code.cdDtlNo}"
@@ -146,7 +145,7 @@
                                             </div>
                                         </th:block>
                                     </div>
-                                    <div class="fom-group">
+                                    <div class="form-group">
                                         <label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
                                         <textarea class="form-control" id="licenseUserGuide" name="description" rows="3"
                                                   th:text="${detail?.description}"></textarea>

@@ -19,7 +19,12 @@
         //데이터 객체
         var data = {
             typeCodes: [],
-            tooltipCont: "<div class=\"tooltipData\"><dl><dt><span class=\"iconSet ops\">Notice Obligation</span>Notice Obligation</dt><dd></dd></dl><dl><dt><span class=\"iconSet man\">Source Code Obligation</span>Source Code Obligation</dt><dd></dd></dl></div>",
+            tooltipCont: "<div>" +
+                "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                "</div>" +
+                "<div>" +
+                "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                "</div>",
             existTooltip: false,
             init: function () {
                 list.load();	// Grid Load
@@ -257,7 +262,7 @@
                     search: false
                 };
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'obligation', index: 'obligation', width: 60, align: 'left'};
+                colModelObj = {name: 'obligation', index: 'obligation', width: 65, align: 'left', sortable: false};
                 colModelArr.push(colModelObj);
                 colModelObj = {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link2'};
                 colModelArr.push(colModelObj);
@@ -342,12 +347,12 @@
                         }
 
                         if (!data.existTooltip) {
-// 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_obligation"))
-// 					.attr("title", data.tooltipCont).tooltip({
-// 						content: function () {
-// 							return $(this).prop('title');
-// 						}
-// 					});
+                            $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                            .attr("title", data.tooltipCont).tooltip({
+                                content: function () {
+                                    return $(this).prop('title');
+                                }
+                            });
 
 // 					$.ajax({
 // 						type: 'GET',
@@ -392,7 +397,7 @@
 // 						}
 // 					});
 
-// 					data.existTooltip = true;						
+         					data.existTooltip = true;
                         }
 
                         tableRefreshNew("list");
