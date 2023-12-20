@@ -35,7 +35,7 @@ var sec_com_evt = {
 				totalMainData = data.totalGridData;
 				fixedMainData = data.fixedGridData;
 				notfixedMainData = data.notFixedGridData;
-				console.log("after save");
+				
 				// 리로드 대신 그리드 삭제 후 다시 그리기
 				$("#totalList").jqGrid('GridUnload');
 				total.loadSecurityGrid();
@@ -248,7 +248,7 @@ var sec_com_fn = {
 							return {
 								setup: function() {
 									var settings = alertify.confirm().settings;
-									console.log(settings);
+									
 									for (var prop in settings) {
 										this.settings[prop] = settings[prop];
 									}
