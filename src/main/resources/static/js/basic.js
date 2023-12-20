@@ -23,11 +23,11 @@ var gRowCnt = "";
 
 $(document).ready(function () {
     $(document).keydown(function (e) {
-        // if (e.target.nodeName != "INPUT" && e.target.nodeName != "TEXTAREA") {
-        //     if (e.keyCode === 8) {
-        //         return false;
-        //     }
-        // }
+        if (e.target.nodeName != "INPUT" && e.target.nodeName != "TEXTAREA" && (e.target.nodeName == "DIV" && e.target.className.indexOf("note-editable") == -1)) {
+            if (e.keyCode === 8) {
+                return false;
+            }
+        }
 
         if (e.keyCode === 82 && e.altKey && !e.shiftKey) {//Alt + R - 이전 탭으로 가기
             returnTabInFrame();
@@ -2651,9 +2651,10 @@ var existsTabName = function (tabNm) {
     return existsTab;
 }
 
+var securityTableWidth = 0;
 var tableRefreshNew = function (id) {
     const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
-        , "_binProjectList1", "_binProjectList2", "_binAddList", "list"];
+        , "_binProjectList1", "_binProjectList2", "_binAddList", "list", "totalList", "fixedList", "notFixedList"];
 
     if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
         window.setTimeout(function () {
@@ -2678,9 +2679,19 @@ var tableRefreshNew = function (id) {
                 }
             });
         }, 300);
+    } else if ("totalList" == id || "fixedList" == id || "notFixedList" == id) {
+        window.setTimeout(function () {
+			var width = $(".outerJqGridSet").width();
+			if (securityTableWidth == 0) securityTableWidth = width;
+            $('.ui-jqgrid-btable').each(function () {
+                var id = $(this).attr('id');
+                if ("totalList" == id || "fixedList" == id || "notFixedList" == id) {
+                    $(this).jqGrid('setGridWidth', 0, true);
+                    $(this).jqGrid('setGridWidth', securityTableWidth, true);
+                }
+            });
+        }, 300);
     } else {
-        if (id.startsWith('subAsList') || id.startsWith('subBeList')) {
-        }
         window.onload = function () {
             var width = $(".card-body").width() - 40;
             $('.ui-jqgrid-btable').each(function () {

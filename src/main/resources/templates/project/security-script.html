@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+var lastsel;
+var totalMainData = [];
+var fixedMainData = [];
+var notfixedMainData = [];
+var saveFlag = false;
+var prevEditSel;
+
+$(function () {
+	'use strict';
+	sec_com_evt.dataInit();
+	com_fn.tabInit();
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		$("#gridArea"+tabId).show();
+	});
+});
+
+var sec_com_evt = {
+	dataInit : function(){
+		var url = '/project/securityGrid/'+[[${project.prjId}]]+'/total';
+		$.ajax({
+			url : url,
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				totalMainData = data.totalGridData;
+				fixedMainData = data.fixedGridData;
+				notfixedMainData = data.notFixedGridData;
+				console.log("after save");
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#totalList").jqGrid('GridUnload');
+				total.loadSecurityGrid();
+				
+				$("#fixedList").jqGrid('GridUnload');
+				fixed.loadSecurityGrid();
+				
+				$("#notFixedList").jqGrid('GridUnload');
+				notFixed.loadSecurityGrid();
+				
+				if (!saveFlag && data.hasOwnProperty('msg')){
+					alertify.alert(data.msg, function(){});
+				}
+				
+				saveFlag = false;
+			}
+		});
+	}
+}
+
+var sec_com_fn = {
+	sendEditor : function(type){
+		//코멘트 저장
+		var editorVal = CKEDITOR.instances.editor.getData();
+		
+		if(!editorVal || editorVal == "") {
+			alertify.alert([[#{msg.project.enter.comment}]], function(){});
+			return false;
+		}
+		
+		var param = {referenceId : [[${project.prjId}]], referenceDiv :'10', contents : editorVal, mailSendType : type};
+		
+		$.ajax({
+			url : '/project/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					$('.ajs-close').trigger("click");
+
+					alertify.success([[#{msg.project.sent.comments.success}]]);
+					resetEditor(CKEDITOR.instances.editor);
+					
+					$(".commentBtn").trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = CKEDITOR.instances.editor.getData();
+		var register = 'admin';
+		var param = {referenceId : [[${project.prjId}]], referenceDiv :'13', contents : editorVal};
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$(".commentBtn").trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	customOnCellSelect : function(target, iCol){
+		$("#" + target).jqGrid('saveRow', prevEditSel);
+		lastsel = -1;
+	},
+	customOnDblClickRow : function(target, rowid){
+		var rowData = $("#" + target).jqGrid('getRowData',rowid);
+		if ("Y" == rowData.activateFlag) {
+			var gridData = $("#" + target).jqGrid('getGridParam','data').filter(function(a){
+		    	if("Y" == a.activateFlag){
+					return a;
+			    }
+	    	});
+						
+			var msg = [[#{msg.project.security.check.version}]];
+			msg += '<br/><br/>';
+			for (var i=0; i<gridData.length; i++){
+				msg += '- ' + gridData[i].ossName;
+				if (i < gridData.length-1){
+					msg += '<br/>';
+				}
+			}
+			alertify.alert(msg, function(){});
+			$("#" + target).jqGrid("resetSelection");
+			return;
+		} else {
+			if (rowid && rowid !== lastsel){
+				$("#" + target).setColProp('vulnerabilityResolution', {editable:true});
+				$("#" + target).jqGrid('editRow',rowid);
+				lastsel=rowid;
+			}
+		}
+		
+		prevEditSel = rowid;
+	},
+	setSaveGridData : function(targetStr) {
+		var target = $("#"+targetStr);
+		var rowDatas = target.jqGrid("getRowData");
+		var totalGridData = target.jqGrid('getGridParam','data');
+		var rowDatasLength = rowDatas.length;
+		var totalGridDataLength = totalGridData.length;
+		
+		for (var i=0; i<rowDatasLength; i++) {
+			for (var j=0; j<totalGridDataLength; j++) {
+				if (rowDatas[i].gridId == totalGridData[j].gridId) {
+					totalGridData[j].vulnerabilityResolution = rowDatas[i].vulnerabilityResolution;
+					continue;
+				}
+			}
+		}
+		
+		return totalGridData;
+	},
+	identificationTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Identify");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
+		}
+	},
+	packagingTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Packaging");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+		}
+	},
+	editTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Project");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+		}
+	},
+	bulkEdit : function(tab){
+    	var gridList;
+ 		var targetGird = "";
+      
+      	switch(tab){
+          	case 'total' : 
+              	gridList = $("#totalList"); targetGird = "totalList";
+              	break;
+          	case 'fixed' : 
+              	gridList = $("#fixedList"); targetGird = "fixedList";
+              	break;
+          	case 'notFixed' : 
+              	gridList = $("#notFixedList"); targetGird = "notFixedList";
+              	break;
+      	}
+
+      	var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+      	var rowCheckedArr = [];
+      	var rowGirdIdArr = [];
+      	var versionEmptyFlag = false;
+      
+      	for(var i=0; i<selarrrow.length; i++){
+      		if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+      			var rowData = gridList.jqGrid("getRowData", selarrrow[i]);
+      			if ("" != rowData["ossVersion"]) {
+      				rowCheckedArr.push(selarrrow[i]);
+      				rowGirdIdArr.push(rowData["gridId"]);
+      			}
+			}
+ 		}
+		
+      	if (rowCheckedArr.length > 0) {
+          	fn_grid_com.totalGridSaveMode(targetGird);
+          	
+          	$("#secBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+      		$("#secBulkEditForm > input[name=gridId]").val(rowGirdIdArr);
+			$("#secBulkEditForm > input[name=target]").val(targetGird);
+			
+			$.ajax({
+				url: "/project/secBulkEditPopup",
+                type: "POST",
+                dataType: 'html',
+                cache : false,
+                success: function (res) {
+                	if(!alertify.secBulkEdit){
+						alertify.dialog('secBulkEdit', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									console.log(settings);
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+                	
+                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security').set('resizable', true).resizeTo('760px', '340px');
+                	$("select[name=vulnerabilityResolution] option:eq(0)").prop("selected", true);
+                },
+                error : function(){
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            });
+      	} else {
+      		alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
+      		return false;
+      	}
+  	},
+  	bulkEditDataInfo : function(obj, flag){
+		var editFlag = false;
+	   	try{
+  			var ossArr = [];
+          	var gridId = obj["gridId"];
+          	var target = obj["target"];
+          	var gridParam = $('#'+target).jqGrid('getGridParam','data');
+          	var customParam = [];
+          	var param = [];
+          
+          	var limit = $('.ui-pg-selbox option:selected').val();
+          	var page = $('.ui-pg-input').val();
+          	var start = (parseInt(page) * parseInt(limit)) - parseInt(limit);
+          
+          	if (parseInt(start) > 0) {
+          		for (var i=0; i<start; i++){
+          			customParam.push(gridParam[i]);
+          		}
+          	}
+          
+          	for (var i=start; i<gridParam.length; i++) {
+          		param.push(gridParam[i]);
+          	}
+          
+          	if (gridId.indexOf(",") > -1) {
+              	var gridIdArr = gridId.split(",");
+              
+              	for (var idx in gridIdArr) {
+              		for (var i=0; i<param.length; i++) {
+                  		if (param[i]["gridId"] == gridIdArr[idx]) {
+                          	for (var key in obj) {
+                              	if ("rowId" != key && "target" != key && "gridId" != key) {
+                              		param[i][key] = obj[key];
+                              	}
+                          	}
+                      	}
+                  	}
+              	}
+          	} else {
+          		for (var i=0; i<param.length; i++) {
+                  	if (param[i]["gridId"] == gridId) {
+                      	for (var key in obj) {
+                      		if ("rowId" != key && "target" != key && "gridId" != key) {
+                      			param[i][key] = obj[key];
+                          	}
+                      	}
+                  	}
+              	}
+          	}
+          
+          	var reloadParam = [];
+          	if (customParam.length > 0) {
+          		for (var i in customParam) {
+          			reloadParam.push(customParam[i]);
+          		}
+          	}
+          
+          	for (var i in param) {
+      			reloadParam.push(param[i]);
+      		}
+          
+          	$("#"+target).jqGrid('setGridParam', {data:reloadParam}).trigger('reloadGrid');
+  		} catch(e) {
+  			alertify.error([[#{msg.common.valid2}]], 0);
+  			editFlag = true;
+  		} finally {
+      		if(!editFlag){
+      			alertify.success([[#{msg.common.success}]]);
+          	}
+     	}
+  	}
+}
+
+var com_fn = {
+	tabInit : function(){
+		var prjName = [[${project.prjName}]];
+		var prjVersion = [[${project.prjVersion}]];
+		if ("" != prjVersion) prjName += "(" + prjVersion + ")";
+		var createdDate = [[${@CommonFunction.formatDateSimple(project.createdDate)}]];
+		var created = [[${project.prjUserName}]]+" "+[[${project.prjDivisionName }]]+' ('+createdDate+')';
+		
+		var bTag = document.createElement("b");
+		bTag.innerText = prjName;
+		
+		$("#prjName").html(bTag);
+		$("#creator").text(created);
+		
+		$("#tabMenuTotal").trigger("click");
+		$("#gridAreaTotal").show();
+	},
+	exeSave : function(data, target){
+		var finalData = {
+			referenceId : [[${project.prjId}]],
+			targetName : target,
+			gridData : JSON.stringify(data)
+		};
+		
+		$.ajax({
+			url : '/project/saveSecurity',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("true" == data.isValid){
+					alertify.success([[#{msg.common.success}]]);
+					saveFlag = true;
+					sec_com_evt.dataInit();
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			}
+		});
+	},
+	downloadExcel : function(target){
+		var data = {
+			"prjId" : [[${project.prjId}]],
+			"code" : target
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"security", "parameter":JSON.stringify(data)}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					if(data.validMsg == "overflow"){
+						alertify.error(getMsgMaxRowCnt(), 0);
+					} else {
+		               alertify.error([[#{msg.common.valid2}]], 0);
+					}
+			   } else {
+			       window.location = '/exceldownload/getFile?id='+data.validMsg;
+			   }
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	bulkEditChange : function(){
+		alertify.confirm([[#{msg.oss.change.bulkedit}]], function (e) {
+			if (e){
+				var obj = $("#secBulkEditForm").serializeObject();
+				obj["vulnerabilityResolution"] = $("select[name=vulnerabilityResolution] option:selected").val();
+				sec_com_fn.bulkEditDataInfo(obj, "mod");
+				com_fn.bulkEditClose();
+			} else {
+				return false;
+			}
+		});
+	},
+	bulkEditReset : function(){
+		alertify.confirm([[#{msg.project.security.check.reset}]], function (e) {
+			if (e){
+				var obj = $("#secBulkEditForm").serializeObject();
+				obj["vulnerabilityResolution"] = "Unresolved";
+				sec_com_fn.bulkEditDataInfo(obj, "reset");
+				com_fn.bulkEditClose();
+			} else {
+				return false;
+			}
+		});
+	},
+	bulkEditClose : function(){
+		$(".ajs-close").trigger("click");
+	}
+}
+
+var total = {
+	loadSecurityGrid : function(){
+		var totalList = $("#totalList");
+		totalList.jqGrid({
+			datatype: 'local',
+			data: totalMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#totalList").jqGrid('saveRow', lastsel);
+								$("#totalList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+		   	editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+			pager: '#totalListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			viewrecords: true,
+			loadonce:true,
+			sortorder: 'desc',
+			height: 'auto',
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("totalList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_totalList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+				
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = totalList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_totalList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("totalList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				tableRefreshNew("totalList");
+			}
+		});
+			
+		totalList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if (!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			}	
+		});
+			
+		totalList.jqGrid('navGrid',"#totalListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
+	},
+	save : function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('totalList');
+				var gridData = sec_com_fn.setSaveGridData('totalList');
+				com_fn.exeSave(gridData, "TOTAL");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+
+var fixed = {
+	loadSecurityGrid : function(){
+		var fixedList = $("#fixedList");
+		fixedList.jqGrid({
+			datatype: 'local',  
+			data: fixedMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#fixedList").jqGrid('saveRow', lastsel);
+								$("#fixedList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+			editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+			pager: '#fixedListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			viewrecords: true,
+			loadonce:true,
+			sortorder: 'desc',
+			height: 'auto',
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("fixedList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_fixedList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+				
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       	iCol = $.jgrid.getCellIndex($td[0]);
+			       	cm = p.colModel[iCol];
+			       
+				  	if (cm != null && cm.name === "cb") {
+					// multiselect checkbox is clicked
+			        	$self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				  	}
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = fixedList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_fixedList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("fixedList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				tableRefreshNew("fixedList");
+			}
+		});
+			
+		fixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if(!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			}	
+		});
+		
+		fixedList.jqGrid('navGrid',"#fixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
+	},
+	save : function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('fixedList');
+				var gridData = sec_com_fn.setSaveGridData('fixedList');
+				com_fn.exeSave(gridData, "FIXED");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+
+var notFixed = {
+	loadSecurityGrid : function(){
+		var notFixedList = $("#notFixedList");
+		notFixedList.jqGrid({ 
+			datatype: 'local',
+			data: notfixedMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#notFixedList").jqGrid('saveRow', lastsel);
+								$("#notFixedList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+			editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+			pager: '#notFixedListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			viewrecords: true,
+			loadonce:true,
+			sortorder: 'desc',
+			height: 'auto',
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("notFixedList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_notFixedList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+					iCol = $.jgrid.getCellIndex($td[0]);
+				    cm = p.colModel[iCol];
+				       
+				    if (cm != null && cm.name === "cb") {
+				    	// multiselect checkbox is clicked
+				        $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				  	}
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = notFixedList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_notFixedList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("notFixedList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				tableRefreshNew("notFixedList");
+			}
+		});
+		
+		notFixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if(!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			}	
+		});
+		
+		notFixedList.jqGrid('navGrid',"#notFixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
+	},
+	save: function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('notFixedList');
+				var gridData = sec_com_fn.setSaveGridData('notFixedList');
+				com_fn.exeSave(gridData, "NOTFIXED");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+</script>
+</th:block>
