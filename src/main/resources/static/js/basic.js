@@ -2970,9 +2970,6 @@ var callDeleteTabInFrame = function (uniqueName) {
     parent.postMessage(JSON.stringify(data), "*");
 }
 
-/**
- * Jqgrid resizing Utility & Options
- * */
 $(window).load(function () {
     resizingJqGidSet();
     resizingInnerJqGidSet();

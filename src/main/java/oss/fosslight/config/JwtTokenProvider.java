@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,12 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.InvalidKeyException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -204,7 +199,10 @@ public class JwtTokenProvider {
             log.warn("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
             log.warn("JWT claims string is empty.");
-        }
+        } catch (NullPointerException e){
+			log.error("JWT Claims is invalid.");
+		}
+
 		return false;
 	}
 	

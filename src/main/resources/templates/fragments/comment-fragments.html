@@ -10,15 +10,22 @@
                         <th:block th:each="comment, status : ${commentList}">
                             <tr>
                                 <td>
+                                    <span class="mb-1">
+                                        <span th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}" class="badge badge-carrot mb-1" >
+                                            [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv)}]]
+                                        </span>
+                                         <span th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}" class="badge badge-ivory mb-1" >
+                                            [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv)}]]
+                                        </span>
+                                    </span>
                                     <div class="post">
                                         <div class="user-block">
-									<span class="username">
-									  <a href="#">[[ ${comment.loginUserName} ]]</a>
-									</span>
+                                            <span class="username">
+                                              <a href="#" th:text="${comment.creator}"></a>
+                                            </span>
                                             <span class="description ml-0" th:text="${comment.createdDate}"></span>
                                         </div>
-                                        <p th:utext="${comment.contents}">
-                                        </p>
+                                        <div th:utext="${comment.contents}"></div>
                                     </div>
                                 </td>
                                 <td class="text-right py-0 align-middle">
@@ -39,7 +46,7 @@
                 </div>
             </th:block>
             <th:block th:if="${#lists.isEmpty(commentList)}">
-                <div class="col-md-12">
+                <div class="col-md-12 mt-3">
                     <strong class="text-lg-gray">No comments were registered.</strong>
                 </div>
             </th:block>
@@ -74,7 +81,6 @@
                             <span class="text-lg-gray text-smaller mx-1">
                                     <span class="badge badge-primary text-md" style="width: 1.5rem">B</span>
                                     <span class="badge badge-warning text-md" style="width: 1.5rem">I</span>
-
                                 <span class="badge badge-info text-md callOpener"
                                       style="width: 1.5rem; cursor: pointer;" id="packaging"
                                       th:if="${#strings.equals(project?.identificationStatus, 'CONF') && not #strings.equals(project?.verificationStatus, 'NA')}">P</span>
@@ -174,9 +180,9 @@
                     var paramId = "";
 
                     if ([[${basicInfo.referenceDiv}]] == 'prj') {
-                        paramId = [[${project?.prjId}]];
+                        paramId = [[ ${project?.prjId} ]];
                     } else if ([[${basicInfo.referenceDiv}]] == '3rd') {
-                        paramId = [[${partner?.partnerId}]];
+                        paramId = [[ ${partner?.partnerId} ]];
                     }
 
                     opener.moveTabInFrameByCommentPopup2(paramId, $(this).attr('id'));
@@ -208,12 +214,12 @@
                         });
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
-                        alertify.error([[ #{msg.common.valid2}]], 0);
+                        alertify.error([[ #{msg.common.valid2} ]], 0);
                     }
                 });
             },
             deleteComment: function (_commId) {
-                if (!confirm(String([[#{msg.oss.confirm.delete.comment}]]))) {
+                if (!confirm(String([[#{msg.oss.confirm.delete.comment} ]]))) {
                     return;
                 }
 
@@ -221,7 +227,7 @@
                     alertify.error(String([[ #{msg.common.success}]]));
                     fn_comment.getCommentList();
                 }, function () {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 });
             },
             getMoreCommentList: function () {
@@ -235,7 +241,7 @@
                         $('#commentListArea').append(data);
                     },
                     error: function () {
-                        alertify.error([[ #{msg.common.valid2}]], 0);
+                        alertify.error([[ #{msg.common.valid2} ]], 0);
                     }
                 });
             },
@@ -273,9 +279,9 @@
                 };
 
                 postAjaxData(param, "/comment/updateComment", "json", function () {
-                    alertify.success(String([[ #{msg.common.success}]]), 0);
+                    alertify.success(String([[ #{msg.common.success} ]]), 0);
                 }, function () {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
                 }, function () {
                     fn_comment.getCommentList();
                 });
@@ -289,7 +295,7 @@
         <div class="row mt-2">
             <div class="col-12">
                 <input type="hidden" id="modifiedCommentId" th:value="${commId}">
-                <input type="hidden" id="contents"  th:value="${contents}">
+                <input type="hidden" id="contents" th:value="${contents}">
                 <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
             </div>
         </div>
@@ -299,7 +305,7 @@
     <div class="comment-popup">
         <div class="row mt-2">
             <div class="col-12">
-                <input type="hidden" id="contents"  th:value="${contents}">
+                <input type="hidden" id="contents" th:value="${contents}">
                 <textarea class="form-control" id="modifiedCommentInPjtEditor" name="commentInput" rows="3" style="margin:0 auto;"></textarea>
                 <div class="row">
                     <div class="col-12 my-2">

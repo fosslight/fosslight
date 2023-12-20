@@ -97,6 +97,7 @@ console.log("dgjkdjslagjl")
             },
             onValidSuccess: function (json, status) {
                 if (json.isValid == 'false') {
+                    createValidMsgComplex(json);
                     alertify.error(String([[ #{msg.common.valid} ]]), 0);
                 } else if (json.isValid == 'true') {
                     loading.show();

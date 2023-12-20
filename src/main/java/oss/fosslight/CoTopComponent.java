@@ -156,8 +156,11 @@ public class CoTopComponent {
     
     protected static boolean isLogin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (auth != null && !"anonymousUser".equalsIgnoreCase(auth.getName()) && auth.isAuthenticated()) { 
+
+		String name =auth.getName();
+		boolean af = auth.isAuthenticated();
+
+		if (auth != null && !"anonymousUser".equalsIgnoreCase(auth.getName()) && auth.isAuthenticated()) {
         	return true;
         }
         

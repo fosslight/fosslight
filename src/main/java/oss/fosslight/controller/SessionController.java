@@ -57,9 +57,9 @@ public class SessionController extends CoTopComponent{
     
 	@GetMapping(value = SESSION.LOGIN, produces = "text/html; charset=utf-8")
 	public String user(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		if (isLogin()) {
+		//if (isLogin()) {
 			res.sendRedirect(req.getContextPath() + "/index");
-		}
+		//}
 		
 		/* 
 			TODO - 추후 특정 이슈가 발생하여 server를 일정기간 Server를 내릴때 해당 기능 사용
@@ -83,7 +83,8 @@ public class SessionController extends CoTopComponent{
 			}
 		*/
 		
-		return "session/login";
+		// return "session/login";
+		return null;
 	}
 	
 	@PostMapping(value = {"/session/login-proc"})

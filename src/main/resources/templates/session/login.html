@@ -50,7 +50,7 @@
                         location.href = "/index?lang=" + res.resultData.locale;
                         return;
                     }
-                }, onError);
+                }, alertify.error([[#{msg.common.valid}]]));
         },
         setSaveIdChecked() {
             const userInputId = getCookie("userInputId");
@@ -110,7 +110,7 @@
             hideErrMsg();
 
             if ("false" == json.isValid) {
-                alertify.error([[ #{msg.common.valid} ]]);
+                alertify.error([[#{msg.common.valid}]]);
 
                 $('.retxt').text('');
 

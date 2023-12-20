@@ -104,6 +104,6 @@ public class BinaryDataController extends CoTopComponent  {
 			, Model model) throws Exception{
 		
 		model.addAttribute("batInfo", vo);
-		return Url.TILES_ROOT + "/binary/binarypopup";
+		return "/binary/binarypopup";
 	}	
 }
