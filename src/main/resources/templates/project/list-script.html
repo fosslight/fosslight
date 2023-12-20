@@ -51,18 +51,15 @@ var gridTooltip = {
 var evt = {
 	init : function(){
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
-		
+		console.log([[${searchBeana}]]);
 		$('select[name=networkServerType]').select2({placeholder: "Restriction", allowClear: true});
-		if ([[${{searchBean.distributionType}}]] != null) $('select[name=networkServerType]').val([[${{searchBean.distributionType}}]]).prop("selected", true);
-		
-		$('select[name=distributionType]').select2({placeholder: "Distribution Type", allowClear: true});
-		if ([[${{searchBean.distributionType}}]] != null) $('select[name=distributionType]').val([[${{searchBean.distributionType}}]]).prop("selected", true);
+		if ([[${searchBean != null}]] && [[${searchBean.networkServerType}]] != null) $('select[name=networkServerType]').val([[${searchBean.networkServerType}]]).prop("selected", true);
 		
 		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
-		if ([[${{searchBean.prjDivision}}]] != null) $('select[name=prjDivision]').val([[${{searchBean.prjDivision}}]]).prop("selected", true);
+		if ([[${searchBean != null}]] && [[${searchBean.prjDivision}]] != null) $('select[name=prjDivision]').val([[${searchBean.prjDivision}]]).prop("selected", true);
 		
 		$('select[name=priority]').select2({placeholder: "Priority", allowClear: true});
-		if ([[${{searchBean.priority}}]] != null) $('select[name=priority]').val([[${{searchBean.priority}}]]).prop("selected", true);
+		if ([[${searchBean != null}]] && [[${searchBean.priority}]] != null) $('select[name=priority]').val([[${searchBean.priority}]]).prop("selected", true);
 		
 		$('#division').select2({placeholder: "Division", allowClear: true});
 		$('#statuses').select2({placeholder: "Status", allowClear: true});
@@ -76,14 +73,6 @@ var evt = {
 			var postData = fn.setGridParam();
 			
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
-		});
-		
-		$('#popCancel').click(function(){
-			$('#changeStatusPop').hide();
-		});
-
-		$('#popChangeStatus').on('click', function(){
-			fn.changeStatusProc();
 		});
 		
 		$(".cal").on("keyup", function(e){
@@ -761,7 +750,7 @@ var fn = {
 //		if(parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
 //		} else {
-//			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 //		}
 	},
 	// Grid distribution display event
@@ -769,7 +758,7 @@ var fn = {
 //		if(parseInt(permission) > 0){
 //			createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
 //		} else {
-//			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 //		}
 	},
 	// Grid reviewer change event
@@ -793,10 +782,10 @@ var fn = {
 				$("#list").jqGrid('saveRow',prjId);
 				$("#list").jqGrid('setCell', prjId, "reviewer", reviewer);
 				
-				alertify.success('<spring:message code="msg.common.success" />');
+				alertify.success([[#{msg.common.success}]]);
 			},
 			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		})
 	},
@@ -843,17 +832,17 @@ var fn = {
 				contentType : 'application/json',
 				success: function (data) {
 					if("false" == data.isValid) {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					} else {
 						window.location =  '/exceldownload/getFile?id='+data.validMsg;
 					}
 				},
 				error: function(data){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 		}
 	},
 	downloadNotice : function(obj, permission){
@@ -863,7 +852,7 @@ var fn = {
 			//파일 이름 임시
 			location.href = '/project/verification/downloadNotice?prjId='+prjId;
 		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 		}
 	},
 	downloadReviewReport : function(obj, permission){
@@ -872,7 +861,7 @@ var fn = {
 
 			location.href = '/project/verification/downloadReviewReport?prjId='+prjId;
 		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 		}
 	},
 	downloadPackage : function(obj, permission){
@@ -881,7 +870,7 @@ var fn = {
 			
 			location.href = '/project/verification/downloadPackage?prjId='+prjId;
 		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 		}
 	},
 	downloadPackageMulti : function(obj, fileIdx, permission){
@@ -890,7 +879,7 @@ var fn = {
 			
 			location.href = '/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx;
 		} else {
-			alertify.alert('<spring:message code="msg.project.check.division.permissions" />', function(){});
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
 		}
 	},
 	setGridParam : function(){
@@ -942,21 +931,48 @@ var fn = {
 				var rtnParameter = {};
 				
 				$.ajax({
-					url : '/project/getProjectStatus',
+					url : '/project/getProjectChangeView/status',
 					type : 'POST',
 					data : JSON.stringify({"prjId" : prjId}),
-					dataType : 'json',
+					dataType : 'html',
 					cache : false,
 					contentType : 'application/json',
-					success: function(data){
-						var distributionStatus = data.distributionStatus;
-						
-						if((distributionStatus||"").toUpperCase() == "PROC"){
-							alertify.alert([[#{msg.project.distribution.loading}]], function(){});
-							return false;
+					success: function(res){
+						if ("" == res) {
+							alertify.alert([[#{msg.project.distribution.loading}]], function(){}).set('resizable', true).resizeTo('600', '210');
+ 							return false;
+						} else {
+							if(!alertify.changeStatus){
+								alertify.dialog('changeStatus', function() {
+									var settings;
+									
+									return {
+										setup: function() {
+											var settings = alertify.confirm().settings;
+											
+											for (var prop in settings) {
+												this.settings[prop] = settings[prop];
+											}
+											
+											var setup = alertify.confirm().setup();
+											setup.buttons = [];
+											setup.focus.element = 1;
+											
+											return setup;
+										},
+										settings: {
+											oncontinue: null
+										},
+										callback: function(closeEvent) {
+											alertify.confirm().callback.call(this, closeEvent);
+										}
+									};
+								}, false, 'confirm');
+		                	}
+							
+							alertify.changeStatus(res).set('title', 'Change Status').set('resizable', true).resizeTo('650', '610');
+							fn.showChangeStatus();
 						}
-						
-						fn.showChangeStatus(data);
 					},
 					error: function(data){
 						alertify.error([[#{msg.common.valid2}]], 0);
@@ -979,21 +995,15 @@ var fn = {
 //			}
 		}
 	},
-	showChangeStatus : function(paramObj){
-		var projectStatus = (paramObj.projectStatus||"").toUpperCase();
-		var identificationStatus = (paramObj.identificationStatus||"").toUpperCase();
-		var verificationStatus = (paramObj.verificationStatus||"").toUpperCase();
-		var distributionStatus = (paramObj.distributionStatus||"").toUpperCase();
-		var completeFlag = paramObj.completeFlag == "Y";
-		var dropFlag = paramObj.dropFlag == "Y";
-		var commId = paramObj.commId;
-		var viewOnlyFlag = paramObj.viewOnlyFlag;
-
-		$("#identificationStatus").val(identificationStatus);
-		$("#distributionStatus").val(distributionStatus);
-		$("#completeFlag").val(paramObj.completeFlag);
-		$("#dropFlag").val(paramObj.dropFlag);
-		$("#commId").val(commId);
+	showChangeStatus : function(){
+		var projectStatus = $("#projectStatus").val();
+		var identificationStatus = $("#identificationStatus").val();
+		var verificationStatus = $("#verificationStatus").val();
+		var distributionStatus = $("#distributionStatus").val();
+		var completeFlag = $("#completeFlag").val() == "Y";
+		var dropFlag = $("#dropFlag").val() == "Y";
+		var commId = $("#commId").val();
+		var viewOnlyFlag = $("#viewOnlyFlag").val();
 
 		$("#CSIdentification > input[type=radio]").attr("disabled", false);
 		$("#CSDrop > input[type=radio]").attr("disabled", false);
@@ -1031,11 +1041,9 @@ var fn = {
 			$("#CSDrop > input[type=radio]").attr("disabled", true);
 			$("#CSDelete > input[type=radio]").attr("disabled", true);
 		}
-		
-		$("#changeStatusPop").show();
 	},
-	changeStatusProc : function(){
-		$("#reason").next(".retxt").hide(); // required reset
+	changeStatusProc : function(){console.log("changeStatusProc");
+		$("#warningMsg").hide(); // required reset
 		
 		var prjId = $("#list").getGridParam("selrow");
 		var rowData = $("#list").getRowData(prjId);
@@ -1046,21 +1054,18 @@ var fn = {
 		var completeFlag = $("#completeFlag").val();
 		var dropFlag = $("#dropFlag").val();
 		var commentFlag = true;
-
+		
 		var authority = "*${sessUserInfo.authority}";
 		if("ROLE_ADMIN" == authority) {
 			if(changeSeq == 1 || changeSeq == 4) {
 				commentFlag = false;
 			}
 		}
-
+		
 		if(commentFlag && reason.split(" ").join("") == "") {
-			alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
-			$("#reason").next(".retxt").show();
-			return false;
-		}
-
-		switch(changeSeq){
+			$("#warningMsg").show();
+		} else {
+			switch(changeSeq){
 			case "1": // restart identification
 				var param = {
 					"prjId" : prjId
@@ -1111,7 +1116,7 @@ var fn = {
 						
 					param["delOsdd"] = "Y"; // -> delete with OSDD
 
-					var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
 					alertify.confirm(dropMessage, function (e) {
 						if (e) {
@@ -1121,7 +1126,7 @@ var fn = {
 						}
 					});
 				}else if (distributionStatus == "RSV"){
-					var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
 					alertify.confirm(dropMessage, function (e) {
 						if (e) {
@@ -1173,6 +1178,7 @@ var fn = {
 			default:
 				break;
 		}
+		}
 	},
 	projectDelete : function(data){
 		var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
@@ -1188,7 +1194,7 @@ var fn = {
 				reloadTabInframe('/project/list');
 			},
 			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	},
@@ -1208,7 +1214,7 @@ var fn = {
 				}
 			},
 			error : function(){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	},
@@ -1226,10 +1232,11 @@ var fn = {
 				reloadTabInframe('/project/list');
 			},
 			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-	}, bomCompare : function(){ /* BOM Compare ADD */
+	}, 
+	bomCompare : function(){ /* BOM Compare ADD */
 		// 체크박스 선택 체크
 		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 	
@@ -1262,15 +1269,17 @@ var fn = {
 	
 			createTabInFrame(tabNm, tabLk);
 		}else {
-			alertify.alert('<spring:message code="msg.project.choose" />', function(){});
+			alertify.alert([[#{msg.project.choose}]], function(){});
 			return false;
 		}
-	}, reqToOpenUser : function(data) { /* role_user 실행 시 */
+	}, 
+	reqToOpenUser : function(data) { /* role_user 실행 시 */
 		var commentsMode = data.commId != "" ? "update" : "insert";
 		var param = {"referenceId" : data.prjId, "contents" : data.userComment, "referenceDiv" : "10", "commId" : data.commId, "commentsMode" : commentsMode};
 		
 		fn.commentsSave(param);
-	}, commentsSave : function(data){
+	}, 
+	commentsSave : function(data){
 		$.ajax({
 			url : '/project/commentsSave',
 			type : 'POST',
@@ -1279,35 +1288,75 @@ var fn = {
 			data : data,
 			success : function(json){
 				if(json.isValid == 'false'){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
-					alertify.alert('<spring:message code="msg.common.success" />', function(){
+					alertify.alert([[#{msg.common.success}]], function(){
 						reloadTabInframe('/project/list');
 						activeTabInFrameList("PROJECT");
 					});
 				}
 			},
 			error : function(){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-	}, changeDivision : function(){
+	}, 
+	changeDivision : function(){
 		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 
 		if(chk > 0){
-			$("#changeDivisionSelect").find("strong").text($("#changeDivisionPop select[name=division] option:first").text());
-			$("#changeDivisionPop").show();
+			$.ajax({
+				url : '/project/getProjectChangeView/division',
+				type : 'POST',
+				data : JSON.stringify({"prjId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeDivision){
+						alertify.dialog('changeDivision', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeDivision(res).set('title', 'Change Division').set('resizable', true).resizeTo('650', '306');
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
 		} else {
 			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
 		}
-	}, changeDivisionSave : function(){
+	}, 
+	changeDivisionSave : function(){
 		var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
-		var division = $("#changeDivisionPop select[name=division]").val();
+		var division = $("select[name=projectChangeDivision] option:selected").val();
 
-		alertify.confirm('<spring:message code="msg.common.change.division" />', function (e) {
+		alertify.confirm([[#{msg.common.change.division}]], function (e) {
 			if (e) {
-				$('#changeDivisionPop').hide();
-				
 				$.ajax({
 					type: 'POST',
 					url :'/project/updateProjectDivision',
@@ -1315,7 +1364,7 @@ var fn = {
 					contentType : 'application/json',
 					success: function (data) {
 						if("true" == data.isValid){
-							alertify.alert('<spring:message code="msg.common.success" />', function(){
+							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								activeTabInFrameList("PROJECT");
 							});
@@ -1323,7 +1372,7 @@ var fn = {
 							var list = [];
 							list = data.resultData;
 							
-							var msg = '<spring:message code="msg.project.check.division.permissions" />';
+							var msg = [[#{msg.project.check.division.permissions}]];
 							msg += '<br/> - '
 
 							for(var i=0; i<list.length; i++){
@@ -1333,22 +1382,24 @@ var fn = {
 								}
 							}
 							
-							alertify.alert(msg, function(){});
+							alertify.alert(msg, function(){
+								fn.closeAlertify();
+							});
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			} else {
 				return false;
 			}
 		});
-	}, changeDivisionCancel : function(){
-		$('#changeDivisionPop').hide();
-	}, toolTipDoubleclick: function () {
+	}, 
+	toolTipDoubleclick: function () {
     	return 'title="' + "Double click" + '"';
-    }, mvSecurityTab : function(prjId){
+    }, 
+    mvSecurityTab : function(prjId){
 		createTabInFrame(prjId+'_Security', '/project/security/'+prjId+'');
 	},
 	change : function(obj) {
@@ -1363,9 +1414,50 @@ var fn = {
 	changeWatcher : function() {
 		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 		if(chk > 0){
-			$("#changeWatcherPop").show();
+			$.ajax({
+				url : '/project/getProjectChangeView/watcher',
+				type : 'POST',
+				data : JSON.stringify({"prjId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeWatcher){
+						alertify.dialog('changeWatcher', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeWatcher(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '385');
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
 		} else {
-			alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
 		}
 	},
 	changeWatcherCanCel : function() {
@@ -1373,7 +1465,7 @@ var fn = {
 	},
 	changeWatcherAdd : function() {
 		if (changeWatcherArr.length == 0) {
-			alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
 			return false;
 		}
 		
@@ -1384,15 +1476,15 @@ var fn = {
 		
 		for (var i in prjIds) {
 			var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
-			if ("1" == gridData.statusPermission) {
+//			if ("1" == gridData.statusPermission) {
 				permissionPrjIds.push(prjIds[i]);
-			} else {
-				notPermissionPrjIds.push(prjIds[i]);
-			}
+//			} else {
+//				notPermissionPrjIds.push(prjIds[i]);
+//			}
 		}
 		
 		if (notPermissionPrjIds.length > 0) {
-			msg = '<spring:message code="msg.project.check.division.permissions" />';
+			msg = [[#{msg.project.check.division.permissions}]];
 			msg += '<br/> - '
 			for (var i in notPermissionPrjIds) {
 				msg += 'PRJ-' + notPermissionPrjIds[i];
@@ -1402,12 +1494,12 @@ var fn = {
 			}
 		}
 		
-		if (permissionPrjIds.length == 0) {
-			alertify.alert(msg, function(){});
-			return false;
-		}
+//		if (permissionPrjIds.length == 0) {
+//			alertify.alert(msg, function(){});
+//			return false;
+//		}
 		
-		alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
 				var data = {"prjIds" : permissionPrjIds, "changeWatcherList" : changeWatcherArr};
 				
@@ -1421,16 +1513,16 @@ var fn = {
 					success: function(resultData){
 						if(resultData.isValid == "true") {
 							if ("" == msg) {
-								alertify.success('<spring:message code="msg.common.success" />');
+								alertify.success([[#{msg.common.success}]]);
 							} else {
 								alertify.alert(msg, function(){});
 							}
 						} else {
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 				
@@ -1441,10 +1533,10 @@ var fn = {
 		});
 	},
 	changeWatcherDelete : function() {
-		alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
 				if (changeWatcherArr.length == 0) {
-					alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
 					return false;
 				}
 				
@@ -1460,13 +1552,13 @@ var fn = {
 					contentType : 'application/json',
 					success: function(resultData){
 						if(resultData.isValid == "true") {
-							alertify.success('<spring:message code="msg.common.success" />');
+							alertify.success([[#{msg.common.success}]]);
 						} else {
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 				
@@ -1498,7 +1590,7 @@ var fn = {
 				$('#prjUserId').change();
 			},
 			error : function(){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	},
@@ -1514,7 +1606,7 @@ var fn = {
 			userTxt		= $userSel.find("option[value='"+userVal+"']").text();
 
 		if(divVal == "" || userVal == "") {
-			return alertify.error('<spring:message code="msg.project.required.selectDivision" />', 0);
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
 		}
 		
 		var isNew = true;
@@ -1541,7 +1633,7 @@ var fn = {
 		if(isNew) {
 			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
 			fn.addWatcherData(divVal, userVal, '');
-				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
 		}
 	},
 	addWatcherData : function (uDiv, uId, uEmail) {
@@ -1551,7 +1643,7 @@ var fn = {
 		dataObj["prjEmail"] = uEmail;
 		changeWatcherArr.push(dataObj);
 	},
-	removeWatcher : function (uDiv, uId) {
+	removeWatcher : function (uDiv, uId, obj) {
 		var uEmail = "";
 		if("Email" == uId) {
 			uEmail = uDiv;
@@ -1560,25 +1652,22 @@ var fn = {
 		}
 		
 		changeWatcherArr.forEach(function(cur, index){
-			var obj = cur;
-			if (uId === obj["prjUserId"] && uDiv === obj["prjDivision"] && uEmail === obj["prjEmail"]) {
+			var object = cur;
+			if (uId === object["prjUserId"] && uDiv === object["prjDivision"] && uEmail === object["prjEmail"]) {
+				$(obj).parent().remove();
 				changeWatcherArr.splice(index, 1);
 			}
 		});
 	},
 	addHtml : function(target, str, division, userId){
-		var viewOnlyFlag = "*${project.viewOnlyFlag}";
 		var rlt = division+((userId!="") ? "/"+userId : "");
-		var html  = '<span id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;';
-		html += '<strong>'+str+'</strong>';
-		if("Y" != viewOnlyFlag) {
-			html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
+		var html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		html += str;
+		if("Y" != [[${searchBean.viewOnlyFlag}]]) {
+			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
+		html += '</div>';
 		target.append(html);
-
-		$('div.multiTxtSet2 .smallDelete').on('click', function(){
-			$(this).parent().remove();
-		});
 	},
 	addEmail : function() {
 		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
@@ -1627,7 +1716,7 @@ var fn = {
 				changeWatcherArr.push(obj);
 			},
 			error: function(data){
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 		
@@ -1650,12 +1739,12 @@ var fn = {
 	},
 	chkListValidation : function(listKind, listId){
 		if(listKind == ""){
-			alertify.error('<spring:message code="msg.project.watcher.selectlist" />', 0);
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
 			return false;
 		}
 		
 		if(listId == ""){
-			alertify.error('<spring:message code="msg.project.watcher.required.copyid" />', 0);
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
 			return false;
 		}
 		
@@ -1758,7 +1847,7 @@ var fn = {
 	},
 	checkChar : function(){
 		if(event.keyCode == 64){//@ 특수문자 체크
-			alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
+			alertify.alert([[#{msg.login.check.char}]], function(){});
     		
 			event.returnValue = false;
     	}
@@ -1775,8 +1864,10 @@ var fn = {
 		$("select[name=prjDomain]").val("").trigger('change');
 		$("select[name=listKind]").val("").trigger('change');
 		$("input[name=listId]").val("");
-		$('#changeWatcherPop').hide();
-		$("#ChangeList").hide();
+		fn.closeAlertify();
+	},
+	closeAlertify : function() {
+		$(".ajs-close").trigger("click");
 	}
 };
 
@@ -1893,7 +1984,7 @@ var list = {
 					var diffNum = +startDate - +endDate;
 					
 					if(diffNum > 0 && endDate > 0){
-						alertify.alert('<spring:message code="msg.common.search.check.date" />', function(){});
+						alertify.alert([[#{msg.common.search.check.date}]], function(){});
 					}
 				}
 				

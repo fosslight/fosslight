@@ -611,7 +611,6 @@
 			var rlt = division+((userId!="") ? "/"+userId : "");
 			var html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 			html += str;
-			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 			if([[${project.viewOnlyFlag}]] != "Y") {
 				html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 			}

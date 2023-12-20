@@ -357,6 +357,7 @@ public final class Url {
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
 		public static final String BOM_COMPARE_LIST_AJAX = PATH + "/bomCompare/listAjax";
 		
+		public static final String PROJECT_CHANGE_VIEW = PATH + "/getProjectChangeView/{code}";
 		public static final String PROJECT_STATUS = PATH + "/getProjectStatus";
 		public static final String PROJECT_BINARY_FILE = PATH + "/getProjectBinaryFile";
 		public static final String PROJECT_BINARY_DB_SAVE = PATH + "/binaryDBSave";

@@ -164,7 +164,7 @@ public class ProjectController extends CoTopComponent {
 				searchBean.setRefPartnerId(defaultSearchRefPartnerId);
 			}
 		} else {
-			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 				deleteSession(SESSION_KEY_SEARCH);
 				
 				searchBean = searchService.getProjectSearchFilter(loginUserName());
@@ -4591,6 +4591,34 @@ public class ProjectController extends CoTopComponent {
 		}
 	}
 
+	@PostMapping(value=PROJECT.PROJECT_CHANGE_VIEW)
+	public String getProjectChangeView(@RequestBody Project project, @PathVariable String code, HttpServletRequest req, HttpServletResponse res, Model model) {
+		if (code.equals("status")) {
+			Map<String, String> map = new HashMap<String, String>();
+			Project prjBean = projectService.getProjectDetail(project);
+			String distributionStatus = avoidNull(prjBean.getDestributionStatus()).toUpperCase();
+			
+			map.put("projectStatus", avoidNull(prjBean.getStatus()).toUpperCase());
+			map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()).toUpperCase());
+			map.put("verificationStatus", avoidNull(prjBean.getVerificationStatus()).toUpperCase());
+			map.put("distributionStatus", distributionStatus);
+			map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
+			map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
+			map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
+			map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
+			map.put("commId", avoidNull(prjBean.getCommId(), ""));
+			map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
+			
+			if (distributionStatus.equals("PROC")) {
+				code = "false";
+			}
+			
+			model.addAttribute("status", map);
+		}
+		model.addAttribute("code", code);
+		return "project/view/projectChangeView";
+	}
+	
 	@PostMapping(value=PROJECT.PROJECT_STATUS)
 	public @ResponseBody ResponseEntity<Object> getProjectStatus(@RequestBody Project project, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
@@ -4895,7 +4923,7 @@ public class ProjectController extends CoTopComponent {
 	
 	@PostMapping(value=PROJECT.SEC_BULK_EDIT_POPUP)
 	public String securityBulkEditPopup(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "project/view/bulkEditPopup";
+		return "project/view/bulkEditView";
 	}
 	
 	@GetMapping(value = PROJECT.SECURITY)
