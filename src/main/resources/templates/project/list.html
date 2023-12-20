@@ -95,16 +95,6 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-4">
-                                            	<div class="form-group">
-                                                    <select class="form-control select2" name="distributionType" style="width: 100%;">
-                                                    	<option th:value="''" ></option>
-                                                    	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                                    	</th:block>
-                                                    </select>
-                                                </div>
-                                            </div>
                                             <div class="col-4">
                                                 <div class="form-group">
                                                 	<div class="input-group">
@@ -122,8 +112,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <select class="form-control select2" name="priority" style="width: 100%;">
@@ -144,22 +132,22 @@
                     <div class="row px-1">
                         <div class="col-md-6">
                             <div class="row">
-                            	<button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.copy()|">Copy</button>
+                            	<button type="button" class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.copy()|" th:text="Copy"></button>
                             	<div id="ChangeContainer" class="inblock" style="vertical-align:top; position: relative;">
 									<input type="button" value="Change" class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.change(this)|"/>
-									<div id="ChangeList" class="w100 tright" style="display: none; position: absolute; z-index: 1; left: 0; text-align:left;">
-										<a th:onclick="|fn.checkProjectStatus()|" style="display: block;">Status</a>
-										<a th:onclick="|fn.changeDivision()|" style="display: block;">Division</a>
-										<a th:onclick="|fn.changeWatcher()|" style="display: block;">Watcher</a>
+									<div id="ChangeList" class="width-6rem tright" style="display: none; position: absolute; z-index: 1; left: 0; text-align:left;">
+										<a th:onclick="|fn.checkProjectStatus()|" style="display: block; font-size: .8rem;" th:text="Status"></a>
+										<a th:onclick="|fn.changeDivision()|" style="display: block; font-size: .8rem;" th:text="Division"></a>
+										<a th:onclick="|fn.changeWatcher()|" style="display: block; font-size: .8rem;" th:text="Watcher"></a>
 									</div>
 								</div>
-                            	<button type="button" class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|">BOM Compare</button>
+                            	<button type="button" class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" th:onclick="|createTabInFrame('New-Project', '/project/edit')|" th:text="'BOM Compare'"></button>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="row float-right">
-                            	<button type="button" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3">Add</button>
-                           		<button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|">Export</button>
+                            	<button type="button" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3" th:text="Add"></button>
+                           		<button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|" th:text="Export"></button>
                             </div>
                         </div>
                     </div>
@@ -167,138 +155,13 @@
                     <div class="row">
                         <div class="col-12 mt-3" style="overflow-x: scroll;">
                             <div class="col-sm-12 jqGridSet">
-                                <table id="list">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
+                                <table id="list"><tr><td></td></tr></table>
                                 <div id="pager"></div>
                             </div>
                         </div>
                     </div>
             </section>
         </div>
-        
-        <!-- Popup -->
-		<div id="changeStatusPop" class="pop changeStatusPop">
-			<h1 class="orange">Change Status</h1>
-			<div class="popdata">
-				<input type="hidden" id="identificationStatus" />
-				<input type="hidden" id="verificationStatus" />
-				<input type="hidden" id="distributionStatus" />
-				<input type="hidden" id="completeFlag" />
-				<input type="hidden" id="dropFlag" />
-				<input type="hidden" id="commId"/>
-				<div class="radioSet" id="CSIdentification"><input type="radio" id="r1" name="radioName" value="1"><label for="r1">Restart Identification</label></div>
-				<div class="radioSet mt10" id="CSDrop"><input type="radio" id="r2" name="radioName" value="2"><label for="r2">Drop</label></div>
-				<div class="radioSet mt10" id="CSDelete"><input type="radio" id="r3" name="radioName" value="3"><label for="r3">Delete</label></div>
-				<div th:if="${#strings.equals(@CommonFunction.isAdmin(), 'true')}" class="radioSet mt10" id="CSComplete"><input type="radio" id="r4" name="radioName" value="4"><label for="r4">Complete</label></div>
-				<div class="taSet required mt20">
-					<label for="t1">Caused by</label>
-					<textarea id="reason" rows="8"></textarea>
-					<div class="retxt">This field is required.</div>
-				</div>
-			</div>
-			<div class="pbtn">
-				<input id="popCancel" type="button" value="Cancel" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" />
-				<input id="popChangeStatus" type="button" value="OK" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3" />
-			</div>
-		</div>
-		<!-- //Popup -->
-		
-		<!-- Popup -->
-		<div id="changeDivisionPop" class="pop changeDivisionPop">
-			<h1 class="orange">Change Division</h1>
-			<div class="popdata">
-				<div class="mtb20">
-					<label>Division</label>
-					<span id="changeDivisionSelect" class="selectSet" style="width: 200px;">
-						<strong title="Division selected value"></strong>
-						<select name="division">
-							<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-								<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-							</th:block>
-						</select>
-					</span>	
-				</div>
-			</div>
-			<div class="pbtn">
-				<input type="button" value="Cancel" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.changeDivisionCancel()|"/>
-				<input type="button" value="OK" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.changeDivisionSave()|"/>
-			</div>
-		</div>
-		<!-- //Popup -->
-		
-			<!-- Popup -->
-			<div id="changeWatcherPop" class="pop changeWatcherPop" style="left:35%;">
-				<h1 class="orange">Change Watcher</h1>
-				<div class="popdata">
-					<div class="tbws1 w900 mt10">
-						<table class="dCase">
-							<tr>
-								<th class="dCase" th:text="#{msg.common.field.watcher}"></th>
-								<td class="dCase">
-									<div class="pb5">
-										<span class="selectSet w200">
-											<strong for="prjDivision" title="Watcher part selected value" th:text="'Select Division'"></strong>
-											<select class="select2" id="prjDivision" name="prjDivision" th:onchange="|fn.selectDivision()|" style="width: 100%;">
-												<option th:value="''"></option>
-												<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-													<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-												</th:block>
-											</select>
-										</span>
-										<span class="selectSet w500">
-											<select id="prjUserId" name="prjUserId">
-										</span>
-										<input type="button" value="+ Add" class="btnCLight gray" th:onclick="|fn.addWatcherClick()|"/>
-									</div>
-									<div class="pb5">
-										<span><input type="text" id="adId" name="adId" style="width:200px" placeholder="Input AD ID" th:onKeypress="|fn.checkChar()|" /></span>
-										<th:block th:with="useDomainFlag=${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}"></th:block>
-										<th:block th:if="${userDomainFlag != null && !#strings.isEmpty(useDomainFlag)}">
-											<span class="selectSet w220">
-												<strong for="domain" title="Watcher domain selected value" th:text="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"></strong>
-												<select id="domain" name="domain">
-													<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
-														<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-													</th:block>
-												</select>
-											</span>
-											<input type="text" id="emailTemp" class="w220" th:style="${useDomainFlag != null && !#strings.isEmpty(useDomainFlag) ? 'display:none'}" 
-													th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}" th:onKeypress="|fn.CheckChar()|"  placeholder="Input your Email Domain" />
-										</th:block>
-										<th:block th:if="${userDomainFlag == null || #strings.isEmpty(useDomainFlag)}">
-											<span class="pd5">@</span>
-											<input type="text" id="emailTemp" style="width:326px !important" value="" th:onKeypress="|fn.checkChar()|"  placeholder="Input your Email Domain" />
-										</th:block>
-										<input type="button" value="+ Add" class="btnCLight gray" th:onclick="|fn.addEmail()|"/>
-									</div>
-									<div class="pb5">
-										<span class="selectSet w200">
-											<strong for="listKind" title="selected value"></strong>
-											<select id="listKind" name="listKind">
-												<option value="">Select List</option>
-												<option value="prj">Project List</option>
-											</select>
-										</span>
-										<span><input type="text" id="listId" name="listId" style="width:500px" placeholder="Input ID you want to copy"/></span>
-										<input type="button" value="+ Add" class="btnCLight gray" th:onclick="|fn.addList()|"/>
-									</div>
-									<div id="multiDiv" class="multiTxtSet2">
-									</div>
-								</td>
-							</tr>
-						</table>
-					</div>
-				</div>
-				<div class="pbtn" style="text-align:right;">
-					<input type="button" value="Add" class="btnColor red" th:onclick="|fn.changeWatcherAdd()|"/>
-					<input type="button" value="Delete" class="btnColor red" th:onclick="|fn.changeWatcherDelete()|"/>
-					<input type="button" value="Cancel" class="btnCancel btnColor" th:onclick="|fn.changeWatcherCanCel()|"/>
-				</div>
-			</div>
-			<!-- //Popup -->
     </div>
     </div>
 </body>
