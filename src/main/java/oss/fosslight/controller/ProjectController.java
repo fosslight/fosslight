@@ -4542,7 +4542,7 @@ public class ProjectController extends CoTopComponent {
 			model.addAttribute("afterPrjId", afterPrjId);
 		}
 		
-		return PROJECT.PAGE_JSP;
+		return "project/bomCompare";
 	}
 			
 	@SuppressWarnings("unchecked")

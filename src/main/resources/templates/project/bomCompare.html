@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="project/verification-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/bomCompare-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+<div class="wrapper">
+    <div class="content-wrapper custom-layout bg-white">
+        <section class="content-header">
+            <div class="container-fluid">
+                <fieldset class="listSearch">
+                    <form id="bomcompareSearch" >
+                        <dl class="basicSearch col2">
+                            <dt>Basic Search Area</dt>
+                            <dd>
+                                <label>Before Project id</label>
+                                <input id="beforePrjId" name="beforePrjId" type="text" onKeyup="this.value=this.value.replace(/[^0-9]/g,'')"/>
+                            </dd>
+                            <dd>
+                                <label>After Project id</label>
+                                <input id="afterPrjId" name="afterPrjId" type="text" onKeyup="this.value=this.value.replace(/[^0-9]/g,'')"/>
+                            </dd>
+                        </dl>
+                        <input id="search" type="button" value="Search" class="btnColor search" />
+                    </form>
+                </fieldset>
+                <!---->
+                <!---->
+                <div class="btnLayout">
+			<span class="right">
+				<a href="#none" class="btnSet excel" onclick="fn.downloadExcel()"><span>Excel download</span></a>
+			</span>
+                </div>
+
+                <!---->
+                <div class="jqGridSet">
+                    <table id="list"><tr><td></td></tr></table>
+                    <div id="pager"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>
