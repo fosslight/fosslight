@@ -89,22 +89,11 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					
 					try {
 						File cycloneDXJsonFile = new File(jsonFullPath);
-						
-						if (cycloneDXJsonFile.exists()) {
-							if (cycloneDXJsonFile.length() <= 0) {
-								rtnMsg = getMessage("cyclonedx.json.failure");
-								
-								CommentsHistory commHisBean = new CommentsHistory();
-								commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-								commHisBean.setReferenceId(prjId);
-								commHisBean.setContents(rtnMsg);
-								commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
-								
-								commentService.registComment(commHisBean);
-							} else {
-								downloadId = fileId;
-							}
-						} 
+						if (cycloneDXJsonFile.exists() && cycloneDXJsonFile.length() > 0) {
+							downloadId = fileId;
+						} else {
+							rtnMsg = getMessage("cyclonedx.json.failure");
+						}
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
 					}
@@ -126,21 +115,10 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					
 					try {
 						File cycloneDXXmlFile = new File(xmlFullPath);
-						
-						if (cycloneDXXmlFile.exists()) {
-							if (cycloneDXXmlFile.length() <= 0) {
-								rtnMsg = getMessage("cyclonedx.xml.failure");
-								
-								CommentsHistory commHisBean = new CommentsHistory();
-								commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-								commHisBean.setReferenceId(prjId);
-								commHisBean.setContents(rtnMsg);
-								commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
-								
-								commentService.registComment(commHisBean);
-							} else {
-								downloadId = fileId;
-							}
+						if (cycloneDXXmlFile.exists() && cycloneDXXmlFile.length() > 0) {
+							downloadId = fileId;
+						} else {
+							rtnMsg = getMessage("cyclonedx.xml.failure");
 						}
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);

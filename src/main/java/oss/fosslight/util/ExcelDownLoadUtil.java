@@ -44,6 +44,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema;
+import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -4891,10 +4892,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (type.toUpperCase().endsWith("JSON")) {
 				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.Version.VERSION_14, bom).toJsonString());
 			} else {
-				fw.write(String.valueOf(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom)));
+				fw.write(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom).toXmlString());
 			}
 			fileId = fileService.registFileDownload(excelFilePath, fileName + ext, logiFileName);
-		} catch (IOException e) {
+		} catch (IOException | GeneratorException e) {
 			log.error(e.getMessage(), e);
 		} finally {
 			if (fw != null) {
@@ -5130,8 +5131,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		bom.setComponents(componentList);
-		bom.setDependencies(dependencyList);
-		bom.setVulnerabilities(vulnerablityList);
+		if (!dependencyList.isEmpty()) bom.setDependencies(dependencyList);
+		if (!vulnerablityList.isEmpty()) bom.setVulnerabilities(vulnerablityList);
 	
 		return bom;
 	}
