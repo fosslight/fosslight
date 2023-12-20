@@ -133,6 +133,88 @@
 
                 return (ids.length == 0) ? 0 : Math.max.apply(Math, ids);
             },
+            // oss_name 가져오기
+            griOssNames : function(data){
+                return $.ajax({
+                    type: 'GET',
+                    url: "/project/getOssNames",
+                    data: data,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            },
+            // oss_version 가져오기
+            griOssVersions : function(e, ossName, target){
+                var ossVersions = [];
+
+                if(ossName=="") {
+                    return false;
+                }
+
+                return $.ajax({
+                    type: 'GET',
+                    url: "/project/getOssVersions",
+                    data: {ossName : ossName },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    success: function(data, status, headers, config){
+                        if(data != null){
+                            data.forEach(function(obj){
+                                ossVersions.push(obj.ossVersion);
+                            });
+
+                            $(e).autocomplete({
+                                source: ossVersions
+                                , minLength: 0
+                                , open: function() { $(this).attr('state', 'open');}
+                                , close: function () { $(this).attr('state', 'closed');}
+                            }).focus(function() {
+                                if ($(this).attr('state') != 'open') {
+                                    $(this).autocomplete("search");
+                                }
+                            }).on('autocompletechange', function() {
+                                var rowid = (e.id).split('_')[0];
+                            });
+
+                            ossVersions = [];
+
+                            $(e).focus();
+                        }
+                    }
+                });
+            },
+            downloadExcel : function(){
+                if(isMaximumRowCheck(totalRow)){
+                    var filters = $("#list").getGridParam("postData").filters;
+                    $("#filters").val(filters);
+                    var data = $('#batSearch').serializeObject();
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/exceldownload/getExcelPost",
+                        data: JSON.stringify({"type":"binaryDB", "parameter":JSON.stringify(data)}),
+                        dataType : 'json',
+                        cache : false,
+                        contentType : 'application/json',
+                        success: function (data) {
+                            if("false" == data.isValid) {
+                                if(data.validMsg == "overflow"){
+                                    alertify.error(getMsgMaxRowCnt(), 0);
+                                }else{
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            } else {
+                                window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+                            }
+                        },
+                        error: function(data){
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                }
+            },
             getSelectedRowCnt : function(){
                 selectedRow = new Array();
                 selectedRow = $('#list').jqGrid('getGridParam', 'selarrrow');
