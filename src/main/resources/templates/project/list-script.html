@@ -716,11 +716,11 @@ var fn = {
 		
 		if(rowObject.identificationSubStatusBom != 0 || "Y" == rowObject.androidFlag) {
 			if ('Fixed' == rowObject.secCode) {
-				display = "<span class=\"badge badge-blue size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</spen>";
+				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</spen>";
 			} else if ('NotFixed' == rowObject.secCode) { 
-				display = "<span class=\"badge badge-blue size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
+				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
 			} else {
-				display = "<span class=\"badge badge-outline-dark-blue size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
+				display = "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
 			}
 		} 
 		
@@ -1880,15 +1880,15 @@ var list = {
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		var authority = '*${sessUserInfo.authority}';
-		var colNameArr = ['ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
 		var colModelArr = [];
-		var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
+        var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 130, align: 'left',cellattr:fn.toolTipDoubleclick};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 130, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 180, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 70, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
@@ -1965,7 +1965,8 @@ var list = {
 			sortorder: 'desc',
 			height: 'auto' ,
 			multiselect : true,
-			loadonce:false,
+            multiselectWidth: 30,
+            loadonce:false,
 			loadComplete:function(data) {
 				totalRow = data.records;
 				

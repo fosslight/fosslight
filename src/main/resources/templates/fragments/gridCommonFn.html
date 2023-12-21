@@ -325,6 +325,10 @@
 
                 return display;
             },
+            displayProjectName: function (cellvalue, options, rowObject) {
+                const display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
+                return display;
+            },
             // comment 포메터
             displayComment: function (cellvalue, options, rowObject) {
                 var display = "";

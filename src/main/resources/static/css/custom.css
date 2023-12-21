@@ -42,6 +42,7 @@ ul { list-style-type: none; }
 .custom-layout .icon-yellow { color: #ffc003;}
 .custom-layout .icon-yellow:hover { color: #c95200; }
 
+.custom-layout .dropdown-item { font-size: .8rem; }
 /* btn color option */
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
@@ -215,6 +216,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .hover-yellow-btn:hover { background-color: #bf8805; }
 .custom-layout .hover-success-btn:hover { background-color: #08571a; }
 .custom-layout .hover-pink-btn:hover { background-color: #930F56FF; }
+.custom-layout .hover-blue-btn:hover { background-color: #033D77FF; }
 /* badge */
 .badge.badge.size-sm { font-size: 90%; padding: .3rem; }
 .badge.badge-cerebral-gray { background-color: #cccccc; color: #fff; }
@@ -471,6 +473,7 @@ html .ui-button.ui-state-disabled:active {
     font-size: .8rem;
 }
 
+.ui-state-default .ui-jqgrid-btable > td[aria-describedby="list_cb"] { width: 30px !important;}
 .ui-jqgrid .ui-jqgrid-htable #main_jqGrid_01_cb { width: 30px !important;}
 .ui-jqgrid .ui-jqgrid-htable .cbox { padding: 0;}
 .ui-jqgrid .ui-jqgrid-htable #jqgh_main_jqGrid_01_cb input { position: relative;}
