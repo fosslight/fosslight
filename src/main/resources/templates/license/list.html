@@ -16,7 +16,7 @@
                                        	<div class="card-header" style="border-bottom: none;">
                                            	<div class="row">
                                                	<div class="col-md-7 d-flex">
-														<div class="form-check width-8rem p-2 pl-3 mt-1" style="font-size: .9rem; margin-left: 0.3rem">
+														<div class="form-check width-8rem p-2 pl-3" style="font-size: .9rem; margin-left: 0.3rem">
 																<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'} ? 'checked'" type="checkbox" value="Y">
 																<label class="form-check-label text-blue-gray" for="licenseNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
 																<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
@@ -30,8 +30,6 @@
 															</div>
 														</div>
 													</div>
-
-
                                                	</div>
                                                	<div class="col-md-2 d-flex justify-content-start mx-2">
                                                    	<div class="input-group-appen d-flex align-items-center">
@@ -43,7 +41,7 @@
                                        	<div class="card-body py-1">
                                            	<div class="row">
                                                	<div class="col-md-3">
-                                                   	<div class="form-group">
+                                                   	<div class="form-group mb-2">
                                                        	<select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
                                                            	<option value=""></option>
                                                            	<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
@@ -51,7 +49,7 @@
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-3">
-                                                   	<div class="form-group">
+                                                   	<div class="form-group mb-2">
                                                      	<select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%;">
                                                            	<option value=""></option>
                                                            	<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
@@ -60,7 +58,7 @@
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-4">
-                                                   	<div class="form-group">
+                                                   	<div class="form-group mb-2">
                                                    		<input type="text" class="form-control" name="webpage" placeholder="Website" th:value="${searchBean.webpage}">
                                                    	</div>
                                                	</div>
