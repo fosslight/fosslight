@@ -6470,11 +6470,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> resMap = new HashMap<>();
 		boolean emptyCheckFlag = false;
 		
-		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
-		for (OssComponents oss : list) {
-			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
-				emptyCheckFlag = true;
-				break;
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+			List<ProjectIdentification> list = projectMapper.checkSelectDownloadFileForBOM(project);
+			if (list != null) {
+				for (ProjectIdentification bean : list) {
+					if (!bean.getLicenseTypeIdx().equals("1")) continue;
+					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
+			}
+		} else {
+			List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+			if (list != null) {
+				for (OssComponents oss : list) {
+					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
 			}
 		}
 		
