@@ -18,42 +18,42 @@
                                     <!-- <div class="card collapsed-card search-form"> -->
                                     <div class="card-header" style="border-bottom: none;">
                                         <div class="row">
-                                            <div class="col-md-1 d-flex align-items-center">
-                                                <div class="custom-control custom-checkbox">
-                                                    <input class="custom-control-input" id="ossNameAllSearchFlag"
+                                            <div class="col-md-7 d-flex">
+                                                <div class="form-check width-8rem p-2 pl-3 mt-1"
+                                                     style="font-size: .85rem; margin-left: 0.3rem">
+                                                    <input class="form-check-input" id="ossNameAllSearchFlag"
                                                            th:checked="${searchBean.ossNameAllSearchFlag eq 'Y' }"
                                                            type="checkbox">
-                                                    <label class="custom-control-label text-blue-gray"
+                                                    <label class="form-check-label text-blue-gray"
                                                            for="ossNameAllSearchFlag"
                                                            style="font-weight: normal;">Exact Match</label>
                                                     <input name="ossNameAllSearchFlag"
                                                            th:value="${searchBean.ossNameAllSearchFlag}"
                                                            type="hidden"/>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-7">
-                                                <div class="row">
-                                                    <form action="simple-results.html">
-                                                        <div class="input-group">
-                                                            <input class="form-control autoComOss" name="ossName"
-                                                                   placeholder="Oss Name"
-                                                                   type="text">
-                                                            <div class="input-group-append">
-                                                                <button class="btn btn-default" id="search"
-                                                                        type="submit">
-                                                                    <i class="fa fa-search"></i>
-                                                                </button>
-                                                            </div>
+
+                                                <div class="w-100">
+                                                    <div class="input-group">
+                                                        <input class="form-control autoComOss" name="ossName"
+                                                               placeholder="Oss Name"
+                                                               type="text">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default" id="search"
+                                                                    type="submit">
+                                                                <i class="fa fa-search"></i>
+                                                            </button>
                                                         </div>
-                                                    </form>
+                                                    </div>
                                                 </div>
+
+
                                             </div>
                                             <div class="col-md-2 d-flex justify-content-start mx-2">
                                                 <div class="input-group-appen d-flex align-items-center">
                                                     <a class="text-blue-gray" data-card-widget="collapse"
                                                        style="font-size: 1rem;" title="Collapse">
                                                         <!-- <i class="fas fa-cart-plus fa-lg mr-2"></i> -->
-                                                        + advanced Search
+                                                        + Advanced Search
                                                     </a>
                                                 </div>
                                             </div>
@@ -62,9 +62,9 @@
                                     <div class="card-body py-1">
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input text-orange"
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-1" style="font-size: .85rem">
+                                                        <input class="form-check-input"
                                                                id="licenseNameAllSearchFlag"
                                                                th:checked="${searchBean.licenseNameAllSearchFlag eq 'Y'}"
                                                                type="checkbox">
@@ -82,8 +82,8 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <div class="form-check text-orange">
+                                                <div class="form-group mb-2">
+                                                    <div class="form-check mb-1" style="font-size: .85rem">
                                                         <input class="form-check-input text-orange"
                                                                id="homepageAllSearchFlag"
                                                                th:checked="${searchBean.homepageAllSearchFlag eq 'Y'}"
@@ -120,8 +120,18 @@
                                                               th:text="${searchBean.summaryDescription}"></textarea>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-4">
-                                                <div class="icheck-secondary d-inline">
+                                                <div class="form-group mb-2">
+                                                    <input class="form-control" id="cvssScoreInput" name="cvssScore"
+                                                           placeholder="Vulnerability (>=)"
+                                                           th:value="${searchBean.cvssScore}"
+                                                           type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mt-2">
+                                                <div class="icheck-orange d-inline">
                                                     <input id="deactivateFlag"
                                                            th:checked="${searchBean.deactivateFlag eq 'Y'}"
                                                            type="checkbox">
@@ -184,7 +194,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <div class="form-group">
+                                                        <div class="form-group mb-2">
                                                             <select class="select2" id="licenseTypeSelect"
                                                                     name="licenseType"
                                                                     style="width: 100%; color: gray;">
@@ -194,38 +204,69 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-3 pt-2">
-                                                        <span>
-                                                            <div class="icheck-secondary d-inline mx-2">
-                                                                <input type="checkbox"  id="noneLicenseFlag" name="ossTypeSearch" value="N"/>
-                                                                <label class="mb-2" for="noneLicenseFlag"
-                                                                       style="font-weight: normal" title="None">
-                                                                   <span class="badge badge-dark">None</span>
-                                                                </label>
+                                                    <div class="col-md-4 pt-1 ml-4 d-flex">
+
+                                                        <div class="width-5rem">
+                                                            <div class="form-check">
+                                                                <div class="form-check-input">
+                                                                    <input checked class="form-check-input"
+                                                                           id="noneLicenseFlag" name="ossTypeSearch"
+                                                                           type="checkbox" value="N"/>
+                                                                    <label class="form-check-label text-blue-gray mb-2"
+                                                                           for="noneLicenseFlag"
+                                                                           style="font-weight: normal" title="None">
+                                                                        <span class="badge badge-dark">None</span>
+                                                                    </label>
+                                                                </div>
+
                                                             </div>
-                                                            <div class="icheck-secondary d-inline mx-2">
-                                                                <input type="checkbox" id="multiLicenseFlag" name="ossTypeSearch" value = "M">
-                                                                <label class="mb-2" for="multiLicenseFlag"
-                                                                       style="font-weight: normal" title="Multi">
-                                                                    <span class="badge badge-primary">Multi</span>
-                                                                </label>
+                                                        </div>
+                                                        <div class="width-5rem">
+                                                            <div class="form-check">
+                                                                <div class="form-check-input">
+                                                                    <input checked class="form-check-input"
+                                                                           id="multiLicenseFlag"
+                                                                           name="ossTypeSearch" type="checkbox"
+                                                                           value="M">
+                                                                    <label class="form-check-label text-blue-gray mb-2"
+                                                                           for="multiLicenseFlag"
+                                                                           style="font-weight: normal"
+                                                                           title="Multi">
+                                                                        <span class="badge badge-primary">Multi</span>
+                                                                    </label>
+                                                                </div>
                                                             </div>
-                                                            <div class="icheck-secondary d-inline mx-2">
-                                                                <input type="checkbox" id="dualLicenseFlag" name="ossTypeSearch" value = "D">
-                                                                <label class="mb-2" for="dualLicenseFlag"
-                                                                       style="font-weight: normal" title="Dual">
-                                                                  <span class="badge badge-info">Dual</span>
-                                                                </label>
+                                                        </div>
+                                                        <div class="width-5rem">
+                                                            <div class="form-check">
+                                                                <div class="form-check-input">
+                                                                    <input checked class="form-check-input"
+                                                                           id="dualLicenseFlag" name="ossTypeSearch"
+                                                                           type="checkbox" value="D">
+                                                                    <label class="form-check-label text-blue-gray mb-2"
+                                                                           for="dualLicenseFlag"
+                                                                           style="font-weight: normal" title="Dual">
+                                                                        <span class="badge badge-info">Dual</span>
+                                                                    </label>
+                                                                </div>
                                                             </div>
-                                                             <div class="icheck-secondary d-inline mx-2">
-                                                                <input type="checkbox" id="versionDiffFlag" name="ossTypeSearch" value = "V"/>
-                                                                            <label class="mb-2" for="versionDiffFlag"
-                                                                                   style="font-weight: normal"
-                                                                                   title="Version Difference">
-                                                                  <span class="badge badge-success">v-Diff</span>
-                                                                </label>
-                                                             </div>
-                                                        </span>
+                                                        </div>
+                                                        <div class="width-5rem">
+                                                            <div class="form-check">
+                                                                <div class="form-check-input">
+                                                                    <input checked class="form-check-input"
+                                                                           id="versionDiffFlag" name="ossTypeSearch"
+                                                                           type="checkbox" value="V"/>
+                                                                    <label class="form-check-label text-blue-gray mb-2"
+                                                                           for="versionDiffFlag"
+                                                                           style="font-weight: normal"
+                                                                           title="Version Difference">
+                                                                        <span class="badge badge-success">v-Diff</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>

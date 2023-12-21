@@ -125,6 +125,10 @@
                 $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
             });
 
+            $("#cvssScoreInput").on("input", function () {
+                return oss_lst_fn.validateCvssScore();
+            });
+
             oss_lst_data.init();
         }
     }
@@ -246,6 +250,20 @@
             }, function () {
                 alertify.error(String([[ #{msg.common.valid2} ]]), 0);
             })
+        },
+        validateCvssScore : function (e) {
+            let inputValue = $("#cvssScoreInput").val();
+            let numericRegex = /^[0-9.]+$/;
+
+            if (!numericRegex.test(inputValue)) {
+                $("#cvssScoreInput").val(inputValue.replace(/[^0-9.]/g, ''));
+            } else {
+                let floatValue = parseFloat(inputValue);
+
+                if (isNaN(floatValue) || floatValue < 0 || floatValue > 10 || !Number.isInteger(floatValue)) {
+                    $("#cvssScoreInput").val('');
+                }
+            }
         }
     }
 
