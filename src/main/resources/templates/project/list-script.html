@@ -190,7 +190,7 @@ var fn = {
 		var statusRequestYn = rowObject.statusRequestYn;
 		var destributionStatus = rowObject.destributionStatus;
 		
-		var display = '<div class="row pl-3">';
+		var display = '<div class="row ml-2 width-14rem">';
 		// identification
 		switch(identificationStatus){
 			case "":
@@ -198,9 +198,9 @@ var fn = {
 					display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
 				} else {
 					if("Y" == rowObject.androidFlag) {
-						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 					} else {
-						display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 					}
 				}
 				break;
@@ -213,24 +213,24 @@ var fn = {
 				} else {
 					if ("Y" == rowObject.androidFlag) {
 						if ("Confirm" == identificationStatus) {
-							display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						} else if (projectStatus == progress) {
-							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						} else if (projectStatus == request) {
-							display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						} else if (projectStatus == review) {
-							display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						}
 					} else {
 						if ("Confirm" == identificationStatus) {
-							display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 						} else {
 							if (projectStatus == progress) {
-								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+								display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 							} else if (projectStatus == request) {
-								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+								display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 							} else if (review == projectStatus) {
-								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+								display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 							}
 						}
 					}
@@ -270,14 +270,14 @@ var fn = {
 						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
 							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
 						} else if ("" != identificationStatus) {
-							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "Progress":
 						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
 							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
 						} else {
-							display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "N/A":
@@ -297,14 +297,14 @@ var fn = {
 							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
 						} else{
 							if ("Confirm" == verificationStatus) {
-								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 							} else {
 								if (projectStatus == progress) {
-									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+									display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == request) {
-									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+									display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == review) {
-									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+									display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								}
 							}
 						}
@@ -636,28 +636,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if(rowObject.identificationStatus == "Confirm"){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel fa-lg ml-1\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-2x mr-2\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf fa-lg ml-1\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-2x mr-2\" title=\"FOSSLight Review Report\"></i></span>';
             }
         }
 		
 		if(rowObject.verificationStatus == "Confirm"){
 			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
 			} else {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code fa-lg ml-1\" title=\"OSS Notice\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-2x mr-2\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId2!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId3!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive fa-lg ml-1\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File3\"></i></span>';
 			}
 		}
 		
@@ -1888,9 +1888,9 @@ var list = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'left', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'progress', index: 'progress', width: 180, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'download', index: 'download', width: 70, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelObj = {name: 'download', index: 'download', width: 70, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: '', index: '', width: 60, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
