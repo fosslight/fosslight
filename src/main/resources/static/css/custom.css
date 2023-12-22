@@ -41,6 +41,8 @@ ul { list-style-type: none; }
 .custom-layout .icon-orange:hover { color: #c95200; }
 .custom-layout .icon-yellow { color: #ffc003;}
 .custom-layout .icon-yellow:hover { color: #c95200; }
+.custom-layout .icon-light-gray { color: #ced4da;}
+.custom-layout .icon-light-gray:hover { color: #595959; }
 
 .custom-layout .dropdown-item { font-size: .8rem; }
 /* btn color option */
@@ -210,7 +212,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .orange-icon { color: orange;}
 .custom-layout .greenyellow-icon { color: greenyellow;}
 .custom-layout .toggle-icon.active { color: #999; /* Change the color to your preferred color */ }
-.custom-layout .hover-icon { color: #000; transition: color 0.3s ease; }
+.custom-layout .hover-icon { color: #333; transition: color 0.3s ease; }
 .custom-layout .hover-icon:hover { color: #ff0000; }
 .custom-layout .hover-light-btn:hover { background-color: #9e9e9e38; }
 .custom-layout .hover-yellow-btn:hover { background-color: #bf8805; }
@@ -725,4 +727,20 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 
 .required {position:relative;}
 .required .retxt {display:none;padding-top:2px;font-size:11px;color:red !important;}
+
+/* oss grid */
+.custom-layout #licenseGrid .fa-file-alt,
+.custom-layout #licenseGrid .fa-file-code,
+.custom-layout #ossGrid .fa-file-alt,
+.custom-layout #ossGrid .fa-file-code
+{
+    color: #9E9E9E;
+    margin-right: .5rem;
+
+}
+
+.custom-layout #projectGrid .fa-2x {
+    margin-right: .5rem;
+}
+
 

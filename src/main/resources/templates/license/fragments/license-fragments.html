@@ -224,7 +224,7 @@
                             loadComplete: function(data){
                                 // 헤더에 버튼 추가
                                 if(!data.existTooltip){
-                                    $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                                    $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
                                         .attr("title", data.tooltipCont).tooltip({
                                         content: function () {
                                             return $(this).prop('title');

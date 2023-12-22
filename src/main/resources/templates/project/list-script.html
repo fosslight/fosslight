@@ -26,21 +26,20 @@ $(document).ready(function () {
 //데이터 객체
 var gridTooltip = {
 	typeCodes : [],
-	tooltipCont : "<div class=\"tooltipData\">"
-                   +"<dl><dt><span class=\"iconSt draft\">Progress</span>Progress</dt></dl><br>"
-                   +"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
-                   +"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
-                   +"<dl><dt><span class=\"iconSt complete\">Complete</span>Complete</dt></dl><br>"
-                   +"<dl><dt><span class=\"iconSt drop\">Drop</span>Drop</dt></dl><br>"
-                   +"<dl><dt><span class=\"priority priority_1\"></span>Priority 0</dt></dl><br>"
-                   +"<dl><dt><span class=\"priority priority_2\"></span>Priority 1</dt></dl><br>"
-                   +"</div>",
-    tooltipCont1 : "<div class=\"tooltipData\">"
-	               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
-	               +"<dl><dt><span class=\"downSet btnReviewReport\">Summary Report</span>Summary Report</dt></dl><br>"
-	               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
-	               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
-	               +"</div>",
+    tooltipCont :   "<div class=\"p-1\">" +
+                        "<div class=\"my-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-lg\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-lg\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-lg\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
+                        "</div>"+
+                    "</div>",
 	existTooltip : false,
 	init : function(){
 		list.load();	// Grid Load
@@ -636,28 +635,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if(rowObject.identificationStatus == "Confirm"){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-2x mr-2\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-2x\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-2x mr-2\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-2x\" title=\"FOSSLight Review Report\"></i></span>';
             }
         }
 		
 		if(rowObject.verificationStatus == "Confirm"){
 			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
 			} else {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-2x mr-2\" title=\"OSS Notice\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-2x\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId2!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId3!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x mr-2\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File3\"></i></span>';
 			}
 		}
 		
@@ -1990,6 +1989,17 @@ var list = {
 				}
 				
 				$('input[id*="_releaseDate"]').attr('class', 'cal');
+
+                if(!gridTooltip.existTooltip){
+                    $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_download"))
+                        .attr("title", gridTooltip.tooltipCont).tooltip({
+                        content: function () {
+                            return $(this).prop('title');
+                        }
+                    });
+
+                    gridTooltip.existTooltip = true;
+                }
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				

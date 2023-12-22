@@ -19,11 +19,14 @@
         //데이터 객체
         var data = {
             typeCodes: [],
-            tooltipCont: "<div>" +
-                "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
-                "</div>" +
-                "<div>" +
-                "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+            tooltipCont:
+                "<div class=\"p-1\">" +
+                    "<div class=\"mb-1\">" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                    "</div>"+
                 "</div>",
             existTooltip: false,
             init: function () {
@@ -327,33 +330,16 @@
                     sortorder: 'desc',
                     loadonce: false,
                     height: 'auto',
-                    loadComplete: function (result) {
-                        totalRow = result.records;
-                        // 헤더에 버튼 추가
-
-                        if (totalRow == 0) {
-                            var cStartDate = $("#cStartDate").val() || 0;
-                            var cEndDate = $("#cEndDate").val() || 0;
-                            var diffNum = +cStartDate - +cEndDate;
-
-                            var mStartDate = $("#mStartDate").val() || 0;
-                            var mEndDate = $("#mEndDate").val() || 0;
-                            var diffNum2 = +mStartDate - +mEndDate;
-
-                            if ((diffNum > 0 && cEndDate > 0) || (diffNum2 > 0 && mEndDate > 0)) {
-                                alertify.alert([[#{msg.common.search.check.date}]], function () {
-                                });
-                            }
-                        }
+                    gridComplete: function () {
 
                         if (!data.existTooltip) {
-                            $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
-                            .attr("title", data.tooltipCont).tooltip({
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                                .attr("title", data.tooltipCont).tooltip({
                                 content: function () {
                                     return $(this).prop('title');
                                 }
                             });
-
+                            data.existTooltip = true;
 // 					$.ajax({
 // 						type: 'GET',
 // 						url: '/system/processGuide/getProcessGuide',
@@ -396,9 +382,27 @@
 // 							}
 // 						}
 // 					});
-
-         					data.existTooltip = true;
                         }
+                    },
+                    loadComplete: function (result) {
+                        totalRow = result.records;
+                        // 헤더에 버튼 추가
+
+                        if (totalRow == 0) {
+                            var cStartDate = $("#cStartDate").val() || 0;
+                            var cEndDate = $("#cEndDate").val() || 0;
+                            var diffNum = +cStartDate - +cEndDate;
+
+                            var mStartDate = $("#mStartDate").val() || 0;
+                            var mEndDate = $("#mEndDate").val() || 0;
+                            var diffNum2 = +mStartDate - +mEndDate;
+
+                            if ((diffNum > 0 && cEndDate > 0) || (diffNum2 > 0 && mEndDate > 0)) {
+                                alertify.alert([[#{msg.common.search.check.date}]], function () {
+                                });
+                            }
+                        }
+
 
                         tableRefreshNew("list");
                     },

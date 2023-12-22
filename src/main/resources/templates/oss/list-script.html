@@ -1,170 +1,546 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
-<script th:inline="javascript">
-    //<![CDATA[
-    /*global $ */
-    let isAdmin = [[ ${@CommonFunction.isAdmin() } ]];
-    let groupBuffer='';
-    let totalRow = 0;
-    let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) } ]];
-    linkFlag = [[ ${searchBean.linkFlag}]];
+    <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        let initParam = {};
+        let isAdmin = [[ ${@CommonFunction.isAdmin() }]];
+        let groupBuffer = '';
+        let totalRow = 0;
+        let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
+        linkFlag = [[ ${searchBean.linkFlag}]];
 
-    $(window).load(function () {
-        oss_lst_evt.init();
-    });
+        $(window).load(function () {
+            oss_lst_evt.init();
+        });
 
-    const oss_lst_evt = {
-        init: function () {
-            setMaxRowCnt(G_ROW_CNT);
+        const oss_lst_evt = {
+            init: function () {
+                setMaxRowCnt(G_ROW_CNT);
 
-            //Initialize Select2 Elements
-            $('.select2').select2();
+                //Initialize Select2 Elements
+                $('.select2').select2();
 
-            $('#creatorSelect').select2({
-                placeholder: "Creater",
-                allowClear: true,
-            });
-
-            $('#modifierSelect').select2({
-                placeholder: "Modifier",
-                allowClear: true,
-            });
-
-            $('#modifierSelect').select2({
-                placeholder: "Modifier",
-                allowClear: true,
-            });
-
-            $('#licenseTypeSelect').select2({
-                placeholder: "License Type",
-                allowClear: true,
-            });
-
-            /* created date & modified date event */
-            const cStartDate = [[${searchBean.cStartDate}]];
-            const cEndDate = [[${searchBean.cEndDate}]];
-
-            $("#createdDate").daterangepicker({
-                autoUpdateInput: false
-            }).on('apply.daterangepicker', function (ev, picker) {
-                $("input[name='cStartDate']").val(picker.startDate.format('YYYYMMDD'));
-                $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
-                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-            })
-                .on('cancel.daterangepicker', function (ev, picker) {
-                    $("#createdDate").val("");
-                    $("input[name='startDate']").val("");
-                    $("input[name='endDate']").val("");
+                $('#creatorSelect').select2({
+                    placeholder: "Creater",
+                    allowClear: true,
                 });
 
-            if (cStartDate != null && cEndDate != null) {
-                $('#createdDate').val(cStartDate.format('MM/DD/YYYY') + ' - ' + cEndDate.format('MM/DD/YYYY'));
-            } else {
-                $('#createdDate').attr('placeholder', 'Created Date');
-            }
-
-            const mStartDate = [[${searchBean.mStartDate}]];
-            const mEndDate = [[${searchBean.mEndDate}]];
-
-            $("#modifiedDate").daterangepicker({
-                autoUpdateInput: false
-            }).on('apply.daterangepicker', function (ev, picker) {
-                $("input[name='mStartDate']").val(picker.startDate.format('YYYYMMDD'));
-                $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
-                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-            })
-                .on('cancel.daterangepicker', function (ev, picker) {
-                    $("#modifiedDate").val("");
-                    $("input[name='mStartDate']").val("");
-                    $("input[name='mEndDate']").val("");
+                $('#modifierSelect').select2({
+                    placeholder: "Modifier",
+                    allowClear: true,
                 });
 
-            if (mStartDate != null && mEndDate != null) {
-                $('#modifiedDate').val(mStartDate.format('MM/DD/YYYY') + ' - ' + mEndDate.format('MM/DD/YYYY'));
-            } else {
-                $('#modifiedDate').attr('placeholder', 'Modified Date');
+                $('#modifierSelect').select2({
+                    placeholder: "Modifier",
+                    allowClear: true,
+                });
+
+                $('#licenseTypeSelect').select2({
+                    placeholder: "License Type",
+                    allowClear: true,
+                });
+
+                /* created date & modified date event */
+                const cStartDate = [[${searchBean.cStartDate}]];
+                const cEndDate = [[${searchBean.cEndDate}]];
+
+                $("#createdDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='cStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $("#createdDate").val("");
+                        $("input[name='startDate']").val("");
+                        $("input[name='endDate']").val("");
+                    });
+
+                if (cStartDate != null && cEndDate != null) {
+                    $('#createdDate').val(cStartDate.format('MM/DD/YYYY') + ' - ' + cEndDate.format('MM/DD/YYYY'));
+                } else {
+                    $('#createdDate').attr('placeholder', 'Created Date');
+                }
+
+                const mStartDate = [[${searchBean.mStartDate}]];
+                const mEndDate = [[${searchBean.mEndDate}]];
+
+                $("#modifiedDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='mStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $("#modifiedDate").val("");
+                        $("input[name='mStartDate']").val("");
+                        $("input[name='mEndDate']").val("");
+                    });
+
+                if (mStartDate != null && mEndDate != null) {
+                    $('#modifiedDate').val(mStartDate.format('MM/DD/YYYY') + ' - ' + mEndDate.format('MM/DD/YYYY'));
+                } else {
+                    $('#modifiedDate').attr('placeholder', 'Modified Date');
+                }
+
+                initParam = serializeObjectHelper();
+                var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
+                console.log(defaultSearchFlag)
+                if (defaultSearchFlag != 'Y') {
+                    // just make grid ui
+                    initParam.ignoreSearchFlag = "Y";
+                }
+
+                var sentMailParam = $("input[name=ossName]").val();
+                if ("Y" == linkFlag && sentMailParam) {
+                    initParam.ignoreSearchFlag = "N";
+                    initParam = serializeObjectHelper();
+                }
+
+                $('#search').on('click', function (e) {
+                    e.preventDefault();
+
+                    const searchOSSName = $("input[type=text][name=ossName]").val();
+                    $("input[type=text][name=ossName]").val(searchOSSName.trim());
+
+                    const searchLicenseName = $("input[type=text][name=licenseName]").val();
+                    $("input[type=text][name=licenseName]").val(searchLicenseName.trim());
+
+                    const searchHomepage = $("input[type=text][name=homepage]").val();
+                    $("input[type=text][name=homepage]").val(searchHomepage.trim());
+
+                    const postData = oss_lst_fn.serializeObjectHelper();
+                    postData.ignoreSearchFlag = "N";
+                    $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
+                });
+
+                $(".cal").on("keyup", function (e) {
+                    calValidation(this, e);
+                });
+
+                $("#ossNameAllSearchFlag").on("change", function (e) {
+                    $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+
+                $("#licenseNameAllSearchFlag").on("change", function (e) {
+                    $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+
+                $("#homepageAllSearchFlag").on("change", function (e) {
+                    $("[name='homepageAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+
+                $("#deactivateFlag").on("change", function () {
+                    $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+
+                $("#cvssScoreInput").on("input", function () {
+                    return oss_lst_fn.validateCvssScore();
+                });
+
+                oss_lst_data.init();
             }
-
-            $('#search').on('click',function(e){
-                e.preventDefault();
-
-                const searchOSSName = $("input[type=text][name=ossName]").val();
-                $("input[type=text][name=ossName]").val(searchOSSName.trim());
-
-                const searchLicenseName = $("input[type=text][name=licenseName]").val();
-                $("input[type=text][name=licenseName]").val(searchLicenseName.trim());
-
-                const searchHomepage = $("input[type=text][name=homepage]").val();
-                $("input[type=text][name=homepage]").val(searchHomepage.trim());
-
-                const postData = oss_lst_fn.serializeObjectHelper();
-                postData.ignoreSearchFlag = "N";
-                $("#list").jqGrid('setGridParam', {postData:postData, page : 1, url : "/oss/listAjax"}).trigger('reloadGrid');
-            });
-
-            $(".cal").on("keyup", function(e){
-                calValidation(this, e);
-            });
-
-            $("#ossNameAllSearchFlag").on("change", function(e){
-                $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
-            });
-
-            $("#licenseNameAllSearchFlag").on("change", function(e){
-                $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
-            });
-
-            $("#homepageAllSearchFlag").on("change", function(e){
-                $("[name='homepageAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
-            });
-
-            $("#deactivateFlag").on("change", function(){
-                $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
-            });
-
-            $("#cvssScoreInput").on("input", function () {
-                return oss_lst_fn.validateCvssScore();
-            });
-
-            oss_lst_data.init();
         }
-    }
 
-    const oss_lst_data = {
-        typeCodes: [],
-        licenseTypeInformation: "<div style=\"float:left\">" +
-                                    "<span class=\"badge badge-primary mr-1\">M</span>" +
-                                    "<strong>Multi License</strong>" +
-                                    "<br>he OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. \lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> \src is GPL-2.0)</p>" +
-                                "</div>" +
-                                "<div>" +
-                                    "<span class=\"badge badge-info mr-1\">D</span>" +
-                                    "<strong>Dual License</strong>" +
-                                    "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
-                                "</div>" +
-                                "<div>" +
-                                    "<span class=\"badge badge-success mr-1\">V</span>" +
-                                    "<strong>different licenses</strong>" +
-                                    "<br>according to its <span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
-                                "</div>",
-        obligationInformation:  "<div>" +
-                                    "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
-                                "</div>" +
-                                "<div>" +
-                                    "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
-                                "</div>",
-        existTooltip: false,
-        init: function () {
-            oss_lst_grid.load();
+        const oss_lst_data = {
+            typeCodes: [],
+            licenseTypeInformation:
+                "<div class=\"p-1\">" +
+                        "<div style=\"float:left\">" +
+                        "<span class=\"badge badge-primary mr-1\">Multi</span>" +
+                        "<strong class=\"ml-1\">Multi License</strong>" +
+                        "<br class=\"ml-1\">The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span class=\"badge badge-info mr-1\">Dual</span>" +
+                        "<strong>Dual License</strong>" +
+                        "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span class=\"badge badge-success mr-1\">v-diff</span>" +
+                        "<strong>Version different licenses</strong>" +
+                        "<br>The OSS is distributed under different licenses according to its version<span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
+                    "</div>" +
+                "</div>",
+            obligationInformation:
+                "<div class=\"p-1\">" +
+                    "<div class=\"mb-1\">" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                    "</div>" +
+                "</div>",
+            existTooltip: false,
+            init: function () {
+                oss_lst_grid.load();
+            }
         }
-    }
 
-    const oss_lst_fn = {
-        serializeObjectHelper: function () {
+        const oss_lst_fn = {
+            serializeObjectHelper: function () {
+                var postData = $('#ossSearch').serializeObject();
+
+                if (postData.ossTypeSearch != null) {
+                    postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                    postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+                } else {
+                    postData.ossTypeSearch = "";
+                }
+
+                return postData;
+            },
+            deleteOss: function () {
+                var deleteIds = [];
+
+                $("#list input[type=checkbox]").each(function () {
+                    if ($(this).is(":checked")) {
+                        var obj = {};
+
+                        var name = $(this).attr('name');
+                        var ossId = name.split("_")[2];
+                        deleteIds.push(ossId);
+                    }
+                });
+
+                if (deleteIds.length > 0) {
+                    const param = {
+                        category: "fragments",
+                        templateName: "common-fragments",
+                        fragmentName: "promptPopupFragment",
+                        data: {context: "Do you want to delete the oss ?"}
+                    };
+                    postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+                        alertify.confirm(res, function (e) {
+                            const comment = $("#promptPopupEditor").summernote('code');
+                            if (e) {
+                                if ("" == comment) {
+                                    alertify.alert(String([[ #{msg.oss.required.deletion}]]), function () {
+                                    });
+                                    return false;
+                                } else {
+                                    oss_lst_fn.multiDelAjax(deleteIds, comment);
+                                }
+                            } else {
+                                return false;
+                            }
+                        });
+                        //initCKEditorToolbar("editor");
+                    }, null, function () {
+                        $("#promptPopupEditor").summernote({
+                            height: 150,
+                            callbacks: {
+                                onInit: function () {
+                                    var content = $(this).summernote('code');
+                                    if (content === '<p><br></p>') {
+                                        $(this).summernote('code', '');
+                                    }
+                                }
+                            }
+                        });
+                    })
+                } else {
+                    alertify.alert(String([[ #{msg.oss.select.ossTable}]]), function () {
+                    });
+                }
+            },
+            multiDelAjax: function (deleteIds, comment) {
+                loading.show();
+                const _param = {"ossIds": deleteIds, "comment": comment};
+
+                postAjaxData(_param, "/oss/multiDelAjax", "json", function (res) {
+                    loading.hide();
+                    var msg = String([[ #{msg.common.success}]]);
+
+                    if (typeof res.notDelOssList !== "undefined") {
+                        var notDelOss = res.notDelOssList;
+                        msg = String([[ #{msg.oss.cannot.delete}]]);
+                        msg += '<br/>';
+                        for (var i in notDelOss) {
+                            msg += '<br/>';
+                            msg += '&emsp;&#8259; ' + notDelOss[i];
+                        }
+                    }
+                    alertify.alert(msg, function () {
+                        callReloadTabInframe("/oss/list", "oss-list");
+                    });
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                })
+            },
+            validateCvssScore: function (e) {
+                let inputValue = $("#cvssScoreInput").val();
+                let numericRegex = /^[0-9.]+$/;
+
+                if (!numericRegex.test(inputValue)) {
+                    $("#cvssScoreInput").val(inputValue.replace(/[^0-9.]/g, ''));
+                } else {
+                    let floatValue = parseFloat(inputValue);
+
+                    if (isNaN(floatValue) || floatValue < 0 || floatValue > 10 || !Number.isInteger(floatValue)) {
+                        $("#cvssScoreInput").val('');
+                    }
+                }
+            }
+        }
+
+        const oss_lst_grid = {
+            oldRowNum: 20,
+            load: function () {
+                $("#list").jqGrid({
+                    url: "/oss/listAjax",
+                    datatype: 'json',
+                    postData: initParam,
+                    jsonReader: {
+                        repeatitems: false,
+                        id: 'ossId',
+                        root: function (obj) {
+                            //original RowNum save
+                            list.oldRowNum = $("#list").jqGrid('getGridParam', 'rowNum');
+                            //Change the rowNumber according to the number of lists.
+                            $("#list").jqGrid('setGridParam', {rowNum: obj.rows.length});
+                            $("#list").jqGrid('setGridParam', {defaultRowNum: list.oldRowNum});
+
+                            return obj.rows;
+                        },
+                        page: function (obj) {
+                            return obj.page;
+                        },
+                        total: function (obj) {
+                            return obj.total;
+                        },
+                        records: function (obj) {
+                            return obj.records;
+                        }
+                    },
+                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
+                    colModel: [
+                        {
+                            name: 'group', width: 20, align: 'center',
+                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                                return ' colspan=2'
+                            },
+                            formatter: function myFormatter(cellvalue, options, rowObject) {
+                                return rowObject.ossId;
+                            }
+                        }
+                        , {
+                            name: 'ossId', index: 'ossId', width: 80, align: 'center',
+                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                                return ' style="display:none;"';
+                            }
+                        }
+                        , {
+                            name: 'ossType',
+                            index: 'ossType',
+                            width: 70,
+                            align: 'center',
+                            sortable: false,
+                            formatter: fn_grid_com.ossTypeFormat
+                        }
+                        , {
+                            name: 'ossName',
+                            index: 'ossName',
+                            width: 200,
+                            align: 'left',
+                            formatter: fn_grid_com.ossNameLinkFormat
+                        }
+                        , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
+                        , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
+                        , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
+                        , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                        , {
+                            name: 'downloadLocation',
+                            index: 'downloadLocation',
+                            width: 150,
+                            align: 'left',
+                            formatter: 'link',
+                            formatoptions: {target: '_blank'}
+                        }
+                        , {
+                            name: 'homepage',
+                            index: 'homepage',
+                            width: 65,
+                            align: 'left',
+                            formatter: 'link2',
+                            formatoptions: {target: '_blank'}
+                        }
+                        , {
+                            name: 'summaryDescription',
+                            index: 'summaryDescription',
+                            width: 150,
+                            height: 50,
+                            align: 'left'
+                        }
+                        , {name: 'cveId', index: 'cveId', hidden: true}
+                        , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: 'vuln'}
+                        , {
+                            name: 'groupKey', index: 'groupKey', hidden: true
+                            , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                                var result;
+                                var isGroup = false;
+
+                                if (groupBuffer == val) {
+                                    isGroup = true;
+                                } else {
+                                    isGroup = false;
+                                }
+
+                                groupBuffer = val;
+
+                                if (isGroup) {
+                                    result = 'isgroup="true"';
+                                } else {
+                                    result = 'isgroup="false"';
+                                }
+
+                                return result;
+                            }
+                        }
+                    ],
+                    rowNum: 20,
+                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
+                    rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
+                    autowidth: true,
+                    pager: '#pager',
+                    gridview: true,
+                    viewrecords: true,
+                    loadonce: false,
+                    height: 'auto',
+                    grouping: true,
+                    groupingView: {
+                        groupField: ['groupKey'],
+                        groupColumnShow: [false]
+                    }, // Enter the column name by group.
+                    gridComplete: function () {
+                        // add button in header
+                        if (!oss_lst_data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
+                                .appendTo($("#jqgh_list_obligation"))
+                                .attr("title", oss_lst_data.obligationInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                });
+
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2"data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                                .attr("title", oss_lst_data.licenseTypeInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                });
+
+                            $('[data-toggle="tooltip"]').tooltip({html: true});
+                            oss_lst_data.existTooltip = true;
+                        }
+
+                        resizingJqGidSet();
+                    },
+                    loadComplete: function (result) {
+                        totalRow = result.records;
+                        var rows = result.rows;
+                        var grid = this;
+
+                        if (totalRow == 0) {
+                            var cStartDate = $("#cStartDate").val() || 0;
+                            var cEndDate = $("#cEndDate").val() || 0;
+                            var diffNum = +cStartDate - +cEndDate;
+
+
+                            var mStartDate = $("#mStartDate").val() || 0;
+                            var mEndDate = $("#mEndDate").val() || 0;
+                            var diffNum2 = +mStartDate - +mEndDate;
+
+                            if ((diffNum > 0 && cEndDate > 0)
+                                || (diffNum2 > 0 && mEndDate > 0)) {
+                                alertify.alert(String([[#{msg.common.search.check.date}]]), function () {
+                                });
+                            }
+                        }
+
+                        //rowNum initiate @@1
+                        $("#list").jqGrid('setGridParam', {rowNum: list.oldRowNum});
+
+                        // Insert the unfold button in the existing group header into the group column of the first row for each group (customize the first row to function as a group header).
+                        $('[id^=listghead_0]').each(function () {
+                            var addBtn = "<span style='cursor:pointer;' class='groupBtns ui-icon ui-icon-plus tree-wrap-ltr' onclick=\"$('#list').jqGrid('groupingToggle','" + $(this).attr("id") + "'); $('#" + $(this).next().attr("id") + "').show(); return false;\"> </span>";
+                            var position = $(this).next().next().children().eq(1).text();
+
+                            if (position != "") {
+                                $(this).next().children().eq(0).append(addBtn);
+                            }
+                        });
+                        //coloring groups
+                        //1. exist group button
+                        $('span.groupBtns').trigger('click').parent().parent().css('background-color', '#CDECFA');
+
+                        //2. below lists
+                        $('tr td[isgroup="true"]', grid).parent().css('background-color', '#E1F6FA');
+
+                        //3. Group sub display icon period in the following lists.
+                        $('tr td[isgroup="true"]', grid).parent().find('td:first')
+                            .prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display', 'inline-block'));
+
+                        //4. Group sub display check box
+                        // var isAdmin = ${ct:isAdmin()};
+                        var isAdmin = true;
+                        if (isAdmin) {
+                            $('#list > tbody > tr').not('[id^=listghead_0]').each(function () {
+                                var prevLocation = $(this).prev().prop('id');
+                                var nextLocation = $(this).next().prop('id');
+
+                                if (typeof prevLocation !== "undefined" && typeof nextLocation !== "undefined"
+                                    || typeof prevLocation !== "undefined") {
+                                    var position = $(this).prop('id');
+                                    var addCheckBox = '<input role="checkbox" type="checkbox" id="jqg_list_' + position + '" class="cbox" name="jqg_list_' + position + '">&emsp;';
+
+                                    $(this).children().eq(0).prepend(addCheckBox);
+                                }
+                            });
+                        }
+
+                        //group + - toggle
+                        $('span.groupBtns').on('click', function (e) {
+                            if ($(this).hasClass('ui-icon-plus')) {
+                                $(this).removeClass('ui-icon-plus').addClass('ui-icon-minus');
+                            } else {
+                                $(this).removeClass('ui-icon-minus').addClass('ui-icon-plus');
+                            }
+                        });
+
+                        $('.listghead_0').hide(); // hide basic groupHeader
+                    },
+                    ondblClickRow: function (rowid, iRow, iCol, e) {
+                        if (iCol != 0) {
+                            var rowData = $("#list").jqGrid('getRowData', rowid);
+
+                            if ("Y" != linkFlag) {
+                                callCreateTabInFrame(rowData['ossId'] + '_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
+                            } else {
+                                const openNewWindow = window.open("about:blank");
+
+                                if (isAdmin) {
+                                    openNewWindow.location.href = "/oss/edit/" + rowData['ossId'];
+                                } else {
+                                    openNewWindow.location.href = "/oss/view/" + rowData['ossId'];
+                                }
+                            }
+                        }
+                    },
+                });
+            }
+        }
+
+        function serializeObjectHelper() {
             var postData = $('#ossSearch').serializeObject();
 
-            if(postData.ossTypeSearch != null) {
+            if (postData.ossTypeSearch != null) {
                 postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
                 postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
             } else {
@@ -172,307 +548,8 @@
             }
 
             return postData;
-        },
-        deleteOss : function () {
-            var deleteIds = [];
-
-            $("#list input[type=checkbox]").each(function() {
-                if ($(this).is(":checked")) {
-                    var obj = {};
-
-                    var name = $(this).attr('name');
-                    var ossId = name.split("_")[2];
-                    deleteIds.push(ossId);
-                }
-            });
-
-            if (deleteIds.length > 0) {
-                const param = {
-                    category : "fragments",
-                    templateName: "common-fragments",
-                    fragmentName: "promptPopupFragment",
-                    data: { context : "Do you want to delete the oss ?"}
-                };
-                postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
-                    alertify.confirm(res, function (e) {
-                        const comment = $("#promptPopupEditor").summernote('code');
-                        if (e) {
-                            if("" == comment){
-                                alertify.alert(String([[ #{msg.oss.required.deletion} ]]), function(){});
-                                return false;
-                            } else {
-                                oss_lst_fn.multiDelAjax(deleteIds, comment);
-                            }
-                        } else {
-                            return false;
-                        }
-                    });
-                    //initCKEditorToolbar("editor");
-                }, null, function () {
-                    $("#promptPopupEditor").summernote({
-                        height: 150,
-                        callbacks: {
-                            onInit: function() {
-                                var content = $(this).summernote('code');
-                                if (content === '<p><br></p>') {
-                                    $(this).summernote('code', '');
-                                }
-                            }
-                        }
-                    });
-                })
-            } else {
-                alertify.alert(String([[ #{msg.oss.select.ossTable} ]]), function(){});
-            }
-        },
-        multiDelAjax : function (deleteIds, comment) {
-            loading.show();
-            const _param = {"ossIds" : deleteIds, "comment" : comment };
-
-            postAjaxData(_param, "/oss/multiDelAjax", "json", function (res) {
-                loading.hide();
-                var msg = String( [[ #{msg.common.success} ]] );
-
-                if (typeof res.notDelOssList !== "undefined") {
-                    var notDelOss = res.notDelOssList;
-                    msg = String( [[ #{msg.oss.cannot.delete} ]] );
-                    msg += '<br/>';
-                    for (var i in notDelOss) {
-                        msg += '<br/>';
-                        msg += '&emsp;&#8259; ' + notDelOss[i];
-                    }
-                }
-                alertify.alert(msg, function(){
-                    callReloadTabInframe("/oss/list", "oss-list");
-                });
-            }, function () {
-                alertify.error(String([[ #{msg.common.valid2} ]]), 0);
-            })
-        },
-        validateCvssScore : function (e) {
-            let inputValue = $("#cvssScoreInput").val();
-            let numericRegex = /^[0-9.]+$/;
-
-            if (!numericRegex.test(inputValue)) {
-                $("#cvssScoreInput").val(inputValue.replace(/[^0-9.]/g, ''));
-            } else {
-                let floatValue = parseFloat(inputValue);
-
-                if (isNaN(floatValue) || floatValue < 0 || floatValue > 10 || !Number.isInteger(floatValue)) {
-                    $("#cvssScoreInput").val('');
-                }
-            }
         }
-    }
 
-    const oss_lst_grid = {
-        oldRowNum: 20,
-        load: function () {
-            $("#list").jqGrid({
-                type:"GET",
-                datatype: 'json',
-                jsonReader: {
-                    repeatitems: false,
-                    id: 'ossId',
-                    root: function (obj) {
-                        //original RowNum save
-                        list.oldRowNum = $("#list").jqGrid('getGridParam', 'rowNum');
-                        //Change the rowNumber according to the number of lists.
-                        $("#list").jqGrid('setGridParam', { rowNum: obj.rows.length });
-                        $("#list").jqGrid('setGridParam', { defaultRowNum: list.oldRowNum });
-
-                        return obj.rows;
-                    },
-                    page: function (obj) { return obj.page; },
-                    total: function (obj) { return obj.total; },
-                    records: function (obj) { return obj.records; }
-                },
-                colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
-                colModel: [
-                    {
-                        name: 'group', width: 20, align: 'center',
-                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                            return ' colspan=2'
-                        },
-                        formatter: function myFormatter(cellvalue, options, rowObject) {
-                            return rowObject.ossId;
-                        }
-                    }
-                    , {
-                        name: 'ossId', index: 'ossId', width: 80, align: 'center',
-                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                            return ' style="display:none;"';
-                        }
-                    }
-                    , { name: 'ossType', index: 'ossType', width: 70, align: 'center', sortable: false, formatter: fn_grid_com.ossTypeFormat }
-                    , { name: 'ossName', index: 'ossName', width: 200, align: 'left', formatter: fn_grid_com.ossNameLinkFormat }
-                    , { name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left' }
-                    , { name: 'licenseName', index: 'licenseName', width: 200, align: 'left' }
-                    , { name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                    , { name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false }
-                    , { name: 'downloadLocation', index: 'downloadLocation', width: 150, align: 'left', formatter: 'link', formatoptions: { target: '_blank' } }
-                    , { name: 'homepage', index: 'homepage', width: 65, align: 'left', formatter: 'link2', formatoptions: { target: '_blank' } }
-                    , { name: 'summaryDescription', index: 'summaryDescription', width: 150, height: 50, align: 'left' }
-                    , { name: 'cveId', index: 'cveId', hidden: true }
-                    , { name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: 'vuln' }
-                    , {
-                        name: 'groupKey', index: 'groupKey', hidden: true
-                        , cellattr: function (rowId, val, rawObject, cm, rdata) {
-                            var result;
-                            var isGroup = false;
-
-                            if (groupBuffer == val) {
-                                isGroup = true;
-                            } else {
-                                isGroup = false;
-                            }
-
-                            groupBuffer = val;
-
-                            if (isGroup) {
-                                result = 'isgroup="true"';
-                            } else {
-                                result = 'isgroup="false"';
-                            }
-
-                            return result;
-                        }
-                    }
-                ],
-                rowNum: 20,
-                rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
-                rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
-                autowidth: true,
-                pager: '#pager',
-                gridview: true,
-                viewrecords: true,
-                loadonce: false,
-                height: 'auto',
-                grouping: true,
-                groupingView: {
-                    groupField: ['groupKey'],
-                    groupColumnShow: [false]
-                }, // Enter the column name by group.
-                gridComplete: function () {
-                    // tableRefresh();
-                },
-                loadComplete: function (result) {
-                    totalRow = result.records;
-                    var rows = result.rows;
-                    var grid = this;
-
-                    if (totalRow == 0) {
-                        var cStartDate = $("#cStartDate").val() || 0;
-                        var cEndDate = $("#cEndDate").val() || 0;
-                        var diffNum = +cStartDate - +cEndDate;
-
-
-                        var mStartDate = $("#mStartDate").val() || 0;
-                        var mEndDate = $("#mEndDate").val() || 0;
-                        var diffNum2 = +mStartDate - +mEndDate;
-
-                        if ((diffNum > 0 && cEndDate > 0)
-                            || (diffNum2 > 0 && mEndDate > 0)) {
-                            alertify.alert(String([[#{msg.common.search.check.date}]]), function () { });
-                        }
-                    }
-
-                    //rowNum initiate @@1
-                    $("#list").jqGrid('setGridParam', { rowNum: list.oldRowNum });
-
-                    // Insert the unfold button in the existing group header into the group column of the first row for each group (customize the first row to function as a group header).
-                    $('[id^=listghead_0]').each(function () {
-                        var addBtn = "<span style='cursor:pointer;' class='groupBtns ui-icon ui-icon-plus tree-wrap-ltr' onclick=\"$('#list').jqGrid('groupingToggle','" + $(this).attr("id") + "'); $('#" + $(this).next().attr("id") + "').show(); return false;\"> </span>";
-                        var position = $(this).next().next().children().eq(1).text();
-
-                        if (position != "") {
-                            $(this).next().children().eq(0).append(addBtn);
-                        }
-                    });
-                    //coloring groups
-                    //1. exist group button
-                    $('span.groupBtns').trigger('click').parent().parent().css('background-color', '#CDECFA');
-
-                    //2. below lists
-                    $('tr td[isgroup="true"]', grid).parent().css('background-color', '#E1F6FA');
-
-                    //3. Group sub display icon period in the following lists.
-                    $('tr td[isgroup="true"]', grid).parent().find('td:first')
-                        .prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display', 'inline-block'));
-
-                    //4. Group sub display check box
-                    // var isAdmin = ${ct:isAdmin()};
-                    var isAdmin = true;
-                    if (isAdmin) {
-                        $('#list > tbody > tr').not('[id^=listghead_0]').each(function () {
-                            var prevLocation = $(this).prev().prop('id');
-                            var nextLocation = $(this).next().prop('id');
-
-                            if (typeof prevLocation !== "undefined" && typeof nextLocation !== "undefined"
-                                || typeof prevLocation !== "undefined") {
-                                var position = $(this).prop('id');
-                                var addCheckBox = '<input role="checkbox" type="checkbox" id="jqg_list_' + position + '" class="cbox" name="jqg_list_' + position + '">&emsp;';
-
-                                $(this).children().eq(0).prepend(addCheckBox);
-                            }
-                        });
-                    }
-
-                    //group + - toggle
-                    $('span.groupBtns').on('click', function (e) {
-                        if ($(this).hasClass('ui-icon-plus')) {
-                            $(this).removeClass('ui-icon-plus').addClass('ui-icon-minus');
-                        } else {
-                            $(this).removeClass('ui-icon-minus').addClass('ui-icon-plus');
-                        }
-                    });
-
-                    $('.listghead_0').hide(); // hide basic groupHeader
-
-                    // add button in header
-                    if (!oss_lst_data.existTooltip) {
-                        $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
-                            .appendTo($("#jqgh_list_obligation"))
-                            .attr("title", oss_lst_data.obligationInformation)
-                            .tooltip({
-                                content: function () {
-                                    return $(this).prop('title');
-                                }
-                            });
-
-                        $('<i class="fa fa-lg fa-info-circle icon-yellow ml-2"data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
-                            .attr("title", oss_lst_data.licenseTypeInformation)
-                            .tooltip({
-                                content: function () {
-                                    return $(this).prop('title');
-                                }
-                            });
-
-                        $('[data-toggle="tooltip"]').tooltip({html: true});
-                        oss_lst_data.existTooltip = true;
-                    }
-                },
-                ondblClickRow: function(rowid,iRow,iCol,e) {
-                    if(iCol!=0){
-                        var rowData = $("#list").jqGrid('getRowData',rowid);
-
-                        if("Y" != linkFlag) {
-                            callCreateTabInFrame(rowData['ossId']+'_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
-                        } else {
-                            const openNewWindow = window.open("about:blank");
-
-                            if(isAdmin){
-                                openNewWindow.location.href	= "/oss/edit/" + rowData['ossId'];
-                            } else {
-                                openNewWindow.location.href	= "/oss/view/" + rowData['ossId'];
-                            }
-                        }
-                    }
-                },
-                // postData: initParam
-            });
-        }
-    }
-    //]]>
-</script>
+        //]]>
+    </script>
 </th:block>
