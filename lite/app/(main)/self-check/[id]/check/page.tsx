@@ -229,18 +229,19 @@ export default function SelfCheckDetailCheck({ params }: { params: { id: string 
 
   // API for loading OSS check result
   const checkOssRequest = useAPI('get', `/api/lite/selfchecks/${params.id}/oss/check`, {
-    onStart: () => setLoading(true),
     onSuccess: (res) => setOssRows(res.data.verificationOss)
   });
 
   // API for loading license check result
   const checkLicenseRequest = useAPI('get', `/api/lite/selfchecks/${params.id}/licenses/check`, {
-    onSuccess: (res) => setLicenseRows(res.data.verificationLicenses),
-    onFinish: () => setLoading(false)
+    onSuccess: (res) => setLicenseRows(res.data.verificationLicenses)
   });
 
   useEffect(() => {
-    checkOssRequest.executeAsync({}).then(() => checkLicenseRequest.execute({}));
+    setLoading(true);
+    Promise.all([checkOssRequest.executeAsync({}), checkLicenseRequest.executeAsync({})]).finally(
+      () => setLoading(false)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
