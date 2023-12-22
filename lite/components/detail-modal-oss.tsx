@@ -15,7 +15,8 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
   const loadDataRequest = useAPI('get', `/api/lite/oss/${modalId}`, {
     onSuccess: (res) => {
       setData(res.data.oss);
-    }
+    },
+    onError: () => router.replace('/database/oss')
   });
 
   // Load data based on query parameter information

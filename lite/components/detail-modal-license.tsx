@@ -1,17 +1,20 @@
 import { useAPI } from '@/lib/hooks';
 import { RESTRICTIONS } from '@/lib/literals';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
 
 export default function DetailModalLicense({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.License | null>(null);
+  const router = useRouter();
 
   // API for loading data
   const loadDataRequest = useAPI('get', `/api/lite/licenses/${modalId}`, {
     onSuccess: (res) => {
       setData(res.data.license);
-    }
+    },
+    onError: () => router.replace('/database/license')
   });
 
   // Load data based on query parameter information
