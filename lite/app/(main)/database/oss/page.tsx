@@ -40,7 +40,17 @@ export default function OSSList() {
     ],
     hidden: [
       {
-        label: 'OSS Type',
+        label: (
+          <span className="flex items-center gap-x-1.5">
+            OSS Type
+            <i
+              className="text-charcoal fa-solid fa-circle-info"
+              title={['N: None']
+                .concat(Object.entries(OSS_TYPES).map(([key, value]) => `${key}: ${value.name}`))
+                .join('\n')}
+            />
+          </span>
+        ),
         name: 'ossType',
         type: 'checkbox',
         options: [
