@@ -21,7 +21,7 @@ export default function LicenseList() {
   const queryParams = useSearchParams();
 
   // Filters
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<{ userName: string; userId: string }[]>([]);
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
@@ -65,22 +65,14 @@ export default function LicenseList() {
         label: 'Creator',
         name: 'creator',
         type: 'select',
-        options: [
-          { label: 'CDG', value: '0' },
-          { label: 'KSE', value: '1' },
-          { label: 'HJH', value: '2' }
-        ]
+        options: users.map((user) => ({ label: user.userName, value: user.userId }))
       },
       { label: 'Created', name: 'created', type: 'date' },
       {
         label: 'Modifier',
         name: 'modifier',
         type: 'select',
-        options: [
-          { label: 'CDG', value: '0' },
-          { label: 'KSE', value: '1' },
-          { label: 'HJH', value: '2' }
-        ]
+        options: users.map((user) => ({ label: user.userName, value: user.userId }))
       },
       { label: 'Modified', name: 'modified', type: 'date' }
     ]
