@@ -383,9 +383,10 @@ var com_fn = {
 		var btn_Analysis_Result = $(".idenAnalysisResult");
 		var btn_check = $(".btnCheck");
 		var btn_supplement_Notice = $(".supplementNotice");
-		console.log(status);
+		var chkStatus = status||"";
+		
 		if(role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
-			switch(status){
+			switch(chkStatus){
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
@@ -1317,7 +1318,8 @@ var com_fn = {
 			contentType : 'application/json',
 			success : function(data){
 				var status = data.identificationStatus||"";
-				returnFlag = (status == curIdenStatus);
+				var curStatus = curIdenStatus||"";
+				returnFlag = (status == curStatus);
 			},
 			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);
@@ -1671,6 +1673,9 @@ var com_fn = {
     	});
     	
     	return checkEmptyFlag;
+	},
+	closeAlertifyView : function () {
+		$(".ajs-close").trigger("click");
 	}
 }
 </script>

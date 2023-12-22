@@ -5242,4 +5242,36 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			return null;
 		}
 	}
+
+	public static void getDisplayIdentificationBtn(String identificationStatus, String viewOnlyFlag, Map<String, Object> btnShowMap) {
+		if (CommonFunction.isAdmin()) {
+			switch (identificationStatus) {
+				case "" : btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
+				case "PROG": btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
+				case "REQ": btnShowMap.put("reviewBtn", CoConstDef.FLAG_YES); break;
+				case "REV": btnShowMap.put("confirmtBtn", CoConstDef.FLAG_YES); break;
+				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
+			}
+			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("confirmtBtn")) btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+		} else if (viewOnlyFlag.equals("Y")) {
+			btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+		} else {
+			switch (identificationStatus) {
+				case "" : btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
+				case "PROG": btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
+				case "REQ": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
+				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
+			}
+			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("confirmtBtn")) btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+		}
+	}
 }

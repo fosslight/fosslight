@@ -27,10 +27,8 @@
 
                 $('[name=\'commentInput\']').unbind('keydown').bind('keydown', function (event) {
                     var doPrevent = false;
-                    console.log("ehrekrhek");
 
                     if (event.keyCode === 8 && $('[name=\'commentInput\']').html() === '<p><br></p>'){
-console.log("dgjkdjslagjl")
                         event.preventDefault();
                     }
                 });

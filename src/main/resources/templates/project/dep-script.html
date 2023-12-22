@@ -130,11 +130,8 @@ var dep_evt = {
 
 						dep_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "EXCEL_FILE") {
-						if(result[1].length != 0) {
-							$('.sheetSelectPop').show();
-							$('.sheetSelectPop .sheetNameArea').children().remove();
-							$('.sheetSelectPop .sheetNameArea').text('');
-							for(var i = 0; i < result[1].length; i++) {
+						if (result[1].length != 0) {
+							for (var i = 0; i < result[1].length; i++) {
 								var num = i+1;
 								var checkedTxt = "";
 								
@@ -143,17 +140,51 @@ var dep_evt = {
 									checkedTxt = "checked";
 								}
 								
-								$('.sheetSelectPop .sheetNameArea').append('<li><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="sheetNum" '+checkedTxt+'>'
-										+'<label for="sheet'+result[1][i].no+'">'+result[1][i].name+'</label></li>');
-								$('.sheetSelectPop .sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+' onchange="com_fn.sheetNameSelect(this)">'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
 							}
+							
+							$('#sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
 						}
+						
+						const sheetHtml = $(".sheetSelectPop").html();
+						$("#sheetBody").empty();
+						
+						if(!alertify.selectSheet){
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
 						
 						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						dep_fn.makeFileTag(result[0][0]);	
+						dep_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
 						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -197,6 +228,29 @@ var dep_evt = {
 						licenseNames.push(tag);
 					}
 				});
+			}
+		});
+		
+		$("select[name=depProjectSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("pNm" == value) {
+				$("input[name=depPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=depPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=depPrjSearchText]").addClass("autoComProjectNmConf");
+				
+				callAutoCompleteFnc("autoComProjectNmConf");
+			} else if ("pId" == value) {
+				$("input[name=depPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=depPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=depPrjSearchText]").addClass("autoComProjectIdConf");
+				
+				callAutoCompleteFnc("autoComProjectIdConf");
+			} else {
+				$("input[name=depPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=depPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=depPrjSearchText]").addClass("resetAutoComp");
+				
+				callAutoCompleteFnc("resetAutoComp");
 			}
 		});
 	}
@@ -624,7 +678,7 @@ var dep_fn = {
 		});
 		
 		if(sheetNum.length == 0) {
-			alert([[#{msg.common.check.sheet}]]);
+			alertify.alert([[#{msg.common.check.sheet}]]);
 			
 			return;
 		} else {
@@ -658,48 +712,50 @@ var dep_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-		$.ajax({
-			url : '/project/getSheetData',
-			type : 'POST',
-			data : JSON.stringify(finalData),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function(data){
-				loading.hide();
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
 
-				if("false" == data.isValid) {
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
+					if("false" == data.isValid) {
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
 					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-					}
-				} else {
-					$('.sheetSelectPop').hide();
+						if(data.externalData) { // validData 표시
+							depValidMsgData = data.externalData;
+						}
 
-					if(data.externalData) { // validData 표시
-						depValidMsgData = data.externalData;
-					}
+						if(data.externalData2) { // validData 표시
+							depDiffMsgData = data.externalData2;
+						}
 
-					if(data.externalData2) { // validData 표시
-						depDiffMsgData = data.externalData2;
-					}
+						dep_fn.makeOssList(data.resultData);
 
-					dep_fn.makeOssList(data.resultData);
-
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
-					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
 					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.ossUpload').children().remove();
+					alertify.error([[#{msg.common.valid}]], 0);
 				}
-			},
-			error: function(data){
-				loading.hide();
-				$('.ossUpload').children().remove();
-				alertify.error([[#{msg.common.valid}]], 0);
-			}
-		});
+			});
+		} finally {
+			com_fn.closeAlertifyView();
+		}
 	},
 
 	makeOssList : function(data){

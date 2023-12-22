@@ -2938,6 +2938,10 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", partnerFlag);
 		
+		Map<String, Object> btnShowMap = new HashMap<>();
+		CommonFunction.getDisplayIdentificationBtn(avoidNull(project.getIdentificationStatus()), avoidNull(project.getViewOnlyFlag()), btnShowMap);
+		model.addAttribute("display", btnShowMap);
+		
 		if (initDiv.equals("4")) {
 			return "project/identification-android";
 		} else {
@@ -4625,12 +4629,12 @@ public class ProjectController extends CoTopComponent {
 		Map<String, String> map = new HashMap<String, String>();
 		Project prjBean = projectService.getProjectDetail(project);
 		
-		map.put("projectStatus", prjBean.getStatus());
-		map.put("identificationStatus", prjBean.getIdentificationStatus());
-		map.put("verificationStatus", prjBean.getVerificationStatus());
-		map.put("distributionStatus", prjBean.getDestributionStatus());
-		map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
-		map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
+		map.put("projectStatus", avoidNull(prjBean.getStatus()));
+		map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()));
+		map.put("verificationStatus", avoidNull(prjBean.getVerificationStatus()));
+		map.put("distributionStatus", avoidNull(prjBean.getDestributionStatus()));
+		map.put("distributeDeployYn", avoidNull(prjBean.getDistributeDeployYn()));
+		map.put("distributeDeployTime", avoidNull(prjBean.getDistributeDeployTime()));
 		map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
 		map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));

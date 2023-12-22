@@ -120,12 +120,8 @@ var bin_evt = {
 
 						bin_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "EXCEL_FILE") {
-						if(result[1].length != 0) {
-							$('.sheetSelectPop').show();
-							$('.sheetSelectPop .sheetNameArea').children().remove();
-							$('.sheetSelectPop .sheetNameArea').text('');
-							
-							for(var i = 0; i < result[1].length; i++) {
+						if (result[1].length != 0) {
+							for (var i = 0; i < result[1].length; i++) {
 								var num = i+1;
 								var checkedTxt = "";
 								
@@ -133,11 +129,45 @@ var bin_evt = {
 									checkedTxt = "checked";
 								}
 								
-								$('.sheetSelectPop .sheetNameArea').append('<li><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="sheetNum" '+checkedTxt+'>'
-										+'<label for="sheet'+result[1][i].no+'">'+result[1][i].name+'</label></li>');
-								$('.sheetSelectPop .sheetApply').attr('onclick', 'bin_fn.getSheetData('+result[0][0].registSeq+')')
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+' onchange="com_fn.sheetNameSelect(this)">'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
 							}
+							
+							$('#sheetApply').attr('onclick', 'bin_fn.getSheetData('+result[0][0].registSeq+')');
 						}
+						
+						const sheetHtml = $(".sheetSelectPop").html();
+						$("#sheetBody").empty();
+						
+						if(!alertify.selectSheet){
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
 						
 						$('#binCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -258,6 +288,29 @@ var bin_evt = {
 						licenseNames.push(tag);
 					}
 				});
+			}
+		});
+		
+		$("select[name=binProjectSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("pNm" == value) {
+				$("input[name=binPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=binPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=binPrjSearchText]").addClass("autoComProjectNmConf");
+				
+				callAutoCompleteFnc("autoComProjectNmConf");
+			} else if ("pId" == value) {
+				$("input[name=binPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=binPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=binPrjSearchText]").addClass("autoComProjectIdConf");
+				
+				callAutoCompleteFnc("autoComProjectIdConf");
+			} else {
+				$("input[name=binPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=binPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=binPrjSearchText]").addClass("resetAutoComp");
+				
+				callAutoCompleteFnc("resetAutoComp");
 			}
 		});
 	}
@@ -720,11 +773,11 @@ var bin_fn = {
 			}
 		});
 		
-		if(sheetNum.length == 0){
+		if (sheetNum.length == 0) {
 			alertify.alert([[#{msg.common.check.sheet}]], function(){});
 			
 			return;
-		}else{
+		} else {
 			loading.show();
 			
 			var target = $("#binList");
@@ -801,54 +854,56 @@ var bin_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-		$.ajax({
-			url : '/project/getSheetData',
-			type : 'POST',
-			data : JSON.stringify(finalData),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function(data){
-				loading.hide();
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
 
-				if("false" == data.isValid) {
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
+					if("false" == data.isValid) {
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
 					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-					}
-				} else {
-					$('.sheetSelectPop').hide();
-					
-					if(data.externalData) { // validData 표시
-						binValidMsgData = data.externalData;
-					}
-					
-					if(data.externalData2) { // validData 표시
-						binDiffMsgData = data.externalData2;
-					}
-					
+						if(data.externalData) { // validData 표시
+							binValidMsgData = data.externalData;
+						}
+						
+						if(data.externalData2) { // validData 표시
+							binDiffMsgData = data.externalData2;
+						}
+						
 
-					if(data.externalData3) { // validData 표시
-						binInfoMsgData = data.externalData3;
+						if(data.externalData3) { // validData 표시
+							binInfoMsgData = data.externalData3;
+						}
+						
+						bin_fn.makeOssList(data.resultData);
+						
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
 					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.ossUpload').children().remove();
 					
-					bin_fn.makeOssList(data.resultData);
-					
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
-					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr, function(){});
-					}
+					alertify.error([[#{msg.common.valid}]], 0);
 				}
-			},
-			error: function(data){
-				loading.hide();
-				$('.ossUpload').children().remove();
-				
-				alertify.error([[#{msg.common.valid}]], 0);
-			}
-		});
+			});
+		} finally {
+			com_fn.closeAlertifyView();
+		}
 	},
 
 	makeOssList : function(data){
