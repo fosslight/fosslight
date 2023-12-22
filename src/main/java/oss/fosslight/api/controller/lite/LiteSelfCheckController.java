@@ -11,12 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.*;
-import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url;
 import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
@@ -24,13 +22,13 @@ import oss.fosslight.service.ApiSelfCheckService;
 import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
-import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @Slf4j
@@ -252,7 +250,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @PostMapping("/selfchecks/{id}/license-notice-email")
     public @ResponseBody ResponseEntity<Object> sendLicenseNoticeEmail(
-            @RequestHeader(value="Origin") String origin,
+            @RequestHeader(value = "Origin") String origin,
             @PathVariable("id") String id
     ) {
         try {

@@ -30,6 +30,8 @@ public class SelfCheckDto {
 
     String comment;
 
+    String creator;
+
     private List<String> fileIds = new ArrayList<>();
 
     public void setPackageFileIds(String idText) {

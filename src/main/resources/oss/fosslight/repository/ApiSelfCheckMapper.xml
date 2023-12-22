@@ -186,6 +186,7 @@
 		FROM PRE_PROJECT_MASTER T1
 
 		WHERE T1.USE_YN = 'Y'
+		  AND T1.CREATOR = #{creator}
 
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(projectId)">
 			AND T1.PRJ_ID = #{projectId}
