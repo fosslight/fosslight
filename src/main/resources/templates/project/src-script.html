@@ -74,10 +74,10 @@ var src_evt = {
 					break;
 			}
 			var postData = $('#srcProjectForm').serializeObject();
-			
 			$('#_srcProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
 			$('.srcProject1').show();
 			$('.srcProject2').hide();
+			tableRefreshNew("_srcProjectList1");
 		});
 		
 		var accept1 = '';
@@ -121,9 +121,6 @@ var src_evt = {
 						src_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "EXCEL_FILE") {
 						if(result[1].length != 0) {
-							$('.sheetSelectPop').show();
-							$('.sheetSelectPop .sheetNameArea').children().remove();
-							$('.sheetSelectPop .sheetNameArea').text('');
 							for(var i = 0; i < result[1].length; i++) {
 								var num = i+1;
 								var checkedTxt = "";
@@ -132,17 +129,51 @@ var src_evt = {
 									checkedTxt = "checked";
 								}
 								
-								$('.sheetSelectPop .sheetNameArea').append('<li><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="sheetNum" '+checkedTxt+'>'
-										+'<label for="sheet'+result[1][i].no+'">'+result[1][i].name+'</label></li>');
-								$('.sheetSelectPop .sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+' onchange="com_fn.sheetNameSelect(this)">'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
 							}
+							
+							$('#sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
 						}
+						
+						const sheetHtml = $(".sheetSelectPop").html();
+						$("#sheetBody").empty();
+						
+						if(!alertify.selectSheet){
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
 						
 						$('#srcCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						src_fn.makeFileTag(result[0][0]);	
+						src_fn.makeFileTag(result[0][0]);
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
 						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -187,6 +218,29 @@ var src_evt = {
 						licenseNames.push(tag);
 					}
 				});
+			}
+		});
+		
+		$("select[name=srcProjectSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("pNm" == value) {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=srcPrjSearchText]").addClass("autoComProjectNmConf");
+				
+				callAutoCompleteFnc("autoComProjectNmConf");
+			} else if ("pId" == value) {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=srcPrjSearchText]").addClass("autoComProjectIdConf");
+				
+				callAutoCompleteFnc("autoComProjectIdConf");
+			} else {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=srcPrjSearchText]").addClass("resetAutoComp");
+				
+				callAutoCompleteFnc("resetAutoComp");
 			}
 		});
 	}
@@ -265,7 +319,7 @@ var src_fn = {
 				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};
 		
 		// 닉네임 체크
-//		src_fn.nickNameValid(mainData, finalData);
+		src_fn.nickNameValid(mainData, finalData);
 	},
 	// 저장
 	exeSave : function(finalData){
@@ -319,7 +373,7 @@ var src_fn = {
 	changeSelectOption : function(){
 		var value = $('input[name=srcSelectOption]:checked').val();
 		
-		if(value == 1){
+		if(value == 1){autoComProjectNmConf
 			$('#srcUploadSearch').show();
 			$('#srcProjectSearch').hide();
 			$('.srcProjectSearch').hide();
@@ -676,48 +730,50 @@ var src_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-		$.ajax({
-			url : '/project/getSheetData',
-			type : 'POST',
-			data : JSON.stringify(finalData),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function(data){
-				loading.hide();
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
 
-				if("false" == data.isValid) {
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
+					if("false" == data.isValid) {
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
 					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-					}
-				} else {
-					$('.sheetSelectPop').hide();
+						if(data.externalData) { // validData 표시
+							srcValidMsgData = data.externalData;
+						}
 
-					if(data.externalData) { // validData 표시
-						srcValidMsgData = data.externalData;
-					}
+						if(data.externalData2) { // validData 표시
+							srcDiffMsgData = data.externalData2;
+						}
 
-					if(data.externalData2) { // validData 표시
-						srcDiffMsgData = data.externalData2;
-					}
+						src_fn.makeOssList(data.resultData);
 
-					src_fn.makeOssList(data.resultData);
-
-					if(data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
-					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
 					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.ossUpload').children().remove();
+					alertify.error([[#{msg.common.valid}]], 0);
 				}
-			},
-			error: function(data){
-				loading.hide();
-				$('.ossUpload').children().remove();
-				alertify.error([[#{msg.common.valid}]], 0);
-			}
-		});
+			});
+		} finally {
+			com_fn.closeAlertifyView();
+		}
 	},
 
 	makeOssList : function(data){
@@ -1261,8 +1317,6 @@ var src_grid = {
 				if(srcInfoMsgData) {
 					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
-				
-				$("#srcList_toppager").remove();
 			},
 			removeHighLight : true
 		});

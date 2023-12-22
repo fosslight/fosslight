@@ -20,14 +20,14 @@
                             <span class="text-lg-gray text-smaller mx-1" id="vCreated"></span>
                         </div>
                         <div class="col-sm-4 float-right">
-                        	<div class="float-right" th:if="${not @CommonFunction.isAdmin() and (project.completeYn eq 'Y' or project.distributeDeployYn eq 'Y' or project.identificationStatus eq 'REV')}">
+                        	<div class="float-right" th:if="${not @CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
-                            <div class="float-right" th:if="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.distributeDeployYn ne 'Y'}">
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomConfirm" th:text="Confirm"></button>
-                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomRequest" th:text="Request"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3" id="bomReviewStart" th:text="'Review Start'"></button>
+                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" th:style="${#strings.equals(display.confirmtBtn, 'N')} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" th:style="${#strings.equals(display.rejectBtn, 'N')} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" th:style="${#strings.equals(display.requestBtn, 'N')} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3" th:style="${#strings.equals(display.reviewBtn, 'N')} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
                         </div>
                     </div>
@@ -109,7 +109,7 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control" name="3rdSearchText"/>
+                                                        <input type="text" class="form-control autoComConfParty" name="3rdSearchText"/>
                                                         <span class="input-group-append">
                                                             <button type="button" class="btn btn-default btn-flat" id="3rdSearchBtn" th:text="Search"></button>
                                                         </span>
@@ -136,7 +136,7 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control" name="prjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf" name="prjSearchText">
                                                         <span class="input-group-append">
                                                             <button type="button" class="btn btn-default btn-flat" id="3rdProjectSearchBtn" th:text="Search"></button>
                                                         </span>
@@ -259,7 +259,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-7">
-                                                        	<div class="ajax-file-upload-container" style="margin-top:0px; width:100%;">
+                                                        	<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
                                                         		<ul class="depCsvFileArea">
                                                         			<th:block th:if="${project.depCsvFile != null}">
                                                         				<th:block th:each="csvFile : ${project.depCsvFile}">
@@ -297,7 +297,7 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control" name="depPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf" name="depPrjSearchText">
                                                         <span class="input-group-append">
                                                             <button type="button" class="btn btn-default btn-flat" id="depProjectSearchBtn" th:text="Search"></button>
                                                         </span>
@@ -392,7 +392,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-7">
-                                                        	<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                        	<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
                                                         		<ul class="csvFileArea">
                                                         			<th:block th:if="${project.csvFile != null}">
                                                         				<th:block th:each="csvFile : ${project.csvFile}">
@@ -430,7 +430,7 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control" name="srcPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf" name="srcPrjSearchText">
                                                         <span class="input-group-append">
                                                             <button type="button" class="btn btn-default btn-flat" id="srcProjectSearchBtn" th:text="Search"></button>
                                                         </span>
@@ -524,7 +524,7 @@
                                                                     <div class="fileuploader" id="binCsvFile" th:text="Upload"></div>
                                                                 </div>
                                                                 <div class="col-md-5">
-                                                            		<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                            		<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
                                                             			<ul class="binFileArea">
                                                         					<th:block th:if="${project.binCsvFile != null}">
                                                         						<th:block th:each="csvFile : ${project.binCsvFile}">
@@ -548,7 +548,7 @@
                                                                     <div class="fileuploader" id="binBinaryFile" th:text="Upload"></div>
                                                                 </div>
                                                                 <div class="col-md-5">
-                                                                	<div class="ajax-file-upload-container binary" style="margin-top:0px;">
+                                                                	<div class="ajax-file-upload-container binary" style="margin-top: 0px; width: 100%;">
                                                                 		<ul class="binBinaryFileArea">
                                                         					<th:block th:if="${project.binBinaryFile != null}">
                                                         						<th:block th:each="csvFile : ${project.binBinaryFile}">
@@ -588,7 +588,7 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control" name="binPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf" name="binPrjSearchText">
                                                         <span class="input-group-append">
                                                             <button type="button" class="btn btn-default btn-flat" id="binProjectSearchBtn" th:text="Search"></button>
                                                         </span>
@@ -650,12 +650,7 @@
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <!-- <div class="row float-left pl-2">
-                                        <button type="button"
-                                            class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3">Bulk Edit</button>
-                                    </div> -->
-                                </div>
+                                <div class="col-md-6"></div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
                                         <button type="button" th:onclick="|party_evt.reset()|" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Reset"></button>
@@ -822,5 +817,36 @@
             </section>
         </div>
     </div>
+    
+    <div class="sheetSelectPop" style="display: none;">
+		<div class="row" style="width: 300px;">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row">
+    					<div class="col-12">
+							<table class="table table-hover text-nowrap sheetTable">
+								<thead>
+									<tr>
+                       					<th class="text-center">
+                       						<input class="form-check-input" id="allCheck" type="checkbox" value="Y">
+											<label class="form-check-label text-blue-gray" for="allCheck" style="font-weight: normal;"></label>
+                       					</th>
+                        				<th class="text-left" th:text="sheetName"></th>
+                   					</tr>
+								</thead>
+								<tbody id="sheetBody"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout" style="width: 300px;">
+			<div class="col-12">
+				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|com_fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:id="sheetApply" th:text="Ok"></button>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

@@ -2653,14 +2653,15 @@ var existsTabName = function (tabNm) {
 var securityTableWidth = 0;
 var tableRefreshNew = function (id) {
     const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
-        , "_binProjectList1", "_binProjectList2", "_binAddList", "list", "totalList", "fixedList", "notFixedList"];
+        , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList"];
 
-    if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
+    if ("_srcProjectList1" == id || "_srcProjectList2" == id || "_srcAddList" == id || "_depProjectList1" == id || "_depProjectList2" == id || "_depAddList" == id
+    		|| "_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
         window.setTimeout(function () {
             var width = $(".card-body").width() - 40;
             $('.ui-jqgrid-btable').each(function () {
                 var id = $(this).attr('id');
-                if ("_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
+                if (tableRefreshList.includes(id)) {
                     $(this).jqGrid('setGridWidth', 0, true);
                     $(this).jqGrid('setGridWidth', width, true);
                 }
@@ -3158,4 +3159,94 @@ function deleteCookie(cookieName) {
 
 function selectLang(lang) {
     window.location.replace('?lang=' + lang);
+}
+
+function callAutoCompleteFnc(value) {
+	var autoCompleteTags = [];console.log(value);
+	var target = "." + value;
+	
+	if ("autoComConfPartyId" == value) {
+		if (autoComplete.partyConfIdTags.length == 0) {
+			commonAjax.getPartnerConfIdTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoCompleteTags.push(obj.partnerId);
+                        }
+                    })
+                }
+            });
+		} else {
+			autoCompleteTags = autoComplete.partyConfIdTags;
+		}
+	} else if ("autoComConfSwNm" == value) {
+		if (autoComplete.softwareConfNameTags.length == 0) {
+			commonAjax.getPartnerConfSwNmTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoCompleteTags.push(obj.softwareName);
+                        }
+                    })
+                }
+            });
+    	} else {
+			autoCompleteTags = autoComplete.softwareConfNameTags;
+		}
+	} else if ("autoComConfParty" == value) {
+		if (autoComplete.partyConfNameTags.length == 0) {
+			commonAjax.getPartnerConfNmTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoCompleteTags.push(obj.partnerName);
+                        }
+                    })
+                }
+            });
+		} else {
+			autoCompleteTags = autoComplete.partyConfNameTags;
+		}
+	} else if ("autoComProjectNmConf" == value) {
+		if (autoComplete.projectNameConfTags.length == 0) {
+			commonAjax.getProjectNameConfTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoCompleteTags.push(obj.prjName);
+                        }
+                    })
+                }
+            });
+		} else {
+			autoCompleteTags = autoComplete.projectNameConfTags;
+		}
+	} else if ("autoComProjectIdConf" == value) {
+		if (autoComplete.projectIdConfTags.length == 0) {
+			commonAjax.getProjectIdConfTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoCompleteTags.push(obj.prjId);
+                        }
+                    })
+                }
+            });
+		} else {
+			autoCompleteTags = autoComplete.projectIdConfTags;
+		}
+	}
+	
+	$(target).autocomplete({
+    	source: autoCompleteTags, minLength: 0, open: function () {
+        	$(this).attr('state', 'open');
+   		}, close: function () {
+      		$(this).attr('state', 'closed');
+ 		}
+ 	})
+	.focus(function () {
+   		if ($(this).attr('state') != 'open') {
+        	$(this).autocomplete("search");
+     	}
+	});
 }
