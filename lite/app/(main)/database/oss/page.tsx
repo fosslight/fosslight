@@ -21,6 +21,7 @@ export default function OSSList() {
   const queryParams = useSearchParams();
 
   // Filters
+  const [users, setUsers] = useState<any[]>([]);
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'OSS Name', name: 'ossName', type: 'char-exact' },
@@ -123,6 +124,11 @@ export default function OSSList() {
   const countPerPage = 10;
   const currentPage = Number(queryParams.get('p') || '1');
 
+  // API for loading users
+  const loadUsersRequest = useAPI('get', '/api/lite/users', {
+    onSuccess: (res) => setUsers(res.data)
+  });
+
   // API for loading rows
   const loadRowsRequest = useAPI('get', '/api/lite/oss', {
     onStart: () => setLoading(true),
@@ -142,6 +148,7 @@ export default function OSSList() {
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
+    loadUsersRequest.execute({});
     loadRowsRequest.execute({
       params: {
         ...filtersForm.watch(),
