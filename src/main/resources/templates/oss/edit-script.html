@@ -968,7 +968,8 @@
                     markTxt += ' <span> ' + ossLicenseComb + ' </span> ';
                 }
 
-                markTxt += `<a>${licenseName}</a>`;
+                markTxt += "<a href=\"#none\" onclick=\"callCreateTabInFrame('" + row.licenseId + "_License', '" + url + "', 'license-edit_" + row.licenseId + "', true)\">" + licenseName + "</a>";
+
             });
 
             var andTxts = markTxt.split('<span> OR </span>');

@@ -114,8 +114,8 @@
 			, T1.LICENSE_NAME
 			, T2.CD_DTL_NM AS LICENSE_TYPE
             , CONCAT(
-            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i>]]>',	'')
-            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-lg\" title=\"Source Code\"></i>]]>',	'')
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-5x\" title=\"Notice\"></i>]]>',	'')
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-5x\" title=\"Source Code\"></i>]]>',	'')
             ) AS OBLIGATION
             , CONCAT(
             	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N') 
@@ -633,8 +633,8 @@
 			, T2.CD_DTL_NM AS LICENSE_TYPE 
 			, T1.LICENSE_TYPE AS LICENSE_TYPE_VAL
 			, CONCAT(
-            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-lg\" title=\"Notice\"></i>]]>',	'')
-            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-lg\" title=\"Source Code\"></i>]]>',	'')
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-5x\" title=\"Notice\"></i>]]>',	'')
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-5x\" title=\"Source Code\"></i>]]>',	'')
             ) AS OBLIGATION
             , CONCAT(
             	IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N')

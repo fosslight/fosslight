@@ -150,10 +150,10 @@
             typeCodes: [],
             licenseTypeInformation:
                 "<div class=\"p-1\">" +
-                        "<div style=\"float:left\">" +
+                    "<div style=\"float:left\">" +
                         "<span class=\"badge badge-primary mr-1\">Multi</span>" +
-                        "<strong class=\"ml-1\">Multi License</strong>" +
-                        "<br class=\"ml-1\">The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
+                        "<strong>Multi License</strong>" +
+                        "<br>The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
                     "</div>" +
                     "<div>" +
                         "<span class=\"badge badge-info mr-1\">Dual</span>" +
@@ -169,10 +169,10 @@
             obligationInformation:
                 "<div class=\"p-1\">" +
                     "<div class=\"mb-1\">" +
-                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-1-5x\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
                     "</div>" +
                     "<div>" +
-                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-5x\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
                     "</div>" +
                 "</div>",
             existTooltip: false,
@@ -219,7 +219,7 @@
                             const comment = $("#promptPopupEditor").summernote('code');
                             if (e) {
                                 if ("" == comment) {
-                                    alertify.alert(String([[ #{msg.oss.required.deletion}]]), function () {
+                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
                                     });
                                     return false;
                                 } else {
@@ -244,7 +244,7 @@
                         });
                     })
                 } else {
-                    alertify.alert(String([[ #{msg.oss.select.ossTable}]]), function () {
+                    alertify.alert([[#{msg.oss.select.ossTable}]], function () {
                     });
                 }
             },
@@ -254,11 +254,11 @@
 
                 postAjaxData(_param, "/oss/multiDelAjax", "json", function (res) {
                     loading.hide();
-                    var msg = String([[ #{msg.common.success}]]);
+                    var msg = String([[ #{msg.common.success} ]]);
 
                     if (typeof res.notDelOssList !== "undefined") {
                         var notDelOss = res.notDelOssList;
-                        msg = String([[ #{msg.oss.cannot.delete}]]);
+                        msg = String([[#{msg.oss.cannot.delete}]]);
                         msg += '<br/>';
                         for (var i in notDelOss) {
                             msg += '<br/>';
@@ -269,7 +269,7 @@
                         callReloadTabInframe("/oss/list", "oss-list");
                     });
                 }, function () {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error(String([[#{msg.common.valid2}]]), 0);
                 })
             },
             validateCvssScore: function (e) {
@@ -439,7 +439,6 @@
                             $('[data-toggle="tooltip"]').tooltip({html: true});
                             oss_lst_data.existTooltip = true;
                         }
-
                         resizingJqGidSet();
                     },
                     loadComplete: function (result) {
@@ -515,6 +514,8 @@
                         });
 
                         $('.listghead_0').hide(); // hide basic groupHeader
+
+                        resizingJqGidSet();
                     },
                     ondblClickRow: function (rowid, iRow, iCol, e) {
                         if (iCol != 0) {

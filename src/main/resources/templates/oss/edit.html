@@ -76,15 +76,15 @@
                                     </div>
                                     <div class="form-group row" th:if="${detail?.ossType}">
                                         <div class="col-2">
-                                            <label class="text-gray" th:text="#{msg.common.field.OSS.type}"></label>
+                                            <label  th:text="#{msg.common.field.OSS.type}"></label>
                                         </div>
                                         <div class="col-9">
                                             <span class="badge badge-primary mr-1 text-sm"
-                                                  th:if="${#strings.contains(detail?.ossType, 'M')}">M</span>
+                                                  th:if="${#strings.contains(detail?.ossType, 'M')}">Multi</span>
                                             <span class="badge badge-success mr-1 text-sm"
-                                                  th:if="${#strings.contains(detail?.ossType, 'V')}">V</span>
+                                                  th:if="${#strings.contains(detail?.ossType, 'V')}">v-diff</span>
                                             <span class="badge badge-info mr-1 text-sm"
-                                                  th:if="${#strings.contains(detail?.ossType, 'D')}">D</span>
+                                                  th:if="${#strings.contains(detail?.ossType, 'D')}">Dual</span>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -164,8 +164,8 @@
                                             <i class="far fa-file-code text-secondary fa-lg mx-1" title="Notice"></i>
                                         </span>
                                             <span th:if="${#strings.equals('11', detail?.obligationType)}">
-                                            <i class="far fa-file-code text-secondary fa-lg mx-1" title="Notice"></i>
-                                            <i class="far fa-file-alt text-secondary fa-lg mx-1" title="Source Code"></i>
+                                            <i class="far fa-file-code fa-1-5x mr-2" title="Notice"></i>
+                                            <i class="far fa-file-alt fa-1-5x mr-2" title="Source Code"></i>
                                         </span>
                                         </div>
                                     </div>

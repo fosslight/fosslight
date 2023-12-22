@@ -22,10 +22,10 @@
             tooltipCont:
                 "<div class=\"p-1\">" +
                     "<div class=\"mb-1\">" +
-                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-lg\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-1-5x\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
                     "</div>" +
                     "<div>" +
-                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-5x\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
                     "</div>"+
                 "</div>",
             existTooltip: false,
@@ -383,6 +383,7 @@
 // 						}
 // 					});
                         }
+                        resizingJqGidSet
                     },
                     loadComplete: function (result) {
                         totalRow = result.records;
@@ -402,9 +403,7 @@
                                 });
                             }
                         }
-
-
-                        tableRefreshNew("list");
+                        resizingJqGidSet
                     },
                     onSelectRow: function (id) {
                         $('#' + id + 'description').width(130).height(140);

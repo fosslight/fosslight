@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="syncPopupFragment">
-    <div class="row p-3" id="wrap" style="padding-top: 10px;">
-        <div class="col-12">
-            <div class="statisticsLayout">
-                <input name="syncRefOssId" type="hidden"/>
-                <input name="ossIds" type="hidden"/>
-                <input name="initCheck" type="hidden" value=0/>
-                <div class="grdSetSyncPopup">
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="jqgridSet grdItemSyncPopup first">
-                                <table id="_ossList">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
+    <div class="custom-layout">
+        <div class="row p-3" id="wrap" style="padding-top: 10px;">
+            <div class="col-12">
+                <div class="statisticsLayout">
+                    <input name="syncRefOssId" type="hidden"/>
+                    <input name="ossIds" type="hidden"/>
+                    <input name="initCheck" type="hidden" value=0/>
+                    <div class="grdSetSyncPopup">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="jqgridSet grdItemSyncPopup first">
+                                    <table id="_ossList">
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="grdItemSyncPopup">
-                                <div id="ossDetailInfo"></div>
+                            <div class="col-6">
+                                <div class="grdItemSyncPopup">
+                                    <span><h6 class="text-bold text-blue-gray">Synchronize OSS Attributes</h6></span>
+                                    <div id="ossDetailInfo"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row px-3">
-        <div class="col-12">
-            <div class="syncPopupEditor">
-                <textarea class="form-control" id="syncOssEditor" rows="5"></textarea>
+        <div class="row px-3">
+            <div class="col-12">
+                <div class="syncPopupEditor">
+                    <textarea class="form-control" id="syncOssEditor" rows="5"></textarea>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row p-3">
-        <div class="col-12">
-            <input class="btn btn-secondary btn-sm px-3" onclick="sync_popup_fn.syncClose();" type="button" value="Cancel"/>
-            <input class="btn btn-info btn-sm float-right px-3" onclick="sync_popup_fn.syncSave();" type="button" value="OK"/>
+        <div class="row p-3">
+            <div class="col-12">
+                <input class="btn btn-secondary btn-sm px-3" onclick="sync_popup_fn.syncClose();" type="button" value="Cancel"/>
+                <input class="btn btn-info btn-sm float-right px-3" onclick="sync_popup_fn.syncSave();" type="button" value="OK"/>
+            </div>
         </div>
     </div>
     <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
@@ -253,99 +256,151 @@
     </script>
 </th:block>
 <th:block th:fragment="syncDetailViewFragment">
-    <div class="card" style="overflow-y: scroll; height: auto; font-size: .8rem">
-        <div class="card-header" style="height: 80%">
-            <strong>Synchronize OSS Attributes</strong>
-        </div>
-        <!-- /.card-header -->
-        <!-- form start -->
-        <div class="card-body">
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input checked="checked" id="Declared License" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.declaredLicense}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <span th:text="${ossInfo.licenseName}"></span>
-                    </div>
-                </div>
-            </div>
-            <hr/>
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input checked="checked" id="Detected License" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.detectedLicense}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <span th:text="${ossInfo.detectedLicense}"></span>
-                    </div>
-                </div>
-            </div>
-            <hr/>
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input id="Download Location" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.downloadLocation}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">
-                            <span th:text="${downloadLocation}"></span><br/>
-                        </th:block>
-                    </div>
-                </div>
-            </div>
-            <hr/>
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input id="Home Page" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.homepage}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <span th:text="${ossInfo.homepage}"></span>
-                    </div>
-                </div>
-            </div>
-            <hr/>
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input id="Summary Description" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.summaryDescription}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <span th:text="${ossInfo.summaryDescription}"></span>
-                    </div>
-                </div>
-            </div>
-            <hr/>
-            <div class="form-group my-1">
-                <div class="row">
-                    <div class="col-1">
-                        <input id="Attribution" type="checkbox">
-                    </div>
-                    <div class="col-3">
-                        <strong th:text="#{msg.common.field.attribution}"></strong>
-                    </div>
-                    <div class="col-7 ml-2">
-                        <span th:text="${ossInfo.attribution}"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="tbws1">
+        <table class="dCase">
+            <colgroup>
+                <col width="2"/>
+                <col width="170"/>
+                <col/>
+            </colgroup>
+            <tbody>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Declared License" checked="checked"></th>
+                <th class="dCase" th:text="#{msg.common.field.declaredLicense}"></th>
+                <td class="dCase">[[${ossInfo.licenseName}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Detected License" checked="checked"></th>
+                <th class="dCase" th:text="#{msg.common.field.detectedLicense}"></th>
+                <td class="dCase">[[${ossInfo.detectedLicense}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Copyright"></th>
+                <th class="dCase" th:text="#{msg.common.field.Copyright}"></th>
+                <td class="dCase">[[${ossInfo.copyright}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Download Location"></th>
+                <th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
+                <td class="dCase">
+                    <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">
+                        <span th:text="${downloadLocation}"></span><br/>
+                    </th:block>
+                </td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Home Page"></th>
+                <th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
+                <td class="dCase">[[${ossInfo.homepage}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Summary Description"></th>
+                <th class="dCase" th:text="#{msg.common.field.summaryDescription}"></th>
+                <td class="dCase">[[${ossInfo.summaryDescription}]]</td>
+            </tr>
+
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Attribution"></th>
+                <th class="dCase" th:text="#{msg.common.field.attribution}"></th>
+                <td class="dCase">[[${ossInfo.attribution}]]</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
+
+<!--    <div class="card" style="overflow-y: scroll; height: auto; font-size: .8rem">-->
+<!--        <div class="card-header" style="height: 80%">-->
+<!--            <strong>Synchronize OSS Attributes</strong>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; /.card-header &ndash;&gt;-->
+<!--        &lt;!&ndash; form start &ndash;&gt;-->
+<!--        <div class="card-body">-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input checked="checked" id="Declared License" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.declaredLicense}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.licenseName}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input checked="checked" id="Detected License" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.detectedLicense}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.detectedLicense}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Download Location" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.downloadLocation}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">-->
+<!--                            <span th:text="${downloadLocation}"></span><br/>-->
+<!--                        </th:block>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Home Page" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.homepage}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.homepage}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Summary Description" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.summaryDescription}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.summaryDescription}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Attribution" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.attribution}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.attribution}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 </th:block>
 </html>

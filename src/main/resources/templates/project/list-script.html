@@ -28,16 +28,16 @@ var gridTooltip = {
 	typeCodes : [],
     tooltipCont :   "<div class=\"p-1\">" +
                         "<div class=\"my-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-lg\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-1-7x\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
                         "</div>" +
                         "<div class=\"mb-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-lg\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-1-7x\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
                         "</div>" +
                         "<div class=\"mb-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-lg\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-7x\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
                         "</div>" +
                         "<div class=\"mb-1\>" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-lg\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-1-7x\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
                         "</div>"+
                     "</div>",
 	existTooltip : false,
@@ -635,28 +635,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if(rowObject.identificationStatus == "Confirm"){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-2x\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-7x mr-2\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-2x\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-7x mr-2\" title=\"FOSSLight Review Report\"></i></span>';
             }
         }
 		
 		if(rowObject.verificationStatus == "Confirm"){
 			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
 			} else {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-2x\" title=\"OSS Notice\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-7x mr-2\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId2!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId3!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-2x\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File3\"></i></span>';
 			}
 		}
 		
@@ -1883,13 +1883,13 @@ var list = {
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 130, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'download', index: 'download', width: 70, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: '', index: '', width: 60, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
