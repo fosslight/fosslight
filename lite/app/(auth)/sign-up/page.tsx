@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 
 export default function SignUp() {
   const [wait, setWait] = useState(false);
-  const [divisions, setDivisions] = useState<{ cdNo: string; detailValue: string }[]>([]);
+  const [divisions, setDivisions] = useState<{ cdDtlNo: string; cdDtlNm: string }[]>([]);
   const router = useRouter();
   const { register, handleSubmit } = useForm();
 
@@ -102,8 +102,8 @@ export default function SignUp() {
         >
           <option value="">(Select)</option>
           {divisions.map((division) => (
-            <option key={division.cdNo} value={division.cdNo}>
-              {division.detailValue}
+            <option key={division.cdDtlNo} value={division.cdDtlNo}>
+              {division.cdDtlNm}
             </option>
           ))}
         </select>
