@@ -13,7 +13,7 @@ export default function Dashboard() {
   const [licenseList, setLicenseList] = useState<ListSection.License[]>([]);
 
   // API for loading dashboard data
-  const loadDashboardRequest = useAPI('get', 'http://localhost:8180/api/lite/dashboard', {
+  const loadDashboardRequest = useAPI('get', '/api/lite/dashboard', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       const { vulnerabilities, oss, licenses } = res.data;

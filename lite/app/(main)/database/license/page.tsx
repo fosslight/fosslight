@@ -5,7 +5,7 @@ import ListTable from '@/components/list-table';
 import { loadingState } from '@/lib/atoms';
 import { parseFilters } from '@/lib/filters';
 import { useAPI } from '@/lib/hooks';
-import { RESTRICTIONS } from '@/lib/literals';
+import { RESTRICTIONS, serverOrigin } from '@/lib/literals';
 import ExcelIcon from '@/public/images/excel.png';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -21,6 +21,7 @@ export default function LicenseList() {
   const queryParams = useSearchParams();
 
   // Filters
+  const [users, setUsers] = useState<{ userName: string; userId: string }[]>([]);
   const filters: { default: List.Filter[]; hidden: List.Filter[] } = {
     default: [
       { label: 'License Name', name: 'licenseName', type: 'char-exact' },
@@ -64,22 +65,14 @@ export default function LicenseList() {
         label: 'Creator',
         name: 'creator',
         type: 'select',
-        options: [
-          { label: 'CDG', value: '0' },
-          { label: 'KSE', value: '1' },
-          { label: 'HJH', value: '2' }
-        ]
+        options: users.map((user) => ({ label: user.userName, value: user.userId }))
       },
       { label: 'Created', name: 'created', type: 'date' },
       {
         label: 'Modifier',
         name: 'modifier',
         type: 'select',
-        options: [
-          { label: 'CDG', value: '0' },
-          { label: 'KSE', value: '1' },
-          { label: 'HJH', value: '2' }
-        ]
+        options: users.map((user) => ({ label: user.userName, value: user.userId }))
       },
       { label: 'Modified', name: 'modified', type: 'date' }
     ]
@@ -110,8 +103,13 @@ export default function LicenseList() {
   const countPerPage = 10;
   const currentPage = Number(queryParams.get('p') || '1');
 
+  // API for loading users
+  const loadUsersRequest = useAPI('get', '/api/lite/users', {
+    onSuccess: (res) => setUsers(res.data)
+  });
+
   // API for loading rows
-  const loadRowsRequest = useAPI('get', 'http://localhost:8180/api/lite/licenses', {
+  const loadRowsRequest = useAPI('get', '/api/lite/licenses', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       setTotalCount(res.data.totalCount);
@@ -121,18 +119,15 @@ export default function LicenseList() {
   });
 
   // API for exporting
-  const downloadExcelRequest = useAPI(
-    'get',
-    'http://localhost:8180/api/lite/licenses/export/excel',
-    {
-      onSuccess: (res) => {
-        window.location.href = `http://localhost:8180/exceldownload/getFile?id=${res.data}`;
-      }
+  const downloadExcelRequest = useAPI('get', '/api/lite/licenses/export/excel', {
+    onSuccess: (res) => {
+      window.location.href = `${serverOrigin}/exceldownload/getFile?id=${res.data}`;
     }
-  );
+  });
 
   // Load new rows when changing page or applying filters (including initial load)
   useEffect(() => {
+    loadUsersRequest.execute({});
     loadRowsRequest.execute({
       params: {
         ...filtersForm.watch(),

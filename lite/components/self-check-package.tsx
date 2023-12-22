@@ -1,5 +1,6 @@
 import { loadingState } from '@/lib/atoms';
 import { useAPI } from '@/lib/hooks';
+import { serverOrigin } from '@/lib/literals';
 import dayjs from 'dayjs';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -23,45 +24,29 @@ export default function SelfCheckPackage({ id }: { id: string }) {
   const queryParams = useSearchParams();
 
   // API for loading file list
-  const loadFilesRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => setFileList(res.data.files),
-      onFinish: () => setLoading(false)
-    }
-  );
+  const loadFilesRequest = useAPI('get', `/api/lite/selfchecks/${id}/packages/files`, {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => setFileList(res.data.files),
+    onFinish: () => setLoading(false)
+  });
 
   // API for loading OSS list
-  const loadRowsRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${id}/packages`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => setOssList(res.data.oss),
-      onFinish: () => setLoading(false)
-    }
-  );
+  const loadRowsRequest = useAPI('get', `/api/lite/selfchecks/${id}/packages`, {
+    onStart: () => setLoading(true),
+    onSuccess: (res) => setOssList(res.data.oss),
+    onFinish: () => setLoading(false)
+  });
 
   // API for uploading file
-  const uploadFileRequest = useAPI(
-    'post',
-    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
-    {
-      onSuccess: () => loadFilesRequest.execute({}),
-      type: 'file'
-    }
-  );
+  const uploadFileRequest = useAPI('post', `/api/lite/selfchecks/${id}/packages/files`, {
+    onSuccess: () => loadFilesRequest.execute({}),
+    type: 'file'
+  });
 
   // API for deleting file
-  const deleteFileRequest = useAPI(
-    'delete',
-    `http://localhost:8180/api/lite/selfchecks/${id}/packages/files`,
-    {
-      onSuccess: () => loadFilesRequest.execute({})
-    }
-  );
+  const deleteFileRequest = useAPI('delete', `/api/lite/selfchecks/${id}/packages/files`, {
+    onSuccess: () => loadFilesRequest.execute({})
+  });
 
   useEffect(() => {
     loadFilesRequest.execute({});
@@ -79,7 +64,7 @@ export default function SelfCheckPackage({ id }: { id: string }) {
               <a
                 key={idx}
                 className="flex justify-center items-center gap-x-1.5 text-sm"
-                href={`http://localhost:8180/download/${file.fileSeq}/${file.logiNm}`}
+                href={`${serverOrigin}/download/${file.fileSeq}/${file.logiNm}`}
                 target="_blank"
               >
                 <i className="fa-solid fa-cube" />

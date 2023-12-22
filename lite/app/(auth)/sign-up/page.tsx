@@ -3,16 +3,22 @@
 import { useAPI } from '@/lib/hooks';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 export default function SignUp() {
   const [wait, setWait] = useState(false);
+  const [divisions, setDivisions] = useState<{ cdDtlNo: string; cdDtlNm: string }[]>([]);
   const router = useRouter();
   const { register, handleSubmit } = useForm();
 
+  // API for loading users
+  const loadDivisionsRequest = useAPI('get', '/api/lite/divisions', {
+    onSuccess: (res) => setDivisions(res.data)
+  });
+
   // API for signing up
-  const signUpRequest = useAPI('post', 'http://localhost:8180/system/user/saveAjax', {
+  const signUpRequest = useAPI('post', '/system/user/saveAjax', {
     onStart: () => setWait(true),
     onSuccess: (res) => {
       if (res.data.isValid === 'true') {
@@ -24,6 +30,11 @@ export default function SignUp() {
     },
     onFinish: () => setWait(false)
   });
+
+  useEffect(() => {
+    loadDivisionsRequest.execute({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <form
@@ -89,13 +100,12 @@ export default function SignUp() {
           className="w-full py-1 bg-transparent border-b border-b-semigray outline-none"
           {...register('division')}
         >
-          {/* TODO (API) */}
           <option value="">(Select)</option>
-          <option value="1">SW Lab</option>
-          <option value="2">Open Source Task</option>
-          <option value="3">AI Lab</option>
-          <option value="4">TESTGG</option>
-          <option value="5">N/A</option>
+          {divisions.map((division) => (
+            <option key={division.cdDtlNo} value={division.cdDtlNo}>
+              {division.cdDtlNm}
+            </option>
+          ))}
         </select>
       </div>
       <button className="w-full py-1 text-lg crimson-btn" disabled={wait}>

@@ -1,21 +1,20 @@
 import { useAPI } from '@/lib/hooks';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailModalRow from './detail-modal-row';
 import Loading from './loading';
 
 export default function DetailModalVuln({ modalId }: { modalId: string }) {
   const [data, setData] = useState<Detail.Vuln | null>(null);
+  const router = useRouter();
 
   // API for loading data
-  const loadDataRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/vulnerabilities/${modalId}`,
-    {
-      onSuccess: (res) => {
-        setData(res.data.vulnerability);
-      }
-    }
-  );
+  const loadDataRequest = useAPI('get', `/api/lite/vulnerabilities/${modalId}`, {
+    onSuccess: (res) => {
+      setData(res.data.vulnerability);
+    },
+    onError: () => router.replace('/database/vulnerability')
+  });
 
   // Load data based on query parameter information
   useEffect(() => {

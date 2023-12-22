@@ -228,27 +228,20 @@ export default function SelfCheckDetailCheck({ params }: { params: { id: string 
   const [licenseRows, setLicenseRows] = useState<SelfCheck.LicenseCheck[]>([]);
 
   // API for loading OSS check result
-  const checkOssRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${params.id}/oss/check`,
-    {
-      onStart: () => setLoading(true),
-      onSuccess: (res) => setOssRows(res.data.verificationOss)
-    }
-  );
+  const checkOssRequest = useAPI('get', `/api/lite/selfchecks/${params.id}/oss/check`, {
+    onSuccess: (res) => setOssRows(res.data.verificationOss)
+  });
 
   // API for loading license check result
-  const checkLicenseRequest = useAPI(
-    'get',
-    `http://localhost:8180/api/lite/selfchecks/${params.id}/licenses/check`,
-    {
-      onSuccess: (res) => setLicenseRows(res.data.verificationLicenses),
-      onFinish: () => setLoading(false)
-    }
-  );
+  const checkLicenseRequest = useAPI('get', `/api/lite/selfchecks/${params.id}/licenses/check`, {
+    onSuccess: (res) => setLicenseRows(res.data.verificationLicenses)
+  });
 
   useEffect(() => {
-    checkOssRequest.executeAsync({}).then(() => checkLicenseRequest.execute({}));
+    setLoading(true);
+    Promise.all([checkOssRequest.executeAsync({}), checkLicenseRequest.executeAsync({})]).finally(
+      () => setLoading(false)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

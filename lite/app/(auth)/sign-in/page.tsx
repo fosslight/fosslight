@@ -12,7 +12,7 @@ export default function SignIn() {
   const { register, handleSubmit } = useForm();
 
   // API for signing in
-  const signInRequest = useAPI('post', 'http://localhost:8180/session/login-proc', {
+  const signInRequest = useAPI('post', '/session/login-proc', {
     onStart: () => setWait(true),
     onSuccess: (res) => {
       if (res.data.response.error) {

@@ -17,7 +17,7 @@ export default function FullSearch() {
   const keyword = queryParams.get('keyword') || '';
 
   // API for loading search result
-  const searchRequest = useAPI('get', 'http://localhost:8180/api/lite/dashboard/search', {
+  const searchRequest = useAPI('get', '/api/lite/dashboard/search', {
     onStart: () => setLoading(true),
     onSuccess: (res) => {
       const { vulnerabilities, oss, licenses } = res.data;

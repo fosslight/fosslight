@@ -12,10 +12,11 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
   const queryParams = useSearchParams();
 
   // API for loading data
-  const loadDataRequest = useAPI('get', `http://localhost:8180/api/lite/oss/${modalId}`, {
+  const loadDataRequest = useAPI('get', `/api/lite/oss/${modalId}`, {
     onSuccess: (res) => {
       setData(res.data.oss);
-    }
+    },
+    onError: () => router.replace('/database/oss')
   });
 
   // Load data based on query parameter information
@@ -276,7 +277,9 @@ export default function DetailModalOSS({ modalId }: { modalId: string }) {
                           </a>
                         </td>
                         <td className="p-1">
-                          <div className="whitespace-pre-line">{vulnerability.summary}</div>
+                          <div className="whitespace-pre-line line-clamp-3">
+                            {vulnerability.summary}
+                          </div>
                         </td>
                       </tr>
                     ))
