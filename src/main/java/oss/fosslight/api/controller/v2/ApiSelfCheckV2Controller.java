@@ -24,6 +24,7 @@ import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.service.*;
@@ -33,6 +34,7 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +69,10 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     private final SelfCheckService selfCheckService;
 
     private final FileService fileService;
+
+    private final VerificationService verificationService;
+
+    private final ProjectService projectService;
 
     @ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
     @ApiImplicitParams({
@@ -117,7 +123,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "name", required = true) String prjId,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
 
@@ -235,7 +241,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_EXPORT_SELFCHECK})
-    public ResponseEntity<FileSystemResource> selfCheckExport(
+    public ResponseEntity selfCheckExport(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
     ) {
@@ -255,11 +261,11 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
                 return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
             } else {
-                return null;
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return null;
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -308,6 +314,37 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
                 apiSelfCheckService.insertWatcher(param);
             }
 
+            return ResponseEntity.ok(resultMap);
+        } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+    }
+
+    @ApiOperation(value = "SelfCheck Get", notes = "SelfCheck Get")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_GET})
+    public ResponseEntity<Map<String, Object>> getSelfcheck(
+            @RequestHeader String authorization,
+            @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId) {
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        try {
+            T2Users userInfo = userService.checkApiUserAuth(authorization);
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("userRole", userRole(userInfo));
+            paramMap.put("prjId", prjId);
+
+            boolean searchFlag = apiSelfCheckService.existProjectCnt(paramMap);
+            if (!searchFlag) {
+                return responseService.errorResponse(HttpStatus.FORBIDDEN, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
+            }
+            var selfCheck = apiSelfCheckService.selectProjectMaster(prjId);
+            resultMap.put("content", selfCheck);
             return ResponseEntity.ok(resultMap);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,

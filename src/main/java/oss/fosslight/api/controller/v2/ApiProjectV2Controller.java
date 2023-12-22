@@ -7,10 +7,8 @@ package oss.fosslight.api.controller.v2;
 
 import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
-import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.tools.ant.taskdefs.condition.Http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -20,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
-import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -29,6 +25,7 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.NoticeMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
@@ -38,7 +35,7 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.net.http.HttpResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Api(tags = {"3. Project"})
@@ -72,7 +69,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     private final HistoryService historyService;
 
+    private final VerificationService verificationService;
+
     private final CodeMapper codeMapper;
+
+    private final NoticeMapper noticeMapper;
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
@@ -83,8 +84,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
             @RequestHeader String authorization,
+            @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
+            @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
-            @ApiParam(value = "Division (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String division,
+            @ApiParam(value = "Division (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String division,
             @ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
@@ -108,6 +111,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("modelName", modelName);
             paramMap.put("status", status);
             paramMap.put("prjIdList", prjIdList);
+            paramMap.put("prjName", prjName);
+            paramMap.put("prjNameExactYn", prjNameExactYn);
 
             try {
                 resultMap = apiProjectService.selectProjectList(paramMap);
@@ -158,7 +163,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> updateModelList(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
-            @ApiParam(value = "Model List (ex. MODEL_NAME|ETC > Etc|20220428)", required = true) @RequestParam(required = true) String[] modelListToUpdate) {
+            @ApiParam(
+                    value = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
+                    required = true
+            )
+            @RequestParam(required = true)
+            String[] modelListToUpdate
+    ) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -214,7 +225,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @PutMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -254,6 +265,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     projectService.insertProjectModel(project);
                     return ResponseEntity.ok(resultMap);
                 }
+            } catch (IndexOutOfBoundsException e) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Error while parsing given file");
             } catch (Exception e) {
                 log.error(e.getMessage());
                 return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -271,17 +284,19 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
+            @ApiParam(value = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
             @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
-            @ApiParam(value = "OS Type (\"Check the input value with /api/v1/code_search\")", required = true) @RequestParam(required = true) String osType,
+            @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
             @ApiParam(value = "OS Type etc", required = false) @RequestParam(required = false) String osTypeEtc,
-            @ApiParam(value = "Distribution Type (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String distributionType,
-            @ApiParam(value = "Distribution Site (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String distributionSite,
+            @ApiParam(value = "Distribution Type (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionType,
+            @ApiParam(value = "Distribution Site (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionSite,
             @ApiParam(value = "Network Service (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String networkServerType,
-            @ApiParam(value = "OSS Notice (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeType,
-            @ApiParam(value = "Notice Platform (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
-            @ApiParam(value = "Priority (\"Check the input value with /api/v1/code_search\")", required = false) @RequestParam(required = false) String priority,
-            @ApiParam(value = "comment", required = false) @RequestParam(required = false) String comment) {
+            @ApiParam(value = "OSS Notice (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeType,
+            @ApiParam(value = "Notice Platform (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
+            @ApiParam(value = "Priority (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String priority,
+            @ApiParam(value = "Visible to everyone? (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "Y") String publicYn,
+            @ApiParam(value = "User comment", required = false) @RequestParam(required = false) String userComment,
+            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -385,6 +400,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("networkServerType", networkServerType);
             paramMap.put("priority", priority);
             paramMap.put("loginUserName", userInfo.getUserId());
+            paramMap.put("publicYn", publicYn);
 
             result = apiProjectService.createProject(paramMap);
 
@@ -414,12 +430,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 log.error(e.getMessage(), e);
             }
 
-            if (comment != null) {
+            if (userComment != null) {
                 CommentsHistory commentHisBean = new CommentsHistory();
                 commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
                 commentHisBean.setReferenceId(resultPrjId);
                 commentHisBean.setExpansion1("SRC");
-                commentHisBean.setContents(comment);
+                commentHisBean.setContents(userComment);
                 commentService.registComment(commentHisBean, false);
             }
 
@@ -427,8 +443,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
                 mailBean.setParamPrjId(resultPrjId);
                 String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
-                comment = avoidNull(comment) + "<br />" + _tempComment;
-                mailBean.setComment(comment);
+                userComment = avoidNull(userComment) + "<br />" + _tempComment;
+                mailBean.setComment(userComment);
                 mailBean.setLoginUserName(userInfo.getUserId());
                 mailBean.setLoginUserRole(userInfo.getAuthority());
                 CoMailManager.getInstance().sendMail(mailBean);
@@ -757,6 +773,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             List<String> prjIdList = new ArrayList<String>();
             prjIdList.add(prjId);
             paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("loginUserName", userInfo.getUserName());
             paramMap.put("userRole", userRole(userInfo));
             paramMap.put("prjId", prjIdList);
             paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
@@ -774,7 +791,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             String changeAdded = "";
             Project project = new Project();
             UploadFile ossReportBean = null;
-            UploadFile binartTxtBean = null;
+            UploadFile binaryTxtBean = null;
 
             String oldFileId = "";
             if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
@@ -825,8 +842,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                             CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
                 }
-                binartTxtBean = apiFileService.uploadFile(binaryTxt); // file 등록 처리 이후 upload된 file정보를 return함.
-                String binaryFileId = binartTxtBean.getRegistFileId();
+                binaryTxtBean = apiFileService.uploadFile(binaryTxt); // file 등록 처리 이후 upload된 file정보를 return함.
+                String binaryFileId = binaryTxtBean.getRegistFileId();
                 List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfoById(binaryFileId));
 
                 if (binaryTxtList != null && !binaryTxtList.isEmpty()) {
@@ -866,7 +883,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 project.setBinBinaryFileId(binaryFileId);
             }
 
-            if (ossReportBean == null && binartTxtBean == null) {
+            if (ossReportBean == null && binaryTxtBean == null) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
             } else {
@@ -1433,6 +1450,39 @@ public class ApiProjectV2Controller extends CoTopComponent {
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+    }
+
+    @ApiOperation(value = "Project get Notice", notes = "Project Get")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
+    public ResponseEntity getSelfcheckReport(
+            @RequestHeader String authorization,
+            @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
+            HttpServletRequest req
+    ) {
+        try {
+            var ossNotice = verificationService.selectOssNoticeOne(prjId);
+
+            if (ossNotice == null) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");
+            }
+            var downloadId = verificationService.getNoticeHtmlFileForPreview(ossNotice);
+
+            T2File fileInfo = fileService.selectFileInfo(downloadId);
+            String filePath = fileInfo.getLogiPath();
+
+            if (!filePath.endsWith("/")) {
+                filePath += "/";
+            }
+
+            filePath += fileInfo.getLogiNm();
+
+            return excelToResponseEntity(filePath, fileInfo.getOrigNm());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
