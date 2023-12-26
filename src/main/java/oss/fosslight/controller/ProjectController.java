@@ -365,7 +365,7 @@ public class ProjectController extends CoTopComponent {
 				
 				String comment = "Copied from [3rd-" + refPartnerId + "] " + partnerName + " (" + softwareName.replace("[]", "/") + ")";
 				project.setComment(comment);
-				model.addAttribute("createThird", toJson(comment));
+				model.addAttribute("createThird", comment);
 			}
 		}
 		
@@ -4039,7 +4039,7 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		model.addAttribute("project", project);
-		model.addAttribute("copy", toJson(project));
+		model.addAttribute("copy", project);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -4378,10 +4378,10 @@ public class ProjectController extends CoTopComponent {
 		Project project = new Project();
 		project.setPrjId(commentsHistory.getReferenceId());
 		Project projectDetail = projectService.getProjectDetail(project);
-		if (projectDetail.getCompleteYn().equals(CoConstDef.FLAG_NO)) {
+		if (avoidNull(projectDetail.getCompleteYn()).equals(CoConstDef.FLAG_NO)) {
 			//향후 메세지 처리 확인 할것
 			return makeJsonResponseHeader(false, "The status is not Complete. Check the status value.", null);
-		}else {
+		} else {
 			String commentsMode = commentsHistory.getCommentsMode();
 			if (commentsMode.equals("reject")) {
 				project.setCompleteYn(CoConstDef.FLAG_NO);
@@ -4403,7 +4403,7 @@ public class ProjectController extends CoTopComponent {
 					return makeJsonResponseHeader(false, resMsg, null);
 				}
 				
-			}else{
+			} else{
 				commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT);
 				commentsHistory.setStatus("Request to Open");
 				commentService.registComment(commentsHistory);

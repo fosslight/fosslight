@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+//<![CDATA[
+/*global $ */
+/*jslint browser: true, nomen: true */
+var lastsel;
+var userList;
+var userIdList;
+var adminUserList;
+var refreshParam = {};
+var totalRow = 0;
+const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var changeWatcherArr = [];
+
+$(document).ready(function () {
+	evt.init();
+	fn.getUserIdList("Y", "REVIEWER"); // 근무자
+	fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
+	$('.btnReject').hide();
+	showHelpLink("Project_List_Main");
+});
+
+//데이터 객체
+var gridTooltip = {
+	typeCodes : [],
+    tooltipCont :   "<div class=\"p-1\">" +
+                        "<div class=\"my-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-1-7x\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-1-7x\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\">" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-7x\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
+                        "</div>" +
+                        "<div class=\"mb-1\>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-1-7x\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
+                        "</div>"+
+                    "</div>",
+	existTooltip : false,
+	init : function(){
+		list.load();	// Grid Load
+	}
+};	
+
+//OSS 쪽에서 프로젝트 검색을 위한 데이터
+var evt = {
+	init : function(){
+		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
+		
+		$('select[name=networkServerType]').select2({placeholder: "Restriction", allowClear: true});
+		if ([[${searchBean != null}]] && [[${searchBean.networkServerType}]] != null) $('select[name=networkServerType]').val([[${searchBean.networkServerType}]]).prop("selected", true);
+		
+		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
+		if ([[${searchBean != null}]] && [[${searchBean.prjDivision}]] != null) $('select[name=prjDivision]').val([[${searchBean.prjDivision}]]).prop("selected", true);
+		
+		$('select[name=priority]').select2({placeholder: "Priority", allowClear: true});
+		if ([[${searchBean != null}]] && [[${searchBean.priority}]] != null) $('select[name=priority]').val([[${searchBean.priority}]]).prop("selected", true);
+		
+		$('#division').select2({placeholder: "Division", allowClear: true});
+		$('#statuses').select2({placeholder: "Status", allowClear: true});
+		
+		refreshParam = fn.setGridParam();
+		
+		$('#search').on('click',function(e){
+			e.preventDefault();
+			var exPostdata = $("#list").jqGrid('getGridParam','postData');
+			exPostdata.ossId = ''; 
+			var postData = fn.setGridParam();
+			
+			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+		});
+		
+		$("#createdDate").daterangepicker({
+			autoUpdateInput: false
+		}).on('apply.daterangepicker', function(ev, picker) {
+		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+		}).on('cancel.daterangepicker', function(ev, picker) {
+			$("#createdDate").val("");
+			$("input[name='schStartDate']").val("");
+		    $("input[name='schEndDate']").val("");
+		});
+	}
+};
+
+
+var fn = {
+	getUserIdList : function(reviewerFlag, type){
+		return $.ajax({
+			type: 'GET',
+			url: '/project/getUserIdList',
+			data: {reviewerFlag : reviewerFlag},
+			success : function(data){
+				if(data != null){
+					temp = data.split(";").reduce(function(obj, cur){
+					    var keys = Object.keys(obj);
+					    var pairData = cur.split(":");
+
+					    if(keys.indexOf(pairData[0]) == -1 && pairData[0].trim() != ""){
+					        obj[pairData[0]] = pairData[1];
+					    }
+
+					    return obj;
+					}, {});
+					
+					if(type == "REVIEWER"){
+						userIdList = temp;
+					} else {
+						adminUserList = temp;
+						gridTooltip.init();
+					}
+				}
+			}
+		});
+	},
+	// unformater
+	unformatter : function(cellvalue, options, rowObject){
+		return cellvalue;
+	},
+	// Grid Status cell display
+	displayStatus : function(cellvalue, options, rowObject){
+//			205 COMP	Complete
+//			205 PROG	Progress
+//			205 REQ		Request
+//			205 REV		Review
+		var display = "";
+		var progress = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_PROGRESS'))}]];
+		var request = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REQUEST'))}]];
+		var review = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REVIEW'))}]];
+		var complete = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
+		var drop = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
+		
+		switch(cellvalue){
+			case progress:
+				display = "<span class=\"text-success text-bold\">" + cellvalue + "</span>";
+
+				break;
+			case request:
+				display = "<span class=\"text-pink text-bold\">" + cellvalue + "</span>";
+
+				break;
+			case review:
+				display = "<span class=\"text-yellow text-bold\">" + cellvalue + "</span>";
+
+				break;
+			case complete:
+				display = "<span class=\"text-dark-blue text-bold\">" + cellvalue + "</span>";
+
+				break;
+			case drop:
+				display = "<span class=\"text-gray text-bold\">" + cellvalue + "</span>";
+
+				break;
+		}
+		
+		return display;
+	},
+	// Grid status cell attr
+	cellattrStatus : function(cellvalue, options, rowObject){
+		// project Priority의 값을 기준으로 background의 색상을 표기함.
+		var styleStr = "";
+		var priority = (rowObject["priority"]).toUpperCase();
+		
+		switch(priority){
+			case "P0":	styleStr = 'style="background-color:#FEAEC9"';	break; // pink
+			case "P1":	styleStr = 'style="background-color:#FFFCB7"';	break; // light yellow
+			default:	break; 
+		}
+
+		return styleStr;
+	},
+	displayProgress : function(cellvalue, options, rowObject) {
+		var dropStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
+		var completeStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
+		var progress = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_PROGRESS'))}]];
+		var request = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REQUEST'))}]];
+		var review = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REVIEW'))}]];
+		var projectStatus = rowObject.status;
+		
+		var identificationStatus = rowObject.identificationStatus;
+		var verificationStatus = rowObject.verificationStatus;
+		var statusRequestYn = rowObject.statusRequestYn;
+		var destributionStatus = rowObject.destributionStatus;
+		
+		var display = '<div class="row ml-2 width-14rem">';
+		// identification
+		switch(identificationStatus){
+			case "":
+				if(projectStatus == dropStatus){
+					display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
+				} else {
+					if("Y" == rowObject.androidFlag) {
+						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+					} else {
+						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+					}
+				}
+				break;
+			case "N/A":
+				display += '<span class="badge badge-gray size-sm width-6rem">Identification(N/A)</span>';
+				break;
+			default:
+				if(projectStatus == dropStatus){
+					display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
+				} else {
+					if ("Y" == rowObject.androidFlag) {
+						if ("Confirm" == identificationStatus) {
+							display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == progress) {
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == request) {
+							display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						} else if (projectStatus == review) {
+							display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+						}
+					} else {
+						if ("Confirm" == identificationStatus) {
+							display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						} else {
+							if (projectStatus == progress) {
+								display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							} else if (projectStatus == request) {
+								display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							} else if (review == projectStatus) {
+								display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+							}
+						}
+					}
+				}
+				
+				break;
+		}
+		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+		// packaging
+		if(identificationStatus != 'Confirm') {
+			if (projectStatus == dropStatus || "Y" == rowObject.statusRequestYn) {
+				display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+			} else {
+				display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+			}
+		} else {
+			if (projectStatus == dropStatus) {
+				switch(verificationStatus) {
+					case "":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+
+						break;
+					case "Progress":
+					case "Request":
+					case "Review":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Drop)</span>';
+
+						break;
+					default:
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging('+cellvalue+')</span>';
+
+					break;
+				}
+			} else {
+				switch(verificationStatus) {
+					case "":
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else if ("" != identificationStatus) {
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+						}
+						break;
+					case "Progress":
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else {
+							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+						}
+						break;
+					case "N/A":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						
+						break;
+					case "Error":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Error)</span>';
+
+						break;
+					case "Drop":
+						display += '<span class="badge badge-gray size-sm width-6rem">Packaging(Drop)</span>';
+
+						break;
+					default:
+						if("N/A" == rowObject.distributeTarget){
+							display += '<span class="badge badge-gray size-sm width-6rem">Packaging(N/A)</span>';
+						} else{
+							if ("Confirm" == verificationStatus) {
+								display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+							} else {
+								if (projectStatus == progress) {
+									display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == request) {
+									display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								} else if (projectStatus == review) {
+									display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
+//		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+		// distribution
+// 		if(identificationStatus == "Confirm" && "N/A" == verificationStatus && "N/A" == destributionStatus) {
+// 			display += '<span class="badge badge-transparent size-sm width-6rem">Distribution(N/A)</span>';
+// 		} else if ("Confirm" != verificationStatus) {
+// 			if (projectStatus == dropStatus){
+// 				switch(destributionStatus){
+// 					case "":
+// 						var statusText = ("Confirm" != verificationStatus) ? "N/A" : "Drop";
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+statusText+')</span>';
+// 						break;
+// 					case "Progress":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+					
+// 						break;
+// 					default:
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+				
+// 						break;
+// 				}
+// 			} else {
+// 				if(projectStatus != completeStatus && "Y" != rowObject.statusRequestYn) {
+// 					display += '<span class="badge badge-gray size-sm width-6rem">Distribution</span>';
+// 				} else {
+// 					display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 				}
+// 			}
+// 		} else {
+// 			if(projectStatus == dropStatus){
+// 				display += '<span class="badge badge-gray size-sm width-6rem">Distribution(Drop)</span>';
+// 			} else {
+// 				switch(destributionStatus){
+// 					case "":
+// 						if(projectStatus != completeStatus){
+// 							if (projectStatus == progress) {
+// 								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else if (projectStatus == request) {
+// 								display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else if (projectStatus == review) {
+// 								display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else {
+// 								display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							}
+// 						} else {
+// 							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 						}
+						
+// 						break;
+// 					case "Error":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+
+// 						break;
+// 					case "N/A":
+// 						display += '<span class="badge badge-gray size-sm width-6rem">Distribution('+destributionStatus+')</span>';
+
+// 						break;
+// 					default:
+// 						if("N/A" == rowObject.distributeTarget){
+// 							display += '<span class="badge badge-gray size-sm width-6rem">Distribution(N/A)</span>';
+// 						} else{
+// 							if ("Done" == destributionStatus) {
+// 								display += "<span class='badge badge-outline-dark-blue size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 							} else {
+// 								if (projectStatus == progress) {
+// 									display += "<span class='badge badge-success size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								} else if (projectStatus == request) {
+// 									display += "<span class='badge badge-pink size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								} else if (projectStatus == review) {
+// 									display += "<span class='badge badge-yellow size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Distribution</span>";
+// 								}
+// 							}
+// 						}
+						
+// 						break;
+// 				}
+// 			}
+// 		}
+		
+		display += '</div>';
+		
+        return display;
+	},
+	// Grid identification cell display
+	displayIdentification : function(cellvalue, options, rowObject){
+//			206 CONF	Confirm
+//			206 NA		N/A
+//			206 PROG	Progress
+//			206 REQ		Request
+//			206 REV		Review
+		var display = "";
+		var hasOss = false;
+		var projectStatus = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
+		var partnerFlag = "*${partnerFlag}";
+		
+		switch(cellvalue){
+			case "":
+				if(rowObject.status == projectStatus){
+					display = "<div class=\"tcenter\">Drop</div>";
+				} else {
+					if("Y" == rowObject.androidFlag) {
+						display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Start</a></div>";
+					} else {
+						display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Start</a></div>";
+					}
+				}
+				
+				break;
+			case "N/A":
+				display = "<div class=\"tcenter\">"+cellvalue+"</div>";
+									
+				break;
+			default:
+				if(rowObject.status == projectStatus && cellvalue != "Confirm"){
+					display = "<span class=\" indentStep\">Drop</span>&nbsp;";
+				} else {
+					display = "<span class=\" indentStep\">"+cellvalue+"</span>&nbsp;";
+				}
+
+				if("Y" != rowObject.androidFlag) {
+					// 버튼 생성 3rd, SRC, BAT
+					// 2018-08-28 choye 수정
+					if ("true" == partnerFlag) {
+						if(rowObject.identificationSubStatusPartner =="Y" ) {
+							display += "<a class='btnPG on3rd' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>"; hasOss = true;
+						} else if(rowObject.identificationSubStatusPartner == "N") {
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
+						} else {
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
+						}
+					}
+					
+					if("Y" == rowObject.identificationSubStatusDep) {
+                        display += "<a class='btnPG onDep' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>"; hasOss = true;
+                    } else if ("N" == rowObject.identificationSubStatusDep) {
+                        display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                    } else {
+                        display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                    }
+					
+					// 2018-08-28 choye 수정
+					if(rowObject.identificationSubStatusSrc =="Y" ) {
+						display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
+					} else if(rowObject.identificationSubStatusSrc == "N") {
+						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
+					} else {
+						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
+					}
+
+					// 2018-08-28 choye 수정
+					if(rowObject.identificationSubStatusBin =="Y" ) {
+						display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
+					} else if(rowObject.identificationSubStatusBin == "N") {
+						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
+					} else {
+						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
+					}
+
+					if(rowObject.identificationSubStatusBom == 0) {
+						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
+					} else {
+						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
+					}
+				} else if("Y" == rowObject.androidFlag) {
+					if(rowObject.identificationSubStatusAndroid =="Y" ) {
+						display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+					} else if(rowObject.identificationSubStatusAndroid == "N") {
+						display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+					} else {
+						display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+					}
+				}
+				
+				if(rowObject.identificationSubStatusBat =="Y" ) {
+					display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",6,"+rowObject.permission+")\">BAT</a>";
+				}
+				
+				break;
+		}
+		
+		return display;
+	},
+	// Grid veritification cell display
+	displayVerification : function(cellvalue, options, rowObject){
+		var display = "";
+		var projectStatusDrop = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
+		var projectStatusComplete = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}";
+		
+		if(rowObject.identificationStatus != 'Confirm') {
+			if(rowObject.status == projectStatusDrop || rowObject.statusRequestYn == "Y" ) {
+				display = "N/A";
+			} else {
+				display = "";
+			}
+		} else {
+			if(rowObject.status == projectStatusDrop) {
+				switch(cellvalue) {
+					case "":
+						display = "N/A";
+
+						break;
+					case "Progress":
+					case "Request":
+					case "Review":
+						display = "Drop";
+
+						break;
+					default:
+						display = cellvalue;
+
+					break;
+				}
+			} else {
+				switch(cellvalue) {
+					case "":
+						if(rowObject.status == projectStatusComplete || rowObject.statusRequestYn == "Y" ) {
+							display = "N/A";
+						} else if(rowObject.identificationStatus!="") {
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Start</a></div>";
+						}
+						
+						break;
+					case "Progress":
+						if(rowObject.status == projectStatusComplete || rowObject.statusRequestYn == "Y" ) {
+							display = "N/A";
+						} else {
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Progress</a></div>";
+						}
+						
+						break;
+					case "N/A":
+						display = "N/A";
+						
+						break;
+					case "Error":
+						display = "Error";
+
+						break;
+					case "Drop":
+						display = "Drop";
+
+						break;
+					default:
+						if(rowObject.distributeTarget == "N/A"){
+							display = "N/A";
+						} else{
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">"+cellvalue+"</a></div>";
+						}
+						break;
+				}
+			}
+		}
+		
+		return display;
+	},
+	// Grid distribution cell display
+	displayDistribution : function(cellvalue, options, rowObject){
+		var display = "";
+		var projectStatusDrop = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
+		var projectStatusComplete = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}";
+		
+		if(rowObject.identificationStatus == 'Confirm' && rowObject.verificationStatus == "N/A" && cellvalue == "N/A") {
+			display = cellvalue;
+		} else if( rowObject.verificationStatus != 'Confirm'){
+			if(rowObject.status == projectStatusDrop){
+				switch(cellvalue){
+					case "":
+						display = (rowObject.verificationStatus != "Confirm") ? "N/A" : "Drop";
+						
+						break;
+					case "Progress":
+						display = "Drop";
+						
+						break;
+					default:
+						display = cellvalue;
+					
+						break;
+				}
+			} else {
+				if(rowObject.status != projectStatusComplete && rowObject.statusRequestYn != "Y" ) {
+					display = "";
+				} else {
+					display = "N/A";
+				}
+			}
+		} else {
+			if(rowObject.status == projectStatusDrop){
+				display = "Drop";
+			} else {
+				switch(cellvalue){
+					case "":
+						if(rowObject.status != projectStatusComplete){
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">Start</a></div>";
+						} else {
+							display = "N/A";
+						}
+						
+						break;
+					case "Error":
+						display = cellvalue;
+
+						break;
+					case "N/A":
+						display = cellvalue;
+
+						break;
+					default:
+						if(rowObject.distributeTarget == "N/A"){
+							display = "N/A";
+						} else{
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvDistribution("+options.rowId+","+rowObject.permission+")\">"+cellvalue+"</a></div>";
+						}
+					
+						break;
+				}
+			}
+		}
+		
+		return display;
+	},
+	// Grid download cell display
+	displayReportDownload : function(cellvalue, options, rowObject){
+		var display = "";
+        if(rowObject.identificationStatus == "Confirm"){
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-7x mr-1\" title=\"FOSSLight Report\"></i></span>';
+            if(rowObject.reviewReportFileId != ""){
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-7x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
+            }
+        }
+		
+		if(rowObject.verificationStatus == "Confirm"){
+			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
+			} else {
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-7x mr-1\" title=\"OSS Notice\"></i></span>';
+			}
+			
+			if(rowObject.packageFileId!=""){
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File1\"></i></span>';
+			}
+			
+			if(rowObject.packageFileId2!=""){
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File2\"></i></span>';
+			}
+			
+			if(rowObject.packageFileId3!=""){
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File3\"></i></span>';
+			}
+		}
+		
+		return display;
+	},
+	// Grid vulnerability cell display
+	displayVulnerability : function(cellvalue, options, rowObject){
+		var display = "";
+		var secCode = "";
+		if (typeof rowObject.secCode !== "undefined") {
+			secCode = rowObject.secCode;
+		}
+        if (parseInt(cellvalue) >= 8.0) {
+        	if ("" != secCode) {
+        		if ("NotFixed" == secCode) {
+        			 //Need to resolve : 8.0 이상 vulnerability 검출, 수정 필요 O
+                    display = '<span class="badge badge-cherry size-sm width-9rem">Need to resolve('+cellvalue+')</span>';
+        		} else {
+        			// Resolved : 8.0 이상 vulnerability 검출, 모두 수정 완료됨
+                    display = '<span class="badge badge-cherry size-sm width-8rem">Resolved('+cellvalue+')</span>';
+        		}
+        	} else {
+        		
+        	}
+        } else if (parseInt(cellvalue) < 8.0 && parseInt(cellvalue) > 0) {
+            // Discovered : 8.0 미만 vulnerability 검출, 수정 필요 X
+            display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered('+cellvalue+')</span>';
+        } else {
+        	display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered(N/A)</span>';
+        }
+        
+        return display;
+		
+		
+// 		var display = "";
+// 		var _url = '/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+		
+// 		if(parseInt(cellvalue) >= 9.0 ) {
+// 			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) >= 7.0 ) {
+// 			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) >= 4.0) {
+// 			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) > 0) {
+// 			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+// 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+// 			display="<span style=\"font-size:0;\"></span>";
+// 		} else {
+// 			display=cellvalue;
+// 		}
+		
+// 		return display;
+	},
+	displaySecurityTab : function(cellvalue, options, rowObject){
+		var display = "";
+		
+		if(rowObject.identificationSubStatusBom != 0 || "Y" == rowObject.androidFlag) {
+			if ('Fixed' == rowObject.secCode) {
+				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</spen>";
+			} else if ('NotFixed' == rowObject.secCode) { 
+				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
+			} else {
+				display = "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
+			}
+		} 
+		
+		return display;
+	},
+	displayComment : function(cellvalue, options, rowObject){
+		var display = "";
+		
+		if(cellvalue !="") {
+			var tmpStr = new RegExp();
+			tmpStr = /[<][^>]*[>]/gi;
+			display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
+		}
+		
+		return display;
+	},
+	// Grid identification display event
+	mvIdentification : function(prjId, initDiv, permission){
+//		if(parseInt(permission) > 0){
+			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv);
+//		} else {
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//		}
+	},
+	// Grid veritification display event
+	mvVerification : function(prjId, permission){
+//		if(parseInt(permission) > 0){
+			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+//		} else {
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//		}
+	},
+	// Grid distribution display event
+	mvDistribution : function(prjId, permission){
+//		if(parseInt(permission) > 0){
+//			createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
+//		} else {
+//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//		}
+	},
+	// Grid reviewer change event
+	reviewerChg : function(){
+		var prjId = (this.id).replace(/[^0-9]/g,'');
+		var reviewer = Object.keys(userIdList)[Object.keys(userIdList)
+													.map(function(e) {
+														  return userIdList[e]
+													})
+													.indexOf(this.value)];
+		var data = {"prjId" : prjId, "reviewer" : reviewer};
+		
+		$.ajax({
+			url : '/project/updateReviewer',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				$("#list").jqGrid('saveRow',prjId);
+				$("#list").jqGrid('setCell', prjId, "reviewer", reviewer);
+				
+				alertify.success([[#{msg.common.success}]]);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	},
+	downloadExcel : function(){
+//		if(isMaximumRowCheck(totalRow)){
+			var data = fn.setGridParam();
+			
+			$.ajax({
+				   type: "POST",
+				   url: '/exceldownload/getExcelPost',
+				   data: JSON.stringify({"type":"project", "parameter":JSON.stringify(data)}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+				   success: function (data) {
+					   loading.hide();
+					   
+					   if("false" == data.isValid) {
+						   if(data.validMsg == "overflow"){
+							   alertify.error(getMsgMaxRowCnt(), 0);
+						   }else{
+			            	   alertify.error([[#{msg.common.valid2}]], 0);
+						   }
+					   } else {
+					       window.location = '/exceldownload/getFile?id='+data.validMsg;
+					   }
+				   },
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+			});
+//		}
+	},
+	downloadReport : function(obj, permission){
+		if(parseInt(permission) > 0){
+			var prjId = $(obj).closest('tr').attr('id'); 
+			
+			$.ajax({
+				type: "POST",
+				url: '/exceldownload/getExcelPost',
+				data: JSON.stringify({"type":"report", "parameter":prjId}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location =  '/exceldownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
+	},
+	downloadNotice : function(obj, permission){
+		if(parseInt(permission) > 0){
+			var prjId = $(obj).closest('tr').attr('id'); 
+			
+			//파일 이름 임시
+			location.href = '/project/verification/downloadNotice?prjId='+prjId;
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
+	},
+	downloadReviewReport : function(obj, permission){
+		if(parseInt(permission) > 0){
+			var prjId = $(obj).closest('tr').attr('id');
+
+			location.href = '/project/verification/downloadReviewReport?prjId='+prjId;
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
+	},
+	downloadPackage : function(obj, permission){
+		if(parseInt(permission) > 0){
+			var prjId = $(obj).closest('tr').attr('id');
+			
+			location.href = '/project/verification/downloadPackage?prjId='+prjId;
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
+	},
+	downloadPackageMulti : function(obj, fileIdx, permission){
+		if(parseInt(permission) > 0){
+			var prjId = $(obj).closest('tr').attr('id');
+			
+			location.href = '/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx;
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
+	},
+	setGridParam : function(){
+		var paramData=$('#projectSearch').serializeObject();
+		
+		//public 값 넣어주기
+		if($('#checkbox3').is(':checked')) {
+			paramData.publicYn = 'N';
+		} else {
+			paramData.publicYn = 'Y';
+		}
+		
+		if(paramData.statuses != null) {
+			paramData.statuses = JSON.stringify(paramData.statuses);
+			paramData.statuses = paramData.statuses.replace(/\"|\[|\]/gi, "");
+		} else {
+			paramData.statuses = "";
+		}
+		
+		return paramData;
+	}, getUserName : function(cellvalue, options, rowObject){
+		return adminUserList[cellvalue] || "";
+	}, 
+	checkProjectCnt : function(){
+		var isValid = true;
+		var checkProjectArr = $("#list").getGridParam("selarrrow");
+		
+		switch(checkProjectArr.length){
+			case 1:
+				break;
+			case 0:
+				isValid = false;
+				alertify.alert([[#{msg.oss.select.project}]], function(){});
+				break;
+			default: // 2개 이상
+				isValid = false;
+				alertify.alert([[#{msg.project.select.only.project}]], function(){});
+				break;
+		}
+
+		return isValid;
+	},
+	checkProjectStatus : function(){
+		if(fn.checkProjectCnt()) {
+			var prjId = $("#list").getGridParam("selrow");
+			var rowData = $("#list").getRowData(prjId);
+
+//			if(parseInt(rowData["statusPermission"]) > 0) {
+				var rtnParameter = {};
+				
+				$.ajax({
+					url : '/project/getProjectChangeView/status',
+					type : 'POST',
+					data : JSON.stringify({"prjId" : prjId}),
+					dataType : 'html',
+					cache : false,
+					contentType : 'application/json',
+					success: function(res){
+						if ("" == res) {
+							alertify.alert([[#{msg.project.distribution.loading}]], function(){}).set('resizable', true).resizeTo('600', '210');
+ 							return false;
+						} else {
+							if(!alertify.changeStatus){
+								alertify.dialog('changeStatus', function() {
+									var settings;
+									
+									return {
+										setup: function() {
+											var settings = alertify.confirm().settings;
+											
+											for (var prop in settings) {
+												this.settings[prop] = settings[prop];
+											}
+											
+											var setup = alertify.confirm().setup();
+											setup.buttons = [];
+											setup.focus.element = 1;
+											
+											return setup;
+										},
+										settings: {
+											oncontinue: null
+										},
+										callback: function(closeEvent) {
+											alertify.confirm().callback.call(this, closeEvent);
+										}
+									};
+								}, false, 'confirm');
+		                	}
+							
+							alertify.changeStatus(res).set('title', 'Change Status').set('resizable', true).resizeTo('650', '610');
+							fn.showChangeStatus();
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+//			} else {
+//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//			}
+		}
+	},
+	copy : function(){
+		if(fn.checkProjectCnt()){
+			var prjId = $("#list").getGridParam("selrow");
+			var rowData = $("#list").getRowData(prjId);
+
+//			if(parseInt(rowData["permission"]) > 0) {
+				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
+//			} else {
+//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//			}
+		}
+	},
+	showChangeStatus : function(){
+		var projectStatus = $("#projectStatus").val();
+		var identificationStatus = $("#identificationStatus").val();
+		var verificationStatus = $("#verificationStatus").val();
+		var distributionStatus = $("#distributionStatus").val();
+		var completeFlag = $("#completeFlag").val() == "Y";
+		var dropFlag = $("#dropFlag").val() == "Y";
+		var commId = $("#commId").val();
+		var viewOnlyFlag = $("#viewOnlyFlag").val();
+
+		$("#CSIdentification > input[type=radio]").attr("disabled", false);
+		$("#CSDrop > input[type=radio]").attr("disabled", false);
+		$("#CSDelete > input[type=radio]").attr("disabled", false);
+		$("#CSComplete > input[type=radio]").attr("disabled", false);
+		
+		if (projectStatus == "PROG"){
+			if (identificationStatus == "" || identificationStatus == "PROG"){
+				$("#CSIdentification > input[type=radio]").attr("disabled", true);
+			}
+		}
+		
+		var authority = "*${sessUserInfo.authority}";
+		if("ROLE_ADMIN" == authority && identificationStatus == "CONF"
+			&& (!verificationStatus
+					|| verificationStatus == ""
+					|| verificationStatus == "PROG"
+					|| verificationStatus == "CONF"
+					|| verificationStatus == "NA")
+			&& !completeFlag){
+			$("#CSComplete > input[type=radio]").attr("disabled", false);
+		} else {
+			$("#CSComplete > input[type=radio]").attr("disabled", true);
+			$("#CSDelete > input[type=radio]").attr("disabled", true);
+		}
+
+		if(!dropFlag && !completeFlag){
+			$("#CSDrop > input[type=radio]").attr("disabled", false);
+		}else{
+			$("#CSDrop > input[type=radio]").attr("disabled", true);
+		}
+		
+		if(projectStatus == "REV"){
+			$("#CSIdentification > input[type=radio]").attr("disabled", true);
+			$("#CSDrop > input[type=radio]").attr("disabled", true);
+			$("#CSDelete > input[type=radio]").attr("disabled", true);
+		}
+	},
+	changeStatusProc : function(){console.log("changeStatusProc");
+		$("#warningMsg").hide(); // required reset
+		
+		var prjId = $("#list").getGridParam("selrow");
+		var rowData = $("#list").getRowData(prjId);
+		var changeSeq = $("input:radio[name='radioName']:checked").val();
+		var reason = $("#reason").val();
+		var identificationStatus = $("#identificationStatus").val();
+		var distributionStatus = $("#distributionStatus").val();
+		var completeFlag = $("#completeFlag").val();
+		var dropFlag = $("#dropFlag").val();
+		var commentFlag = true;
+		
+		var authority = "*${sessUserInfo.authority}";
+		if("ROLE_ADMIN" == authority) {
+			if(changeSeq == 1 || changeSeq == 4) {
+				commentFlag = false;
+			}
+		}
+		
+		if(commentFlag && reason.split(" ").join("") == "") {
+			$("#warningMsg").show();
+		} else {
+			switch(changeSeq){
+			case "1": // restart identification
+				var param = {
+					"prjId" : prjId
+				  , "userComment" : reason
+				  , "identificationStatus" : "PROG"
+				};
+				if ("ROLE_ADMIN" == authority){
+					if(identificationStatus == "CONF"){
+						if(distributionStatus == "DONE"){
+							param["delOsdd"] = "Y"; // -> delete with OSDD
+							
+							if(completeFlag != "Y"){ // -> delete with OSDD & identification reject 후 end 
+								param["changeStatusFlag"] = "Y";
+							}
+						}
+
+						if(completeFlag == "Y"){
+							param["completeYn"] = "N"; // -> reopen 동작
+						}
+					}
+
+					if (dropFlag == "Y"){
+						param["completeYn"] = "N"; // -> reopen 동작
+					}
+					
+					fn.updateProjectStatus(param);
+				}else{
+					if(completeFlag == "Y"){
+						param["commId"] = $("#commId").val();
+						fn.reqToOpenUser(param);
+					}else {
+						if (dropFlag == "Y"){
+							param["completeYn"] = "N"; // -> reopen 동작
+						}
+						
+						fn.updateProjectStatus(param);
+					}
+				}
+				
+				break;
+			case "2": // drop -> distribution Done 일경우 delete with OSDD를 실행 후 drop 처리함.
+				if(distributionStatus == "DONE"){
+					var param = {
+						"prjId" : prjId
+						, "identificationStatus" : "PROG"
+						, "userComment" : reason
+					};
+						
+					param["delOsdd"] = "Y"; // -> delete with OSDD
+
+					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+					alertify.confirm(dropMessage, function (e) {
+						if (e) {
+							fn.updateProjectStatus(param, fn.exeProjectDrop);
+						} else {
+							return false;
+						}
+					});
+				}else if (distributionStatus == "RSV"){
+					var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+					alertify.confirm(dropMessage, function (e) {
+						if (e) {
+							fn.cancelDistributeReserve();
+						} else {
+							return false;
+						}
+					});
+				}else{
+					var param = {
+						"prjId" : prjId
+						, "userComment" : reason
+					};
+					
+					fn.exeProjectDrop(param);
+				}
+
+				break;
+			case "3": // delete
+				var param = {
+					"prjId" : prjId
+				  , "userComment" : reason
+				  , "identificationStatus" : "PROG"
+				};
+
+				if(identificationStatus == "CONF"){ // identification > confirm 일 경우 reject 후 delete
+					if(distributionStatus == "DONE"){
+						param["delOsdd"] = "Y"; // -> delete with OSDD
+						
+						if(completeFlag != "Y"){
+							param["changeStatusFlag"] = "Y"; // -> delete with OSDD & identification reject 후 end 
+						}
+					} 
+
+					if(completeFlag == "Y"){
+						param["completeYn"] = "N"; // -> reopen 동작
+					}
+					
+					fn.updateProjectStatus(param, fn.projectDelete);
+				} else { // identification > !confirm 일 경우 즉시 delete
+					fn.projectDelete({"prjId" : prjId, "userComment" : reason});
+				}
+				
+				break;
+			case "4": // complete
+				fn.updateProjectStatus({"prjId" : prjId, "completeYn" : "Y", "userComment" : reason});
+				
+				break;
+			default:
+				break;
+		}
+		}
+	},
+	projectDelete : function(data){
+		var _url = '/project/delAjax?prjId=' + data.prjId + '&userComment=' + data.userComment;
+		
+		$.ajax({
+			url : _url,
+			type : 'POST',
+			data : '',
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				reloadTabInframe('/project/list');
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	updateProjectStatus : function(data, callbackFunc){
+		$.ajax({
+			url : '/project/updateProjectStatus',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(){
+				if(typeof callbackFunc == "function"){
+					callbackFunc(data);
+				} else {
+					reloadTabInframe('/project/list');
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	exeProjectDrop : function (data){
+		data["dropYn"] = "Y";
+		
+		$.ajax({
+			url : '/project/updateProjectStatus',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				reloadTabInframe('/project/list');
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}, 
+	bomCompare : function(){ /* BOM Compare ADD */
+		// 체크박스 선택 체크
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+	
+		if(chk < 3){
+			var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var beforePrjId = "";
+			var afterPrjId = "";
+
+			switch (chk) {
+				case 0:
+					beforePrjId = "0000";
+					afterPrjId = "0000";
+					break;
+				case 1:
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = "0000";
+					break;
+				case 2:
+					bomCompareArr.sort();
+					
+					beforePrjId = bomCompareArr[0];
+					afterPrjId = bomCompareArr[1];
+					
+					break;
+			}
+			
+			var tabNm = "BOM_Compare";
+			var tabLk = '/project/bomCompare/'+beforePrjId+'/'+afterPrjId+'';
+	
+			createTabInFrame(tabNm, tabLk);
+		}else {
+			alertify.alert([[#{msg.project.choose}]], function(){});
+			return false;
+		}
+	}, 
+	reqToOpenUser : function(data) { /* role_user 실행 시 */
+		var commentsMode = data.commId != "" ? "update" : "insert";
+		var param = {"referenceId" : data.prjId, "contents" : data.userComment, "referenceDiv" : "10", "commId" : data.commId, "commentsMode" : commentsMode};
+		
+		fn.commentsSave(param);
+	}, 
+	commentsSave : function(data){
+		$.ajax({
+			url : '/project/commentsSave',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : data,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.alert([[#{msg.common.success}]], function(){
+						reloadTabInframe('/project/list');
+						activeTabInFrameList("PROJECT");
+					});
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}, 
+	changeDivision : function(){
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+
+		if(chk > 0){
+			$.ajax({
+				url : '/project/getProjectChangeView/division',
+				type : 'POST',
+				data : JSON.stringify({"prjId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeDivision){
+						alertify.dialog('changeDivision', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeDivision(res).set('title', 'Change Division').set('resizable', true).resizeTo('650', '306');
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+		}
+	}, 
+	changeDivisionSave : function(){
+		var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
+		var division = $("select[name=projectChangeDivision] option:selected").val();
+
+		alertify.confirm([[#{msg.common.change.division}]], function (e) {
+			if (e) {
+				$.ajax({
+					type: 'POST',
+					url :'/project/updateProjectDivision',
+					data: JSON.stringify({'prjIds':changeDivisionArr, 'prjDivision':division}),
+					contentType : 'application/json',
+					success: function (data) {
+						if("true" == data.isValid){
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/project/list');
+								activeTabInFrameList("PROJECT");
+							});
+						} else {
+							var list = [];
+							list = data.resultData;
+							
+							var msg = [[#{msg.project.check.division.permissions}]];
+							msg += '<br/> - '
+
+							for(var i=0; i<list.length; i++){
+								msg += 'PRJ-' + list[i];
+								if(i < list.length - 1){
+									msg += ', ';
+								}
+							}
+							
+							alertify.alert(msg, function(){
+								fn.closeAlertify();
+							});
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+	}, 
+	toolTipDoubleclick: function () {
+    	return 'title="' + "Double click" + '"';
+    }, 
+    mvSecurityTab : function(prjId){
+		createTabInFrame(prjId+'_Security', '/project/security/'+prjId+'');
+	},
+	change : function(obj) {
+		var changeListId = '#' + $(obj).siblings("div").attr("id");
+        if ($(changeListId).css('display')=='none') {
+            $(changeListId).show();
+        }else{
+            $(changeListId).hide();
+        }
+        $(changeListId).menu();
+	},
+	changeWatcher : function() {
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+		if(chk > 0){
+			$.ajax({
+				url : '/project/getProjectChangeView/watcher',
+				type : 'POST',
+				data : JSON.stringify({"prjId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeWatcher){
+						alertify.dialog('changeWatcher', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeWatcher(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '385');
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+		}
+	},
+	changeWatcherCanCel : function() {
+		fn.resetChangeWatcherPop();
+	},
+	changeWatcherAdd : function() {
+		if (changeWatcherArr.length == 0) {
+			alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+			return false;
+		}
+		
+		var msg = "";
+		var notPermissionPrjIds = [];
+		var permissionPrjIds = [];
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in prjIds) {
+			var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
+//			if ("1" == gridData.statusPermission) {
+				permissionPrjIds.push(prjIds[i]);
+//			} else {
+//				notPermissionPrjIds.push(prjIds[i]);
+//			}
+		}
+		
+		if (notPermissionPrjIds.length > 0) {
+			msg = [[#{msg.project.check.division.permissions}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPrjIds) {
+				msg += 'PRJ-' + notPermissionPrjIds[i];
+				if(i < notPermissionPrjIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+//		if (permissionPrjIds.length == 0) {
+//			alertify.alert(msg, function(){});
+//			return false;
+//		}
+		
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
+			if (e) {
+				var data = {"prjIds" : permissionPrjIds, "changeWatcherList" : changeWatcherArr};
+				
+				$.ajax({
+					url : '/project/addWatchers',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if(resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+							} else {
+								alertify.alert(msg, function(){});
+							}
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+				
+				fn.resetChangeWatcherPop();
+			} else {
+				return false;
+			}
+		});
+	},
+	changeWatcherDelete : function() {
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
+			if (e) {
+				if (changeWatcherArr.length == 0) {
+					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+					return false;
+				}
+				
+				var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+				var data = {"prjIds" : prjIds, "changeWatcherList" : changeWatcherArr};
+				
+				$.ajax({
+					url : '/project/removeWatchers',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if(resultData.isValid == "true") {
+							alertify.success([[#{msg.common.success}]]);
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+				
+				fn.resetChangeWatcherPop();
+			} else {
+				return false;
+			}
+		});
+	},
+	selectDivision : function() {
+		var division = $('#prjDivision').val();
+		$('#prjUserId').children().remove();
+		if(division == "") {
+			$('#prjUserId').val("").prev().text("select User").change();
+			return false;
+		}
+		$('#prjUserId').attr('disabled', false);
+		$.ajax({
+			url : '/partner/getUserList',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'division' : division},
+			success : function(data){
+				data.forEach(function(obj){
+					$('#prjUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+				});
+				
+				$('#prjUserId').change();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	addWatcherClick : function() {
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		var $divSel	= $("#prjDivision"),
+			divVal	= $divSel.val(),
+			divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+		
+		var $userSel	= $("#prjUserId"),
+			userVal		= $userSel.val()||"",
+			userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+		if(divVal == "" || userVal == "") {
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+		}
+		
+		var isNew = true;
+		
+		$(".watcherTags").each(function(i, tag){
+			var tagDiv = $(tag).val().split("/")[0]
+			  , tagUid = $(tag).val().split("/")[1];
+			
+			if(divVal == tagDiv) {
+				if(tagUid == 'all') {
+					isNew = false;
+
+					return false;
+				}
+				
+				if(userVal == 'all') {
+					$(tag).closest('span').remove();
+				} else if(tagUid == userVal) {
+					isNew = false;
+				}
+			}
+		});
+		
+		if(isNew) {
+			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			fn.addWatcherData(divVal, userVal, '');
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+		}
+	},
+	addWatcherData : function (uDiv, uId, uEmail) {
+		var dataObj = {};
+		dataObj["prjDivision"] = uDiv;
+		dataObj["prjUserId"] = uId;
+		dataObj["prjEmail"] = uEmail;
+		changeWatcherArr.push(dataObj);
+	},
+	removeWatcher : function (uDiv, uId, obj) {
+		var uEmail = "";
+		if("Email" == uId) {
+			uEmail = uDiv;
+			uId = "";
+			uDiv = "";
+		}
+		
+		changeWatcherArr.forEach(function(cur, index){
+			var object = cur;
+			if (uId === object["prjUserId"] && uDiv === object["prjDivision"] && uEmail === object["prjEmail"]) {
+				$(obj).parent().remove();
+				changeWatcherArr.splice(index, 1);
+			}
+		});
+	},
+	addHtml : function(target, str, division, userId){
+		var rlt = division+((userId!="") ? "/"+userId : "");
+		var html  = '<div class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		html += str;
+		if("Y" != [[${searchBean.viewOnlyFlag}]]) {
+			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+		}
+		html += '</div>';
+		target.append(html);
+	},
+	addEmail : function() {
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		var adId = $("#adId").val();
+		var domain = $("#emailTemp").val();
+
+		if(adId == "") {
+			$("#adId").focus();
+			return alertify.error([[#{enter.watcher.error}]], 0);
+		}
+		
+		var _email = adId + "@" + domain;
+		
+		var regEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+		if (!regEmail.test(_email)) {
+			$("#adId").focus();
+
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/system/user/checkEmail', 
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'email' : _email},
+			success: function (data) {
+				var obj = {};
+				if("true" == data.isValid) {
+					var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+					obj["prjDivision"] = data.division;
+					obj["prjUserId"] = data.userId;
+					obj["prjEmail"] = '';
+					
+					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+				} else {
+					obj["prjDivision"] = '';
+					obj["prjUserId"] = '';
+					obj["prjEmail"] = _email;
+					
+					fn.addHtml($("#multiDiv"), _email, _email, "Email");
+				}
+				
+				changeWatcherArr.push(obj);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		$("#adId").val('');
+		$("#emailTemp").val('');
+		$("#domain").val("${ct:getConstDef('CD_DTL_DEFAULT_DOMAIN')}").trigger('change');
+	},
+	addList : function() {
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		var listKind = $("#listKind").val(),
+		listId = $("#listId").val();
+		
+		if(fn.chkListValidation(listKind, listId)) {
+			var obj = {};
+			obj["listKind"] = listKind;
+			obj["listId"] = listId;
+		
+			fn.copyWatcher(obj, prjIds);
+		}
+	},
+	chkListValidation : function(listKind, listId){
+		if(listKind == ""){
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+			return false;
+		}
+		
+		if(listId == ""){
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+			return false;
+		}
+		
+		return true;
+	},
+	copyWatcher : function(obj, prjIds) {
+		for (var i in prjIds) {
+			var prjId = prjIds[i];
+			obj["prjId"] = prjId;
+			obj["copyWatcherLocation"] = "list";
+			
+			$.ajax({
+				url : '/project/copyWatcher',
+				type : 'POST',
+				data : JSON.stringify(obj),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(resultData){
+					var copyWatcher = resultData.copyWatcher;
+					
+					if(copyWatcher.length){
+						for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+							var isNew = true
+							  , division = copyWatcher[i].prjDivision || ""
+							  , divisionName = copyWatcher[i].prjDivisionName || ""
+							  , userId = copyWatcher[i].prjUserId || ""
+							  , userName = copyWatcher[i].prjUserName || ""
+							  , email = copyWatcher[i].prjEmail || ""
+							  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+							  , userUseYn = copyWatcher[i].userUseYn || "Y";
+							
+							$(".watcherTags").each(function(idx, tag){
+								var tagDiv = $(tag).val().split("/")[0]
+								  , tagUid = $(tag).val().split("/")[1];
+								  
+								if(division == tagDiv) {
+									if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+										isNew = false;
+										
+										return false;
+									} else if(tagUid == userId) {
+										isNew = false;	// 이미 등록된 watcher가 있을경우
+									}
+								}
+								
+								if(tagUid == "Email") {
+									if(email == tagDiv) {
+										isNew = false;
+									}
+								}
+							});
+							
+							if(isNew){
+								var obj = {};
+								if(email != ""){
+									obj["prjDivision"] = '';
+									obj["prjUserId"] = '';
+									obj["prjEmail"] = _email;
+									
+									fn.addHtml($("#multiDiv"), email, email, "Email");
+								} else {
+									var str = "";
+									
+									if(userName == "") {
+										str = divisionName;
+									} else {
+										str = '<b';
+
+										if(divisionEmptyCd != division) {
+											if(deptUseYn == "N"){
+												str += ' class="deleteUser"';
+											}
+											
+											str += '>'+divisionName+'</b>/<b';
+										}
+										
+										if(userUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+										
+										str += '>'+userName+'</b>';
+									}
+									
+									obj["prjDivision"] = division;
+									obj["prjUserId"] = userId;
+									obj["prjEmail"] = '';
+									
+									fn.addHtml($("#multiDiv"), str, division, userId);
+								}
+								
+								changeWatcherArr.push(obj);
+							}
+						}
+					}
+				},
+				error : fn.onError
+			});
+		}
+	},
+	checkChar : function(){
+		if(event.keyCode == 64){//@ 특수문자 체크
+			alertify.alert([[#{msg.login.check.char}]], function(){});
+    		
+			event.returnValue = false;
+    	}
+	},
+	selectDomain : function() {
+		var adIdDomain = $("select[name=prjDomain] option:checked").text();
+		if ("Select Domain" == adIdDomain) adIdDomain = "";
+		$("input[name=adIdDomain]").val(adIdDomain);
+	},
+	resetChangeWatcherPop : function() {
+		changeWatcherArr = [];
+		$("#multiDiv").children().remove();
+		$("select[name=prjDivision]").val("").trigger('change');
+		$("select[name=prjDomain]").val("").trigger('change');
+		$("select[name=listKind]").val("").trigger('change');
+		$("input[name=listId]").val("");
+		fn.closeAlertify();
+	},
+	closeAlertify : function() {
+		$(".ajs-close").trigger("click");
+	}
+};
+
+// jqGrid
+var list = {
+	load : function(){
+		var distributionFlag = [[${distributionFlag}]];
+		var authority = '*${sessUserInfo.authority}';
+		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+		var rowList = rowStr.split(",");
+		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+		var authority = '*${sessUserInfo.authority}';
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
+		var colModelArr = [];
+        var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: '', index: '', width: 60, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'division', index: 'division', width: 70, align: 'left', sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'creator', index: 'creator', width: 50, align: 'left', sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'reviewer', index: 'reviewer', width: 50, align: 'left',edittype:'text', formatter:fn.getUserName
+                , editoptions: {
+					dataInit:
+						function (e) {
+							$(e).autocomplete({
+								source: function(req, res){
+									res(
+										$.grep(Object.keys(userIdList)
+												.map(function(e) {
+													  return userIdList[e]
+												}), function(cur){
+										    return cur;
+										})
+									);
+								}
+								, minLength: 0
+								, open: function() { $(this).attr('state', 'open');}
+								, close: function () { $(this).attr('state', 'closed');}
+							}).focus(function() {
+								if ($(this).attr('state') != 'open') {
+									$(this).autocomplete("search");
+								}
+							}).blur(function(){
+								$(this).attr('state', 'closed');
+							}).on('autocompletechange', fn.reviewerChg);
+							
+							currentOssName = e.value;
+						}
+				}
+				, sortable : true
+			};
+		if ("ROLE_ADMIN" == authority) {
+			colModelObj["editable"] = true;
+		} else {
+			colModelObj["editable"] = false;
+		}
+		colModelArr.push(colModelObj);
+		
+		$("#list").jqGrid({
+			url:'/project/listAjax',
+			datatype: 'json',
+			jsonReader:{
+				repeatitems: false,
+				id:'prjId',
+				root:function(obj){return obj.rows;},
+				page:function(obj){return obj.page;},
+				total:function(obj){return obj.total;},
+				records:function(obj){return obj.records;}
+			},
+		  	colNames: colNameArr,
+            colModel: colModelArr,
+			rowNum: rowNum,
+			rowList: rowList,
+			editurl:'clientArray',
+ 			autowidth: true,
+			pager: '#pager',
+			gridview: true,
+			sortable: function (permutation) {},
+			sortname: 'prjId',
+			viewrecords: true,
+			sortorder: 'desc',
+			height: 'auto' ,
+			multiselect : true,
+            multiselectWidth: 30,
+            loadonce:false,
+			loadComplete:function(data) {
+				totalRow = data.records;
+				
+				lastsel=-1;
+				
+				// color 설정
+				var target = $("#list");
+				var arr = target.jqGrid('getDataIDs');
+				var selectEl = "";
+				var status ="";
+				var rowid;
+
+				if(totalRow == 0){
+					var startDate = $("#schStartDate").val()||0;
+					var endDate = $("#schEndDate").val()||0;
+					var diffNum = +startDate - +endDate;
+					
+					if(diffNum > 0 && endDate > 0){
+						alertify.alert([[#{msg.common.search.check.date}]], function(){});
+					}
+				}
+				
+				$('input[id*="_releaseDate"]').attr('class', 'cal');
+
+                if(!gridTooltip.existTooltip){
+                    $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_download"))
+                        .attr("title", gridTooltip.tooltipCont).tooltip({
+                        content: function () {
+                            return $(this).prop('title');
+                        }
+                    });
+
+                    gridTooltip.existTooltip = true;
+                }
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var rowData = $("#list").jqGrid('getRowData',rowid);
+				var isAdmin = [[${@CommonFunction.isAdmin()}]];
+				
+				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
+					fn.mvIdentification(rowid, "5", rowData['permission']);
+				} else if('true' == isAdmin && iCol == 6 || 'false' == isAdmin && iCol == 5) {
+					if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
+						
+					} else {
+						fn.mvVerification(rowData['prjId'], rowData['permission']);
+					}
+				} else if('true' == isAdmin && iCol == 7 || 'false' == isAdmin && iCol == 6) {
+					if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
+						
+					} else {						
+						fn.mvDistribution(rowData['prjId'], rowData['permission']);
+					}
+				} else if(iCol != 0 && iCol != 5 && iCol != 14) {
+					createTabInFrame(rowData['prjId']+'_Project', '/project/edit/'+rowData['prjId']);
+				}
+			},
+			postData: refreshParam
+		});
+	}
+};
+
+//]]>
+</script>
+</th:block>
