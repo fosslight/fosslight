@@ -6,6 +6,7 @@
         let temp = {obligation: ''};
         let list = [];
         let licenseTags = [];
+        let isAdmin = [[ ${@CommonFunction.isAdmin() }]];
         let gLicenseData = new Array();
         let detectedLicenseValid = true;
         let deactivateFlag = "N";
@@ -40,14 +41,14 @@
         });
 
         const oss_edit_data = {
-            detail: [[ ${detail}]],
-            list: [[ ${list}]] != null ? [[ ${list}]] : {rows: []},
-            components: [[ ${components}]],
-            componentsPartner: [[ ${componentsPartner}]],
-            vulnInfoList: [[ ${vulnInfoList}]],
+            detail: [[ ${detail} ]],
+            list: [[ ${list} ]] != null ? [[ ${list} ]] : {rows: []},
+            components: [[ ${components} ]],
+            componentsPartner: [[ ${componentsPartner} ]],
+            vulnInfoList: [[ ${vulnInfoList} ]],
             clone: '',
             typeCodes: [],
-            ossId: [[ ${ossId}]],
+            ossId: [[ ${ossId} ]],
             isCopyData: [[ ${isCopyData} ]],
             init: function () {
                 list = this.isCopyData ? this.detail.ossLicenses : this.list.rows;
@@ -175,37 +176,38 @@
                     viewrecords: true,
                     loadonce: true,
                     onSelectRow: function (rowid) {
-                        $("div.retxt._licenseChoice_" + rowid).remove();
+                        if(isAdmin) {
+                            $("div.retxt._licenseChoice_" + rowid).remove();
 
-                        if (rowid && rowid !== lastsel) {
-                            _licenseChoice.jqGrid('saveRow', lastsel);
-                            _licenseChoice.jqGrid('editRow', rowid);
-                            lastsel = rowid;
+                            if (rowid && rowid !== lastsel) {
+                                _licenseChoice.jqGrid('saveRow', lastsel);
+                                _licenseChoice.jqGrid('editRow', rowid);
+                                lastsel = rowid;
 
-                            createMultiLicenseText();
+                                createMultiLicenseText();
 
-                            list.forEach(function (row, index) {
-                                if (row.ossLicenseIdx == lastsel) {
-                                    row.ossLicenseComb = $('#_licenseChoice').jqGrid('getCell', lastsel, 'ossLicenseComb');
+                                list.forEach(function (row, index) {
+                                    if (row.ossLicenseIdx == lastsel) {
+                                        row.ossLicenseComb = $('#_licenseChoice').jqGrid('getCell', lastsel, 'ossLicenseComb');
+                                    };
+                                });
+
+                                makeBackGroundColor();
+                                setFristComb();
+                                setCustomAutoComplete('multi');
+
+                                var type = autoLicense(list);
+                                var obligationHtml = autoObligation(list);
+
+                                if (list.length == 0) {
+                                    type = '';
+                                    obligationHtml = '';
                                 }
-                                ;
-                            });
 
-                            makeBackGroundColor();
-                            setFristComb();
-                            setCustomAutoComplete('multi');
-
-                            var type = autoLicense(list);
-                            var obligationHtml = autoObligation(list);
-
-                            if (list.length == 0) {
-                                type = '';
-                                obligationHtml = '';
+                                $('#lt td').html(type);
+                                $('#ob td').html('');
+                                $(obligationHtml).appendTo('#ob td');
                             }
-
-                            $('#lt td').html(type);
-                            $('#ob td').html('');
-                            $(obligationHtml).appendTo('#ob td');
                         }
                     },
                     afterInsertRow: function (rowid, rowdata, rowelem) {
@@ -229,7 +231,7 @@
                 });
 
                 _licenseChoice.jqGrid('navGrid', "#_licenseChoicePager", {
-                    edit: false, add: true, del: false, search: false, refresh: false
+                    edit: false, add: isAdmin, del: false, search: false, refresh: false
                     , addfunc: function (rowid) {
                         var ids = $("#_licenseChoice").jqGrid("getDataIDs");
                         var newId = ids.length ? Number(ids[ids.length - 1]) + 1 : 1;
@@ -290,7 +292,7 @@
                     });
 
                     if (!jsValidResult || !detectedLicenseValid) {
-                        alertify.error(String([[ #{msg.common.valid}]]), 0);
+                        alertify.error(String([[ #{msg.common.valid} ]]), 0);
                         //$("span.retxt").show();
 
                         return false;

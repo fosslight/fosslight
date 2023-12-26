@@ -633,28 +633,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if(rowObject.identificationStatus == "Confirm"){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-7x mr-2\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-7x mr-1\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-7x mr-2\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-7x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
             }
         }
 		
 		if(rowObject.verificationStatus == "Confirm"){
 			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
 			} else {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-7x mr-2\" title=\"OSS Notice\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-7x mr-1\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId2!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if(rowObject.packageFileId3!=""){
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-2\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-7x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
 		}
 		
@@ -1658,7 +1658,7 @@ var fn = {
 	},
 	addHtml : function(target, str, division, userId){
 		var rlt = division+((userId!="") ? "/"+userId : "");
-		var html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		var html  = '<div class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
 		if("Y" != [[${searchBean.viewOnlyFlag}]]) {
 			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';

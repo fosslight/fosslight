@@ -42,34 +42,39 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="ossName" th:text="#{msg.common.field.OSS.name}"><span
+                                        <label th:text="#{msg.common.field.OSS.name}"><span
                                                 class="text-orange">*</span></label>
                                         <input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}"
-                                               type="text"/>
+                                               type="text" th:disabled="${not @CommonFunction.isAdmin()}"/>
                                     </div>
                                     <div class="form-group tag-form" name="append-stag-form">
                                         <label th:text="#{msg.common.field.nickname}"></label>
-                                        <div class="input-group">
-                                            <input class="form-control" id="input_ossNicknames" onblur="oss_edit_fn.checkNickName(this)"
-                                                   type="text">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-default" id="ossNicknames" name="addTagButton"
-                                                        type="button">
-                                                    Add
-                                                </button>
+                                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                                            <div class="input-group">
+                                                <input class="form-control" id="input_ossNicknames" onblur="oss_edit_fn.checkNickName(this)"
+                                                       type="text">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default" id="ossNicknames" name="addTagButton"
+                                                            type="button">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                                <!-- /btn-group -->
                                             </div>
-                                            <!-- /btn-group -->
-                                        </div>
+                                        </th:block>
                                     </div>
                                     <div class="form-group row" id="appendArea_ossNicknames">
                                         <th:block th:each="ossNickname : ${detail?.ossNicknames}"
                                                   th:if="${!#strings.isEmpty(ossNickname)}">
                                             <div class="col-4 tag-container mb-1 pr-0">
-                                                <div class="external-event" name="appendArea_ossNicknames">
+                                                <div class="external-event pl-3" name="appendArea_ossNicknames">
                                                     <input name="ossNicknames" th:value="${ossNickname}"
                                                            type="hidden"/>
-                                                    <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                       onclick="deleteTag(this)"></i>[[${ossNickname}]]
+                                                    <th:block th:if="${@CommonFunction.isAdmin()}">
+                                                        <i class="fas fa-times text-blue-gray float-right mt-1"
+                                                           onclick="deleteTag(this)"></i>
+                                                    </th:block>
+                                                        [[${ossNickname}]]
                                                 </div>
                                             </div>
                                         </th:block>
@@ -91,7 +96,7 @@
                                         <label for="ossVersion" th:text="#{msg.common.field.OSS.version}"><span
                                                 class="text-orange">*</span></label>
                                         <input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}"
-                                               type="text"/>
+                                               type="text" th:disabled="${not @CommonFunction.isAdmin()}"/>
                                         <span class="retxt"></span>
                                     </div>
                                     <div class="form-group">
@@ -111,26 +116,31 @@
                                     </div>
                                     <div class="form-group tag-form" name="append-stag-form">
                                         <label th:text="#{msg.common.field.detectedLicense}"></label>
-                                        <div class="input-group">
-                                            <input class="form-control autoComOssLicense" id="input_detectedLicense" type="text">
-                                            <div class="input-group-append">
-                                                <button class="btn btn-default" id="detectedLicense" name="addTagButton"
-                                                        type="button">
-                                                    Add
-                                                </button>
+                                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                                            <div class="input-group">
+                                                <input class="form-control autoComOssLicense" id="input_detectedLicense" type="text">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default" id="detectedLicense" name="addTagButton"
+                                                            type="button">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                                <!-- /btn-group -->
                                             </div>
-                                            <!-- /btn-group -->
-                                        </div>
+                                        </th:block>
                                     </div>
                                     <div class="form-group row" id="appendArea_detectedLicense">
                                         <th:block th:each="detectedLicense : ${detail?.detectedLicenses}"
                                                   th:if="${!#strings.isEmpty(detectedLicense)}">
                                             <div class="col-4 tag-container mb-1 pr-0">
-                                                <div class="external-event" name="appendArea_detectedLicense">
+                                                <div class="external-event pl-3" name="appendArea_detectedLicense">
                                                     <input name="detectedLicenses" th:value="${detectedLicense}"
                                                            type="hidden"/>
+                                                    <th:block th:if="${@CommonFunction.isAdmin()}">
                                                     <i class="fas fa-times text-blue-gray float-right mt-1"
-                                                       onclick="deleteTag(this)"></i>[[${detectedLicense}]]
+                                                       onclick="deleteTag(this)"></i>
+                                                    </th:block>
+                                                        [[${detectedLicense}]]
                                                 </div>
                                             </div>
                                         </th:block>
@@ -138,7 +148,7 @@
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.Copyright}">Attribution 고지</label>
                                         <textarea class="form-control" rows="5"
-                                                  th:text="${detail?.copyright}"></textarea>
+                                                  th:text="${detail?.copyright}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
                                     </div>
                                     <div class="form-group" th:if="${detail?.licenseType}">
                                         <label class="text-light-gray"
@@ -146,11 +156,11 @@
                                         <select class="select2" disabled id="licenseTypeSelect"
                                                 name="licenseType" style="width: 100%;">
                                             <option value=""></option>
-                                            <th:block
-                                                    th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                            <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
                                                 <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}"
                                                         th:text="${code.cdDtlNm}"
-                                                        th:value="${code.cdDtlNo}"></option>
+                                                        th:value="${code.cdDtlNo}">
+                                                </option>
                                             </th:block>
                                         </select>
                                     </div>
@@ -172,56 +182,62 @@
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.downloadLocation}"></label>
                                         <input class="form-control" id="inputName" name="downloadLocations" th:value="${detail?.downloadLocation}"
-                                               type="text">
+                                               type="text" th:disabled="${not @CommonFunction.isAdmin()}"/>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.homepage}">홈페이지</label>
-                                        <input class="form-control" name="downloadLocations" th:value="${homepage}">
+                                        <input class="form-control" name="downloadLocations" th:value="${homepage}" th:disabled="${not @CommonFunction.isAdmin()}"/>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.summaryDescription}">요약 설명</label>
                                         <textarea class="form-control" rows="5"
-                                                  th:text="${summaryDescription}"></textarea>
+                                                  th:text="${summaryDescription}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.attribution}">Attribution 고지</label>
-                                        <textarea class="form-control" rows="5" th:text="${attribution}"></textarea>
+                                        <textarea class="form-control" rows="5" th:text="${attribution}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="inputName">Comment</label>
-                                        <textarea class="form-control" id="commentCont" name='commentInput'
-                                                  rows="3" style="height: 800px"></textarea>
+                                    <th:block th:if="${@CommonFunction.isAdmin()}">
+                                        <div class="form-group">
+                                            <label for="inputName">Comment</label>
+                                            <textarea class="form-control" id="commentCont" name='commentInput'
+                                                      rows="3" style="height: 800px"></textarea>
+                                        </div>
+                                    </th:block>
+                                </div>
+                                <th:block th:if="${@CommonFunction.isAdmin()}">
+                                    <div class="card-footer clearfix">
+                                        <a th:if="${isCopyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
+                                        <a class="btn btn-teal-01 float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.save()">Save</a>
+                                        <a th:if="${isCopyData == null}" class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
+                                        <a class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.syncOssPage()">Sync</a>
                                     </div>
-                                </div>
-                                <div class="card-footer clearfix">
-                                    <a th:if="${isCopyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
-                                    <a class="btn btn-teal-01 float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.save()">Save</a>
-                                    <a th:if="${isCopyData == null}" class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
-                                    <a class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.syncOssPage()">Sync</a>
-                                </div>
+                                </th:block>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card card-lg-red">
-                                <div class="card-header">
-                                    <h3 class="card-title">Comment</h3>
-                                    <div class="card-tools">
-                                        <button class="btn btn-tool text-white" data-card-widget="collapse"
-                                                title="Collapse"
-                                                type="button">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
+                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                            <div class="col-md-3">
+                                <div class="card card-lg-red">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Comment</h3>
+                                        <div class="card-tools">
+                                            <button class="btn btn-tool text-white" data-card-widget="collapse"
+                                                    title="Collapse"
+                                                    type="button">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="card-body pt-0">
-                                    <div class="row" id="commentAreaFragment">
-                                        <div class="col-md-12 mt-3" >
-                                            <strong class="text-lg-gray">No comments were registered.</strong>
+                                    <div class="card-body pt-0">
+                                        <div class="row" id="commentAreaFragment">
+                                            <div class="col-md-12 mt-3" >
+                                                <strong class="text-lg-gray">No comments were registered.</strong>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </th:block>
                     </div>
                 </form>
             </section>

@@ -716,9 +716,9 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .ui-jqgrid .ui-jqgrid-view input {
     border: .8px solid #ced4da;
     border-radius: 4px;
-    padding: 4px;
+    padding: 2px;
     text-align: center;
-    font-size: .8rem;
+    font-size: .7rem;
     height: auto;
     margin: 0 5px;
 }

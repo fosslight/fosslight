@@ -3064,7 +3064,7 @@ function appendMultiTag(e, elId_01, elId_02, tgId) {
     }
 
     const el = $("<div/>", {
-        class: "external-event",
+        class: "external-event pl-3",
         text: word,
     }).append(
         '<i class="fas fa-times float-right mt-1" onclick="deleteTag()"></i>'
@@ -3091,7 +3091,7 @@ function appendSingleTag(event, id) {
     });
 
     const tagContainer = $("<div/>", {
-        class: "external-event",
+        class: "external-event pl-3",
         name: id
     });
 

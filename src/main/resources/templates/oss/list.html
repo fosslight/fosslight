@@ -107,7 +107,6 @@
                                                               rows="3"
                                                               th:text="${searchBean.copyright}"></textarea>
                                                 </div>
-
                                             </div>
 
                                             <div class="col-md-5">
@@ -178,8 +177,7 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-3"
-                                                         th:if="${#lists.size(@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))) > 0}">
+                                                    <div class="col-md-3">
                                                         <div class="form-group mb-2">
                                                             <input class="form-control" id="modifiedDate"
                                                                    placeholder="Modified Date" type="text"/>

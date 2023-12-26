@@ -152,7 +152,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 		// 일반 user 화면 일 경우 restriction을 full name으로 화면 출력
 		// admin 화면 일 경우 restriction code를 사용하여 체크박스로 구성
-		if (!"ROLE_ADMIN".equals(loginUserRole())) {
+		// if (!"ROLE_ADMIN".equals(loginUserRole())) {
 			if (licenseMaster.getRestriction() != null) {
 				T2CodeDtl t2CodeDtl = new T2CodeDtl();
 				List<T2CodeDtl> t2CodeDtlList = new ArrayList<>(); 
@@ -176,7 +176,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				licenseMaster.setRestriction(restrictionStr);
 				licenseMaster.setRestrictionCdNoList(restrictionCdNoList);
 			}
-		}
+		//}
 		
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
 		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
