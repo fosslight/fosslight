@@ -1780,7 +1780,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 				checkKey = checkKey.toUpperCase();
 				OssMaster ossmaster = ossInfo.get(checkKey);
 				if (ossmaster != null && !isEmpty(ossmaster.getOssNameTemp())) {
-					ossmaster = ossInfo.get((ossmaster.getOssNameTemp().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase());
+					OssMaster om = ossInfo.get((ossmaster.getOssNameTemp().trim() + "_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase());
+					ossmaster.setDetectedLicenses(om.getDetectedLicenses());
 				}
 				
 				// exclude=Y 상태인 경우 체크하지 않음
