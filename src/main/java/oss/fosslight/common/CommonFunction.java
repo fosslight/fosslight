@@ -5322,4 +5322,60 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			result.put("infoData", rtnMsgMapByValid);
 		}
 	}
+
+	public static Object copyObject(Object obj, String gubn) {
+		if (gubn.equals("OM")) {
+			OssMaster bean = (OssMaster) obj;
+			
+			OssMaster copiedBean = new OssMaster();
+			copiedBean.setOssId(bean.getOssId());
+			copiedBean.setOssName(bean.getOssName());
+			copiedBean.setOssVersion(bean.getOssVersion());
+			copiedBean.setLicenseName(bean.getLicenseName());
+			copiedBean.setOssLicenses(bean.getOssLicenses());
+			copiedBean.setDetectedLicenses(bean.getDetectedLicenses());
+			copiedBean.setOssNickname(bean.getOssNickname());
+			copiedBean.setOssNicknames(bean.getOssNicknames());
+			copiedBean.setDownloadLocation(bean.getDownloadLocation());
+			copiedBean.setDownloadLocations(bean.getDownloadLocations());
+			copiedBean.setHomepage(bean.getHomepage());
+			
+			if (!isEmpty(bean.getLicenseDiv())) {
+				copiedBean.setMultiLicenseFlag(bean.getLicenseDiv());
+				copiedBean.setLicenseDiv(bean.getLicenseDiv());
+			}
+			
+			if (!isEmpty(bean.getLicenseType())) {
+				copiedBean.setLicenseType(bean.getLicenseType());
+			}
+			
+			if (!isEmpty(bean.getObligationType())) {
+				copiedBean.setObligation(bean.getObligationType());
+			}
+			
+			if (!isEmpty(bean.getModifiedDate())) {
+				copiedBean.setModifiedDate(bean.getModifiedDate());
+			}
+			
+			if (!isEmpty(bean.getModifier())) {
+				copiedBean.setModifier(bean.getModifier());
+			}
+			
+			if (!isEmpty(bean.getCreatedDate())) {
+				copiedBean.setCreatedDate(bean.getCreatedDate());
+			}
+			
+			if (!isEmpty(bean.getCreator())) {
+				copiedBean.setCreator(bean.getCreator());
+			}
+
+			copiedBean.setAttribution(bean.getAttribution());
+			copiedBean.setSummaryDescription(bean.getSummaryDescription());
+			copiedBean.setCopyright(bean.getCopyright());
+			
+			return copiedBean;
+		} else {
+			return obj;
+		}
+	}
 }
