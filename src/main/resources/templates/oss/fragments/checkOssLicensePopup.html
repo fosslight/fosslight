@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="oss/fragments/checkOssLicensePopup-script :: contentScript"></th:block>
+<body>
+	<div class="card-body">
+		<div class="form-group" style="margin-bottom: 0;">
+			<label class="pl-2" for="checkLicense" style="margin-bottom: .2rem; font-size: .85rem;" th:text="#{msg.project.check.license}"></label>
+			<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_EXTERNAL_SERVICE_USED_FLAG')) == 'N'}">
+				<br/>
+				<label class="pl-2" for="disable" style="margin-bottom: .2rem; font-size: .85rem; color: blue;" th:text="#{external.service.disable}"></label>
+			</th:block>
+			<th:block th:unless="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_EXTERNAL_SERVICE_USED_FLAG')) == 'N'}">
+				<br/>
+				<label class="pl-2" for="errorMsg" id="errorMsg" style="margin-bottom: .2rem; font-size: .85rem; color: blue; display: none;"></label>
+			</th:block>
+		</div>
+		<div class="row pl-2" style="width: 100%;">
+			<div class="col-md-12 outerJqGridSet">
+            	<table id="ossList"><tr><td></td></tr></table>
+       		</div>
+		</div>
+		<div class="row pl-2 float-left custom-layout" style="margin-top: 10px;">
+        	<button type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" th:text="'Change License'"></button>
+    	</div>
+	</div>
+</body>
+</html>
