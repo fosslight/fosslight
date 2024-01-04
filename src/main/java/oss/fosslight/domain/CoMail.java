@@ -5,21 +5,12 @@
 
 package  oss.fosslight.domain;
 
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import org.apache.commons.lang3.StringUtils;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class CoMail extends ComBean {
 	
 	/** The Constant serialVersionUID. */
@@ -586,38 +577,6 @@ public class CoMail extends ComBean {
 	 * Instantiates a new co mail.
 	 */
 	public CoMail() {}
-	
-	/**
-	 *  UTILITIES *.
-	 *
-	 * @param path the path
-	 * @param model the model
-	 * @return the string
-	 */
-	public String geVelocityTemplateContent(String path, Map<String, Object> model) {
-		VelocityContext context = new VelocityContext();
-		Writer writer = new StringWriter();
-		VelocityEngine vf = new VelocityEngine();
-		Properties props = new Properties();
-		context.put("TEMPLATE_URL", path); // context 정보
-		
-	    props.put("resource.loader", "class");
-	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-	    props.put("input.encoding", "UTF-8");
-	    
-	    vf.init(props);
-	    
-		try {
-			Template template = vf.getTemplate(""); // file name
-			template.merge(context, writer);
-			
-			return writer.toString();
-		} catch (Exception e) {
-			System.out.println("Exception occured while processing velocity template");
-			log.error(e.getMessage());
-		}
-		return "";
-	}
 	
 	/**
 	 * Gets the compare data before.

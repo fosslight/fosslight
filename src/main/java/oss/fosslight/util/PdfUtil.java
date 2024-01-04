@@ -1,27 +1,35 @@
 package oss.fosslight.util;
 
-import com.itextpdf.html2pdf.HtmlConverter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import oss.fosslight.CoTopComponent;
-import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.*;
-import oss.fosslight.repository.*;
-import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.VulnerabilityService;
+import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
+import com.itextpdf.html2pdf.HtmlConverter;
+
+import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.CommonFunction;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.LicenseMapper;
+import oss.fosslight.repository.OssMapper;
+import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.repository.VerificationMapper;
+import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.VulnerabilityService;
 
 @Slf4j
 public final class PdfUtil extends CoTopComponent {
@@ -136,8 +144,11 @@ public final class PdfUtil extends CoTopComponent {
         convertData.put("OssReview", ossReview);
         convertData.put("LicenseReview", licenseReview);
         convertData.put("VulnerabilityReview", vulnerabilityReview);
-        String pdfContent = getVelocityTemplateContent("/template/report/reviewReport.html", convertData);
-        return pdfContent;
+        convertData.put("templateUrl", "/template/report/reviewReport.html");
+        
+        return CommonFunction.VelocityTemplateToString(convertData);
+//        String pdfContent = getVelocityTemplateContent("/template/report/reviewReport.html", convertData);
+//        return pdfContent;
     }
 
     /**
@@ -147,37 +158,37 @@ public final class PdfUtil extends CoTopComponent {
      * @param model the model
      * @return the string
      * */
-    private String getVelocityTemplateContent(String path, Map<String, Object> model) {
-        VelocityContext context = new VelocityContext();
-        Writer writer = new StringWriter();
-        VelocityEngine vf = new VelocityEngine();
-        Properties props = new Properties();
-
-        for (String key : model.keySet()) {
-            if (!"templateUrl".equals(key)) {
-                context.put(key, model.get(key));
-            }
-        }
-
-        context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
-        context.put("commonFunction", CommonFunction.class);
-
-        props.put("resource.loader", "class");
-        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        props.put("input.encoding", "UTF-8");
-
-        vf.init(props);
-
-        try {
-            Template template = vf.getTemplate(path); // file name
-            template.merge(context, writer);
-
-            return writer.toString();
-        } catch (Exception e) {
-            log.error("Exception occured while processing velocity template:" + e.getMessage());
-        }
-        return "";
-    }
+//    private String getVelocityTemplateContent(String path, Map<String, Object> model) {
+//        VelocityContext context = new VelocityContext();
+//        Writer writer = new StringWriter();
+//        VelocityEngine vf = new VelocityEngine();
+//        Properties props = new Properties();
+//
+//        for (String key : model.keySet()) {
+//            if (!"templateUrl".equals(key)) {
+//                context.put(key, model.get(key));
+//            }
+//        }
+//
+//        context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
+//        context.put("commonFunction", CommonFunction.class);
+//
+//        props.put("resource.loader", "class");
+//        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+//        props.put("input.encoding", "UTF-8");
+//
+//        vf.init(props);
+//
+//        try {
+//            Template template = vf.getTemplate(path); // file name
+//            template.merge(context, writer);
+//
+//            return writer.toString();
+//        } catch (Exception e) {
+//            log.error("Exception occured while processing velocity template:" + e.getMessage());
+//        }
+//        return "";
+//    }
 
     public Map<String,Object> getPdfFilePath(String prjId) throws Exception{
         Map<String,Object> fileInfo = new HashMap<>();

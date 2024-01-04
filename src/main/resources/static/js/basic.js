@@ -608,10 +608,7 @@ var deleteTabByName = function (tabLk) {
 }
 
 var deleteTab = function (tabLk) {
-    var tabs = $("#nav-tabs").tabs();
-    var panel = tabs.find(".ui-state-default:eq(" + selectTab + ")");
-
-    panel.find(".ui-icon-close").trigger("click");
+    $(".nav-link.active").prev().trigger("click");
 }
 
 var activeDeleteTab = function () {
@@ -2691,6 +2688,17 @@ var tableRefreshNew = function (id) {
                 }
             });
         }, 300);
+    } else if ("_modelList" == id) {
+        window.setTimeout(function () {
+			var width = $(".card-body").width();
+            $('.ui-jqgrid-btable').each(function () {
+                var id = $(this).attr('id');
+                if ("_modelList" == id) {
+                    $(this).jqGrid('setGridWidth', 0, true);
+                    $(this).jqGrid('setGridWidth', width, true);
+                }
+            });
+        }, 300);
     } else {
         window.onload = function () {
             var width = $(".card-body").width() - 40;
@@ -2886,7 +2894,6 @@ function createTab_new(title, link, uniqueName, autoOpen) {
 }
 
 function deleteTab_new(uniqueName) {
-    console.log(uniqueName);
     $("#tab--" + uniqueName).parent().find('.btn-iframe-close').trigger("click");
 }
 
@@ -3162,7 +3169,7 @@ function selectLang(lang) {
 }
 
 function callAutoCompleteFnc(value) {
-	var autoCompleteTags = [];console.log(value);
+	var autoCompleteTags = [];
 	var target = "." + value;
 	
 	if ("autoComConfPartyId" == value) {

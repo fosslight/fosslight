@@ -5,11 +5,8 @@
 
 package oss.fosslight.config;
 
-import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.VelocityException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -75,18 +72,18 @@ public class AppConfig {
 		return mailSenderImpl;
 	}
 	
-    @Bean
-    public VelocityEngine getVelocityEngine() throws VelocityException, IOException {
-    	VelocityEngine factory = new VelocityEngine();
-        Properties props = new Properties();
-        props.put("resource.loader", "class");
-        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        props.put("input.encoding", AppConstBean.APP_ENCODING);
-        props.put("output.encoding", AppConstBean.APP_ENCODING);
-        props.put("response.encoding", AppConstBean.APP_ENCODING);
- 
-        factory.init(props);
-        
-        return factory;
-    }
+//    @Bean
+//    public VelocityEngine getVelocityEngine() throws VelocityException, IOException {
+//    	VelocityEngine factory = new VelocityEngine();
+//        Properties props = new Properties();
+//        props.put("resource.loader", "class");
+//        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+//        props.put("input.encoding", AppConstBean.APP_ENCODING);
+//        props.put("output.encoding", AppConstBean.APP_ENCODING);
+//        props.put("response.encoding", AppConstBean.APP_ENCODING);
+// 
+//        factory.init(props);
+//        
+//        return factory;
+//    }
 }

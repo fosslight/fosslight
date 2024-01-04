@@ -171,7 +171,7 @@
 
 				// 선택한 item이 없을 경우.
 				if(divVal == "" || userVal == "") {
-					return alertify.error('<spring:message code="msg.project.required.selectDivision" />', 0);
+					return alertify.error([[#{msg.project.required.selectDivision}]], 0);
 				}
 				
 				/* tag 정보 */
@@ -208,24 +208,19 @@
 				$("#_modelList").jqGrid('clearGridData');
 			});
 			
-			// 컴플리트 버튼 
-			$('#complete').click(function(){
-				fn.exeProjectComplete('Y');
-			})				
-			
 			$('#drop').on('click', function(){
 				var comment = "";
 				if(comment == ""){
-					alertify.alert('<spring:message code="msg.project.confirm.comment" />', function(){});
+					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
 				}else{
 					if(distributionStatus == "PROC"){
-						var comment = '<spring:message code="msg.project.distribution.loading" />';
+						var comment = [[#{msg.project.distribution.loading}]];
 						
 						alertify.error(comment, 0);
 
 						return false;
 					} else if(distributionStatus == "RSV"){
-						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -235,7 +230,7 @@
 							}
 						});
 					} else if(distributionStatus == "DONE"){
-						var dropMessage = '<spring:message code="msg.project.warn.drop.rsv" />';
+						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
 						alertify.confirm(dropMessage, function (e) {
 							if (e) {
@@ -274,7 +269,7 @@
 			// 삭제
 			$("#delete").click(function(){
 				if(data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
-					alertify.alert('<spring:message code="msg.project.warn.edit.delete" />', function(){});
+					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
 
 					return;
 				} else {
@@ -339,7 +334,7 @@
 						$('.ajax-file-upload-statusbar').remove();
 						fn.makeModelList(data);	
 					} else {
-						alertify.error('<spring:message code="msg.common.valid" />', 0);
+						alertify.error([[#{msg.common.valid}]], 0);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 					}
@@ -355,7 +350,7 @@
 
 				if(adId == "") {
 					$("#adId").focus();
-					return alertify.error('<spring:message code="enter.watcher.error" />', 0);
+					return alertify.error([[#{enter.watcher.error}]], 0);
 				}
 				
 				var _email = adId + "@" + domain;
@@ -365,7 +360,7 @@
 				if (!regEmail.test(_email)) {
 					$("#adId").focus();
 
-					return alertify.error('<spring:message code="invalid.email.error" />', 0);
+					return alertify.error([[#{invalid.email.error}]], 0);
 				}
 				
 				$.ajax({
@@ -386,7 +381,7 @@
 						}
 					},
 					error: function(data){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 				
@@ -469,7 +464,7 @@
 						cache : false,
 						contentType : 'application/json',
 						success: function(){
-							alertify.success('<spring:message code="msg.common.success" />');
+							alertify.success([[#{msg.common.success}]]);
 						},
 						error : fn.onError
 					});
@@ -640,7 +635,7 @@
 							}
 						}
 						
-						alertify.success('<spring:message code="msg.common.success" />');
+						alertify.success([[#{msg.common.success}]]);
 					}
 				},
 				error : fn.onError
@@ -755,12 +750,12 @@
 						}
 						
 						if(prjId) {
-							alertify.success('<spring:message code="msg.common.success" />');
+							alertify.success([[#{msg.common.success}]]);
 						}
 					}
 					
 					if(!copyWatcher.length) {
-						alertify.warning('<spring:message code="msg.project.required.id" />');
+						alertify.warning([[#{msg.project.required.id}]]);
 					}
 				},
 				error : fn.onError
@@ -844,7 +839,7 @@
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -871,7 +866,7 @@
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -881,11 +876,9 @@
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
 
-				var editorVal = $('#comment').summernote('code');
+				var editorVal = $('#additionalInformation').next().find(".note-editable").html();
 				$('input[name=comment]').val(editorVal);
 
-// 				var editorVal2 = "";
-// 				$('input[name=userComment]').val(editorVal2);
 				cleanErrMsg("_modelList");
 
 				var rows = fn.getModelGridRows('#_modelList');
@@ -908,7 +901,7 @@
 				if (true == [[${@CommonFunction.isAdmin()}]] && ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]])) {
 					var creator = $("input[name=creator]").val();
 					if(creator == ""){
-						alertify.alert('<spring:message code="msg.project.required.autocomplete" />', function(){});
+						alertify.alert([[#{msg.project.required.autocomplete}]], function(){});
 						
 						return false;
 					}
@@ -942,16 +935,16 @@
 					$('#checkbox3').val('Y');
 				}
 				
-// 				$("#projectForm").ajaxForm({
-// 					url : URL,
-// 					type : 'POST',
-// 					dataType: "json",
-// 					cache : false,
-// 					success: function(data) {
-// 						fn.onRegistSuccess(data);
-// 					},
-// 					error : fn.onError
-// 				}).submit();
+				$("#projectForm").ajaxForm({
+					url : URL,
+					type : 'POST',
+					dataType: "json",
+					cache : false,
+					success: function(data) {
+						fn.onRegistSuccess(data);
+					},
+					error : fn.onError
+				}).submit();
 			},
 			// 삭제
 			deleteSubmit : function(){
@@ -1007,19 +1000,19 @@
 					alertify.error(_errMsg, 0);
 					gridListBulkEdit("_modelList", pickdates);
 					createValidMsgComplex(json);
-				} else if(json.isValid == 'true') {
-					if(typeof json.resultData !== "undefined" && typeof json.resultData.confirmCopyStatusSuccess !== "undefined"){
-						if(json.resultData.confirmCopyStatusSuccess == 'false'){
+				} else if (json.isValid == 'true') {
+					if (typeof json.resultData !== "undefined" && typeof json.resultData.confirmCopyStatusSuccess !== "undefined") {
+						if (json.resultData.confirmCopyStatusSuccess == 'false') {
 							var msg;
-							if(typeof json.resultData.confirmCopyStatusFail !== "undefined"){
+							if (typeof json.resultData.confirmCopyStatusFail !== "undefined") {
 								var confirmCopyStatusFail = json.resultData.confirmCopyStatusFail;
 								
-								if("identification" == confirmCopyStatusFail){
+								if ("identification" == confirmCopyStatusFail) {
 									msg = [[#{msg.project.copy.confirm.status.fail.identification}]];
-								}else if("verification" == confirmCopyStatusFail){
+								} else if ("verification" == confirmCopyStatusFail){
 									msg = [[#{msg.project.copy.confirm.status.fail.verification}]];
 								}
-							}else{
+							} else {
 								msg = [[#{msg.common.success}]];
 							}
 
@@ -1030,7 +1023,7 @@
 								
 								activeTabInFrameList("PROJECT");
 							});
-						}else if(json.resultData.confirmCopyStatusSuccess == 'true'){
+						} else if (json.resultData.confirmCopyStatusSuccess == 'true') {
 							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								
@@ -1039,10 +1032,10 @@
 								activeTabInFrameList("PROJECT");
 							});
 						}
-					}else{
+					} else {
 						var prjId = $('input[name=prjId]').val();
 						
-						if(data.copy) {
+						if (data.copy) {
 							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								
@@ -1054,7 +1047,7 @@
 							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								
-								if(prjId == '') {
+								if (prjId == '') {
 									deleteTabInFrame('/project/edit');
 									activeTabInFrameList("PROJECT");
 								} else {
@@ -1065,7 +1058,7 @@
 										flag = json.resultData.isAdd;
 									}
 									
-									if(status == "DONE" && flag == "true") {
+									if (status == "DONE" && flag == "true") {
 										alertify.confirm([[#{msg.project.required.only}]], function () {
 												deleteTabInFrame('/project/edit/'+prjId);
 												createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
@@ -1090,11 +1083,11 @@
 					reloadTabInframe('<c:url value="/project/list"/>');
 					
 					if(data.copy) {
-						alertify.alert('<spring:message code="msg.common.success" />', function(){
+						alertify.alert([[#{msg.common.success}]], function(){
 							deleteTabInFrame('/project/copy/'+data.copy.prjId);
 						});
 					} else {
-						alertify.alert('<spring:message code="msg.common.success" />', function(){
+						alertify.alert([[#{msg.common.success}]], function(){
 							if(prjId){
 								deleteTabInFrame('/project/edit/'+prjId);
 							} else {
@@ -1103,7 +1096,7 @@
 						});
 					}
 				} else {
-					alertify.error('<spring:message code="msg.common.valid2" />', 0)
+					alertify.error([[#{msg.common.valid2}]], 0)
 				}
 			},
 			// 에러 콜백
@@ -1117,7 +1110,7 @@
 					fn.disabledVerificationConfirm(true);
 				}
 				
-				alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				alertify.error([[#{msg.common.valid2}]], 0);
 			},
 			selectDivision : function() {
 				var division = $('#prjDivision').val();
@@ -1143,7 +1136,7 @@
 						$('#prjUserId').change();
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -1169,13 +1162,13 @@
 					contentType : 'application/json',
 					success: function (data) {
 						if("false" == data.isValid) {
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
 							window.location =  '/exceldownload/getFile?id='+data.validMsg;
 						}
 					},
 					error: function(data){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -1214,16 +1207,16 @@
 					data : param,
 					success : function(json){
 						if(json.isValid == 'false'){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
 							$('.ajs-close').trigger("click");
-							alertify.success('<spring:message code="msg.project.sent.comments.success" />');
+							alertify.success([[#{msg.project.sent.comments.success}]]);
 							
 							$(".commentBtn open").trigger( "click" );
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -1241,15 +1234,15 @@
 					data : param,
 					success : function(json){
 						if(json.isValid == 'false'){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
-							alertify.success('<spring:message code="msg.common.success" />');
+							alertify.success([[#{msg.common.success}]]);
 							
 							$(".commentBtn.open").trigger( "click" );
 						}
 					},
 					error : function(){
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
@@ -1296,7 +1289,142 @@
 				var type = "";
 				var commId = "";
 				if ("N" == [[${project.viewOnlyFlag}]]) {
+					var identificationHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+					var packagingHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
 					
+					var readOnly = false;
+					var mode = null;
+					
+					if (info == null) {
+						mode = "insert";
+					} else if ([[${@CommonFunction.isAdmin()}]]) {
+						commId = info.commId;
+						mode = "reject";
+					} else {
+						commId = info.commId;
+						mode = "update";
+					}
+					
+					let divTemp = document.createElement("div");
+					divTemp.classList.add("col-12");
+					
+					let hiddenInput = document.createElement("input");
+					hiddenInput.type = "hidden";
+					hiddenInput.id = "commentsMode";
+					hiddenInput.name = "commentsMode";
+					hiddenInput.value = mode;
+					divTemp.appendChild(hiddenInput);
+					
+					hiddenInput = document.createElement("input");
+					hiddenInput.type = "hidden";
+					hiddenInput.id = "commIdPopup";
+					hiddenInput.name = "commIdPopup";
+					hiddenInput.value = commId;
+					divTemp.appendChild(hiddenInput);
+					
+					let textarea = document.createElement("textarea");
+					textarea.id = "reqToOpenTextarea";
+					
+					divTemp.appendChild(textarea);
+					$("#reqToOpenDiv").append(divTemp);
+					
+					$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					if (info != null && info.contents != null) {
+						$("#reqToOpenTextarea").summernote('code', info.contents);
+					}
+					
+					divTemp = document.createElement("div");
+					divTemp.classList.add("col-12");
+					
+					let col = document.createElement("div");
+					col.classList.add("col-3");
+					
+					let formGroup = document.createElement("div");
+					formGroup.classList.add("form-group");
+					
+					let formCheck = document.createElement("div");
+					formCheck.classList.add("form-check");
+					
+					let inputRadio = document.createElement("input");
+					inputRadio.classList.add("form-check-input");
+					inputRadio.type = "radio";
+					inputRadio.name = "referenceDiv";
+					inputRadio.value = identificationHisCode;
+					
+					let label = document.createElement("label");
+					label.classList.add("form-check-label");
+					label.innerText = "Identification";
+					
+					if (info != null && info.referenceDiv != null && info.referenceDiv == identificationHisCode) {
+						inputRadio.setAttribute('checked', true);
+					}
+					
+					formCheck.appendChild(inputRadio);
+					formCheck.appendChild(label);
+					formGroup.appendChild(formCheck);
+					col.appendChild(formGroup);
+					$("#reqToOpenDiv2").append(col);
+					
+					col = document.createElement("div");
+					col.classList.add("col-3");
+					
+					formGroup = document.createElement("div");
+					formGroup.classList.add("form-group");
+					
+					formCheck = document.createElement("div");
+					formCheck.classList.add("form-check");
+					
+					inputRadio = document.createElement("input");
+					inputRadio.classList.add("form-check-input");
+					inputRadio.type = "radio";
+					inputRadio.name = "referenceDiv";
+					inputRadio.value = packagingHisCode;
+					
+					label = document.createElement("label");
+					label.classList.add("form-check-label");
+					label.innerText = "Packaging";
+					
+					if (info != null && info.referenceDiv != null && info.referenceDiv == packagingHisCode) {
+						inputRadio.setAttribute('checked', true);
+					}
+					
+					formCheck.appendChild(inputRadio);
+					formCheck.appendChild(label);
+					formGroup.appendChild(formCheck);
+					col.appendChild(formGroup);
+					$("#reqToOpenDiv2").append(col);
+					
+					const reqToOpenHtml = $(".requestToOpenPop").html();
+					$("#reqToOpenDiv").empty();
+					$("#reqToOpenDiv2").empty();
+					
+					if(!alertify.reqToOpen){
+						alertify.dialog('reqToOpen', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'alert');
+                	}
+					
+					alertify.reqToOpen(reqToOpenHtml).set('title', 'Request To Open');
 				}
 			},
 			commentsSave : function(data){
@@ -1310,9 +1438,9 @@
 						data : data,
 						success : function(json){
 							if(json.isValid == 'false'){
-								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+								alertify.error([[#{msg.common.valid2}]], 0);
 							} else {
-								alertify.alert('<spring:message code="msg.common.success" />', function(){
+								alertify.alert([[#{msg.common.success}]], function(){
 									reloadTabInframe('/project/list');
 									deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
 									activeTabInFrameList("PROJECT");
@@ -1320,7 +1448,7 @@
 							}
 						},
 						error : function(){
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						}
 					});
 				} else {
@@ -1339,7 +1467,7 @@
 								activeTabInFrameList("PROJECT");
 							},
 							error : function(){
-								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+								alertify.error([[#{msg.common.valid2}]], 0);
 							}
 						});
 					} else {
@@ -1351,9 +1479,9 @@
 							data : data,
 							success : function(json) {
 								if(json.isValid == 'false') {
-									alertify.error('<spring:message code="msg.common.valid2" />', 0);
+									alertify.error([[#{msg.common.valid2}]], 0);
 								} else {
-									alertify.alert('<spring:message code="msg.common.success" />', function(){
+									alertify.alert([[#{msg.common.success}]], function(){
 										reloadTabInframe('/project/list');
 										deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
 										activeTabInFrameList("PROJECT");
@@ -1361,7 +1489,7 @@
 								}
 							},
 							error : function() {
-								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+								alertify.error([[#{msg.common.valid2}]], 0);
 							}
 						});
 					}
@@ -1369,7 +1497,7 @@
 			},
 			commentsIgnore : function(){
 				/* 2018-07-30 choye 추가 */
-				var data = {"referenceId" : '${project.prjId}', "contents" : ""};
+				var data = {"referenceId" : [[${project.prjId}]], "contents" : ""};
 
 				$.ajax({
 					url : '/project/commentsIgnore',
@@ -1379,9 +1507,9 @@
 					data : data,
 					success : function(json) {
 						if(json.isValid == 'false') {
-							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
-							alertify.alert('<spring:message code="msg.common.success" />', function(){
+							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
 								activeTabInFrameList("PROJECT");
@@ -1389,21 +1517,21 @@
 						}
 					},
 					error : function() {
-						alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
 			},
 			chkListValidation : function(listKind, listId){
 				if(listKind == ""){
 					// TODO : 추후 문구 수정예정
-					alertify.error('<spring:message code="msg.project.watcher.selectlist" />', 0);
+					alertify.error([[#{msg.project.watcher.selectlist}]], 0);
 
 					return false;
 				}
 				
 				if(listId == ""){
 					// TODO : 추후 문구 수정예정
-					alertify.error('<spring:message code="msg.project.watcher.required.copyid" />', 0);
+					alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
 
 					return false;
 				}
@@ -1424,7 +1552,7 @@
 			},
 			CheckChar : function(){
 				if(event.keyCode == 64){//@ 특수문자 체크
-            				alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
+            				alertify.alert([[#{msg.login.check.char}]], function(){});
             		
             				event.returnValue = false;
             	}
@@ -1473,7 +1601,7 @@
 				document.execCommand( 'Copy' );
 		        
 				$('.ajs-close').trigger("click");
-				alertify.success('<spring:message code="msg.common.success" />');
+				alertify.success([[#{msg.common.success}]]);
 			},
 			disabledCompleteRow : function(disabledBoolean){
 				var diabledNameList = ['prjName', 'osType', 'osTypeEtc', 'distributionType', 'networkServerType', 'distributeTarget', 'noticeType', 'noticeTypeEtc', 'priority', 'creatorNm', 'reviewer'];
@@ -1487,16 +1615,132 @@
 				var identificationStatusConfFlag = $("#identificationStatusConfFlag").val();
 				var verificationStatusConfFlag = $("#verificationStatusConfFlag").val();
 
-				if('Y' != identificationStatusConfFlag){
-					$("#CSIdentificationConfirm > input[type=radio]").attr("disabled", true);
+				for (var i=0; i<3; i++) {
+					let col = document.createElement("div");
+					col.classList.add("col-12");
+					
+					let formGroup = document.createElement("div");
+					formGroup.classList.add("form-group");
+					
+					let formCheck = document.createElement("div");
+					formCheck.classList.add("form-check");
+					
+					let inputRadio = document.createElement("input");
+					inputRadio.classList.add("form-check-input");
+					inputRadio.type = "radio";
+					inputRadio.name = "confirmStatusCopyRadio";
+					
+					if (i == 0) {
+						inputRadio.value = "IdentificationProg";
+						inputRadio.setAttribute('checked', true);
+					} else if (i == 1) {
+						inputRadio.value = "IdentificationConf";
+						if('Y' != identificationStatusConfFlag){
+							inputRadio.setAttribute('disabled', true);
+						}
+					} else {
+						inputRadio.value = "verificationConf";
+						if('Y' != verificationStatusConfFlag){
+							inputRadio.setAttribute('disabled', true);
+						}
+					}
+					
+					let label = document.createElement("label");
+					label.classList.add("form-check-label");
+					
+					if (i == 0) {
+						label.innerText = "Identification Progress";
+					} else if (i == 1) {
+						label.innerText = "Identification Confirm";
+					} else {
+						label.innerText = "Packaging Confirm";
+					}
+					
+					formCheck.appendChild(inputRadio);
+					formCheck.appendChild(label);
+					formGroup.appendChild(formCheck);
+					col.appendChild(formGroup);
+					
+					$("#copyConfirmDiv").append(col);
 				}
-
-				if('Y' != verificationStatusConfFlag){
-					$("#CSVerificationConfirm > input[type=radio]").attr("disabled", true);
+				
+				const copyConfirmHtml = $(".copyConfirmPopup").html();
+				$("#copyConfirmDiv").empty();
+				
+				if(!alertify.copyConfirm){
+					alertify.dialog('copyConfirm', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.buttons = [];
+								setup.focus.element = 1;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '450px';
+						        }
+							}
+						};
+					}, false, 'alert');
+            	}
+				
+				alertify.copyConfirm(copyConfirmHtml).set('title', 'Project Copy Status');
+			},
+			rejectRegist : function() {
+				var referenceDiv = $(':radio[name="referenceDiv"]:checked').val();
+				var commentsMode = $('#commentsMode').val();
+				var commId = $('#commIdPopup').val();
+				var matilType = "";
+				
+				if ("insert" == commentsMode || "update" == commentsMode || "reject" == commentsMode) {
+					if ("" == $("#reqToOpenTextarea").next().find(".note-editable").text()) {
+						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
+						return false;
+					}
+					
+					if (referenceDiv == undefined) {
+						alertify.alert([[#{msg.project.required.rejectDiv}]], function(){});
+						return false;
+					}
 				}
-
-				$("#CSIdentificationProgress > input[type=radio]").prop("checked", true);
-				$("#copyConfirmPopup").show();
+				
+				if ("reject" == commentsMode) {
+					if (referenceDiv != null) {
+						if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]]) {
+							data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+						} else if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]) {
+							data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+						} else if ("" == referenceDiv) {
+							data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+						}
+					} else {
+						data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+					}
+				} else {
+					data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv" : referenceDiv, "commId" : commId, "commentsMode" : commentsMode};
+				}
+				
+				fn.commentsSave(data);
+			},
+			closeAlertifyView : function() {
+				$(".ajs-close").trigger("click");
+			},
+			copyConfirmSave : function() {
+				fn.saveSubmit();
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+			},
+			copyConfirmClose : function() {
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				fn.closeAlertifyView();
 			}
 		}
 	
@@ -1508,6 +1752,7 @@
 		createThird : [[${createThird}]],
 		init : function(){
 			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			
 			if(data.detail){
 				$('input[name=prjId]').val(data.detail.prjId);
@@ -1528,7 +1773,6 @@
 					$('select[name=osType]').val("").trigger('change');
 				}
 
-				$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				$("[name='additionalInformation']").summernote('code', data.detail.comment);
 				
 				$('select[name=category]').val(data.detail.category).trigger('change');
@@ -1639,7 +1883,7 @@
 					$('select[name=osType]').val("").trigger('change');
 				}
 
-				$('textarea[name=comment]').val(data.copy.comment);
+				$("[name='additionalInformation']").summernote('code', data.copy.comment);
 				$('select[name=category]').val(data.copy.category).trigger('change');
 				$('select[name=prjDivision]').val(data.copy.prjDivision).trigger('change');
 				
@@ -1728,7 +1972,7 @@
 					modelList.load();
 				},
 				error : function(){
-					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
 		}
@@ -1778,20 +2022,20 @@
 											// 날짜 형식 체크
 											var date_pattern = /^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/;
 											if (!date_pattern.test(result)){
-												alertify.error('<spring:message code="msg.common.valid" />', 0);
+												alertify.error([[#{msg.common.valid}]], 0);
 												$(this).val("");
 											} else {
 												// 해당 월 말일 체크
 												var checkLastDate = new Date(result.substring(0,4), result.substring(4,6), 0);
 												if (parseInt(result.substring(6,8)) > parseInt(checkLastDate.getDate())){
-													alertify.error('<spring:message code="msg.common.valid" />', 0);
+													alertify.error([[#{msg.common.valid}]], 0);
 													$(this).val("");
 												} else {
 													$(this).val(result);
 												}
 											}
 										} else {
-											alertify.error('<spring:message code="msg.common.valid" />', 0);
+											alertify.error([[#{msg.common.valid}]], 0);
 											$(this).val("");
 										}
 									} else {
@@ -1871,9 +2115,9 @@
 			var categoryCd = '';
 			
 			switch(site){
-				case siteCd[0].cdDtlNo:		categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
-				case siteCd[1].cdDtlNo:		categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE2')}]];	break;
-				case siteCd[2].cdDtlNo:		categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
+				case siteCd[0].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
+				case siteCd[1].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE2')}]];	break;
+				case siteCd[2].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
 			}
 			
 			getCategoryCodeJson(categoryCd);
@@ -1895,7 +2139,7 @@
 			
 			if(!regExp.test(date)){
 				$this.val("");
-				alert('<spring:message code="msg.project.confirm.wrong.input.date" />');
+				alert([[#{msg.project.confirm.wrong.input.date}]]);
 			}
 		}
 	}
@@ -1925,7 +2169,7 @@
 				}
 			}
 		});
-	};	
+	};
 //]]>
 </script>
 </th:block>

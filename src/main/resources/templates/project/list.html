@@ -189,23 +189,15 @@
                         <div class="col-md-6">
                             <div class="row">
                             	<button type="button" class="btn btn-yellow-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.copy()|" th:text="Copy"></button>
-<!--                            	<div id="ChangeContainer" class="inblock" style="vertical-align:top; position: relative;">-->
-<!--									<input type="button" value="Change" class="btn btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.change(this)|"/>-->
-<!--									<div id="ChangeList" class="width-6rem tright" style="display: none; position: absolute; z-index: 1; left: 0; text-align:left;">-->
-<!--										<a th:onclick="|fn.checkProjectStatus()|" style="display: block; font-size: .8rem;" th:text="Status"></a>-->
-<!--										<a th:onclick="|fn.changeDivision()|" style="display: block; font-size: .8rem;" th:text="Division"></a>-->
-<!--										<a th:onclick="|fn.changeWatcher()|" style="display: block; font-size: .8rem;" th:text="Watcher"></a>-->
-<!--									</div>-->
-<!--								</div>-->
                                 <div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
-                                    <button type="button" class="btn btn-yellow-03 px-3" value="Change">Action</button>
+                                    <button type="button" class="btn btn-yellow-03 px-3" th:text="Change"></button>
                                     <button type="button" class="btn btn-yellow-03 dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                         <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <div class="dropdown-menu" id="ChangeList" role="menu">
-                                        <a class="dropdown-item" href="#" th:onclick="|fn.checkProjectStatus()|">Status</a>
-                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" >Division</a>
-                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|">Watcher</a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.checkProjectStatus()|" th:text="Status"></a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" th:text="Division"></a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
                                     </div>
                                 </div>
                             	<button type="button" class="btn btn-yellow-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|" th:text="'BOM Compare'"></button>
@@ -213,7 +205,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="row float-right">
-                           		<button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                           		<button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|" th:text="Export"><i class="far fa-file-excel mr-2"></i></button>
                                 <button type="button" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:text="Add"></button>
                             </div>
                         </div>

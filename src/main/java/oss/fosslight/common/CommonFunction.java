@@ -13,8 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
@@ -41,7 +39,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -63,9 +60,6 @@ import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -78,6 +72,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -4280,36 +4276,28 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return target.replaceAll("[/\\\\]", "_");
 	}
 	
+	private static TemplateEngine templateEngine;
+	public static void setTemplateEngine(TemplateEngine engine) {
+		templateEngine = engine;
+	}
+	
+	public static String VelocityTemplateToString(String templatePath, Map<String, Object> model) {
+		model.put("templateURL", templatePath);
+		return VelocityTemplateToString(model);
+	}
+	
 	public static String VelocityTemplateToString(Map<String, Object> model) {		
-		VelocityContext context = new VelocityContext();
-		Writer writer = new StringWriter();
-		VelocityEngine ve = new VelocityEngine();
-		Properties props = new Properties();
-		
-		for (String key : model.keySet()) {
-			if (!"templateURL".equals(key)) {
-				context.put(key, model.get(key));
-			}
-		}
-		
-	    props.put("resource.loader", "class");
-	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-	    props.put("input.encoding", "UTF-8");
-	    
-		ve.init(props);
-
-		// Core Logic: Velocity engine decides which template should be loaded according to the model's template URL
-		// Refer to the 'template' directory for further information.
+		Context context = new Context();
+		model.keySet().stream().filter(key -> !"templateURL".equals(key)).forEach(key -> context.setVariable(key, model.get(key)));
+		String convertResultStr;
 		try {
-			Template template = ve.getTemplate((String) model.get("templateURL"));
-			template.merge(context, writer);
-			
-			return writer.toString();
+			convertResultStr = templateEngine.process((String) model.get("templateURL"), context);
 		} catch (Exception e) {
 			log.error(e.getMessage());
+			throw e;
 		}
+		return convertResultStr;
 		
-		return "";
 	}
 	
 	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String dateStr, String fileType) {

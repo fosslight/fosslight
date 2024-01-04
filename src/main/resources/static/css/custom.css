@@ -789,3 +789,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .custom-layout .tbws1.linkCase tbody tr th.dCase {padding-left:30px;text-align:left;font-size:16px;}
 .custom-layout .tbws1.linkCase tbody tr td.dCase {height:100px;font-size:13px;line-height:22px;}
 .custom-layout .tbws1.linkCase tbody tr td.dCase.tleft {padding-left:30px;}
+
+.alertify .ajs-footer .ajs-buttons .ajs-button.ajs-warning {
+  color: #e22563;
+}

@@ -5,8 +5,6 @@
 
 package oss.fosslight.domain;
 
-import java.io.StringWriter;
-import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,7 +12,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,10 +30,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -704,7 +706,7 @@ public class CoMailManager extends CoTopComponent {
     		}
     		
     		// mail Template
-    		String msgContents = getVelocityTemplateContent(getTemplateFilePath(bean.getMsgType()), convertDataMap);
+    		String msgContents = CommonFunction.VelocityTemplateToString(getTemplateFilePath(bean.getMsgType()), convertDataMap);
     		if (isEmpty(msgContents)) {
     			throw new Exception("Can not convert mail contents Email Type : " + bean.getMsgType());
     		}
@@ -3309,44 +3311,6 @@ public class CoMailManager extends CoTopComponent {
 		return keyList.toString();
 	}
 
-	/**
-	 * Get velocity template content.
-	 *
-	 * @param path the path
-	 * @param model the model
-	 * @return the string
-	 */
-	private String getVelocityTemplateContent(String path, Map<String, Object> model) {
-		VelocityContext context = new VelocityContext();
-		Writer writer = new StringWriter();
-		VelocityEngine vf = new VelocityEngine();
-		Properties props = new Properties();
-		
-		for (String key : model.keySet()) {
-			if (!"templateUrl".equals(key)) {
-				context.put(key, model.get(key));
-			}
-		}
-		
-		context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
-		context.put("commonFunction", CommonFunction.class);
-	    
-		props.put("resource.loader", "class");
-	    props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-	    props.put("input.encoding", "UTF-8");
-	    
-	    vf.init(props);
-	    
-		try {
-			Template template = vf.getTemplate(path); // file name
-			template.merge(context, writer);
-			
-			return writer.toString();
-		} catch (Exception e) {
-			log.error("Exception occured while processing velocity template:" + e.getMessage());
-		}
-		return "";
-	}
 	
 	private String[] selectMailAddrFromIds(String[] toIds) {
 		Map<String, String[]> param = new HashMap<String, String[]>();

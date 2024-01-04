@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="project/project-edit_script :: scriptFragment"></th:block>
-<th:block th:replace="project/edit_script :: contentScript"></th:block>
+<th:block th:replace="project/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
@@ -30,10 +30,7 @@
                             <div class="card-header">
                                 <h3 class="card-title text-white">Form</h3>
                                 <div class="card-tools">
-                                    <button type="button" class="btn btn-tool text-white" data-card-widget="collapse"
-                                        title="Collapse">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
+                                    <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -53,10 +50,10 @@
                                                 <div class="col-sm-12">
                                                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                         <label class="btn btn-sm btn-onOff px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio1" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="">Everyone
+                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off">Creator & Watcher
+                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'">
                                                         </label>
                                                     </div>
                                                 </div>
@@ -80,18 +77,22 @@
                                     <div class="col-12">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
-                                            <select class="form-control select2" style="width: 100%;">
+                                            <select class="form-control select2" name="distributionType" style="width: 100%;">
                                             	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
                                             		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.distributionType)}"></option>
                                             	</th:block>
                                             </select>
                                             <div class="row mt-2">
                                                 <p class="text-gray text-bold mx-3" th:text="'Network service only?'"></p>
-                                                <div class="form-group mb-0 ml-">
-                                                    <div class="custom-control custom-switch">
-                                                        <input name="networkServerType" type="checkbox" class="custom-control-input" id="customSwitch1" th:checked="${project != null && #strings.equals(project.networkServerType, 'Y')}">
-                                                        <label class="custom-control-label" for="customSwitch1">Yes</label>
-                                                      </div>
+                                                <div class="form-group clearfix mb-0 ml-">
+                                                	<div class="icheck-primary d-inline">
+														<input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'"/>
+														<label for="networkServerType_Y" th:text="Yes"></label>
+													</div>
+													<div class="icheck-primary d-inline" style="margin-left: 5px;">
+														<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'N')} ? 'checked'"/>
+														<label for="networkServerType_N" th:text="No"></label>
+													</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -100,10 +101,10 @@
 
                                 <div class="form-group">
                                     <label for="inputName" th:text="#{msg.common.field.priority}"></label>
-                                    <select class="form-control select2" style="width: 100%;">
-                                        <option>P0</option>
-                                        <option>P1</option>
-                                        <option>P2</option>
+                                    <select class="form-control select2" style="width: 100%;" select id="priority" name="priority">
+                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
+                                    	</th:block>
                                     </select>
                                 </div>
 
@@ -114,15 +115,11 @@
                                        		<div class="float-left" id="modelFile" style="max-width: 100%;"></div>
                                         </div>
                                         <div class="col-2">
-                                        	<button type="button" class="btn btn-default btn-sm float-right px-5"><i class="fa fa-download"></i>Download</button>
+                                        	<button type="button" class="btn btn-default btn-sm float-right px-5" th:text="Download" th:onclick="|fn.downloadModelList()|"><i class="fa fa-download"></i></button>
                                         </div>
                                     </div>
                                     <div class="jq-container">
-                                        <table id="_modelList">
-                                            <tr>
-                                                <td></td>
-                                            </tr>
-                                        </table>
+                                        <table id="_modelList"><tr><td></td></tr></table>
                                         <div id="pagerModel"></div>
                                     </div>
                                 </div>
@@ -147,7 +144,7 @@
 											</select>
                                         </div>
                                         <div class="col-1">
-                                            <button id="addWatcher" type="button" class="btn btn-default">Add</button>
+                                            <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
                                         </div>
                                     </div>
                                     <div class="row my-1">
@@ -175,7 +172,7 @@
                                         	</th:block>
                                         </div>
                                         <div class="col-1">
-                                            <button id="addEmail" type="button" class="btn btn btn-default">Add</button>
+                                            <button id="addEmail" type="button" class="btn btn btn-default" th:text="Add"></button>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -190,7 +187,7 @@
                                             <input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
                                         </div>
                                         <div class="col-1">
-                                            <button id="addList" type="button" class="btn btn-default">Add</button>
+                                            <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
                                         </div>
                                     </div>
                                     <div class="form-group mt-2">
@@ -198,27 +195,49 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="comment">Comment</label>
+                                    <label for="comment" th:text="Comment"></label>
                                     <textarea id="comment" rows="3"></textarea>
                                 </div>
                             </div>
                             <!-- /.card-body -->
                             <div class="card-footer clearfix">
-                                <a href="javascript:void(0)" class="btn btn-secondary float-left">Delete</a>
-                                <a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right">Save</a>
+                            	<th:block th:if="${project.prjId != null}">
+                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|" class="btn btn-secondary float-left" th:text="Delete"></a>
+                            		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-secondary float-left" style="margin-left: 5px; display: none;" th:text="Drop"></a>
+                            	</th:block>
+                                <th:block th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
+                                	<a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right" th:text="Save"></a>
+                                </th:block>
+                                <th:block th:unless="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
+                                	<th:block th:if="${project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
+                                		<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-yellow-03 float-right" th:text="Open"></a>
+                                	</th:block>
+                                	<th:block th:if="${@CommonFunction.isAdmin()}">
+                                		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'N'}">
+                                			<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-yellow-03 float-right" th:text="Open"></a>
+                                		</th:block>
+                                		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'Y'}">
+                                			<a id="reqToOpen" class="btn btn-yellow-03 float-right" th:text="'Requested to Open'"></a>
+                                		</th:block>
+                                	</th:block>
+                                	<th:block th:unless="${@CommonFunction.isAdmin()}">
+                                		<th:block th:if="${project.completeYn == 'Y' and and project.viewOnlyFlag == 'N'}">
+                                			<a id="reqToOpen" class="btn btn-yellow-03 float-right" th:text="'Requested to Open'"></a>
+                                		</th:block>
+                                	</th:block>
+                                </th:block>
+                                <a th:onclick="|fn.copy()|" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="Copy"></a>
+                                <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-01 float-right" id="complete" style="margin-right: 5px;" th:text="Complete"></a>
+                                <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="'Share URL'"></a>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="card card-lg-red">
                             <div class="card-header">
-                                <h3 class="card-title">Comment</h3>
-
+                                <h3 class="card-title" th:text="Comment"></h3>
                                 <div class="card-tools">
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"
-                                        title="Collapse">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                                 </div>
                             </div>
                             <div class="card-body pt-0">
@@ -230,58 +249,46 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- /.card-body -->
                         </div>
                     </div>
                 </div>
                 </form>
             </section>
-            <!-- modal -->
-            <div class="modal fade" id="modal-comment">
-                <!-- modal dialog -->
-                <div class="modal-dialog modal-lg">
-                    <!-- modal-content -->
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Comment</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <textarea id="compose-textarea-03" class="form-control" style="height: 800px" rows="3">
-                                <ul>
-                                    <li>List item one</li>
-                                    <li>List item two</li>
-                                    <li>List item three</li>
-                                    <li>List item four</li>
-                                </ul>
-                            </textarea>
-                        </div>
-                        <div class="modal-footer justify-content-between">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
-                        </div>
-                    </div>
-                    <!-- /.modal-content -->
-                </div>
-                <!-- /.modal-dialog -->
-            </div>
-            <!--/. modal -->
         </div>
-        <footer class="main-footer">
-            <div class="float-right d-none d-sm-block">
-                <b>Version</b> 3.2.0
-            </div>
-            <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights
-            reserved.
-        </footer>
-        <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark">
-            <!-- Control sidebar content goes here -->
-        </aside>
-        <!-- /.control-sidebar -->
     </div>
+    
+    <div class="requestToOpenPop" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row" id="reqToOpenDiv"></div>
+					<div class="row" id="reqToOpenDiv2"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12">
+				<button type="button" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
+				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
+			</div>
+		</div>
+	</div>
+	
+	<div class="copyConfirmPopup" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row" id="copyConfirmDiv"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12">
+				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.copyConfirmClose()|"></button>
+				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.copyConfirmSave()|"></button>
+			</div>
+		</div>
+	</div>
 </body>
-
 </html>
