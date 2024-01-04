@@ -1989,10 +1989,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return ossMapper.checkExistsOssByname(bean);
 	}
 
-	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList) {
+	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList, String downloadlocationUrl) {
 		String checkName = "";
 		boolean isValid = false;
-		Matcher ossNameMatcher = p.matcher("https://" + bean.getDownloadLocation());
+		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
 		String[] android = null;
 		while (ossNameMatcher.find()) {
 			for (String list : androidPlatformList){
@@ -2271,7 +2271,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 						} else {
 							if (urlSearchSeq == 7) {
-								generateCheckOSSName(bean, p, androidPlatformList);
+								generateCheckOSSName(bean, p, androidPlatformList, downloadlocationUrl);
 								checkName = bean.getCheckName();
 							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
