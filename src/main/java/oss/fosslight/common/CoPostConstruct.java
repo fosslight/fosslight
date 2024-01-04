@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.repository.CodeManagerMapper;
@@ -28,12 +29,14 @@ public class CoPostConstruct {
 	@Autowired LicenseMapper licenseMapper;
 	@Autowired OssMapper ossMapper;
 	@Autowired ProjectMapper projectMapper;
+	@Autowired private TemplateEngine emailTemplateEngine;
 	
 	@PostConstruct
 	public void initPostConstruct() {
 		try {
 			CommonFunction.setT2UserService(t2UserService);
 			CommonFunction.setOssService(ossService);
+			CommonFunction.setTemplateEngine(emailTemplateEngine);
 			CoCodeManager.setCodeManagerMapper(codeManagerMapper);
 			CoCodeManager.setLicenseMapper(licenseMapper);
 			CoCodeManager.setOssMapper(ossMapper);

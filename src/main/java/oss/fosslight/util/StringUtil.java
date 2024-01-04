@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.CharUtils;
+import org.apache.commons.lang3.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.HtmlUtils;
 
@@ -78,7 +78,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String abbreviate(String str, int maxWidth) {
-		return org.apache.commons.lang.StringUtils.abbreviate(str, maxWidth);
+		return org.apache.commons.lang3.StringUtils.abbreviate(str, maxWidth);
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String abbreviate(String str, int offset, int maxWidth) {
-		return org.apache.commons.lang.StringUtils.abbreviate(str, offset, maxWidth);
+		return org.apache.commons.lang3.StringUtils.abbreviate(str, offset, maxWidth);
 	}
 
 	/**
@@ -123,7 +123,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String capitalize(String str) {
-		return org.apache.commons.lang.StringUtils.capitalize(str);
+		return org.apache.commons.lang3.StringUtils.capitalize(str);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String center(String str, int size) {
-		return org.apache.commons.lang.StringUtils.center(str, size);
+		return org.apache.commons.lang3.StringUtils.center(str, size);
 	}
 
 	/**
@@ -165,7 +165,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String center(String str, int size, char padChar) {
-		return org.apache.commons.lang.StringUtils.center(str, size, padChar);
+		return org.apache.commons.lang3.StringUtils.center(str, size, padChar);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String center(String str, int size, String padStr) {
-		return org.apache.commons.lang.StringUtils.center(str, size, padStr);
+		return org.apache.commons.lang3.StringUtils.center(str, size, padStr);
 	}
 
 	/**
@@ -214,7 +214,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String chomp(String str) {
-		return org.apache.commons.lang.StringUtils.chomp(str);
+		return org.apache.commons.lang3.StringUtils.chomp(str);
 	}
 
 	/**
@@ -238,7 +238,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String chomp(String str, String separator) {
-		return org.apache.commons.lang.StringUtils.chomp(str, separator);
+		return org.apache.commons.lang3.StringUtils.chomp(str, separator);
 	}
 
 	/**
@@ -262,7 +262,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String chop(String str) {
-		return org.apache.commons.lang.StringUtils.chop(str);
+		return org.apache.commons.lang3.StringUtils.chop(str);
 	}
 
 	/**
@@ -323,7 +323,7 @@ public final class StringUtil {
 	 *  포함되어있지 않거나 입력 문자열이 <code>null</code>인경우 false
 	 */
 	public static boolean contains(String str, char searchChar) {
-		return org.apache.commons.lang.StringUtils.contains(str, searchChar);
+		return org.apache.commons.lang3.StringUtils.contains(str, searchChar);
 	}
 
 	/**
@@ -346,7 +346,7 @@ public final class StringUtil {
 	 *  포함되어있지 않거나 입력 문자열이 <code>null</code>인경우 false
 	 */
 	public static boolean contains(String str, String searchStr) {
-		return org.apache.commons.lang.StringUtils.contains(str, searchStr);
+		return org.apache.commons.lang3.StringUtils.contains(str, searchStr);
 	}
 
 	/**
@@ -371,7 +371,7 @@ public final class StringUtil {
 	 *  포함되어있지 않거나 입력 문자열이 <code>null</code>인경우 false
 	 */
 	public static boolean containsIgnoreCase(String str, String searchStr) {
-		return org.apache.commons.lang.StringUtils.containsIgnoreCase(str, searchStr);
+		return org.apache.commons.lang3.StringUtils.containsIgnoreCase(str, searchStr);
 	}
 
 	/**
@@ -543,7 +543,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static int countMatches(String str, String sub) {
-		return org.apache.commons.lang.StringUtils.countMatches(str, sub);
+		return org.apache.commons.lang3.StringUtils.countMatches(str, sub);
 	}
 
 	/**
@@ -617,7 +617,7 @@ public final class StringUtil {
 	 * @return 결과문자열
 	 */
 	public static String defaultIfBlank(String str, String defaultStr) {
-		return org.apache.commons.lang.StringUtils.defaultIfEmpty(str, defaultStr);
+		return org.apache.commons.lang3.StringUtils.defaultIfEmpty(str, defaultStr);
 	}
 
 	/**
@@ -636,7 +636,7 @@ public final class StringUtil {
 	 * @return 결과문자열
 	 */
 	public static String defaultIfEmpty(String str, String defaultStr) {
-		return org.apache.commons.lang.StringUtils.defaultIfEmpty(str, defaultStr);
+		return org.apache.commons.lang3.StringUtils.defaultIfEmpty(str, defaultStr);
 	}
 
 	/**
@@ -652,7 +652,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 공백
 	 */
 	public static String defaultString(String str) {
-		return org.apache.commons.lang.StringUtils.defaultString(str);
+		return org.apache.commons.lang3.StringUtils.defaultString(str);
 	}
 
 	/**
@@ -670,7 +670,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 문자열이 null일경우 초기설정문자
 	 */
 	public static String defaultString(String str, String defaultStr) {
-		return org.apache.commons.lang.StringUtils.defaultString(str, defaultStr);
+		return org.apache.commons.lang3.StringUtils.defaultString(str, defaultStr);
 	}
 
 	/**
@@ -729,7 +729,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 문자열이 null일겨우 <code>null</code>
 	 */
 	public static String deleteWhitespace(String str) {
-		return org.apache.commons.lang.StringUtils.deleteWhitespace(str);
+		return org.apache.commons.lang3.StringUtils.deleteWhitespace(str);
 	}
 	
 	public static String deleteWhitespaceWithSpecialChar(String str) {
@@ -797,7 +797,7 @@ public final class StringUtil {
 	 * @return 결과문자열
 	 */
 	public static String difference(String str1, String str2) {
-		return org.apache.commons.lang.StringUtils.difference(str1, str2);
+		return org.apache.commons.lang3.StringUtils.difference(str1, str2);
 	}
 
 	/**
@@ -818,7 +818,7 @@ public final class StringUtil {
 	 *  <code>null</code>인경우 <code>true</code> 
 	 */
 	public static boolean endsWith(String str, String suffix) {
-		return org.apache.commons.lang.StringUtils.endsWith(str, suffix);
+		return org.apache.commons.lang3.StringUtils.endsWith(str, suffix);
 	}
 
 	/**
@@ -839,7 +839,7 @@ public final class StringUtil {
 	 *  <code>null</code>인경우 <code>true</code> 
 	 */
 	public static boolean endsWithIgnoreCase(String str, String suffix) {
-		return org.apache.commons.lang.StringUtils.endsWithIgnoreCase(str, suffix);
+		return org.apache.commons.lang3.StringUtils.endsWithIgnoreCase(str, suffix);
 	}
 
 	/**
@@ -858,7 +858,7 @@ public final class StringUtil {
 	 * @return 두 개의 문자열을 비교하여 같으면 true, 아니면 false를 반환
 	 */
 	public static boolean equals(String str1, String str2) {
-		return org.apache.commons.lang.StringUtils.equals(str1, str2);
+		return org.apache.commons.lang3.StringUtils.equals(str1, str2);
 	}
 
 	/**
@@ -877,7 +877,7 @@ public final class StringUtil {
 	 * @return 두 개의 문자열을 영문 대소문자를 무시하고 비교하여 같으면 true, 아니면 false를 반환
 	 */
 	public static boolean equalsIgnoreCase(String str1, String str2) {
-		return org.apache.commons.lang.StringUtils.equalsIgnoreCase(str1, str2);
+		return org.apache.commons.lang3.StringUtils.equalsIgnoreCase(str1, str2);
 	}
 
 	/**
@@ -896,7 +896,7 @@ public final class StringUtil {
 	 * @return 두 개의 문자열을 비교하여 다르면 true, 아니면 false를 반환
 	 */
 	public static boolean notEquals(String str1, String str2) {
-		return !org.apache.commons.lang.StringUtils.equals(str1, str2);
+		return !org.apache.commons.lang3.StringUtils.equals(str1, str2);
 	}
 
 	/**
@@ -915,7 +915,7 @@ public final class StringUtil {
 	 * @return 두 개의 문자열을 영문 대소문자를 무시하고 비교하여 다르면 true, 아니면 false를 반환
 	 */
 	public static boolean notEqIgnoreCase(String str1, String str2) {
-		return !org.apache.commons.lang.StringUtils.equalsIgnoreCase(str1, str2);
+		return !org.apache.commons.lang3.StringUtils.equalsIgnoreCase(str1, str2);
 	}
 
 	/**
@@ -981,7 +981,7 @@ public final class StringUtil {
 	 * @return 결과문자열
 	 */
 	public static String getCommonPrefix(String[] strs) {
-		return org.apache.commons.lang.StringUtils.getCommonPrefix(strs);
+		return org.apache.commons.lang3.StringUtils.getCommonPrefix(strs);
 	}
 
 
@@ -1056,7 +1056,7 @@ public final class StringUtil {
 	 * @return 문자열1을 문자열2로 변환하기위해 치환,삽입,삭제하지 않으면 않되는 최소의 문자수
 	 */
 	public static int getLevenshteinDistance(String s, String t) {
-		return org.apache.commons.lang.StringUtils.getLevenshteinDistance(s, t);
+		return org.apache.commons.lang3.StringUtils.getLevenshteinDistance(s, t);
 	}
 
 	/**
@@ -1155,11 +1155,11 @@ public final class StringUtil {
 	 * @return null 또는 빈 문자열은 INDEX_NOT_FOUND (-1)를 반환
 	 */
 	public static int indexOf(String str, char searchChar, int startPos) {
-		return org.apache.commons.lang.StringUtils.indexOf(str, searchChar, startPos);
+		return org.apache.commons.lang3.StringUtils.indexOf(str, searchChar, startPos);
 	}
 	
 	public static int indexOf(String str, String searchChar) {
-		return org.apache.commons.lang.StringUtils.indexOf(str, searchChar);
+		return org.apache.commons.lang3.StringUtils.indexOf(str, searchChar);
 	}
 
 	/**
@@ -1192,7 +1192,7 @@ public final class StringUtil {
 	 * @return 검색 문자열의 첫 번째 인덱스 없는 경우-1 일치 하거나 null 문자열 입력
 	 */
 	public static int indexOf(String str, String searchStr, int startPos) {
-		return org.apache.commons.lang.StringUtils.indexOf(str, searchStr, startPos);
+		return org.apache.commons.lang3.StringUtils.indexOf(str, searchStr, startPos);
 	}
 
 	/**
@@ -1221,7 +1221,7 @@ public final class StringUtil {
 	 * @return 검색된 첫번째인덱스, 검색되지않은 경우 -1반환.
 	 */
 	public static int indexOfAny(String str, String[] searchStrs) {
-		return org.apache.commons.lang.StringUtils.indexOfAny(str, searchStrs);
+		return org.apache.commons.lang3.StringUtils.indexOfAny(str, searchStrs);
 	}
 
 	/**
@@ -1243,7 +1243,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 비교하여 같으면 -1
 	 */
 	public static int indexOfDifference(String str1, String str2) {
-		return org.apache.commons.lang.StringUtils.indexOfDifference(str1, str2);
+		return org.apache.commons.lang3.StringUtils.indexOfDifference(str1, str2);
 	}
 
 	/**
@@ -1274,7 +1274,7 @@ public final class StringUtil {
 	 * @since 2.4
 	 */
 	public static int indexOfDifference(String[] strs) {
-		return org.apache.commons.lang.StringUtils.indexOfDifference(strs);
+		return org.apache.commons.lang3.StringUtils.indexOfDifference(strs);
 	}
 
 	/**
@@ -1340,7 +1340,7 @@ public final class StringUtil {
 	 * @return 문자 또는 숫자 또는 문자열이 null이 아닐경우 <code>true</code>
 	 */
 	public static boolean isAlphanumeric(String str) {
-		return org.apache.commons.lang.StringUtils.isAlphanumeric(str);
+		return org.apache.commons.lang3.StringUtils.isAlphanumeric(str);
 	}
 
 	/**
@@ -1361,7 +1361,7 @@ public final class StringUtil {
 	 * @return 문자열의 문자가 문자 또는 숫자이거나 공백문자 또는 문자열이 null이 아닐경우 <code>true</code>
 	 */
 	public static boolean isAlphanumericSpace(String str) {
-		return org.apache.commons.lang.StringUtils.isAlphanumericSpace(str);
+		return org.apache.commons.lang3.StringUtils.isAlphanumericSpace(str);
 	}
 
 	/**
@@ -1384,7 +1384,7 @@ public final class StringUtil {
 	 * @return 문자열의 문자가 모두 문자이거나 공백문자 또는 문자열이 null이 아닐경우 <code>true</code>
 	 */
 	public static boolean isAlphaSpace(String str) {
-		return org.apache.commons.lang.StringUtils.isAlphaSpace(str);
+		return org.apache.commons.lang3.StringUtils.isAlphaSpace(str);
 	}
 
 	/**
@@ -1409,7 +1409,7 @@ public final class StringUtil {
 	 * @return 문자열의 모든 문자가  printable한 문자일경우 <code>true</code> 
 	 */
 	public static boolean isAsciiPrintable(String str) {
-		return org.apache.commons.lang.StringUtils.isAsciiPrintable(str);
+		return org.apache.commons.lang3.StringUtils.isAsciiPrintable(str);
 	}
 
 	/**
@@ -1429,7 +1429,7 @@ public final class StringUtil {
 	 *         이외의 경우 false 
 	 */
 	public static boolean isBlank(String str) {
-	    return org.apache.commons.lang.StringUtils.isBlank(str);
+	    return org.apache.commons.lang3.StringUtils.isBlank(str);
 	}
 
 	//중복되거나 불필요한 메소드 여기까지...확인. -> 
@@ -1660,7 +1660,7 @@ public final class StringUtil {
 	 *         이외의 경우 false 
 	 */
 	public static boolean isNotBlank(String str) {
-	    return org.apache.commons.lang.StringUtils.isNotBlank(str);
+	    return org.apache.commons.lang3.StringUtils.isNotBlank(str);
 	}
 
 	// Mid
@@ -1724,7 +1724,7 @@ public final class StringUtil {
 	 * @return 문자열의 모든 문자가 숫자 또는 문자열이 null이 아닐경우<code>true</code>
 	 */
 	public static boolean isNumeric(String str) {
-		return org.apache.commons.lang.StringUtils.isNumeric(str);
+		return org.apache.commons.lang3.StringUtils.isNumeric(str);
 	}
 
 	/**
@@ -1745,7 +1745,7 @@ public final class StringUtil {
 	 * @return 문자열이 숫자 또는 공백문자 이거나 문자열이 null이 아닐경우<code>true</code>
 	 */
 	public static boolean isNumericSpace(String str) {
-		return org.apache.commons.lang.StringUtils.isNumericSpace(str);
+		return org.apache.commons.lang3.StringUtils.isNumericSpace(str);
 	}
 	
 	// Mid
@@ -1788,7 +1788,7 @@ public final class StringUtil {
 	 * @return 문자열이 공백 또는 공백문자 이거나 문자열이 null이 아닐경우<code>true</code>
 	 */
 	public static boolean isWhitespace(String str) {
-		return org.apache.commons.lang.StringUtils.isWhitespace(str);
+		return org.apache.commons.lang3.StringUtils.isWhitespace(str);
 	}
 	
 	// Mid
@@ -1802,7 +1802,7 @@ public final class StringUtil {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String join(Collection collection, char separator) {
-		return org.apache.commons.lang.StringUtils.join(collection, separator);
+		return org.apache.commons.lang3.StringUtils.join(collection, separator);
 	}
 	
 	// Mid
@@ -1816,7 +1816,7 @@ public final class StringUtil {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String join(Collection collection, String separator) {
-		return org.apache.commons.lang.StringUtils.join(collection, separator);
+		return org.apache.commons.lang3.StringUtils.join(collection, separator);
 	}
 
 	/**
@@ -1828,7 +1828,7 @@ public final class StringUtil {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String join(Iterator iterator, char separator) {
-		return org.apache.commons.lang.StringUtils.join(iterator, separator);
+		return org.apache.commons.lang3.StringUtils.join(iterator, separator);
 	}
 
 	// Mid
@@ -1842,7 +1842,7 @@ public final class StringUtil {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String join(Iterator iterator, String separator) {
-		return org.apache.commons.lang.StringUtils.join(iterator, separator);
+		return org.apache.commons.lang3.StringUtils.join(iterator, separator);
 	}
 
 	/**
@@ -1860,7 +1860,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 배열이 null일경우 <code>null</code>
 	 */
 	public static String join(Object[] array) {
-		return org.apache.commons.lang.StringUtils.join(array);
+		return org.apache.commons.lang3.StringUtils.join(array);
 	}
 
 	/**
@@ -1880,7 +1880,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 배열이 null일경우 <code>null</code>
 	 */
 	public static String join(Object[] array, char separator) {
-		return org.apache.commons.lang.StringUtils.join(array, separator);
+		return org.apache.commons.lang3.StringUtils.join(array, separator);
 	}
 
 	/**
@@ -1903,7 +1903,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 배열이 null일경우 <code>null</code>
 	 */
 	public static String join(Object[] array, char separator, int startIndex, int endIndex) {
-		return org.apache.commons.lang.StringUtils.join(array, separator, startIndex, endIndex);
+		return org.apache.commons.lang3.StringUtils.join(array, separator, startIndex, endIndex);
 	}
 
 	/**
@@ -1924,7 +1924,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 배열이 null일경우 <code>null</code>
 	 */
 	public static String join(Object[] array, String separator) {
-		return org.apache.commons.lang.StringUtils.join(array, separator);
+		return org.apache.commons.lang3.StringUtils.join(array, separator);
 	}
 
 	/**
@@ -1948,7 +1948,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 배열이 null일경우 <code>null</code>
 	 */
 	public static String join(Object[] array, String separator, int startIndex, int endIndex) {
-		return org.apache.commons.lang.StringUtils.join(array, separator, startIndex, endIndex);
+		return org.apache.commons.lang3.StringUtils.join(array, separator, startIndex, endIndex);
 	}
 
 	/**
@@ -1966,7 +1966,7 @@ public final class StringUtil {
 	 * @return 검색 문자 마지막 인덱스 없는 경우-1 일치 또는 null 문자열 입력
 	 */
 	public static int lastIndexOf(String str, char searchChar) {
-		return org.apache.commons.lang.StringUtils.lastIndexOf(str, searchChar);
+		return org.apache.commons.lang3.StringUtils.lastIndexOf(str, searchChar);
 	}
 
 	// Mid
@@ -1991,7 +1991,7 @@ public final class StringUtil {
 	 * @return 검색 문자 마지막 인덱스 없는 경우-1 일치 또는 null 문자열 입력
 	 */
 	public static int lastIndexOf(String str, char searchChar, int startPos) {
-		return org.apache.commons.lang.StringUtils.lastIndexOf(str, searchChar, startPos);
+		return org.apache.commons.lang3.StringUtils.lastIndexOf(str, searchChar, startPos);
 	}
 
 	/**
@@ -2012,7 +2012,7 @@ public final class StringUtil {
 	 * @return 검색 문자열의 마지막 인덱스 없는 경우-1 일치 또는 null 문자열 입력
 	 */
 	public static int lastIndexOf(String str, String searchStr) {
-		return org.apache.commons.lang.StringUtils.lastIndexOf(str, searchStr);
+		return org.apache.commons.lang3.StringUtils.lastIndexOf(str, searchStr);
 	}
 
 	/**
@@ -2036,7 +2036,7 @@ public final class StringUtil {
 	 * @return 검색 문자열의 마지막 인덱스 없는 경우-1 일치 또는 null 문자열 입력
 	 */
 	public static int lastIndexOf(String str, String searchStr, int startPos) {
-		return org.apache.commons.lang.StringUtils.lastIndexOf(str, searchStr, startPos);
+		return org.apache.commons.lang3.StringUtils.lastIndexOf(str, searchStr, startPos);
 	}
 
 	/**
@@ -2064,7 +2064,7 @@ public final class StringUtil {
 	 * @return 검색된 최후의 인덱스, 검색되지않은 경우 -1반환.
 	 */
 	public static int lastIndexOfAny(String str, String[] searchStrs) {
-		return org.apache.commons.lang.StringUtils.lastIndexOfAny(str, searchStrs);
+		return org.apache.commons.lang3.StringUtils.lastIndexOfAny(str, searchStrs);
 	}
 
 	/**
@@ -2159,7 +2159,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String lowerCase(String str) {
-		return org.apache.commons.lang.StringUtils.lowerCase(str);
+		return org.apache.commons.lang3.StringUtils.lowerCase(str);
 	}
 
 	/**
@@ -2182,7 +2182,7 @@ public final class StringUtil {
 	 * @return 결과 문자열, 문자열이 null의 경우 <code>null</code>
 	 */
 	public static String mid(String str, int pos, int len) {
-		return org.apache.commons.lang.StringUtils.mid(str, pos, len);
+		return org.apache.commons.lang3.StringUtils.mid(str, pos, len);
 	}
 
 	/**
@@ -2287,7 +2287,7 @@ public final class StringUtil {
 	 * @return 검색 문자열의 n 번째 인덱스-1 (INDEX_NOT_FOUND) 없으면 일치 또는 null 문자열 입력
 	 */
 	public static int ordinalIndexOf(String str, String searchStr, int ordinal) {
-		return org.apache.commons.lang.StringUtils.ordinalIndexOf(str, searchStr, ordinal);
+		return org.apache.commons.lang3.StringUtils.ordinalIndexOf(str, searchStr, ordinal);
 	}
 
 	/**
@@ -2314,7 +2314,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String overlay(String str, String overlay, int start, int end) {
-		return org.apache.commons.lang.StringUtils.overlay(str, overlay, start, end);
+		return org.apache.commons.lang3.StringUtils.overlay(str, overlay, start, end);
 	}
 
 	private static String padChar(String str, int size, char padChar, boolean isLeft) {
@@ -2435,7 +2435,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String remove(String str, char remove) {
-		return org.apache.commons.lang.StringUtils.remove(str, remove);
+		return org.apache.commons.lang3.StringUtils.remove(str, remove);
 	}
 
 	/**
@@ -2455,7 +2455,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String remove(String str, String remove) {
-		return org.apache.commons.lang.StringUtils.remove(str, remove);
+		return org.apache.commons.lang3.StringUtils.remove(str, remove);
 	}
 
 	/**
@@ -2545,7 +2545,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String removeEnd(String str, String remove) {
-		return org.apache.commons.lang.StringUtils.removeEnd(str, remove);
+		return org.apache.commons.lang3.StringUtils.removeEnd(str, remove);
 	}
 
 	/**
@@ -2568,7 +2568,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String removeEndIgnoreCase(String str, String remove) {
-		return org.apache.commons.lang.StringUtils.removeEndIgnoreCase(str, remove);
+		return org.apache.commons.lang3.StringUtils.removeEndIgnoreCase(str, remove);
 	}
 
 	/**
@@ -2602,7 +2602,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String removeStart(String str, String remove) {
-		return org.apache.commons.lang.StringUtils.removeStart(str, remove);
+		return org.apache.commons.lang3.StringUtils.removeStart(str, remove);
 	}
 
 	/**
@@ -2624,7 +2624,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String removeStartIgnoreCase(String str, String remove) {
-		return org.apache.commons.lang.StringUtils.removeStartIgnoreCase(str, remove);
+		return org.apache.commons.lang3.StringUtils.removeStartIgnoreCase(str, remove);
 	}
 
 	/**
@@ -2657,7 +2657,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String repeat(String str, int repeat) {
-		return org.apache.commons.lang.StringUtils.repeat(str, repeat);
+		return org.apache.commons.lang3.StringUtils.repeat(str, repeat);
 	}
 
 	/**
@@ -2710,7 +2710,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replace(String text, String searchString, String replacement, int max) {
-		return org.apache.commons.lang.StringUtils.replace(text, searchString, replacement, max);
+		return org.apache.commons.lang3.StringUtils.replace(text, searchString, replacement, max);
 	}
 
 	/**
@@ -2750,7 +2750,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replaceChars(String str, char searchChar, char replaceChar) {
-		return org.apache.commons.lang.StringUtils.replaceChars(str, searchChar, replaceChar);
+		return org.apache.commons.lang3.StringUtils.replaceChars(str, searchChar, replaceChar);
 	}
 
 	/**
@@ -2774,7 +2774,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replaceChars(String str, String searchChars, String replaceChars) {
-		return org.apache.commons.lang.StringUtils.replaceChars(str, searchChars, replaceChars);
+		return org.apache.commons.lang3.StringUtils.replaceChars(str, searchChars, replaceChars);
 	}
 
 	/**
@@ -2800,7 +2800,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replaceEach(String text, String[] searchList, String[] replacementList) {
-		return org.apache.commons.lang.StringUtils.replaceEach(text, searchList, replacementList);
+		return org.apache.commons.lang3.StringUtils.replaceEach(text, searchList, replacementList);
 	}
 
 	/**
@@ -2827,7 +2827,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replaceEachRepeatedly(String text, String[] searchList, String[] replacementList) {
-		return org.apache.commons.lang.StringUtils.replaceEachRepeatedly(text, searchList, replacementList);
+		return org.apache.commons.lang3.StringUtils.replaceEachRepeatedly(text, searchList, replacementList);
 	}
 
 	/**
@@ -2919,7 +2919,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String replaceOnce(String text, String searchString, String replacement) {
-		return org.apache.commons.lang.StringUtils.replaceOnce(text, searchString, replacement);
+		return org.apache.commons.lang3.StringUtils.replaceOnce(text, searchString, replacement);
 	}
 
 	/**
@@ -2996,7 +2996,7 @@ public final class StringUtil {
 	 * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
 	 */
 	public static String reverseDelimited(String str, char separatorChar) {
-		return org.apache.commons.lang.StringUtils.reverseDelimited(str, separatorChar);
+		return org.apache.commons.lang3.StringUtils.reverseDelimited(str, separatorChar);
 	}
 	
 	// Mid
@@ -3093,7 +3093,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] split(String str) {
-    	return org.apache.commons.lang.StringUtils.split(str);
+    	return org.apache.commons.lang3.StringUtils.split(str);
     }
 
 	/**
@@ -3133,7 +3133,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] split(String str, String separatorChars) {
-    	return org.apache.commons.lang.StringUtils.split(str, separatorChars);
+    	return org.apache.commons.lang3.StringUtils.split(str, separatorChars);
     }
 	
 	// Mid
@@ -3156,7 +3156,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] split(String str, String separatorChars, int max) {
-    	return org.apache.commons.lang.StringUtils.split(str, separatorChars, max);
+    	return org.apache.commons.lang3.StringUtils.split(str, separatorChars, max);
     }
 
 	/**
@@ -3178,7 +3178,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitByCharacterType(String str) {
-    	return org.apache.commons.lang.StringUtils.splitByCharacterType(str);
+    	return org.apache.commons.lang3.StringUtils.splitByCharacterType(str);
     }
 
 	// Mid
@@ -3202,7 +3202,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitByCharacterTypeCamelCase(String str) {
-    	return org.apache.commons.lang.StringUtils.splitByCharacterTypeCamelCase(str);
+    	return org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(str);
     }
 
 	/**
@@ -3222,7 +3222,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitByWholeSeparator(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.splitByWholeSeparator(str, separator);
+    	return org.apache.commons.lang3.StringUtils.splitByWholeSeparator(str, separator);
     }
 
 	/**
@@ -3244,7 +3244,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
 	public static String[] splitByWholeSeparator(String str, String separator, int max) {
-    	return org.apache.commons.lang.StringUtils.splitByWholeSeparator(str, separator, max);
+    	return org.apache.commons.lang3.StringUtils.splitByWholeSeparator(str, separator, max);
     }
 
 	/**
@@ -3264,7 +3264,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitByWholeSeparatorPreserveAllTokens(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.splitByWholeSeparatorPreserveAllTokens(str, separator);
+    	return org.apache.commons.lang3.StringUtils.splitByWholeSeparatorPreserveAllTokens(str, separator);
     }
 
 	/**
@@ -3286,7 +3286,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitByWholeSeparatorPreserveAllTokens(String str, String separator, int max) {
-    	return org.apache.commons.lang.StringUtils.splitByWholeSeparatorPreserveAllTokens(str, separator, max);
+    	return org.apache.commons.lang3.StringUtils.splitByWholeSeparatorPreserveAllTokens(str, separator, max);
     }
 
 	/**
@@ -3348,7 +3348,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitPreserveAllTokens(String str) {
-    	return org.apache.commons.lang.StringUtils.splitPreserveAllTokens(str);
+    	return org.apache.commons.lang3.StringUtils.splitPreserveAllTokens(str);
     }
 
 	/**
@@ -3374,7 +3374,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitPreserveAllTokens(String str, char separatorChar) {
-    	return org.apache.commons.lang.StringUtils.splitPreserveAllTokens(str, separatorChar);
+    	return org.apache.commons.lang3.StringUtils.splitPreserveAllTokens(str, separatorChar);
     }
 
 	/**
@@ -3400,7 +3400,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitPreserveAllTokens(String str, String separatorChars) {
-    	return org.apache.commons.lang.StringUtils.splitPreserveAllTokens(str, separatorChars);
+    	return org.apache.commons.lang3.StringUtils.splitPreserveAllTokens(str, separatorChars);
     }
 
 	/**
@@ -3424,7 +3424,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열이 null일경우 <code>null</code>
      */
     public static String[] splitPreserveAllTokens(String str, String separatorChars, int max) {
-    	return org.apache.commons.lang.StringUtils.splitPreserveAllTokens(str, separatorChars, max);
+    	return org.apache.commons.lang3.StringUtils.splitPreserveAllTokens(str, separatorChars, max);
     }
 
 	/**
@@ -3489,7 +3489,7 @@ public final class StringUtil {
      * @return 문자열이 검색문자로 시작되는경우와 문자열 양쪽모두 <code>null</code>인경우 <code>true</code> 
      */
     public static boolean startsWith(String str, String prefix) {
-    	return org.apache.commons.lang.StringUtils.startsWith(str, prefix);
+    	return org.apache.commons.lang3.StringUtils.startsWith(str, prefix);
     }
     
     /**
@@ -3509,7 +3509,7 @@ public final class StringUtil {
      *  <code>null</code>인경우 <code>true</code> 
      */
     public static boolean startsWithIgnoreCase(String str, String prefix) {
-    	return org.apache.commons.lang.StringUtils.startsWithIgnoreCase(str, prefix);
+    	return org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(str, prefix);
     }
 
     /**
@@ -3646,7 +3646,7 @@ public final class StringUtil {
      * 		   "" 일경우 ""
      */
     public static String strip(String str) {
-    	return org.apache.commons.lang.StringUtils.strip(str);
+    	return org.apache.commons.lang3.StringUtils.strip(str);
     }
 
     /**
@@ -3668,7 +3668,7 @@ public final class StringUtil {
      * 		   "" 일경우 ""
      */
     public static String strip(String str, String stripChars) {
-    	return org.apache.commons.lang.StringUtils.strip(str, stripChars);
+    	return org.apache.commons.lang3.StringUtils.strip(str, stripChars);
     }
 
     /**
@@ -3685,7 +3685,7 @@ public final class StringUtil {
      * @return strip결과 문자열
      */
     public static String[] stripAll(String[] strs) {
-    	return org.apache.commons.lang.StringUtils.stripAll(strs);
+    	return org.apache.commons.lang3.StringUtils.stripAll(strs);
     }
     
     // Mid
@@ -3707,7 +3707,7 @@ public final class StringUtil {
      * @return strip 결과 문자열
      */
     public static String[] stripAll(String[] strs, String stripChars) {
-    	return org.apache.commons.lang.StringUtils.stripAll(strs, stripChars);
+    	return org.apache.commons.lang3.StringUtils.stripAll(strs, stripChars);
     }
 
     /**
@@ -3731,7 +3731,7 @@ public final class StringUtil {
      * 		   "" 일경우 ""
      */
     public static String stripEnd(String str, String stripChars) {
-    	return org.apache.commons.lang.StringUtils.stripEnd(str, stripChars);
+    	return org.apache.commons.lang3.StringUtils.stripEnd(str, stripChars);
     }
 
     /**
@@ -3754,7 +3754,7 @@ public final class StringUtil {
      * 		   "" 일경우 ""
      */
     public static String stripStart(String str, String stripChars) {
-    	return org.apache.commons.lang.StringUtils.stripStart(str, stripChars);
+    	return org.apache.commons.lang3.StringUtils.stripStart(str, stripChars);
     }
 
     /**
@@ -3776,7 +3776,7 @@ public final class StringUtil {
      * @return null 문자열 또는 "" 일경우 ""
      */
     public static String stripToEmpty(String str) {
-    	return org.apache.commons.lang.StringUtils.stripToEmpty(str);
+    	return org.apache.commons.lang3.StringUtils.stripToEmpty(str);
     }
 
     /**
@@ -3797,7 +3797,7 @@ public final class StringUtil {
      * @return null 문자열 또는 "" 일경우 null
      */
     public static String stripToNull(String str) {
-    	return org.apache.commons.lang.StringUtils.stripToNull(str);
+    	return org.apache.commons.lang3.StringUtils.stripToNull(str);
     }
 
     /**
@@ -3828,7 +3828,7 @@ public final class StringUtil {
      * @return 시작점으로부터의 문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substring(String str, int start) {
-    	return org.apache.commons.lang.StringUtils.substring(str, start);
+    	return org.apache.commons.lang3.StringUtils.substring(str, start);
     }
 
     /**
@@ -3861,7 +3861,7 @@ public final class StringUtil {
      * @return 시작점으로부터 종료점까지의 문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substring(String str, int start, int end) {
-    	return org.apache.commons.lang.StringUtils.substring(str, start, end);
+    	return org.apache.commons.lang3.StringUtils.substring(str, start, end);
     }
 
     /**
@@ -3883,7 +3883,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substringAfter(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.substringAfter(str, separator);
+    	return org.apache.commons.lang3.StringUtils.substringAfter(str, separator);
     }
 
     /**
@@ -3906,7 +3906,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substringAfterLast(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.substringAfterLast(str, separator);
+    	return org.apache.commons.lang3.StringUtils.substringAfterLast(str, separator);
     }
 
     // SubStringAfter/SubStringBefore
@@ -3930,7 +3930,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substringBefore(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.substringBefore(str, separator);
+    	return org.apache.commons.lang3.StringUtils.substringBefore(str, separator);
     }
 
     /**
@@ -3952,7 +3952,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열이 null일경우 <code>null</code>
      */
     public static String substringBeforeLast(String str, String separator) {
-    	return org.apache.commons.lang.StringUtils.substringBeforeLast(str, separator);
+    	return org.apache.commons.lang3.StringUtils.substringBeforeLast(str, separator);
     }
 
     // Substring between
@@ -3974,7 +3974,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열에 TAG가 존재하지않을 경우<code>null</code>
      */
     public static String substringBetween(String str, String tag) {
-    	return org.apache.commons.lang.StringUtils.substringBetween(str, tag);
+    	return org.apache.commons.lang3.StringUtils.substringBetween(str, tag);
     }
 
     /**
@@ -3999,7 +3999,7 @@ public final class StringUtil {
      * @return 결과문자열, 문자열에 TAG가 존재하지않을 경우<code>null</code>
      */
     public static String substringBetween(String str, String open, String close) {
-    	return org.apache.commons.lang.StringUtils.substringBetween(str, open, close);
+    	return org.apache.commons.lang3.StringUtils.substringBetween(str, open, close);
     }
 
     /**
@@ -4019,7 +4019,7 @@ public final class StringUtil {
      * @return 결과문자배열, 문자열과 OPEN 및 CLOSE중 null인 경우<code>null</code>
      */
 	public static String[] substringsBetween(String str, String open, String close) {
-    	return org.apache.commons.lang.StringUtils.substringsBetween(str, open, close);
+    	return org.apache.commons.lang3.StringUtils.substringsBetween(str, open, close);
     }
 
     /**
@@ -4035,7 +4035,7 @@ public final class StringUtil {
      * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
      */
     public static String swapCase(String str) {
-    	return org.apache.commons.lang.StringUtils.swapCase(str);
+    	return org.apache.commons.lang3.StringUtils.swapCase(str);
     }
 
     /**
@@ -4218,7 +4218,7 @@ public final class StringUtil {
      * 		   "" 일경우 ""
      */
     public static String trim(String str) {
-        return org.apache.commons.lang.StringUtils.trim(str);
+        return org.apache.commons.lang3.StringUtils.trim(str);
     }
 
     /**
@@ -4257,7 +4257,7 @@ public final class StringUtil {
      * @return null 문자열 또는 ""일 경우 ""
      */
     public static String trimToEmpty(String str) {
-    	return org.apache.commons.lang.StringUtils.trimToEmpty(str);
+    	return org.apache.commons.lang3.StringUtils.trimToEmpty(str);
     }
 
     /**
@@ -4276,7 +4276,7 @@ public final class StringUtil {
      * @return null 문자열 또는 ""일 경우 null
      */
     public static String trimToNull(String str) {
-    	return org.apache.commons.lang.StringUtils.trimToNull(str);
+    	return org.apache.commons.lang3.StringUtils.trimToNull(str);
     }
 
     /**
@@ -4293,7 +4293,7 @@ public final class StringUtil {
      * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
      */
     public static String uncapitalize(String str) {
-    	return org.apache.commons.lang.StringUtils.uncapitalize(str);
+    	return org.apache.commons.lang3.StringUtils.uncapitalize(str);
     }
 
     /**
@@ -4309,7 +4309,7 @@ public final class StringUtil {
      * @return 결과문자열, 입력문자열이 null일경우 <code>null</code>
      */
     public static String upperCase(String str) {
-    	return org.apache.commons.lang.StringUtils.upperCase(str);
+    	return org.apache.commons.lang3.StringUtils.upperCase(str);
     }
 
 
