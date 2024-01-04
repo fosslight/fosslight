@@ -1721,7 +1721,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			if (	!(!isEmpty(bean.getGroupingColumn()) && currentGroup.equals(bean.getGroupingColumn()))) {
+			if (!(!isEmpty(bean.getGroupingColumn()) && currentGroup.equals(bean.getGroupingColumn()))) {
 				// 0(1) : error level
 				if (errorMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
@@ -1790,10 +1790,24 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		
 		// validation 위치별 재정렬
-		// treemap을 이용하여 오름차순으로 정렬한다.
-		TreeMap<String,ProjectIdentification> tm = new TreeMap<String,ProjectIdentification>(sortMap);
-		for (String key : tm.keySet()) {
-			sortList.add(tm.get(key));
+		if (!sortMap.isEmpty()) {
+			List<String> sortKeyList = sortMap.keySet().stream().collect(Collectors.toList());
+			if (sortKeyList.size() > 1) {
+				Collections.sort(sortKeyList, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						if (new BigDecimal(o1.split("[_]")[0]).compareTo(new BigDecimal(o2.split("[_]")[0])) > 0) {
+							return 1;
+						} else {
+							return -1;
+						}
+					}
+				});
+			}
+			
+			for (String sortKey : sortKeyList) {
+				sortList.add(sortMap.get(sortKey));
+			}
 		}
 
 		// subGrid에서 오류가 있는 row
