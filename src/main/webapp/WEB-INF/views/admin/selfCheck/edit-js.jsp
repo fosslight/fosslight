@@ -18,6 +18,7 @@
 	var etcDomain = "${ct:getConstDef('CD_DTL_ECT_DOMAIN')}";
 	var divisionUseFlag = "${not empty ct:getCodeValues(ct:getConstDef('CD_USER_DIVISION'))}";
 	var projectPermission = '${projectPermission}';
+	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
 	
 	$(document).ready(function() {
 		'use strict';
@@ -200,13 +201,14 @@
 			$("#addEmail").click(function() {
 				/* AD ID 정보 */
 				var adId = $("#adId").val();
+				var domain = $("#emailTemp").val();
 
 				if(adId == "") {
 					$("#adId").focus();
 					return alertify.error('<spring:message code="enter.watcher.error" />', 0);
 				}
 				
-				var _email = adId + "@lge.com";
+				var _email = adId + "@" + domain;
 				var regEmail = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
 
 				if (!regEmail.test(_email)) {
@@ -237,6 +239,7 @@
 				});
 				
 				$("#adId").val('');
+				$("#emailTemp").val('');
 			});
 			
 			$('#addList').on('click', function(){
@@ -1290,6 +1293,26 @@
 					$(obj).hide();
 				}
 			});
+		},
+		showUnconfirmedLicense: function() {
+			var header    = '<p>';
+				header   += 	  '<b>' + '<spring:message code="msg.selfcheck.notice.error" />' + '</b>';
+				header   += '</p>';
+			var contents  = '<ul>';
+				contents +=	   unconfirmedLicenseList
+												.reduce((str, licenseName) => {
+													if(licenseName != '') {
+														str += fn.makeSquareStyle(licenseName);
+													}
+
+													return str;
+												}, '');
+				contents += '</ul>';
+
+			alertify.alert(header + '<br>' + contents);
+		},
+		makeSquareStyle: function(value){
+			return '<li style="list-style-type: square;">' + value + '</li>';
 		}
 	};
 
@@ -1488,6 +1511,8 @@
 	var srcValidMsgData;
 	var srcDiffMsgData;
 	var licenseData;
+	var unconfirmedLicenseList;
+	
 	// SRC 함수
 	var src_fn = {
 		// src 그리드 데이터
@@ -1511,6 +1536,8 @@
 						srcDiffMsgData = data.diffData;
 					}
 
+					unconfirmedLicenseList = data.unconfirmedLicenseList ? data.unconfirmedLicenseList : [];
+					
 					// 리로드 대신 그리드 삭제 후 다시 그리기
 					$("#srcList").jqGrid('GridUnload');
 					
@@ -2612,10 +2639,10 @@
 								$('#'+rowid+'_licenseNameBtn').append(mult);
 							}
 						});
-                                                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
-                                                var nextRow = rowid
-                                                $('#'+nextRow+"_"+nextCol).focus();
 						$('#'+rowid+'_licenseName').val("");
+                        var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
+                        var nextRow = rowid
+                        $('#'+nextRow+"_"+nextCol).focus();
 					}
 				},
 				onPaging: function(action) {
@@ -2910,30 +2937,38 @@
 			$('#noticePreview').click(function(e){
 				e.preventDefault();
 				
-				fn.saveOrGetNotice('preview');
+				if (unconfirmedLicenseList.length > 0) {
+					fn.showUnconfirmedLicense();
+				} else {
+					fn.saveOrGetNotice('preview');
+				}
 			});
 
 			$('#packageDocDownload').click(function(e){
-				var type = $('#docType').val();
-				
-				if(type == 'noticeDownload') {
-					fn.downloadNotice();
-				} else if(type == 'noticeTextDownload') {
-					fn.downloadNoticeText();
-				} else if(type == 'noticeSimpleDownload') {
-					fn.downloadNoticeSimple();
-				} else if(type == 'noticeTextSimpleDownload') {
-					fn.downloadNoticeTextSimple();
-				} else if(type == 'spdxSpreadSheet') {
-					fn.downloadSpdxSpreadSheetExcel();
-				} else if(type == 'spdxRdf') {
-					fn.downloadSpdxRdf();
-				} else if(type == 'spdxTag') {
-					fn.downloadSpdxTag();
-				} else if(type == 'spdxJson') {
-					fn.downloadSpdxJson();
-				} else if(type == 'spdxYaml') {
-					fn.downloadSpdxYaml();
+				if (unconfirmedLicenseList.length > 0) {
+					fn.showUnconfirmedLicense();
+				} else { 
+					var type = $('#docType').val();
+					
+					if(type == 'noticeDownload') {
+						fn.downloadNotice();
+					} else if(type == 'noticeTextDownload') {
+						fn.downloadNoticeText();
+					} else if(type == 'noticeSimpleDownload') {
+						fn.downloadNoticeSimple();
+					} else if(type == 'noticeTextSimpleDownload') {
+						fn.downloadNoticeTextSimple();
+					} else if(type == 'spdxSpreadSheet') {
+						fn.downloadSpdxSpreadSheetExcel();
+					} else if(type == 'spdxRdf') {
+						fn.downloadSpdxRdf();
+					} else if(type == 'spdxTag') {
+						fn.downloadSpdxTag();
+					} else if(type == 'spdxJson') {
+						fn.downloadSpdxJson();
+					} else if(type == 'spdxYaml') {
+						fn.downloadSpdxYaml();
+					}
 				}
 			});
 

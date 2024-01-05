@@ -2129,7 +2129,7 @@ var saveFlag = false;
 	    	});
 	    	
 	    	return checkEmptyFlag;
-		}
+		},
 		downloadSpdxSpreadSheetExcel : function(){
 			var partnerId = "${detail.partnerId}";
 			if ("" !== partnerId) {
@@ -2262,6 +2262,7 @@ var saveFlag = false;
 			if('${detail.partnerId}' != "") {
 				fn.getPartyGridData();
 			} else {
+				grid.init();
 				partyMainData = [];
 				partySubData = [];
 			}

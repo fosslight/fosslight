@@ -146,6 +146,25 @@
 									</table>
 								#end
 								
+								#if( $versionDiffInfoList )
+									<br />
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">V-Diff Declared License Info</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<col style="width:40%">
+										<col style="width:*">
+										<tr>
+											<td style="padding:5px;background:#f0f0f0;">OSS Name (version)</td>
+											<td style="padding:5px;background:#f0f0f0;">Declared License</td>
+										</tr>
+										#foreach ( $versionDiffInfo in $!$versionDiffInfoList )
+										<tr>
+											<td style="padding:5px;">$versionDiffInfo.ossNameInfo</td>
+											<td style="padding:5px;">$versionDiffInfo.licenseInfo</td>
+										</tr>
+										#end
+									</table>
+								#end
+								
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
 								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
 								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>

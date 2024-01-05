@@ -351,7 +351,7 @@
 			, #{osType}
 			, #{osTypeEtc}
 			, #{distributionSite}
-			, ''
+			, #{comment}
 			, #{loginUserName}
 			, #{loginUserName}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
@@ -419,7 +419,7 @@
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
 					ELSE 99 
 				 END AS MERGE_ORDER 
-			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, RTN.COPYRIGHT AS COPYRIGHT_TEXT
+			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT
 			 , RTN.CVSS_SCORE_MAX
 			 , RTN.CVSS_SCORE_MAX1
 			 , RTN.CVSS_SCORE_MAX2
@@ -1053,7 +1053,7 @@
 					ELSE 99 END AS mergeOrder, 
 			RTN.LICENSE_ID as licenseId, 
 			RTN.LICENSE_NAME as licenseName, 
-			RTN.COPYRIGHT AS copyrightText, 
+			GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS copyrightText,
 			RTN.LICENSE_TYPE_IDX as licenseTypeIdx, 
 			RTN.CVSS_SCORE_MAX as cvssScoreMax,
 			RTN.CVSS_SCORE_MAX1 as cvssScoreMax1,
@@ -1216,4 +1216,21 @@
 	<insert id="insertWatcher" parameterType="hashMap">
 		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
 	</insert>
+	
+	<update id="updateProjectSubStatus" parameterType="hashMap">
+		UPDATE 
+			PROJECT_MASTER
+		SET 
+			<if test='identificationSubStatusPartner != null'>
+			IDENTIFICATION_SUB_STATUS_PARTNER = #{identificationSubStatusPartner}
+			</if>
+			<if test='identificationSubStatusSrc != null'>
+			IDENTIFICATION_SUB_STATUS_SRC = #{identificationSubStatusSrc}
+			</if>
+			<if test='identificationSubStatusBin != null'>
+			IDENTIFICATION_SUB_STATUS_BIN = #{identificationSubStatusBin}
+			</if>
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
 </mapper>

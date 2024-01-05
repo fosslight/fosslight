@@ -465,6 +465,8 @@ var fn_grid_com = {
 					partyMainData[partyMainData.length-1] = dataArray;
 				} else if("batList" == div) {
 					batMainData[batMainData.length-1] = dataArray;
+				} else if("depList" == div) {
+					depMainData[depMainData.length-1] = dataArray;
 				}
 				
 				$.each(dataArray, function(_key, _val){
@@ -556,6 +558,8 @@ var fn_grid_com = {
 					partyMainData[partyMainData.length-1] = dataArray;
 				} else if("batList" == div) {
 					batMainData[batMainData.length-1] = dataArray;
+				} else if("depList" == div) {
+					depMainData[depMainData.length-1] = dataArray;
 				}
 				
 				$.each(dataArray, function(_key, _val){
@@ -717,6 +721,11 @@ var fn_grid_com = {
 					bat_grid_list.load();
 					// total record 표시
 					$("#batList_toppager_right, #batPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+batMainData.length+'</div>');
+				} else if("#depList" == targetDataObj) {
+					depMainData = reMakeArrObj;
+					dep_grid.load();
+					// total record 표시
+					$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
 				}
 			}
 		},
@@ -752,6 +761,9 @@ var fn_grid_com = {
 				} else if("#batList" == targetDataObj) {
 					batMainData = reMakeArrObj;
 					bat_grid_list.load();
+				} else if("#depList" == targetDataObj) {
+					depMainData = reMakeArrObj;
+					dep_grid.load();
 				}
 			} else {
 				// sub
@@ -772,6 +784,9 @@ var fn_grid_com = {
 				} else if("#batList" == targetSubDataObj) {
 					batSubData[selrow.split("-")[0]] = reMakeArrObj;
 					target.jqGrid('setGridParam', {data: batSubData}).trigger("reloadGrid");
+				} else if("#depList" == targetSubDataObj) {
+					depSubData[selrow.split("-")[0]] = reMakeArrObj;
+					target.jqGrid('setGridParam', {data: depSubData}).trigger("reloadGrid");
 				}
 			}
 		},
@@ -1146,6 +1161,8 @@ var fn_grid_com = {
 		    		   partySubData[rowid.split("-")[0]] = dataArray;
 		    	   } else if("batList" == targetSubDataObj) {
 		    		   batSubData[rowid.split("-")[0]] = dataArray;
+		    	   } else if("depList" == targetSubDataObj) {
+		    		   depSubData[rowid.split("-")[0]] = dataArray;
 		    	   }
 		       }
 		       

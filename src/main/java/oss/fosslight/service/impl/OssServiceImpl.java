@@ -29,7 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -511,8 +510,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if ("Duplicated".equalsIgnoreCase(bean.getMergeStr())) {
 					// mail 발송을 위해 삭제전 data 취득
 					Map<String, OssMaster> mailDiffMap = new HashMap<>();
-					OssMaster ossMailInfo1 = getOssInfo(bean.getDelOssId(), true);
-					OssMaster tempBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
+					OssMaster tempBean1 = getOssInfo(bean.getDelOssId(), true);
 					
 					List<String> ossNickNameList = new ArrayList<String>();
 
@@ -527,8 +525,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					tempBean1.setOssId(bean.getDelOssId());
 					mailDiffMap.put("before", tempBean1);
 					
-					OssMaster ossMailInfo2 = getOssInfo(bean.getOssId(), true);
-					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
+					OssMaster tempBean2 = getOssInfo(bean.getOssId(), true);
 					
 					if (tempBean2.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
@@ -547,21 +544,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					// 실제로 삭제되는 것은 아님
 					// 이름만 변경해서 비교 메일 발송
 					Map<String, OssMaster> mailDiffMap = new HashMap<>();
-					OssMaster ossMailInfo1 = getOssInfo(bean.getOssId(), true);
-					OssMaster tempBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
+					OssMaster tempBean1 = getOssInfo(bean.getOssId(), true);
 					
 					if (tempBean1.getOssNicknames() != null) {
 						tempBean1.setOssNickname(CommonFunction.arrayToString(tempBean1.getOssNicknames(), "<br>"));
 					}
 					
+					tempBean1.setOssId(bean.getOssId());
 					mailDiffMap.put("before", tempBean1);
 
-					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
-					
 					List<String> ossNickNameList = new ArrayList<String>();
 
-					OssMaster ossMailInfo2 = getOssInfo(ossMaster.getNewOssId(), true);
-					OssMaster beforeBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
+					OssMaster tempBean2 = (OssMaster) CommonFunction.copyObject(tempBean1, "OM");
+					OssMaster beforeBean1 = getOssInfo(ossMaster.getNewOssId(), false);
+					
 					if (beforeBean1.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(beforeBean1.getOssNicknames())) {
 							ossNickNameList.add(nickName);
@@ -1993,10 +1989,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return ossMapper.checkExistsOssByname(bean);
 	}
 
-	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList) {
+	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList, String downloadlocationUrl) {
 		String checkName = "";
 		boolean isValid = false;
-		Matcher ossNameMatcher = p.matcher("https://" + bean.getDownloadLocation());
+		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
 		String[] android = null;
 		while (ossNameMatcher.find()) {
 			for (String list : androidPlatformList){
@@ -2247,6 +2243,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 
 				if ( urlSearchSeq > -1 ) {
+					if(urlSearchSeq == 10) { //pythonhosted
+						String name[] =  bean.getDownloadLocation().split("/");
+						bean.setDownloadLocation(checkOssNameUrl.get(2) + name[name.length-2]);
+					}
+
 					bean = downloadlocationFormatter(bean, urlSearchSeq);
 					String downloadlocationUrl = bean.getDownloadLocation();
 					
@@ -2270,7 +2271,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 						} else {
 							if (urlSearchSeq == 7) {
-								generateCheckOSSName(bean, p, androidPlatformList);
+								generateCheckOSSName(bean, p, androidPlatformList, downloadlocationUrl);
 								checkName = bean.getCheckName();
 							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
@@ -3028,6 +3029,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				ossNewistData.setDownloadLocation(url);
 			}
+			
+			if (ossNewistData.getLicenseName() != null && !ossNewistData.getLicenseName().contains(" OR ")) {
+				ProjectIdentification prjOssMaster = new ProjectIdentification();
+				prjOssMaster.setOssId(ossNewistData.getOssId());
+				List<ProjectIdentification> Licenselist = projectMapper.getLicenses(prjOssMaster);
+				if (Licenselist.size() != 0){
+					Licenselist = CommonFunction.makeLicenseExcludeYn(Licenselist);
+					ossNewistData.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(Licenselist, ","));
+				}
+			}
+			
+			ossNewistData.setOssId(null);
 		}
 		
 		return ossNewistData;
@@ -3749,6 +3762,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else if (isNewVersion) {
 				mailBean.setParamOssInfo(ossMaster);
 			}
+			
+			if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(mailType)) {
+				setVdiffInfoForSentMail(ossMaster.getOssName(), mailBean);
+			}
+			
 			CoMailManager.getInstance().sendMail(mailBean);
 
 		} catch (Exception e) {
@@ -3783,6 +3803,31 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return resMap;
 	}
 
+	public void setVdiffInfoForSentMail(String ossName, CoMail mailBean) {
+		List<Map<String, Object>> resultData  = new ArrayList<>();
+		boolean vDiffFlag = ossMapper.checkOssVersionDiff(ossName) > 0 ? true : false;
+
+		if(vDiffFlag) {
+			OssMaster param = new OssMaster();
+			param.setOssNames(new String[] {ossName});
+			Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
+
+			for (String key : ossMap.keySet()) {
+				OssMaster om = ossMap.get(key);
+				Map<String, Object> contentMap = new HashMap<>();
+				contentMap.put("ossNameInfo", om.getOssName() + " (" + om.getOssVersion() + ")");
+				contentMap.put("licenseInfo", CommonFunction.makeLicenseExpression(om.getOssLicenses()));
+				resultData.add(contentMap);
+			}
+			
+			if (resultData != null && !resultData.isEmpty()) {
+				mailBean.setParamList(resultData);
+			} else {
+				mailBean.setParamList(new ArrayList<>());
+			}
+		}
+	}
+	
 	@Override
 	public List<String> getDeactivateOssList() {
 		return ossMapper.getDeactivateOssList();

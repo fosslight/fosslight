@@ -85,6 +85,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	private static String REVIEW_REPORT_PATH=CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
 	
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
@@ -133,7 +134,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		if (result > 0){
 			return false;
-		}else{
+		} else{
 			return true;
 		}
 	}
@@ -279,21 +280,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException {
-		return getReviewReportPdfFile(ossNotice, null);
+	public boolean getReviewReportPdfFile(String prjId) throws IOException {
+		return getReviewReportPdfFile(prjId, null);
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice, String contents) throws IOException {
-		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
+	public boolean getReviewReportPdfFile(String prjId, String contents) throws IOException {
+		Project prjInfo = projectService.getProjectBasicInfo(prjId);
 
-		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
-			return true;
+		try {
+			contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(prjId));
+		}catch(Exception e){
+			log.error(e.getMessage());
+			return false;
 		}
-
-		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
 
 		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
@@ -424,9 +424,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		try {
 			// file path and name 설정
-			// 파일 path : <upload_home>/notice/
+			// 파일 path : <upload_home>/reviewReport/
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
-			String filePath = NOTICE_PATH + "/" + project.getPrjId();
+			String filePath = REVIEW_REPORT_PATH + "/" + project.getPrjId();
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
@@ -668,8 +668,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if (s.startsWith(packageFileName)) {
-							collectDataDeCompResultList.add(s);
-							s = s.replace(packageFileName, "");
+							String removePackageFileName = s.replace(packageFileName, "");
+							if (removePackageFileName.startsWith("/")) {
+								removePackageFileName = removePackageFileName.substring(1);
+							}
+							collectDataDeCompResultList.add(removePackageFileName);
 							
 							if (s.startsWith("/")) {
 								s = s.substring(1);
@@ -1268,7 +1271,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
 			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
-		}else {
+		} else {
 			updateProjectStatus(project);
 		}
 		
@@ -1493,6 +1496,91 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
 				project.setSpdxYamlFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
 
+				makeZipFile = true;
+			}
+		}
+		
+		// cycloneDX
+		String cdxJsonFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			if (isEmpty(cdxJsonFileId)) {
+				cdxJsonFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXJson", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
+			}
+			
+			if (!isEmpty(cdxJsonFileId)) {
+				T2File jsonFileInfo = fileService.selectFileInfo(cdxJsonFileId);
+				String jsonFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!jsonFullPath.endsWith("/")) {
+					jsonFullPath += "/";
+				}
+				
+				jsonFullPath += jsonFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(jsonFileInfo.getLogiNm())+".json";
+				String resultFileName = FilenameUtils.getBaseName(jsonFileInfo.getOrigNm())+".json";
+				String tagFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxJsonFile = new File(tagFullPath);
+				
+				if (cdxJsonFile.exists() && cdxJsonFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.json.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxJsonFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
+				makeZipFile = true;
+			}
+		}
+		
+		String cdxXmlFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			if (isEmpty(cdxXmlFileId)) {
+				cdxXmlFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXXml", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
+			}
+			
+			if (!isEmpty(cdxXmlFileId)) {
+				T2File xmlFileInfo = fileService.selectFileInfo(cdxXmlFileId);
+				String xmlFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!xmlFullPath.endsWith("/")) {
+					xmlFullPath += "/";
+				}
+				
+				xmlFullPath += xmlFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(xmlFileInfo.getLogiNm())+".xml";
+				String resultFileName = FilenameUtils.getBaseName(xmlFileInfo.getOrigNm())+".xml";
+				String tagFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxXmlFile = new File(tagFullPath);
+				
+				if (cdxXmlFile.exists() && cdxXmlFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.xml.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxXmlFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
 				makeZipFile = true;
 			}
 		}
@@ -2215,7 +2303,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
-			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
+			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) bean.setHomepage("http://" + bean.getHomepage());
 			
 			noticeList.add(bean);
 		}
@@ -2529,54 +2617,59 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		  
 		Project project = projectMapper.selectProjectMaster(prjParam);
 		
-		if (fileSeq.equals("1")) {
-			prjParam.setPackageFileId(registFileId);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else if (fileSeq.equals("2")) {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(registFileId);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(registFileId);
-		}
-				
-		List<String> fileSeqs = new ArrayList<String>(); 
-		if (prjParam.getPackageFileId() != null) {
-			fileSeqs.add(prjParam.getPackageFileId()); 
-		}  
-		if (prjParam.getPackageFileId2() != null) {
-			fileSeqs.add(prjParam.getPackageFileId2()); 
-		} 
-		if (prjParam.getPackageFileId3() != null) {
-			fileSeqs.add(prjParam.getPackageFileId3()); 
-		}
+		if (fileSeq.equals("4")) {
+			prjParam.setPackageVulDocFileId(registFileId);
+			verificationMapper.updatePackageVulDocFile(prjParam);
+		} else {
+			if (fileSeq.equals("1")) {
+				prjParam.setPackageFileId(registFileId);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+			}else if (fileSeq.equals("2")) {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(registFileId);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+			}else {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(registFileId);
+			}
 					
-		Map<Object, Object> map = new HashMap<Object, Object>();
-		map.put("prjId", prjId);
-		map.put("fileSeqs", fileSeqs);
-		
-		String packagingComment = "";
-		
-		try {
-			packagingComment = fileService.setClearFiles(map);
-		}catch(Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		prjParam.setStatusVerifyYn("N");
-		// project_master packageFileId update
-		verificationMapper.updatePackageFile(prjParam);
-		
-		// commentHistory regist
-		if (!packagingComment.equals("")) {
-			CommentsHistory commHisBean = new CommentsHistory();
-			commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-			commHisBean.setReferenceId(prjId); 
-			commHisBean.setContents(packagingComment);
+			List<String> fileSeqs = new ArrayList<String>(); 
+			if (prjParam.getPackageFileId() != null) {
+				fileSeqs.add(prjParam.getPackageFileId()); 
+			}  
+			if (prjParam.getPackageFileId2() != null) {
+				fileSeqs.add(prjParam.getPackageFileId2()); 
+			} 
+			if (prjParam.getPackageFileId3() != null) {
+				fileSeqs.add(prjParam.getPackageFileId3()); 
+			}
+						
+			Map<Object, Object> map = new HashMap<Object, Object>();
+			map.put("prjId", prjId);
+			map.put("fileSeqs", fileSeqs);
 			
-			commentService.registComment(commHisBean, false);
+			String packagingComment = "";
+			
+			try {
+				packagingComment = fileService.setClearFiles(map);
+			}catch(Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			prjParam.setStatusVerifyYn("N");
+			// project_master packageFileId update
+			verificationMapper.updatePackageFile(prjParam);
+			
+			// commentHistory regist
+			if (!packagingComment.equals("")) {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+				commHisBean.setReferenceId(prjId); 
+				commHisBean.setContents(packagingComment);
+				
+				commentService.registComment(commHisBean, false);
+			}
 		}
 	}
 	
@@ -2626,6 +2719,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			bitFlag |= CoConstDef.FLAG_I;
 		}
 		
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_J;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			bitFlag |= CoConstDef.FLAG_K;
+		}
+		
 		return bitFlag;
 	}
 	
@@ -2647,5 +2748,22 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public void deleteFile(Map<Object, Object> map) {
+		String delFileSeq = (String) map.get("delFileSeq");
+		String prjId = (String) map.get("prjId");
+		T2File file = fileService.selectFileInfo(delFileSeq);
+		
+		// delete logical file
+		fileMapper.updateFileDelYn(new String[] {delFileSeq});
+		// delete physical file
+		fileService.deletePhysicalFile(file, "VERIFY");
+		// update file id
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setPackageVulDocFileId(null);
+		verificationMapper.updatePackageVulDocFile(project);
 	}
 }

@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -59,7 +61,6 @@ import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.util.YamlUtil;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 
@@ -643,6 +644,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 											).collect(Collectors.toList()).size() == 0
 				).collect(Collectors.toList());
 		
+		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty((String) e.get("ossName")) && !((String) e.get("ossName")).equals("-")).collect(Collectors.toList());
+		
 		List<Map<String, Object>> filteredAfterBomList = afterBomList
 				.stream()
 				.filter(afList -> beforeBomList
@@ -652,6 +655,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 											.equalsIgnoreCase((String) bfList.get("ossName") + "||" + (String) bfList.get("ossVersion") + "||" + getLicenseNameSort((String) bfList.get("licenseName")))
 											).collect(Collectors.toList()).size() == 0
 				).collect(Collectors.toList());
+		
+		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty((String) e.get("ossName")) && !((String) e.get("ossName")).equals("-")).collect(Collectors.toList());
 		
 		// status > add
 		for (Map<String, Object> after : filteredAfterBomList) {
@@ -1821,7 +1826,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		apiProjectMapper.updateReadmeContent(project);
 	}
 
-	private Map<String, Object> getProjectBasicInfo(String prjId) {
+	@Override
+	public Map<String, Object> getProjectBasicInfo(String prjId) {
 		Map<String, Object> param = new HashMap<>();
 		param.put("prjId", prjId);
 		
@@ -1961,6 +1967,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					}
 				}
 				bean = findOssIdAndName(bean);
+				
+				String copyrightText = (String) bean.get("copyrightText");
+				if(!isEmpty(copyrightText)) {
+					String[] copyrights = copyrightText.split("\\|");
+					String customCopyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+					bean.put("copyrightText", customCopyrightText);
+				}
 				
 				// 컴포넌트 마스터 인서트
 				apiProjectMapper.registBomComponents(bean);
@@ -2868,7 +2881,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList) {
+	public void getIdentificationGridList(String prjId, String code, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentsLicenseList, List<Map<String, Object>> gridDataList) {
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
 		identification.setReferenceDiv(code);
@@ -2876,10 +2889,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		if (map.containsKey("mainData")) {
 			List<ProjectIdentification> gridDatas = (List<ProjectIdentification>) map.get("mainData");
 			if (gridDatas != null && !gridDatas.isEmpty()) {
-				List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
-				Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
-				ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
-				ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
+				if (gridDataList == null) {
+					List<List<ProjectIdentification>> gridDataLicenses = CommonFunction.setOssComponentLicense(gridDatas);
+					Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(gridDatas, gridDataLicenses);
+					ossComponentList.addAll((List<ProjectIdentification>) remakeComponentsMap.get("mainList"));
+					ossComponentsLicenseList.addAll((List<List<ProjectIdentification>>) remakeComponentsMap.get("subList"));
+				} else {
+					ObjectMapper objectMapper = new ObjectMapper();
+					gridDataList.addAll(objectMapper.convertValue(gridDatas, new TypeReference<List<Map<String, Object>>>(){}));
+					gridDataList = serMergeGridData(gridDataList);
+				}
 			}
 		}
 	}
@@ -3165,7 +3184,16 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return ossComponentLicenseList;
 	}
 	
-	private void deleteUploadFile(Project project, String refDiv) {
+	@Override
+	public void updateSubStatus(Map<String, Object> param) {
+		apiProjectMapper.updateProjectSubStatus(param);
+
+		List<String> componentIds = apiProjectMapper.selectComponentId(param);
 		
+		for (String componentId : componentIds) {
+			apiProjectMapper.deleteOssComponentsLicense(componentId);
+		}
+		
+		apiProjectMapper.deleteOssComponents(param);
 	}
 }

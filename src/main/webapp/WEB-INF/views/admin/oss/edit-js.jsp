@@ -172,8 +172,21 @@
 						
 						break;
 					case 'ossType':
-						if(v.toUpperCase() == 'V'){
-							$("[name='"+k+"']").html(' / <span class="iconSet vdif">v-Diff</span>');
+						var colOssType = '';
+						if (v.toUpperCase().indexOf('M') > -1) {
+							colOssType += '<span class="iconSet multi">Multi</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('D') > -1) {
+							colOssType += '<span class="iconSet dual">Dual</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('V') > -1){
+							colOssType += '<span class="iconSet vdif">v-Diff</span>';
+						}
+						
+						if ('' != colOssType) {
+							$("[name='"+k+"']").html(colOssType);
 						}
 						
 						break;
@@ -1390,14 +1403,38 @@
 		
 		$('input[name=ossLicensesJson]').val(JSON.stringify(newRows));
 		
+		var pattern = /\s/g;
+		var patternFlag = false;
+		var patternCheckFlag = false;
 		$("[name='downloadLocations']").each(function(idx, cur){
-			$(cur).val($(cur).val().trim());
+			var value = $(cur).val().trim();
+			$(cur).val(value);
+			if (value.match(pattern)) {
+				$(cur).parent().next("span.urltxt").empty();
+				$(cur).parent().next("span.urltxt").css("display", "none");
+				$(cur).parent().next().next("span.retxt").empty();
+				$(cur).parent().next().next("span.retxt").html("Remove spaces").show();
+				patternFlag = true;
+				patternCheckFlag = true;
+			}
 		});
-		
+		if (patternFlag) alertify.error("DownloadLocation remove spaces", 0);
+		patternFlag = false;
 		$("[name='homepage']").each(function(idx, cur){
-			$(cur).val($(cur).val().trim());
+			var value = $(cur).val().trim();
+			$(cur).val(value);
+			if (value.match(pattern)) {
+				$(cur).next("span.urltxt").empty();
+				$(cur).next("span.urltxt").css("display", "none");
+				$(cur).next().next("span.retxt").empty();
+				$(cur).next().next("span.retxt").html("Remove spaces").show();
+				patternFlag = true;
+				patternCheckFlag = true;
+			}
 		});
-
+		if (patternFlag) alertify.error("Homepage remove spaces", 0);
+		if (patternCheckFlag) return false;
+		
 		var nicknameFormatErrorFlag = true;
 		$("[name='ossNicknames']").each(function(idx, cur){
 			var nickname = $(cur).val();
@@ -1517,32 +1554,34 @@
 	};
 	
 	//V-Diff 체크
-	function checkVdiff() {
-		var flag = "";
-		if($('input[name=ossVersion]').val() == "") {
-			var rows = getOssGridRows('#_licenseChoice');
-			var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
-
-			$.ajax({
-				url : '<c:url value="/oss/checkVdiff"/>',
-				type : 'POST',
-				data : JSON.stringify(postData),
-				dataType : 'json',
-				cache : false,
-				async : false,
-				contentType : 'application/json',
-				success : function(json){
-					flag = json.vFlag;
-		        },
-	            error : function(){
-	            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
-	            }
-			});
-		} else {
-			flag = "N";
+	function checkVdiff(func) {
+		var rtnData = {};
+		var rows = getOssGridRows('#_licenseChoice');
+		var ossVersion = $('input[name=ossVersion]').val();
+		var postData = {'ossId' : $('input[name=ossId]').val(), 'ossName' : $('input[name=ossName]').val(), 'license' : JSON.stringify(rows)};
+		
+		if ("save" == func && "" != ossVersion) {
+			postData['ossVersion'] = ossVersion;
 		}
-
-		return flag;
+		
+		$.ajax({
+			url : '<c:url value="/oss/checkVdiff"/>',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success : function(json){
+				rtnData = json.vFlag;
+	        },
+            error : function(){
+            	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            }
+		});
+		
+		rtnData['ossVersion'] = ossVersion;
+		return rtnData;
 	};
 	
 	// 그리드 체크 메세지( gridStr 그리드 문자열 )
@@ -1658,20 +1697,129 @@
 				ossGridValidMsg(json, "_licenseChoice");
 			}
 		} else if(json.isValid == 'true') {
-			var v_flag = checkVdiff();
-
+			var data = checkVdiff('save');
+			var v_flag = data.vFlag;
+			
 			if(v_flag == "Y"){
-				alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
-					if (e) {
-						onRegist();
+				if ("" != data.ossVersion) {
+					if (typeof data.resultData != "undefined") {
+						var checkList = data.resultData;
+						var height = 0;
+						let vDiffDiv = document.createElement('div');
+						vDiffDiv.id = 'vDiffDiv';
+						let h1 = document.createElement('h1');
+						h1.innerHTML = '<spring:message code="msg.oss.confirm.ossVersion" />';
+						vDiffDiv.appendChild(h1);
+						vDiffDiv.appendChild(document.createElement('br'));
+						height += 30;
+						
+						let table = document.createElement('table');
+						table.style.width = '100%';
+						$(table).css('border-collapse','collapse');
+						let thead = document.createElement('thead');
+						let tbody = document.createElement('tbody');
+						
+						let row_1 = document.createElement('tr');
+						$(row_1).css('background-color','#a39d9b');
+						row_1.style.height = "30";
+						height += 30;
+						
+						let heading_1 = document.createElement('th');
+						heading_1.style.border = '1px solid #444444';
+						$(heading_1).css('font-weight','bold');
+						$(heading_1).css('color','white');
+						heading_1.innerHTML = "OSS Name (version)";
+						
+						let heading_2 = document.createElement('th');
+						heading_2.style.border = '1px solid #444444';
+						$(heading_2).css('font-weight','bold');
+						$(heading_2).css('color','white');
+						heading_2.innerHTML = "Declared License";
+						
+						row_1.appendChild(heading_1);
+						row_1.appendChild(heading_2);
+						
+						thead.appendChild(row_1);
+						table.appendChild(thead);
+						
+						for (var j in checkList) {
+							var ossInfo = checkList[j].split("|")[0];
+							var declaredLicense = checkList[j].split("|")[1];
+							
+							let row_2 = document.createElement('tr');
+							row_2.style.height = "30";
+							height += 30;
+							
+							let row_2_data_1 = document.createElement('td');
+							row_2_data_1.style.border = '1px solid #444444';
+							row_2_data_1.innerHTML = '&nbsp;' + ossInfo;
+							
+							let row_2_data_2 = document.createElement('td');
+							row_2_data_2.style.border = '1px solid #444444';
+							row_2_data_2.innerHTML = '&nbsp;' + declaredLicense;
+							
+							row_2.appendChild(row_2_data_1);
+							row_2.appendChild(row_2_data_2);
+							tbody.appendChild(row_2);
+						}
+						
+						table.appendChild(tbody);
+						vDiffDiv.appendChild(table);
+						
+						height = (height + 160) < 750 ? (height + 160) : 750;
+						
+						if (!alertify.firstVDiffDialog) {
+							alertify.dialog('firstVDiffDialog', function() {
+								var settings;
+								
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+									settings: {
+										oncontinue: null
+									},
+									callback: function(closeEvent) {
+										alertify.confirm().callback.call(this, closeEvent);
+									}
+								};
+							}, false, 'confirm');
+							
+							alertify.firstVDiffDialog(vDiffDiv)
+							.set('onok', function(closeEvent){onRegist();})
+							.set('oncancel', function(closeEvent){return;});
+						} else {
+							alertify.firstVDiffDialog(vDiffDiv)
+							.set('onok', function(closeEvent){onRegist();})
+							.set('oncancel', function(closeEvent){return;})
+							.set('resizable', true).resizeTo('25%', height);
+						}
 					} else {
-						return false;
+						onRegist();
 					}
-				});
-			}else if(v_flag == ""){
+				} else {
+					alertify.confirm('<spring:message code="msg.oss.confirm.ossVersion" />', function (e) {
+						if (e) {
+							onRegist();
+						} else {
+							return false;
+						}
+					});
+				}
+			} else if(v_flag == ""){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				return;
-			}else{
+			} else {
 				onRegist();
 			}
 		}		
@@ -1723,7 +1871,7 @@
 			}
 
 		} else if(json.isValid == 'true') {
-			var v_flag = checkVdiff();
+			var v_flag = checkVdiff('delete');
 
 			if(v_flag == ""){
 				loading.hide();
@@ -2119,98 +2267,153 @@ var fn_commemt = {
 
 var fn = {
 	urlDuplication : function(target){
-		var value = $(target).val();
+		var value = $(target).val().trim();
+		$(target).val(value);
 
 		if(value.charAt(value.length-1) == "/"){
 			value = value.slice(0, -1); // 마지막 문자열 제거
 			$(target).val(value);
 		}
 		
-    	$("input[name=validationType]").val('DOWNLOADLOCATION');
-    	$("[name='downloadLocation']").val(value);
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-		        	$(target).parent().next("span.urltxt").empty();
-					$(target).parent().next("span.urltxt").html(json.externalData2.downloadLocation).show();
-	        	}else{
-		        	$(target).parent().next("span.urltxt").empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
+		var pattern = /\s/g;
+		if (value.match(pattern)) {
+			$(target).parent().next("span.urltxt").empty();
+			$(target).parent().next("span.urltxt").css("display", "none");
+			$(target).parent().next().next("span.retxt").empty();
+			$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+		} else {
+			$(target).parent().next().next("span.retxt").empty();
+			$(target).parent().next().next("span.retxt").css("display", "none");
+			
+			$("input[name=validationType]").val('DOWNLOADLOCATION');
+	    	$("[name='downloadLocation']").val(value);
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+			        		var downloadLocation = json.externalData2.downloadLocation;
+			        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
+			        			downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
+			        		}
+			        		
+			        		$(target).parent().next("span.urltxt").empty();
+			        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
+			        	}
+		        	}else{
+			        	$(target).parent().next("span.urltxt").empty();
+		        	}
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	urlDuplicationAll : function(){
+		var pattern = /\s/g;
+		var patternCnt = 0;
+		
 		$("[name='downloadLocations']").each(function(idx, cur){
-			var value = $(cur).val();
+			var value = $(cur).val().trim();
+			$(cur).val(value);
 
 			if(value.charAt(value.length-1) == "/"){
 				value = value.slice(0, -1); // 마지막 문자열 제거
 				$(cur).val(value);
 			}
+			
+			if (value.match(pattern)) {
+				patternCnt++;
+				$(cur).parent().next("span.urltxt").empty();
+				$(cur).parent().next("span.urltxt").css("display", "none");
+				$(cur).parent().next().next("span.retxt").empty();
+				$(cur).parent().next().next("span.retxt").html("Remove spaces");
+			}
 		});
 		
-		$("input[name=validationType]").val('DOWNLOADLOCATIONS');
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-	        		var diffMsg = json.externalData2.downloadLocations.split("||");
-					
-					$("[name='downloadLocations']").each(function(idx, cur){
-						var downloadLocation = $(cur).val();
-						var msg = diffMsg.filter(function(a){
-					        return a.indexOf(downloadLocation) > -1;
-					    })[0];
+		if (patternCnt == 0) {
+			$("input[name=validationType]").val('DOWNLOADLOCATIONS');
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		var diffMsg = json.externalData2.downloadLocations.split("||");
 						
-						if(msg){
-							msg = msg.split("@@")[1];	
-							$(cur).parent().next("span.urltxt").empty();
-							$(cur).parent().next("span.urltxt").html(msg).show();
-						}						
-					});
-					
-	        	}else{
-	        		$(".multiDownloadLocationSet > .required > span.urltxt").empty();
-	        	}
-	        	
-	        	fn.homepageDuplication($('input[name=homepage]'));
-	        },
-            error : onError
-	    }).submit();
+						$("[name='downloadLocations']").each(function(idx, cur){
+							var downloadLocation = $(cur).val();
+							var msg = diffMsg.filter(function(a){
+						        return a.indexOf(downloadLocation) > -1;
+						    })[0];
+							
+							if(msg){
+								msg = msg.split("@@")[1];
+								var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
+								$(cur).parent().next().next("span.retxt").empty();
+								$(cur).parent().next().next("span.urltxt").css("display", "none");
+								$(cur).parent().next("span.urltxt").empty();
+								$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+							}						
+						});
+						
+		        	}else{
+		        		$(".multiDownloadLocationSet > .required > span.urltxt").empty();
+		        	}
+		        	
+		        	fn.homepageDuplication($('input[name=homepage]'));
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	homepageDuplication : function(target){
-		var value = $(target).val();
+		var value = $(target).val().trim();
+		$(target).val(value);
 
 		if(value.charAt(value.length-1) == "/"){
 			value = value.slice(0, -1); // 마지막 문자열 제거
 			$(target).val(value);
 		}
 		
-		$("input[name=validationType]").val('HOMEPAGE');
-		
-		$("#ossForm").ajaxForm({
-			url :'<c:url value="/oss/urlDuplicateValidation"/>',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-					$(target).next("span.urltxt").empty();
-					$(target).next("span.urltxt").html(json.externalData2.homepage).show();
-	        	}else{
-					$(target).next("span.urltxt").empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
+		var pattern = /\s/g;
+		if (value.match(pattern)) {
+			$(target).next("span.urltxt").empty();
+			$(target).next("span.urltxt").css("display", "none");
+			$(target).next().next("span.retxt").empty();
+			$(target).next().next("span.retxt").html("Remove spaces").show();
+		} else {
+			$(target).next().next("span.retxt").empty();
+			$(target).next().next("span.retxt").css("display", "none");
+			
+			$("input[name=validationType]").val('HOMEPAGE');
+			
+			$("#ossForm").ajaxForm({
+				url :'<c:url value="/oss/urlDuplicateValidation"/>',
+	            type : 'POST',
+	            dataType:"json",
+	            cache : false,
+		        success : function(json) {
+		        	if(json.externalData2){
+		        		if (typeof json.externalData2.homepage !== 'undefined') {
+		        			var homepageHtml = json.externalData2.homepage;
+			        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+			        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
+			        		}
+			        		
+			        		$(target).next("span.urltxt").empty();
+							$(target).next("span.urltxt").html(homepageHtml).show();
+		        		}
+		        	}else{
+						$(target).next("span.urltxt").empty();
+		        	}
+		        },
+	            error : onError
+		    }).submit();
+		}
 	},
 	checkValid : function(){
 		var result = gLicenseData.filter(function(a){
@@ -2318,6 +2521,54 @@ var fn = {
 					registSubmit();
 				} else {
 					return false;
+				}
+			});
+		}
+	},
+	showOssViewPage : function (obj) {
+		var ossName = $(obj).parent().next().find('input').val();
+		var ossVersion = $(obj).parent().parent().next().next().find('input').val();
+		fn.showDetailPopup(ossName, ossVersion);
+	},
+	loadUrl : function (target, url) {
+		var ossNameObj = url.split("?")[1];
+		var ossName = ossNameObj.split("=")[1];
+		var ossVersion = $("input[name=ossVersion]").val();
+		fn.showDetailPopup(ossName, ossVersion);
+	},
+	showDetailPopup : function (ossName, ossVersion) {
+		if ("" != ossName) {
+			var _popup = null;
+			
+			if ("N/A" == ossVersion) {
+				ossVersion = "";
+			}
+			
+			$.ajax({
+				url : '<c:url value="/oss/checkExistsOssByname"/>',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {ossName : ossName},
+				contentType : 'application/json',
+				success : function(data){
+					if(data.isValid == 'true') {
+						if(_popup == null || _popup.closed) {
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+								alertify.alert('<spring:message code="msg.common.window.allowpopup" />', function(){});
+							}
+						} else {
+							_popup.close();
+							_popup = window.open('<c:url value="/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion+'"/>', 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+						}
+					} else {
+						alertify.alert('<spring:message code="msg.selfcheck.info.unconfirmed.oss" />', function(){});
+					}
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
 				}
 			});
 		}

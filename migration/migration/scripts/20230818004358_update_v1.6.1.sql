@@ -30,6 +30,27 @@ VALUES ('227', '1', '15', '', '', 15, 'Y'),
        ('227', '3', '50', '', '', 50, 'Y'),
        ('227', '4', '100', '', '', 10, 'Y');
 
+INSERT INTO `PROCESS_GUIDE` VALUES ('License_Edit_Info', 'License_Edit', '<div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull;<strong> SPDX License인 경우 :</strong> SPDX 링크로 website를 추가<br />&bull;<strong> License 이름이 한글인 경우 :</strong> 1. License 이름 영문으로 변경하고, 2. 한글 License명은 License text 최상단에 포함<br />&bull;<strong> MIT/BSD-like인 경우 :</strong> MIT/BSD-like (OSS_Name) 으로 이름을 설정</div>', '', 'Y');
+
+ALTER TABLE `PROJECT_MASTER` ADD `CDX_JSON_FILE_ID` int(11) NULL DEFAULT NULL;
+ALTER TABLE `PROJECT_MASTER` ADD `CDX_XML_FILE_ID` int(11) NULL DEFAULT NULL;
+
+ALTER TABLE `PROJECT_MASTER` ADD `PACKAGE_VUL_DOC_FILE_ID` int(11) NULL DEFAULT NULL;
+INSERT INTO
+    `T2_CODE_DTL` (
+    `CD_NO`,
+    `CD_DTL_NO`,
+    `CD_DTL_NM`,
+    `CD_SUB_NO`,
+    `CD_DTL_EXP`,
+    `CD_ORDER`,
+    `USE_YN`
+)
+VALUES
+    ('120', '40', '프로젝트 PACKAGINE VUL DOC FILE', '', 'pdf,xlsm,zip,tar.gz,gz,tar.xz', 40, 'Y');
+
+ALTER TABLE `OSS_COMPONENTS` MODIFY `DEPENDENCIES` varchar(5000) DEFAULT NULL;
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 

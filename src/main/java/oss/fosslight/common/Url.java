@@ -147,6 +147,7 @@ public final class Url {
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		public static final String DEL_OSS_VERSION_MERGE_AJAX = PATH +  "/delOssWithVersionMeregeAjax";
 		public static final String URL_DUPLICATE_VALIDATION = PATH + "/urlDuplicateValidation";
 		public static final String VALIDATION = PATH + "/validation";
@@ -298,7 +299,9 @@ public final class Url {
 		public static final String TRD_MAP = PATH + "/get3rdMap";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		public static final String SAVE_MODEL_AJAX = PATH + "/saveModelAjax";
 		
@@ -393,6 +396,7 @@ public final class Url {
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
+		public static final String DELETE_FILE = PATH + "/deleteFile";
 	}
 	
 //	public static final class DISTRIBUTION {
@@ -449,7 +453,9 @@ public final class Url {
 		public static final String AUTOCOMPLETE_CONF_SW_VER_AJAX = PATH + "/autoCompleteConfSwVerAjax";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String UPDATE_PUBLIC_YN = PATH + "/updatePublicYn";
@@ -736,6 +742,13 @@ public final class Url {
 		
 	}
 	
+	public static final class CYCLONEDXDOWNLOAD {
+		public static final String PATH = "/cyclonedxdownload";
+		
+		public static final String CYCLONEDX_POST = PATH + "/getCycloneDXPost";
+		public static final String FILE = PATH + "/getFile";
+	}
+	
 	public static final class IMAGE_VIEW {
 		public static final String PATH = "/imageView";
 		
@@ -803,6 +816,9 @@ public final class Url {
 			
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
+			
+			/** API Project Not applicable */
+			public static final String FOSSLIGHT_API_PROJECT_NOT_APPLICABLE		= "/prj_not_applicable";
 			
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_DEP			= "/oss_report_dep";
