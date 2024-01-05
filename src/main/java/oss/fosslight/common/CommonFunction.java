@@ -1798,6 +1798,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					public int compare(String o1, String o2) {
 						if (new BigDecimal(o1.split("[_]")[0]).compareTo(new BigDecimal(o2.split("[_]")[0])) > 0) {
 							return 1;
+						} else if (new BigDecimal(o1.split("[_]")[0]).compareTo(new BigDecimal(o2.split("[_]")[0])) == 0) {
+							return 0;
 						} else {
 							return -1;
 						}
