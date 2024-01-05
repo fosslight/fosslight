@@ -458,6 +458,77 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value={OSS.MULTI_DEL_AJAX})
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute OssMaster ossMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		String resCd="00";
+		HashMap<String, Object> resMap = new HashMap<>();
+		String[] ossIds = ossMaster.getOssIds();
+		List<String> notDelOssList = new ArrayList<>();
+		
+		for (String ossId : ossIds) {
+			String existOssCnt = ossService.checkExistOssConf(ossId);
+			
+			if (Integer.parseInt(existOssCnt) > 0) {
+				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(ossId); 
+				String notDelOss = oss.getOssName() + " (" + avoidNull(oss.getOssVersion(), "N/A") + ")";
+				notDelOssList.add(notDelOss);
+			} else {
+				OssMaster ossMailBean = ossService.getOssInfo(ossId, true);
+				
+				OssMaster param = new OssMaster();
+				param.setOssId(ossId);
+				param.setOssName(ossMailBean.getOssName());
+				param.setComment(ossMaster.getComment());
+				param.setLoginUserName(loginUserName());
+				param.setCreatedDate(ossMailBean.getCreatedDate());
+				
+				if (ossMailBean.getOssNicknames() != null) {
+					ossMailBean.setOssNickname(CommonFunction.arrayToString(ossMailBean.getOssNicknames(), "<br>"));	
+				}
+				
+				putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+				
+				try {
+					History h = ossService.work(param);
+					
+					h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+					historyService.storeData(h);
+				} catch(Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_DELETE);
+					mailBean.setParamOssId(ossId);
+					mailBean.setComment(param.getComment());
+					mailBean.setParamOssInfo(ossMailBean);
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+
+				// 삭제처리
+				try {
+					ossService.deleteOssMaster(param);
+					resCd="10";
+					CoCodeManager.getInstance().refreshOssInfo();
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		resMap.put("resCd", resCd);
+		if (notDelOssList != null && !notDelOssList.isEmpty()) resMap.put("notDelOssList", notDelOssList);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@PostMapping(value=OSS.DEL_OSS_VERSION_MERGE_AJAX)
 	public @ResponseBody ResponseEntity<Object> delOssWithVersionMeregeAjax(
 			@ModelAttribute OssMaster ossMaster
@@ -716,6 +787,7 @@ public class OssController extends CoTopComponent{
 		Map<String, Object> reqMap = new HashMap<>();
 		reqMap.put("ossId", (String) map.get("ossId"));
 		reqMap.put("ossName", (String) map.get("ossName"));
+		if (map.containsKey("ossVersion")) reqMap.put("ossVersion", (String) map.get("ossVersion"));
 		
 		Type collectionType = new TypeToken<List<OssLicense>>(){}.getType();
 		List<OssLicense> list = ossService.checkLicenseId((List<OssLicense>) fromJson((String) map.get("license"), collectionType));
@@ -755,7 +827,7 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
-	@PostMapping(value=OSS.DELTE_COMMENT)
+	@PostMapping(value=OSS.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
 			, HttpServletRequest req
@@ -1735,6 +1807,12 @@ public class OssController extends CoTopComponent{
 		Type typeAnalysis = new TypeToken<List<OssAnalysis>>() {}.getType();
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+		for (OssAnalysis oa : analysisResultData) {
+			if (oa.getTitle().contains("최신 등록 정보")) {
+				oa.setOssId(ossService.getOssInfo(null, oa.getOssName(), false).getOssId());
+			}
+		}
+		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
 		
 		if (getSessionObject(sessionKey) != null) {
@@ -1764,6 +1842,10 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			for (OssAnalysis oa : detailData) {
+				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+			}
+			
 			result.put("isValid", true);
 			result.put("detailData", detailData);
 			result.put("cloneLicenseData", new OssMaster());
@@ -1833,7 +1915,20 @@ public class OssController extends CoTopComponent{
 		if (!isEmpty(analysisBean.getLicenseName())) {
 //			for (String s : analysisBean.getLicenseName().toUpperCase().split(" OR ")) {
 				// 순서가 중요
-				String orGroupStr = analysisBean.getLicenseName().replaceAll("\\(", " ").replaceAll("\\)", " ");
+				String orGroupStr = analysisBean.getLicenseName();
+				boolean multiLicenseFlag = false;
+			
+				if (orGroupStr.contains(",")) {
+					multiLicenseFlag = true;
+			
+					if (orGroupStr.startsWith("(")) {
+						orGroupStr = orGroupStr.substring(1, orGroupStr.length());
+						if (orGroupStr.endsWith(")")) {
+							orGroupStr = orGroupStr.substring(0, orGroupStr.length()-1);
+						}
+					}
+				}
+			
 //				boolean groupFirst = true;
 				for (String s2 : orGroupStr.split(",")) {
 					LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(s2.trim().toUpperCase());
@@ -1843,12 +1938,12 @@ public class OssController extends CoTopComponent{
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId(license.getLicenseId());
 						licenseBean.setLicenseName(license.getLicenseNameTemp());
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					} else {
 						licenseBean.setOssLicenseIdx(String.valueOf(licenseIdx++));
 						licenseBean.setLicenseId("");
 						licenseBean.setLicenseName(s2);
-						licenseBean.setOssLicenseComb("AND");
+						if (multiLicenseFlag) licenseBean.setOssLicenseComb("AND");
 					}
 					
 					ossLicenseList.add(licenseBean);

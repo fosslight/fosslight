@@ -1,27 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ include file="/WEB-INF/constants.jsp"%>
 <!DOCTYPE html>
 <html>
 	<head>
-<!-- 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"> -->
-		<meta charset="utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<title>FOSSLight Hub</title>
-		<%@ include file="/WEB-INF/constants.jsp"%>
-<%-- Add script --%>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-<link rel="stylesheet" href="${ctxPath}/css/common.css?${cssVersion}" />
-<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-<script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
-
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
-<script src="${ctxPath}/js/basic.js?${jsVersion}"></script>
-
-<!-- alertify -->
-<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"/>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css"/>
-
+		<tiles:insertAttribute name="meta" />
+		<tiles:insertAttribute name="scripts" />
+		<script type="text/javascript" src="${ctxPath}/js/ckeditor/ckeditor.js?${jsVersion}"></script>
 		<script>
 			if (top.location!= self.location) {
 			   top.location = self.location.href;
@@ -339,6 +322,9 @@
         </script>
     </head>
     <body id="login_before">
+		<!-- Notice -->
+		<div class="pops" style="width: 600px;">
+		</div>
     	<!-- Login -->
 		<div id="login" class="loginArea">
 			<div class="back">
@@ -465,6 +451,113 @@
 			</div>
 		</div>
 		<!-- //Login -->
-        <div id="blind_wrap"></div>
     </body>
+	<script>
+		$.ajax({
+			url: '<c:url value="/system/notice/getPublishedNotice"/>',
+			type: "GET",
+			success: function (data) {
+				if (data.noticeList) {
+					for (var i = 0; i < data.noticeList.length; i++) {
+						var seq = data.noticeList[i].seq;
+						var title = data.noticeList[i].title;
+						var notice = data.noticeList[i].notice;
+
+						if (getCookie("noticeYn_" + seq) != "N") {
+							addPopup(title, notice, seq);
+						}
+					}
+				}
+			},
+			error: function () {
+			}
+		});
+
+		function addPopup(title, content, seq) {
+			var popRegistPop = createPopRegistPop();
+			var popData = createPopData();
+			var noticeTitle = createNoticeTitle();
+			var noticeContent = createNoticeContent();
+			var checkboxLabel = createCheckboxLabel();
+			var okButton = createOkButton();
+			appendChild();
+
+			CKEDITOR.replace('noticeEdit_' + seq, {
+				customConfig: '<c:url value="/js/customEditorConf_Comment.js"/>'
+			});
+
+			okButton.addEventListener("click", function () {
+				var checkbox = document.getElementById("chkday_" + seq);
+				if (checkbox.checked) {
+					setCookie("noticeYn_" + seq, "N", 1);
+				}
+
+				popRegistPop.style.display = "none";
+			});
+
+			popRegistPop.style.display = "block";
+
+			function createPopRegistPop() {
+				var popRegistPop = document.createElement("div");
+				popRegistPop.classList.add("pop", "registPop");
+				popRegistPop.style.width = "600px";
+				popRegistPop.style.position = "absolute";
+				return popRegistPop;
+			}
+
+			function createPopData() {
+				var popData = document.createElement("div");
+				popData.className = "popdata";
+				popData.style.padding = "10px 10px 10px";
+				return popData;
+			}
+
+			function createNoticeTitle() {
+				var noticeTitle = document.createElement("div");
+				noticeTitle.id = "noticeTitle";
+				noticeTitle.style.textAlign = "center";
+				noticeTitle.style.fontSize = "12pt";
+				noticeTitle.style.fontWeight = "bold";
+				noticeTitle.style.paddingBottom = "15px";
+				noticeTitle.innerHTML = "[Notice] " + title;
+				return noticeTitle;
+			}
+
+			function createNoticeContent() {
+				var noticeContent = document.createElement("div");
+				noticeContent.id = "noticeContent";;
+				noticeContent.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+				return noticeContent;
+			}
+
+			function createCheckboxLabel() {
+				var checkboxLabel = document.createElement("label");
+				checkboxLabel.htmlFor = "chkday_" + seq;
+				checkboxLabel.innerHTML = '<input type="checkbox" value="checkbox" name="chkbox" id="chkday_' + seq + '" />&nbsp;Do not show this message again';
+				return checkboxLabel;
+			}
+
+			function createOkButton() {
+				var okButton = document.createElement("input");
+				okButton.id = "btnNotice";
+				okButton.type = "button";
+				okButton.value = "OK";
+				okButton.className = "okRegister";
+				okButton.style.height = "40px";
+				okButton.style.cursor = "pointer";
+				return okButton;
+			}
+
+			function appendChild() {
+				popData.appendChild(noticeTitle);
+				popData.appendChild(noticeContent);
+				popData.appendChild(checkboxLabel);
+				popData.appendChild(okButton);
+				popRegistPop.appendChild(popData);
+
+				var pops = document.querySelector(".pops");
+				pops.appendChild(popRegistPop);
+			}
+		}
+	</script>
 </html>

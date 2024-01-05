@@ -30,6 +30,7 @@ public class OssNotice extends ComBean implements Serializable {
 	private String packageFileId;
 	private String packageFileId2;
 	private String packageFileId3;
+	private String packageVulDocFileId;
 	private String userComment;
 
 	private String networkServerFlag = "N";
@@ -337,5 +338,11 @@ public class OssNotice extends ComBean implements Serializable {
 	}
 	public void setPreviewOnly(String previewOnly) {
 		this.previewOnly = previewOnly;
+	}
+	public String getPackageVulDocFileId() {
+		return packageVulDocFileId;
+	}
+	public void setPackageVulDocFileId(String packageVulDocFileId) {
+		this.packageVulDocFileId = packageVulDocFileId;
 	}
 }

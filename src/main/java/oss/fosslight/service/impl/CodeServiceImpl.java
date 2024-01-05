@@ -20,18 +20,22 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
+import oss.fosslight.domain.LicenseMaster;
+
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CodeService;
+import oss.fosslight.service.LicenseService;
 
 @Slf4j
 @Service
 public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	@Autowired CodeMapper codeMapper;
 	@Autowired T2UserMapper t2UserMapper;
+	@Autowired LicenseService licenseService;
 
 	/**
 	 * 코드 목록 조회
@@ -165,6 +169,27 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 
 		}
 
+		List<String> delRestrictionList = null;
+		if (CoConstDef.CD_LICENSE_RESTRICTION.equals(cdNo)) {
+			T2CodeDtl param = new T2CodeDtl();
+			param.setCdNo(cdNo);
+			List<T2CodeDtl> codeDetailList = codeMapper.selectCodeDetailList(param);
+			
+			if (codeDetailList != null && !codeDetailList.isEmpty()) {
+				delRestrictionList = codeDetailList
+						.stream()
+						.filter(e -> 
+								dtlList
+									.stream()
+									.filter(a ->
+											(a.getCdDtlNo() + "|" + a.getCdDtlNm()).equalsIgnoreCase(e.getCdDtlNo() + "|" + e.getCdDtlNm())
+											).collect(Collectors.toList()).size() == 0
+									).map(b -> b.getCdDtlNo())
+						.collect(Collectors.toList());
+									
+			}
+		}
+		
 		if (isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
 			// 1. 기존 github token값 보관
 			T2CodeDtl githubTokenDtl = codeMapper.getCodeDetail(cdNo, CoConstDef.CD_DTL_GITHUB_TOKEN);
@@ -194,6 +219,13 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			for (T2CodeDtl vo : dtlList) {
 				codeMapper.insertCodeDetail(vo);
 			}
+		}
+		
+		// delete license restriction information
+		if (delRestrictionList != null && !delRestrictionList.isEmpty()) {
+			LicenseMaster licenseMaster = new LicenseMaster();
+			licenseMaster.setArrRestriction(delRestrictionList.toArray(new String[delRestrictionList.size()]));
+			licenseService.deleteLicenseMasterForRestriction(licenseMaster);
 		}
 	}
 

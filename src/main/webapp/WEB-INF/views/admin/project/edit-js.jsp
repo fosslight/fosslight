@@ -393,7 +393,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 				}
 			});
 			
@@ -427,6 +427,17 @@
 					changeTabInFrame(idx);
 				}else{
 					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
+				}
+			});
+			
+			$("#securityTab").click(function(){
+				var prjId = $('input[name=prjId]').val();
+				var idx = getTabIndex(prjId+"_Security");
+				
+				if(idx != ""){
+					changeTabInFrame(idx);
+				}else{
+					createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
 				}
 			});
 			
@@ -907,6 +918,11 @@
 			saveModelSubmit : function(){
 				var rows = fn.getModelGridRows('#_modelList');
 				$('input[name=prjModelJson]').val(JSON.stringify(rows));
+				
+				//disabled일경우 제거
+				if($("input[name=distributeTarget]").is(":disabled")){
+					$("input[name=distributeTarget]").removeAttr("disabled");
+				}
 				
 				$("#projectForm").ajaxForm({
 					url : '<c:url value="/project/saveModelAjax"/>',

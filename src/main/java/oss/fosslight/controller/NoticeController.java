@@ -70,8 +70,8 @@ public class NoticeController extends CoTopComponent {
 		return makeJsonResponseHeader();
 	}
 	
-	@RequestMapping(value=NOTICE.PUBLISHEDT_NOTICE, method = {RequestMethod.POST, RequestMethod.GET})
-	public @ResponseBody ResponseEntity<Object> getPublishedtNotice(
+	@RequestMapping(value=NOTICE.PUBLISHED_NOTICE, method = {RequestMethod.POST, RequestMethod.GET})
+	public @ResponseBody ResponseEntity<Object> getPublishedNotice(
 			@ModelAttribute Notice vo
 			, HttpServletRequest req
 			, HttpServletResponse res

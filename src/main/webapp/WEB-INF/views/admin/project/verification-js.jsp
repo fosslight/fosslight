@@ -210,27 +210,33 @@
 				onSuccess : function(e, data){
 					var result = jQuery.parseJSON(data);
 
-					result.forEach(function(item){
-						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
-						
-						$('.uploadList_1 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'1\')"></span></li>');
-						$('input[name=fileSeq_1]').val(item[0].registSeq);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						$("#fileUplWarnMessage_1").hide();
-					});
+                                    if(result[0] != "UNSUPPORTED_FILE") {
+                                        result.forEach(function (item) {
+                                            var appendHtml = '<span style="margin-left:20px;">' + item[0].createdDate + '</span>';
+                                            var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
 
-					$('.verifyFile_1').hide();
-					$("#uploadAdd_1").show();
-					$("#uploadRemove_1").hide();
+                                            $('.uploadList_1 ul').append('<li><span><strong><a href="' + _url + '">' + item[0].originalFilename + appendHtml + '</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')"></span></li>');
+                                            $('input[name=fileSeq_1]').val(item[0].registSeq);
+                                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                            $('.ajax-file-upload-statusbar').remove();
+                                            $("#fileUplWarnMessage_1").hide();
+                                        });
 
-					// verified 초기화
-					verified = false;
-					
-					evt.uploadStatus = true;
+                                        $('.verifyFile_1').hide();
+                                        $("#uploadAdd_1").show();
+                                        $("#uploadRemove_1").hide();
 
-					fn.autoVerify();
+                                        // verified 초기화
+                                        verified = false;
+
+                                        evt.uploadStatus = true;
+
+                                        fn.autoVerify();
+                                    }else{
+                                        $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                        $('.ajax-file-upload-statusbar').remove();
+                                        alertify.alert(result[1], function(){});
+                                    }
 				},
 			});
 			
@@ -241,28 +247,35 @@
 				fileName:'myfile',
 				onSuccess : function(e, data){
 					var result = jQuery.parseJSON(data);
-					
-					result.forEach(function(item){
-						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
-						
-						$('.uploadList_2 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
-						$('input[name=fileSeq_2]').val(item[0].registSeq);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						$("#fileUplWarnMessage_2").hide();
-					});
 
-					$('.verifyFile_2').hide();
-					$("#uploadAdd_2").show();
-					$("#uploadRemove_2").hide();
+                                    if(result[0] != "UNSUPPORTED_FILE") {
+                                        result.forEach(function(item){
+                                            var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
+                                            var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
 
-					// verified 초기화
-					verified = false;
-					
-					evt.uploadStatus = true;
+                                            $('.uploadList_2 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'2\')"></span></li>');
+                                            $('input[name=fileSeq_2]').val(item[0].registSeq);
+                                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                            $('.ajax-file-upload-statusbar').remove();
+                                            $("#fileUplWarnMessage_2").hide();
+                                        });
 
-					fn.autoVerify();
+                                        $('.verifyFile_2').hide();
+                                        $("#uploadAdd_2").show();
+                                        $("#uploadRemove_2").hide();
+
+                                        // verified 초기화
+                                        verified = false;
+
+                                        evt.uploadStatus = true;
+
+                                        fn.autoVerify();
+                                    }else {
+                                        $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                        $('.ajax-file-upload-statusbar').remove();
+                                        alertify.alert(result[1], function () {
+                                        });
+                                    }
 				},
 			});
 			
@@ -274,26 +287,33 @@
 				onSuccess : function(e, data){
 					var result = jQuery.parseJSON(data);
 
-					result.forEach(function(item){
-						var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
-						var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
-						
-						$('.uploadList_3 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
-						$('input[name=fileSeq_3]').val(item[0].registSeq);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						$("#fileUplWarnMessage_3").hide();
-					});
+                                    if(result[0] != "UNSUPPORTED_FILE") {
+                                        result.forEach(function(item){
+                                            var appendHtml = '<span style="margin-left:20px;">'+item[0].createdDate+'</span>';
+                                            var _url = '<c:url value="/download/'+item[0].registSeq+'/'+item[0].fileName+'"/>';
 
-					$('.verifyFile_3').hide();
-					$("#uploadRemove_3").hide();
+                                            $('.uploadList_3 ul').append('<li><span><strong><a href="'+_url+'">'+item[0].originalFilename+appendHtml+'</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\''+item[0].registSeq+'\', \'3\')"></span></li>');
+                                            $('input[name=fileSeq_3]').val(item[0].registSeq);
+                                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                            $('.ajax-file-upload-statusbar').remove();
+                                            $("#fileUplWarnMessage_3").hide();
+                                        });
 
-					// verified 초기화
-					verified = false;
-					
-					evt.uploadStatus = true;
+                                        $('.verifyFile_3').hide();
+                                        $("#uploadRemove_3").hide();
 
-					fn.autoVerify();
+                                        // verified 초기화
+                                        verified = false;
+
+                                        evt.uploadStatus = true;
+
+                                        fn.autoVerify();
+                                    }else {
+                                        $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                        $('.ajax-file-upload-statusbar').remove();
+                                        alertify.alert(result[1], function () {
+                                        });
+                                    }
 				},
 			});
 			
@@ -375,17 +395,9 @@
 					} else {
 						var result = data.resultData;
 						var target = $('#list');
-						var rowData = target.jqGrid("getRowData");
-						var rowid = "";
 						
-						for(var i = 0; i < result.length; i++){
-							for(var j = 0; j < rowData.length; j++){
-								if(result[i].ossName == rowData[j].ossName && result[i].ossVersion == rowData[j].ossVersion && result[i].licenseName == rowData[j].licenseName){
-									rowid = rowData[j].componentId;
-								}
-							}
-							
-							target.jqGrid("setCell", rowid, "filePath", result[i].filePath);
+						for (var i = 0; i < result.length; i++){
+							target.jqGrid("setCell", result[i].componentId, "filePath", result[i].filePath);
 						}
 						
 						target.jqGrid().trigger('reloadGrid');
@@ -981,7 +993,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 				}
 			});
 			$("#packagingTab").click(function(){
@@ -1014,7 +1026,16 @@
 					createTabInFrame(prjId+'_Project', '#<c:url value="/project/edit/'+prjId+'"/>');
 				}
 			});
-			
+			$("#securityTab").click(function(){
+				var prjId = '${project.prjId}';
+				var idx = getTabIndex(prjId+"_Security");
+				
+				if(idx != ""){
+					changeTabInFrame(idx);
+				} else {
+					createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+				}
+			});
 			$("#append").click(function(e){
 				var checked = $(this).prop("checked");
 				$("#editAppendedYn").val(checked ? "Y" : "N");
@@ -1204,13 +1225,14 @@
 			
 			btn_div.show();
 			if(role=="ROLE_ADMIN"){ // 관리자 권한 일 경우
+				$("#approve").attr("disabled", false);
+				
 				switch(status){
 					case "":
 						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "PROG":
@@ -1218,7 +1240,6 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "REQ":
@@ -1226,9 +1247,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "REV":
@@ -1236,9 +1255,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "CONF":
@@ -1252,7 +1269,6 @@
 						$('#noticeEditor').prop('disabled', true);
 						$('#noticeEditor').css('opacity', 0.5);
 						
-						$("#approve").attr("disabled",true);
 						break;
 						
 				}

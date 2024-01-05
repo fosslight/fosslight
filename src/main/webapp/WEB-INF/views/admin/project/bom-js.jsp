@@ -80,6 +80,7 @@ var bom_fn = {
 		var str = "";
 		arr = bomList.jqGrid('getDataIDs');
 		var gridData = new Array();
+		var checkGridData = new Array();
 		
  		for(var i in arr){
  			// mergePreDiv 설정
@@ -103,7 +104,13 @@ var bom_fn = {
  				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
  	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
  				}
- 			}
+ 			} else if(str[0] =="DEP") {
+                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+
+                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
+                }
+            }
  			
  			// obligationType 설정
  			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
@@ -120,15 +127,19 @@ var bom_fn = {
  				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
  				
 		 		gridData.push(bomList.getRowData(arr[i]));
+			} else {
+				checkGridData.push(bomList.getRowData(arr[i]));
 			}
  		}
  		
  		gridData.reverse();
+ 		checkGridData.reverse();
  		
 		var finalData = {
 			referenceId : '${project.prjId}',
 			merge : 'Y',
-			gridData : JSON.stringify(gridData)
+			gridData : JSON.stringify(gridData),
+			checkGridData : JSON.stringify(checkGridData)
 		};
 		
 		$.ajax({
@@ -279,6 +290,31 @@ var bom_fn = {
 		
 		return display;
 	},
+	onCboxClickAll : function(allChk, target) {
+		if(event.stopPropagation) {
+	    	event.stopPropagation(); //MOZILLA
+    	} else {
+	    	event.cancelBubble = true; //IE
+    	}
+		
+		var dataArray = $("#"+target).jqGrid("getRowData");
+    	
+        if($(allChk).is(":checked")) {
+            $("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','Y');
+                $(this).prop('checked',true);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        } else {
+        	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','N');
+                $(this).prop('checked',false);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        }
+	},
 	unDisplayNotify : function(cellvalue, options, rowObject){
 		var display = $("#"+options.rowId+"_notify").val();
 		
@@ -342,8 +378,40 @@ var bom_fn = {
 		$("#bomList").jqGrid('setCell', rowId, 'source', "10");
 
 		if(adminCheckYn) {
+			var checkList = ["downloadLocation", "homepage", "copyrightText"];
+			
+			try {
+				var rowData = $("#bomList").getRowData(id);
+				var componentId = rowData["componentId"];
+				Object.keys(rowData).forEach(function(value){
+					if(checkList.includes(value)) {
+						var data = rowData[value];
+						if(value == "downloadLocation" || value == "homepage"){
+							if(data.indexOf("Not the same as property") > -1){
+								data = data.split("Not the same as property")[0];
+							} else if(data.indexOf("The address should be") > -1){
+								data = data.split("The address should be")[0];
+							}
+						} else {
+							if(data.indexOf("<div class") > -1){
+								data = data.split("<div")[0];
+							}
+						}
+						
+						data = data.replace(/<[^>]*>?/g, '');
+						$("#bomList").jqGrid("setCell", id, value, data);
+					}
+				});
+			} finally {
+				$("#bomList").jqGrid('setColProp','homepage', {editable: true});
+				$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
+				$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
+				$("#bomList").jqGrid('editRow', id);
+			}
+			
 			$("#"+id+"_adminCheck").val("Y");
 		} else {
+			$("#bomList").jqGrid('saveRow', id);
 			$("#"+id+"_adminCheck").val("N");
 		}
 	},
@@ -575,7 +643,7 @@ var bom_fn = {
 		};
 
 		$.ajax({
-			url : '<c:url value="${suffixUrl}/project/binaryDBSave"/>',
+			url : '<c:url value="/project/binaryDBSave"/>',
 			type : 'POST',
 			data : JSON.stringify(param),
 			dataType : 'json',
@@ -594,7 +662,7 @@ var bom_fn = {
 		});
     },
     exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");console.log(exportListId);
+    	var exportListId = '#' + $(obj).siblings("div").attr("id");
         if ($(exportListId).css('display')=='none') {
             $(exportListId).show();
         }else{
@@ -604,16 +672,41 @@ var bom_fn = {
     },
     selectDownloadFile : function(target) {
     	// download file
-        if (target === "report_sub") bom_fn.downloadExcel();
-        else if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
-        else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
-        else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
-        else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
-        else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+    	if (target === "report_sub") {
+        	bom_fn.downloadExcel();
+        } else {
+        	var identificationStatus = '${project.identificationStatus}';
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+    				if (e) {
+    					bom_fn.selectDownloadFileValidation(target);
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		bom_fn.selectDownloadFileValidation(target);
+        	}
+        }
+        
         // hide list
         $("#ExportList").hide();
     },
-	downloadSpdxSpreadSheetExcel : function(){
+    selectDownloadFileValidation : function(target) {
+    	if (com_fn.checkSelectDownloadFile('BOM')) {
+    		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
+            else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
+            else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
+            else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
+            else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+            else if (target === "YAML") com_fn.downloadYaml('BOM');
+            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
+    	} else {
+    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+    	}
+    },
+    downloadSpdxSpreadSheetExcel : function(){
 		$.ajax({
 			type: "POST",
 			url: '<c:url value="/spdxdownload/getSPDXPost"/>',
@@ -712,12 +805,51 @@ var bom_fn = {
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
 			}
 		});
+	},
+	loadAnalysisUrl : function (target, url) {
+		createTabInFrame(target, url);
+	},
+	displayVulnerability : function(cellvalue, options, rowObject){
+		var display = "";
+		var _url = "";
+		var prjId = '${project.prjId}';
+		var ossName = "";
+		if (typeof rowObject.refOssName !== "undefined") {
+			ossName = rowObject.refOssName.replace(' ','_');
+		} else {
+			ossName = rowObject.ossName;
+			if (typeof ossName !== "undefined" && "" != ossName) {
+				ossName = ossName.replace(' ', '_');
+			}
+		}
+		
+		if (prjId) {
+			_url = '<c:url value="/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		} else {
+			_url = '<c:url value="/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType="/>';
+		}
+		
+		if(parseInt(cellvalue) >= 9.0 ) {
+			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 7.0 ) {
+			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) >= 4.0) {
+			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) > 0) {
+			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+			display="<span style=\"font-size:0;\"></span>";
+		} else {
+			display=cellvalue;
+		}
+		
+		return display;
 	}
 }
 
 var bom_data = {
 		getJqGrid : function(param){
-			var data = param || {referenceId : '${project.prjId}', merge : 'N'};
+			var data = param ? param : {referenceId : '${project.prjId}', merge : 'N'};
 				
 			$.ajax({
 				url : '<c:url value="${suffixUrl}/project/identificationGrid/${project.prjId}/13"/>',
@@ -766,7 +898,8 @@ var bom_data = {
 				, data : bomMainData
 				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
 		             ,'Download Location','Homepage','LicenseId','Copyright Text'
-		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn','admin<br>check']
+		             ,'CVE ID' ,'Vulnera<br/>bility','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn'
+		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">']
 				, colModel : [
 					{name: 'group', width: 20, align: 'center', search : false, sorttype: 'int',
 					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
@@ -795,7 +928,7 @@ var bom_data = {
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true},
 					{name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', template: searchStringOptions},
 					{name: 'cveId', index: 'cveId', hidden:true},
-					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
+					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:bom_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
 					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 					{name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true},
 					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
@@ -886,6 +1019,10 @@ var bom_data = {
 						gridDiffMsg(bomDiffMsgData, "bomList");
 					}
 
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
 					// totla record 표시
 					$("#bomList_toppager_right, #bomPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+bomMainData.length+'</div>');
 					
@@ -923,7 +1060,7 @@ var bom_data = {
 				}
 				, onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if(iCol == "0"){
-						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, null, com_fn.getLicenseName);
+						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					}
 				}
 				, ondblClickRow: function(rowid,iRow,iCol,e) {
@@ -950,7 +1087,7 @@ var bom_data = {
 
 								break;
 							case "SRC" : //srcList
-								tabSeq = "1"
+								tabSeq = "2"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#srcList").jqGrid("setSelection", componentId);
@@ -958,7 +1095,7 @@ var bom_data = {
 
 								break;
 							case "BIN" : //binList
-								tabSeq = "2"
+								tabSeq = "3"
 									
 								$(".tabMenu a").eq(tabSeq).click();
 								$("#binList").jqGrid("setSelection", componentId);

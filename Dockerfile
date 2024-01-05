@@ -10,7 +10,7 @@ RUN gradle build --no-daemon --exclude-task test
 
 
 # Create the containerized app
-FROM adoptopenjdk/openjdk11:jre-11.0.15_10-ubuntu
+FROM eclipse-temurin:11.0.21_9-jre-jammy
 LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
@@ -20,11 +20,11 @@ COPY ./LICENSES /app/LICENSES
 
 ADD ./src/main/resources/template /app/template
 
-RUN chmod +x /app/wait-for /app/verify/verify  \
-    && apt-get update  \
-    && apt-get install -y --no-install-recommends netcat  \
-    && rm -rf /var/lib/apt/lists/*  \
-    && ln -s /bin/sh bash
+RUN chmod +x /app/wait-for /app/verify/verify && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends netcat && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -s /bin/sh bash
 
 WORKDIR /app
 CMD ["java" , "-jar", "FOSSLight.war", "--root.dir=/data/fosslight", "--server.port=8180"]

@@ -11,7 +11,14 @@ var objs = [];
 var licenseNames = [];
 //2018-08-10 choye 추가
 var binData;
-// SRC 이벤트
+
+$(document).click(function(e){
+	if(!$("#binExportContainer").has(e.target).length) {
+		$("#binExportList").hide();
+	}
+});
+
+// BIN 이벤트
 var bin_evt = {
 	csvDelFileSeq : [],
 	init: function(){
@@ -521,6 +528,7 @@ var bin_fn = {
 			onSelectRow: function(id){},
 			autoencode: true,
 			gridview: true,
+			rowNum: 1000,
  			sortname: 'referenceId',
 			viewrecords: true,
  			sortorder: 'desc',
@@ -632,6 +640,43 @@ var bin_fn = {
 		
 		$('.binProject2').hide();
 	},
+	exportList : function(obj) {
+    	var exportListId = '#' + $(obj).siblings("div").attr("id");
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        }else{
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function(target) {
+    	// download file
+        if (target === "report_sub") {
+        	bin_fn.downloadExcel();
+        } else {
+        	var identificationStatus = '${project.identificationStatus}';
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+    				if (e) {
+    					bin_fn.selectDownloadFileValidation();
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		bin_fn.selectDownloadFileValidation();
+        	}
+        }
+        // hide list
+        $("#binExportList").hide();
+    },
+    selectDownloadFileValidation : function() {
+    	if (com_fn.checkSelectDownloadFile('BIN')) {
+    		com_fn.downloadYaml('BIN');
+    	} else {
+    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+    	}
+    },
 	// 다운로드 엑셀
 	downloadExcel : function(){
 		$.ajax({

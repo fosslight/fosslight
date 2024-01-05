@@ -28,6 +28,7 @@
 			,T2.REFERENCE_ID
 			,CASE
 				WHEN T2.REFERENCE_DIV = '10' THEN '3rd' 
+				WHEN T2.REFERENCE_DIV = '16' THEN 'DEP' 
 				WHEN T2.REFERENCE_DIV = '11' THEN 'SRC' 
 				WHEN T2.REFERENCE_DIV = '12' THEN 'BAT' 
 				WHEN T2.REFERENCE_DIV = '15' THEN 'BIN' 
@@ -248,6 +249,14 @@
 		   AND T1.DEL_YN = 'N'
 	</select>
 	
+	<select id="selectVerificationVulDocFile" resultType="oss.fosslight.domain.File" parameterType="String">
+		SELECT T1.*
+			 , DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		  FROM T2_FILE T1
+		 WHERE T1.FILE_SEQ = #{packageVulDocFileId}
+		   AND T1.DEL_YN = 'N'
+	</select>
+	
 	<select id="selectPackageFileName" resultType="oss.fosslight.domain.T2File" parameterType="String">
 	SELECT
 		T2.*
@@ -332,6 +341,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(spdxYamlFileId)">
 				, SPDX_YAML_FILE_ID = #{spdxYamlFileId}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxJsonFileId)">
+				, CDX_JSON_FILE_ID = #{cdxJsonFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdxXmlFileId)">
+				, CDX_XML_FILE_ID = #{cdxXmlFileId}
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(zipFileId)">
 				, ZIP_FILE_ID = #{zipFileId}
 			</if>
@@ -357,6 +372,17 @@
 	     <if test="!@oss.fosslight.util.StringUtil@isEmpty(statusVerifyYn)">
 	     , STATUS_VERIFY_YN = #{statusVerifyYn} 
 	     </if>
+	 WHERE PRJ_ID = #{prjId}
+	</update>
+	
+	<update id="updatePackageVulDocFile" parameterType="oss.fosslight.domain.Project">
+	UPDATE PROJECT_MASTER 
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageVulDocFileId)">
+		SET PACKAGE_VUL_DOC_FILE_ID = #{packageVulDocFileId}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(packageVulDocFileId)">
+		SET PACKAGE_VUL_DOC_FILE_ID = null
+		</if>
 	 WHERE PRJ_ID = #{prjId}
 	</update>
 	
@@ -442,7 +468,8 @@
 		SELECT T2.OSS_ID, T2.OSS_NAME, T1.OSS_NICKNAME 
 		FROM OSS_NICKNAME T1 
 		INNER JOIN OSS_MASTER T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.USE_YN = 'Y'
-		WHERE OSS_NICKNAME = #{ossName}
+		WHERE T1.OSS_NICKNAME = #{ossName}
+		AND IFNULL(T2.OSS_VERSION, '') = IFNULL(#{ossVersion}, '')
 		ORDER BY T2.OSS_ID DESC
 		LIMIT 1
  	</select>

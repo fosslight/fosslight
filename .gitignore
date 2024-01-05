@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
+.uuid
 
 ### STS ###
 .apt_generated
@@ -39,3 +40,5 @@ out/
 /mail/maildata/
 /mail/maillogs/
 /mail/mailstate/
+
+/service/docx/license/*

@@ -61,6 +61,76 @@
 		</div>
 		<!---->
 	</div><!-- //end of edit mode -->
+	<div class="tbws1 w1025 mt10">
+		<table class="dCase">
+			<colgroup>
+				<col width="188" />
+				<col />
+			</colgroup>
+			<tbody>
+				<tr>
+					<th class="dCase"><spring:message code="msg.common.field.watcher" /></th>
+					<td class="dCase">
+						<div class="pb5">
+							<span class="selectSet w200">
+								<strong for="prjDivision" title="Watcher part selected value">Select Division</strong>
+								<select id="prjDivision" name="prjDivision" onchange="fn.selectDivision()">
+									<option value="">Select Division</option>
+										${ct:genOption(ct:getConstDef("CD_USER_DIVISION"))}
+								</select>
+							</span>
+							<span class="selectSet w500">
+								<strong for="prjUserId" title="Watcher name selected value">Select User</strong>
+								<select id="prjUserId" name="prjUserId">
+								</select>
+							</span>
+							<input id="addWatcher" type="button" value="+ Add" class="btnCLight gray" />
+						</div>
+						<div class="pb5">
+							<span><input type="text" id="adId" name="adId" style="width:200px" placeholder="Input AD ID" onKeypress="fn.CheckChar()" /></span>
+							<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
+							<c:set var="useDomainFlag" value="${ct:genOption(ct:getConstDef('CD_REGIST_DOMAIN'))}" />
+							<c:choose>
+								<c:when test="${not empty useDomainFlag}">
+									<span class="selectSet w220">
+										<strong for="domain" title="Watcher domain selected value">${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}</strong>
+										<select id="domain" name="domain">
+											${ct:genOption(ct:getConstDef("CD_REGIST_DOMAIN"))}
+										</select>
+									</span>
+									<input type="text" id="emailTemp" class="w220" <c:if test="${not empty useDomainFlag}">style="display:none;" value="${ct:getCodeExpString(ct:getConstDef('CD_REGIST_DOMAIN'), ct:getConstDef('CD_DTL_DEFAULT_DOMAIN'))}"</c:if> onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+								</c:when>
+								<c:otherwise>
+									<span class="pd5">@</span>
+									<input type="text" id="emailTemp" style="width:326px !important" value="" onKeypress="fn.CheckChar()"  placeholder="Input your Email Domain" />
+								</c:otherwise>
+							</c:choose>
+							<input id="addEmail" type="button" value="+ Add" class="btnCLight gray" />
+						</div>
+						<div class="pb5">
+							<span class="selectSet w200">
+								<strong for="listKind" title="selected value">Select List</strong>
+								<select id="listKind">
+									<option value="">Select List</option>
+									<option value="prj">Project List</option>
+									<c:if test="${partnerFlag}">
+										<option value="par">3rd Party List</option>
+									</c:if>
+									<c:if test="${batFlag}">
+										<option value="bat">BAT List</option>
+									</c:if>
+								</select>
+							</span>
+							<span><input type="text" id="listId" name="listId" style="width:500px" placeholder="Input ID you want to copy"/></span>
+							<input id="addList" type="button" value="+ Add" class="btnCLight gray" />
+						</div>
+						<div id="multiDiv" class="multiTxtSet2">
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 <c:if test="${not empty project.prjId}">
 	<div class="projdecTab">
 		<div class="subTab">
@@ -136,6 +206,7 @@
 						<input id="Export" type="button" value="Export" class="btnColor red btnExport" onclick="fn.exportList()"/>
 						<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" onclick="fn.selectDownloadFile()">
 							<a id="report_sub" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+							<a id="YAML" style="display: block;">FOSSLight Report (YAML)</a>
 							<a id="Spreadsheet_sub" style="display: block;">SPDX (Spreadsheet)</a>
 							<a id="RDF_sub" style="display: block;">SPDX (RDF)</a>
 							<a id="TAG_sub" style="display: block;">SPDX (TAG)</a>
@@ -144,7 +215,6 @@
 						</div>
 					</div>
 	                <input type="button" value="Bulk Edit" onclick="fn.bulkEdit()" class="btnColor red"/>
-	                <input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
 	                <input type="button" value="Check OSS Name" onclick="src_fn.CheckOssViewPage()" class="btnColor red btnExpor srcBtn" style="width: 115px;" />
 	                <input type="button" value="Check License" onclick="src_fn.CheckOssLicenseViewPage()" class="btnColor red btnExpor srcBtn" style="width: 100px;" />
 	                <input id="srcResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />

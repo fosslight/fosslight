@@ -222,7 +222,7 @@ public class NvdDataService {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	private Map<String, Object> nvdCveDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
+	public Map<String, Object> nvdCveDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
 		int totalResults = (int) rtnMap.get("totalResults");
 		String urlConnTimestamp = (String) rtnMap.get("timestamp");
 		String format = (String) rtnMap.get("format");
@@ -570,7 +570,7 @@ public class NvdDataService {
 
 	@SuppressWarnings("unchecked")
 	@Transactional
-	private Map<String, Object> nvdMetaDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
+	public Map<String, Object> nvdMetaDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
 		log.info("nvdMetaDataApiJob start");
 		
 		int totalResults = (int) rtnMap.get("totalResults");
@@ -934,7 +934,7 @@ public class NvdDataService {
 	}
 
 	@Transactional
-	private String nvdCveDataSyncJob(boolean restApiFlag) throws JsonParseException, JsonMappingException, IOException {
+	public String nvdCveDataSyncJob(boolean restApiFlag) throws JsonParseException, JsonMappingException, IOException {
 		String resCd = "00";
 		log.info("Start CVE Data Sync Job");
 //		// 1. Wait Job 데이터 조회

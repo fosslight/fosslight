@@ -32,6 +32,8 @@ $(document).ready(function(){
 // SRC 이벤트
 var binAndroid_evt = {
 	init: function(){
+		if ($(".androidCsvFileArea").find('li').length > 0) $("#applyBtn").hide();
+		
 		$("#binAndroidList").jqGrid('GridUnload');
 
 		doNotUseAutoLoadingFlag = "Y"; // loading is not displayed, so loading operation manually occurs.
@@ -666,6 +668,7 @@ var binAndroid_fn = {
 		
 		// csv파일 업로드
 		if($('.androidCsvFileArea').find('li').length == 0) {
+			$('#applyBtn').show();
 			$('#androidCsvFile').show();
 		} else {
 			$('#androidCsvFile').hide();
@@ -887,6 +890,8 @@ var binAndroid_fn = {
 							alertify.alert(data.resultData.changehisLicenseName, function(){});
 						}
 					}
+					
+					if($('.androidCsvFileArea').find('li').length > 0) $('#applyBtn').hide();
 				}
 			},
 			error: function(data){

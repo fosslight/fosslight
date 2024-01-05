@@ -122,6 +122,12 @@ public class Project extends ComBean implements Serializable {
 	/** The allow download SPDX yaml yn. */
 	private String allowDownloadSPDXYamlYn;
 
+	/** The allow download CycloneDX json yn. */
+	private String allowDownloadCDXJsonYn;
+	
+	/** The allow download CycloneDX xml yn. */
+	private String allowDownloadCDXXmlYn;
+	
 	/** The identification status. */
 	private String identificationStatus;
 	
@@ -136,6 +142,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The identification sub status partner. */
 	private String identificationSubStatusPartner;
+	
+	/** The identification sub status dep. */
+	private String identificationSubStatusDep;
 	
 	/** The identification sub status src. */
 	private String identificationSubStatusSrc;
@@ -329,16 +338,12 @@ public class Project extends ComBean implements Serializable {
 	
 	private String ossNameMergeFlag;
 	
+	private String depCsvFileFlag = "N";
 	private String srcCsvFileFlag = "N";
-	
 	private String binCsvFileFlag = "N";
-	
 	private String binBinaryFileFlag = "N";
-	
 	private String srcAndroidCsvFileFlag = "N";
-	
 	private String srcAndroidNoticeFileFlag = "N";
-
 	private String srcAndroidNoticeXmlFileFlag = "N";
 	private String srcAndroidResultFileFlag = "N";
 	
@@ -351,6 +356,14 @@ public class Project extends ComBean implements Serializable {
 	private int statusPermission;
 	
 	private String secCode;
+	
+	private String vulDocInst;
+	private String vulDocInfo;
+	
+	private Float standardScore;
+	private String copyWatcherLocation;
+	/** add watcher list. */
+	private ArrayList<Map<String, String>> changeWatcherList;
 	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -374,6 +387,9 @@ public class Project extends ComBean implements Serializable {
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
 
+	/** The bin csv file id. */
+	private String depCsvFileId;
+	
 	/** The src csv file id. */
 	// FILE_ID
 	private String srcCsvFileId;
@@ -406,6 +422,7 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId; // 오픈소스 파일ID
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
+	private String packageVulDocFileId;
 	
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
@@ -417,6 +434,9 @@ public class Project extends ComBean implements Serializable {
 	private List<T2File> packageFile; // 오픈소스 파일객체
 	private List<T2File> packageFile2; // 오픈소스 파일객체
 	private List<T2File> packageFile3; // 오픈소스 파일객체
+	
+	/** The dep csv file. */
+	private List<T2File> depCsvFile; // csv 파일 객체
 	
 	/** The csv file. */
 	private List<T2File> csvFile; // csv 파일 객체
@@ -446,6 +466,7 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo; // 오픈소스 파일객체
 	private T2File packageFileInfo2; // 오픈소스 파일객체
 	private T2File packageFileInfo3; // 오픈소스 파일객체
+	private T2File packageVulDocFileInfo;
 	
 	/** The notice text file id. */
 	private String noticeTextFileId;
@@ -678,6 +699,13 @@ public class Project extends ComBean implements Serializable {
 	private String changeStatusFlag;
 
 	private String ossNameTemp;
+	
+	private String dependencies;
+	
+	/** The cyclonedx file id. */
+	private String cdxJsonFileId;
+	private String cdxXmlFileId;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -1325,6 +1353,14 @@ public class Project extends ComBean implements Serializable {
 		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
+	public void setWatchers(String watcher) {
+		if (!isEmpty(watcher)) {
+			this.watchers = new String[] {watcher};
+		} else {
+			this.watchers = null;
+		}
+	}
+	
 	/**
 	 * Gets the watcher list.
 	 *
@@ -4255,5 +4291,133 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSecCode(String secCode) {
 		this.secCode = secCode;
+	}
+
+	public String getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public String getIdentificationSubStatusDep() {
+		return identificationSubStatusDep;
+	}
+
+	public void setIdentificationSubStatusDep(String identificationSubStatusDep) {
+		this.identificationSubStatusDep = identificationSubStatusDep;
+	}
+
+	public String getDepCsvFileId() {
+		return depCsvFileId;
+	}
+
+	public void setDepCsvFileId(String depCsvFileId) {
+		this.depCsvFileId = depCsvFileId;
+	}
+
+	public List<T2File> getDepCsvFile() {
+		return depCsvFile;
+	}
+
+	public void setDepCsvFile(List<T2File> depCsvFile) {
+		this.depCsvFile = depCsvFile;
+	}
+
+	public String getDepCsvFileFlag() {
+		return depCsvFileFlag;
+	}
+
+	public void setDepCsvFileFlag(String depCsvFileFlag) {
+		this.depCsvFileFlag = depCsvFileFlag;
+	}
+
+	public String getAllowDownloadCDXJsonYn() {
+		return allowDownloadCDXJsonYn;
+	}
+
+	public void setAllowDownloadCDXJsonYn(String allowDownloadCDXJsonYn) {
+		this.allowDownloadCDXJsonYn = allowDownloadCDXJsonYn;
+	}
+
+	public String getAllowDownloadCDXXmlYn() {
+		return allowDownloadCDXXmlYn;
+	}
+
+	public void setAllowDownloadCDXXmlYn(String allowDownloadCDXXmlYn) {
+		this.allowDownloadCDXXmlYn = allowDownloadCDXXmlYn;
+	}
+
+	public String getCdxJsonFileId() {
+		return cdxJsonFileId;
+	}
+
+	public void setCdxJsonFileId(String cdxJsonFileId) {
+		this.cdxJsonFileId = cdxJsonFileId;
+	}
+
+	public String getCdxXmlFileId() {
+		return cdxXmlFileId;
+	}
+
+	public void setCdxXmlFileId(String cdxXmlFileId) {
+		this.cdxXmlFileId = cdxXmlFileId;
+	}
+
+	public String getVulDocInst() {
+		return vulDocInst;
+	}
+
+	public void setVulDocInst(String vulDocInst) {
+		this.vulDocInst = vulDocInst;
+	}
+
+	public String getPackageVulDocFileId() {
+		return packageVulDocFileId;
+	}
+
+	public void setPackageVulDocFileId(String packageVulDocFileId) {
+		this.packageVulDocFileId = packageVulDocFileId;
+	}
+
+	public String getVulDocInfo() {
+		return vulDocInfo;
+	}
+
+	public void setVulDocInfo(String vulDocInfo) {
+		this.vulDocInfo = vulDocInfo;
+	}
+
+	public T2File getPackageVulDocFileInfo() {
+		return packageVulDocFileInfo;
+	}
+
+	public void setPackageVulDocFileInfo(T2File packageVulDocFileInfo) {
+		this.packageVulDocFileInfo = packageVulDocFileInfo;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
+	}
+
+	public String getCopyWatcherLocation() {
+		return copyWatcherLocation;
+	}
+
+	public void setCopyWatcherLocation(String copyWatcherLocation) {
+		this.copyWatcherLocation = copyWatcherLocation;
+	}
+
+	public ArrayList<Map<String, String>> getChangeWatcherList() {
+		return changeWatcherList;
+	}
+
+	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
+		this.changeWatcherList = changeWatcherList;
 	}
 }

@@ -1,6 +1,11 @@
 package oss.fosslight.util;
 
+import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
+import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
+import com.itextpdf.io.font.FontProgram;
+import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.layout.font.FontProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -9,17 +14,12 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.*;
-import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.repository.LicenseMapper;
-import oss.fosslight.repository.OssMapper;
-import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.domain.File;
+import oss.fosslight.repository.*;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VulnerabilityService;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,7 +30,7 @@ import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
 public final class PdfUtil extends CoTopComponent {
 
     private static PdfUtil instance;
-
+    private static VerificationMapper verificationMapper;
     private static LicenseMapper licenseMapper;
     private static OssMapper ossMapper;
     private static VulnerabilityService vulnerabilityService;
@@ -47,16 +47,26 @@ public final class PdfUtil extends CoTopComponent {
             vulnerabilityService = (VulnerabilityService) getWebappContext().getBean(VulnerabilityService.class);
             codeMapper = (CodeMapper) getWebappContext().getBean(CodeMapper.class);
             projectMapper = (ProjectMapper) getWebappContext().getBean(ProjectMapper.class);
+            verificationMapper = (VerificationMapper) getWebappContext().getBean(VerificationMapper.class);
         }
         return instance;
     }
-    public static ByteArrayInputStream html2pdf(String html) {
+    public static ByteArrayInputStream html2pdf(String html) throws IOException {
+        String font = "src/main/resources/static/NanumGothicBold.ttf";
+
+        ConverterProperties properties = new ConverterProperties();
+        FontProvider fontProvider = new DefaultFontProvider(false,false,false);
+        FontProgram fontProgram = FontProgramFactory.createFont(font);
+        fontProvider.addFont(fontProgram);
+        properties.setFontProvider(fontProvider);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HtmlConverter.convertToPdf(html, outputStream);
+        HtmlConverter.convertToPdf(html, outputStream, properties);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
         return inputStream;
     }
-    public String getReviewReportHtml(String prjId){
+    public String getReviewReportHtml(String prjId) throws Exception
+    {
         Map<String,Object> convertData = new HashMap<>();
         List<OssMaster> ossReview = new ArrayList<>();
         List<LicenseMaster> licenseReview = new ArrayList<>();
@@ -92,19 +102,20 @@ public final class PdfUtil extends CoTopComponent {
             }
 
             //VulnerabilityReview
-            List<Map<String, Object>> _list = vulnerabilityService.selectMaxScoreNvdInfo(oss.getOssName(), oss.getOssVersion());
-            for (Map<String, Object> m : _list) {
-                BigDecimal bdScore = new BigDecimal(Float.toString((Float) m.get("cvssScore")));
+            projectIdentification.setOssName(oss.getOssName());
+            projectIdentification.setOssVersion(oss.getOssVersion());
+            ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
+            if(prjOssMaster.getCvssScore()!=null) {
+                BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
 
-                if (bdScore.compareTo(new BigDecimal("8.0")) < 0) {
-                    continue;
+                if (bdScore.compareTo(new BigDecimal("8.0")) >= 0) {
+                    Vulnerability vulnerability = new Vulnerability();
+                    vulnerability.setOssName(oss.getOssName());
+                    vulnerability.setVersion(oss.getOssVersion());
+                    vulnerability.setCvssScore(prjOssMaster.getCvssScore());
+                    vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                    vulnerabilityReview.add(vulnerability);
                 }
-                Vulnerability vulnerability = new Vulnerability();
-                vulnerability.setOssName(oss.getOssName());
-                vulnerability.setVersion(oss.getOssVersion());
-                vulnerability.setCvssScore(Float.toString((Float) m.get("cvssScore")));
-                vulnerability.setVulnerabilityLink((String) m.get("vulnerabilityLink"));
-                vulnerabilityReview.add(vulnerability);
             }
 
             //LisenseReview
@@ -165,6 +176,7 @@ public final class PdfUtil extends CoTopComponent {
         props.put("resource.loader", "class");
         props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
         props.put("input.encoding", "UTF-8");
+        props.put("output.encoding", "UTF-8");
 
         vf.init(props);
 
@@ -177,5 +189,36 @@ public final class PdfUtil extends CoTopComponent {
             log.error("Exception occured while processing velocity template:" + e.getMessage());
         }
         return "";
+    }
+
+    public Map<String,Object> getPdfFilePath(String prjId) throws Exception{
+        Map<String,Object> fileInfo = new HashMap<>();
+        String fileName = "";
+        String filePath = CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+        project = projectMapper.selectProjectMaster(project);
+
+        oss.fosslight.domain.File pdfFile = null;
+
+        if(!isEmpty(project.getZipFileId())) {
+            pdfFile = verificationMapper.selectVerificationFile(project.getZipFileId());
+            fileName =  pdfFile.getOrigNm();
+            filePath += java.io.File.separator + fileName;
+        } else {
+            pdfFile = verificationMapper.selectVerificationFile(project.getReviewReportFileId());
+            fileName =  pdfFile.getOrigNm();
+            filePath += java.io.File.separator + prjId + java.io.File.separator + fileName;
+        }
+
+        // Check File Exist
+        java.io.File file = new java.io.File(filePath);
+        if(!file.exists()){
+            throw new Exception("Don't Exist PDF");
+        }
+        fileInfo.put("fileName",fileName);
+        fileInfo.put("filePath",filePath);
+        return  fileInfo;
     }
 }

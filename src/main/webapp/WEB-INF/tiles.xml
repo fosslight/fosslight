@@ -13,6 +13,7 @@
 	<definition name="tiles/layout/iframe" 	template="/WEB-INF/views/template/layout/admin/iframe.jsp" />
 	<definition name="tiles/layout/identification" 	template="/WEB-INF/views/template/layout/admin/identification.jsp" />
 	<definition name="tiles/layout/partner" 	template="/WEB-INF/views/template/layout/admin/partner.jsp" />
+	<definition name="tiles/layout/security" 	template="/WEB-INF/views/template/layout/admin/security.jsp" />
 	
 	<definition name="tiles/admin/*/*/*/*/*" extends="tiles/layout/iframe">
 		<put-attribute name="meta" 				value="/WEB-INF/views/template/layout/admin/meta.jsp" />
@@ -49,18 +50,29 @@
 	<!-- Login Page -->
     <definition name="tiles/session/login"    template="/WEB-INF/views/session/login.jsp">
         <put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
-        <put-attribute name="header"            value="/WEB-INF/views/template/layout/admin/header.jsp" />
+		<put-attribute name="scripts" 			value="/WEB-INF/views/template/layout/admin/scripts.jsp" />
     </definition>
     <!-- identification -->
    	<definition name="tiles/admin/project/identification" extends="tiles/layout/identification" >
 	 	<put-attribute name="scripts" 				value="/WEB-INF/views/template/layout/admin/scripts_ifr4.7.jsp" />
 	 	<put-attribute name="common-js" 			value="/WEB-INF/views/admin/project/common-js.jsp" />
 	 	<put-attribute name="3rd-js" 				value="/WEB-INF/views/admin/project/3rd-js.jsp" />
+	 	<put-attribute name="dep-js" 				value="/WEB-INF/views/admin/project/dep-js.jsp" />
 	 	<put-attribute name="src-js" 				value="/WEB-INF/views/admin/project/src-js.jsp" />
 	 	<put-attribute name="bin-js" 				value="/WEB-INF/views/admin/project/bin-js.jsp" />
 	 	<put-attribute name="binAndroid-js" 		value="/WEB-INF/views/admin/project/binAndroid-js.jsp" />
 	 	<put-attribute name="bom-js" 				value="/WEB-INF/views/admin/project/bom-js.jsp" />
 	 	<put-attribute name="tabs" 					value="/WEB-INF/views/admin/project/identification.jsp"/>
+	</definition>
+	
+	<!-- security -->
+   	<definition name="tiles/admin/project/security" extends="tiles/layout/security" >
+	 	<put-attribute name="scripts" 				value="/WEB-INF/views/template/layout/admin/scripts_ifr4.7.jsp" />
+	 	<put-attribute name="secCommon-js" 			value="/WEB-INF/views/admin/project/secCommon-js.jsp" />
+	 	<put-attribute name="secTotal-js" 			value="/WEB-INF/views/admin/project/secTotal-js.jsp" />
+	 	<put-attribute name="secFixed-js" 			value="/WEB-INF/views/admin/project/secFixed-js.jsp" />
+	 	<put-attribute name="secNotFixed-js" 		value="/WEB-INF/views/admin/project/secNotFixed-js.jsp" />
+	 	<put-attribute name="tabs" 					value="/WEB-INF/views/admin/project/security.jsp"/>
 	</definition>
 	
     <!-- partner -->
@@ -146,6 +158,10 @@
 		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
 	</definition>
     <definition name="tiles/admin/oss/ossBulkEditPopup" 	template="/WEB-INF/views/admin/oss/ossBulkEditPopup.jsp">
+		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
+		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
+	</definition>
+	<definition name="tiles/admin/project/secBulkEditPopup" 	template="/WEB-INF/views/admin/project/secBulkEditPopup.jsp">
 		<put-attribute name="meta"              value="/WEB-INF/views/template/layout/admin/meta.jsp" />
 		<put-attribute name="scripts"           value="/WEB-INF/views/template/layout/admin/scripts_popup4.7.jsp" />
 	</definition>

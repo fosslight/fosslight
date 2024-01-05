@@ -18,8 +18,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -42,6 +45,7 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.StringUtil;
 
 /**
@@ -357,6 +361,13 @@ public class CoMailManager extends CoTopComponent {
     			if (bean.getCompareDataBefore() != null || bean.getCompareDataAfter() != null) {
     				convertModifiedData(convertDataMap, bean.getMsgType());
     			}
+    			
+    			// when modifying/registering oss, if there is a version diff, license information by version is output
+				if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())) {
+					convertDataMap.put("versionDiffInfoList", bean.getParamList());
+				}
     			
     			// 17.08.02 sw-yun 22번 메일은 더이상 사용하지 않고, 21번 메일에 포함
     			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
@@ -1024,6 +1035,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED:
+    		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED:
@@ -1110,7 +1122,8 @@ public class CoMailManager extends CoTopComponent {
         			// to list ------------------------------------------------------------
         			
         			// reviewer
-    				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())) {
+    				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())) {
     					if (bean.getToIds() != null && bean.getToIds().length > 0) {
     						toList.addAll(Arrays.asList(selectMailAddrFromIds(bean.getToIds())));
     					} else if (!isEmpty(partnerInfo.getReviewer())) {
@@ -1148,13 +1161,15 @@ public class CoMailManager extends CoTopComponent {
 
     				// Creator, Watcher
     				if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_REQ_REVIEW.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_WATCHER_REGISTED.equals(bean.getMsgType())
     						) {
     					ccList.addAll(mailManagerMapper.setPartnerWatcherMailList(bean.getParamPartnerId()));
-    					if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())) {
+    					if (CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED.equals(bean.getMsgType())
+    							|| CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED.equals(bean.getMsgType())) {
     						ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{bean.getLoginUserName()})));
     					}
     				} 
@@ -1666,7 +1681,13 @@ public class CoMailManager extends CoTopComponent {
 				title = StringUtil.replace(title, "${Creator}", _s2);
 			}
 			
-			if (title.indexOf("${Reviewer}") > -1) {
+			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") > -1) {
+				String[] toIds = bean.getToIds();
+				title = StringUtil.replace(title, "${Reviewer}", avoidNull(makeUserNameFormat(toIds[0])));
+				title = StringUtil.replace(title, "${ReviewerTo}", avoidNull(makeUserNameFormat(toIds[1])));
+			}
+			
+			if (title.indexOf("${Reviewer}") > -1 && title.indexOf("${ReviewerTo}") == -1) {
 				title = StringUtil.replace(title, "${Reviewer}", _s3);
 			}
 			
@@ -3430,7 +3451,22 @@ public class CoMailManager extends CoTopComponent {
 			helper.setBcc(coMail.getBccIds() != null ? coMail.getBccIds() : new String[]{});
 			helper.setSubject(coMail.getEmlTitle());
 			helper.setText(coMail.getEmlMessage(), true);
-			
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())){
+				try {
+					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
+					String fileName = (String) fileInfo.get("fileName");
+					String filePath = (String) fileInfo.get("filePath");
+					log.debug("filepath: " + fileInfo.get("filePath"));
+					DataSource dataSource = new FileDataSource(filePath);
+					helper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"), dataSource);
+				}catch(Exception e){
+					// Don't Exist Pdf
+					log.debug(e.getMessage(), e);
+				}
+			}
+
 			// Email Send
 			mailSender.send(message);
 			// Email History Status Update

@@ -397,6 +397,7 @@
                 		<input type="button" value="Export" class="btnColor red btnExport" onclick="fn.exportList(this)"/>
                 		<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
 							<a onclick="fn.selectDownloadFile('report_sub')" style="display: block;">FOSSLight Report (Spreadsheet)</a>
+							<a onclick="fn.selectDownloadFile('YAML')" style="display: block;">FOSSLight Report (YAML)</a>
 							<a onclick="fn.selectDownloadFile('Spreadsheet_sub')" style="display: block;">SPDX (Spreadsheet)</a>
 							<a onclick="fn.selectDownloadFile('RDF_sub')" style="display: block;">SPDX (RDF)</a>
 							<a onclick="fn.selectDownloadFile('TAG_sub')" style="display: block;">SPDX (TAG)</a>
@@ -404,7 +405,6 @@
 							<a onclick="fn.selectDownloadFile('YAML_sub')" style="display: block;">SPDX (YAML)</a>
 						</div>
                     </div>
-					<input type="button" value="Yaml" class="btnColor red btnExport" onclick="fn.downloadYaml()"/>
                 </c:if>
                 <c:if test="${detail.status ne 'REQ' and detail.status ne 'CONF' and  (detail.loginUserRole eq 'ROLE_ADMIN'  or (detail.loginUserRole ne 'ROLE_ADMIN' and detail.status ne 'REV')) and detail.viewOnlyFlag ne 'Y'}">
                     <input type="button" value="Check OSS Name" onclick="fn.CheckOssViewPage('PARTNER')" class="btnColor red srcBtn" style="width: 115px;" />

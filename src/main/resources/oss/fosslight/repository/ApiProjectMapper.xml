@@ -92,6 +92,9 @@
 		     , A.NOTICE_TYPE_ETC AS NOTICE_PLATFORM
 		     , A.PRIORITY
 		     , A.STATUS
+		     , A.SRC_CSV_FILE_ID
+			 , A.BIN_CSV_FILE_ID
+			 , A.BIN_BINARY_FILE_ID
 		  FROM (
 			SELECT T1.PRJ_ID
 				 , T1.PRJ_NAME
@@ -114,6 +117,9 @@
 				 , IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
 				 , IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
 				 , T1.DISTRIBUTION_TYPE
+				 , T1.SRC_CSV_FILE_ID
+				 , T1.BIN_CSV_FILE_ID
+				 , T1.BIN_BINARY_FILE_ID
 				 , T3.CD_DTL_NM
 				 , T3.CD_DTL_NO
                  , IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
@@ -345,7 +351,7 @@
 			, #{osType}
 			, #{osTypeEtc}
 			, #{distributionSite}
-			, ''
+			, #{comment}
 			, #{loginUserName}
 			, #{loginUserName}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
@@ -413,7 +419,7 @@
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
 					ELSE 99 
 				 END AS MERGE_ORDER 
-			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, RTN.COPYRIGHT AS COPYRIGHT_TEXT
+			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT
 			 , RTN.CVSS_SCORE_MAX
 			 , RTN.CVSS_SCORE_MAX1
 			 , RTN.CVSS_SCORE_MAX2
@@ -904,6 +910,7 @@
 	        , A.DISTRIBUTE_OSD_KEY
 			
 			/** FILE_ID **/
+			, A.DEP_CSV_FILE_ID
 			, A.SRC_CSV_FILE_ID
 			, A.SRC_ANDROID_CSV_FILE_ID
 			, A.SRC_ANDROID_NOTICE_FILE_ID
@@ -1046,7 +1053,7 @@
 					ELSE 99 END AS mergeOrder, 
 			RTN.LICENSE_ID as licenseId, 
 			RTN.LICENSE_NAME as licenseName, 
-			RTN.COPYRIGHT AS copyrightText, 
+			GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS copyrightText,
 			RTN.LICENSE_TYPE_IDX as licenseTypeIdx, 
 			RTN.CVSS_SCORE_MAX as cvssScoreMax,
 			RTN.CVSS_SCORE_MAX1 as cvssScoreMax1,
@@ -1194,5 +1201,36 @@
 			VERIFY_FILE_CONTENT = #{verifyFileContent}
 		WHERE
 			PRJ_ID	= #{prjId}
+	</update>
+	
+	<select id="existsWatcherByEmail" parameterType="string" resultType="int">
+		SELECT COUNT(1) 
+		FROM PROJECT_WATCHER WAT
+		LEFT JOIN T2_USERS USR
+		ON WAT.USER_ID = USR.USER_ID
+		AND USR.USE_YN = 'Y'
+		WHERE WAT.PRJ_ID = #{prjId}
+		AND (WAT.EMAIL = #{email} OR USR.EMAIL = #{email})
+	</select>
+	
+	<insert id="insertWatcher" parameterType="hashMap">
+		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
+	</insert>
+	
+	<update id="updateProjectSubStatus" parameterType="hashMap">
+		UPDATE 
+			PROJECT_MASTER
+		SET 
+			<if test='identificationSubStatusPartner != null'>
+			IDENTIFICATION_SUB_STATUS_PARTNER = #{identificationSubStatusPartner}
+			</if>
+			<if test='identificationSubStatusSrc != null'>
+			IDENTIFICATION_SUB_STATUS_SRC = #{identificationSubStatusSrc}
+			</if>
+			<if test='identificationSubStatusBin != null'>
+			IDENTIFICATION_SUB_STATUS_BIN = #{identificationSubStatusBin}
+			</if>
+		WHERE
+			PRJ_ID = #{prjId}
 	</update>
 </mapper>

@@ -55,7 +55,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification);
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList);
 	
 	public void checkProjectReviewer(Project project);
 	
@@ -156,6 +156,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	List<ProjectIdentification> setMergeGridData(List<ProjectIdentification> gridData);
 	
+	List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData);
+	
 	String checkValidData(Map<String, Object> map);
 	
 	String makeNoticeFileContents(Map<String, Object> paramMap);
@@ -203,6 +205,12 @@ public interface ProjectService extends HistoryConfig{
 	public boolean checkReqEntrySecurity(Project project, String tabMenu);
 
 	public void copySecurityDataForProject(Project project);
+	
+	public Map<String, Object> checkSelectDownloadFile(Project project);
+
+	public List<OssComponents> getDependenciesDataList(Project project);
+
+	void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
 }
 
 

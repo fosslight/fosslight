@@ -27,7 +27,7 @@
 						UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName})
 					</when>
 					<otherwise>
-						UPPER(T1.LICENSE_NAME) = UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+						UPPER(T1.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
 					</otherwise>
 				 </choose>
 				OR 
@@ -748,4 +748,15 @@
 	<delete id="deleteLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
 		DELETE FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
 	</delete>
+	
+	<update id="updateLicenseMasterForRestriction" parameterType="oss.fosslight.domain.LicenseMaster">
+		UPDATE LICENSE_MASTER 
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			SET RESTRICTION = #{restriction} 
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			SET RESTRICTION = null
+		</if>
+		WHERE LICENSE_ID = #{licenseId}
+	</update>
 </mapper>

@@ -4,6 +4,7 @@
 <tiles:insertAttribute name="common-js" />
 <c:if test="${project.androidFlag eq 'N'}">
 	<tiles:insertAttribute name="3rd-js" />
+	<tiles:insertAttribute name="dep-js" />
 	<tiles:insertAttribute name="src-js" />
 	<tiles:insertAttribute name="bin-js" />
 	<tiles:insertAttribute name="bom-js" />

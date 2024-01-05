@@ -11,6 +11,13 @@ var objs = [];
 var licenseNames = [];
 //2018-08-10 choye 추가
 var srcData;
+
+$(document).click(function(e){
+	if(!$("#srcExportContainer").has(e.target).length) {
+		$("#srcExportList").hide();
+	}
+});
+
 // SRC 이벤트
 var src_evt = {
 	csvDelFileSeq : [],
@@ -196,6 +203,7 @@ var src_evt = {
 var srcMainData;
 var srcValidMsgData;
 var srcDiffMsgData;
+var srcInfoMsgData;
 
 // SRC 함수
 var src_fn = {
@@ -229,6 +237,10 @@ var src_fn = {
 					srcDiffMsgData = data.diffData;
 				}
 				
+				if(data.infoData) {
+					srcInfoMsgData = data.infoData;
+				}
+				
 				// 리로드 대신 그리드 삭제 후 다시 그리기
 				$("#srcList").jqGrid('GridUnload');
 				src_grid.load();
@@ -236,7 +248,7 @@ var src_fn = {
 				// totla record 표시
 				$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
 				
-				fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+				fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 			},
 			error : function(){
 				alertify.error('<spring:message code="msg.common.valid2" />', 0);
@@ -442,6 +454,7 @@ var src_fn = {
 			onSelectRow: function(id){},
 			autoencode: true,
 			gridview: true,
+			rowNum: 1000,
  			sortname: 'referenceId',
 			viewrecords: true,
  			sortorder: 'desc',
@@ -541,6 +554,43 @@ var src_fn = {
 		src_fn.getSrcGridData(param, type);
 		$('.srcProject2').hide();
 	},
+	exportList : function(obj) {
+    	var exportListId = '#' + $(obj).siblings("div").attr("id");
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        }else{
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function(target) {
+    	// download file
+        if (target === "report_sub") {
+        	src_fn.downloadExcel();
+        } else {
+        	var identificationStatus = '${project.identificationStatus}';
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm('<spring:message code="msg.common.check.sbom.export" />', function (e) {
+    				if (e) {
+    					src_fn.selectDownloadFileValidation();
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		src_fn.selectDownloadFileValidation();
+        	}
+        }
+        // hide list
+        $("#srcExportList").hide();
+    },
+    selectDownloadFileValidation : function() {
+    	if (com_fn.checkSelectDownloadFile('SRC')) {
+    		com_fn.downloadYaml('SRC');
+    	} else {
+    		alertify.error('<spring:message code="msg.common.check.sbom.export2" />', 0);
+    	}
+    },
 	// 다운로드 엑셀
 	downloadExcel : function(){
 		$.ajax({
@@ -829,7 +879,7 @@ var src_grid = {
 											var rowid = (e.id).split('_')[0];
 											
 											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'srcList');
-											fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+											fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 										}
 									
 									}).dblclick(function(){
@@ -855,7 +905,7 @@ var src_grid = {
 								$(e).on( "autocompletechange", function() {
 									var rowid = (e.id).split('_')[0];
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 								});
 							}
 					}
@@ -933,7 +983,7 @@ var src_grid = {
 									
 									$('#'+rowid+'_licenseName').val("");
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 								}).on("keypress", function(evt){
 									if(evt.keyCode == 13){
 										var rowid = (e.id).split('_')[0];
@@ -980,7 +1030,7 @@ var src_grid = {
 										
 										$('#'+rowid+'_licenseName').val("");
 
-										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 									}
 								});
 							}
@@ -999,7 +1049,7 @@ var src_grid = {
 									$("#"+rowid+"_downloadLocation").val(value);
 								}
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 							}).on("blur", function() {
 								var value = e.value;
 								
@@ -1026,7 +1076,7 @@ var src_grid = {
 										$("#"+rowid+"_homepage").val(value);
 									}
 									
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 								}).on("blur", function() {
 									var value = e.value;
 									
@@ -1046,7 +1096,7 @@ var src_grid = {
 							$(e).on("change", function() {
 								var rowid = (e.id).split('_')[0];
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 							});
 						}
 					}
@@ -1060,7 +1110,7 @@ var src_grid = {
 								$(e).on("change", function() {
 									var rowid = (e.id).split('_')[0];
 
-									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 								});
 							}
 					}	
@@ -1072,7 +1122,7 @@ var src_grid = {
 							$(e).on("change", function() {
 								var rowid = (e.id).split('_')[0];
 
-								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData,srcInfoMsgData);
 							});
 						}
 					}
@@ -1162,14 +1212,14 @@ var src_grid = {
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				if(iCol=="3") {
-					fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+					fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				// 체크 박스 영역 제외
 				cleanErrMsg("srcList", rowid);
 
-				fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+				fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 
 				// 서브 그리드 제외
 				ondblClickRowBln = false;
@@ -1207,6 +1257,10 @@ var src_grid = {
 				
 				if(srcDiffMsgData) {
 					gridDiffMsg(srcDiffMsgData, "srcList");
+				}
+				
+				if(srcInfoMsgData) {
+					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
 			},
 			removeHighLight : true

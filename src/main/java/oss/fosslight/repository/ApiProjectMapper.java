@@ -85,4 +85,10 @@ public interface ApiProjectMapper {
 	void updateReadmeContent(Map<String, Object> project);
 
 	void updateVerifyContents(Map<String, Object> project);
+
+	int existsWatcherByEmail(@Param("prjId") String prjId, @Param("email") String email);
+
+	void insertWatcher(Map<String, Object> paramMap);
+
+	void updateProjectSubStatus(Map<String, Object> param);
 }

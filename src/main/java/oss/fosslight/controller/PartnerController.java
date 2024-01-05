@@ -381,9 +381,11 @@ public class PartnerController extends CoTopComponent{
 			, HttpServletResponse res
 			, Model model) throws Exception{
 		PartnerMaster orgPartnerMaster = null;
+		boolean reviewerEmptyFlag = false;
 		
 		if (!isEmpty(vo.getReviewer())) {
 			orgPartnerMaster = partnerService.getPartnerMasterOne(vo);
+			if (isEmpty(orgPartnerMaster.getReviewer())) reviewerEmptyFlag = true;
 		}
 		
 		int result = partnerService.updateReviewer(vo);
@@ -399,9 +401,13 @@ public class PartnerController extends CoTopComponent{
 		try {
 			if (orgPartnerMaster != null) {
 				if (orgPartnerMaster != null && !vo.getReviewer().equals(orgPartnerMaster.getReviewer())) {
-					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED);
+					CoMail mailBean = reviewerEmptyFlag ? new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED) : new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED);
 					mailBean.setParamPartnerId(vo.getPartnerId());
-					mailBean.setToIds(new String[]{vo.getReviewer()});
+					if (reviewerEmptyFlag) {
+						mailBean.setToIds(new String[]{vo.getReviewer()});
+					} else {
+						mailBean.setToIds(new String[]{orgPartnerMaster.getReviewer(), vo.getReviewer()});
+					}
 					CoMailManager.getInstance().sendMail(mailBean);
 				}
 			}
@@ -759,6 +765,52 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(resultMap);
 	}
 	
+	@PostMapping(value = PARTNER.ADD_WATCHERS)
+	public @ResponseBody ResponseEntity<Object> addWatchers(@RequestBody PartnerMaster project,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		try {
+			// addWatcher로 email을 등록할 경우 ldap search로 존재하는 사용자의 email인지 check가 필요함.
+			String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
+			PartnerMaster param = new PartnerMaster();
+			
+			for (Map<String, String> changeWatcher : project.getChangeWatcherList()) {
+				String parEmail = changeWatcher.get("parEmail");
+				
+				if (CoConstDef.FLAG_YES.equals(ldapFlag) && !isEmpty(parEmail)) {
+					Map<String, String> userInfo = new HashMap<>();
+					userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
+					userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
+					
+					boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", parEmail);
+					
+					if (!isAuthenticated) {
+						throw new Exception("add Watcher Failure");
+					}
+				}
+				
+				param.setParUserId(changeWatcher.get("parUserId"));
+				param.setParDivision(changeWatcher.get("parDivision"));
+				param.setParEmail(parEmail);
+				
+				for (String partnerId : project.getPartnerIds()) {
+					if (!isEmpty(param.getParUserId()) || !isEmpty(param.getParEmail())) {
+						param.setPartnerId(partnerId);
+						partnerService.addWatcher(param);
+					}
+				}
+			}
+			
+			resultMap.put("isValid", "true");
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, null);
+		}
+		
+		return makeJsonResponseHeader(resultMap);
+	}
+	
 	@PostMapping(value = PARTNER.REMOVE_WATCHER)
 	public @ResponseBody ResponseEntity<Object> removeWatcher(@RequestBody PartnerMaster project,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
@@ -767,6 +819,34 @@ public class PartnerController extends CoTopComponent{
 				partnerService.removeWatcher(project);
 			} else {
 				return makeJsonResponseHeader(false, null);
+			}
+		} catch (Exception e) {
+			return makeJsonResponseHeader(false, null);
+		}
+		
+		return makeJsonResponseHeader();
+	}
+	
+	@PostMapping(value = PARTNER.REMOVE_WATCHERS)
+	public @ResponseBody ResponseEntity<Object> removeWatchers(@RequestBody PartnerMaster project,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		try {
+			PartnerMaster param = new PartnerMaster();
+			
+			for (Map<String, String> changeWatcher : project.getChangeWatcherList()) {
+				String parUserId = changeWatcher.get("parUserId");
+				String parEmail = changeWatcher.get("parEmail");
+				
+				if (!isEmpty(parUserId) || !isEmpty(parEmail)) {
+					param.setParUserId(parUserId);
+					param.setParDivision(changeWatcher.get("parDivision"));
+					param.setParEmail(parEmail);
+					
+					for (String partnerId : project.getPartnerIds()) {
+						param.setPartnerId(partnerId);
+						partnerService.removeWatcher(param);
+					}
+				}
 			}
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, null);
@@ -802,7 +882,7 @@ public class PartnerController extends CoTopComponent{
 						}
 					}
 					
-					if (!isEmpty(project.getPartnerId())) {
+					if (isEmpty(project.getCopyWatcherLocation()) && !isEmpty(project.getPartnerId())) {
 						boolean existPartnerWatcher = partnerService.existsWatcher(project);
 						
 						for (PartnerMaster pm : result) {
@@ -1504,5 +1584,16 @@ public class PartnerController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(resultFlag, null);
+	}
+	
+	@PostMapping(value = PARTNER.CHECK_SELECT_DOWNLOAD_FILE)
+	public @ResponseBody ResponseEntity<Object> checkSelectDownloadFile(@RequestBody PartnerMaster partnerMaster, HttpServletRequest req, HttpServletResponse res, Model model){
+		Map<String, Object> resMap = new HashMap<>();
+		try {
+			resMap = partnerService.checkSelectDownloadFile(partnerMaster);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return makeJsonResponseHeader(resMap);
 	}
 }

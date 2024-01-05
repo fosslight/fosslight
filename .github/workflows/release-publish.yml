@@ -2,7 +2,6 @@
 # 2. Build the exe file and upload it in the release assets
 # 3. Deploy the latest release to demo.fosslight.org
 # 4. Deploy Image to Docker Hub
-# 5. Notify the results to the Slack channel
 
 name: Release FOSSLight
 
@@ -31,7 +30,8 @@ jobs:
 
       - name: Commit files
         run: |
-          git config --local user.name "github-actions[bot]"
+          git config --global user.email "fosslight-dev@lge.com"
+          git config --global user.name "FOSSLight-dev"
           git add CHANGELOG.md
           git commit -m "Update ChangeLog on ${{ matrix.ref }} branch"
 
@@ -41,12 +41,17 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ matrix.ref }}
 
-  build:
-    needs: update-changelog
-    runs-on: ubuntu-18.04
+  deploy-image:
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
@@ -58,96 +63,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build --exclude-task test
-
-      - name: Rename package
-        run: mv build/libs/FOSSLight*.war FOSSLight.war
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./FOSSLight.war
-          asset_name: FOSSLight.war
-          asset_content_type: application/octet-stream
-
-  deploy-demo:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Sleep for 30 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '30s'
-
-      - name: Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
-          key: ${{ secrets.REMOTE_SSH_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-            cd /service/deploy/fosslight/
-            bash /service/deploy/fosslight/deploy.sh
-
-  deploy-image:
-    needs: deploy-demo
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./Dockerfile
-          platforms: |
-            linux/arm64/v8
-            linux/arm/v7
-            linux/ppc64le
-            linux/s390x
-            linux/amd64
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/fosslight:${{ github.event.release.tag_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  notify:
-    if: always()
-    needs:
-      - update-changelog
-      - build
-      - deploy-demo
-      - deploy-image
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Slack Workflow Notification
-        uses: Gamesight/slack-workflow-status@master
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          channel: '#release'
-          name: 'FOSSLight Bot'
-          icon_url: https://github.com/fosslight.png
+      - name: JIB Build and push
+        run: >
+          ./gradlew jib 
+          -Djib.to.image='${{ secrets.DOCKERHUB_USERNAME }}/fosslight' 
+          -Djib.to.tags=${{ github.event.release.tag_name }},latest
+          -Pjib.multiplatform 

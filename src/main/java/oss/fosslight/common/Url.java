@@ -147,6 +147,7 @@ public final class Url {
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		public static final String DEL_OSS_VERSION_MERGE_AJAX = PATH +  "/delOssWithVersionMeregeAjax";
 		public static final String URL_DUPLICATE_VALIDATION = PATH + "/urlDuplicateValidation";
 		public static final String VALIDATION = PATH + "/validation";
@@ -154,7 +155,7 @@ public final class Url {
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
-		public static final String DELTE_COMMENT = PATH + "/deleteComment";
+		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
 		
 		public static final String SAVE_SESSION_OSS_INFO = PATH + "/saveSessionOssInfo";
@@ -249,6 +250,7 @@ public final class Url {
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
+		public static final String SAVE_DEP = PATH + "/saveDep";
 		public static final String SAVE_SRC = PATH + "/saveSrc"; 
 		public static final String SAVE_BIN = PATH + "/saveBin";
 		public static final String SAVE_BINANDROID = PATH + "/saveBinAndroid";
@@ -264,7 +266,7 @@ public final class Url {
 		
 		public static final String OSS_NAMES = PATH + "/getOssNames";
 		
-		public static final String OSS_VERIONS = PATH + "/getOssVersions";
+		public static final String OSS_VERSIONS = PATH + "/getOssVersions";
 		public static final String UPDATE_REVIEWER = PATH + "/updateReviewer";
 		public static final String UPDATE_REJECT = PATH + "/updateReject";
 		public static final String CATEGORY_CODE = PATH + "/getCategoryCode";
@@ -277,9 +279,11 @@ public final class Url {
 		public static final String IDENTIFICATION_ID_DIV = PATH + "/identification/{prjId}/{initDiv}";
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
-		public static final String IDENTIFICATION_PROJECT_SERCH_CD = PATH + "/identificationProjectSearch/{code}";
-		public static final String IDENTIFIATION_THIRD = PATH + "/identificationThird";
-		public static final String IDENTIFICAITON_GRID_POST = PATH + "/identificationGridPost";
+
+		public static final String IDENTIFICATION_PROJECT_SEARCH_CD = PATH + "/identificationProjectSearch/{code}";
+		public static final String IDENTIFICATION_THIRD = PATH + "/identificationThird";
+		public static final String IDENTIFICATION_GRID_POST = PATH + "/identificationGridPost";
+
 		public static final String IDENTIFICATION_MERGED_GRID_ID_CD = PATH + "/identificationMergedGrid/{prjId}/{code}";
 		public static final String TRD_OSS = PATH + "/3rdOss";
 		
@@ -295,7 +299,9 @@ public final class Url {
 		public static final String TRD_MAP = PATH + "/get3rdMap";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		public static final String SAVE_MODEL_AJAX = PATH + "/saveModelAjax";
 		
@@ -325,7 +331,7 @@ public final class Url {
 		
 		public static final String MODEL_FILE = PATH + "/modelFile";
 		
-		public static final String SUPPLEMEMT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
+		public static final String SUPPLEMENT_NOTICE_FILE = PATH  + "/getSupplementNoticeFile";
 		
 		public static final String BOM_COMPARE = PATH  + "/bomCompare/{beforePrjId}/{afterPrjId}";
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
@@ -346,6 +352,12 @@ public final class Url {
 		public static final String SECURITY_JSP = TILES_ROOT + PATH + "/security";
 		public static final String SAVE_SECURITY = PATH + "/saveSecurity";
 		public static final String CHECK_REQ_ENTRY_SECURITY = PATH + "/checkReqEntrySecurity";
+		public static final String SEC_BULK_EDIT_POPUP = PATH + "/secBulkEditPopup";
+		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulkEditPopup";
+		
+		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile/{code}";
 	}
 	
 	public static final class VERIFICATION {
@@ -384,6 +396,7 @@ public final class Url {
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
+		public static final String DELETE_FILE = PATH + "/deleteFile";
 	}
 	
 //	public static final class DISTRIBUTION {
@@ -440,7 +453,9 @@ public final class Url {
 		public static final String AUTOCOMPLETE_CONF_SW_VER_AJAX = PATH + "/autoCompleteConfSwVerAjax";
 		
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
+		public static final String ADD_WATCHERS = PATH + "/addWatchers";
 		public static final String REMOVE_WATCHER = PATH + "/removeWatcher";
+		public static final String REMOVE_WATCHERS = PATH + "/removeWatchers";
 		public static final String COPY_WATCHER = PATH + "/copyWatcher";
 		
 		public static final String UPDATE_PUBLIC_YN = PATH + "/updatePublicYn";
@@ -468,6 +483,8 @@ public final class Url {
 		public static final String PARTNER_DIVISION = PATH + "/updatePartnerDivision";
 
 		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
+		
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class USER {
@@ -484,7 +501,7 @@ public final class Url {
 		
 		public static final String CHECK_EMAIL = PATH + "/checkEmail";
 		
-		public static final String AUTOCOMPLETE_CRAETOR_AJAX = PATH + "/autoCompleteCreatorAjax";
+		public static final String AUTOCOMPLETE_CREATOR_AJAX = PATH + "/autoCompleteCreatorAjax";
 		public static final String AUTOCOMPLETE_REVIEWER_AJAX = PATH + "/autoCompleteReviewerAjax";
 		public static final String AUTOCOMPLETE_CREATOR_DIVISION_AJAX = PATH + "/autoCompleteCreatorDivisionAjax";
 		
@@ -557,6 +574,7 @@ public final class Url {
 		public static final String MAKE_NOTICE_TEXT_SIMPLE = PATH + "/makeNoticeTextSimple";	
 			
 		public static final String MAKE_YAML = PATH + "/makeYaml";
+		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 	}
 	
 	public static final class COMPLIANCE {
@@ -620,7 +638,7 @@ public final class Url {
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		
-		public static final String PUBLISHEDT_NOTICE = PATH + "/getPublishedtNotice";
+		public static final String PUBLISHED_NOTICE = PATH + "/getPublishedNotice";
 	}
 	
 	public static final class CONFIGURATION {
@@ -724,6 +742,13 @@ public final class Url {
 		
 	}
 	
+	public static final class CYCLONEDXDOWNLOAD {
+		public static final String PATH = "/cyclonedxdownload";
+		
+		public static final String CYCLONEDX_POST = PATH + "/getCycloneDXPost";
+		public static final String FILE = PATH + "/getFile";
+	}
+	
 	public static final class IMAGE_VIEW {
 		public static final String PATH = "/imageView";
 		
@@ -745,10 +770,16 @@ public final class Url {
 		/** 3RD PARTY */
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partner_search";
+			
+			/** API 3rd Party Add Watcher */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partner_watcher_add";
 		
 		/** OSS */
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_SEARCH				= "/oss_search";
+
+			/** API OSS List 조회 */
+			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss_register";
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
@@ -771,6 +802,9 @@ public final class Url {
 			/** API Update Project Model */
 			public static final String FOSSLIGHT_API_MODEL_UPDATE			= "/model_update";
 			
+			/** API Update Project Model WITH FILE */
+			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/model_update_upload_file";
+			
 			/** API Project BOM Tab Export */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/prj_bom_export";
 
@@ -780,7 +814,14 @@ public final class Url {
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
 			
+			/** API Project Add Watcher */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
+			
+			/** API Project Not applicable */
+			public static final String FOSSLIGHT_API_PROJECT_NOT_APPLICABLE		= "/prj_not_applicable";
+			
 			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT_DEP			= "/oss_report_dep";
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/oss_report_src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/oss_report_bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/oss_report_android";
@@ -806,6 +847,9 @@ public final class Url {
 			
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/export_selfcheck";
+			
+			/** API SelfCheck Add Watcher */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfcheck_watcher_add";
 		
 		/** BINARY */
 			/** API Binary List 조회 */

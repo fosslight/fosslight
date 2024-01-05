@@ -70,4 +70,6 @@ public interface PartnerService extends HistoryConfig{
 	public List<PartnerMaster> getPartnerIdList(PartnerMaster partnerMaster);
 	
 	public Map<String, Object> getExportDataForSbomInfo(PartnerMaster partnerMaster);
+
+	public Map<String, Object> checkSelectDownloadFile(PartnerMaster partnerMaster);
 }
