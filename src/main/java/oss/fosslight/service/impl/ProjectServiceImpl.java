@@ -4886,6 +4886,143 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
+	@Override
+	public List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData) {
+		List<ProjectIdentification> tempData = new ArrayList<ProjectIdentification>();
+		List<ProjectIdentification> resultGridData = new ArrayList<ProjectIdentification>();
+		String groupColumn = "";
+		boolean ossNameEmptyFlag = false;
+		
+		for (ProjectIdentification info : gridData) {
+			if (isEmpty(groupColumn)) {
+				groupColumn = info.getOssName() + "-" + info.getOssVersion();
+			}
+			
+			if ("-".equals(groupColumn)) {
+				if ("NA".equals(info.getLicenseType())) {
+					ossNameEmptyFlag = true;
+				}
+			}
+			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion())
+					&& !("-".equals(info.getOssName()) 
+					&& !"NA".equals(info.getLicenseType()))
+					&& !ossNameEmptyFlag) {
+				tempData.add(info);
+			} else { // 다른 grouping
+				setMergeDataByAndroid(tempData, resultGridData);
+				groupColumn = info.getOssName() + "-" + info.getOssVersion();
+				tempData.clear();
+				tempData.add(info);
+			}
+			
+			ossNameEmptyFlag = false;
+		}
+		
+		setMergeDataByAndroid(tempData, resultGridData);
+		
+		return resultGridData;
+	}
+	
+	private void setMergeDataByAndroid(List<ProjectIdentification> tempData, List<ProjectIdentification> resultGridData) {
+		if (tempData.size() > 0) {
+			Collections.sort(tempData, new Comparator<ProjectIdentification>() {
+				@Override
+				public int compare(ProjectIdentification o1, ProjectIdentification o2) {
+					if (o1.getLicenseName().length() >= o2.getLicenseName().length()) {
+						return 1;
+					}else {
+						return -1;
+					}
+				}
+			});
+			
+			ProjectIdentification rtnBean = null;
+			
+			for (ProjectIdentification temp : tempData) {
+				if (rtnBean == null) {
+					rtnBean = temp;
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						List<String> rtnBeanCopyrights = Arrays.asList(rtnBean.getCopyrightText().split("\\n"));
+						String mergedCopyrightText = rtnBeanCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
+					}
+					continue;
+				}
+				
+				String key = temp.getOssName() + "-" + temp.getLicenseType();
+				
+				if ("--NA".equals(key)) {
+					if (!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
+						resultGridData.add(rtnBean);
+						rtnBean = temp;
+						continue;
+					}
+				}
+				
+				for (String licenseName : temp.getLicenseName().split(",")) {
+					boolean equalFlag = false;
+					
+					for (String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
+						if (rtnLicenseName.equals(licenseName)) {
+							equalFlag = true;
+							break;
+						}
+					}
+					
+					if (!equalFlag) {
+						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
+					}
+				}
+				
+				if (!isEmpty(temp.getCopyrightText())) {
+					List<String> mergedCopyrights = new ArrayList<>();
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(rtnBean.getCopyrightText().split("\\n")));
+					}
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(temp.getCopyrightText().split("\\n")));
+					}
+					if (mergedCopyrights != null && !mergedCopyrights.isEmpty()) {
+						String mergedCopyrightText = mergedCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
+					}
+				}
+				
+				if (!isEmpty(temp.getRestriction())) {
+					for (String restriction : temp.getRestriction().split("\\n")) {
+						if (!isEmpty(restriction) && !rtnBean.getRestriction().contains(restriction)) {
+							if (!isEmpty(rtnBean.getRestriction())) {
+								rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
+							} else {
+								rtnBean.setRestriction(restriction);
+							}
+						}
+					}
+				}
+				
+				if (isEmpty(rtnBean.getDownloadLocation())) { 
+					if (!isEmpty(temp.getDownloadLocation())) {
+						rtnBean.setDownloadLocation(temp.getDownloadLocation());
+					}
+				}
+				
+				if (isEmpty(rtnBean.getHomepage())) {
+					if (!isEmpty(temp.getHomepage())) {
+						rtnBean.setHomepage(temp.getHomepage());
+					}
+				}
+				
+				if (isEmpty(rtnBean.getCopyrightText())) {
+					if (!isEmpty(temp.getCopyrightText())) {
+						rtnBean.setCopyrightText(temp.getCopyrightText());
+					}
+				}
+			}
+			
+			resultGridData.add(rtnBean);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String checkValidData(Map<String, Object> map) {
@@ -5212,6 +5349,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
 		
+		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
+		
 		List<ProjectIdentification> filteredAfterBomList = afterBomList
 				.stream()
 				.filter(afList-> 
@@ -5222,6 +5361,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										.equalsIgnoreCase(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim()))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
+		
+		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		// status > add
 		int addchk = 0;

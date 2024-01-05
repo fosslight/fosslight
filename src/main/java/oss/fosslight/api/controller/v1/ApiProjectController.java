@@ -600,11 +600,24 @@ public class ApiProjectController extends CoTopComponent {
 			int records = apiProjectService.existProjectCntBomCompare(paramMap);
 			
 			if (records > 0) {
-				List<Map<String, Object>> beforeBomList = apiProjectService.getBomList(beforePrjId);
-				List<Map<String, Object>> afterBomList = apiProjectService.getBomList(afterPrjId);
-				
-				if (beforeBomList == null 
-						|| afterBomList == null) { // before, after값 중 하나라도 null이 있으면 비교 불가함.
+				List<Map<String, Object>> beforeBomList = new ArrayList<>();
+				List<Map<String, Object>> afterBomList = new ArrayList<>();
+						
+				Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
+				if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+					beforeBomList = apiProjectService.getBomList(beforePrjId);
+				} else {
+					apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
+				}
+				 
+				Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
+				if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+					afterBomList = apiProjectService.getBomList(afterPrjId);
+				} else {
+					apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
+				}
+								
+				if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
 					throw new Exception();
 				}
 				
@@ -711,7 +724,7 @@ public class ApiProjectController extends CoTopComponent {
 							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 							
 							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP, ossComponentList, ossComponentsLicenseList);
+								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP, ossComponentList, ossComponentsLicenseList, null);
 							}
 							
 							ossComponentList.addAll(ossComponents);
@@ -892,7 +905,7 @@ public class ApiProjectController extends CoTopComponent {
 							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 							
 							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList);
+								apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
 							}
 							
 							ossComponentList.addAll(ossComponents);
@@ -1135,7 +1148,7 @@ public class ApiProjectController extends CoTopComponent {
 						List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 						
 						if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-							apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN, ossComponentList, ossComponentsLicenseList);
+							apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN, ossComponentList, ossComponentsLicenseList, null);
 						}
 						
 						ossComponentList.addAll(ossComponents);
