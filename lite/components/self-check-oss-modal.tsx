@@ -22,13 +22,13 @@ export default function SelfCheckOSSModal({
   const [licenses, setLicenses] = useState<SelfCheck.OSSLicense[]>([]);
   const { register, handleSubmit, reset, watch, setValue } = useForm({
     defaultValues: {
-      ossName: '',
-      ossVersion: '',
+      ossName: values?.ossName || '',
+      ossVersion: values?.ossVersion || '',
       licenseName: '',
-      path: '',
-      copyright: '',
-      downloadUrl: '',
-      homepageUrl: ''
+      path: values?.path || '',
+      copyright: values?.copyright || '',
+      downloadUrl: values?.downloadUrl || '',
+      homepageUrl: values?.homepageUrl || ''
     }
   });
 
@@ -60,26 +60,22 @@ export default function SelfCheckOSSModal({
 
   useEffect(() => {
     if (show) {
+      loadAutocompleteOSSRequest.execute({});
+      loadAutocompleteLicenseRequest.execute({});
+
+      reset({
+        ossName: values?.ossName || '',
+        ossVersion: values?.ossVersion || '',
+        licenseName: '',
+        path: values?.path || '',
+        copyright: values?.copyright || '',
+        downloadUrl: values?.downloadUrl || '',
+        homepageUrl: values?.homepageUrl || ''
+      });
       setLicenses(values?.licenses || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
-
-  useEffect(() => {
-    loadAutocompleteOSSRequest.execute({});
-    loadAutocompleteLicenseRequest.execute({});
-
-    reset({
-      ossName: values?.ossName || '',
-      ossVersion: values?.ossVersion || '',
-      licenseName: '',
-      path: values?.path || '',
-      copyright: values?.copyright || '',
-      downloadUrl: values?.downloadUrl || '',
-      homepageUrl: values?.homepageUrl || ''
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values]);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" hideByBackdrop={false}>
