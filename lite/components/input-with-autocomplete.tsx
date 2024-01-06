@@ -98,11 +98,9 @@ export default function InputWithAutocomplete({
           setShowOptions(true);
         }}
         onBlur={() => {
-          setTimeout(() => {
-            setActiveOptionIdx(0);
-            setShowOptions(false);
-            if (pickValue) pickValue(value);
-          }, 300);
+          setActiveOptionIdx(0);
+          setShowOptions(false);
+          if (pickValue) pickValue(value);
         }}
         placeholder={placeholder}
       />
@@ -116,7 +114,7 @@ export default function InputWithAutocomplete({
                   'autocomplete-option px-2 py-1 cursor-pointer hover:bg-sky-50',
                   idx === activeOptionIdx && '!bg-sky-100'
                 )}
-                onClick={() => {
+                onMouseDown={() => {
                   setValue(option.value);
                   setActiveOptionIdx(0);
                   setShowOptions(false);
