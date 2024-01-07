@@ -16,7 +16,7 @@ public class FileDto {
         fileId = file.getOrgFileId();
         created = file.getCreatedDate();
         orgNm = file.getOrigNm();
-        logiNm = file.getOrigNm();
+        logiNm = file.getLogiNm();
         fileSeq = file.getFileSeq();
     }
 }
