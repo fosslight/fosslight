@@ -608,6 +608,7 @@ public class ApiProjectController extends CoTopComponent {
 					beforeBomList = apiProjectService.getBomList(beforePrjId);
 				} else {
 					apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
+					beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
 				}
 				 
 				Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
@@ -615,6 +616,7 @@ public class ApiProjectController extends CoTopComponent {
 					afterBomList = apiProjectService.getBomList(afterPrjId);
 				} else {
 					apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
+					afterBomList = apiProjectService.setMergeGridData(afterBomList);
 				}
 								
 				if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {

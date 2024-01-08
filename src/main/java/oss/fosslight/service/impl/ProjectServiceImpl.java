@@ -5553,7 +5553,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 
 	private String getCompareKey(ProjectIdentification param) {
-		return param.getOssName().toLowerCase() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName();
+		return (param.getOssName() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName()).toLowerCase();
 	}
 	
 	private static String changeStyle(String flag, String text) {
