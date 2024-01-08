@@ -489,7 +489,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
 
 				// Convert Map to Apache Velocity Template
-				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
+				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice, true));
 			}
 		}
 	}
@@ -1894,6 +1894,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 	@Override
 	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice) {
+		return getNoticeHtmlInfo(ossNotice, false);
+	}
+	
+	@Override
+	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol) {
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		String noticeType = "";
@@ -2210,6 +2215,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
 			
+			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
+			
 			noticeList.add(bean);
 		}
 		
@@ -2241,6 +2248,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
+			
+			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
 			
 			srcList.add(bean);
 		}

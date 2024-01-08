@@ -27,7 +27,6 @@ var saveFlag = false;
 		evt.init();
 		evt.tabInit();
 		datas.init();
-		grid.init();
 
 		<c:if test="${batFlag}">
 		//if('${detail.partnerId}' != ""){

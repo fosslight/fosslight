@@ -60,6 +60,8 @@ public interface VerificationService {
 	
 	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice);
 	
+	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol);
+	
 	OssNotice selectOssNoticeOne(String prjId);
 	
 	void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception;
