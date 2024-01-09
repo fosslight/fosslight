@@ -14,11 +14,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -4888,139 +4886,40 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData) {
-		List<ProjectIdentification> tempData = new ArrayList<ProjectIdentification>();
-		List<ProjectIdentification> resultGridData = new ArrayList<ProjectIdentification>();
-		String groupColumn = "";
-		boolean ossNameEmptyFlag = false;
+		List<ProjectIdentification> resultGridData = null;
+		Map<String, ProjectIdentification> resultGridDataMap = new HashMap<>();
+		String groupKey = "";
 		
-		for (ProjectIdentification info : gridData) {
-			if (isEmpty(groupColumn)) {
-				groupColumn = info.getOssName() + "-" + info.getOssVersion();
-			}
+		for (ProjectIdentification grid : gridData) {
+			groupKey = (grid.getOssName() + "_" + avoidNull(grid.getOssVersion())).toUpperCase();
 			
-			if ("-".equals(groupColumn)) {
-				if ("NA".equals(info.getLicenseType())) {
-					ossNameEmptyFlag = true;
-				}
-			}
-			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion())
-					&& !("-".equals(info.getOssName()) 
-					&& !"NA".equals(info.getLicenseType()))
-					&& !ossNameEmptyFlag) {
-				tempData.add(info);
-			} else { // 다른 grouping
-				setMergeDataByAndroid(tempData, resultGridData);
-				groupColumn = info.getOssName() + "-" + info.getOssVersion();
-				tempData.clear();
-				tempData.add(info);
-			}
-			
-			ossNameEmptyFlag = false;
-		}
-		
-		setMergeDataByAndroid(tempData, resultGridData);
-		
-		return resultGridData;
-	}
-	
-	private void setMergeDataByAndroid(List<ProjectIdentification> tempData, List<ProjectIdentification> resultGridData) {
-		if (tempData.size() > 0) {
-			Collections.sort(tempData, new Comparator<ProjectIdentification>() {
-				@Override
-				public int compare(ProjectIdentification o1, ProjectIdentification o2) {
-					if (o1.getLicenseName().length() >= o2.getLicenseName().length()) {
-						return 1;
-					}else {
-						return -1;
-					}
-				}
-			});
-			
-			ProjectIdentification rtnBean = null;
-			
-			for (ProjectIdentification temp : tempData) {
-				if (rtnBean == null) {
-					rtnBean = temp;
-					if (!isEmpty(rtnBean.getCopyrightText())) {
-						List<String> rtnBeanCopyrights = Arrays.asList(rtnBean.getCopyrightText().split("\\n"));
-						String mergedCopyrightText = rtnBeanCopyrights.stream().distinct().collect(Collectors.joining("\n"));
-						rtnBean.setCopyrightText(mergedCopyrightText);
-					}
-					continue;
-				}
-				
-				String key = temp.getOssName() + "-" + temp.getLicenseType();
-				
-				if ("--NA".equals(key)) {
-					if (!rtnBean.getLicenseName().contains(temp.getLicenseName())) {
-						resultGridData.add(rtnBean);
-						rtnBean = temp;
-						continue;
-					}
-				}
-				
-				for (String licenseName : temp.getLicenseName().split(",")) {
+			if (!resultGridDataMap.containsKey(groupKey)) {
+				resultGridDataMap.put(groupKey, grid);
+			} else {
+				ProjectIdentification bean = resultGridDataMap.get(groupKey);
+				for (String licenseName : grid.getLicenseName().split(",")) {
 					boolean equalFlag = false;
 					
-					for (String rtnLicenseName : rtnBean.getLicenseName().split(",")) {
-						if (rtnLicenseName.equals(licenseName)) {
+					for (String rtnLicenseName : bean.getLicenseName().split(",")) {
+						if (rtnLicenseName.trim().equals(licenseName.trim())) {
 							equalFlag = true;
 							break;
 						}
 					}
 					
 					if (!equalFlag) {
-						rtnBean.setLicenseName(rtnBean.getLicenseName() + "," + licenseName);
+						bean.setLicenseName((bean.getLicenseName() + "," + licenseName).trim());
 					}
 				}
-				
-				if (!isEmpty(temp.getCopyrightText())) {
-					List<String> mergedCopyrights = new ArrayList<>();
-					if (!isEmpty(rtnBean.getCopyrightText())) {
-						mergedCopyrights.addAll(Arrays.asList(rtnBean.getCopyrightText().split("\\n")));
-					}
-					if (!isEmpty(rtnBean.getCopyrightText())) {
-						mergedCopyrights.addAll(Arrays.asList(temp.getCopyrightText().split("\\n")));
-					}
-					if (mergedCopyrights != null && !mergedCopyrights.isEmpty()) {
-						String mergedCopyrightText = mergedCopyrights.stream().distinct().collect(Collectors.joining("\n"));
-						rtnBean.setCopyrightText(mergedCopyrightText);
-					}
-				}
-				
-				if (!isEmpty(temp.getRestriction())) {
-					for (String restriction : temp.getRestriction().split("\\n")) {
-						if (!isEmpty(restriction) && !rtnBean.getRestriction().contains(restriction)) {
-							if (!isEmpty(rtnBean.getRestriction())) {
-								rtnBean.setRestriction(rtnBean.getRestriction() + "\\n" + restriction);
-							} else {
-								rtnBean.setRestriction(restriction);
-							}
-						}
-					}
-				}
-				
-				if (isEmpty(rtnBean.getDownloadLocation())) { 
-					if (!isEmpty(temp.getDownloadLocation())) {
-						rtnBean.setDownloadLocation(temp.getDownloadLocation());
-					}
-				}
-				
-				if (isEmpty(rtnBean.getHomepage())) {
-					if (!isEmpty(temp.getHomepage())) {
-						rtnBean.setHomepage(temp.getHomepage());
-					}
-				}
-				
-				if (isEmpty(rtnBean.getCopyrightText())) {
-					if (!isEmpty(temp.getCopyrightText())) {
-						rtnBean.setCopyrightText(temp.getCopyrightText());
-					}
-				}
+				resultGridDataMap.put(groupKey, bean);
 			}
-			
-			resultGridData.add(rtnBean);
 		}
+		
+		if (!resultGridDataMap.isEmpty()) {
+			resultGridData = new ArrayList<>(resultGridDataMap.values());
+		}
+		
+		return resultGridData;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -5600,38 +5499,57 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (cnt > 0) {
 				return ossNameVersion;
-			}else {
+			} else {
 				return ossNameVersion + " / " + ossNameVersion2;
 			}
-		}else {
-			String licenseNmArr1[] = ossLicenseName.split("/");
-			
+		} else {
+			String licenseNmArr1[] = ossLicenseName.split(" / ");
 			int chk = 0;
-			for (int i=0; i<count; i++) {
-				if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
-					List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
-					List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
-					
-					Set<String> set = new LinkedHashSet<>(licenseNmChk1);
-					set.addAll(licenseNmChk2);
-					
-					List<String> mergeList = new ArrayList<>(set);
-					
-					if (mergeList.size() > 0) {
-						String str = "";
-						for (int j=0; j<mergeList.size(); j++) {
-							str += mergeList.get(j);
-							if (j < mergeList.size()-1) {
-								str += ", ";
+			boolean chkFlag = false;
+			
+			if (count == licenseNmArr1.length) {
+				chkFlag = true;
+				
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						List<String> mergeList = new ArrayList<>();
+						List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
+						List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
+						
+						for (String chk1 : licenseNmChk1) {
+							boolean equalsFlag = false;
+							
+							for (String chk2 : licenseNmChk2) {
+								if (chk1.trim().equalsIgnoreCase(chk2.trim())) {
+									equalsFlag = true;
+									break;
+								}
+							}
+							
+							if (!equalsFlag) {
+								for (String chk2 : licenseNmChk2) {
+									mergeList.add(chk2.trim());
+								}
+								mergeList.add(chk1.trim());
 							}
 						}
-						licenseNmArr1[i] = str;
-						chk++;
+						
+						if (mergeList.size() > 0) {
+							String str = "";
+							for (int j=0; j<mergeList.size(); j++) {
+								str += mergeList.get(j);
+								if (j < mergeList.size()-1) {
+									str += ", ";
+								}
+							}
+							licenseNmArr1[i] = str;
+							chk++;
+						}
 					}
 				}
 			}
 			
-			if (chk > 0) {
+			if (chk > 0 || chkFlag) {
 				String strMerge = "";
 				for (int i=0; i<licenseNmArr1.length; i++) {
 					strMerge += licenseNmArr1[i];
@@ -5639,8 +5557,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						strMerge += " / ";
 					}
 				}
-				return strMerge;
-			}else {
+				
+				int cnt = 0;
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						cnt++;
+					}
+				}
+				
+				if (cnt == 0) {
+					return strMerge + " / " + ossLicenseName2;
+				} else {
+					return strMerge;
+				}
+			} else {
 				return ossLicenseName + " / " + ossLicenseName2;
 			}
 		}

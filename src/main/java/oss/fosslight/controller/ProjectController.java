@@ -4603,7 +4603,7 @@ public class ProjectController extends CoTopComponent {
 					beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
 				}
 			}
-			if (beforeDataFlag) return makeJsonResponseHeader(false, "1");
+			if (beforeDataFlag || beforeBomList == null) return makeJsonResponseHeader(false, "1");
 			
 			afterBom = getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
 			if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
@@ -4619,7 +4619,7 @@ public class ProjectController extends CoTopComponent {
 					afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
 				}
 			}
-			if (afterDataFlag) return makeJsonResponseHeader(false, "1");
+			if (afterDataFlag || afterBomList == null) return makeJsonResponseHeader(false, "1");
 			
 			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
 			return makeJsonResponseHeader(true, "0" , resultMap);
