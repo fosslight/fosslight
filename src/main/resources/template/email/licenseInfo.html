@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
 	<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
@@ -16,82 +16,96 @@
 				<td width="60" style="background:#f9f9f9"></td>
 				<td>
 					<table cellspacing="0" cellpadding="0" border="0">
-						<tr>
-							<td colspan="3" height="25" style="background:#c00c3f">
-								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
-							</td>
-						</tr>
-						<tr>
-							<td width="1" style="background:#ddd"></td>
-							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
-								#if($comment && $comment != "")
-									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<col style="width:40%">
-        							<col style="width:*">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Name</th>
-										<td style="padding:5px;">$!license_basic_info.licenseName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Type</th>
-										<td style="padding:5px;">$!license_basic_info.licenseType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
-										<td style="padding:5px;">$!license_basic_info.restriction</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
-										<td style="padding:5px;">$!license_basic_info.obligation</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">SPDX Short Identifier</th>
-										<td style="padding:5px;">$!license_basic_info.shortIdentifier</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
-										<td style="padding:5px;">$!license_basic_info.licenseNickname</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
-										<td style="padding:5px;">#if( $license_basic_info.webpageLinkFormat )$!license_basic_info.webpageLinkFormat#end</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
-										<td style="padding:5px;">$!license_basic_info.description</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Text</th>
-										<td style="padding:5px;">$!license_basic_info.licenseText</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
-										<td style="padding:5px;">$!license_basic_info.attribution</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Created Date / Creator</th>
-										<td style="padding:5px;">$!modifiedDate / $!modifierNm</td>
-									</tr>
-								</table>
-								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
-							</td>
-							<td width="1" style="background:#ddd"></td>
-						</tr>
+						<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+							<tr>
+								<td colspan="3" height="28" style="background:#f9f9f9"></td>
+							</tr>
+							<tr>
+								<td width="60" style="background:#f9f9f9"></td>
+								<td>
+									<table cellspacing="0" cellpadding="0" border="0">
+										<tr>
+											<td colspan="3" height="25" style="background:#c00c3f">
+												<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+											</td>
+										</tr>
+										<tr>
+											<td width="1" style="background:#ddd"></td>
+											<td style="padding:40px;">
+												<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+												<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+												<div th:if="${comment != null and comment != ''}">
+													<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+													<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+												</div>
+												<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+													<col style="width:40%">
+													<col style="width:*">
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+														<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">License Name</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.licenseName}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">License Type</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.licenseType}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.restriction}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.obligation}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">SPDX Short Identifier</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.shortIdentifier}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.licenseNickname}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
+														<td style="padding:5px;" th:if="${license_basic_info.webpageLinkFormat}" th:text="${license_basic_info.webpageLinkFormat}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.description}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">License Text</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.licenseText}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
+														<td style="padding:5px;" th:utext="${license_basic_info.attribution}"></td>
+													</tr>
+													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Created Date / Creator</th>
+														<td style="padding:5px;" th:utext="|${modifiedDate} / ${modifierNm}|"></td>
+													</tr>
+												</table>
+												<div style="margin:20px 0;border:1px dashed #666;"></div>
+												<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+													 style="font-size:12px;">
+													* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+												</div>
+											</td>
+											<td width="1" style="background:#ddd"></td>
+										</tr>
+										<tr>
+											<td colspan="3" height="1" style="background:#ddd"></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+
 						<tr>
 							<td colspan="3" height="1" style="background:#ddd"></td>
 						</tr>
@@ -103,6 +117,5 @@
 				<td colspan="3" height="28" style="background:#f9f9f9"></td>
 			</tr>
 		</table>
-		
 	</body>
 </html>

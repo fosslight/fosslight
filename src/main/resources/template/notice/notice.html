@@ -32,135 +32,182 @@
 		<div class="notice_body">
 			<h2 class="notice_title">
 				<strong class="left">Open Source Software Notice</strong>
-				<span class="right"><sup>$!{noticeTitle}</sup></span>
+				<span class="right"><sup th:text="${noticeTitle}"></sup></span>
 			</h2>
-			#if($!{editCompanyYn} == "Y")
-				<p>This product from $!{companyNameFull} contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
-			#end
-			#if($!{editCompanyYn} != "Y")
+			<th:block th:if="${editCompanyYn} == 'Y'">
+				<p>This product from <span th:text="${companyNameFull}"></span> contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
+			</th:block>
+			<th:block th:if="${editCompanyYn} != 'Y'">
 				<p>This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
-			#end
-			#if($!{disclosureObligationSize} != "0")
-			<div style="padding:10px;max-width:800px;">
-				<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
-					<caption>Open source lists under Copyleft license.</caption>
-					<tr>
-						<th width=182>Open Source</th>
-						<th width=159>License</th>
-						<th width=443>Copyright</th>
-					</tr>
-					#foreach( $!{closeSource} in $!{disclosureObligationList} ) 
-					<tr>
-						<td>
-							#if($!{closeSource.homepage} != "")<a href="$!{closeSource.homepage}" target='_blank' rel='noreferrer noopener'>$!{closeSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end</a>#end
-							#if($!{closeSource.homepage} == "")$!{closeSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end #end
-						</td>
-						<td>
-						#foreach( $!{licenseInfo} in $!{closeSource.ossComponentsLicense} )
-						<p><a href="#$!{licenseInfo.licenseName}">$!{licenseInfo.licenseName}</a></p>
-						#end
-						</td>
-						<td>$!{closeSource.copyrightText}</td>
-					</tr>
-					#end
-				</table>
-			</div>
+			</th:block>
+
+			<th:block th:if="${disclosureObligationSize != '0'}">
+				<div style="padding:10px;max-width:800px;">
+					<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
+						<caption>Open source lists under Copyleft license.</caption>
+						<tr>
+							<th width="182">Open Source</th>
+							<th width="159">License</th>
+							<th width="443">Copyright</th>
+						</tr>
+						<th:block th:each="closeSource : ${disclosureObligationList}">
+							<tr>
+								<td>
+									<a th:if="${closeSource.homepage != ''}" th:href="${closeSource.homepage}" target="_blank" rel="noreferrer noopener">
+										<span th:text="${closeSource.ossName}"></span>
+										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
+									</a>
+									<span th:if="${closeSource.homepage == ''}">
+                            <span th:text="${closeSource.ossName}"></span>
+                            <span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
+                        </span>
+								</td>
+								<td>
+									<th:block th:each="licenseInfo : ${closeSource.ossComponentsLicense}">
+										<p>
+											<a th:href="#${licenseInfo.licenseName}" th:text="${licenseInfo.licenseName}"></a>
+										</p>
+									</th:block>
+								</td>
+								<td th:text="${closeSource.copyrightText}"></td>
+							</tr>
+						</th:block>
+					</table>
+				</div>
 				<p>
-					#if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from $!{companyNameFull} at <a href= "$!{distributionSiteUrl}" target='_blank' rel='noreferrer noopener'>$!{distributionSiteUrl}.</a> #end
-					#if($!{editCompanyYn} == "N" && $!{editDistributionSiteUrlYn} == "Y") The source code for the above may be obtained free of charge from <a href= "$!{distributionSiteUrl}" target='_blank' rel='noreferrer noopener'>$!{distributionSiteUrl}.</a> #end
-					#if($!{editDistributionSiteUrlYn} == "N") #end
-					#if($!{editDistributionSiteUrlYn} == "Y" && $!{editEmailYn} == "Y") 
-						#if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") We #end will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product. 
-					#end
-					#if($!{editDistributionSiteUrlYn} == "N" && $!{editEmailYn} == "Y") 
-						#if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") We #end will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product. 
-					#end
-					#if($!{editEmailYn} == "N") #end 
+					<th:block th:if="${editCompanyYn == 'Y' && editDistributionSiteUrlYn == 'Y'}">
+						The source code for the above may be obtained free of charge from <span th:text="${companyNameFull}"></span> at
+						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
+							<span th:text="${distributionSiteUrl}"></span>
+						</a>
+					</th:block>
+					<th:block th:if="${editCompanyYn == 'N' && editDistributionSiteUrlYn == 'Y'}">
+						The source code for the above may be obtained free of charge from
+						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
+							<span th:text="${distributionSiteUrl}"></span>
+						</a>
+					</th:block>
+					<th:block th:if="${editDistributionSiteUrlYn == 'N'}"></th:block>
+					<th:block th:if="${editDistributionSiteUrlYn == 'Y' && editEmailYn == 'Y'}">
+						<th:block th:if="${editCompanyYn == 'Y'}">
+							<span th:text="${companyNameFull}"></span>
+						</th:block>
+						<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
+						will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+					</th:block>
+					<th:block th:if="${editDistributionSiteUrlYn == 'N' && editEmailYn == 'Y'}">
+						<th:block th:if="${editCompanyYn == 'Y'}">
+							<span th:text="${companyNameFull}"></span>
+						</th:block>
+						<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
+						will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+					</th:block>
+					<th:block th:if="${editEmailYn == 'N'}"></th:block>
 					<br>
 				</p>
-			#end	
-		
-			#if($!{noticeObligationSize} != "0")
-			<br>
-				<p>Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in the tables below.</p>
-			<div style="padding:10px;max-width:800px;">
-				<table width="100%" class="gridtable" aria-label="Open source lists under Pemissive License.">
-					<caption>Open source lists under Pemissive License.</caption>
-					<tr>
-						<th width=182>Open Source</th>
-						<th width=159>License</th>
-						<th width=443>Copyright</th>
-					</tr>
-					#foreach( $!{openSource} in $!{noticeObligationList} ) 
-					<tr>
-						<td >
-							#if($!{openSource.homepage} != "")<a href="$!{openSource.homepage}" target='_blank' rel='noreferrer noopener'>$!{openSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end</a>#end
-							#if($!{openSource.homepage} == "")$!{openSource.ossName}  #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end #end
-						</td>
-						<td>
-						#foreach( $!{licenseInfo} in $!{openSource.ossComponentsLicense} )
-						<p><a href="#$!{licenseInfo.licenseName}">$!{licenseInfo.licenseName}</a>
-						#end
-						</td>
-						<td><p>$!{openSource.copyrightText}</p></td>
-					</tr>
-				#end
-				</table>
-			</div>
-			#end
-			
-			#if($!attributionList || $!ossAttributionList)
-				#if($!attributionList)
-					#foreach( $attr in $attributionList )
-					#if($!{isSimpleNotice} != "Y") 
-					<p class="bdTop"><b>$attr.licenseName Attribution</b></p>
-					#end
-					#if($!{isSimpleNotice} != "N")
-					<p><b>$attr.licenseName Attribution</b></p>
-					#end 
-					<p>$attr.attribution</p>
-					#end
-				#end
-				
-				#if($!ossAttributionList)
-					#foreach( $value in $ossAttributionList )
-					#set ($s = $value.split("__"))
-					#set ($ossname = $s[0])
-					#set ($attribution = $s[1])
-					#if($!{isSimpleNotice} != "Y") 
-					<p class="bdTop"><b>$ossname Attribution</b></p>
-					#end
-					#if($!{isSimpleNotice} != "N")
-					<p><b>$ossname Attribution</b></p>
-					#end 
-					<p>$attribution</p>
-					#end
-				#end
-			#end
-			<!-- License Name, License text 	 -->
-			#foreach( $!{license} in $!{licenseList} )
-				#if($!{license.licenseName} != "") 
-				<p class="bdTop license">
-					<b id="$!{license.licenseName}">$!{license.licenseName}</b><br> <br>
-					<br>$!{license.licenseText}<br>
+			</th:block>
+
+			<th:block th:if="${noticeObligationSize != '0'}">
+				<br>
+				<p>Please be informed that
+					<th:block th:if="${editCompanyYn == 'Y'}">
+						<span th:text="${companyNameFull}"></span>
+					</th:block>
+					<th:block th:if="${editCompanyYn == 'N'}">this</th:block>
+					product may contain open source software listed in the tables below.
 				</p>
-				#end
-			#end
-			
-	
-			#if($!licenseListUrls)
-			<p class="bdTop license"><b>License URLs</b><br></p>
-			<ul class="bdTop2 license">
-				#foreach( $!{license} in $!{licenseListUrls} )
-					#if($!{license.licenseName} != "") 
-						<li id="$!{license.licenseName}">$!{license.licenseName} : <a href="$!{license.webpage}" target='_blank' rel='noreferrer noopener'>$!{license.webpage}</a></li>
-					#end
-				#end
-			</ul>
-			#end
-			
-			#if($!{editAppendedYn} == "Y")<p class="bdTop">$!{appended}</p>#end 
-			#if($!{editAppendedYn} == "N") #end
+				<div style="padding:10px;max-width:800px;">
+					<table width="100%" class="gridtable" aria-label="Open source lists under Permissive License.">
+						<caption>Open source lists under Permissive License.</caption>
+						<tr>
+							<th width="182">Open Source</th>
+							<th width="159">License</th>
+							<th width="443">Copyright</th>
+						</tr>
+						<th:block th:each="openSource : ${noticeObligationList}">
+							<tr>
+								<td>
+									<a th:if="${openSource.homepage != ''}" th:href="${openSource.homepage}" target="_blank" rel="noreferrer noopener">
+										<span th:text="${openSource.ossName}"></span>
+										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
+									</a>
+									<span th:if="${openSource.homepage == ''}">
+                            <span th:text="${openSource.ossName}"></span>
+                            <span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
+                        </span>
+								</td>
+								<td>
+									<th:block th:each="licenseInfo : ${openSource.ossComponentsLicense}">
+										<p>
+											<a th:href="#${licenseInfo.licenseName}" th:text="${licenseInfo.licenseName}"></a>
+										</p>
+									</th:block>
+								</td>
+								<td>
+									<p th:text="${openSource.copyrightText}"></p>
+								</td>
+							</tr>
+						</th:block>
+					</table>
+				</div>
+			</th:block>
+
+			<th:block th:if="${attributionList or ossAttributionList}">
+				<th:block th:if="${attributionList}">
+					<th:block th:each="attr : ${attributionList}">
+						<th:block th:if="${isSimpleNotice != 'Y'}">
+							<p class="bdTop"><b th:text="${attr.licenseName} Attribution"></b></p>
+						</th:block>
+						<th:block th:if="${isSimpleNotice != 'N'}">
+							<p><b th:text="${attr.licenseName} Attribution"></b></p>
+						</th:block>
+						<p th:text="${attr.attribution}"></p>
+					</th:block>
+				</th:block>
+
+				<th:block th:if="${ossAttributionList}">
+					<th:block th:each="value : ${ossAttributionList}">
+						<th:block th:with="s=${value.split('__')}, ossname=${s[0]}, attribution=${s[1]}">
+							<th:block th:if="${isSimpleNotice != 'Y'}">
+								<p class="bdTop"><b th:text="${ossname} Attribution"></b></p>
+							</th:block>
+							<th:block th:if="${isSimpleNotice != 'N'}">
+								<p><b th:text="${ossname} Attribution"></b></p>
+							</th:block>
+							<p th:text="${attribution}"></p>
+						</th:block>
+					</th:block>
+				</th:block>
+			</th:block>
+
+			<!-- License Name, License text 	 -->
+			<th:block th:each="license : ${licenseList}">
+				<th:block th:if="${license.licenseName != ''}">
+					<p class="bdTop license">
+						<b th:id="${license.licenseName}" th:text="${license.licenseName}"></b><br> <br>
+						<br th:text="${license.licenseText}"></br>
+					</p>
+				</th:block>
+			</th:block>
+
+			<th:block th:if="${licenseListUrls}">
+				<p class="bdTop license"><b>License URLs</b><br></p>
+				<ul class="bdTop2 license">
+					<th:block th:each="license : ${licenseListUrls}">
+						<th:block th:if="${license.licenseName != ''}">
+							<li th:id="${license.licenseName}">
+								<span th:text="${license.licenseName}"></span> :
+								<a th:href="${license.webpage}" target="_blank" rel="noreferrer noopener" th:text="${license.webpage}"></a>
+							</li>
+						</th:block>
+					</th:block>
+				</ul>
+			</th:block>
+
+			<th:block th:if="${editAppendedYn == 'Y'}">
+				<p class="bdTop" th:text="${appended}"></p>
+			</th:block>
+			<th:block th:if="${editAppendedYn == 'N'}"></th:block>
 		</div>
 	</body>
 </html>

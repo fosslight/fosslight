@@ -1,40 +1,43 @@
-#foreach ($!{ossInfo} in $!{noticeData})
-$!{ossInfo.ossName}($!{ossInfo.licenseName})
-$!{ossInfo.copyrightText}
-#end
+[# th:each="${noticeData}" th:var="ossInfo"]
+    [# th:text="${ossInfo.ossName} + '(' + ${ossInfo.licenseName} + ')'"][/]
+    [#th:text="${ossInfo.copyrightText}"][/]
+[/]
 
-#set ($attributionCnt = 0)
-#foreach ($!{ossInfo} in $!{noticeData})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
+[# th:with="attributionCnt=0"][/]
+
+[# th:each="ossInfo : ${noticeData}"]
+    [# th:each="licenseInfo : ${ossInfo.componentLicenseList}"]
+        [# th:if="${licenseInfo.attribution != ''}"]
+            [# th:with="attributionCnt=${attributionCnt + 1}"]
+                ------------------------
+                [# th:text="${licenseInfo.licenseName} + ' Attribution'"][/]
+                [# th:text="${licenseInfo.attribution}"][/]
+            [/]
+        [/]
+    [/]
+[/]
+[# th:each="ossInfo : ${noticeData}"]
+    [# th:if="${ossInfo.attribution != ''}"]
+        [# th:with="attributionCnt=${attributionCnt + 1}"]
+            ------------------------
+            [# th:text="${ossInfo.ossName} + ' Attribution'"][/]
+            [# th:text="${ossInfo.attribution}"][/]
+        [/]
+    [/]
+[/]
+
+[# th:if="${$attributionCnt > 0}"]
 ------------------------
-$!{licenseInfo.licenseName} Attribution
-$!{licenseInfo.attribution}
-#end
-#end
-#end
-#foreach ($!{ossInfo} in $!{noticeData})
-#if($!{ossInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
-------------------------
-$!{ossInfo.ossName} Attribution
-$!{ossInfo.attribution}
-#end
-#end
-#if($attributionCnt > 0)
-------------------------
-#end
+[/]
 
-#set($duplicateLicense = [])
-#foreach ($!{ossInfo} in $!{noticeData})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.licenseText} != "" && $!{licenseInfo.obligationType} == "10" && !$duplicateLicense.contains($!{licenseInfo.licenseName}))
-#set($swallow = $duplicateLicense.add($!{licenseInfo.licenseName}))
-
-$!{licenseInfo.licenseName}
-
-$!{licenseInfo.licenseText}
-#end
-#end
-#end
+[# th:with="duplicateLicense=[]"][/]
+[# th:each="ossInfo : ${noticeData}"]
+    [# th:each="licenseInfo : ${ossInfo.componentLicenseList}"]
+        [# th:if="${licenseInfo.licenseText != '' and licenseInfo.obligationType == '10' and !duplicateLicense.contains(licenseInfo.licenseName)}"]
+            [# th:with="swallow=${duplicateLicense.add(licenseInfo.licenseName)}"]
+               [# th:text="${licenseInfo.licenseName}"][/]
+               [# th:text="${licenseInfo.licenseText}"][/]
+           [/]
+        [/]
+    [/]
+[/]

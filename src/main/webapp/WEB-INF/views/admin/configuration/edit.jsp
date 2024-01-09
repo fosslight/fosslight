@@ -41,7 +41,8 @@
 										<input type="checkbox" id="passwordEnabled"/>
 									</c:otherwise>
 								</c:choose>
-								<label for="single">Password</label></span></th>
+								<label for="single">Password</label></span>
+							</th>
 							<td class="dCase">
 								<input type="password" name="password" id="password" value="" style="width: 200px;" disabled="disabled" />
 							</td>

@@ -24,12 +24,12 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null}" th:text="${contentsTitle}"></div>
-								<p style="font-size:12px;" th:if="${contentsSubTitle != null}" th:text="${contentsSubTitle}"></p>
-								#if($comment && $comment != "" && ($mailType == "19" || $mailType == "10" || $mailType == "13"))
-									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}" th:utext="${contentsTitle}"></div>
+								<p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
+								<th:block th:if="${comment and not comment == '' and (mailType == '19' or mailType == '10' or mailType == '13')}">
+									<h2 style="margin:0; padding:25px 10px 0; font-size:16px;">Comment</h2>
+									<div style="padding:10px; font-size:12px;" th:utext="${comment}"></div>
+								</th:block>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
         							<col style="width:60%">
@@ -39,86 +39,90 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<td style="padding:5px;">$!oss_basic_info.ossName</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.ossName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
-										<td style="padding:5px;">$!oss_basic_info.ossNickname</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.ossNickname}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<td style="padding:5px;">$!oss_basic_info.ossVersion #if($!oss_basic_info.ossVersion != '') #end 
-										#if($oss_basic_info.ossType.contains("M")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/> #end
-										#if($oss_basic_info.ossType.contains("D")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/> #end
-										#if($oss_basic_info.ossType.contains("V")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/> #end
+										<td style="padding:5px;" th:utext="${oss_basic_info.ossVersion}">
+											<img th:if="${oss_basic_info.ossType.contains('M')}" src="data:image/png;base64,iVBORw0KG..."/>
+											<img th:if="${oss_basic_info.ossType.contains('D')}" src="data:image/png;base64,iVBORw0KG..."/>
+											<img th:if="${oss_basic_info.ossType.contains('V')}" src="data:image/png;base64,iVBORw0KG..."/>
 										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
-										<td style="padding:5px;">$!oss_basic_info.licenseName ($!oss_basic_info.licenseType)</td>
+										<td style="padding:5px;" th:utext="|${oss_basic_info.licenseName} + ' (' + ${oss_basic_info.licenseType} + ')'|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
 										<td style="padding:5px;">
-										#foreach( $detectedLicense in $!oss_basic_info.detectedLicenses )
-											$!detectedLicense#if( $foreach.hasNext ), #end
-										#end
+											<span th:each="detectedLicense, iterStat : ${oss_basic_info.detectedLicenses}">
+												<span th:utext="${detectedLicense}"></span>
+												<span th:if="${iterStat.last == false}">, </span>
+											</span>
 										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
-										<td style="padding:5px;">$!oss_basic_info.obligation</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.obligation}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
-										<td style="padding:5px;">$!oss_basic_info.copyright</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.copyright}"></td>
 									</tr>
-									#if($oss_basic_info.ossType.contains("M") || $oss_basic_info.ossType.contains("D"))
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
-										<td>
-											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-											#foreach( $ossLicense in $oss_basic_info.ossLicenses )
-												<tr>
-													<td>$!ossLicense.ossLicenseComb</td>
-													<td>$!ossLicense.licenseName</td>
-													<td>$!ossLicense.ossCopyright</td>
-												</tr>
-											#end
-											</table>
-										</td>
-									</tr>
-									#end
+									<th:block th:if="${#strings.contains(oss_basic_info.ossType, 'M') or #strings.contains(oss_basic_info.ossType, 'D')}">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
+											<td>
+												<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+													<tr th:each="ossLicense : ${oss_basic_info.ossLicenses}">
+														<td th:utext="${ossLicense.ossLicenseComb}"></td>
+														<td th:utext="${ossLicense.licenseName}"></td>
+														<td th:utext="${ossLicense.ossCopyright}"></td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</th:block>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Homepage</th>
-										<td style="padding:5px;">#if($!{oss_basic_info.homepage} != "")<a href="$!oss_basic_info.homepage" target="_blank">$!oss_basic_info.homepage</a>#end</td>
+										<td style="padding:5px;">
+											<span th:if="${oss_basic_info.homepage != null and not #strings.isEmpty(oss_basic_info.homepage)}">
+												<a th:href="${oss_basic_info.homepage}" target="_blank" th:utext="${oss_basic_info.homepage}"></a>
+											</span>
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Download Location</th>
-										<td style="padding:5px;">#if($!{oss_basic_info.downloadLocation} != "")$!oss_basic_info.downloadLocation#end</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.downloadLocation}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Summary Description</th>
-										<td style="padding:5px;">$!oss_basic_info.summaryDescription</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.summaryDescription}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
-										<td style="padding:5px;">$!oss_basic_info.attribution</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.attribution}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Created Date / Creator</th>
-										<td style="padding:5px;">$!oss_basic_info.createdDate / $!oss_basic_info.creator</td>
+										<td style="padding:5px;" th:utext="${oss_basic_info.createdDate} + ' / ' + ${oss_basic_info.creator}"></td>
 									</tr>
 								</table>
-								#if($comment && $comment != "" && $mailType != "19" && $mailType != "10" && $mailType != "13")
+								<div th:if="${comment != null and not #strings.isEmpty(comment) and mailType != '19' and mailType != '10' and mailType != '13'">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
-								
-								#if( $projectList )
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								</div>
+
+								<div th:if="${projectList != null and not #lists.isEmpty(projectList)}">
 									<br />
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<thead>
 										<tr>
 											<th style="padding:5px;background:#f0f0f0;">ID</th>
 											<th style="padding:5px;background:#f0f0f0;">Project Name</th>
@@ -128,21 +132,21 @@
 											<th style="padding:5px;background:#f0f0f0;">Created Date</th>
 											<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
 										</tr>
-										#foreach( $project in $projectList )
-										<tr>
-											<td style="padding:5px;">$!project.prjId</td>
-											<td style="padding:5px;">$!project.prjName</td>
-											<td style="padding:5px;">$!project.prjVersion</td>
-											<td style="padding:5px;">$!project.distributionType</td>
-											<td style="padding:5px;">$!project.creator</td>
-											<td style="padding:5px;">$!project.createdDate</td>
-											<td style="padding:5px;">$!project.reviewer</td>
+										</thead>
+										<tbody>
+										<tr th:each="project : ${projectList}">
+											<td style="padding:5px;" th:utext="${project.prjId}"></td>
+											<td style="padding:5px;" th:utext="${project.prjName}"></td>
+											<td style="padding:5px;" th:utext="${project.prjVersion}"></td>
+											<td style="padding:5px;" th:utext="${project.distributionType}"></td>
+											<td style="padding:5px;" th:utext="${project.creator}"></td>
+											<td style="padding:5px;" th:utext="${project.createdDate}"></td>
+											<td style="padding:5px;" th:utext="${project.reviewer}"></td>
 										</tr>
-										#end
+										</tbody>
 									</table>
-								#end
-								
-								#if( $versionDiffInfoList )
+								</div>
+								<div th:if="${versionDiffInfoList != null and not #lists.isEmpty(versionDiffInfoList)}">
 									<br />
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">V-Diff Declared License Info</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
@@ -152,18 +156,19 @@
 											<td style="padding:5px;background:#f0f0f0;">OSS Name (version)</td>
 											<td style="padding:5px;background:#f0f0f0;">Declared License</td>
 										</tr>
-										#foreach ( $versionDiffInfo in $!$versionDiffInfoList )
-										<tr>
-											<td style="padding:5px;">$versionDiffInfo.ossNameInfo</td>
-											<td style="padding:5px;">$versionDiffInfo.licenseInfo</td>
+										<tr th:each="versionDiffInfo : ${versionDiffInfoList}">
+											<td style="padding:5px;" th:utext="${versionDiffInfo.ossNameInfo}"></td>
+											<td style="padding:5px;" th:utext="${versionDiffInfo.licenseInfo}"></td>
 										</tr>
-										#end
 									</table>
-								#end
+								</div>
+
 								
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

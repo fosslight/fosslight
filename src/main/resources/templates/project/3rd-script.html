@@ -763,6 +763,7 @@ var part_grid = {
 					
 					// exclude에 따른 음영설정
 					fn_grid_com.checkExclude(data, 'list3');
+                    resizingJqGidSet();
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if(iCol=="2") fn_grid_com.showOssViewPage(partList, rowid);

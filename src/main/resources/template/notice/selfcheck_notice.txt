@@ -1,86 +1,110 @@
-#set($hash = "#")
-$hash$hash$hash Open Source Software Notice $hash$hash$hash
+[# th:block th:with="hash='#'"]
+    [# th:text="${hash}${hash}${hash} Open Source Software Notice ${hash}${hash}${hash}"][/]
+[/]
 
-#if($!{editCompanyYn} == "Y")This product from $!{companyNameFull} contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
-#end
-#if($!{editCompanyYn} != "Y")This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
-#end
+[# th:if="${editCompanyYn eq 'Y'}"]
+    This product from [# th:text="${companyNameFull}"][/] contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
+[/]
+[# th:if="${editCompanyYn ne 'Y'}"]
+    This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
+[/]
 
-#if($!{disclosureObligationSize} != "0")	
-#foreach( $!{closeSource} in $!{disclosureObligationList} ) 
-$!{closeSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{closeSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
-$!{closeSource.copyrightText}
+[# th:if="${disclosureObligationSize != '0'}"]
+   [# th:each="closeSource : ${disclosureObligationList}"]
+        [# th:text="${closeSource.ossName}"]
+        [# th:if="${hideOssVersionYn != 'Y'}"]
+            [# th:text="${closeSource.ossVersion}"][/]
+        [/]
+        (
+            [# th:each="licenseInfo : ${closeSource.ossComponentsLicense}"]
+                [# th:text="${licenseInfo.licenseName}"],
+            [/]
+        )
+        [# th:text="${closeSource.copyrightText}"][/]
+   [/]
 
-#end
-#if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y")The source code for the above may be obtained free of charge from $!{companyNameFull} at $!{distributionSiteUrl}.#end
-#if($!{editCompanyYn} == "N" && $!{editDistributionSiteUrlYn} == "Y")The source code for the above may be obtained free of charge from $!{distributionSiteUrl}.#end
-#if($!{editDistributionSiteUrlYn} == "N") #end
-#if($!{editDistributionSiteUrlYn} == "Y" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.#end
-#if($!{editDistributionSiteUrlYn} == "N" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.#end
-#if($!{editEmailYn} == "N") #end 
-#end
+    [# th:if="${editCompanyYn == 'Y' and editDistributionSiteUrlYn == 'Y'}"]
+        The source code for the above may be obtained free of charge from [# th:text="${companyNameFull}"][/] at [# th:text="${distributionSiteUrl}"][/].
+    [/]
 
-#if($!{noticeObligationSize} != "0")
-Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in to tables below.
+    [# th:if="${editCompanyYn == 'N' and editDistributionSiteUrlYn == 'Y'}"]
+        The source code for the above may be obtained free of charge from [# th:text="${distributionSiteUrl}"][/].
+    [/]
 
-#foreach( $!{openSource} in $!{noticeObligationList} ) 
-$!{openSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{openSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
-#if($!{openSource.copyrightText} != "")
-$!{openSource.copyrightText}
-#end
+    [# th:if="${editDistributionSiteUrlYn eq 'N'}"][/]
 
-#end
-#end
-		
-#if($!attributionList || $!ossAttributionList)
-#if($!{isSimpleNotice} != "Y") 
+   [# th:if="${editDistributionSiteUrlYn eq 'Y' and editEmailYn eq 'Y'}"]
+       [# th:if="${editCompanyYn eq 'Y'}" th:text="${companyNameFull}"][/]
+       [# th:if="${editCompanyYn eq 'N'}"]We[/]
+       will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+   [/]
+
+   [# th:if="${editDistributionSiteUrlYn eq 'Y' and editEmailYn eq 'Y'}"]
+       [# th:if="${editCompanyYn eq 'Y'}" th:text="${companyNameFull}"][/]
+       [# th:if="${editCompanyYn eq 'N'}"]We[/]
+       will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+   [/]
+
+   [# th:if="${editEmailYn eq 'N'}"][/]
+[/]
+
+
+[# th:if="${noticeObligationSize != '0'}"]
+    Please be informed that
+    [# th:if="${editCompanyYn == 'Y'}" th:text="${companyNameFull}"][/]
+    [# th:if="${editCompanyYn == 'N'}"]this[/]
+    product may contain open source software listed in the tables below.
+[/]
+
+[# th:each="openSource : ${noticeObligationList}"]
+    [# th:text="${openSource.ossName}"][/]
+    [# th:if="${hideOssVersionYn != 'Y'}"]
+        [# th:text="${openSource.ossVersion}"][/]
+    [/]
+    ([# th:each="licenseInfo : ${openSource.ossComponentsLicense}"]
+        [# th:text="${licenseInfo.licenseName}"][/],
+    [/])
+    [# th:if="${openSource.copyrightText != ''}"]
+        [# th:text="${openSource.copyrightText}"][/]
+    [/]
+[/]
+
+[# th:if="${attributionList != null or ossAttributionList != null}"]
+    [# th:if="${isSimpleNotice != 'Y'}"]
+        _________________________________________________________________________________________________________________________
+    [/]
+    [# th:each="attr : ${attributionList}"]
+        [# th:text="${attr.licenseName} + ' Attribution'"][/]
+        [# th:text="${attr.attribution}"][/]
+    [/]
+    [# th:if="${ossAttributionList != null}"]
+        [# th:text="${}"]
+    [/]
+[/]
+
+[# th:each="${licenseList}" th:var="license"][/]
+[# th:if="${license.licenseName != ''}"]
 _________________________________________________________________________________________________________________________
-#end
+[/]
 
-#foreach( $attr in $attributionList )
-$attr.licenseName Attribution
-$attr.attribution
+[# th:text="${license.licenseText}"]
+    [# th:text="${license.licenseText}"][/]
+[/]
 
-#end
+[# th:if="${licenseListUrls}"]
+    [# th:each="${licenseListUrls}" th:var="license"]
+        [# th:if="${license.licenseName != ''}"]
+            [# th:text="${license.licenseName} + ' : ' + ${license.webpage}"][/]
+        [/]
+    [/]
+[/]
 
-#if($!ossAttributionList)
-#foreach( $value in $ossAttributionList )
-#set ($s = $value.split("__"))
-#set ($ossname = $s[0])
-#set ($attribution = $s[1])
-$ossname Attribution
-$attribution
-
-#end
-#end
-#end
-
-#foreach( $!{license} in $!{licenseList} )
-#if($!{license.licenseName} != "") 
+[# th:if="${editAppendedYn eq 'Y'}"][/]
 _________________________________________________________________________________________________________________________
 
+[# th:text="${appended}"][/]
+[# th:if="${editAppendedYn eq 'N'}"][/]
 
-$!{license.licenseName}
-
-
-$!{license.licenseText}
-
-
-#end
-#end
-#if($!licenseListUrls)
-#foreach( $!{license} in $!{licenseListUrls} )
-#if($!{license.licenseName} != "") 
-$!{license.licenseName} : $!{license.webpage}
-#end
-#end
-#end
-		
-#if($!{editAppendedYn} == "Y") 
-_________________________________________________________________________________________________________________________
-
-$!{appended} 
-#end #if($!{editAppendedYn} == "N") #end
-
-#set ($s = $noticeTitle.split(".txt"))
-($s.get(0))
+[# th:with="s=${noticeTitle.split('.txt')}"]
+    ($s[0])
+[/]

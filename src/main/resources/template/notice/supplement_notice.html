@@ -1,55 +1,66 @@
 <table cellpadding="0" cellspacing="0" border="0">
-#foreach ($mapEntry in $noticeData.entrySet())
-#set ($binaryPathList = $mapEntry.key.split(","))
+    <th:block th:each="mapEntry : ${noticeData.entrySet()}">
+        <th:block th:with="binaryPathList=${mapEntry.key.split(',')}">
 <tr id="id$velocityCount"><td class="same-license">
 <div class="label">Notices for file(s):</div>
 <div class="file-list">
-#foreach ($binaryPath in $binaryPathList)
-$binaryPath<br/>
-#end
+    <th:block th:each="binaryPath : ${binaryPathList}">
+        <span th:text="${binaryPath}"></span><br/>
+    </th:block>
 </div><!-- file-list -->
 <!-- license-text -->
 <pre class="license-text">
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-$!{ossInfo.ossName}($!{ossInfo.licenseName})
-$!{ossInfo.copyrightText}
-#end
+    <th:block th:each="ossInfo : ${mapEntry.value}">
+        <p th:text="${ossInfo.ossName} + '(' + ${ossInfo.licenseName} + ')'"></p>
+        <p th:text="${ossInfo.copyrightText}"></p>
+    </th:block>
 
-#set ($attributionCnt = 0)
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
-------------------------
-$!{licenseInfo.licenseName} Attribution
-$!{licenseInfo.attribution}
-#end
-#end
-#end
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#if($!{ossInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
-------------------------
-$!{ossInfo.ossName} Attribution
-$!{ossInfo.attribution}
-#end
-#end
-#if($attributionCnt > 0)
-------------------------
-#end
-#set($duplicateLicense = [])
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.licenseText} != "" && $!{licenseInfo.obligationType} == "10" && !$duplicateLicense.contains($!{licenseInfo.licenseName}))
-#set($swallow = $duplicateLicense.add($!{licenseInfo.licenseName}))
 
-$!{licenseInfo.licenseName}
+<th:block th:with="attributionCnt=0">
+    <th:block th:each="ossInfo : ${mapEntry.value}">
+        <th:block th:each="licenseInfo : ${ossInfo.componentLicenseList}">
+            <th:block th:if="${licenseInfo.attribution != null and licenseInfo.attribution != ''}">
+                <th:block th:with="attributionCnt=${attributionCnt + 1}">
+                    <span>------------------------</span>
+                    <p th:text="${licenseInfo.licenseName} + ' Attribution'"></p>
+                    <p th:text="${licenseInfo.attribution}"></p>
+                </th:block>
+            </th:block>
+        </th:block>
+    </th:block>
+</th:block>
 
-$!{licenseInfo.licenseText}
-#end
-#end
-#end
+<th:block th:with="attributionCnt=0">
+    <th:block th:each="ossInfo : ${mapEntry.value}">
+        <th:block th:if="${ossInfo.attribution != null and ossInfo.attribution != ''}">
+            <th:block th:with="attributionCnt=${attributionCnt + 1}">
+                <span>------------------------</span>
+                <p th:text="${ossInfo.ossName} + ' Attribution'"></p>
+                <p th:text="${ossInfo.attribution}"></p>
+            </th:block>
+        </th:block>
+    </th:block>
+</th:block>
+
+<th:block th:if="${attributionCnt > 0}">
+    <span>------------------------</span>
+</th:block>
+
+<th:block th:object="${#sets.newSet()}">
+    <th:block th:each="ossInfo : ${mapEntry.value}">
+        <th:block th:each="licenseInfo : ${ossInfo.componentLicenseList}">
+            <th:block th:if="${licenseInfo.licenseText != '' and licenseInfo.obligationType == '10' and !__${#object.contains(licenseInfo.licenseName)}__}">
+                <th:block th:with="__${#object.add(licenseInfo.licenseName)}__">
+                    <span th:text="${licenseInfo.licenseName}"></span>
+                    <span th:text="${licenseInfo.licenseText}"></span>
+                </th:block>
+            </th:block>
+        </th:block>
+    </th:block>
+</th:block>
+
 </pre><!-- license-text --> 
 </td></tr><!-- same-license -->
-#end
+    </th:block>
+    </th:block>
 </table>

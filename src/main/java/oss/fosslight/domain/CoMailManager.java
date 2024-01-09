@@ -2592,7 +2592,7 @@ public class CoMailManager extends CoTopComponent {
 		for (String s : CoCodeManager.getCodes(CoConstDef.CD_MAIL_COMPONENT_TEMPLATE)) {
 			for (String type : CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_COMPONENT_TEMPLATE, s).split(",")) {
 				if (msgType.equals(type.trim())) {
-					return "/template/email/" + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_TEMPLATE, s);
+					return "email/" + CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_TEMPLATE, s);
 				}
 			}
 		}

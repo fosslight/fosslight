@@ -144,7 +144,7 @@ public final class PdfUtil extends CoTopComponent {
         convertData.put("OssReview", ossReview);
         convertData.put("LicenseReview", licenseReview);
         convertData.put("VulnerabilityReview", vulnerabilityReview);
-        convertData.put("templateUrl", "/template/report/reviewReport.html");
+        convertData.put("templateUrl", "report/reviewReport.html");
         
         return CommonFunction.VelocityTemplateToString(convertData);
 //        String pdfContent = getVelocityTemplateContent("/template/report/reviewReport.html", convertData);

@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=euc-kr">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
 	<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
@@ -24,53 +24,49 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:text="${contentsTitle}"></div>
+								<div th:if="${contentsSubTitle}" style="font-size:12px;" th:text="${contentsSubTitle}"></div>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
-        							<col style="width:*">
+									<col style="width:*">
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
 										<th style="padding:5px;background:#f0f0f0;">Binary Analysis Information</th>
 									</tr>
-<!-- 									
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">ID</th>
-										<td style="padding:5px;">$!bat_exe_info.batId</td>
-									</tr>
- -->									
+									<!--
+                                    <tr>
+                                        <th align="left" style="padding:5px;background:#f0f0f0;">ID</th>
+                                        <td style="padding:5px;">${bat_exe_info.batId}</td>
+                                    </tr>
+                                     -->
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
-										<td style="padding:5px;">($!bat_exe_info.batId) $!bat_exe_info.softwareName</td>
+										<td style="padding:5px;" th:text="|(${bat_exe_info.batId}) ${bat_exe_info.softwareName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
-										<td style="padding:5px;">$!bat_exe_info.softwareVersion</td>
+										<td style="padding:5px;" th:text="|${bat_exe_info.softwareVersion}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party</th>
-										<td style="padding:5px;">$!bat_exe_info.partnerName</td>
+										<td style="padding:5px;" th:text="|${bat_exe_info.partnerName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Analysis File</th>
-										<td style="padding:5px;">$!bat_exe_info.binaryFileId</td>
+										<td style="padding:5px;" th:text="|${bat_exe_info.binaryFileId}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!bat_exe_info.creator</td>
+										<td style="padding:5px;" th:text="|${bat_exe_info.creator}|"></td>
 									</tr>
 								</table>
 								<br />
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:text="'* This mail was sent by ' + ${domain.replaceAll('(http|https)://', '')}" style="font-size:12px;"></div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>
+
 						<tr>
 							<td colspan="3" height="1" style="background:#ddd"></td>
 						</tr>

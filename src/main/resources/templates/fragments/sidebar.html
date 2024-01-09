@@ -17,7 +17,7 @@
             <div class="col-6">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
-                <a th:text="${@CommonFunction.loginUserName()}"></a>
+                <a onclick="createTabNew('configuration_edit', '/configuration/edit')" style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" ></a>
               </span>
             </div>
             <div class="col-1">

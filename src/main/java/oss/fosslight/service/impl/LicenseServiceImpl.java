@@ -401,7 +401,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		
 		model.put("licenseText", CommonFunction.lineReplaceToBR(bean.getLicenseText()));
-		model.put("templateURL", "/template/notice/license.html");
+		model.put("templateURL", "notice/license.html");
 		
 		return CommonFunction.VelocityTemplateToString(model);
 	}

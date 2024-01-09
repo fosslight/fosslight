@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+    //<![CDATA[
+    /*global $ */
+    /*jslint browser: true, nomen: true */
+    //var defaultLocale = '${sessUserInfo.defaultLocale}';
+    let defaultTab = [[${sessUserInfo?.defaultTab}]];
+
+    $(document).ready(function(){
+        'use strict';
+        data.init();
+        evt.init();
+    });
+
+    let commentTemp = '';
+    let data = {
+        init : function(){
+            if(!defaultTab) {
+                $("[name='defaultTab']:eq(0)").attr("checked", true); // 첫번째 항목을 선택하도록 변경
+            } else {
+                $.each(defaultTab.split(","), function(idx, val){
+                    $("#defaultTab" + val).attr('checked', true);
+                });
+            }
+            $('#ConfigurationForm select[name="defaultLocale"]').trigger('change');
+            $('#userInfoArea select[name="division"]').trigger('change');
+
+            let userDivision = $('#userInfoArea select[name="division"]');
+            if([[${sessUserInfo?.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                for(var i=0;i<userDivision.children().length;i++){
+                    if(userDivision.children()[i].value == [[${sessUserInfo.division}]]) {
+                        break;
+                    }
+                    if(userDivision.children().length - 1 == i ) {
+                        let divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), sessUserInfo?.division)}]];
+                        userDivision.append("<option value='" + [[${sessUserInfo.division}]] + "' >" + divisionName+ "</option>");
+                        $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                        $('#userInfoArea select[name="division"] option:last').change();
+                    }
+                }
+            }
+
+            userDivision = $('#userInfoArea select[name="division"]');
+            for(var i=0;i<userDivision.children().length;i++){
+                if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                    break;
+                }
+                if(userDivision.children().length - 1 == i ) {
+                    userDivision.append("<option value=[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}] ></option>");
+                    if([[${sessUserInfo.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                        $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                        $('#userInfoArea select[name="division"] option:last').change();
+                    }
+                }
+            }
+        },
+    };
+
+    let evt = {
+        init : function(){
+            $("#save").on('click',function(){
+                //var radioVal = $('input[name="defaultTab"]:checked').val();
+                if($('input:checkbox[name="defaultTab"]:checked').length == 0){
+                    alertify.alert([[#{msg.configuration.required.selectDefaultTab}]], function(){});
+                    return false;
+                }
+
+                alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+                    if (e) {
+                        fn.updateSubmit();
+                    } else {
+                        return false;
+                    }
+                });
+            });
+
+            $("#passwordEnabled").on('change', function(){
+                var isChecked = $('#passwordEnabled').is(":checked");
+                $("#password").attr("disabled", !isChecked);
+                $("#password").val('');
+            });
+        }
+    };
+
+    let fn = {
+        loadSearchCondition: function(){
+            var searchAreaFlag = $("#defaultSearch option:selected").val();
+            $("#searchConditionArea").fadeOut(300);
+            $("#searchConditionBtnArea").fadeOut(300);
+
+            if(searchAreaFlag != "") {
+                $.ajax({
+                    url : "/configuration/loadDefaultSearchCondition",
+                    dataType : 'html',
+                    cache : false,
+                    data : {'defaultSearchType' : searchAreaFlag},
+                    success : function(detailResult){
+                        $("#searchConditionArea").html(detailResult);
+                        $("#searchConditionArea").fadeIn(300);
+                        $("#searchConditionBtnArea").fadeIn(300);
+                    },
+                    error : function(request,status,error){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                        $("#defaultSearch").val("");
+                    }
+                });
+
+            }
+
+        },
+        updateSearchCondition: function(){
+            // multiple checkbox values to comma separate
+            var chkElArr = ["restrictions", "statuses", "status"];
+            $.each(chkElArr, function(index, item){
+                var selectEl = $('#searchConditionForm input[name="'+item+'"]');
+                if(selectEl.length > 0) {
+                    fn.appendFormCheckboxValuesEl(item);
+                }
+            });
+
+            $("#searchConditionForm").ajaxForm({
+                url : "/configuration/updateDefaultSearchCondition",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: fn.onUpdateSuccess,
+                error : fn.onError
+            }).submit();
+        },
+        appendFormCheckboxValuesEl(target) {
+            $('#searchConditionForm input[name="chk_'+target+'"]').remove();
+            var addEl = '<input type="hidden" name="chk_'+target+'" value="'+ $('input[name="'+target+'"]:checked').map(function () {return this.value;}).get().join(",") +'" />';
+            $("#searchConditionForm").append(addEl);
+        },
+        updateSubmit : function(){
+            $("#ConfigurationForm").ajaxForm({
+                url : "/configuration/saveAjax",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: fn.onUpdateSuccess,
+                error : fn.onError
+            }).submit();
+        },
+        onUpdateSuccess : function(json, status){
+            loading.hide();
+            if(json.resCd == '10'){
+                alertify.success([[#{msg.common.success}]]);
+            }else{
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        },
+        onError : function(data, status){
+            alertify.error([[#{msg.common.valid2}]], 0);
+        },
+        changePassword : function(){
+            var params = {};
+            var password = $("#password").val();
+            var userName = $('#userInfoArea input[name="userName"]').val();
+            var division = $.trim($('#userInfoArea select[name="division"] option:selected').val());
+            var confirmMsg = "";
+            if(division === [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+                confirmMsg = [[#{msg.configuration.confirm.save}]];
+            } else {
+                confirmMsg = [[#{msg.common.confirm.save}]];
+            }
+            alertify.confirm(confirmMsg, function (e) {
+                if (e) {
+                    $.ajax({
+                        type: 'POST',
+                        url : "/system/user/updateUserNameAndDivision",
+                        data: JSON.stringify({'userName':userName, 'division':division, 'password': password}),
+                        contentType : 'application/json',
+                        success: function (data) {
+                            if("true" != data.isValid) {
+                                if(data.validMsg) {
+                                    alertify.alert(data.validMsg);
+                                } else {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            } else {
+                                alertify.success([[#{msg.common.success}]]);
+                            }
+                        },
+                        error : fn.onError
+                    });
+                } else {
+                    return false;
+                }
+            });
+        }
+    };
+    //]]>
+</script>
+</th:block>

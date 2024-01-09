@@ -1,13 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
-	<body>
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
 				<td colspan="3" height="28" style="background:#f9f9f9"></td>
@@ -24,17 +17,12 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
-							
-							#if( $comment )
-								<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-								<div style="padding:10px;font-size:12px;">$!comment</div>
-							#end
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment}">
+									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								</div>
 								<!-- <p style="font-size:12px;">▶Created : $!before.createdDate / $!before.creator</p> -->
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<tr>
@@ -44,78 +32,92 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-										<td style="padding:5px;">$!before.prjName</td>
-										<td style="padding:5px;">$!after.prjName</td>
+										<td style="padding:5px;" th:utext="${before.prjName}"></td>
+										<td style="padding:5px;" th:utext="${after.prjName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
-										<td style="padding:5px;">$!before.prjVersion</td>
-										<td style="padding:5px;">$!after.prjVersion</td>
+										<td style="padding:5px;" th:utext="${before.prjVersion}"></td>
+										<td style="padding:5px;" th:utext="${after.prjVersion}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
-										<td style="padding:5px;">$!before.osType</td>
-										<td style="padding:5px;">$!after.osType</td>
+										<td style="padding:5px;" th:utext="${before.osType}"></td>
+										<td style="padding:5px;" th:utext="${after.osType}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only?</th>
-										<td style="padding:5px;">$!before.distributionType / $!before.networkServerType</td>
-										<td style="padding:5px;">$!after.distributionType / $!after.networkServerType</td>
+										<td style="padding:5px;" th:utext="|${before.distributionType} / ${before.networkServerType}|"></td>
+										<td style="padding:5px;" th:utext="|${after.distributionType} / ${after.networkServerType}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
-										<td style="padding:5px;">$!before.distributeTarget</td>
-										<td style="padding:5px;">$!after.distributeTarget</td>
+										<td style="padding:5px;" th:utext="${before.distributeTarget}"></td>
+										<td style="padding:5px;" th:utext="${after.distributeTarget}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
-										<td style="padding:5px;">$!before.noticeType</td>
-										<td style="padding:5px;">$!after.noticeType</td>
+										<td style="padding:5px;" th:utext="${before.noticeType}"></td>
+										<td style="padding:5px;" th:utext="${after.noticeType}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
-										<td style="padding:5px;">$!before.priority</td>
-										<td style="padding:5px;">$!after.priority</td>
+										<td style="padding:5px;" th:utext="${before.priority}"></td>
+										<td style="padding:5px;" th:utext="${after.priority}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Model Information</th>
-										<td style="padding:5px;">#foreach( $modelInfo in $before.modelListInfo )$!modelInfo <br />#end</td>
-										<td style="padding:5px;">#foreach( $modelInfo in $after.modelListInfo )$!modelInfo <br />#end</td>
+										<td style="padding:5px;">
+											<span th:each="modelInfo : ${before.modelListInfo}" th:utext="${modelInfo}"></span><br />
+										</td>
+										<td style="padding:5px;">
+											<span th:each="modelInfo : ${after.modelListInfo}" th:utext="${modelInfo}"></span><br />
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
-										<td style="padding:5px;">$!before.comment</td>
-										<td style="padding:5px;">$!after.comment</td>
+										<td style="padding:5px;"><span th:utext="${before.comment}"></span></td>
+										<td style="padding:5px;"><span th:utext="${after.comment}"></span></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
-										<td style="padding:5px;">$!before.modifiedDate / $!before.modifier </td>
-										<td style="padding:5px;">$!after.modifiedDate / $!after.modifier </td>
+										<td style="padding:5px;">
+											<span th:utext="${before.modifiedDate}"></span> / <span th:utext="${before.modifier}"></span>
+										</td>
+										<td style="padding:5px;">
+											<span th:utext="${after.modifiedDate}"></span> / <span th:utext="${after.modifier}"></span>
+										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										<td style="padding:5px;">$!before.reviewer</td>
-										<td style="padding:5px;">$!after.reviewer</td>
+										<td style="padding:5px;"><span th:utext="${before.reviewer}"></span></td>
+										<td style="padding:5px;"><span th:utext="${after.reviewer}"></span></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
-										<td style="padding:5px;">$!before.division</td>
-										<td style="padding:5px;">$!after.division</td>
+										<td style="padding:5px;"><span th:utext="${before.division}"></span></td>
+										<td style="padding:5px;"><span th:utext="${after.division}"></span></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!before.creator</td>
-										<td style="padding:5px;">$!after.creator</td>
+										<td style="padding:5px;"><span th:utext="${before.creator}"></span></td>
+										<td style="padding:5px;"><span th:utext="${after.creator}"></span></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Watcher</th>
-										<td style="padding:5px;">#foreach( $watcherInfo in $before.watcherListInfo )$!watcherInfo <br />#end</td>
-										<td style="padding:5px;">#foreach( $watcherInfo in $after.watcherListInfo )$!watcherInfo <br />#end</td>
+										<td style="padding:5px;">
+											<span th:each="watcherInfo : ${before.watcherListInfo}" th:utext="${watcherInfo}"></span><br />
+										</td>
+										<td style="padding:5px;">
+											<span th:each="watcherInfo : ${after.watcherListInfo}" th:utext="${watcherInfo}"></span><br />
+										</td>
 									</tr>
 								</table>
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>
@@ -130,6 +132,5 @@
 				<td colspan="3" height="28" style="background:#f9f9f9"></td>
 			</tr>
 		</table>
-		
-	</body>
+</body>
 </html>

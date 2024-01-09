@@ -1,70 +1,69 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
 <html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
-	<body>
-		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td width="60" style="background:#f9f9f9"></td>
-				<td>
-					<table cellspacing="0" cellpadding="0" border="0">
-						<tr> 
-							<td colspan="3" height="25" style="background:#c00c3f">
-								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
-							</td>
-						</tr>
-						<tr>
-							<td width="1" style="background:#ddd"></td>
-							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
-							#end
-								<pre>
-#if( $mailType == "800" )							
-FOSSLight Hub-Access Token was issued as follows.
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <style>
+        .marker {
+            background-color: Yellow;
+        }
+    </style>
+    <title>FOSSLight Hub</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" style="font-family:'arial,sans-serif'">
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+    <tr>
+        <td style="background:#f9f9f9" width="60"></td>
+        <td>
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td colspan="3" height="25" style="background:#c00c3f">
+                        <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background:#ddd" width="1"></td>
+                    <td style="padding:40px;">
+                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}"
+                             th:text="${contentsTitle}"></div>
+                        <pre>
+							<th:block th:if="${mailType == '800'}">
+									FOSSLight Hub-Access Token was issued as follows.
+								<div th:if="${token}">
+									<span th:text="${token}"></span>
+								</div>
+								<div th:if="${expireDate}">
+									Expired date : <span th:text="${expireDate}"></span>
+								</div>
+								<div th:text="${tokenInfo}"></div>
+							</th:block>
 
-#if( $token )
-$token
-#end
+							<th:block th:if="${mailType == '801'}">
+									The access token of FOSSLight Hub has been deleted.
+								<div th:text="${tokenInfo}"></div>
+							</th:block>
+						</pre>
+                        <div style="margin:20px 0;border:1px dashed #666;"></div>
+                        <div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+                             style="font-size:12px;">
+                            * This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+                        </div>
+                    </td>
+                    <td style="background:#ddd" width="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" height="1" style="background:#ddd"></td>
+                </tr>
+            </table>
+        </td>
+        <td style="background:#f9f9f9" width="60"></td>
+    </tr>
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+</table>
 
-
-#if( $expireDate )
-Expired date : $expireDate
-#end
-
-$tokenInfo
-#end
-#if( $mailType == "801" )
-The access token of FOSSLight Hub has been deleted.
-
-$tokenInfo
-#end
-								</pre>
-								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
-							</td>
-							<td width="1" style="background:#ddd"></td>
-						</tr>
-						<tr>
-							<td colspan="3" height="1" style="background:#ddd"></td>
-						</tr>
-					</table>
-				</td>
-				<td width="60" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-		</table>
-		
-	</body>
+</body>
 </html>

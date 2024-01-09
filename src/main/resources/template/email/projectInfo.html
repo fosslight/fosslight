@@ -1,13 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
-	<body>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
+<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
 				<td colspan="3" height="28" style="background:#f9f9f9"></td>
@@ -24,17 +24,13 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$contentsSubTitle</p>
-							#end
-								#if($comment && $comment != "" && ($mailType == "51" || $mailType == "50" || $mailType == "40" || $mailType == "41" || $mailType == "68" || $mailType == "38" || $mailType == "33" || $mailType == "46" || $mailType == "100"))
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
-							
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								</div>
+
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
         							<col style="width:*">
@@ -44,212 +40,202 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-										<td style="padding:5px;">(${project_basic_info.prjId}) ${project_basic_info.prjName}</td>
+										<td style="padding:5px;" th:utext="|(${project_basic_info.prjId}) ${project_basic_info.prjName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
-										<td style="padding:5px;">$!project_basic_info.prjVersion</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.prjVersion}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
 										<td style="padding:5px;">$!project_basic_info.osType</td>
 									</tr>
 									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
+										<td style="padding:5px;" th:utext="${project_basic_info.osType}"></td>
+									</tr>
+									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only? </th>
-										<td style="padding:5px;">$!project_basic_info.distributionType / $!project_basic_info.networkServerType</td>
+										<td style="padding:5px;" th:utext="|${project_basic_info.distributionType} / ${project_basic_info.networkServerType}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
-										<td style="padding:5px;">$!project_basic_info.distributeTarget</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.distributeTarget}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
-										<td style="padding:5px;">$!project_basic_info.noticeType</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.noticeType}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
-										<td style="padding:5px;">$!project_basic_info.priority</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
-										<td style="padding:5px;">$!project_basic_info.comment</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.priority}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!project_basic_info.creator</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.creator}"></td>
 									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
-										<td style="padding:5px;">$!project_basic_info.division</td>
-									</tr>
-									#if( $project_basic_info.reviewer )
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										<td style="padding:5px;">$!project_basic_info.reviewer</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.reviewer}"></td>
 									</tr>
-									#end
-								</table>
-								#if( $disclosure_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; List of OSS to Disclose &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $disclosure_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end
-								#if( $bom_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $bom_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end
-								#if( $distribution_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Distribution Information &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
-										<td style="padding:5px;">$!distribution_info.distributeName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Master Category</th>
-										<td style="padding:5px;">$!distribution_info.distributeMasterCategory</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
-										<td style="padding:5px;">$!distribution_info.distributeTarget</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
-										<td style="padding:5px;">$!distribution_info.noticeFileId</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Package</th>
-										<td style="padding:5px;">
-											$!distribution_info.packageFileId
-											#if( $!distribution_info.packageFileId2 ) <br>$!distribution_info.packageFileId2 #end
-											#if( $!distribution_info.packageFileId3 ) <br>$!distribution_info.packageFileId3 #end
-										</td>
+									<tr th:if="${project_basic_info.reviewer}">
+										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
+										<td style="padding:5px;" th:utext="${project_basic_info.reviewer}"></td>
 									</tr>
 								</table>
-								#end
-								#if( $model_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Model Information &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">Category</th>
-										<th style="padding:5px;background:#f0f0f0;">Model Name</th>
-										<th style="padding:5px;background:#f0f0f0;">Release Date</th>
-										<th style="padding:5px;background:#f0f0f0;">Last Modified</th>
-										<th style="padding:5px;background:#f0f0f0;">Updated Date</th>
-									</tr>
-									#foreach( $model in $model_info )
-									<tr>
-										<td style="padding:5px;">$!model.category</td>
-										<td style="padding:5px;">$!model.modelName</td>
-										<td style="padding:5px;">$!model.releaseDate</td>
-										<td style="padding:5px;">$!model.modifier</td>
-										<td style="padding:5px;">$!model.modifiedDate</td>
-									</tr>
-									#end
-								</table>
-								#end
-								#if( $vulnerability_prj_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Vulnerability Information &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">CVE ID</th>
-										<th style="padding:5px;background:#f0f0f0;">Score</th>
-										<th style="padding:5px;background:#f0f0f0;">Summary</th>
-										<th style="padding:5px;background:#f0f0f0;">Published Date</th>
-										<th style="padding:5px;background:#f0f0f0;">Modified Date</th>
-									</tr>
-									#foreach( $vulnerability in $vulnerability_prj_oss_info )
-									<tr>
-										<td style="padding:5px;">$!vulnerability.ossName</td>
-										<td style="padding:5px;">$!vulnerability.ossVersion</td>
-										<td style="padding:5px;">
-											$commonFunction.convertCveIdToLink($!vulnerability.cveId)
-										</td>
-										<td style="padding:5px;">$!vulnerability.cvssScore</td>
-										<td style="padding:5px;">$!vulnerability.vulnSummary</td>
-										<td style="padding:5px;">$!vulnerability.publishedDate</td>
-										<td style="padding:5px;">$!vulnerability.modifiedDate</td>
-									</tr>
-									#end
-								</table>
-								#end
+								<th:block th:if="${disclosure_oss_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List to Disclose &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
+											<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
+											<th style="padding:5px;background:#f0f0f0;">License Name</th>
+										</tr>
+										<tr th:each="oss : ${disclosure_oss_info}">
+											<td style="padding:5px;" th:utext="${oss.ossName}"></td>
+											<td style="padding:5px;" th:utext="${oss.ossVersion}"></td>
+											<td style="padding:5px;" th:utext="${oss.licenseName}"></td>
+										</tr>
+									</table>
+								</th:block>
 
-								#if( $vulnerability_prj_recalc_oss_info )
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Vulnerability Information &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Before Change</th>
-										<th style="padding:5px;background:#f0f0f0;">After Change</th>
-									</tr>
-									
-									#foreach( $vulnerability_reCalc in $vulnerability_prj_recalc_oss_info )
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<td style="padding:5px;" colspan="2">$!vulnerability_reCalc.ossName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<td style="padding:5px;" colspan="2">$!vulnerability_reCalc.ossVersion</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
-										<td style="padding:5px;">
-											$commonFunction.convertCveIdToLink($!vulnerability_reCalc.cveId)
-										</td>
-										<td style="padding:5px;">
-											$commonFunction.convertCveIdToLink($$!vulnerability_reCalc.cveIdTo)
-										</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Score</th>
-										<td style="padding:5px;">$!vulnerability_reCalc.cvssScore</td>
-										<td style="padding:5px;">$!vulnerability_reCalc.cvssScoreTo</td>
-									</tr>
-									#end
+								<th:block th:if="${bom_oss_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
+											<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
+											<th style="padding:5px;background:#f0f0f0;">License Name</th>
+										</tr>
+										<tr th:each="oss : ${bom_oss_info}">
+											<td style="padding:5px;" th:utext="${oss.ossName}"></td>
+											<td style="padding:5px;" th:utext="${oss.ossVersion}"></td>
+											<td style="padding:5px;" th:utext="${oss.licenseName}"></td>
+										</tr>
+									</table>
+								</th:block>
 
-								</table>
-								#end
-								
+								<th:block th:if="${distribution_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Distribution Information &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
+											<td style="padding:5px;" th:utext="${distribution_info.distributeName}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Master Category</th>
+											<td style="padding:5px;" th:utext="${distribution_info.distributeMasterCategory}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
+											<td style="padding:5px;" th:utext="${distribution_info.distributeTarget}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
+											<td style="padding:5px;" th:utext="${distribution_info.noticeFileId}"></td>
+										</tr>
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Package</th>
+											<td style="padding:5px;">
+												<p th:utext="${distribution_info.packageFileId}"></p>
+												<br><p th:utext="${distribution_info.packageFileId2}"></p>
+												<br><p th:utext="${distribution_info.packageFileId3}"></p>
+											</td>
+										</tr>
+									</table>
+								</th:block>
+
+								<th:block th:if="${model_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Model Information &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th style="padding:5px;background:#f0f0f0;">Category</th>
+											<th style="padding:5px;background:#f0f0f0;">Model Name</th>
+											<th style="padding:5px;background:#f0f0f0;">Release Date</th>
+											<th style="padding:5px;background:#f0f0f0;">Last Modified</th>
+											<th style="padding:5px;background:#f0f0f0;">Updated Date</th>
+										</tr>
+										<tr th:each="model : ${model_info}">
+											<td style="padding:5px;" th:utext="${model.category}"></td>
+											<td style="padding:5px;" th:utext="${model.modelName}"></td>
+											<td style="padding:5px;" th:utext="${model.releaseDate}"></td>
+											<td style="padding:5px;" th:utext="${model.modifier}"></td>
+											<td style="padding:5px;" th:utext="${model.modifiedDate}"></td>
+										</tr>
+									</table>
+								</th:block>
+
+								<th:block th:if="${vulnerability_prj_oss_info}">
+									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:utext="'« Vulnerability Information »'"></h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
+										<tr>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Version'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'CVE ID'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Score'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Summary'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Published Date'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'Modified Date'"></th>
+										</tr>
+										<tr th:each="vulnerability : ${vulnerability_prj_oss_info}">
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.ossVersion}"></td>
+											<td th:style="'padding:5px;'">
+												<a th:href="${@CommonFunction.convertCveIdToLink(vulnerability.cveId)}" th:utext="${vulnerability.cveId}"></a>
+											</td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.cvssScore}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.vulnSummary}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.publishedDate}"></td>
+											<td th:style="'padding:5px;'" th:utext="${vulnerability.modifiedDate}"></td>
+										</tr>
+									</table>
+								</th:block>
+
+								<th:block th:if="${vulnerability_prj_recalc_oss_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Vulnerability Information &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+											<th style="padding:5px;background:#f0f0f0;">Before Change</th>
+											<th style="padding:5px;background:#f0f0f0;">After Change</th>
+										</tr>
+										<th:block th:each="vulnerability_reCalc: ${vulnerability_prj_recalc_oss_info}">
+											<tr>
+												<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
+												<td style="padding:5px;" colspan="2" th:block="${vulnerability_reCalc.ossName}"></td>
+											</tr>
+											<tr>
+												<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
+												<td style="padding:5px;" colspan="2" th:block="${vulnerability_reCalc.ossVersion}"></td>
+											</tr>
+											<tr>
+												<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
+												<td style="padding:5px;" th:utext="${@CommonFunction.convertCveIdToLink(vulnerability_reCalc.cveId)}"></td>
+												<td style="padding:5px;" th:utext="${@CommonFunction.convertCveIdToLink(vulnerability_reCalc.cveIdTo)}"></td>
+											</tr>
+											<tr>
+												<th align="left" style="padding:5px;background:#f0f0f0;">Score</th>
+												<td style="padding:5px;" th:utext="${vulnerability_reCalc.cvssScore}"></td>
+												<td style="padding:5px;" th:utext="${vulnerability_reCalc.cvssScoreTo}"></td>
+											</tr>
+										</th:block>
+									</table>
+								</th:block>
 								<br />
-								#if($comment && $comment != "" && $mailType != "51" && $mailType != "50" && $mailType != "40" && $mailType != "41" && $mailType != "68" && $mailType != "38" && $mailType != "33" && $mailType != "46" && $mailType != "100")
-									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
+								<div th:if="${comment and comment != '' and mailType != '51' and mailType != '50' and mailType != '40' and mailType != '41' and mailType != '68' and mailType != '38' and mailType != '33' and mailType != '46' and mailType != '100' }">
+									<h2 th:style="'margin:0;padding:25px 10px 0;font-size:16px;'" th:utext="'Comment'"></h2>
+									<div th:style="'padding:10px;font-size:12px;'" th:utext="${comment}"></div>
+								</div>
+
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

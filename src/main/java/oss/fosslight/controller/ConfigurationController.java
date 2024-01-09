@@ -47,7 +47,7 @@ public class ConfigurationController extends CoTopComponent {
 	@GetMapping(value=CONFIGURATION.EDIT, produces = "text/html; charset=utf-8")
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("userInfo", userService.getLoginUserInfo());
-		return CONFIGURATION.EDIT_JSP;
+		return "configuration/edit";
 	}
 	
 	@PostMapping(value=CONFIGURATION.SAVE_AJAX, produces = "text/html; charset=utf-8")

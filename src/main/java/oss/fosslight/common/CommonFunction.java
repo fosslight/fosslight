@@ -4288,6 +4288,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	
 	public static String VelocityTemplateToString(Map<String, Object> model) {		
 		Context context = new Context();
+		context.setVariable("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
+		context.setVariable("commonFunction", CommonFunction.class);
+
 		model.keySet().stream().filter(key -> !"templateURL".equals(key)).forEach(key -> context.setVariable(key, model.get(key)));
 		String convertResultStr;
 		try {
@@ -4297,9 +4300,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			throw e;
 		}
 		return convertResultStr;
-		
 	}
-	
+
 	public static String getNoticeFileName(String prjId, String prjName, String prjVersion, String dateStr, String fileType) {
 		return getNoticeFileName(prjId, prjName, prjVersion, null, dateStr, fileType);
 	}

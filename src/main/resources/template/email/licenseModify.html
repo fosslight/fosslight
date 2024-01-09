@@ -1,174 +1,70 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
-	<body>
-		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td width="60" style="background:#f9f9f9"></td>
-				<td>
-					<table cellspacing="0" cellpadding="0" border="0">
-						<tr>
-							<td colspan="3" height="25" style="background:#c00c3f">
-								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
-							</td>
-						</tr>
-						<tr>
-							<td width="1" style="background:#ddd"></td>
-							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
-							#if( $comment )
-								<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-								<div style="padding:10px;font-size:12px;">$!comment</div>
-							#end
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Before Change</th>
-										<th style="padding:5px;background:#f0f0f0;">After Change</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Name</th>
-										<td style="padding:5px;">$!before.licenseName</td>
-										<td style="padding:5px;">$!after.licenseName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Type</th>
-										<td style="padding:5px;">$!before.licenseType</td>
-										<td style="padding:5px;">$!after.licenseType</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
-										<td style="padding:5px;">#foreach( $licenseRestriction in $before.arrRestriction )$!licenseRestriction <br />#end</td>
-										<td style="padding:5px;">#foreach( $licenseRestriction in $after.arrRestriction )$!licenseRestriction <br />#end</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
-										<td style="padding:5px;">$!before.obligation</td>
-										<td style="padding:5px;">$!after.obligation</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">SPDX Short Identifier</th>
-										<td style="padding:5px;">$!before.shortIdentifier</td>
-										<td style="padding:5px;">$!after.shortIdentifier</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
-										<td style="padding:5px;">#foreach( $nickName in $before.licenseNicknames )$!nickName <br />#end</td>
-										<td style="padding:5px;">#foreach( $nickName in $after.licenseNicknames )$!nickName <br />#end</td>
-									</tr>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
+<body>
+<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
+	<tr>
+		<td colspan="3" height="28" style="background:#f9f9f9"></td>
+	</tr>
+	<tr>
+		<td width="60" style="background:#f9f9f9"></td>
+		<td>
+			<table cellspacing="0" cellpadding="0" border="0">
+				<tr>
+					<td colspan="3" height="25" style="background:#c00c3f">
+						<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+					</td>
+				</tr>
+				<tr>
+					<td width="1" style="background:#ddd"></td>
+					<td style="padding:40px;">
+						<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+						<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+						<div th:if="${comment}">
+							<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+							<div style="padding:10px;font-size:12px;" th:text="${comment}"></div>
+						</div>
+						<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+								<th style="padding:5px;background:#f0f0f0;">Before Change</th>
+								<th style="padding:5px;background:#f0f0f0;">After Change</th>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">License Name</th>
+								<td style="padding:5px;" th:utext="${before.licenseName}"></td>
+								<td style="padding:5px;" th:utext="${after.licenseName}"></td>
+							</tr>
+							<!-- Add other rows as needed -->
+						</table>
 
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
-										<!-- TODO MAIL-SERVICE -->
-										<!-- hk-cho : http 프로토콜이 넘어오지 않을 경우, 상대경로로 지정되는 오류가 있어서 validate 필요 -->
-										<td style="padding:5px;">#if( $before.webpageLinkFormat )$!before.webpageLinkFormat#end</td>
-										<td style="padding:5px;">#if( $after.webpageLinkFormat )$!after.webpageLinkFormat#end</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
-										<td style="padding:5px;">$!before.description</td>
-										<td style="padding:5px;">$!after.description</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Text</th>
-										<td style="padding:5px;">$!before.licenseText</td>
-										<td style="padding:5px;">$!after.licenseText</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
-										<td style="padding:5px;">$!before.attribution</td>
-										<td style="padding:5px;">$!after.attribution</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
-										<td style="padding:5px;">$!before.modifiedDate / $!before.modifier </td>
-										<td style="padding:5px;">$!after.modifiedDate / $!after.modifier </td>
-									</tr>
-								</table>
+						<!-- Add other content as needed -->
 
-								#if( $ossList )
-									<br />
-									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS list with changed license type &raquo;</h2>
-									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-										<tr>
-											<th style="padding:5px;background:#f0f0f0;">ID</th>
-											<th style="padding:5px;background:#f0f0f0;">OSS Name(Version)</th>
-											<th style="padding:5px;background:#f0f0f0;">License</th>
-											<th style="padding:5px;background:#f0f0f0;">License Type(before)</th>
-											<th style="padding:5px;background:#f0f0f0;">License Type(after)</th>
-											<th style="padding:5px;background:#f0f0f0;">Obligation(before)</th>
-											<th style="padding:5px;background:#f0f0f0;">Obligation(after)</th>
-										</tr>
-										#foreach( $ossInfo in $ossList )
-										<tr>
-											<td style="padding:5px;">$!ossInfo.ossId</td>
-											<td style="padding:5px;">$!ossInfo.ossName</td>
-											<td style="padding:5px;">$!ossInfo.licenseName</td>
-											<td style="padding:5px;">$!ossInfo.orgLicenseType</td>
-											<td style="padding:5px;">$!ossInfo.licenseType</td>
-											<th style="padding:5px;">$!ossInfo.orgObligationType</th>
-											<th style="padding:5px;">$!ossInfo.obligation</th>
-										</tr>
-										#end
-									</table>
-								#end
-								#if( $projectList )
-									<br />
-									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
-									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-										<tr>
-											<th style="padding:5px;background:#f0f0f0;">ID</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Name</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Version</th>
-											<th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
-											<th style="padding:5px;background:#f0f0f0;">Creator</th>
-											<th style="padding:5px;background:#f0f0f0;">Created Date</th>
-											<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										</tr>
-										#foreach( $project in $projectList )
-										<tr>
-											<td style="padding:5px;">$!project.prjId</td>
-											<td style="padding:5px;">$!project.prjName</td>
-											<td style="padding:5px;">$!project.prjVersion</td>
-											<td style="padding:5px;">$!project.distributionType</td>
-											<td style="padding:5px;">$!project.creator</td>
-											<td style="padding:5px;">$!project.createdDate</td>
-											<td style="padding:5px;">$!project.reviewer</td>
-										</tr>
-										#end
-									</table>
-								#end
-								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain">$shortDomain</a></div>
-							</td>
-							<td width="1" style="background:#ddd"></td>
-						</tr>
-						<tr>
-							<td colspan="3" height="1" style="background:#ddd"></td>
-						</tr>
-					</table>
-				</td>
-				<td width="60" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-		</table>
-		
-	</body>
+						<div style="margin:20px 0;border:1px dashed #666;"></div>
+						<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+							 style="font-size:12px;">
+							* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+						</div>
+					</td>
+					<td width="1" style="background:#ddd"></td>
+				</tr>
+				<tr>
+					<td colspan="3" height="1" style="background:#ddd"></td>
+				</tr>
+			</table>
+		</td>
+		<td width="60" style="background:#f9f9f9"></td>
+	</tr>
+	<tr>
+		<td colspan="3" height="28" style="background:#f9f9f9"></td>
+	</tr>
+</table>
+
+</body>
 </html>

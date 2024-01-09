@@ -17,9 +17,9 @@
             <section class="content">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-info submit-form">
+                        <div class="card card-outline card-dark submit-form">
                             <div class="card-header">
-                                <h3 class="card-title text-white" th:text="Settings"></h3>
+                                <h3 class="card-title" th:text="Settings"></h3>
                                 <div class="card-tools">
                                     <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse">
                                         <i class="fas fa-minus"></i>
@@ -31,7 +31,7 @@
                                     <p th:text="#{msg.configuration.guide.comment}"></p>
                                 </div>
                                 <div class="form-group clearfix">
-                                	<div class="icheck-info d-inline checkSet">
+                                	<div class="icheck-warning d-inline checkSet">
                                         <input type="checkbox" id="loginFlag" name="loginFlag" class="mainCategory" th:checked="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) == 'Y'} ? 'checked'">
                                         <label for="loginFlag" th:text="'Authentication using LDAP'"></label>
                                     </div>
@@ -104,7 +104,7 @@
                                 </div>
 
                                 <div class="form-group clearfix">
-                                    <div class="icheck-info d-inline checkSet">
+                                    <div class="icheck-warning d-inline checkSet">
                                         <input type="checkbox" id="externalAnalysisFlag" name="externalAnalysisFlag" class="mainCategory" 
                                         	th:checked="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_EXTERNAL_ANALYSIS_USED_FLAG')) == 'Y'} ? 'checked'">
                                         <label for="externalAnalysisFlag" th:text="'External Analysis Setting'"></label>
@@ -129,8 +129,9 @@
 										</th:block>
                                 	</div>
 	                            </div>
+                            </div>
                             <div class="card-footer clearfix">
-                                <a style="cursor:pointer;" id="save" class="btn btn-info float-right" th:text="Save"></a>
+                                <a style="cursor:pointer;" id="save" class="btn btn-dark-04 float-right" th:text="Save"></a>
                             </div>
                         </div>
                     </div>
